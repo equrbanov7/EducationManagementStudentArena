@@ -4,19 +4,28 @@
         <nav class="blog-header__nav">
             <a href="/blog/" class="blog-header__logo">MyBlog.az</a>
 
-            <ul class="blog-header__nav-list blog-header__nav-list--desktop"> {# Desktop üçün əlavə sinif #}
+            <ul class="blog-header__nav-list blog-header__nav-list--desktop">
                 <li class="blog-header__nav-item">
-                    <a href="/blog/" class="blog-header__nav-link">Ana Səhifə</a>
+                    <a href="/blog/"
+                       class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
+                        Ana Səhifə
+                    </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="/blog/technology/" class="blog-header__nav-link">Texnologiya</a>
+                    <a href="/blog/technology/"
+                       class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
+                        Texnologiya
+                    </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="/blog/about/" class="blog-header__nav-link">Haqqımızda</a>
+                    <a href="/blog/about/"
+                       class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
+                        Haqqımızda
+                    </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{% url 'subscribe' %}"
-                       class="blog-header__nav-link blog-header__nav-link--primary">
+                       class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
                         Abunə Ol
                     </a>
                 </li>
@@ -27,27 +36,34 @@
                 <span class="blog-header__toggle-line"></span>
                 <span class="blog-header__toggle-line"></span>
             </button>
-
         </nav>
     </div>
 </header>
 
-{# MOBİL NAVİGASİYA: OVERLAY VƏ MENYU PANELİ #}
-{# Bu hissə indi partial faylın içində yerləşir #}
+{# Mobil menyu #}
 <div class="mobile-nav-overlay"></div>
-<ul class="blog-header__nav-list mobile-nav-panel"> {# DİQQƏT: Artıq `blog-header__nav-list` ilə birlikdə `mobile-nav-panel` sinifi də var #}
+<ul class="blog-header__nav-list mobile-nav-panel">
     <li class="blog-header__nav-item">
-        <a href="/blog/" class="blog-header__nav-link">Ana Səhifə</a>
+        <a href="/blog/"
+           class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
+            Ana Səhifə
+        </a>
     </li>
     <li class="blog-header__nav-item">
-        <a href="/blog/technology/" class="blog-header__nav-link">Texnologiya</a>
+        <a href="/blog/technology/"
+           class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
+            Texnologiya
+        </a>
     </li>
     <li class="blog-header__nav-item">
-        <a href="/blog/about/" class="blog-header__nav-link">Haqqımızda</a>
+        <a href="/blog/about/"
+           class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
+            Haqqımızda
+        </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="{% url 'subscribe' %}"
-           class="blog-header__nav-link blog-header__nav-link--primary">
+           class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
             Abunə Ol
         </a>
     </li>
