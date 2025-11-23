@@ -93,3 +93,13 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.post.title} ({self.rating})"
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    conf_token = models.CharField(max_length=64, blank=True, null=True) # Təsdiq linki üçün token
+    is_active = models.BooleanField(default=False) # Təsdiq olunmayıbsa passivdir
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email

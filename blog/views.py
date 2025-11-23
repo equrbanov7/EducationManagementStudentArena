@@ -5,8 +5,12 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from django.core.mail import send_mail 
+from django.template.loader import render_to_string 
+from django.conf import settings
 
-from .models import Post, Category, Comment
+from .models import Post, Category, Comment, Subscriber
 from .forms import (
     SubscriptionForm,
     RegisterForm,
@@ -19,14 +23,36 @@ from .forms import (
 
 def home(request):
     """
-    Ana səhifə – ən son postları göstərir
+    Ana səhifə – ən son postları və yan paneldə kateqoriyaları göstərir
     """
+    
+    # 1. Postları çəkirik (Sənin yazdığın optimallaşdırılmış sorğu)
+    # is_published=True əlavə etdim ki, yalnız yayımlanmışlar görsənsin
     posts = (
         Post.objects
+        .filter(is_published=True) 
         .select_related("category", "author")
         .order_by("-created_at")
     )
-    return render(request, "blog/home.html", {"posts": posts})
+
+    # 2. Kateqoriyaları və içindəki post sayını hesablayırıq
+    # filter=Q(...) hissəsi yalnız is_published=True olan postları sayır
+    categories = (
+        Category.objects
+        .annotate(
+            post_count=Count('posts', filter=Q(posts__is_published=True))
+        )
+        .filter(post_count__gt=0)  # İçi boş (0 post olan) kateqoriyaları göstərmir
+        .order_by('name')
+    )
+
+    # 3. Hər ikisini kontekstə qoyuruq
+    context = {
+        "posts": posts,
+        "categories": categories,
+    }
+
+    return render(request, "blog/home.html", context)
 
 
 def about(request):
@@ -40,11 +66,12 @@ def technology(request):
     Yoxdursa, sadəcə hamını qaytaracaq.
     """
     tech_posts = (
-        Post.objects
-        .filter(category__slug="technology")  # əgər slug yoxdur, bunu dəyişə bilərik
-        .select_related("category", "author")
-        .order_by("-created_at")
-    )
+    Post.objects
+    .filter(category__slug__in=["proqramlasdirma", "suni-intellekt"])
+    .select_related("category", "author")
+    .order_by("-created_at")
+)
+    
     return render(request, "blog/technology.html", {"posts": tech_posts})
 
 
@@ -67,7 +94,7 @@ def post_detail(request, slug):
         .order_by("-created_at")
     )
 
-    # Bu user bu post üçün əvvəldən hər hansı şərh yazıb?
+    
     user_first_comment = None
     if request.user.is_authenticated:
         user_first_comment = Comment.objects.filter(
@@ -117,22 +144,45 @@ def post_detail(request, slug):
 # ------------------- SUBSCRIBE ------------------- #
 
 def subscribe_page(request):
-    """
-    Email ilə abunə formu.
-    Hələlik yalnız mesaj göstəririk, real DB/API hissəsini sonra əlavə edərik.
-    """
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data["email"]
 
-            # Burada real DB yazmaq və ya Mailchimp API çağırmaq olar:
-            # Subscriber.objects.create(email=email)
+            try:
+                # 1. Abunəçini bazaya yaz
+                subscriber, created = Subscriber.objects.get_or_create(email=email)
+                
+                if created or not subscriber.is_active:
+                    
+                    # 2. Email şablonunu yarat
+                    html_message = render_to_string(
+                        'email_templates/welcome_email.html',
+                        {'email': email}
+                    )
+                    
+                    # 3. Email göndər
+                    send_mail(
+                        'Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]',
+                        # Text versiyası (html-i dəstəkləməyən proqramlar üçün)
+                        f'Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        html_message=html_message,
+                        fail_silently=False,
+                    )
+                    
+                    messages.success(request, f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.")
+                    
+                else:
+                    messages.warning(request, f"'{email}' ünvanı artıq abunəçilərimizdədir.")
 
-            messages.success(
-                request,
-                f"{email} ünvanı uğurla abunə oldu! Təşəkkürlər."
-            )
+
+            except Exception as e:
+                # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
+                messages.error(request, f"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.")
+                print(f"EMAIL ERROR: {e}") # Xətanı konsolda göstər
+                
             return redirect("subscribe")
         else:
             messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
@@ -300,3 +350,29 @@ def logout_view(request):
     """
     logout(request)
     return redirect("home")
+
+
+# ------------------- CATEGORY DETAIL ------------------- #
+
+def category_detail(request, slug):
+    # 1. Hazırkı seçilmiş kateqoriyanı tapırıq (yoxdursa 404 qaytarır)
+    category = get_object_or_404(Category, slug=slug)
+
+    # 2. YALNIZ bu kateqoriyaya aid olan və yayımlanmış postları tapırıq
+    posts = Post.objects.filter(category=category, is_published=True).order_by("-created_at")
+
+    # 3. Sidebar üçün bütün kateqoriyaları və post saylarını hesablayırıq (Home view-dakı kimi)
+    categories = (
+        Category.objects
+        .annotate(post_count=Count('posts', filter=Q(posts__is_published=True)))
+        .filter(post_count__gt=0)
+        .order_by('name')
+    )
+
+    context = {
+        'category': category,   # Başlıqda adını yazmaq üçün
+        'posts': posts,         # Süzülmüş postlar
+        'categories': categories # Sidebar üçün siyahı
+    }
+
+    return render(request, 'blog/category_detail.html', context)

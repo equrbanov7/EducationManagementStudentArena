@@ -1,65 +1,73 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block title %}Texnologiya Xəbərləri və Yeniliklər{% endblock %}
 
- {% block extraCss %} 
-
- <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
- {% endblock %} 
-
+{% block extraCss %} 
+ <link rel="stylesheet" href="{% static 'css/technology.css' %}">
+{% endblock %} 
 
 {% block content %}
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+<div class="blog-container">
 
-    <header class="page-header" style="text-align: center; margin: 40px 0;">
-        <h1>Texnologiya Dünyası</h1>
-        <p style="color: #666; max-width: 700px; margin: 10px auto;">
-            Süni intellekt, proqramlaşdırma, yeni qadjetlər və rəqəmsal dünya haqqında ən son analizlər və xəbərlər.
+    <header class="page-header">
+        <h1 class="main-title">Texnologiya Dünyası</h1>
+        <p class="sub-title">
+            Süni intellekt, proqramlaşdırma, yeni qadjetlər və rəqəmsal dünya haqqında ən son analizlər.
         </p>
     </header>
 
     <section class="blog-grid">
-        
-
         {% for post in posts %}
             <article class="blog-card">
                 <div class="card-img-wrapper">
-                    {% if post.image %}
-                        <img src="{{ post.image }}" alt="{{ post.title }}" class="card-img-top">
-                    {% else %}
-                        <img src="{% static 'images/tech-placeholder.svg' %}" alt="Default Tech Image" class="card-img-top">
-                    {% endif %} 
+                    <a href="{% url 'post_detail' post.slug %}">
+                        
+                        <img 
+                            src="{{ post.image_url }}" 
+                            alt="{{ post.title }}" 
+                            class="card-img-top"
+                            onerror="this.onerror=null; this.src='{% static 'images/tech-placeholder.svg' %}';"
+                        >
+                
+                    </a>
+                    
+                    {% if post.category %}
+                        <span class="category-badge">{{ post.category.name }}</span>
+                    {% endif %}
                 </div>
 
                 <div class="card-body">
+                    <div class="card-meta">
+                        <span class="meta-date">📅 {{ post.created_at|date:"d M Y" }}</span>
+                        <span class="meta-rating">★ {{ post.average_rating|floatformat:1 }}</span>
+                    </div>
 
                     <h2 class="card-title">
-                       
-                        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-
+                        <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
                     </h2>
                     
-                    
                     <p class="card-excerpt">
-                        {{ post.excerpt|truncatewords:25 }}
+                        {{ post.excerpt|truncatewords:20 }}
                     </p>
                     
                     <div class="card-footer">
-                        <span>📅 {{ post.created_at|date:"d M Y" }}</span>
+                        <div class="author-info">
+                            <span class="author-avatar">👤</span> 
+                            <span class="author-name">{{ post.author.username|title }}</span>
+                        </div>
+                        <a href="{% url 'post_detail' post.slug %}" class="read-more-btn">Oxu &rarr;</a>
                     </div>
                 </div>
             </article>
 
         {% empty %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f9f9f9; border-radius: 10px;">
+            <div class="empty-state">
                 <h3>Hələ ki, bu kateqoriyada məqalə yoxdur.</h3>
                 <p>Tezliklə yeni məqalələr əlavə olunacaq. Bizi izləməyə davam edin!</p>
             </div>
         {% endfor %}
-
     </section>
 
-    </div>
+</div>
 {% endblock %}

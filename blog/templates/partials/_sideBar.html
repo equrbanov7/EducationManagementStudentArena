@@ -1,44 +1,31 @@
 <aside class="sidebar">
-    <div class="widget">
+  <div class="widget">
       <h3>Kateqoriyalar</h3>
       <ul class="category-list">
-        <li><a href="#">Proqramlaşdırma (5)</a></li>
-        <li><a href="#">Dizayn (3)</a></li>
-        <li><a href="#">Süni İntellekt (2)</a></li>
-        <li><a href="#">Karyera (4)</a></li>
+          {% for category in categories %}
+              <li>
+                  {# Category detail səhifəsinin URL-i olmalıdır. Məsələn: {% url 'category_detail' category.slug %} #}
+                  <a href="{% url 'category_detail' category.slug %}"> 
+                      {{ category.name }} 
+                      <span class="category-count">({{ category.post_count }})</span>
+                  </a>
+              </li>
+          {% empty %}
+              <li><a href="#">Heç bir kateqoriya tapılmadı.</a></li>
+          {% endfor %}
       </ul>
-    </div>
+  </div>
 
-    <div class="widget">
+  <div class="widget">
       <h3>Populyar Etiketlər</h3>
-      <div style="display: flex; flex-wrap: wrap; gap: 5px">
-        <span
-          style="
-            background: #eee;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-          "
-          >Javascript</span
-        >
-        <span
-          style="
-            background: #eee;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-          "
-          >CSS</span
-        >
-        <span
-          style="
-            background: #eee;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-          "
-          >React</span
-        >
+      <div class="tags-container">
+          {# Etiket modelin hazır olduqda bura əlavə edəcəksən #}
+          <span class="tag-item">Javascript</span>
+          <span class="tag-item">CSS</span>
+          <span class="tag-item">Python</span>
+          <span class="tag-item">Django</span>
+          <span class="tag-item">Front-end</span>
+          <span class="tag-item">AI</span>
       </div>
-    </div>
-  </aside>
+  </div>
+</aside>

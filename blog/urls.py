@@ -44,8 +44,8 @@ urlpatterns = [
     # path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     path('posts/create/', views.create_post, name='create_post'),
     path('posts/<slug:slug>/', views.post_detail, name='post_detail'),
-    
-
-   
     path('posts/<int:post_id>/edit/', views.edit_post, name='edit_post'),
+    
+    # ---- Category URL-ləri ----
+    path('category/<slug:slug>/', views.category_detail, name='category_detail'),
 ]

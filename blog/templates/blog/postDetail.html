@@ -31,11 +31,12 @@
             </div>
         </header>
 
-        {% if post.image_url %}
-            <img src="{{ post.image_url }}" alt="{{ post.title }}" class="article-featured-image">
-        {% else %}
-            <img src="{% static 'img/tech-placeholder.svg' %}" alt="Default Blog Image" class="article-featured-image">
-        {% endif %}
+        <img 
+        src="{{ post.image_url }}" 
+        alt="{{ post.title }}" 
+        class="article-featured-image"
+        onerror="this.onerror=null; this.src='{% static 'images/tech-placeholder.svg' %}';"
+    >
 
         <div class="article-content">
             {# Əgər excerpt göstərmək istəyirsənsə, əvvəlcə qısa təsviri verə bilərsən #}
@@ -130,7 +131,5 @@
     </section>
 </div>
 
-<footer class="article-footer">
-    <a href="{% url 'home' %}" class="back-btn"><i class="fas fa-arrow-left"></i> Ana Səhifəyə Qayıt</a>
-</footer>
+
 {% endblock %}

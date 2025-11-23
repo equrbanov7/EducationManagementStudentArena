@@ -149,36 +149,7 @@
     margin: 40px 0;
 }
 
-/* --- Məqalə Footer / Navigation --- */
-.article-footer {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #eee;
-    text-align: center;
-}
 
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--text-dark, #4b5563);
-    font-weight: 600;
-    padding: 10px 20px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    transition: 0.3s;
-}
-
-.back-btn:hover {
-    color: var(--primary-color, #4f46e5);
-    border-color: var(--primary-color, #4f46e5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.back-btn i {
-    margin-right: 8px;
-}
 
 
 /* ############################################# */
