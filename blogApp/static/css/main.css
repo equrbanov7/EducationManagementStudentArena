@@ -1,0 +1,32 @@
+     /* --- Ümumi CSS Sıfırlama və Dəyişənlər --- */
+     :root {
+        --primary-color: #2563eb;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-main);
+        background-color: var(--bg-color);
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+        transition: 0.3s;
+    }
+
+    ul {
+        list-style: none;
+    }

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Texnologiya Xəbərləri və Yeniliklər{% endblock %}
+
+ {% block extraCss %} 
+
+ <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
+ {% endblock %} 
+
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+    <header class="page-header">
+        <h1>Texnologiya Dünyası</h1>
+        <p style="color: #666; max-width: 700px; margin: 10px auto;">
+            Süni intellekt, proqramlaşdırma, yeni qadjetlər və rəqəmsal dünya haqqında ən son analizlər və xəbərlər.
+        </p>
+    </header>
+
+    <section class="blog-grid">
+        
+
+        {% for post in posts %}
+            <article class="blog-card">
+                <div class="card-img-wrapper">
+                    {% if post.image %}
+                        <img src="{{ post.image }}" alt="{{ post.title }}" class="card-img-top">
+                    {% else %}
+                        <img src="{% static 'images/tech-placeholder.svg' %}" alt="Default Tech Image" class="card-img-top">
+                    {% endif %} 
+                </div>
+
+                <div class="card-body">
+
+                    <h2 class="card-title">
+                       
+                        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+
+                    </h2>
+                    
+                    
+                    <p class="card-excerpt">
+                        {{ post.excerpt|truncatewords:25 }}
+                    </p>
+                    
+                    <div class="card-footer">
+                        <span>📅 {{ post.created_at|date:"d M Y" }}</span>
+                    </div>
+                </div>
+            </article>
+
+        {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #f9f9f9; border-radius: 10px;">
+                <h3>Hələ ki, bu kateqoriyada məqalə yoxdur.</h3>
+                <p>Tezliklə yeni məqalələr əlavə olunacaq. Bizi izləməyə davam edin!</p>
+            </div>
+        {% endfor %}
+
+    </section>
+
+    </div>
+{% endblock %}

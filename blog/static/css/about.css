@@ -1,0 +1,115 @@
+/* static/css/about.css */
+
+/* Konteyner və Ümumi Stillər */
+.about-container {
+    max-width: 1000px;
+    margin: 40px auto; /* Yuxarıdan/aşağıdan məsafə və mərkəzləmə */
+    padding: 0 20px;
+    font-family: inherit; /* base.html-dəki şrifti istifadə etsin */
+}
+
+/* Başlıq Hissəsi (Hero-vari) */
+.about-header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.about-header h1 {
+    font-size: 2.8rem;
+    color: #222; /* Tünd rəng (base rənglərinizə uyğunlaşdırın) */
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.about-lead-text {
+    font-size: 1.2rem;
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Məzmun Bloku (Şəkil və Mətn yan-yana) */
+.about-content-block {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    margin-bottom: 80px;
+}
+
+/* Sıranı tərsinə çevirmək üçün köməkçi sinif (optional) */
+.about-content-block.reverse {
+    flex-direction: row-reverse;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-text h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.about-text p {
+    margin-bottom: 15px;
+    line-height: 1.7;
+    color: #555;
+}
+
+.about-image-wrapper {
+    flex: 1;
+}
+
+.about-image-wrapper img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+/* Komanda və ya Dəyərlər Grid-i (Sadə versiya) */
+.about-values-section {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.about-values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.value-item {
+    padding: 30px;
+    background: #f9fafb; /* Açıq boz fon */
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.value-item h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Responsive Dizayn */
+@media (max-width: 768px) {
+    .about-header h1 {
+        font-size: 2rem;
+    }
+    
+    .about-content-block {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    /* Mobildə şəkli həmişə mətndən əvvəl göstər (optional) */
+    .about-image-wrapper {
+        order: -1; 
+    }
+}

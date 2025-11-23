@@ -1,0 +1,84 @@
+  /* --- Blog Grid Layout --- */
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Əsas hissə və Yan panel */
+    gap: 30px;
+    margin-bottom: 50px;
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+  }
+
+  /* --- Blog Kartı Dizaynı --- */
+  .blog-card {
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .blog-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card-img {
+    height: 200px;
+    background-color: #ddd;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .card-category {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+  }
+
+  .card-excerpt {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    flex-grow: 1;
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  .read-more {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+    /* --- Mobile Responsive --- */
+    @media (max-width: 768px) {
+        .content-wrapper {
+          grid-template-columns: 1fr; /* Yan paneli aşağı salır */
+        }
+      }

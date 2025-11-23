@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Abunə Ol | Ən son yenilikləri qaçırma{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/subscribe.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="subscribe-container">
+    <div class="subscribe-box">
+        
+        <header class="subscribe-header">
+            <h1>Yeniliklərdən İlk Siz Xəbərdar Olun!</h1>
+            <p class="subscribe-lead">
+                Həftəlik ən maraqlı texnologiya xəbərləri, proqramlaşdırma dərsləri və eksklüziv məqalələr birbaşa poçt qutunuzda.
+            </p>
+        </header>
+
+        <ul class="subscribe-benefits">
+            <li>Həftədə sadəcə bir dəfə, yığcam e-poçt</li>
+            <li>Yeni məqalələrdən anında xəbər tutmaq imkanı</li>
+            <li>Eksklüziv kontent və endirimlər</li>
+        </ul>
+
+        {% if messages %}
+            <ul class="messages-list">
+                {% for message in messages %}
+                <li class="{{ message.tags }}">
+                    {{ message }}
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="post" class="subscribe-form" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ form.email }}
+                
+                {% if form.email.errors %}
+                    <div style="color: #991b1b; font-size: 0.9rem; margin-top: 5px; text-align: left;">
+                        {{ form.email.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <a type="submit" class="btn-subscribe">İndi Abunə Ol</a>
+        </form>
+
+        <p class="privacy-note">
+            *Biz spam göndərmirik. İstədiyiniz vaxt abunəlikdən çıxa bilərsiniz.
+        </p>
+    </div>
+</div>
+{% endblock %}

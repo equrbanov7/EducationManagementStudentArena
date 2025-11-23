@@ -1,0 +1,54 @@
+
+
+{% extends "base.html" %}
+{% load static %}
+
+ {% block title %}Minimal Blog | Ana Səhifə{% endblock%} 
+ {% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    {% comment %} <link rel="stylesheet" href="{% static 'css/search.css' %}"> {% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sideBar.css' %}">
+{% endblock %} 
+
+{% block content %}
+
+<section class="hero">
+  <div class="container">
+    <h1>Düşüncələr və Hekayələr</h1>
+    <p>Texnologiya, proqramlaşdırma və həyat tərzi haqqında ən son yazılar.</p>
+  </div>
+</section>
+
+
+
+
+
+<main class="container">
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Məqalə axtar..." />
+  </div>
+
+  <div class="content-wrapper">
+    <section id="blogContainer" class="blog-grid">
+      {% for post in posts %}
+       {% include "partials/_blogCard.html" with post=post %} 
+      {% empty %}
+      <p>Hələ heç bir yazı yoxdur.</p>
+      {% endfor %}
+    </section>
+
+    {% include "partials/_sideBar.html" %} 
+
+ 
+  </div>
+</main>
+
+
+{% block extraJs %}
+    <script src="{% static 'js/search.js' %}"></script>
+{% endblock %}
+
+
+
+{% endblock %}

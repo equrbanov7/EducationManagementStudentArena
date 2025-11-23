@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{# 1. Səhifə başlığını təyin edirik #}
+{% block title %}Haqqımızda | My Awesome Blog{% endblock %}
+
+{# 2. Bu səhifəyə məxsus CSS faylını qoşuruq #}
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{# 3. Əsas məzmunu yerləşdiririk #}
+{% block content %}
+<div class="about-container">
+
+    <header class="about-header">
+        <h1>Bizim Hekayəmiz</h1>
+        <p class="about-lead-text">
+            Blogumuzun necə yarandığı, missiyamız və bizi hər gün yazmağa ruhlandıran səbəblər haqqında.
+        </p>
+    </header>
+
+    <section class="about-content-block">
+        <div class="about-text">
+            <h2>Missiyamız Nədir?</h2>
+            <p>Burada blogunuzun əsas məqsədini yaza bilərsiniz. Məsələn: "Bizim əsas məqsədimiz mürəkkəb texnoloji yenilikləri və proqramlaşdırma dünyasındakı trendləri ana dilimizdə, sadə və anlaşıqlı şəkildə oxuculara çatdırmaqdır."</p>
+            <p>Biz inanırıq ki, bilik paylaşıldıqca dəyər qazanır. Hər bir məqaləmizlə oxucularımıza yeni bir baxış bucağı qazandırmağı hədəfləyirik.</p>
+        </div>
+        <div class="about-image-wrapper">
+            <img src="https://picsum.photos/id/2/600/400" alt="Bizim missiyamız">
+        </div>
+    </section>
+
+    <section class="about-content-block reverse">
+        <div class="about-text">
+            <h2>Komandamızla Tanış Olun</h2>
+            <p>Bu blog bir nəfərin həvəsi ilə başlasa da, indi böyük bir cəmiyyətə çevrilib. Biz fərqli sahələrdən gələn, amma ortaq maraqları paylaşan bir qrup entuziastıq.</p>
+            <p>Yazarlarımız öz sahələrində təcrübəli mütəxəssislərdir və hər zaman ən dəqiq məlumatı araşdırıb sizə təqdim etməyə çalışırlar.</p>
+        </div>
+        <div class="about-image-wrapper">
+             <img src="https://picsum.photos/id/107/600/400" alt="Bizim komanda">
+        </div>
+    </section>
+
+    <section class="about-values-section">
+        <h2>Dəyərlərimiz</h2>
+        <div class="about-values-grid">
+            <div class="value-item">
+                <h3>Keyfiyyət</h3>
+                <p>Kəmiyyətə deyil, məzmunun dərinliyinə və keyfiyyətinə önəm veririk.</p>
+            </div>
+            <div class="value-item">
+                <h3>Obyektivlik</h3>
+                <p>Mövzuları tərəfsiz araşdırır və fərqli baxış bucaqlarını təqdim edirik.</p>
+            </div>
+            <div class="value-item">
+                <h3>İnkişaf</h3>
+                <p>Daim öyrənir, yenilikləri izləyir və blogumuzu təkmilləşdiririk.</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+/* --- Hero Bölməsi --- */ .hero { text-align: center; padding: 60px 20px; background: linear-gradient(to right, #1e3a8a, #3b82f6); color: white; margin-bottom: 40px; } .hero h1 { font-size: 2.5rem; margin-bottom: 10px; } .hero p { font-size: 1.1rem; opacity: 0.9; }
+
+  /* --- Axtarış Paneli --- */
+  .search-container {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+  }
+
+  #searchInput {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  #searchInput:focus {
+    border-color: var(--primary-color);
+  }
+
+  /* --- Blog Grid Layout --- */
+  .content-wrapper {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Əsas hissə və Yan panel */
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+

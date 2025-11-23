@@ -1,0 +1,136 @@
+/* static/css/detail.css */
+
+/* Məqalənin əsas konteyneri - Oxunaqlılıq üçün eni daha dar tuturuq */
+.article-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Georgia', serif; /* Uzun mətnlər üçün Serif şriftləri daha rahatdır (opsional) */
+}
+
+/* --- Məqalə Başlığı (Header) --- */
+.article-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.article-category {
+    display: inline-block;
+    background-color: #eef2ff;
+    color: #4f46e5;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-decoration: none;
+    font-family: sans-serif; /* Base fonta qayıdırıq */
+}
+
+.article-title {
+    font-size: 2.5rem;
+    line-height: 1.3;
+    color: #111;
+    margin-bottom: 15px;
+    font-family: sans-serif;
+}
+
+.article-meta {
+    color: #6b7280;
+    font-size: 0.95rem;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* --- Məqalə Şəkli --- */
+.article-featured-image {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* --- Məqalə Məzmunu (Body) --- */
+.article-content {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #374151;
+}
+
+/* Məzmun içindəki paraqraflar arası məsafə */
+.article-content p {
+    margin-bottom: 25px;
+}
+
+/* Məzmun içindəki başlıqlar (h2, h3) */
+.article-content h2 {
+    font-size: 1.8rem;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    color: #111;
+    font-family: sans-serif;
+}
+
+.article-content h3 {
+    font-size: 1.5rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #222;
+    font-family: sans-serif;
+}
+
+/* Məzmun içindəki şəkillər (User editor-dan şəkil yükləyibsə) */
+.article-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+/* Blockquote (Sitatlar üçün) */
+.article-content blockquote {
+    border-left: 4px solid #4f46e5;
+    margin: 30px 0;
+    padding-left: 20px;
+    font-style: italic;
+    color: #555;
+    background: #f9fafb;
+    padding: 20px;
+}
+
+/* --- Footer / Navigation --- */
+.article-footer {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: #4b5563;
+    font-weight: 600;
+    font-family: sans-serif;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    color: #4f46e5;
+    transform: translateX(-5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .article-title {
+        font-size: 2rem;
+    }
+    .article-content {
+        font-size: 1rem;
+    }
+}

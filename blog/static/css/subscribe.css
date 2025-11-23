@@ -1,0 +1,145 @@
+/* static/css/subscribe.css */
+
+/* Səhifənin əsas konteyneri - Mərkəzləşdirilmiş qutu */
+.subscribe-container {
+    min-height: 70vh; /* Ekranın ən az 70%-ni tutsun ki, mərkəzdə qalsın */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: #f9fafb; /* Yüngül boz arxa fon */
+}
+
+/* Abunə qutusu */
+.subscribe-box {
+    background: #ffffff;
+    max-width: 600px;
+    width: 100%;
+    padding: 50px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* Başlıq və Mətn */
+.subscribe-header h1 {
+    font-size: 2.2rem;
+    color: #111;
+    margin-bottom: 15px;
+}
+
+.subscribe-lead {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+/* Faydalar Siyahısı (Optional) */
+.subscribe-benefits {
+    text-align: left;
+    display: inline-block; /* Mərkəzdə qalması üçün */
+    margin: 0 auto 30px auto;
+    color: #555;
+}
+
+.subscribe-benefits li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+/* Siyahı maddələrinin qarşısındakı kiçik ikonlar üçün */
+.subscribe-benefits li::before {
+    content: '✓'; 
+    color: #4f46e5; /* Əsas rəng */
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* --- Forma Dizaynı --- */
+.subscribe-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 450px;
+    margin: 0 auto; /* Formanı mərkəzləşdir */
+}
+
+/* Django-nun yaratdığı input sahəsi üçün stil */
+.form-group input[type="email"] {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group input[type="email"]:focus {
+    border-color: #4f46e5; /* Focus olanda rəng dəyişsin */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Göndər Düyməsi */
+.btn-subscribe {
+    width: 100%;
+    padding: 15px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-subscribe:hover {
+    background-color: #3730a3;
+}
+
+/* Spam xəbərdarlığı */
+.privacy-note {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+/* Django Mesajları (Uğurlu/Xəta) */
+.messages-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.messages-list li {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.messages-list li.success {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+.messages-list li.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .subscribe-box {
+        padding: 30px 20px;
+    }
+    .subscribe-header h1 {
+        font-size: 1.8rem;
+    }
+}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} | My Blog{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/postDetail.css' %}">
+{% endblock %}
+
+{% block content %}
+<article class="article-container">
+    
+    <header class="article-header">
+        {% if post.category %}
+            <span class="article-category">{{ post.category }}</span>
+        {% endif %}
+        
+        <h1 class="article-title">{{ post.title }}</h1>
+        
+        <div class="article-meta">
+            <span>📅 {{ post.date }}</span>
+        </div>
+    </header>
+
+    {% if post.image %}
+        <img src="{{ post.image }}" alt="{{ post.title }}" class="article-featured-image">
+    {% else %}
+        <img src="{% static 'img/tech-placeholder.svg' %}" alt="Default Blog Image" class="article-featured-image">
+    {% endif %}
+
+    <div class="article-content">
+        {{ post.excerpt|linebreaks }} {# content sahəsindən oxuyuruq #}
+    </div>
+
+    <footer class="article-footer">
+        <a href="{% url 'home' %}" class="back-btn">← Ana Səhifəyə Qayıt</a>
+    </footer>
+
+</article>
+{% endblock %}
