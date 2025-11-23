@@ -1,11 +1,20 @@
-/* static/css/detail.css */
+/* static/css/postDetail.css */
 
-/* Məqalənin əsas konteyneri - Oxunaqlılıq üçün eni daha dar tuturuq */
-.article-container {
-    max-width: 800px;
-    margin: 40px auto;
+/* --- Ümumi Səhifə Konteyneri --- */
+.article-page-wrapper {
+    max-width: 900px; /* Səhifənin əsas eni */
+    margin: 50px auto;
     padding: 0 20px;
-    font-family: 'Georgia', serif; /* Uzun mətnlər üçün Serif şriftləri daha rahatdır (opsional) */
+    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+}
+
+/* --- Məqalənin Əsas Konteyneri --- */
+.article-container {
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 40px;
+    margin-bottom: 40px;
 }
 
 /* --- Məqalə Başlığı (Header) --- */
@@ -16,32 +25,43 @@
 
 .article-category {
     display: inline-block;
-    background-color: #eef2ff;
-    color: #4f46e5;
-    padding: 6px 12px;
-    border-radius: 20px;
+    background-color: var(--primary-light, #eef2ff); /* Açıq primary rəng */
+    color: var(--primary-color, #4f46e5);
+    padding: 8px 16px;
+    border-radius: 25px;
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 15px;
     text-decoration: none;
-    font-family: sans-serif; /* Base fonta qayıdırıq */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .article-title {
-    font-size: 2.5rem;
-    line-height: 1.3;
-    color: #111;
+    font-size: 2.8rem; /* Daha böyük başlıq */
+    line-height: 1.2;
+    color: var(--text-dark, #1f2937);
     margin-bottom: 15px;
-    font-family: sans-serif;
+    font-weight: 700;
 }
 
 .article-meta {
-    color: #6b7280;
-    font-size: 0.95rem;
-    font-family: sans-serif;
+    color: var(--text-light, #6b7280);
+    font-size: 0.9rem;
     display: flex;
     justify-content: center;
-    gap: 15px;
+    flex-wrap: wrap; /* Kiçik ekranlarda alt-alta düşsün */
+    gap: 10px 20px; /* İkonlar arasında məsafə */
+}
+
+.article-meta span {
+    display: flex;
+    align-items: center;
+}
+
+.article-meta span i {
+    margin-right: 6px;
+    color: var(--primary-color, #4f46e5);
 }
 
 /* --- Məqalə Şəkli --- */
@@ -57,80 +77,391 @@
 
 /* --- Məqalə Məzmunu (Body) --- */
 .article-content {
-    font-size: 1.15rem;
+    font-size: 1.1rem; /* Oxunaqlılığı artırır */
     line-height: 1.8;
-    color: #374151;
+    color: var(--text-dark, #374151);
+    word-wrap: break-word; /* Uzun sözləri parçala */
 }
 
-/* Məzmun içindəki paraqraflar arası məsafə */
 .article-content p {
     margin-bottom: 25px;
 }
 
-/* Məzmun içindəki başlıqlar (h2, h3) */
 .article-content h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin-top: 40px;
     margin-bottom: 20px;
-    color: #111;
-    font-family: sans-serif;
+    color: var(--text-dark, #1f2937);
+    font-weight: 600;
 }
 
 .article-content h3 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     margin-top: 30px;
     margin-bottom: 15px;
-    color: #222;
-    font-family: sans-serif;
+    color: var(--text-dark, #222);
+    font-weight: 600;
 }
 
-/* Məzmun içindəki şəkillər (User editor-dan şəkil yükləyibsə) */
+.article-content ul,
+.article-content ol {
+    margin-left: 25px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.article-content li {
+    margin-bottom: 8px;
+}
+
+.article-content a {
+    color: var(--primary-color, #4f46e5);
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.article-content a:hover {
+    color: #1e40af;
+}
+
 .article-content img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
-    margin: 20px 0;
+    margin: 25px 0;
+    display: block;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
-/* Blockquote (Sitatlar üçün) */
 .article-content blockquote {
-    border-left: 4px solid #4f46e5;
+    border-left: 5px solid var(--primary-color, #4f46e5);
     margin: 30px 0;
-    padding-left: 20px;
+    padding: 20px 25px;
     font-style: italic;
-    color: #555;
-    background: #f9fafb;
-    padding: 20px;
+    color: var(--text-light, #555);
+    background: var(--bg-light, #f9fafb);
+    border-radius: 8px;
+    font-size: 1.05rem;
+}
+.article-content hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 40px 0;
 }
 
-/* --- Footer / Navigation --- */
+/* --- Məqalə Footer / Navigation --- */
 .article-footer {
-    margin-top: 60px;
+    margin-top: 40px;
     padding-top: 30px;
     border-top: 1px solid #eee;
+    text-align: center;
 }
 
 .back-btn {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
-    color: #4b5563;
+    color: var(--text-dark, #4b5563);
     font-weight: 600;
-    font-family: sans-serif;
+    padding: 10px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
     transition: 0.3s;
 }
 
 .back-btn:hover {
-    color: #4f46e5;
-    transform: translateX(-5px);
+    color: var(--primary-color, #4f46e5);
+    border-color: var(--primary-color, #4f46e5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* Responsive */
+.back-btn i {
+    margin-right: 8px;
+}
+
+
+/* ############################################# */
+/* --- RATING & COMMENTS BÖLMƏSİ DİZAYNI --- */
+/* ############################################# */
+
+.article-extra-section { /* Bütün rating və comment bölməsini əhatə edir */
+    max-width: 800px;
+    margin: 0 auto 50px auto;
+    padding: 0 20px;
+}
+
+/* --- Reytinq Blok --- */
+.article-rating-block {
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    padding: 25px 30px;
+    margin-bottom: 40px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.article-rating-block p {
+    font-size: 1.1rem;
+    color: var(--text-dark, #1f2937);
+    margin: 0;
+}
+
+.article-rating-block strong {
+    font-size: 1.3rem;
+    color: var(--primary-color, #4f46e5);
+    font-weight: 700;
+}
+
+/* --- Şərhlər Bölməsi --- */
+.comments-section { /* article-comments -> comments-section */
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    padding: 30px;
+    margin-bottom: 40px;
+    border: 1px solid #e0e0e0;
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.comments-title {
+    font-size: 1.8rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 30px;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.comment-item {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--bg-light, #fcfcfc);
+    border: 1px solid #f0f0f0;
+    margin-bottom: 20px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.comment-author {
+    font-weight: 700;
+    color: var(--primary-color, #4f46e5);
+    font-size: 1rem;
+}
+
+.comment-meta {
+    font-size: 0.85rem;
+    color: var(--text-light, #6b7280);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comment-meta .star-rating {
+    color: #fcd34d; /* Sarı ulduz rəngi */
+}
+
+
+.comment-text {
+    color: var(--text-dark, #374151);
+    line-height: 1.6;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+.comments-section p:last-child {
+    color: var(--text-light, #6b7280);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* --- Şərh Yazma Formu --- */
+.add-comment-section { /* article-add-comment -> add-comment-section */
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+}
+
+.add-comment-section h3 {
+    font-size: 1.6rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 25px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.comment-auth-message {
+    font-size: 1rem;
+    color: var(--text-light, #6b7280);
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.comment-auth-message a {
+    color: var(--primary-color, #4f46e5);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.comment-auth-message a:hover {
+    text-decoration: underline;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.comment-form .form-group { /* Auth və Post formundakı kimi stilizasiya */
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.comment-form .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.comment-form .form-group textarea,
+.comment-form .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    background-color: #f9fafb;
+    resize: vertical;
+}
+
+.comment-form .form-group textarea:focus,
+.comment-form .form-group select:focus {
+    border-color: var(--primary-color, #4f46e5);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    background-color: #ffffff;
+}
+
+.comment-form .form-group textarea {
+    min-height: 100px;
+}
+
+.comment-form .form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+}
+
+.comment-form .form-error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.comment-submit-btn {
+    width: auto; /* Avtomatik en */
+    align-self: flex-start; /* Sola yanaşdır */
+    padding: 12px 25px;
+    background-color: var(--primary-color, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.comment-submit-btn:hover {
+    background-color: #1e40af;
+    transform: translateY(-2px);
+}
+
+
+/* --- Responsive Dizayn --- */
 @media (max-width: 768px) {
-    .article-title {
-        font-size: 2rem;
+    .article-container,
+    .article-extra-section {
+        padding: 0 15px; /* Kiçik ekranlarda kənar boşluqları azalt */
+        margin: 30px auto;
     }
+
+    .article-container {
+        padding: 30px 20px;
+    }
+
+    .article-title {
+        font-size: 2.2rem;
+    }
+
+    .article-header {
+        margin-bottom: 30px;
+    }
+
+    .article-featured-image {
+        margin-bottom: 30px;
+    }
+
     .article-content {
         font-size: 1rem;
+        line-height: 1.7;
+    }
+    .article-content h2 {
+        font-size: 1.6rem;
+        margin-top: 30px;
+        margin-bottom: 15px;
+    }
+    .article-content h3 {
+        font-size: 1.3rem;
+        margin-top: 25px;
+        margin-bottom: 10px;
+    }
+
+    .article-rating-block,
+    .comments-section,
+    .add-comment-section {
+        padding: 20px;
+    }
+
+    .comments-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .comment-item {
+        padding: 15px;
+    }
+    .comment-header {
+        flex-direction: column; /* Mobil də alt-alta düşsün */
+        align-items: flex-start;
+        gap: 5px;
+    }
+    .comment-author {
+        font-size: 0.95rem;
+    }
+    .comment-meta {
+        font-size: 0.8rem;
     }
 }

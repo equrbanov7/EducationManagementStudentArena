@@ -1,144 +1,259 @@
-from django.shortcuts import render,redirect, get_object_or_404
-from django.http import HttpResponse
-from django.http import Http404
-from django.contrib import messages # Mesaj göstərmək üçün
-from .forms import SubscriptionForm
+# blog/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, Http404
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 
-from django.contrib.auth.models import User          # 👈 yeni
-from django.contrib.auth import login, logout # 👈 yeni   
-
-from .models import Post  # yuxarıya əlavə et# 👈 yeni
-
-from .forms import SubscriptionForm, RegisterForm    # 👈 RegisterForm-u da əlavə edəcəyik (aşağıda kodunu yazıram)
-# ƏLAVƏ: hələ Post modeli istifadə etmirik, ona görə .models import etmirəm
-
-
-
-
+from .models import Post, Category, Comment
+from .forms import (
+    SubscriptionForm,
+    RegisterForm,
+    PostForm,
+    CommentForm,
+)
 
 
-
-# Create your views here.
-
-# def home(request):
-#     return HttpResponse("Welcome to the Home Page")
-
-posts = [
-    {
-        "id": 1,
-        "title": "JavaScript öyrənməyə necə başlamalı?",
-        "excerpt": "Proqramlaşdırma dünyasına yeni başlayanlar üçün JavaScript ən ideal dillərdən biridir. Bu məqalədə yol xəritəsini təqdim edirik.",
-        "category": "Proqramlaşdırma",
-        "date": "23 Noyabr 2024",
-        "image": "https://picsum.photos/id/1/600/400",  # Nümunə şəkil
-    },
-    {
-        "id": 2,
-        "title": "Süni İntellektin gələcəyi",
-        "excerpt": "AI texnologiyaları sürətlə inkişaf edir. Bəs yaxın 10 ildə bizi nələr gözləyir? Ekspert rəyləri və proqnozlar.",
-        "category": "Süni İntellekt",
-        "date": "20 Noyabr 2024",
-        "image": "https://picsum.photos/id/20/600/400",
-    },
-    {
-        "id": 3,
-        "title": "Minimalist Dizayn Prinsipləri",
-        "excerpt": "Daha az, daha çoxdur. Veb dizaynda minimalizmin istifadəçi təcrübəsinə təsiri və tətbiq üsulları.",
-        "category": "Dizayn",
-        "date": "18 Noyabr 2024",
-        "image": "https://picsum.photos/id/3/600/400",
-    },
-    {
-        "id": 4,
-        "title": "Uzaqdan işləməyin üstünlükləri",
-        "excerpt": "Remote iş rejimi həyatımızı necə dəyişir? Məhsuldarlığı artırmaq üçün tövsiyələr.",
-        "category": "Karyera",
-        "date": "15 Noyabr 2024",
-        "image": "https://picsum.photos/id/4/600/400",
-    },
-    {
-        "id": 5,
-        "title": "CSS Grid və Flexbox fərqləri",
-        "excerpt": "Müasir CSS layout sistemləri arasındakı əsas fərqlər və hansını nə vaxt istifadə etməli olduğunuzu öyrənin.",
-        "category": "Proqramlaşdırma",
-        "date": "12 Noyabr 2024",
-        "image": "https://picsum.photos/id/6/600/400",
-    },
-    {
-        "id": 6,
-        "title": "Sağlam həyat tərzi üçün 5 vərdiş",
-        "excerpt": "Kompüter arxasında çox vaxt keçirənlər üçün sağlamlığı qorumağın qızıl qaydaları.",
-        "category": "Həyat Tərzi",
-        "date": "10 Noyabr 2024",
-        "image": "https://picsum.photos/id/9/600/400",
-    },
-]
+# ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
 def home(request):
+    """
+    Ana səhifə – ən son postları göstərir
+    """
+    posts = (
+        Post.objects
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+    return render(request, "blog/home.html", {"posts": posts})
 
-    return render(request, 'blog/home.html',{'posts':posts})
 
 def about(request):
-    # return HttpResponse("About Us Page")
-    return render(request, 'blog/about.html')
+    return render(request, "blog/about.html")
+
 
 def technology(request):
-    # return HttpResponse("Technology Category Page")
-    return render(request, 'blog/technology.html',{'posts':posts})
+    """
+    Texnologiya kateqoriyasına aid postlar.
+    Category modelində 'technology' slug-u varsa ona görə filter edirik.
+    Yoxdursa, sadəcə hamını qaytaracaq.
+    """
+    tech_posts = (
+        Post.objects
+        .filter(category__slug="technology")  # əgər slug yoxdur, bunu dəyişə bilərik
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+    return render(request, "blog/technology.html", {"posts": tech_posts})
+
 
 def contact(request):
-    return HttpResponse("Contact Us Page")
+    return HttpResponse("Contact Us Page (demo)")
 
-def post_detail(request, post_id):
-    post = next((post for post in posts if post["id"] == post_id), None)
-    if post is None:
-        raise Http404("Post tapılmadı")
 
-    return render(request, "blog/postDetail.html", {"post": post})
+# ------------------- POST DETAY + COMMENT ------------------- #
 
+def post_detail(request, slug):
+    """
+    Bir postun detal səhifəsi + şərhlər və rating forması.
+    Rating yalnız ilk şərhdə nəzərə alınır.
+    """
+    post = get_object_or_404(Post, slug=slug, is_published=True)
+
+    comments = (
+        post.comments
+        .select_related("user")
+        .order_by("-created_at")
+    )
+
+    # Bu user bu post üçün əvvəldən hər hansı şərh yazıb?
+    user_first_comment = None
+    if request.user.is_authenticated:
+        user_first_comment = Comment.objects.filter(
+            post=post,
+            user=request.user
+        ).order_by("created_at").first()
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Şərh yazmaq üçün əvvəlcə daxil olun.")
+            return redirect("login")
+
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            if user_first_comment is None:
+                # ✅ İlk dəfə şərh yazır → həm text, həm rating götürürük
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.user = request.user
+                comment.save()
+                messages.success(request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐")
+            else:
+                # ✅ Artıq bu posta şərhi var → YENİ şərh yazsın, amma rating DƏYİŞMƏSİN
+                comment = Comment(
+                    post=post,
+                    user=request.user,
+                    text=form.cleaned_data["text"],
+                    rating=user_first_comment.rating  # rating-i köhnədən götürürük
+                )
+                comment.save()
+                messages.success(request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂")
+
+            return redirect("post_detail", slug=post.slug)
+    else:
+        form = CommentForm()
+
+    context = {
+        "post": post,
+        "comments": comments,
+        "comment_form": form,
+        "user_first_comment": user_first_comment,  # template-də istifadə edərsən
+    }
+    return render(request, "blog/postDetail.html", context)
+
+
+# ------------------- SUBSCRIBE ------------------- #
 
 def subscribe_page(request):
-    if request.method == 'POST':
+    """
+    Email ilə abunə formu.
+    Hələlik yalnız mesaj göstəririk, real DB/API hissəsini sonra əlavə edərik.
+    """
+    if request.method == "POST":
         form = SubscriptionForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            
-            # --- BURADA EMAİLİ BAZAYA YAZMAQ KODU OLACAQ ---
-            # Məsələn:
+            email = form.cleaned_data["email"]
+
+            # Burada real DB yazmaq və ya Mailchimp API çağırmaq olar:
             # Subscriber.objects.create(email=email)
-            # Və ya Mailchimp API-a göndərmək.
-            
-            # Uğurlu mesajı göstər
-            messages.success(request, f'{email} ünvanı uğurla abunə oldu! Təşəkkürlər.')
-            return redirect("subscribe") # Formu təmizləmək üçün yenidən yükləyirik
+
+            messages.success(
+                request,
+                f"{email} ünvanı uğurla abunə oldu! Təşəkkürlər."
+            )
+            return redirect("subscribe")
         else:
-            messages.error(request, 'Zəhmət olmasa düzgün email ünvanı daxil edin.')
+            messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
     else:
         form = SubscriptionForm()
 
-    return render(request, "blog/subscribe.html", {'form': form})
+    return render(request, "blog/subscribe.html", {"form": form})
 
 
-#example post detail request http://
+# ------------------- POST CRUD ------------------- #
 
+from django.utils.text import slugify
+from .models import Post
+
+@login_required
 def create_post(request):
-    return HttpResponse("Create a New Post Page")
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
 
+            base_slug = slugify(post.title)
+            slug = base_slug
+            counter = 1 
+
+            while Post.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            post.slug = slug
+
+            post.save()
+            messages.success(request, "Post uğurla yaradıldı.")
+            return redirect("post_detail", slug=post.slug)
+    else:
+        form = PostForm()
+
+    return render(request, "post_form.html", {"form": form})
+
+
+
+
+
+@login_required
 def edit_post(request, post_id):
-    return HttpResponse(f"Edit Post ID: {post_id}")
+    """
+    Postu redaktə etmək.
+    Yalnız həmin postun müəllifi redaktə edə bilər.
+    """
+    post = get_object_or_404(Post, pk=post_id, author=request.user)
 
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Post yeniləndi.")
+            return redirect("post_detail", post_id=post.id)
+    else:
+        form = PostForm(instance=post)
+
+    context = {
+        "form": form,
+        "post": post,
+        "is_edit": True,
+    }
+    return render(request, "blog/post_form.html", context)
+
+
+@login_required
 def delete_post(request, post_id):
-    return HttpResponse(f"Delete Post ID: {post_id}")
+    """
+    Postu silmək – sadə variant.
+    Confirmation üçün ayrıca template istifadə edə bilərik.
+    """
+    post = get_object_or_404(Post, pk=post_id, author=request.user)
+
+    if request.method == "POST":
+        post.delete()
+        messages.success(request, "Post silindi.")
+        return redirect("home")
+
+    return render(request, "blog/post_confirm_delete.html", {"post": post})
+
 
 def list_posts(request):
-    return HttpResponse("List of All Posts")
+    """
+    Bütün postların siyahısı (əgər ayrıca page istəyirsənsə).
+    """
+    posts = (
+        Post.objects
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+    return render(request, "blog/post_list.html", {"posts": posts})
+
 
 def search_posts(request):
-    return HttpResponse("Search Posts Page")
+    """
+    Sadə search: ?q=... ilə title və excerpt-də axtarır.
+    """
+    query = request.GET.get("q", "").strip()
+    posts = Post.objects.all()
+
+    if query:
+        posts = posts.filter(
+            title__icontains=query
+        ) | posts.filter(
+            excerpt__icontains=query
+        )
+
+    posts = posts.order_by("-created_at")
+
+    return render(request, "blog/search_results.html", {
+        "posts": posts,
+        "query": query,
+    })
 
 
+# ------------------- USER REGISTER / PROFILE / LOGOUT ------------------- #
 
-# ---------------- YENİ: USER REGISTER ----------------
 def register_view(request):
     """
     Yeni istifadəçi qeydiyyatı.
@@ -159,26 +274,29 @@ def register_view(request):
     return render(request, "blog/register.html", {"form": form})
 
 
-# ---------------- YENİ: USER PROFIL SƏHİFƏSİ ----------------
-
-
 def user_profile(request, username):
+    """
+    İstifadəçi profili – həmin user-in yazdığı postlar.
+    Məsələn: /blog/users/elvin/
+    """
     profile_user = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=profile_user).order_by("-created_at")
+    user_posts = (
+        Post.objects
+        .filter(author=profile_user)
+        .select_related("category")
+        .order_by("-created_at")
+    )
 
     context = {
         "profile_user": profile_user,
-        "posts": posts,
+        "posts": user_posts,
     }
     return render(request, "blog/user_profile.html", context)
 
 
-#  ---------------- YENİ: LOGOUT VIEW ----------------
-
 def logout_view(request):
     """
     İstifadəçini çıxış etdirib ana səhifəyə yönləndirir.
-    GET və POST hər ikisini qəbul edəcək.
     """
     logout(request)
-    return redirect('home')
+    return redirect("home")

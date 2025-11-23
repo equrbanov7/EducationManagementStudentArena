@@ -1,19 +1,5 @@
-  /* --- Blog Grid Layout --- */
-  .content-wrapper {
-    display: grid;
-    grid-template-columns: 3fr 1fr; /* Əsas hissə və Yan panel */
-    gap: 30px;
-    margin-bottom: 50px;
-  }
-
-  .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 25px;
-  }
-
-  /* --- Blog Kartı Dizaynı --- */
-  .blog-card {
+/* --- Blog Kartı Dizaynı --- */
+.blog-card {
     background: var(--card-bg);
     border-radius: 10px;
     overflow: hidden;
@@ -21,48 +7,61 @@
     transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
-  }
+}
 
-  .blog-card:hover {
+.blog-card:hover {
     transform: translateY(-5px);
-  }
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Hover kölgəsini gücləndirdim */
+}
 
-  .card-img {
+.card-img {
     height: 200px;
     background-color: #ddd;
     background-size: cover;
     background-position: center;
-  }
+}
 
-  .card-body {
+.card-body {
     padding: 20px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-  }
+}
 
-  .card-category {
+.card-category {
     font-size: 0.8rem;
     color: var(--primary-color);
     font-weight: 600;
     text-transform: uppercase;
     margin-bottom: 8px;
-  }
+    letter-spacing: 0.5px; /* Hərflər arası məsafə */
+}
 
-  .card-title {
+.card-title {
     font-size: 1.25rem;
     margin-bottom: 10px;
-    color: var(--text-dark);
-  }
+    line-height: 1.4; /* Sətirlər arası boşluq */
+}
 
-  .card-excerpt {
+.card-title a {
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.card-title a:hover {
+    color: var(--primary-color);
+}
+
+.card-excerpt {
     color: var(--text-light);
     font-size: 0.95rem;
+    line-height: 1.6; /* Sətirlər arası boşluq */
     margin-bottom: 20px;
     flex-grow: 1;
-  }
+}
 
-  .card-footer {
+.card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -70,15 +69,57 @@
     border-top: 1px solid #eee;
     font-size: 0.85rem;
     color: var(--text-light);
-  }
+}
 
-  .read-more {
+/* Yeni əlavələr: Müəllif və Tarix */
+.card-meta {
+    display: flex;
+    flex-direction: column; /* Müəllif və Tarix alt-alta düşsün */
+    gap: 5px; /* Aralarındakı boşluq */
+    font-size: 0.8rem; /* Daha kiçik şrift */
+}
+
+.card-author {
+    color: var(--text-dark, #4b5563); /* Müəllif adı rəngi */
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.card-author:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.card-author i, .card-date i {
+    margin-right: 5px; /* İkon və mətn arası boşluq */
+    color: #9ca3af; /* İkon rəngi */
+}
+
+.card-date {
+    color: var(--text-light, #6b7280); /* Tarix rəngi */
+}
+
+
+.read-more {
     color: var(--primary-color);
     font-weight: 600;
-  }
-    /* --- Mobile Responsive --- */
-    @media (max-width: 768px) {
-        .content-wrapper {
-          grid-template-columns: 1fr; /* Yan paneli aşağı salır */
-        }
-      }
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.read-more:hover {
+    text-decoration: underline;
+    color: #1e40af; /* Daha tünd rəng */
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    .content-wrapper {
+        grid-template-columns: 1fr; /* Yan paneli aşağı salır */
+    }
+    .card-footer {
+        flex-direction: column; /* Mobil də alt-alta düşsün */
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

@@ -1,0 +1,159 @@
+/* static/css/post_form.css */
+
+/* --- Ümumi Səhifə Konteyneri --- */
+.post-form-page-wrapper {
+    min-height: calc(100vh - 170px); /* Header və footer hündürlüyünü nəzərə alaraq */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #f3e5f5 0%, #e0f7fa 100%); /* Yüngül bənövşəyi-mavi gradient fon */
+    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+}
+
+/* --- Forma Kartı --- */
+.post-form-card {
+    background: #ffffff;
+    max-width: 800px; /* Daha geniş forma üçün */
+    width: 100%;
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+/* --- Başlıq və Altyazı --- */
+.post-form-heading {
+    font-size: 2.5rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.post-form-subheading {
+    color: var(--text-light, #6b7280);
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+}
+
+/* --- Forma --- */
+.post-creation-form { /* Formun öz sinifi */
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Sahələr arası məsafə */
+    text-align: left; /* Mətnləri sola çək */
+}
+
+/* Formun ümumi xəta mesajları (non_field_errors) */
+.post-form-global-errors {
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #fecaca;
+    font-size: 0.95rem;
+    text-align: left;
+}
+.post-form-global-errors li {
+    list-style: none; /* List stilini sıfırla */
+    margin-bottom: 5px;
+}
+
+/* Hər forma qrupu */
+.post-form-group {
+    margin-bottom: 0; /* Gap istifadə edirik */
+}
+
+.post-form-group label {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Input sahələrinin ümumi stili */
+.post-form-group input[type="text"],
+.post-form-group input[type="url"], /* Image URL üçün */
+.post-form-group textarea,
+.post-form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    background-color: #f9fafb;
+    resize: vertical; /* Textarea üçün dikey ölçü dəyişikliyinə icazə ver */
+}
+
+.post-form-group input[type="text"]:focus,
+.post-form-group input[type="url"]:focus,
+.post-form-group textarea:focus,
+.post-form-group select:focus {
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: #ffffff;
+}
+
+/* Textarea üçün xüsusi hündürlük */
+.post-form-group textarea {
+    min-height: 120px; /* Məzmun üçün minimum hündürlük */
+}
+
+/* Select elementinin stili */
+.post-form-group select {
+    appearance: none; /* Default oxu gizlət */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem; /* Ox üçün boşluq */
+}
+
+
+/* Forma sahəsinin xətası */
+.post-form-field-error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* --- Göndər Düyməsi --- */
+.post-form-submit-btn { /* btn-primary -> post-form-submit-btn */
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px; /* Düymənin yuxarısından məsafə */
+}
+
+.post-form-submit-btn:hover {
+    background-color: #1e40af;
+    transform: translateY(-2px);
+}
+
+/* --- Responsive Dizayn --- */
+@media (max-width: 768px) {
+    .post-form-card {
+        padding: 30px 20px;
+        margin: 0 15px;
+    }
+    .post-form-heading {
+        font-size: 2rem;
+    }
+    .post-form-subheading {
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+}

@@ -8,33 +8,129 @@
 {% endblock %}
 
 {% block content %}
-<article class="article-container">
-    
-    <header class="article-header">
-        {% if post.category %}
-            <span class="article-category">{{ post.category }}</span>
+<div class="article-page-wrapper"> {# Ümumi səhifə konteyneri #}
+    <article class="article-container">
+        
+        <header class="article-header">
+            {% if post.category %}
+                <a href="#" class="article-category">
+                    <i class="fas fa-tag"></i> {{ post.category.name }}
+                </a> {# Kateqoriyaya link və ikon #}
+            {% endif %}
+            
+            <h1 class="article-title">{{ post.title }}</h1>
+            
+            <div class="article-meta">
+                <span><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}</span>
+                {% if post.author %}
+                    <span>• <a href="{% url 'user_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
+                {% endif %}
+                {% if post.average_rating %}
+                    <span>• <i class="fas fa-star"></i> {{ post.average_rating|floatformat:1 }} / 5</span>
+                {% endif %}
+            </div>
+        </header>
+
+        {% if post.image_url %}
+            <img src="{{ post.image_url }}" alt="{{ post.title }}" class="article-featured-image">
+        {% else %}
+            <img src="{% static 'img/tech-placeholder.svg' %}" alt="Default Blog Image" class="article-featured-image">
         {% endif %}
-        
-        <h1 class="article-title">{{ post.title }}</h1>
-        
-        <div class="article-meta">
-            <span>📅 {{ post.date }}</span>
+
+        <div class="article-content">
+            {# Əgər excerpt göstərmək istəyirsənsə, əvvəlcə qısa təsviri verə bilərsən #}
+            {% if post.excerpt %}
+                <p class="article-excerpt">
+                    **{{ post.excerpt|linebreaks }}** {# Qısa təsviri bold etdim #}
+                </p>
+                <hr>
+            {% endif %}
+
+            {{ post.content|linebreaks }} 
         </div>
-    </header>
 
-    {% if post.image %}
-        <img src="{{ post.image }}" alt="{{ post.title }}" class="article-featured-image">
-    {% else %}
-        <img src="{% static 'img/tech-placeholder.svg' %}" alt="Default Blog Image" class="article-featured-image">
-    {% endif %}
+       
 
-    <div class="article-content">
-        {{ post.excerpt|linebreaks }} {# content sahəsindən oxuyuruq #}
-    </div>
+    </article>
 
-    <footer class="article-footer">
-        <a href="{% url 'home' %}" class="back-btn">← Ana Səhifəyə Qayıt</a>
-    </footer>
+    {# ------- RATING & COMMENTS BÖLMƏSİ ------- #}
+    <section class="article-extra-section"> {# Yeni konteyner #}
+        <div class="article-rating-block">
+            {% if post.average_rating %}
+                <p>Məqalənin orta reytinqi: <strong>{{ post.average_rating|floatformat:1 }}</strong> <i class="fas fa-star"></i> / 5</p>
+            {% else %}
+                <p>Bu məqalə üçün hələ reytinq yoxdur.</p>
+            {% endif %}
+        </div>
 
-</article>
+        <div class="comments-section"> {# article-comments -> comments-section #}
+            <h2 class="comments-title">Şərhlər ({{ comments.count }})</h2>
+
+            {% for comment in comments %}
+                <article class="comment-item">
+                    <header class="comment-header">
+                        <strong class="comment-author">{{ comment.user.username }}</strong>
+                        <span class="comment-meta">
+                            {{ comment.created_at|date:"d M Y H:i" }} • 
+                            <span class="star-rating">
+                                {% for _ in ""|ljust:comment.rating %} <i class="fas fa-star"></i> {% endfor %} {# Reytinq ulduzları #}
+                            </span>
+                        </span>
+                    </header>
+                    <p class="comment-text">{{ comment.text|linebreaks }}</p>
+                </article>
+            {% empty %}
+                <p>Hələ şərh yoxdur. İlk şərh yazan sən ol 😊</p>
+            {% endfor %}
+        </div>
+
+        <div class="add-comment-section"> {# article-add-comment -> add-comment-section #}
+            <h3>Şərh yaz</h3>
+
+            {% if not request.user.is_authenticated %}
+                <p class="comment-auth-message">
+                    Şərh yazmaq üçün
+                    <a href="{% url 'login' %}?next={{ request.path }}">daxil ol</a>
+                    və ya
+                    <a href="{% url 'register' %}">qeydiyyatdan keç</a>.
+                </p>
+            {% else %}
+                <form method="post" class="comment-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        {{ comment_form.text.label_tag }}
+                        {{ comment_form.text }}
+                        {% if comment_form.text.errors %}
+                            <div class="form-error">
+                                {{ comment_form.text.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                  
+                    <div class="form-group">
+                        {{ comment_form.rating.label_tag }}
+                        {{ comment_form.rating }}
+                        {% if comment_form.rating.errors %}
+                            <div class="form-error">
+                                {{ comment_form.rating.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+           
+                
+
+                    <button type="submit" class="comment-submit-btn">
+                        Şərhi Göndər
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<footer class="article-footer">
+    <a href="{% url 'home' %}" class="back-btn"><i class="fas fa-arrow-left"></i> Ana Səhifəyə Qayıt</a>
+</footer>
 {% endblock %}

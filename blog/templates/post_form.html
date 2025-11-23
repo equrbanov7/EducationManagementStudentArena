@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yeni Post | MyBlog.az{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/post_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="post-form-page-wrapper"> {# Yeni ümumi konteyner sinifi #}
+    <div class="post-form-card"> {# post-form-card #}
+        <h1 class="post-form-heading">Yeni Yazı Yarat</h1> {# post-form-heading #}
+        <p class="post-form-subheading"> {# post-form-subheading #}
+            Bloqun üçün yeni məqalə əlavə et.
+        </p>
+
+        <form method="post" class="post-creation-form" novalidate> {# Yeni forma sinifi #}
+            {% csrf_token %}
+
+            {# Formun ümumi xəta mesajları #}
+            {% if form.non_field_errors %}
+                <div class="post-form-global-errors">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="post-form-group"> {# form-group -> post-form-group #}
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="post-form-field-error">{{ form.title.errors.0 }}</div> {# form-error -> post-form-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="post-form-group"> {# form-group -> post-form-group #}
+                {{ form.category.label_tag }}
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="post-form-field-error">{{ form.category.errors.0 }}</div> {# form-error -> post-form-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="post-form-group"> {# form-group -> post-form-group #}
+                {{ form.image_url.label_tag }}
+                {{ form.image_url }}
+                {% if form.image_url.errors %}
+                    <div class="post-form-field-error">{{ form.image_url.errors.0 }}</div> {# form-error -> post-form-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="post-form-group"> {# form-group -> post-form-group #}
+                {{ form.excerpt.label_tag }}
+                {{ form.excerpt }}
+                {% if form.excerpt.errors %}
+                    <div class="post-form-field-error">{{ form.excerpt.errors.0 }}</div> {# form-error -> post-form-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="post-form-group"> {# form-group -> post-form-group #}
+                {{ form.content.label_tag }}
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div class="post-form-field-error">{{ form.content.errors.0 }}</div> {# form-error -> post-form-field-error #}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="post-form-submit-btn"> {# btn-primary -> post-form-submit-btn #}
+                Yazını Yarat
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

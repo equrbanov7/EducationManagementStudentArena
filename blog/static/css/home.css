@@ -1,39 +1,128 @@
-/* --- Hero Bölməsi --- */ .hero { text-align: center; padding: 60px 20px; background: linear-gradient(to right, #1e3a8a, #3b82f6); color: white; margin-bottom: 40px; } .hero h1 { font-size: 2.5rem; margin-bottom: 10px; } .hero p { font-size: 1.1rem; opacity: 0.9; }
+/* static/css/home.css */
 
-  /* --- Axtarış Paneli --- */
-  .search-container {
-    margin-bottom: 30px;
-    display: flex;
-    justify-content: center;
-  }
-
-  #searchInput {
-    padding: 12px 20px;
-    width: 100%;
-    max-width: 500px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    font-size: 1rem;
-    outline: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  }
-
-  #searchInput:focus {
-    border-color: var(--primary-color);
-  }
-
-  /* --- Blog Grid Layout --- */
-  .content-wrapper {
-    display: grid;
-    grid-template-columns: 3fr 1fr; /* Əsas hissə və Yan panel */
-    gap: 30px;
-    margin-bottom: 50px;
-}
-
-.container {
-    max-width: 1200px;
+/* --- Ümumi Konteyner --- */
+.site-main-container {
+    max-width: 1200px; /* Ümumi məzmunun maksimum eni */
     margin: 0 auto;
     padding: 0 20px;
 }
 
+/* --- Hero Bölməsi --- */
+.home-hero-section {
+    text-align: center;
+    padding: 80px 20px; /* Daha çox padding */
+    background: linear-gradient(to right, var(--primary-dark, #1e3a8a), var(--primary-color, #3b82f6));
+    color: white;
+    margin-bottom: 50px; /* Aşağıdan məsafəni artırırıq */
+    border-radius: 12px; /* Yüngül künclər */
+}
 
+.home-hero-section h1 {
+    font-size: 3.2rem; /* Daha böyük şrift */
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.home-hero-section p {
+    font-size: 1.3rem; /* Daha böyük şrift */
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* --- Axtarış Paneli --- */
+.home-search-wrapper {
+    margin-bottom: 40px; /* Aşağıdan məsafə */
+    display: flex;
+    justify-content: center;
+}
+
+.home-search-input {
+    padding: 14px 25px; /* Daha çox padding */
+    width: 100%;
+    max-width: 600px; /* Daha geniş axtarış sahəsi */
+    border: 1px solid var(--border-light, #ddd);
+    border-radius: 30px; /* Daha yumru künclər */
+    font-size: 1.05rem;
+    outline: none;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.home-search-input:focus {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Focus zamanı kölgə */
+}
+
+/* --- Əsas Məzmun Və Yan Panel Konteyneri --- */
+.home-content-layout {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Əsas məzmun (3 hissə) və yan panel (1 hissə) */
+    gap: 40px; /* Sütunlar arası məsafə */
+    margin-bottom: 60px; /* Səhifənin aşağısından məsafə */
+}
+
+/* --- Blog Grid Bölməsi --- */
+.home-blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 3 sütun üçün adaptiv grid */
+    gap: 30px; /* Kartlar arası məsafə */
+}
+
+/* --- "Heç bir yazı yoxdur" mesajı üçün stil --- */
+.home-no-posts-message {
+    grid-column: 1 / -1; /* Bütün sütunları əhatə etsin */
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--text-light, #6b7280);
+    padding: 50px 0;
+    background-color: var(--bg-light, #f9fafb);
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+
+/* --- Responsive Dizayn --- */
+@media (max-width: 992px) { /* Tablet ölçüləri */
+    .home-hero-section h1 {
+        font-size: 2.5rem;
+    }
+    .home-hero-section p {
+        font-size: 1.1rem;
+    }
+    .home-content-layout {
+        grid-template-columns: 2fr 1fr; /* Yan paneli biraz kiçildir */
+        gap: 30px;
+    }
+    .home-blog-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Kartları biraz kiçildir */
+        gap: 25px;
+    }
+}
+
+@media (max-width: 768px) { /* Mobil ölçüləri */
+    .home-hero-section {
+        padding: 50px 15px;
+        margin-bottom: 30px;
+    }
+    .home-hero-section h1 {
+        font-size: 2rem;
+    }
+    .home-hero-section p {
+        font-size: 1rem;
+    }
+    .home-search-wrapper {
+        margin-bottom: 30px;
+    }
+    .home-content-layout {
+        grid-template-columns: 1fr; /* Yan paneli əsas məzmunun altına salır */
+        gap: 50px; /* Daha çox boşluq */
+    }
+    .home-blog-grid {
+        grid-template-columns: 1fr; /* Kartlar bir sütunda göstərilir */
+        gap: 20px;
+    }
+    .home-no-posts-message {
+        padding: 30px 15px;
+    }
+}

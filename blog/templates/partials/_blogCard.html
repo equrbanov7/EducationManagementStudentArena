@@ -1,14 +1,24 @@
+{% load static %}
 <article class="blog-card">
-    <div class="card-img" style="background-image: url('{{ post.image }}')"></div>
+    <div class="card-img" style="background-image: url('{{ post.image_url }}')"></div>
     <div class="card-body">
         <span class="card-category">{{ post.category }}</span>
         <h2 class="card-title">
-            <a href="#">{{ post.title }}</a>
+            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a> {# Linki buraya da əlavə etdim #}
         </h2>
         <p class="card-excerpt">{{ post.excerpt }}</p>
         <div class="card-footer">
-            <span>{{ post.date }}</span>
-            <a href="#" class="read-more">Oxumağa davam et →</a>
+            <div class="card-meta"> {# Author və Tarix üçün yeni konteyner #}
+                {% if post.author %}
+                <a href="{% url 'user_profile' post.author.username %}" class="card-author">
+                    <i class="fas fa-user-circle"></i> {{ post.author.username }}
+                </a>
+            {% endif %}
+                <span class="card-date">
+                    <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}
+                </span> {# Yeni ikon və tarix formatı #}
+            </div>
+            <a href="{% url 'post_detail' post.slug %}" class="read-more">Oxumağa davam et →</a>
         </div>
     </div>
 </article>

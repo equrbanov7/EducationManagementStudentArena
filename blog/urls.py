@@ -41,7 +41,11 @@ urlpatterns = [
     path('users/<str:username>/', views.user_profile, name='user_profile'),
 
     # --- Postlarla bağlı URL-lər ---
-    path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
+    # path('posts/<int:post_id>/', views.post_detail, name='post_detail'),
     path('posts/create/', views.create_post, name='create_post'),
+    path('posts/<slug:slug>/', views.post_detail, name='post_detail'),
+    
+
+   
     path('posts/<int:post_id>/edit/', views.edit_post, name='edit_post'),
 ]
