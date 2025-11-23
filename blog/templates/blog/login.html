@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Daxil ol | MyBlog{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
+    <div class="auth-card">
+        <h1 class="auth-heading">Daxil ol</h1> {# auth-title -> auth-heading #}
+        <p class="auth-subheading">Hesabınıza daxil olun və öz postlarınızı idarə edin.</p> {# auth-subtitle -> auth-subheading #}
+
+        {% if form.non_field_errors %}
+            <div class="auth-global-errors"> {# auth-errors -> auth-global-errors #}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+
+            <div class="auth-form-field"> {# auth-field -> auth-form-field #}
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="auth-field-error">{{ form.username.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="auth-form-field"> {# auth-field -> auth-form-field #}
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-submit-btn">Daxil ol</button> {# auth-btn -> auth-submit-btn #}
+        </form>
+
+        <p class="auth-footer-text">
+            Hesabınız yoxdur? <a href="{% url 'register' %}">Qeydiyyatdan keçin</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

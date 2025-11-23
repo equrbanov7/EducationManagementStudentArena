@@ -52,4 +52,30 @@ document.addEventListener('DOMContentLoaded', function () {
             closeMobileNav();
         }
     });
+
+    const userToggle = document.querySelector('.blog-header__user-toggle');
+    const userMenu = document.querySelector('.blog-header__user-menu');
+
+    if (userToggle && userMenu) {
+        // Aç / bağla
+        userToggle.addEventListener('click', function (e) {
+            e.stopPropagation(); // body click eventinə düşməsin
+            const isOpen = userMenu.classList.contains('blog-header__user-menu--open');
+            if (isOpen) {
+                userMenu.classList.remove('blog-header__user-menu--open');
+                userToggle.setAttribute('aria-expanded', 'false');
+            } else {
+                userMenu.classList.add('blog-header__user-menu--open');
+                userToggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        // Çöldə klik edəndə bağla
+        document.addEventListener('click', function () {
+            if (userMenu.classList.contains('blog-header__user-menu--open')) {
+                userMenu.classList.remove('blog-header__user-menu--open');
+                userToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
 });

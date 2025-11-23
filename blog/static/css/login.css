@@ -1,0 +1,149 @@
+/* static/css/auth.css */
+
+/* --- Ümumi Səhifə Fonu və Mərkəzləşdirmə --- */
+.auth-page-wrapper { /* register-page-wrapper -> auth-page-wrapper */
+    min-height: calc(100vh - 170px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #e0f2f7 0%, #f0f8ff 100%);
+    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+}
+
+/* --- Qeydiyyat/Daxilolma Kartı (Formanın olduğu əsas qutu) --- */
+.auth-card { /* register-card -> auth-card */
+    background: #ffffff;
+    max-width: 450px;
+    width: 100%;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+/* --- Başlıq və Altyazı --- */
+.auth-heading { /* register-heading -> auth-heading */
+    font-size: 2rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.auth-subheading { /* register-subheading -> auth-subheading */
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+/* --- Xəta Mesajları (Form-un yuxarısında) --- */
+.auth-global-errors { /* register-global-errors -> auth-global-errors */
+    background-color: #fee2e2;
+    color: #991b1b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #fecaca;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+/* --- Forma Stili --- */
+.auth-form { /* register-form -> auth-form */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Forma Sahəsi (Label, Input, Error) */
+.auth-form-field { /* register-form-field -> auth-form-field */
+    text-align: left;
+}
+
+.auth-form-field label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.auth-form-field input[type="text"],
+.auth-form-field input[type="email"],
+.auth-form-field input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    background-color: #f9fafb;
+}
+
+.auth-form-field input[type="text"]:focus,
+.auth-form-field input[type="email"]:focus,
+.auth-form-field input[type="password"]:focus {
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: #ffffff;
+}
+
+/* Forma Sahəsinin Xətası */
+.auth-field-error { /* register-field-error -> auth-field-error */
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* --- Göndər Düyməsi --- */
+.auth-submit-btn { /* register-submit-btn -> auth-submit-btn */
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.auth-submit-btn:hover {
+    background-color: #1e40af;
+    transform: translateY(-2px);
+}
+
+/* --- Kartın Alt Mətni (Login/Register linki) --- */
+.auth-footer-text { /* register-footer-text -> auth-footer-text */
+    margin-top: 30px;
+    color: var(--text-light, #6b7280);
+    font-size: 0.95rem;
+}
+
+.auth-footer-text a {
+    color: var(--primary-color, #2563eb);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.auth-footer-text a:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* --- Responsive Dizayn --- */
+@media (max-width: 500px) {
+    .auth-card {
+        padding: 30px 20px;
+        margin: 0 15px;
+    }
+    .auth-heading {
+        font-size: 1.8rem;
+    }
+}

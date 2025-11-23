@@ -84,6 +84,11 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
+# Login / logout ayarları
+LOGIN_URL = '/blog/login/'
+LOGIN_REDIRECT_URL = '/blog/'        # uğurlu login-dən sonra hara getsin
+LOGOUT_REDIRECT_URL = '/blog/'       # logout-dan sonra hara qayıtsın (istəsən)
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

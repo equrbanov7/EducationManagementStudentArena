@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Qeydiyyat | MyBlog{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="register-page-wrapper">
+    <div class="register-card">
+        <h1 class="register-heading">Hesab Yarat</h1>
+        <p class="register-subheading">Yeni hesab yaradın və öz bloqunuzu paylaşmağa başlayın.</p>
+
+        {% if form.non_field_errors %}
+            <div class="register-global-errors">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="register-form" novalidate>
+            {% csrf_token %}
+
+            <div class="register-form-field">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="register-field-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="register-form-field">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="register-field-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="register-form-field">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="register-field-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="register-form-field">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="register-field-error">{{ form.password2.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="register-submit-btn">Qeydiyyatdan keç</button>
+        </form>
+
+        <p class="register-footer-text">
+            Artıq hesabınız var? <a href="{% url 'login' %}">Daxil olun</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

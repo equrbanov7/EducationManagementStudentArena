@@ -1,0 +1,149 @@
+/* static/css/register.css */
+
+/* --- Ümumi Səhifə Fonu və Mərkəzləşdirmə --- */
+.register-page-wrapper {
+    min-height: calc(100vh - 170px); /* Header və footer hündürlüyünü nəzərə alaraq (təxmini) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #e0f2f7 0%, #f0f8ff 100%); /* Yüngül gradient fon */
+    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+}
+
+/* --- Qeydiyyat Kartı (Formanın olduğu əsas qutu) --- */
+.register-card {
+    background: #ffffff;
+    max-width: 450px; /* Qutunun maksimum eni */
+    width: 100%;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+/* --- Başlıq və Altyazı --- */
+.register-heading {
+    font-size: 2rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.register-subheading {
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    margin-bottom: 30px;
+}
+
+/* --- Xəta Mesajları (Form-un yuxarısında) --- */
+.register-global-errors {
+    background-color: #fee2e2; /* Qırmızı fon */
+    color: #991b1b; /* Tünd qırmızı mətn */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #fecaca;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+/* --- Forma Stili --- */
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Sahələr arası məsafə */
+}
+
+/* Forma Sahəsi (Label, Input, Error) */
+.register-form-field {
+    text-align: left;
+}
+
+.register-form-field label {
+    display: block; /* Etiketi yuxarıda göstər */
+    font-size: 0.9rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.register-form-field input[type="text"],
+.register-form-field input[type="email"],
+.register-form-field input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db; /* Açıq boz çərçivə */
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    background-color: #f9fafb; /* Yüngül input fonu */
+}
+
+.register-form-field input[type="text"]:focus,
+.register-form-field input[type="email"]:focus,
+.register-form-field input[type="password"]:focus {
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Yüngül focus kölgəsi */
+    background-color: #ffffff; /* Focus olanda ağ fon */
+}
+
+/* Forma Sahəsinin Xətası */
+.register-field-error {
+    color: #ef4444; /* Qırmızı xəta mətni */
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* --- Göndər Düyməsi --- */
+.register-submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px; /* Düymənin yuxarısından məsafə */
+}
+
+.register-submit-btn:hover {
+    background-color: #1e40af; /* Hover rəngi */
+    transform: translateY(-2px); /* Yüngül yuxarı qalxma */
+}
+
+/* --- Kartın Alt Mətni (Login linki) --- */
+.register-footer-text {
+    margin-top: 30px;
+    color: var(--text-light, #6b7280);
+    font-size: 0.95rem;
+}
+
+.register-footer-text a {
+    color: var(--primary-color, #2563eb);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.register-footer-text a:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* --- Responsive Dizayn --- */
+@media (max-width: 500px) {
+    .register-card {
+        padding: 30px 20px;
+        margin: 0 15px; /* Kənar boşluqlar */
+    }
+    .register-heading {
+        font-size: 1.8rem;
+    }
+}
