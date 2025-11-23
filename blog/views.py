@@ -1,9 +1,16 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
 from django.http import Http404
 from django.contrib import messages # Mesaj göstərmək üçün
 from .forms import SubscriptionForm
 
+from django.contrib.auth.models import User          # 👈 yeni
+from django.contrib.auth import login, logout # 👈 yeni   
+
+from .models import Post  # yuxarıya əlavə et# 👈 yeni
+
+from .forms import SubscriptionForm, RegisterForm    # 👈 RegisterForm-u da əlavə edəcəyik (aşağıda kodunu yazıram)
+# ƏLAVƏ: hələ Post modeli istifadə etmirik, ona görə .models import etmirəm
 
 
 
@@ -128,3 +135,50 @@ def list_posts(request):
 
 def search_posts(request):
     return HttpResponse("Search Posts Page")
+
+
+
+# ---------------- YENİ: USER REGISTER ----------------
+def register_view(request):
+    """
+    Yeni istifadəçi qeydiyyatı.
+    Qeydiyyat uğurlu olduqda user-i login edib onun profil səhifəsinə yönləndiririk.
+    """
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            password = form.cleaned_data["password"]
+            user.set_password(password)  # şifrəni hash-lə saxla
+            user.save()
+            login(request, user)        # qeydiyyatdan sonra avtomatik login
+            return redirect("user_profile", username=user.username)
+    else:
+        form = RegisterForm()
+
+    return render(request, "blog/register.html", {"form": form})
+
+
+# ---------------- YENİ: USER PROFIL SƏHİFƏSİ ----------------
+
+
+def user_profile(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    posts = Post.objects.filter(author=profile_user).order_by("-created_at")
+
+    context = {
+        "profile_user": profile_user,
+        "posts": posts,
+    }
+    return render(request, "blog/user_profile.html", context)
+
+
+#  ---------------- YENİ: LOGOUT VIEW ----------------
+
+def logout_view(request):
+    """
+    İstifadəçini çıxış etdirib ana səhifəyə yönləndirir.
+    GET və POST hər ikisini qəbul edəcək.
+    """
+    logout(request)
+    return redirect('home')

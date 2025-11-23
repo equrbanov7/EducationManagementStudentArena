@@ -31,11 +31,54 @@
                 </li>
             </ul>
 
-            <button class="blog-header__toggle" type="button" aria-label="Menyunu aç/bağla">
-                <span class="blog-header__toggle-line"></span>
-                <span class="blog-header__toggle-line"></span>
-                <span class="blog-header__toggle-line"></span>
-            </button>
+            {# -------- SAĞ TƏRƏF: AUTH HİSSƏSİ -------- #}
+            <div class="blog-header__auth">
+                {% if request.user.is_authenticated %}
+                    <div class="blog-header__user">
+                        <button
+                            type="button"
+                            class="blog-header__user-toggle"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >
+                            <span class="blog-header__user-avatar">
+                                {{ request.user.username|first|upper }}
+                            </span>
+                            <span class="blog-header__user-name">
+                                {{ request.user.username }}
+                            </span>
+                            <span class="blog-header__user-caret">▾</span>
+                        </button>
+
+                        <div class="blog-header__user-menu">
+                            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__user-menu-item">
+                                Profilim
+                            </a>
+                            <a href="{% url 'logout' %}" class="blog-header__user-menu-item">
+                                Çıxış et
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="blog-header__guest-actions">
+                        <a href="{% url 'login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
+                            Daxil ol
+                        </a>
+                        <a href="{% url 'register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
+                            Qeydiyyat
+                        </a>
+                    </div>
+                {% endif %}
+
+                {# Burger button mobil üçün #}
+                <button class="blog-header__toggle" type="button" aria-label="Menyunu aç/bağla">
+                    <span class="blog-header__toggle-line"></span>
+                    <span class="blog-header__toggle-line"></span>
+                    <span class="blog-header__toggle-line"></span>
+                </button>
+            </div>
+
+            
         </nav>
     </div>
 </header>
@@ -61,6 +104,35 @@
             Haqqımızda
         </a>
     </li>
+    
+
+    {# Mobil menyuda da auth hissəsi olsun #}
+    {% if request.user.is_authenticated %}
+    
+        <li class="blog-header__nav-item">
+            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__nav-link">
+                Profilim ({{ request.user.username }})
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'logout' %}" class="blog-header__nav-link">
+                Çıxış et
+            </a>
+        </li>
+    {% else %}
+        <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'login' %}" class="blog-header__nav-link">
+                Daxil ol
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'register' %}" class="blog-header__nav-link">
+                Qeydiyyat
+            </a>
+        </li>
+    {% endif %}
+
     <li class="blog-header__nav-item">
         <a href="{% url 'subscribe' %}"
            class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">

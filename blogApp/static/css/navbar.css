@@ -111,6 +111,102 @@
     background: var(--primary-color);
 }
 
+.blog-header__auth {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.blog-header__guest-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Login düyməsi üçün daha sakit görünüş */
+.blog-header__nav-link--muted {
+    opacity: 0.8;
+    font-size: 0.95rem;
+}
+
+/* User dropdown */
+.blog-header__user {
+    position: relative;
+}
+
+.blog-header__user-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-header__user-toggle:hover {
+    background: rgba(15, 23, 42, 0.05);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.blog-header__user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.blog-header__user-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.blog-header__user-caret {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Açılan menyu */
+.blog-header__user-menu {
+    position: absolute;
+    right: 0;
+    top: 110%;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    padding: 8px 0;
+    display: none; /* JS ilə açıb-bağlayacağıq */
+    z-index: 200;
+}
+
+.blog-header__user-menu--open {
+    display: block;
+}
+
+.blog-header__user-menu-item {
+    display: block;
+    padding: 8px 14px;
+    font-size: 0.95rem;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.blog-header__user-menu-item:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+
+
 
 /* --- MOBİL NAVİGASİYA (Overlay və Panel) Stilləri --- */
 
@@ -202,6 +298,9 @@
     .blog-header__nav-list--desktop {
         display: none; /* Mobil də desktop naviqasiyasını gizlət */
     }
+    .blog-header__guest-actions {
+        display: none; /* Mobil menyuda ayrıca göstəririk */
+    }
     /* Mobil menyu paneli və overlay JavaScript tərəfindən idarə olunacaq */
 }
 
@@ -212,6 +311,13 @@
     .blog-header__nav-list--desktop {
         display: flex; /* Desktop-da normal naviqasiyanı göstər */
     }
+
+    .blog-header__auth {
+        gap: 8px;
+    }
+
+   
+
     /* Desktop-da mobil menyu elementlərini tamamilə gizlət */
     .mobile-nav-overlay,
     .mobile-nav-panel {

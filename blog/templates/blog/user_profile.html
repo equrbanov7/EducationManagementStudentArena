@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }} | Profil{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page-wrapper"> {# auth-page-wrapper kimi, ümumi konteyner #}
+
+    <header class="profile-section-header">
+        <h1><span>{{ profile_user.username }}</span> Profili</h1>
+        <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
+
+        {% if request.user.is_authenticated and request.user == profile_user %}
+            <a href="{% url 'create_post' %}" class="profile-create-post-btn">
+                <i class="fas fa-plus-circle"></i> Yeni post yarat {# Əlavə ikon üçün Font Awesome lazımdır #}
+            </a>
+        {% endif %}
+    </header>
+
+    <section class="profile-posts-section">
+        {% if posts %}
+            {% for post in posts %}
+                <article class="profile-post-card">
+                    <h3> {# h2 yerinə h3 #}
+                        <a href="{% url 'post_detail' post.slug %}"> {# post.id yerinə post.slug #}
+                            {{ post.title }}
+                        </a>
+                    </h3>
+                    <p>{{ post.excerpt|default:post.content|truncatewords:25 }}</p>
+                    <small>📅 {{ post.created_at|date:"d M Y" }}</small>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p class="profile-no-posts-message">Bu istifadəçinin hələ heç bir postu yoxdur.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

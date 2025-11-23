@@ -1,0 +1,161 @@
+/* static/css/profile.css */
+
+/* --- Ümumi Səhifə Konteyneri --- */
+.profile-page-wrapper {
+    max-width: 900px; /* Səhifənin əsas eni */
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+}
+
+/* --- Profil Başlığı (Header) --- */
+.profile-section-header {
+    text-align: center;
+    margin-bottom: 50px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-section-header h1 {
+    font-size: 2.8rem;
+    color: var(--primary-color, #2563eb); /* Əsas rəng */
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.profile-section-header h1 span {
+    color: var(--text-dark, #1f2937); /* İstifadəçi adının rəngi */
+}
+
+.profile-section-header .profile-subheading {
+    color: var(--text-light, #6b7280);
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+}
+
+/* "Yeni post yarat" düyməsi */
+.profile-create-post-btn {
+    display: inline-block;
+    background-color: var(--primary-color, #2563eb);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.profile-create-post-btn:hover {
+    background-color: #1e40af;
+    transform: translateY(-2px);
+}
+
+/* --- Profil Məlumat Kartı (optional, əlavə info varsa) --- */
+/* Hazırda bu səhifədə user info yoxdur, amma gələcəkdə əlavə etsəniz: */
+/*
+.profile-info-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    padding: 30px;
+    margin-bottom: 40px;
+    text-align: left;
+}
+.profile-info-card p {
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+    color: var(--text-dark, #1f2937);
+}
+.profile-info-card p strong {
+    color: var(--primary-color, #2563eb);
+}
+*/
+
+/* --- İstifadəçi Postları Bölməsi --- */
+.profile-posts-section {
+    margin-top: 50px;
+}
+
+.profile-posts-section h2 {
+    font-size: 2rem;
+    color: var(--text-dark, #1f2937);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.profile-no-posts-message {
+    text-align: center;
+    color: var(--text-light, #6b7280);
+    font-size: 1.1rem;
+    padding: 50px 20px;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    border: 1px dashed #e0e0e0;
+}
+
+
+/* --- Post Kartları --- */
+.profile-post-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #f0f0f0;
+    text-align: left;
+}
+
+.profile-post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.profile-post-card h3 { /* Postun adı h2 yerinə h3 olacaq */
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.profile-post-card h3 a {
+    text-decoration: none;
+    color: var(--text-dark, #1f2937);
+    transition: color 0.2s;
+}
+
+.profile-post-card h3 a:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.profile-post-card p {
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.profile-post-card small {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    display: block; /* Vaxtı yeni sətirdən başla */
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+/* --- Responsive Dizayn --- */
+@media (max-width: 768px) {
+    .profile-section-header h1 {
+        font-size: 2.2rem;
+    }
+    .profile-section-header .profile-subheading {
+        font-size: 1rem;
+    }
+    .profile-post-card {
+        padding: 20px;
+    }
+    .profile-post-card h3 {
+        font-size: 1.3rem;
+    }
+}
