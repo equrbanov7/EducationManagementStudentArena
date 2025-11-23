@@ -94,6 +94,24 @@
     background-color: #1e40af;
 }
 
+.blog-header__nav-link--active {
+    color: var(--primary-color);
+    font-weight: 600;
+    position: relative;
+}
+
+.blog-header__nav-link--active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--primary-color);
+}
+
+
 /* --- MOBİL NAVİGASİYA (Overlay və Panel) Stilləri --- */
 
 /* Mobil Overlay - Bütün ekranı tutan yarı-şəffaf qara fon */
