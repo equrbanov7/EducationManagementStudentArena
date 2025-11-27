@@ -1,0 +1,172 @@
+/* static/css/student_exam_list.css */
+
+/* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
+.container.my-4 {
+    max-width: 900px;
+    margin: 40px auto; /* Yuxarı-aşağı məsafə və mərkəzləşdirmə */
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Başlıq --- */
+.container.my-4 h1 {
+    font-size: 2rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 30px;
+    font-weight: 800;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6; /* Ayırıcı xətt */
+}
+
+/* --- İmtahan Siyahısı (Bootstrap .list-group override) --- */
+ul.list-group {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+li.list-group-item {
+    background-color: #fcfcfd;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 15px; /* List elementləri arasında boşluq */
+    display: flex;
+    flex-wrap: wrap; /* Kiçik ekranlarda bükülmək üçün */
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px; /* Elementlər arasında boşluq */
+    transition: all 0.2s ease;
+}
+
+li.list-group-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-color: var(--primary-color-light, #bfdbfe);
+    transform: translateY(-2px); /* Yüngül yuxarı hərəkət */
+}
+
+li.list-group-item strong {
+    font-size: 1.2rem;
+    color: var(--text-dark, #1f2937);
+    display: block; /* Yeni sətirə keçir */
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+li.list-group-item small {
+    font-size: 0.9rem;
+    color: var(--text-light, #6b7280);
+    line-height: 1.4;
+    display: block; /* Hər small elementi yeni sətirə keçsin */
+}
+
+/* --- Cəhd Sayı Badgesi (Bootstrap .badge .bg-secondary override) --- */
+li.list-group-item .badge.bg-secondary {
+    background-color: #e0e7ff !important; /* Açıq mavi */
+    color: var(--primary-color, #3b82f6);
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap; /* Mətni bir sətirdə saxlayır */
+}
+
+/* --- İmtahana Başla Düyməsi (Bootstrap .btn .btn-primary override) --- */
+li.list-group-item .btn.btn-primary {
+    background-color: var(--primary-color, #3b82f6);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+    margin-left: 15px !important; /* Bootstrap ms-3-ü override edir */
+}
+
+li.list-group-item .btn.btn-primary:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.5);
+    color: white; /* Hover zamanı mətn rəngini qoru */
+}
+
+
+/* --- Boş mesaj --- */
+.container.my-4 p:not(.list-group-item small) { /* small class-ı olmayan p elementləri üçün */
+    text-align: center;
+    padding: 40px 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin-top: 30px;
+}
+
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container.my-4 {
+        padding: 20px;
+        margin: 20px auto;
+    }
+    .container.my-4 h1 {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+
+    li.list-group-item {
+        flex-direction: column; /* Mobil cihazlarda sütun şəklində düzülür */
+        align-items: flex-start; /* Sol tərəfə yasla */
+        padding: 18px 20px;
+    }
+    li.list-group-item > div:first-child {
+        width: 100%; /* Məlumat bloku tam eni tutur */
+        margin-bottom: 15px;
+    }
+    li.list-group-item > div:last-child {
+        width: 100%; /* Düymə bloku tam eni tutur */
+        display: flex; /* İçindəki elementləri yan-yana gətirir */
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Sol tərəfə yasla */
+        gap: 10px; /* Cəhd və düymə arasında boşluq */
+    }
+
+    li.list-group-item .badge.bg-secondary {
+        margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
+        flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
+        text-align: center;
+    }
+    li.list-group-item .btn.btn-primary {
+        width: auto; /* Düymə öz məzmununa uyğun ölçüdə olsun */
+        flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
+        margin-left: 0 !important; /* Mobil görünüşdə margin-left sıfırlanır */
+        justify-content: center;
+    }
+
+    .container.my-4 p:not(.list-group-item small) {
+        padding: 30px 15px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    li.list-group-item strong {
+        font-size: 1.1rem;
+    }
+    li.list-group-item small {
+        font-size: 0.85rem;
+    }
+}

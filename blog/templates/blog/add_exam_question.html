@@ -1,6 +1,11 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}{{ exam.title }} - Yeni sual{% endblock %}
+
+{% block extraCss %}
+    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
+    <link rel="stylesheet" href="{% static 'css/add_exam_question.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container my-4">

@@ -3,12 +3,17 @@
 
 {% block title %}{{ exam.title }} - Nəticələr{% endblock %}
 
+{% block extraCss %}
+    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
+    <link rel="stylesheet" href="{% static 'css/teacher_exam_results.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container my-4">
     <h1>{{ exam.title }} - Nəticələr</h1>
 
     <p>
-        Tip: {{ exam.get_exam_type_display }}<br>
+        Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
         Status:
         {% if exam.is_active %}
             <span class="badge bg-success">Aktiv</span>
@@ -66,30 +71,30 @@
             </table>
         </div>
     {% else %}
-        <p>Hələ heç kim bu imtahanı verməyib.</p>
+        <p class="empty-message">Hələ heç kim bu imtahanı verməyib.</p>
     {% endif %}
 
     <hr>
 
     <h3>Sual üzrə statistika</h3>
     {% if question_stats %}
-        <ol>
+        <ol class="question-stats-list">
             {% for item in question_stats %}
-                <li class="mb-2">
-                    <p><strong>{{ item.question.text }}</strong></p>
-                    <p>
+                <li class="stat-item">
+                    <p class="question-text"><strong>{{ item.question.text }}</strong></p>
+                    <p class="stat-details">
                         Ümumi cavab: <strong>{{ item.total }}</strong>,
-                        Düzgün: <strong>{{ item.correct }}</strong>,
-                        Səhv: <strong>{{ item.wrong }}</strong>
+                        Düzgün: <strong class="correct-stat">{{ item.correct }}</strong>,
+                        Səhv: <strong class="wrong-stat">{{ item.wrong }}</strong>
                         {% if item.total %}
-                            ({{ item.correct|divisibleby:item.total }})
+                            (<span class="percentage-stat">{{ item.correct|divisibleby:item.total }}%</span>)
                         {% endif %}
                     </p>
                 </li>
             {% endfor %}
         </ol>
     {% else %}
-        <p>Bu imtahan üçün hələ cavab yoxdur.</p>
+        <p class="empty-message">Bu imtahan üçün hələ cavab yoxdur.</p>
     {% endif %}
 
     <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary mt-3">

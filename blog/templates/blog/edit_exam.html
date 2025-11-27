@@ -1,6 +1,12 @@
 {% extends "base.html" %}
+{% load static %} {# static tagını unutmayın #}
 
 {% block title %}{{ exam.title }} - Redaktə{% endblock %}
+
+{% block extraCss %}
+    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
+    <link rel="stylesheet" href="{% static 'css/edit_exam.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container my-4">

@@ -463,9 +463,7 @@ def teacher_exam_list(request):
 
 @login_required
 def create_exam(request):
-    """
-    Yeni imtahan bloku yaratmaq (test və ya yazılı/praktiki).
-    """
+   
     _ensure_teacher(request.user)
 
     if request.method == "POST":

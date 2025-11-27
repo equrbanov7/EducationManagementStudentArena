@@ -1,0 +1,400 @@
+/* static/css/exam_detail.css */
+
+/* --- Ümumi Səhifə Wrapper --- */
+.exam-detail-page-wrapper {
+    padding: 40px 20px;
+    background-color: var(--bg-light, #f9fafb);
+    min-height: calc(100vh - 200px); /* Footer-i nəzərə alaraq */
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Əsas Kart Dizaynı --- */
+.exam-detail-card {
+    background: #ffffff;
+    max-width: 900px; /* Bir az daha geniş edirik */
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Kart Başlığı Hissəsi --- */
+.card-header {
+    padding: 30px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+    text-align: center;
+}
+
+.exam-detail-title {
+    font-size: 2.2rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.exam-detail-description {
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    margin: 0 auto;
+    max-width: 600px; /* Açıqlama mətni çox uzun olmasın */
+    line-height: 1.6;
+}
+
+/* --- Kartın Gövdəsi --- */
+.card-body {
+    padding: 30px;
+}
+
+/* --- İmtahan Məlumatları Hissəsi --- */
+.exam-info-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* İki sütun, responsiv */
+    gap: 20px;
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-item {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 80px;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-label i {
+    font-size: 1rem;
+    color: #9ca3af;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark, #1f2937);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-badge.active {
+    background-color: #d1fae5; /* Açıq yaşıl */
+    color: #047857; /* Tünd yaşıl */
+}
+
+.status-badge.passive {
+    background-color: #fee2e2; /* Açıq qırmızı */
+    color: #b91c1c; /* Tünd qırmızı */
+}
+
+/* --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- */
+.exam-actions-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Mobil uyğunluğu üçün */
+    gap: 15px;
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.action-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent; /* default */
+}
+
+/* Düymə Stilləri */
+.primary-btn {
+    background-color: var(--primary-color, #3b82f6);
+    color: white;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+}
+.primary-btn:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-1px);
+    color: white; /* Hover zamanı mətn rəngini qoru */
+}
+
+.secondary-btn {
+    background-color: #6b7280;
+    color: white;
+    box-shadow: 0 2px 5px rgba(107, 114, 128, 0.3);
+}
+.secondary-btn:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+    color: white;
+}
+
+.warning-btn {
+    background-color: #f59e0b;
+    color: white;
+    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);
+}
+.warning-btn:hover {
+    background-color: #d97706;
+    transform: translateY(-1px);
+    color: white;
+}
+
+.success-btn { /* Aktiv et düyməsi */
+    background-color: #10b981;
+    color: white;
+    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+}
+.success-btn:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+    color: white;
+}
+
+.outline-btn {
+    background-color: transparent;
+    border-color: #9ca3af;
+    color: #4b5563;
+}
+.outline-btn:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    border-color: #6b7280;
+}
+
+.danger-btn {
+    background-color: #ef4444;
+    color: white;
+    box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+}
+.danger-btn:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* Kiçik Düymələr (sual redaktə/sil) */
+.action-btn.outline-btn-sm, .action-btn.danger-btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+}
+
+
+/* --- Mövcud Suallar Hissəsi --- */
+.questions-section {
+    margin-top: 20px;
+}
+
+.section-title {
+    font-size: 1.6rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 25px;
+    font-weight: 700;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.question-list {
+    list-style: none; /* Standart nömrələri gizlədirik */
+    padding: 0;
+}
+
+.question-item {
+    background-color: #fcfcfd;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    transition: all 0.2s ease;
+}
+
+.question-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-color: #bfdbfe;
+}
+
+.question-content {
+    flex-grow: 1;
+}
+
+.question-order {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color, #3b82f6);
+    margin-right: 10px;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark, #1f2937);
+    display: inline; /* Sıra nömrəsi ilə yan-yana */
+}
+
+/* Sualların Seçimləri */
+.options-list {
+    list-style: none;
+    padding: 10px 0 0 0;
+    margin-top: 15px;
+    border-top: 1px dashed #e5e7eb;
+    margin-left: 25px; /* Sual mətnindən bir az içəri */
+}
+
+.option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.option-item:last-child {
+    margin-bottom: 0;
+}
+
+.option-indicator i {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    line-height: 1.5; /* Mətn ilə eyni səviyyədə olsun */
+}
+
+.option-item.correct .option-indicator i {
+    color: #10b981; /* Düzgün cavab yaşıl */
+}
+
+.option-item.correct .option-text {
+    font-weight: 600;
+    color: #047857;
+}
+
+/* Suallar üçün hərəkət düymələri (Edit/Delete) */
+.question-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0; /* Böyüməsin */
+}
+
+/* --- Boş Sual Vəziyyəti --- */
+.empty-state-questions {
+    text-align: center;
+    padding: 50px 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+    margin-top: 20px;
+}
+
+.empty-state-questions .empty-icon {
+    font-size: 2.5rem;
+    color: #9ca3af;
+    margin-bottom: 15px;
+}
+
+.empty-state-questions p {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-bottom: 25px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .exam-detail-page-wrapper {
+        padding: 20px 15px;
+    }
+    .card-header {
+        padding: 20px;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .exam-detail-title {
+        font-size: 1.8rem;
+    }
+    .exam-detail-description {
+        font-size: 0.95rem;
+    }
+    .exam-info-section {
+        grid-template-columns: 1fr; /* Mobildə tək sütun */
+        gap: 15px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+    }
+    .exam-actions-section {
+        flex-direction: column;
+        align-items: stretch; /* Düymələri tam enə yayırdıq */
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+    }
+    .action-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    .question-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+    }
+    .question-content {
+        margin-bottom: 15px;
+    }
+    .options-list {
+        margin-left: 0;
+    }
+    .question-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    .action-btn.outline-btn-sm, .action-btn.danger-btn-sm {
+        width: auto; /* Kiçik düymələrin enini öz məzmununa qaytarırıq */
+        flex-grow: 1; /* Mövcud yerdə böyüməsinə icazə veririk */
+    }
+}

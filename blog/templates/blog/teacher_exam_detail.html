@@ -1,103 +1,142 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ exam.title }}{% endblock %}
 
+{% block extraCss %}
+    {# Yeni CSS faylını qoşuruq #}
+    <link rel="stylesheet" href="{% static 'css/teacher_exam_detail.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-    <h1>{{ exam.title }}</h1>
-    <p>{{ exam.description }}</p>
+<div class="exam-detail-page-wrapper">
+    <div class="exam-detail-card">
+        <div class="card-header">
+            <h1 class="exam-detail-title">{{ exam.title }}</h1>
+            <p class="exam-detail-description">{{ exam.description }}</p>
+        </div>
 
-    <p>
-        Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
-        Status:
-        {% if exam.is_active %}
-            <span class="badge bg-success">Aktiv</span>
-        {% else %}
-            <span class="badge bg-secondary">Passiv</span>
-        {% endif %}
-    </p>
-    
-    <form method="post"
-          action="{% url 'toggle_exam_active' exam.slug %}"
-          style="display:inline-block;">
-        {% csrf_token %}
-        {% if exam.is_active %}
-            <button type="submit" class="btn btn-sm btn-warning">
-                Deaktiv et
-            </button>
-        {% else %}
-            <button type="submit" class="btn btn-sm btn-success">
-                Aktiv et
-            </button>
-        {% endif %}
-    </form>
-    
-    <a href="{% url 'edit_exam' exam.slug %}" class="btn btn-sm btn-outline-primary">
-        Redaktə et
-    </a>
-    
-    <form method="post"
-          action="{% url 'delete_exam' exam.slug %}"
-          style="display:inline-block;"
-          onsubmit="return confirm('Bu imtahanı silməyə əminsiniz?');">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-outline-danger">
-            Sil
-        </button>
-    </form>
-    
-    
-    
-
-    <a href="{% url 'add_exam_question' exam.slug %}" class="btn btn-primary mb-3">
-        Yeni sual əlavə et
-    </a>
-    
-    <a href="{% url 'teacher_exam_results' exam.slug %}" class="btn btn-sm btn-outline-primary">
-        Nəticələrə bax
-    </a>
-
-    <h3>Mövcud suallar</h3>
-    {% if questions %}
-        <ol>
-            {% for q in questions %}
-            <li>
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <strong>{{ q.order }}.</strong> {{ q.text }}
-                        {% if exam.exam_type == "test" %}
-                            <ul>
-                                {% for opt in q.options.all %}
-                                    <li>
-                                        {% if opt.is_correct %}<strong>✓{% else %}•{% endif %}
-                                        {{ opt.text }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <a href="{% url 'edit_exam_question' exam.slug q.id %}"
-                           class="btn btn-sm btn-outline-primary">
-                            Edit
-                        </a>
-                        <form method="post"
-                              action="{% url 'delete_exam_question' exam.slug q.id %}"
-                              style="display:inline-block;"
-                              onsubmit="return confirm('Bu sualı silməyə əminsiniz?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
+        <div class="card-body">
+            {# --- İmtahan Məlumatları Hissəsi --- #}
+            <section class="exam-info-section">
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-file-alt"></i> Tip:</span>
+                    <span class="info-value">{{ exam.get_exam_type_display }}</span>
                 </div>
-            </li>
-        {% endfor %}
-        
-        </ol>
-    {% else %}
-        <p>Bu imtahan üçün hələ sual əlavə etməmisiniz.</p>
-    {% endif %}
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-info-circle"></i> Status:</span>
+                    {% if exam.is_active %}
+                        <span class="status-badge active">Aktiv</span>
+                    {% else %}
+                        <span class="status-badge passive">Passiv</span>
+                    {% endif %}
+                </div>
+                {% if exam.total_duration_minutes %}
+                <div class="info-item">
+                    <span class="info-label"><i class="far fa-clock"></i> Ümumi Müddət:</span>
+                    <span class="info-value">{{ exam.total_duration_minutes }} dəqiqə</span>
+                </div>
+                {% endif %}
+                {% if exam.default_question_time_seconds %}
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-stopwatch"></i> Sual Vaxtı:</span>
+                    <span class="info-value">{{ exam.default_question_time_seconds }} saniyə</span>
+                </div>
+                {% endif %}
+                {% if exam.max_attempts_per_user %}
+                <div class="info-item">
+                    <span class="info-label"><i class="fas fa-redo-alt"></i> Cəhdlər:</span>
+                    <span class="info-value">{{ exam.max_attempts_per_user }}</span>
+                </div>
+                {% endif %}
+            </section>
+
+            {# --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- #}
+            <section class="exam-actions-section">
+                <div class="action-group">
+                    <a href="{% url 'add_exam_question' exam.slug %}" class="action-btn primary-btn">
+                        <i class="fas fa-plus-circle"></i> Yeni sual əlavə et
+                    </a>
+                    <a href="{% url 'teacher_exam_results' exam.slug %}" class="action-btn secondary-btn">
+                        <i class="fas fa-poll"></i> Nəticələrə bax
+                    </a>
+                </div>
+                <div class="action-group">
+                    <form method="post" action="{% url 'toggle_exam_active' exam.slug %}">
+                        {% csrf_token %}
+                        {% if exam.is_active %}
+                            <button type="submit" class="action-btn warning-btn">
+                                <i class="fas fa-pause-circle"></i> Deaktiv et
+                            </button>
+                        {% else %}
+                            <button type="submit" class="action-btn success-btn">
+                                <i class="fas fa-play-circle"></i> Aktiv et
+                            </button>
+                        {% endif %}
+                    </form>
+                    <a href="{% url 'edit_exam' exam.slug %}" class="action-btn outline-btn">
+                        <i class="fas fa-edit"></i> Redaktə et
+                    </a>
+                    <form method="post" action="{% url 'delete_exam' exam.slug %}"
+                          onsubmit="return confirm('Bu imtahanı silməyə əminsiniz?');">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn danger-btn">
+                            <i class="fas fa-trash-alt"></i> Sil
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            {# --- Mövcud Suallar Hissəsi --- #}
+            <section class="questions-section">
+                <h2 class="section-title">Mövcud suallar</h2>
+                {% if questions %}
+                    <ol class="question-list">
+                        {% for q in questions %}
+                        <li class="question-item">
+                            <div class="question-content">
+                                <span class="question-order">{{ q.order }}.</span>
+                                <p class="question-text">{{ q.text }}</p>
+
+                                {% if exam.exam_type == "test" %}
+                                    <ul class="options-list">
+                                        {% for opt in q.options.all %}
+                                            <li class="option-item {% if opt.is_correct %}correct{% endif %}">
+                                                <span class="option-indicator">
+                                                    {% if opt.is_correct %}<i class="fas fa-check-circle"></i>{% else %}<i class="far fa-circle"></i>{% endif %}
+                                                </span>
+                                                <span class="option-text">{{ opt.text }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            <div class="question-actions">
+                                <a href="{% url 'edit_exam_question' exam.slug q.id %}"
+                                   class="action-btn outline-btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="post"
+                                      action="{% url 'delete_exam_question' exam.slug q.id %}"
+                                      onsubmit="return confirm('Bu sualı silməyə əminsiniz?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn danger-btn-sm">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <div class="empty-state-questions">
+                        <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
+                        <p>Bu imtahan üçün hələ sual əlavə etməmisiniz.</p>
+                        <a href="{% url 'add_exam_question' exam.slug %}" class="action-btn primary-btn-sm">İlk sualı əlavə et</a>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
 </div>
 {% endblock %}

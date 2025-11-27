@@ -1,0 +1,282 @@
+/* static/css/question_form.css */
+
+/* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
+.container.my-4 {
+    max-width: 800px;
+    margin: 40px auto; /* Yuxarı-aşağı məsafə və mərkəzləşdirmə */
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Başlıqlar --- */
+.container.my-4 h1 {
+    font-size: 1.8rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 25px;
+    font-weight: 800;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6; /* Ayırıcı xətt */
+}
+
+.container.my-4 h4 { /* Variantlar başlığı üçün */
+    font-size: 1.4rem;
+    color: var(--text-dark, #1f2937);
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* --- Formanın Özü --- */
+form {
+    padding-top: 10px;
+}
+
+/* --- Ümumi Forma Qrupu (Bootstrap .mb-3 sinifini override edir) --- */
+div.mb-3 {
+    margin-bottom: 20px !important; /* Bootstrap-ın !important override etmək üçün */
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Forma Etiketləri --- */
+div.mb-3 label {
+    font-weight: 600;
+    color: var(--text-dark, #374151);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+/* --- Inputlar, Select-lər və Textarea-lar --- */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box; /* Padding və border enə daxil edilsin */
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Focus halı */
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+/* --- Bootstrap'in .form-check sinfini override edir --- */
+div.form-check {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    padding-left: 0 !important; /* Bootstrap-ın default paddingini ləğv et */
+}
+
+div.form-check input[type="checkbox"] {
+    position: absolute; /* Orijinal checkbox-ı gizlədirik */
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Yeni checkbox qutusu (Bootstrap .form-check-input yerinə) */
+div.form-check label.form-check-label::before { /* Bu hissəni Bootstrap-ın default checkbox-unu stilizə etmək üçün istifadə edirik */
+    content: "";
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    background-color: #f9fafb;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+    position: relative;
+    top: 2px; /* Düzəltmək üçün */
+    vertical-align: top; /* Düzəltmək üçün */
+    flex-shrink: 0;
+}
+
+/* Checkbox seçiləndə */
+div.form-check input[type="checkbox"]:checked + label.form-check-label::before {
+    background-color: var(--primary-color, #3b82f6);
+    border-color: var(--primary-color, #3b82f6);
+}
+
+/* Check işarəsi */
+div.form-check label.form-check-label::after {
+    content: "";
+    position: absolute;
+    display: none; /* Əvvəlcə gizlədirik */
+    left: 7px; /* Position üçün dəyərlər */
+    top: 5px; /* Position üçün dəyərlər */
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    /* Bootstrap-ın .form-check-label-in position relative olması lazımdır */
+}
+/* Seçiləndə check işarəsini göstər */
+div.form-check input[type="checkbox"]:checked + label.form-check-label::after {
+    display: block;
+}
+
+/* Bootstrap-ın .form-check-label üçün position relative əlavə edirik */
+div.form-check label.form-check-label {
+    position: relative;
+    padding-left: 0 !important; /* Bootstrap-ın default paddingini ləğv et */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: var(--text-dark, #374151);
+}
+
+
+/* --- Xəta Mesajları (Bootstrap .non-field-errors və .errorlist-i override edir) --- */
+.non_field_errors, ul.errorlist {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    list-style: none; /* List stilini yığışdırır */
+    padding-left: 15px; /* Siyahı indentasiyasını düzəldir */
+}
+
+ul.errorlist li {
+    margin-bottom: 5px;
+}
+
+div.mb-3 .errorlist { /* Hər sahənin öz xətaları */
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 500;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    list-style: none;
+}
+div.mb-3 .errorlist li {
+    margin-bottom: 0;
+}
+
+/* Xəta olan inputlar üçün border rəngi */
+div.mb-3:has(.errorlist) input,
+div.mb-3:has(.errorlist) select,
+div.mb-3:has(.errorlist) textarea {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+
+/* --- Düymələr (Bootstrap .btn siniflərini override edir) --- */
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    margin-right: 10px; /* Düymələr arasında boşluq */
+}
+
+/* Yadda saxla düyməsi */
+.btn.btn-success {
+    background-color: var(--primary-color, #3b82f6);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+}
+
+.btn.btn-success:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
+    color: white; /* Hover zamanı mətn rəngini qoru */
+}
+
+/* Yadda saxla və yeni əlavə et düyməsi */
+.btn.btn-outline-primary {
+    background-color: #e0e7ff; /* Açıq primary rəng */
+    color: var(--primary-color, #3b82f6);
+    border-color: #c7d2fe;
+}
+.btn.btn-outline-primary:hover {
+    background-color: #c7d2fe;
+    color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-2px);
+    border-color: #a5b4fc;
+}
+
+/* Ləğv et düyməsi */
+.btn.btn-secondary {
+    background-color: transparent;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+
+.btn.btn-secondary:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container.my-4 {
+        padding: 20px;
+        margin: 20px auto;
+    }
+    .container.my-4 h1 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+    .container.my-4 h4 {
+        font-size: 1.2rem;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+    div.mb-3 {
+        margin-bottom: 15px !important;
+    }
+
+    /* Düymələri tək sütuna düzürük */
+    form button, form a.btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+    form button:last-of-type, form a.btn:last-of-type {
+        margin-bottom: 0; /* Son düymənin altında boşluq olmasın */
+    }
+}

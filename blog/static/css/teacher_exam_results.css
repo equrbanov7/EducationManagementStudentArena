@@ -1,0 +1,255 @@
+/* static/css/exam_results.css */
+
+/* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
+.container.my-4 {
+    max-width: 1100px; /* Nəticələr cədvəli üçün daha geniş konteyner */
+    margin: 40px auto; /* Yuxarı-aşağı məsafə və mərkəzləşdirmə */
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Başlıqlar --- */
+.container.my-4 h1 {
+    font-size: 2rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 25px;
+    font-weight: 800;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6; /* Ayırıcı xətt */
+}
+
+.container.my-4 h3 {
+    font-size: 1.6rem;
+    color: var(--text-dark, #1f2937);
+    margin-top: 35px;
+    margin-bottom: 25px;
+    font-weight: 700;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* --- Ümumi Məlumatlar --- */
+.container.my-4 p {
+    font-size: 1rem;
+    color: var(--text-dark, #374151);
+    line-height: 1.5;
+}
+
+/* Status Badges (Bootstrap .badge .bg-success/.bg-secondary override) */
+.badge.bg-success {
+    background-color: #10b981 !important; /* Aktiv üçün yaşıl */
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge.bg-secondary {
+    background-color: #6b7280 !important; /* Deaktiv üçün boz */
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* --- Separator (Bootstrap .hr-i override edir) --- */
+hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 40px 0;
+}
+
+/* --- Cədvəl Dizaynı (Bootstrap .table siniflərini override edir) --- */
+.table-responsive {
+    margin-top: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow-x: auto; /* Kiçik ekranlarda scroll etmək üçün */
+}
+
+table.table {
+    width: 100%;
+    border-collapse: collapse; /* Xətləri birləşdirir */
+    margin-bottom: 0; /* Bootstrap-ın default marginini ləğv edir */
+    font-size: 0.95rem;
+    color: var(--text-dark, #374151);
+}
+
+table.table thead th {
+    background-color: #f8fafc;
+    color: var(--text-dark, #1f2937);
+    font-weight: 700;
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+table.table tbody td {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+table.table tbody tr:last-child td {
+    border-bottom: none; /* Son sıradan xətt yığışdırılır */
+}
+
+table.table tbody tr.table-striped:nth-of-type(odd) { /* .table-striped üçün */
+    background-color: #fcfcfd; /* Yüngül fon rəngi */
+}
+
+/* Cədvəldəki rəngli statistikalar */
+td strong.correct-stat { color: #10b981; }
+td strong.wrong-stat { color: #ef4444; }
+td span.percentage-stat { color: var(--primary-color, #3b82f6); font-weight: 700; }
+
+
+/* --- Sual üzrə Statistika Siyahısı --- */
+ol.question-stats-list {
+    list-style: none; /* Standart nömrələri gizlədirik */
+    padding: 0;
+    counter-reset: question-counter; /* Nömrələmə üçün sayğac */
+}
+
+li.stat-item {
+    background-color: #fcfcfd;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    padding-left: 55px; /* Nömrə üçün yer saxlayırıq */
+}
+
+li.stat-item::before { /* Xüsusi nömrələmə */
+    counter-increment: question-counter;
+    content: counter(question-counter) ".";
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color, #3b82f6);
+}
+
+li.stat-item .question-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark, #1f2937);
+    margin: 0;
+}
+
+li.stat-item .stat-details {
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin: 0;
+}
+
+li.stat-item .stat-details strong {
+    font-weight: 700;
+}
+
+li.stat-item .stat-details strong.correct-stat {
+    color: #10b981; /* Düzgün rəngi */
+}
+li.stat-item .stat-details strong.wrong-stat {
+    color: #ef4444; /* Səhv rəngi */
+}
+li.stat-item .stat-details .percentage-stat {
+    color: var(--primary-color, #3b82f6); /* Faizin rəngi */
+    font-weight: 700;
+}
+
+/* --- Boş mesajlar --- */
+p.empty-message {
+    text-align: center;
+    padding: 30px 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+    color: #6b7280;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+/* --- Geri Qayıt Düyməsi (Bootstrap .btn .btn-secondary .mt-3 override edir) --- */
+.btn.btn-secondary.mt-3 {
+    background-color: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px !important; /* Bootstrap-ın marginini override edir */
+}
+
+.btn.btn-secondary.mt-3:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container.my-4 {
+        padding: 20px;
+        margin: 20px auto;
+    }
+    .container.my-4 h1 {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+    .container.my-4 h3 {
+        font-size: 1.4rem;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+
+    /* Cədvəl üçün kiçik ekranlarda daha sıx stil */
+    table.table thead th, table.table tbody td {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    li.stat-item {
+        padding: 15px 15px 15px 45px; /* Nömrə üçün yer saxlayırıq */
+    }
+    li.stat-item::before {
+        left: 15px;
+        top: 15px;
+    }
+    .btn.btn-secondary.mt-3 {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    table.table thead th, table.table tbody td {
+        font-size: 0.8rem;
+    }
+    li.stat-item .question-text {
+        font-size: 1rem;
+    }
+    li.stat-item .stat-details {
+        font-size: 0.85rem;
+    }
+}

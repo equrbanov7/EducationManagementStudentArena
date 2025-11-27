@@ -4,17 +4,22 @@
 
 {% block title %}{{ exam.title }} - İmtahan{% endblock %}
 
+{% block extraCss %}
+    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
+    <link rel="stylesheet" href="{% static 'css/take_exam.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container my-4">
     <h1>{{ exam.title }}</h1>
 
-    <p>
-        Tip: {{ exam.get_exam_type_display }}<br>
+    <p class="exam-info">
+        Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
         Müddət:
         {% if exam.total_duration_minutes %}
-            {{ exam.total_duration_minutes }} dəqiqə
+            <strong>{{ exam.total_duration_minutes }} dəqiqə</strong>
         {% else %}
-            Limitsiz
+            <strong>Limitsiz</strong>
         {% endif %}
     </p>
 
@@ -27,46 +32,52 @@
     <form method="post" id="exam-form">
         {% csrf_token %}
 
-        <ol>
+        <ol class="question-list">
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
-                <li class="mb-4">
-                    <p><strong>{{ q.text }}</strong></p>
+                <li class="question-item">
+                    <p class="question-text"><strong>{{ forloop.counter }}. {{ q.text }}</strong></p>
 
                     {# TEST imtahanı üçün variantlar #}
                     {% if exam.exam_type == "test" %}
 
                         {% if q.answer_mode == "single" %}
-                            {% for opt in q.options.all %}
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input
-                                            type="radio"
-                                            name="q_{{ q.id }}"
-                                            value="{{ opt.id }}"
-                                            class="form-check-input"
-                                            {% if ans and opt in ans.selected_options.all %}checked{% endif %}
-                                        >
-                                        {{ opt.text }}
-                                    </label>
-                                </div>
-                            {% endfor %}
+                            <div class="options-group">
+                                {% for opt in q.options.all %}
+                                    <div class="form-check custom-radio">
+                                        <label class="form-check-label">
+                                            <input
+                                                type="radio"
+                                                name="q_{{ q.id }}"
+                                                value="{{ opt.id }}"
+                                                class="form-check-input"
+                                                {% if ans and opt in ans.selected_options.all %}checked{% endif %}
+                                            >
+                                            <span class="custom-radio-mark"></span>
+                                            {{ opt.text }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
 
                         {% elif q.answer_mode == "multiple" %}
-                            {% for opt in q.options.all %}
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input
-                                            type="checkbox"
-                                            name="q_{{ q.id }}_opt_{{ opt.id }}"
-                                            value="{{ opt.id }}"
-                                            class="form-check-input"
-                                            {% if ans and opt in ans.selected_options.all %}checked{% endif %}
-                                        >
-                                        {{ opt.text }}
-                                    </label>
-                                </div>
-                            {% endfor %}
+                            <div class="options-group">
+                                {% for opt in q.options.all %}
+                                    <div class="form-check custom-checkbox">
+                                        <label class="form-check-label">
+                                            <input
+                                                type="checkbox"
+                                                name="q_{{ q.id }}_opt_{{ opt.id }}"
+                                                value="{{ opt.id }}"
+                                                class="form-check-input"
+                                                {% if ans and opt in ans.selected_options.all %}checked{% endif %}
+                                            >
+                                            <span class="custom-checkbox-mark"></span>
+                                            {{ opt.text }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
 
                         {% else %}
                             {# test içində açıq sual istəsən #}
@@ -92,12 +103,84 @@
         {% endfor %}
         </ol>
 
-        <button type="submit" name="submit_action" value="save" class="btn btn-secondary">
-            Yadda saxla
-        </button>
-        <button type="submit" name="submit_action" value="finish" class="btn btn-primary">
-            İmtahanı bitir
-        </button>
+        <div class="form-actions">
+            <button type="submit" name="submit_action" value="save" class="btn btn-secondary">
+                <i class="fas fa-save"></i> Yadda saxla
+            </button>
+            <button type="submit" name="submit_action" value="finish" class="btn btn-primary">
+                <i class="fas fa-flag-checkered"></i> İmtahanı bitir
+            </button>
+        </div>
     </form>
 </div>
+
+{# Timer üçün JavaScript - base.html faylında ola bilər, amma burda da yerləşdirə bilərəm #}
+{% if remaining_seconds %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let remainingSeconds = {{ remaining_seconds }};
+        const timerValueElement = document.getElementById('timer-value');
+        const examForm = document.getElementById('exam-form');
+        const saveButton = examForm.querySelector('button[name="submit_action"][value="save"]');
+        const finishButton = examForm.querySelector('button[name="submit_action"][value="finish"]');
+
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const pad = (num) => String(num).padStart(2, '0');
+
+            if (hours > 0) {
+                return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            } else {
+                return `${pad(minutes)}:${pad(seconds)}`;
+            }
+        }
+
+        function updateTimer() {
+            if (remainingSeconds <= 0) {
+                timerValueElement.textContent = "Vaxt bitdi!";
+                clearInterval(timerInterval);
+                // İmtahanı avtomatik göndərmək
+                if (examForm) {
+                    // "İmtahanı bitir" düyməsini simulyasiya edirik
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'submit_action';
+                    hiddenInput.value = 'finish';
+                    examForm.appendChild(hiddenInput);
+                    examForm.submit();
+                }
+                return;
+            }
+
+            timerValueElement.textContent = formatTime(remainingSeconds);
+
+            // Son 1 dəqiqə qaldıqda rəngi dəyiş
+            if (remainingSeconds <= 60) {
+                document.getElementById('exam-timer').classList.add('alert-danger');
+                document.getElementById('exam-timer').classList.remove('alert-info');
+            } else if (remainingSeconds <= 300) { // Son 5 dəqiqə
+                document.getElementById('exam-timer').classList.add('alert-warning');
+                document.getElementById('exam-timer').classList.remove('alert-info');
+            }
+            
+            remainingSeconds--;
+        }
+
+        // Timeri hər saniyə yenilə
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // Səhifə yüklənəndə bir dəfə dərhal yenilə
+
+        // Formanın göndərilməsini tutub düyməni deaktiv etmək
+        examForm.addEventListener('submit', function() {
+            saveButton.disabled = true;
+            finishButton.disabled = true;
+            saveButton.textContent = 'Saxlanılır...';
+            finishButton.textContent = 'Bitirilir...';
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}
