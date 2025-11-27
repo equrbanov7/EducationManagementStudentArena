@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load get_item %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - İmtahan{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>{{ exam.title }}</h1>
+
+    <p>
+        Tip: {{ exam.get_exam_type_display }}<br>
+        Müddət:
+        {% if exam.total_duration_minutes %}
+            {{ exam.total_duration_minutes }} dəqiqə
+        {% else %}
+            Limitsiz
+        {% endif %}
+    </p>
+
+    {% if remaining_seconds %}
+        <div id="exam-timer" class="alert alert-info">
+            Qalan vaxt: <span id="timer-value"></span>
+        </div>
+    {% endif %}
+
+    <form method="post" id="exam-form">
+        {% csrf_token %}
+
+        <ol>
+        {% for q in questions %}
+            {% with ans=answers_by_qid|get_item:q.id %}
+                <li class="mb-4">
+                    <p><strong>{{ q.text }}</strong></p>
+
+                    {# TEST imtahanı üçün variantlar #}
+                    {% if exam.exam_type == "test" %}
+
+                        {% if q.answer_mode == "single" %}
+                            {% for opt in q.options.all %}
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input
+                                            type="radio"
+                                            name="q_{{ q.id }}"
+                                            value="{{ opt.id }}"
+                                            class="form-check-input"
+                                            {% if ans and opt in ans.selected_options.all %}checked{% endif %}
+                                        >
+                                        {{ opt.text }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+
+                        {% elif q.answer_mode == "multiple" %}
+                            {% for opt in q.options.all %}
+                                <div class="form-check">
+                                    <label class="form-check-label">
+                                        <input
+                                            type="checkbox"
+                                            name="q_{{ q.id }}_opt_{{ opt.id }}"
+                                            value="{{ opt.id }}"
+                                            class="form-check-input"
+                                            {% if ans and opt in ans.selected_options.all %}checked{% endif %}
+                                        >
+                                        {{ opt.text }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+
+                        {% else %}
+                            {# test içində açıq sual istəsən #}
+                            <textarea
+                                name="q_{{ q.id }}"
+                                rows="4"
+                                class="form-control"
+                                placeholder="Cavabınızı yazın..."
+                            >{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
+                        {% endif %}
+
+                    {# YAZILI / PRAKTİKİ imtahan – HƏMİŞƏ TEXTAREA #}
+                    {% else %}
+                        <textarea
+                            name="q_{{ q.id }}"
+                            rows="4"
+                            class="form-control"
+                            placeholder="Cavabınızı yazın..."
+                        >{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
+                    {% endif %}
+                </li>
+            {% endwith %}
+        {% endfor %}
+        </ol>
+
+        <button type="submit" name="submit_action" value="save" class="btn btn-secondary">
+            Yadda saxla
+        </button>
+        <button type="submit" name="submit_action" value="finish" class="btn btn-primary">
+            İmtahanı bitir
+        </button>
+    </form>
+</div>
+{% endblock %}

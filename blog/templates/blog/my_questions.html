@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Mənim suallarım{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Mənim suallarım</h1>
+
+    <a href="{% url 'create_question' %}" class="btn btn-success mb-3">
+        Yeni sual yarat
+    </a>
+
+    {% if questions %}
+        <ul class="list-group">
+            {% for q in questions %}
+                <li class="list-group-item">
+                    <strong>{{ q.question_text }}</strong><br>
+                    {% if q.answer_text %}
+                        <small>Cavab:</small> {{ q.answer_text }}<br>
+                    {% endif %}
+                    <small class="text-muted">
+                        {{ q.created_at|date:"d.m.Y H:i" }} —
+                        {% if q.visible_to_all %}
+                            Hamı görə bilər
+                        {% else %}
+                            Yalnız seçilmiş istifadəçilər
+                        {% endif %}
+                    </small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Hələ heç bir sual yaratmamısınız.</p>
+    {% endif %}
+</div>
+{% endblock %}

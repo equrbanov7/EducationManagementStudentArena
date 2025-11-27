@@ -1,0 +1,195 @@
+/* static/css/exam_list.css */
+
+/* --- Ümumi Səhifə Konteyneri --- */
+.exams-page-container {
+    max-width: 1200px; /* Geniş ekranlar üçün artırdıq */
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* --- Başlıq və Düymə Hissəsi --- */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-section h1 {
+    font-size: 2.2rem;
+    color: var(--text-dark, #1f2937);
+    margin: 0;
+    font-weight: 800;
+}
+
+.create-exam-btn {
+    background-color: var(--primary-color, #3b82f6);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+}
+
+.create-exam-btn:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
+    color: white;
+}
+
+/* --- GRID LAYOUT (Əsas Hissə) --- */
+.exams-grid {
+ 
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    
+    gap: 25px; /* Kartlar arası boşluq */
+}
+
+/* --- Kart Dizaynı --- */
+.exam-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.exam-card:hover {
+    transform: translateY(-5px); /* Hover edəndə yuxarı qalxır */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color, #3b82f6);
+}
+
+/* Kartın Linki (Bütün kartı əhatə edir) */
+.exam-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Kartın hündürlüyünü tam tutur */
+    padding: 24px;
+}
+
+/* Kartın Gövdəsi (Məlumatlar) */
+.exam-card-body {
+    flex-grow: 1; /* Footer-i aşağı itələmək üçün */
+    margin-bottom: 20px;
+}
+
+.exam-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark, #111827);
+    margin-bottom: 12px;
+    line-height: 1.4;
+    /* Uzun başlıqları kəsmək üçün */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.exam-status-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.exam-type-label {
+    color: var(--text-light, #6b7280);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background-color: #d1fae5; /* Açıq yaşıl */
+    color: #047857; /* Tünd yaşıl */
+}
+
+.status-badge.passive {
+    background-color: #fee2e2; /* Açıq qırmızı */
+    color: #b91c1c; /* Tünd qırmızı */
+}
+
+/* Kart Footer (Müddət) */
+.exam-card-footer {
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: flex-end; /* Sağa yasla */
+}
+
+.duration-badge {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- Boş vəziyyət --- */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #9ca3af;
+    margin-bottom: 15px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .create-exam-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .exams-grid {
+        /* Mobildə 1 sütun olsun, amma çox kiçik deyilsə 2 də ola bilər */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .exams-grid {
+        grid-template-columns: 1fr; /* Yalnız 1 sütun */
+    }
+}

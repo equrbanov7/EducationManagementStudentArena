@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}{{ exam.title }} - Yeni sual{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    {% if editing %}
+         <h1>{{ exam.title }} – sualı redaktə et</h1>
+    {% else %}
+         <h1>{{ exam.title }} üçün yeni sual</h1>
+    {% endif %}
+ 
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+            {{ form.text.label_tag }}
+            {{ form.text }}
+            {{ form.text.errors }}
+        </div>
+
+        {% if exam.exam_type == "test" %}
+            <div class="mb-3">
+                {{ form.answer_mode.label_tag }}
+                {{ form.answer_mode }}
+                {{ form.answer_mode.errors }}
+            </div>
+        {% endif %}
+
+        <div class="mb-3">
+            {{ form.time_limit_seconds.label_tag }}
+            {{ form.time_limit_seconds }}
+            {{ form.time_limit_seconds.errors }}
+        </div>
+
+        {% if exam.exam_type == "written" %}
+            <div class="mb-3">
+                {{ form.correct_answer.label_tag }}
+                {{ form.correct_answer }}
+                {{ form.correct_answer.errors }}
+            </div>
+        {% else %}
+            <h4>Variantlar</h4>
+            <div class="mb-2">
+                {{ form.option1_text.label_tag }}<br>
+                {{ form.option1_text }}
+                <div class="form-check">
+                    {{ form.option1_is_correct }}
+                    {{ form.option1_is_correct.label_tag }}
+                </div>
+            </div>
+            <div class="mb-2">
+                {{ form.option2_text.label_tag }}<br>
+                {{ form.option2_text }}
+                <div class="form-check">
+                    {{ form.option2_is_correct }}
+                    {{ form.option2_is_correct.label_tag }}
+                </div>
+            </div>
+            <div class="mb-2">
+                {{ form.option3_text.label_tag }}<br>
+                {{ form.option3_text }}
+                <div class="form-check">
+                    {{ form.option3_is_correct }}
+                    {{ form.option3_is_correct.label_tag }}
+                </div>
+            </div>
+            <div class="mb-2">
+                {{ form.option4_text.label_tag }}<br>
+                {{ form.option4_text }}
+                <div class="form-check">
+                    {{ form.option4_is_correct }}
+                    {{ form.option4_is_correct.label_tag }}
+                </div>
+            </div>
+        {% endif %}
+
+        <button type="submit" name="save" class="btn btn-success">
+            Yadda saxla
+        </button>
+        <button type="submit" name="save_and_continue" class="btn btn-outline-primary">
+            Yadda saxla və yeni sual əlavə et
+        </button>
+        <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary">
+            Ləğv et
+        </a>
+    </form>
+</div>
+{% endblock %}

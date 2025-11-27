@@ -1,0 +1,289 @@
+/* static/css/create_exam.css */
+
+/* --- Ümumi Səhifə Konteyneri --- */
+.create-exam-page-wrapper {
+    padding: 40px 20px;
+    background-color: var(--bg-light, #f9fafb);
+    min-height: calc(100vh - 200px); /* Footer-i nəzərə alaraq */
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Əsas Kart --- */
+.create-exam-card {
+    background: #ffffff;
+    max-width: 800px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* --- Kart Başlığı --- */
+.card-header {
+    padding: 30px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+    text-align: center;
+}
+
+.card-header h1 {
+    font-size: 1.8rem;
+    color: var(--text-dark, #111827);
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.card-header p {
+    color: var(--text-light, #6b7280);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* --- Forma --- */
+.exam-form {
+    padding: 30px;
+}
+
+/* Grid Sistemi */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 sütunlu grid */
+    gap: 25px;
+}
+
+.span-full {
+    grid-column: 1 / -1; /* Tam genişlik tutan elementlər üçün */
+}
+
+/* Form Qrupu */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Etiketlər (Labels) */
+.form-group label {
+    font-weight: 600;
+    color: var(--text-dark, #374151);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+/* Inputlar, Select-lər və Textarea-lar üçün Ümumi Stil */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f9fafb;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Textarea üçün */
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Focus halı */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+/* İkonlu Inputlar üçün Wrapper */
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon input {
+    padding-right: 40px; /* İkon üçün yer açırıq */
+}
+
+.input-with-icon .icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none; /* İkona klikləməyi deaktiv edir */
+}
+
+/* --- Xüsusi Checkbox Dizaynı --- */
+.checkbox-group {
+    justify-content: center; /* Sütunun ortasına salır */
+}
+
+.checkbox-label-wrapper {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    font-weight: 600;
+    color: var(--text-dark, #374151);
+}
+
+/* Orijinal checkbox-ı gizlədirik */
+.checkbox-label-wrapper input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Yeni checkbox qutusu */
+.custom-checkbox-box {
+    height: 22px;
+    width: 22px;
+    background-color: #f9fafb;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    margin-right: 10px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+/* Checkbox seçiləndə */
+.checkbox-label-wrapper input:checked ~ .custom-checkbox-box {
+    background-color: var(--primary-color, #3b82f6);
+    border-color: var(--primary-color, #3b82f6);
+}
+
+/* Check işarəsi (əvvəlcə gizli) */
+.custom-checkbox-box::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Seçiləndə check işarəsini göstər */
+.checkbox-label-wrapper input:checked ~ .custom-checkbox-box::after {
+    display: block;
+}
+
+/* --- Köməkçi Mətnlər (help_text) --- */
+.form-text.text-muted {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 6px;
+}
+
+/* --- Xəta Mesajları --- */
+.form-global-errors {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Xəta olan inputlar */
+.form-group:has(.field-error) input,
+.form-group:has(.field-error) select,
+.form-group:has(.field-error) textarea {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+/* --- Düymələr (Actions) --- */
+.form-actions {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end; /* Sağ tərəfə yasla */
+    gap: 15px;
+}
+
+.btn-submit, .btn-cancel {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-submit {
+    background-color: var(--primary-color, #3b82f6);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+}
+
+.btn-submit:hover {
+    background-color: var(--primary-dark, #1e3a8a);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
+}
+
+.btn-cancel {
+    background-color: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+}
+
+.btn-cancel:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .create-exam-page-wrapper {
+        padding: 20px 15px;
+    }
+
+    .card-header {
+        padding: 20px;
+    }
+    
+    .exam-form {
+        padding: 20px;
+    }
+
+    /* Mobildə gridi tək sütuna salırıq */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse; /* Ləğv et düyməsi aşağı düşsün */
+    }
+
+    .btn-submit, .btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+}

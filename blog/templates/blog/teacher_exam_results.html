@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - Nəticələr{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>{{ exam.title }} - Nəticələr</h1>
+
+    <p>
+        Tip: {{ exam.get_exam_type_display }}<br>
+        Status:
+        {% if exam.is_active %}
+            <span class="badge bg-success">Aktiv</span>
+        {% else %}
+            <span class="badge bg-secondary">Deaktiv</span>
+        {% endif %}
+    </p>
+
+    <hr>
+
+    <h3>İştirakçıların nəticələri</h3>
+    {% if attempts %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>İstifadəçi</th>
+                        <th>Status</th>
+                        <th>Düzgün</th>
+                        <th>Səhv</th>
+                        <th>Bal (%)</th>
+                        <th>Başlama</th>
+                        <th>Bitmə</th>
+                        <th>Müddət (san)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for att in attempts %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ att.user.username }}</td>
+                            <td>{{ att.get_status_display }}</td>
+                            <td>{{ att.correct_count }}</td>
+                            <td>{{ att.wrong_count }}</td>
+                            <td>{{ att.score_percent }}</td>
+                            <td>{{ att.started_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if att.finished_at %}
+                                    {{ att.finished_at|date:"d.m.Y H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if att.duration_seconds %}
+                                    {{ att.duration_seconds }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Hələ heç kim bu imtahanı verməyib.</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Sual üzrə statistika</h3>
+    {% if question_stats %}
+        <ol>
+            {% for item in question_stats %}
+                <li class="mb-2">
+                    <p><strong>{{ item.question.text }}</strong></p>
+                    <p>
+                        Ümumi cavab: <strong>{{ item.total }}</strong>,
+                        Düzgün: <strong>{{ item.correct }}</strong>,
+                        Səhv: <strong>{{ item.wrong }}</strong>
+                        {% if item.total %}
+                            ({{ item.correct|divisibleby:item.total }})
+                        {% endif %}
+                    </p>
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p>Bu imtahan üçün hələ cavab yoxdur.</p>
+    {% endif %}
+
+    <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary mt-3">
+        İmtahana qayıt
+    </a>
+</div>
+{% endblock %}

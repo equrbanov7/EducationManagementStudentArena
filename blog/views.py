@@ -5,17 +5,20 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.core.mail import send_mail 
 from django.template.loader import render_to_string 
 from django.conf import settings
-
-from .models import Post, Category, Comment, Subscriber
+from django.utils import timezone
+from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
 from .forms import (
     SubscriptionForm,
     RegisterForm,
     PostForm,
     CommentForm,
+    QuestionForm,
+    ExamForm, ExamQuestionCreateForm
 )
 
 
@@ -376,3 +379,506 @@ def category_detail(request, slug):
     }
 
     return render(request, 'blog/category_detail.html', context)
+
+
+# ------------------- QUESTION SUBMISSION ------------------- #
+
+@login_required
+def create_question(request):
+    # Yalnız teacher qrupu olanlar sual yarada bilsin
+    if not request.user.is_teacher:
+        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
+            form.save_m2m()  # visible_users üçün lazımdır
+            return redirect("my_questions")
+    else:
+        form = QuestionForm()
+
+    return render(request, "blog/create_question.html", {
+        "form": form
+    })
+
+
+@login_required
+def my_questions(request):
+    """
+    Bu view müəllimin öz yaratdığı sualları göstərir.
+    """
+    questions = Question.objects.filter(author=request.user).order_by("-created_at")
+    return render(request, "blog/my_questions.html", {
+        "questions": questions
+    })
+
+
+@login_required
+def questions_i_can_see(request):
+    """
+    Bu view login olan user-in görə bildiyi bütün sualları göstərir.
+    visible_to_all = True olanlar,
+    + author = user olanlar,
+    + visible_users siyahısında user olanlar.
+    """
+    from django.db.models import Q
+
+    questions = (
+        Question.objects
+        .filter(
+            Q(visible_to_all=True) |
+            Q(author=request.user) |
+            Q(visible_users=request.user)
+        )
+        .distinct()
+        .select_related("author")
+    )
+
+    return render(request, "blog/questions_i_can_see.html", {
+        "questions": questions
+    })
+
+
+# ------------------- EXAM VIEWS (BÖLÜM 3) ------------------- #
+
+def _ensure_teacher(user):
+    if not getattr(user, "is_teacher", False):
+        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+
+
+@login_required
+def teacher_exam_list(request):
+    """
+    Müəllimin yaratdığı bütün imtahanların siyahısı.
+    """
+    _ensure_teacher(request.user)
+    exams = Exam.objects.filter(author=request.user).order_by("-created_at")
+    return render(request, "blog/teacher_exam_list.html", {
+        "exams": exams,
+    })
+
+
+@login_required
+def create_exam(request):
+    """
+    Yeni imtahan bloku yaratmaq (test və ya yazılı/praktiki).
+    """
+    _ensure_teacher(request.user)
+
+    if request.method == "POST":
+        form = ExamForm(request.POST)
+        if form.is_valid():
+            exam = form.save(commit=False)
+            exam.author = request.user
+            exam.save()
+            # form.save(commit=False) etdiyimiz üçün related sahələri sonra saxlayırıq
+            return redirect("teacher_exam_detail", slug=exam.slug)
+    else:
+        form = ExamForm()
+
+    return render(request, "blog/create_exam.html", {
+        "form": form,
+    })
+
+
+@login_required
+def teacher_exam_detail(request, slug):
+    """
+    Müəllim üçün konkret imtahanın detal səhifəsi:
+    - məlumat
+    - suallar
+    - 'Sual əlavə et' düyməsi
+    (sonra bura statistikalar, attempts və s. də əlavə ediləcək).
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    questions = exam.questions.all().order_by("order")
+
+    return render(request, "blog/teacher_exam_detail.html", {
+        "exam": exam,
+        "questions": questions,
+    })
+
+
+@login_required
+def add_exam_question(request, slug):
+    """
+    Müəllim imtahana sual əlavə edir.
+    Test imtahanı üçün variantlar da eyni formda daxil olunur.
+    Yazılı imtahan üçün yalnız sual mətni + ideal cavab hissəsi istifadə edilir.
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+
+    if request.method == "POST":
+        form = ExamQuestionCreateForm(request.POST, exam_type=exam.exam_type)
+        if form.is_valid():
+            # Sualı yaradıq
+            last_q = exam.questions.order_by("-order").first()
+            next_order = (last_q.order + 1) if last_q else 1
+
+            question = form.save(commit=False)
+            question.exam = exam
+            question.order = next_order
+
+            # Yazılı imtahan üçün answer_mode-u zorla "single" edə bilərik
+            if exam.exam_type == "written":
+                question.answer_mode = "single"
+
+            question.save()
+
+            # Əgər exam tipi testdirsə → variantları yarat
+            if exam.exam_type == "test":
+                form.create_options(question)
+
+            # hansı düyməyə basıldığını yoxlayaq
+            if "save_and_continue" in request.POST:
+                # eyni imtahan üçün yenidən boş formada aç
+                return redirect("add_exam_question", slug=exam.slug)
+            else:
+                # Sadəcə imtahan detalına qayıt
+                return redirect("teacher_exam_detail", slug=exam.slug)
+    else:
+        form = ExamQuestionCreateForm(exam_type=exam.exam_type)
+
+    return render(request, "blog/add_exam_question.html", {
+        "exam": exam,
+        "form": form,
+    })
+
+
+
+@login_required
+def toggle_exam_active(request, slug):
+    """
+    Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+
+    if request.method == "POST":
+        exam.is_active = not exam.is_active
+        exam.save()
+    return redirect("teacher_exam_detail", slug=exam.slug)
+
+
+@login_required
+def edit_exam(request, slug):
+    """
+    Mövcud imtahanın parametrlərini redaktə etmək.
+    (ad, tip, vaxt, attempt limiti, aktiv/passiv və s.)
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+
+    if request.method == "POST":
+        form = ExamForm(request.POST, instance=exam)
+        if form.is_valid():
+            form.save()
+            # Sadə success sonrası imtahan detalına qayıdırıq
+            return redirect("teacher_exam_detail", slug=exam.slug)
+    else:
+        form = ExamForm(instance=exam)
+
+    return render(request, "blog/edit_exam.html", {
+        "exam": exam,
+        "form": form,
+    })
+
+
+@login_required
+def delete_exam(request, slug):
+    """
+    İmtahanı silmək – amma əvvəlcə təsdiq istəyəciyik.
+    Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+
+    if exam.attempts.exists():
+        # sadə variant: hazırda cəhd varsa silməyə icazə vermirik
+        # istəsən bunu sonradan dəyişərik
+        raise PermissionDenied("Bu imtahan üzrə artıq cəhdlər var, silə bilməzsiniz.")
+
+    if request.method == "POST":
+        exam.delete()
+        return redirect("teacher_exam_list")
+
+    return render(request, "blog/confirm_delete_exam.html", {"exam": exam})
+
+
+@login_required
+def edit_exam_question(request, slug, question_id):
+    """
+    Mövcud sualı redaktə etmək (text, cavab rejimi, vaxt, variantlar və s.).
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
+
+    if request.method == "POST":
+        form = ExamQuestionCreateForm(
+            request.POST,
+            instance=question,
+            exam_type=exam.exam_type,
+        )
+        if form.is_valid():
+            q = form.save(commit=False)
+            q.exam = exam
+
+            if exam.exam_type == "written":
+                q.answer_mode = "single"
+
+            q.save()
+
+            if exam.exam_type == "test":
+                form.save_options(q)
+
+            return redirect("teacher_exam_detail", slug=exam.slug)
+    else:
+        form = ExamQuestionCreateForm(
+            instance=question,
+            exam_type=exam.exam_type,
+        )
+
+    return render(request, "blog/add_exam_question.html", {
+        "exam": exam,
+        "form": form,
+        "editing": True,
+        "question": question,
+    })
+
+
+
+@login_required
+def delete_exam_question(request, slug, question_id):
+    """
+    Sualı silmək – əvvəlcə təsdiq istənilir.
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
+
+    if request.method == "POST":
+        question.delete()
+        return redirect("teacher_exam_detail", slug=exam.slug)
+
+    return render(request, "blog/confirm_delete_question.html", {
+        "exam": exam,
+        "question": question,
+    })
+
+
+
+
+
+# ---------------- STUDENT TƏRƏFİ -------------------
+
+@login_required
+def student_exam_list(request):
+    """
+    Tələbə üçün görünən imtahanlar:
+    - is_active = True
+    - attempts_left > 0 (əgər limit qoyulubsa)
+    """
+    exams = Exam.objects.filter(is_active=True).order_by("-created_at")
+    available_exams = []
+    for exam in exams:
+        left = exam.attempts_left_for(request.user)
+        # left == None → limitsiz, yoxsa 0-dan böyük olmalıdır
+        if left is None or left > 0:
+            available_exams.append((exam, left))
+
+    return render(request, "blog/student_exam_list.html", {
+        "exam_items": available_exams,
+    })
+
+
+@login_required
+def start_exam(request, slug):
+    exam = get_object_or_404(Exam, slug=slug, is_active=True)
+
+    # Bu userin bu imtahan üzrə bütün cəhdləri
+    qs = exam.attempts.filter(user=request.user).order_by("-started_at")
+
+    # 1) Davam edən attempt varsa → ora yönləndir
+    current = qs.filter(status__in=["draft", "in_progress"]).first()
+    if current:
+        return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
+
+    # 2) Bitmiş cəhdlərin sayı
+    finished_qs = qs.filter(status__in=["submitted", "expired"])
+    finished_count = finished_qs.count()
+
+    # 3) Max attempt – default 1 olsun
+    max_attempts = exam.max_attempts_per_user or 1
+
+    if finished_count >= max_attempts:
+        # Artıq yeni attempt YOX, sadəcə son nəticəyə buraxırıq
+        last = finished_qs.first()
+        if last:
+            return redirect("exam_result", slug=exam.slug, attempt_id=last.id)
+        return redirect("student_exam_list")
+
+    # 4) Yeni attempt yaradılır
+    attempt_number = finished_count + 1
+    attempt = ExamAttempt.objects.create(
+        user=request.user,
+        exam=exam,
+        attempt_number=attempt_number,
+        status="in_progress",
+    )
+
+    return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+
+
+
+
+@login_required
+def take_exam(request, slug, attempt_id):
+    attempt = get_object_or_404(
+        ExamAttempt,
+        id=attempt_id,
+        exam__slug=slug,
+        user=request.user,
+    )
+    exam = attempt.exam
+
+    # ✅ Bitmiş attempt-ə bir daha girmək OLMAZ – avtomatik nəticəyə atırıq
+    if attempt.is_finished:
+        return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
+    
+
+    questions = ExamQuestion.objects.filter(
+         exam=exam
+    ).prefetch_related("options")
+
+
+    # (İstəsən sonra timer üçün istifadə edərik)
+    remaining_seconds = None
+
+    if request.method == "POST":
+        action = request.POST.get("submit_action")  # "save" və ya "finish"
+
+        # 🔁 Bütün suallar üçün cavabları oxu və yadda saxla
+        for q in questions:
+            ans, _ = ExamAnswer.objects.get_or_create(
+                attempt=attempt,
+                question=q,
+            )
+
+            # köhnə variant seçimini təmizlə
+            ans.selected_options.clear()
+
+            # --- TEST imtahanı + single/multiple sual ---
+            if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+
+                if q.answer_mode == "single":
+                    opt_id = request.POST.get(f"q_{q.id}")
+                    if opt_id:
+                        opt = q.options.filter(id=opt_id).first()
+                        if opt:
+                            ans.selected_options.add(opt)
+
+                else:  # multiple
+                    for opt in q.options.all():
+                        if request.POST.get(f"q_{q.id}_opt_{opt.id}"):
+                            ans.selected_options.add(opt)
+
+                ans.text_answer = ""
+                ans.auto_evaluate()   # düzgün/səhv hesabla
+
+            # --- Yazılı / praktiki (və ya testdə açıq sual) ---
+            else:
+                text = request.POST.get(f"q_{q.id}", "").strip()
+                ans.text_answer = text
+                ans.is_correct = False  # müəllim sonradan qiymətləndirəcək
+                ans.save()
+
+        # Ümumi nəticə yalnız test imtahanları üçün
+        if exam.exam_type == "test":
+            attempt.recalculate_score()
+
+        # Bitirmə vs draft
+        if action == "finish":
+            attempt.mark_finished(status="submitted")
+            return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
+        else:
+            attempt.status = "draft"
+            attempt.save(update_fields=["status"])
+            return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+
+    # GET – mövcud cavabları yığırıq
+    answers = (
+        attempt.answers
+        .select_related("question")
+        .prefetch_related("selected_options")
+    )
+    answers_by_qid = {a.question_id: a for a in answers}
+
+    context = {
+        "exam": exam,
+        "attempt": attempt,
+        "questions": questions,
+        "answers_by_qid": answers_by_qid,
+        "remaining_seconds": remaining_seconds,
+    }
+    return render(request, "blog/take_exam.html", context)
+
+
+@login_required
+def exam_result(request, slug, attempt_id):
+    """
+    Student üçün konkret attempt-in nəticə səhifəsi.
+    """
+    exam = get_object_or_404(Exam, slug=slug)
+    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
+
+    questions = exam.questions.all().order_by("order").prefetch_related("options")
+    answers = ExamAnswer.objects.filter(attempt=attempt).prefetch_related("selected_options")
+    answers_by_qid = {a.question_id: a for a in answers}
+
+    return render(request, "blog/exam_result.html", {
+        "exam": exam,
+        "attempt": attempt,
+        "questions": questions,
+        "answers_by_qid": answers_by_qid,
+    })
+
+
+# ---------------- TEACHER EXAM RESULTS ------------------- #
+
+@login_required
+def teacher_exam_results(request, slug):
+    """
+    Müəllim üçün imtahan nəticələri:
+    - hər attempt üçün user, nəticə, müddət
+    - sonradan filtrlər əlavə edə bilərik.
+    """
+    _ensure_teacher(request.user)
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+
+    attempts = exam.attempts.select_related("user").order_by("-started_at")
+
+    # Ən tez bitirənlər üçün ayrıca sort da göstərə bilərik.
+    fastest_attempts = sorted(
+        [a for a in attempts if a.duration_seconds],
+        key=lambda a: a.duration_seconds
+    )[:5]
+
+    # Ən çox səhv edilən suallar:
+    questions = exam.questions.all()
+    hardest_questions = sorted(
+        questions,
+        key=lambda q: q.correct_ratio
+    )[:5]  # ratio ən aşağı olanlar
+
+    return render(request, "blog/teacher_exam_results.html", {
+        "exam": exam,
+        "attempts": attempts,
+        "fastest_attempts": fastest_attempts,
+        "hardest_questions": hardest_questions,
+    })

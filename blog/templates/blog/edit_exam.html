@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ exam.title }} - Redaktə{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>"{{ exam.title }}" imtahanını redaktə et</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {{ form.description.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.exam_type.label_tag }}
+            {{ form.exam_type }}
+            {{ form.exam_type.errors }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.is_active }}
+            {{ form.is_active.label_tag }}
+            {{ form.is_active.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.total_duration_minutes.label_tag }}
+            {{ form.total_duration_minutes }}
+            {{ form.total_duration_minutes.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.default_question_time_seconds.label_tag }}
+            {{ form.default_question_time_seconds }}
+            {{ form.default_question_time_seconds.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.max_attempts_per_user.label_tag }}
+            {{ form.max_attempts_per_user }}
+            {{ form.max_attempts_per_user.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Yadda saxla</button>
+        <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary">
+            Ləğv et
+        </a>
+    </form>
+</div>
+{% endblock %}

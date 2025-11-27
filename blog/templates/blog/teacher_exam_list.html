@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}İmtahanlarım{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/teacher_exam_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="exams-page-container">
+    <div class="header-section">
+        <h1>İmtahanlarım</h1>
+        <a href="{% url 'create_exam' %}" class="create-exam-btn">
+            <i class="fas fa-plus-circle"></i> Yeni imtahan yarat
+        </a>
+    </div>
+
+    {% if exams %}
+        {# Grid Konteyneri #}
+        <div class="exams-grid">
+            {% for exam in exams %}
+                {# Kartın özü #}
+                <article class="exam-card">
+                    {# Bütün kartı əhatə edən link #}
+                    <a href="{% url 'teacher_exam_detail' exam.slug %}" class="exam-card-link">
+                        
+                        {# Kartın yuxarı hissəsi: Məlumatlar #}
+                        <div class="exam-card-body">
+                            <h3 class="exam-title">{{ exam.title }}</h3>
+                            
+                            <div class="exam-status-wrapper">
+                                <span class="exam-type-label">
+                                    <i class="fas fa-file-alt"></i> {{ exam.get_exam_type_display }}
+                                </span>
+                                {% if exam.is_active %}
+                                    <span class="status-badge active">Aktiv</span>
+                                {% else %}
+                                    <span class="status-badge passive">Passiv</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {# Kartın aşağı hissəsi: Müddət #}
+                        {% if exam.total_duration_minutes %}
+                            <div class="exam-card-footer">
+                                <span class="duration-badge">
+                                    <i class="far fa-clock"></i> {{ exam.total_duration_minutes }} dəq
+                                </span>
+                            </div>
+                        {% endif %}
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="far fa-folder-open"></i>
+            </div>
+            <p>Hələ heç bir imtahan yaratmamısınız.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

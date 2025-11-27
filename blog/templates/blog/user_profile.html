@@ -8,25 +8,54 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile-page-wrapper"> {# auth-page-wrapper kimi, ümumi konteyner #}
+<div class="profile-page-wrapper">
 
     <header class="profile-section-header">
         <h1><span>{{ profile_user.username }}</span> Profili</h1>
         <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
 
         {% if request.user.is_authenticated and request.user == profile_user %}
-            <a href="{% url 'create_post' %}" class="profile-create-post-btn">
-                <i class="fas fa-plus-circle"></i> Yeni post yarat {# Əlavə ikon üçün Font Awesome lazımdır #}
-            </a>
+             <a href="{% url 'create_post' %}" class="profile-create-post-btn">
+               <i class="fas fa-plus-circle"></i> Yeni post yarat
+             </a>
+
+             {% if request.user.is_teacher %}
+                 <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
+                      <i class="fas fa-file-alt"></i> İmtahanlarım
+                 </a>
+                 <a href="{% url 'create_exam' %}" class="profile-create-post-btn">
+                      <i class="fas fa-plus-square"></i> Yeni imtahan yarat
+                 </a>
+            {% endif %}
         {% endif %}
+
+
+        {% comment %} {% if request.user.is_authenticated and request.user == profile_user %}
+            {# Post yarat düyməsi #}
+            <a href="{% url 'create_post' %}" class="profile-create-post-btn">
+                <i class="fas fa-plus-circle"></i> Yeni post yarat
+            </a>
+
+            {# ƏGƏR teacher-dirsə, sual düymələri də görünsün #}
+            {% if request.user.is_teacher %}
+                <a href="{% url 'create_question' %}" class="profile-create-post-btn">
+                    <i class="fas fa-question-circle"></i> Yeni sual yarat
+                </a>
+                <a href="{% url 'my_questions' %}" class="profile-create-post-btn">
+                    <i class="fas fa-list"></i> Mənim suallarım
+                </a>
+            {% endif %}
+        {% endif %} {% endcomment %}
+
+
     </header>
 
     <section class="profile-posts-section">
         {% if posts %}
             {% for post in posts %}
                 <article class="profile-post-card">
-                    <h3> {# h2 yerinə h3 #}
-                        <a href="{% url 'post_detail' post.slug %}"> {# post.id yerinə post.slug #}
+                    <h3>
+                        <a href="{% url 'post_detail' post.slug %}">
                             {{ post.title }}
                         </a>
                     </h3>

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static get_item %}
+
+{% block title %}{{ exam.title }} - Nəticə{% endblock %}
+
+
+{% block content %}
+<div class="container my-4">
+    <h1>{{ exam.title }} - Nəticəniz</h1>
+
+    <p>
+        Status:
+        {% if attempt.status == "submitted" %}
+            <span class="badge bg-success">Təslim edilib</span>
+        {% elif attempt.status == "expired" %}
+            <span class="badge bg-danger">Vaxt bitib</span>
+        {% else %}
+            <span class="badge bg-secondary">{{ attempt.get_status_display }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Düzgün: <strong>{{ attempt.correct_count }}</strong><br>
+        Səhv: <strong>{{ attempt.wrong_count }}</strong><br>
+        Bal: <strong>{{ attempt.score_percent }}%</strong><br>
+        {% if attempt.duration_seconds %}
+            Müddət: {{ attempt.duration_seconds }} saniyə
+        {% endif %}
+    </p>
+
+    <hr>
+
+    <h3>Sual-sual nəticə</h3>
+    <ol>
+        {% for q in questions %}
+            {% with ans=answers_by_qid|get_item:q.id %}
+            <li class="mb-3">
+                <p><strong>{{ q.text }}</strong></p>
+
+                {% if exam.exam_type == "test" %}
+                    <ul>
+                        {% for opt in q.options.all %}
+                            <li>
+                                {% if opt.is_correct %}
+                                    <strong>✓ {{ opt.text }}</strong>
+                                {% else %}
+                                    {{ opt.text }}
+                                {% endif %}
+                                {% if ans and opt in ans.selected_options.all %}
+                                    <span class="badge bg-info ms-1">Sənin seçimin</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% if ans %}
+                        {% if ans.is_correct %}
+                            <span class="badge bg-success">Düzgün cavab</span>
+                        {% else %}
+                            <span class="badge bg-danger">Səhv cavab</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Cavab verməmisən</span>
+                    {% endif %}
+                {% else %}
+                    <p><em>Sənin cavabın:</em></p>
+                    {% if ans %}
+                        <pre>{{ ans.text_answer }}</pre>
+                    {% else %}
+                        <p><span class="badge bg-warning text-dark">Cavab verməmisən</span></p>
+                    {% endif %}
+                    {% if q.correct_answer %}
+                        <p><em>Ideal cavab nümunəsi:</em></p>
+                        <pre>{{ q.correct_answer }}</pre>
+                    {% endif %}
+                {% endif %}
+            </li>
+            {% endwith %}
+        {% endfor %}
+    </ol>
+
+    <a href="{% url 'student_exam_list' %}" class="btn btn-primary">
+        İmtahanlara qayıt
+    </a>
+</div>
+{% endblock %}

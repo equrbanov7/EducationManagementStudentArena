@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}İmtahanlar{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Mövcud imtahanlar</h1>
+
+    {% if exam_items %}
+        <ul class="list-group">
+            {% for exam, left in exam_items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ exam.title }}</strong><br>
+                        <small>
+                            Tip: {{ exam.get_exam_type_display }} |
+                            Müəllif: {{ exam.author.username }} |
+                            Yaradılma: {{ exam.created_at|date:"d.m.Y H:i" }}
+                        </small><br>
+                        {% if exam.total_duration_minutes %}
+                            <small>Ümumi müddət: {{ exam.total_duration_minutes }} dəq</small>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if left %}
+                            {% if left == None %}
+                                <span class="badge bg-secondary">Attempts: limitsiz</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Qalan cəhd: {{ left }}</span>
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'start_exam' exam.slug %}" class="btn btn-primary ms-3">
+                            İmtahana başla
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Hal-hazırda sizin üçün aktiv imtahan yoxdur.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Yeni imtahan{% endblock %}
+
+{% block extraCss %}
+    {# Yeni CSS faylını qoşuruq #}
+    <link rel="stylesheet" href="{% static 'css/create_exam.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="create-exam-page-wrapper">
+    <div class="create-exam-card">
+        <div class="card-header">
+            <h1>Yeni imtahan yarat</h1>
+            <p>Tələbələr üçün yeni bir bilik yoxlaması hazırlayın.</p>
+        </div>
+
+        <form method="post" class="exam-form" novalidate>
+            {% csrf_token %}
+            
+            {# Ümumi forma xətaları #}
+            {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+                {# Tam genişlikdə olan sahələr (span-full) #}
+                <div class="form-group span-full">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="field-error">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group span-full">
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                    <small class="form-text text-muted">İmtahan haqqında qısa məlumat.</small>
+                     {% if form.description.errors %}
+                        <div class="field-error">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                {# Yan-yana olan sahələr #}
+                <div class="form-group">
+                    {{ form.exam_type.label_tag }}
+                    {{ form.exam_type }}
+                     {% if form.exam_type.errors %}
+                        <div class="field-error">{{ form.exam_type.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                 <div class="form-group checkbox-group">
+                    {# Checkbox üçün xüsusi struktur #}
+                    <label for="{{ form.is_active.id_for_label }}" class="checkbox-label-wrapper">
+                        {{ form.is_active }}
+                        <span class="custom-checkbox-box"></span>
+                        {{ form.is_active.label }}
+                    </label>
+                     {% if form.is_active.errors %}
+                        <div class="field-error">{{ form.is_active.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.total_duration_minutes.label_tag }}
+                    <div class="input-with-icon">
+                        {{ form.total_duration_minutes }}
+                        <i class="far fa-clock icon"></i>
+                    </div>
+                    <small class="form-text text-muted">Ümumi imtahan müddəti (dəqiqə).</small>
+                     {% if form.total_duration_minutes.errors %}
+                        <div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.default_question_time_seconds.label_tag }}
+                     <div class="input-with-icon">
+                        {{ form.default_question_time_seconds }}
+                        <i class="fas fa-stopwatch icon"></i>
+                    </div>
+                    <small class="form-text text-muted">Hər sual üçün varsayılan vaxt (saniyə).</small>
+                     {% if form.default_question_time_seconds.errors %}
+                        <div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.max_attempts_per_user.label_tag }}
+                     <div class="input-with-icon">
+                         {{ form.max_attempts_per_user }}
+                         <i class="fas fa-redo icon"></i>
+                     </div>
+                     {% if form.max_attempts_per_user.errors %}
+                        <div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <a href="javascript:history.back()" class="btn-cancel">Ləğv et</a>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check"></i> Yarat
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -24,6 +24,13 @@
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
+                    <a href="{% url 'student_exam_list' %}"
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
+                        Exams
+                    </a>
+                </li>
+                
+                <li class="blog-header__nav-item">
                     <a href="{% url 'subscribe' %}"
                        class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
                         Abunə Ol
