@@ -35,7 +35,7 @@
 
     <hr>
 
-    <h3>Sual-sual nəticə</h3>
+    <h3>Sual - nəticə</h3>
     <ol class="question-results-list">
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
@@ -56,9 +56,9 @@
                                     <i class="far fa-circle option-icon"></i>
                                 {% endif %}
                                 {{ opt.text }}
-                                {% if ans and opt in ans.selected_options.all %}
+                                {% comment %} {% if ans and opt in ans.selected_options.all %}
                                     <span class="badge your-choice-badge">Sənin seçimin</span>
-                                {% endif %}
+                                {% endif %} {% endcomment %}
                             </li>
                         {% endfor %}
                     </ul>
@@ -93,7 +93,7 @@
         {% endfor %}
     </ol>
 
-    <div class="text-center mt-5">
+    <div class="text-center mt-5 exam-result-back-btn">
         <a href="{% url 'student_exam_list' %}" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i> İmtahanlara qayıt
         </a>

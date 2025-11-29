@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string 
 from django.conf import settings
 from django.utils import timezone
+from datetime import timedelta
 from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
 from .forms import (
     SubscriptionForm,
@@ -734,7 +735,6 @@ def start_exam(request, slug):
 
 
 
-
 @login_required
 def take_exam(request, slug, attempt_id):
     attempt = get_object_or_404(
@@ -745,76 +745,72 @@ def take_exam(request, slug, attempt_id):
     )
     exam = attempt.exam
 
-    # ✅ Bitmiş attempt-ə bir daha girmək OLMAZ – avtomatik nəticəyə atırıq
+    # Əgər artıq bitibsə, nəticəyə at
     if attempt.is_finished:
         return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
-    
 
-    questions = ExamQuestion.objects.filter(
-         exam=exam
-    ).prefetch_related("options")
+    questions = ExamQuestion.objects.filter(exam=exam).order_by('order', 'id').prefetch_related("options")
 
-
-    # (İstəsən sonra timer üçün istifadə edərik)
+    # --- Server tərəfli Vaxt Hesablaması ---
     remaining_seconds = None
+    is_time_up = False # Vaxtın bitib-bitməməsi bayrağı
+
+    if exam.total_duration_minutes and attempt.started_at:
+        now = timezone.now()
+        finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
+        diff = finish_time - now
+        total_seconds = diff.total_seconds()
+        
+        if total_seconds <= 0:
+            is_time_up = True # Vaxt bitib!
+            remaining_seconds = 0
+        else:
+            remaining_seconds = int(total_seconds)
 
     if request.method == "POST":
-        action = request.POST.get("submit_action")  # "save" və ya "finish"
+        action = request.POST.get("submit_action")
 
-        # 🔁 Bütün suallar üçün cavabları oxu və yadda saxla
+        # 1. Cavabları Yadda Saxla (Vaxt bitsə belə son seçilənlər yadda qalsın)
         for q in questions:
-            ans, _ = ExamAnswer.objects.get_or_create(
-                attempt=attempt,
-                question=q,
-            )
-
-            # köhnə variant seçimini təmizlə
+            ans, created = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
             ans.selected_options.clear()
 
-            # --- TEST imtahanı + single/multiple sual ---
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-
                 if q.answer_mode == "single":
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
                         opt = q.options.filter(id=opt_id).first()
-                        if opt:
-                            ans.selected_options.add(opt)
-
-                else:  # multiple
+                        if opt: ans.selected_options.add(opt)
+                else:
                     for opt in q.options.all():
                         if request.POST.get(f"q_{q.id}_opt_{opt.id}"):
                             ans.selected_options.add(opt)
-
                 ans.text_answer = ""
-                ans.auto_evaluate()   # düzgün/səhv hesabla
-
-            # --- Yazılı / praktiki (və ya testdə açıq sual) ---
+                ans.auto_evaluate()
             else:
                 text = request.POST.get(f"q_{q.id}", "").strip()
                 ans.text_answer = text
-                ans.is_correct = False  # müəllim sonradan qiymətləndirəcək
+                ans.is_correct = False
                 ans.save()
 
-        # Ümumi nəticə yalnız test imtahanları üçün
         if exam.exam_type == "test":
             attempt.recalculate_score()
 
-        # Bitirmə vs draft
-        if action == "finish":
-            attempt.mark_finished(status="submitted")
+        # 2. QƏRAR VERMƏ ANI
+        # Əgər istifadəçi "Bitir" basıbsa VƏ YA Serverdə vaxt bitibsə -> İmtahanı Sonlandır
+        if action == "finish" or is_time_up:
+            status = "expired" if is_time_up else "submitted"
+            attempt.mark_finished(status=status)
             return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
+        
         else:
+            # Vaxt hələ var, sadəcə yadda saxlayır
             attempt.status = "draft"
             attempt.save(update_fields=["status"])
             return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
-    # GET – mövcud cavabları yığırıq
-    answers = (
-        attempt.answers
-        .select_related("question")
-        .prefetch_related("selected_options")
-    )
+    # GET sorğusu
+    answers = attempt.answers.select_related("question").prefetch_related("selected_options")
     answers_by_qid = {a.question_id: a for a in answers}
 
     context = {

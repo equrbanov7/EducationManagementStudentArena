@@ -5,182 +5,342 @@
 {% block title %}{{ exam.title }} - İmtahan{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/take_exam.css' %}">
+    {# Sual timeri üçün kiçik stil əlavəsi #}
+    <style>
+        .question-timer-badge {
+            background-color: #e0f2fe;
+            color: #0284c7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 15px;
+        }
+        .question-timer-badge.danger {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1>{{ exam.title }}</h1>
+<div class="exam-container">
+    
+    <div class="exam-header">
+        <div class="header-top">
+            <div>
+                <h2 class="exam-title">{{ exam.title }}</h2>
+            </div>
 
-    <p class="exam-info">
-        Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
-        Müddət:
-        {% if exam.total_duration_minutes %}
-            <strong>{{ exam.total_duration_minutes }} dəqiqə</strong>
-        {% else %}
-            <strong>Limitsiz</strong>
-        {% endif %}
-    </p>
+            <div style="display: flex; gap: 10px;">
+                {# --- YENİ: Sual Timeri --- #}
+                <div class="question-timer-badge" id="question-timer-container" style="display: none;">
+                    <i class="fas fa-hourglass-half"></i> 
+                    Sual vaxtı: <span id="question-timer-value">--:--</span>
+                </div>
 
-    {% if remaining_seconds %}
-        <div id="exam-timer" class="alert alert-info">
-            Qalan vaxt: <span id="timer-value"></span>
+                {# Mövcud: Ümumi İmtahan Timeri #}
+                <div class="timer-badge" id="exam-timer-container">
+                    <i class="fas fa-clock"></i> 
+                    Ümumi: <span id="timer-value">--:--</span>
+                </div>
+            </div>
         </div>
-    {% endif %}
+        
+        <div class="progress-area">
+            <div class="progress-info">
+                <span>Sual: <strong id="current-question-num">1</strong> / {{ questions|length }}</span>
+                <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ questions|length }}</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
 
     <form method="post" id="exam-form">
         {% csrf_token %}
 
-        <ol class="question-list">
-        {% for q in questions %}
-            {% with ans=answers_by_qid|get_item:q.id %}
-                <li class="question-item">
-                    <p class="question-text"><strong>{{ forloop.counter }}. {{ q.text }}</strong></p>
+        <div class="slides-wrapper">
+            {% for q in questions %}
+                {% with ans=answers_by_qid|get_item:q.id %}
+                {# --- DƏYİŞİKLİK: data-time-limit atributu əlavə edildi --- #}
+                <div class="question-slide" 
+                     data-index="{{ forloop.counter0 }}" 
+                     id="slide-{{ forloop.counter0 }}"
+                     data-time-limit="{{ q.effective_time_limit|default:0 }}">
+                    
+                    <div class="question-content">
+                        <span class="q-number">Sual {{ forloop.counter }}</span>
+                        <p class="q-text">{{ q.text }}</p>
 
-                    {# TEST imtahanı üçün variantlar #}
-                    {% if exam.exam_type == "test" %}
-
-                        {% if q.answer_mode == "single" %}
-                            <div class="options-group">
-                                {% for opt in q.options.all %}
-                                    <div class="form-check custom-radio">
-                                        <label class="form-check-label">
-                                            <input
-                                                type="radio"
-                                                name="q_{{ q.id }}"
-                                                value="{{ opt.id }}"
-                                                class="form-check-input"
-                                                {% if ans and opt in ans.selected_options.all %}checked{% endif %}
-                                            >
-                                            <span class="custom-radio-mark"></span>
-                                            {{ opt.text }}
+                        {# --- Variantlar --- #}
+                        {% if exam.exam_type == "test" %}
+                            
+                            {% if q.answer_mode == "single" %}
+                                <div class="options-group">
+                                    {% for opt in q.options.all %}
+                                        <label class="option-card">
+                                            <input type="radio" 
+                                                   name="q_{{ q.id }}" 
+                                                   value="{{ opt.id }}" 
+                                                   onchange="updateProgress()"
+                                                   {% if ans and opt in ans.selected_options.all %}checked{% endif %}>
+                                            <span class="circle-mark"></span>
+                                            <span class="opt-text">{{ opt.text }}</span>
                                         </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
+                                    {% endfor %}
+                                </div>
 
-                        {% elif q.answer_mode == "multiple" %}
-                            <div class="options-group">
-                                {% for opt in q.options.all %}
-                                    <div class="form-check custom-checkbox">
-                                        <label class="form-check-label">
-                                            <input
-                                                type="checkbox"
-                                                name="q_{{ q.id }}_opt_{{ opt.id }}"
-                                                value="{{ opt.id }}"
-                                                class="form-check-input"
-                                                {% if ans and opt in ans.selected_options.all %}checked{% endif %}
-                                            >
-                                            <span class="custom-checkbox-mark"></span>
-                                            {{ opt.text }}
+                            {% elif q.answer_mode == "multiple" %}
+                                <div class="options-group">
+                                    {% for opt in q.options.all %}
+                                        <label class="option-card">
+                                            <input type="checkbox" 
+                                                   name="q_{{ q.id }}_opt_{{ opt.id }}" 
+                                                   value="{{ opt.id }}"
+                                                   onchange="updateProgress()"
+                                                   {% if ans and opt in ans.selected_options.all %}checked{% endif %}>
+                                            <span class="box-mark"></span>
+                                            <span class="opt-text">{{ opt.text }}</span>
                                         </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
                         {% else %}
-                            {# test içində açıq sual istəsən #}
-                            <textarea
-                                name="q_{{ q.id }}"
-                                rows="4"
-                                class="form-control"
-                                placeholder="Cavabınızı yazın..."
-                            >{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
+                            {# Yazılı Sual #}
+                            <textarea name="q_{{ q.id }}" 
+                                      class="written-answer" 
+                                      placeholder="Cavabınızı bura yazın..."
+                                      oninput="updateProgress()">{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
                         {% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
 
-                    {# YAZILI / PRAKTİKİ imtahan – HƏMİŞƏ TEXTAREA #}
-                    {% else %}
-                        <textarea
-                            name="q_{{ q.id }}"
-                            rows="4"
-                            class="form-control"
-                            placeholder="Cavabınızı yazın..."
-                        >{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
-                    {% endif %}
-                </li>
-            {% endwith %}
-        {% endfor %}
-        </ol>
-
-        <div class="form-actions">
-            <button type="submit" name="submit_action" value="save" class="btn btn-secondary">
-                <i class="fas fa-save"></i> Yadda saxla
+        <div class="exam-footer">
+            <button type="button" id="prev-btn" class="nav-btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Əvvəlki
             </button>
-            <button type="submit" name="submit_action" value="finish" class="btn btn-primary">
-                <i class="fas fa-flag-checkered"></i> İmtahanı bitir
+
+            <button type="button" id="next-btn" class="nav-btn btn-primary">
+                Növbəti <i class="fas fa-arrow-right"></i>
+            </button>
+
+            <button type="submit" name="submit_action" value="finish" id="finish-btn" class="nav-btn btn-success" style="display: none;">
+                İmtahanı Bitir <i class="fas fa-check"></i>
             </button>
         </div>
     </form>
 </div>
 
-{# Timer üçün JavaScript - base.html faylında ola bilər, amma burda da yerləşdirə bilərəm #}
-{% if remaining_seconds %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let remainingSeconds = {{ remaining_seconds }};
-        const timerValueElement = document.getElementById('timer-value');
+        const slides = document.querySelectorAll('.question-slide');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const finishBtn = document.getElementById('finish-btn');
+        const currentQNum = document.getElementById('current-question-num');
+        const answeredCountEl = document.getElementById('answered-count');
+        const progressFill = document.getElementById('progress-fill');
         const examForm = document.getElementById('exam-form');
-        const saveButton = examForm.querySelector('button[name="submit_action"][value="save"]');
-        const finishButton = examForm.querySelector('button[name="submit_action"][value="finish"]');
+        
+        const qTimerContainer = document.getElementById('question-timer-container');
+        const qTimerValue = document.getElementById('question-timer-value');
+        let questionTimerInterval = null;
+
+        let currentIndex = 0;
+        const totalSlides = slides.length;
 
         function formatTime(totalSeconds) {
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            if (totalSeconds < 0) totalSeconds = 0;
+            const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-
-            const pad = (num) => String(num).padStart(2, '0');
-
-            if (hours > 0) {
-                return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-            } else {
-                return `${pad(minutes)}:${pad(seconds)}`;
-            }
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        function updateTimer() {
-            if (remainingSeconds <= 0) {
-                timerValueElement.textContent = "Vaxt bitdi!";
-                clearInterval(timerInterval);
-                // İmtahanı avtomatik göndərmək
-                if (examForm) {
-                    // "İmtahanı bitir" düyməsini simulyasiya edirik
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'submit_action';
-                    hiddenInput.value = 'finish';
-                    examForm.appendChild(hiddenInput);
-                    examForm.submit();
-                }
+        // --- YENİ: Inputları deaktiv edən funksiya ---
+        function disableSlideInputs(slideElement) {
+            // Slayd daxilindəki bütün input və textarea-ları tapıb disabled edirik
+            const inputs = slideElement.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            // Vizual olaraq solğunlaşdırırıq
+            slideElement.style.opacity = '0.7';
+            // Kliklənmənin qarşısını alırıq
+            slideElement.style.pointerEvents = 'none';
+        }
+
+        // --- Sual Timeri Funksiyası (Yenilənmiş) ---
+        function startQuestionTimer(slideElement) {
+            if (questionTimerInterval) {
+                clearInterval(questionTimerInterval);
+                qTimerContainer.classList.remove('danger');
+            }
+
+            // Əgər bu sualın vaxtı artıq bitibsə (geri qayıdanda)
+            if (slideElement.getAttribute('data-time-expired') === 'true') {
+                qTimerContainer.style.display = 'flex';
+                qTimerValue.textContent = "00:00";
+                qTimerContainer.classList.add('danger');
+                disableSlideInputs(slideElement); // Yenidən deaktiv et ki, əmin olaq
                 return;
             }
 
-            timerValueElement.textContent = formatTime(remainingSeconds);
+            // Vaxt limitini HTML-dən alırıq
+            let timeLimit = parseInt(slideElement.getAttribute('data-time-limit')) || 0;
 
-            // Son 1 dəqiqə qaldıqda rəngi dəyiş
-            if (remainingSeconds <= 60) {
-                document.getElementById('exam-timer').classList.add('alert-danger');
-                document.getElementById('exam-timer').classList.remove('alert-info');
-            } else if (remainingSeconds <= 300) { // Son 5 dəqiqə
-                document.getElementById('exam-timer').classList.add('alert-warning');
-                document.getElementById('exam-timer').classList.remove('alert-info');
+            if (timeLimit > 0) {
+                qTimerContainer.style.display = 'flex';
+                qTimerValue.textContent = formatTime(timeLimit);
+
+                questionTimerInterval = setInterval(() => {
+                    timeLimit--;
+                    // Qalan vaxtı slaydda yadda saxlayırıq (geri qayıtmaq üçün)
+                    slideElement.setAttribute('data-time-limit', timeLimit);
+                    
+                    qTimerValue.textContent = formatTime(timeLimit);
+
+                    if (timeLimit <= 10 && timeLimit > 0) {
+                        qTimerContainer.classList.add('danger');
+                    }
+
+                    // --- VAXT BİTDİ ---
+                    if (timeLimit <= 0) {
+                        clearInterval(questionTimerInterval);
+                        
+                        // 1. Slayda "vaxt bitdi" damğası vururuq
+                        slideElement.setAttribute('data-time-expired', 'true');
+                        
+                        // 2. Inputları deaktiv edirik
+                        disableSlideInputs(slideElement);
+
+                        // 3. Avtomatik növbəti suala keçirik
+                        if (currentIndex < totalSlides - 1) {
+                            showSlide(currentIndex + 1);
+                        } else {
+                            // Son sualdırsa, imtahanı bitiririk
+                            examForm.submit();
+                        }
+                        // Progress barı yeniləyirik (disabled olanlar sayılmasın deyə)
+                        updateProgress();
+                    }
+                }, 1000);
+            } else {
+                qTimerContainer.style.display = 'none';
             }
-            
-            remainingSeconds--;
         }
 
-        // Timeri hər saniyə yenilə
-        const timerInterval = setInterval(updateTimer, 1000);
-        updateTimer(); // Səhifə yüklənəndə bir dəfə dərhal yenilə
+        // 1. Slaydı göstərmə funksiyası
+        function showSlide(index) {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
 
-        // Formanın göndərilməsini tutub düyməni deaktiv etmək
-        examForm.addEventListener('submit', function() {
-            saveButton.disabled = true;
-            finishButton.disabled = true;
-            saveButton.textContent = 'Saxlanılır...';
-            finishButton.textContent = 'Bitirilir...';
+            const currentSlide = slides[index];
+            currentSlide.classList.add('active');
+            
+            currentQNum.textContent = index + 1;
+
+            prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
+            if (index === totalSlides - 1) {
+                nextBtn.style.display = 'none';
+                finishBtn.style.display = 'flex';
+            } else {
+                nextBtn.style.display = 'flex';
+                finishBtn.style.display = 'none';
+            }
+
+            currentIndex = index;
+            startQuestionTimer(currentSlide);
+            updateProgress(); // Slayd dəyişəndə progressi yoxla
+        }
+
+        // 2. İrəli / Geri
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < totalSlides - 1) showSlide(currentIndex + 1);
         });
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) showSlide(currentIndex - 1);
+        });
+
+        // 3. Cavablananları saymaq (Yenilənmiş: yalnız aktivləri sayır)
+        window.updateProgress = function() {
+            let answeredCount = 0;
+            slides.forEach(slide => {
+                // Yalnız :not(:disabled) olanları sayırıq
+                const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
+                const textareas = slide.querySelectorAll('textarea:not(:disabled)');
+                let hasText = false;
+                if (textareas.length > 0) {
+                    if (textareas[0].value.trim().length > 0) hasText = true;
+                }
+                if (inputs.length > 0 || hasText) {
+                    answeredCount++;
+                }
+            });
+            answeredCountEl.textContent = answeredCount;
+            const percent = (answeredCount / totalSlides) * 100;
+            progressFill.style.width = percent + '%';
+        }
+
+        // Başlanğıc
+        showSlide(0);
+        // updateProgress(); // showSlide içində çağırılır onsuz da
+
+        // 4. Ümumi Timer Məntiqi (Backend-dən gələn dəyərlə işləyir)
+        {% if remaining_seconds is not None %}
+        // Django şablonundan dəyəri alıb rəqəmə çeviririk
+        let remainingSeconds = parseInt("{{ remaining_seconds }}");
+        
+        if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
+            const timerValueElement = document.getElementById('timer-value');
+            const timerContainer = document.getElementById('exam-timer-container');
+            
+            timerValueElement.textContent = formatTime(remainingSeconds);
+
+            const timerInterval = setInterval(() => {
+                remainingSeconds--;
+                
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    if (questionTimerInterval) clearInterval(questionTimerInterval);
+                    timerValueElement.textContent = "00:00";
+
+                    var hiddenInput = document.createElement("input");
+                    hiddenInput.setAttribute("type", "hidden");
+                    hiddenInput.setAttribute("name", "submit_action");
+                    hiddenInput.setAttribute("value", "finish");
+                    examForm.appendChild(hiddenInput);
+
+                    // Vaxt bitdi, formu göndər
+                    examForm.submit();
+                    return;
+                }
+                
+                timerValueElement.textContent = formatTime(remainingSeconds);
+                
+                if (remainingSeconds < 60) {
+                    timerContainer.style.backgroundColor = '#fee2e2';
+                    timerContainer.style.color = '#dc2626';
+                }
+            }, 1000);
+        } else {
+             // Vaxt bitibsə və ya səhv gəlibsə
+             document.getElementById('timer-value').textContent = "00:00";
+        }
+        {% endif %}
     });
 </script>
-{% endif %}
+
+
+
 {% endblock %}

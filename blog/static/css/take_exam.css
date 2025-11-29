@@ -1,392 +1,264 @@
-/* static/css/exam_taking.css */
+/* --- Ümumi Reset --- */
+body {
+    background-color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+}
 
-/* --- Ümumi Səhifə Konteyneri (Bootstrap .container sinifini override edir) --- */
-.container.my-4 {
-    max-width: 900px;
-    margin: 40px auto; /* Yuxarı-aşağı məsafə və mərkəzləşdirmə */
-    padding: 30px;
+.exam-container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: transparent;
+}
+
+/* --- Başlıq və Progress Bar (Header) --- */
+.exam-header {
     background: #ffffff;
+    padding: 20px 30px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.exam-title {
+    font-size: 1.5rem;
+    color: #111827;
+    font-weight: 700;
+    margin: 0;
+}
+
+.timer-badge {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+}
+
+/* Progress Area */
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #4b5563;
+    margin-bottom: 8px;
+}
+
+.progress-info strong {
+    color: #111827;
+    font-weight: 700;
+}
+
+.answered-status {
+    color: #059669; /* Yaşıl rəng cavablananlar üçün */
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 4px;
     overflow: hidden;
 }
 
-/* --- Başlıq --- */
-.container.my-4 h1 {
-    font-size: 2rem;
-    color: var(--text-dark, #111827);
-    margin-bottom: 25px;
-    font-weight: 800;
-    text-align: center;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #f3f4f6; /* Ayırıcı xətt */
+.progress-bar-fill {
+    height: 100%;
+    background-color: #3b82f6; /* Dolma rəngi */
+    width: 0%;
+    transition: width 0.4s ease;
 }
 
-/* --- İmtahan Məlumatı --- */
-p.exam-info {
-    font-size: 1rem;
-    color: var(--text-dark, #374151);
-    line-height: 1.6;
-    margin-bottom: 25px;
-    text-align: center;
-}
-p.exam-info strong {
-    color: var(--primary-color, #3b82f6);
+/* --- SLAYDLAR (Slides) --- */
+.slides-wrapper {
+    position: relative;
+    min-height: 400px; /* Slaydın hoppanmaması üçün minimum hündürlük */
 }
 
-/* --- Timer Dizaynı (Bootstrap .alert siniflərini override edir) --- */
-#exam-timer {
-    padding: 15px 20px;
-    border-radius: 12px;
+.question-slide {
+    display: none; /* Hamısını gizlət */
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    animation: fadeIn 0.4s ease;
+}
+
+.question-slide.active {
+    display: block; /* Yalnız aktiv olanı göstər */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.q-number {
+    display: inline-block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9ca3af;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.q-text {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.5;
     margin-bottom: 30px;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: 700;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- Variantlar (Radio & Checkbox Cards) --- */
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.option-card:hover {
+    border-color: #bfdbfe;
+    background-color: #f9fafb;
+}
+
+/* Input gizlətmək */
+.option-card input {
+    display: none;
+}
+
+/* İşarələr (Custom UI) */
+.circle-mark, .box-mark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    margin-right: 15px;
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.circle-mark { border-radius: 50%; }
+.box-mark { border-radius: 6px; }
+
+/* Seçiləndə stil */
+.option-card input:checked ~ .circle-mark,
+.option-card input:checked ~ .box-mark {
+    border-color: #3b82f6;
+    background-color: #3b82f6;
+}
+
+/* Seçiləndə kartın özü */
+.option-card:has(input:checked) {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.opt-text {
+    font-size: 1rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Yazılı Sual üçün Textarea */
+.written-answer {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    min-height: 150px;
+    font-size: 1rem;
+    resize: vertical;
+    outline: none;
+}
+.written-answer:focus {
+    border-color: #3b82f6;
+}
+
+/* --- Aşağı Naviqasiya (Footer) --- */
+.exam-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    padding: 0 5px;
+}
+
+.nav-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-}
-
-#exam-timer.alert-info { /* Default mavi */
-    background-color: #e0e7ff !important;
-    color: var(--primary-color, #3b82f6);
-    border: 1px solid #c7d2fe;
-}
-
-#exam-timer.alert-warning { /* Sarı */
-    background-color: #fef3c7 !important;
-    color: #f59e0b;
-    border: 1px solid #fcd34d;
-}
-
-#exam-timer.alert-danger { /* Qırmızı */
-    background-color: #fee2e2 !important;
-    color: #ef4444;
-    border: 1px solid #fecaca;
-}
-
-#exam-timer #timer-value {
-    min-width: 80px; /* Vaxtın yerini sabit saxlayır */
-}
-/* İkon əlavə edə bilərik */
-#exam-timer::before {
-    content: "\f017"; /* FontAwesome stopwatch ikonası */
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    margin-right: 5px;
-    color: inherit; /* Valideyn rəngini götürür */
-}
-
-/* --- Suallar Siyahısı --- */
-ol.question-list {
-    list-style: none; /* Standart nömrələri gizlədirik */
-    padding: 0;
-    counter-reset: question-counter; /* Nömrələmə üçün sayğac */
-    margin-bottom: 40px;
-}
-
-li.question-item {
-    background-color: #fcfcfd;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 25px 30px;
-    margin-bottom: 25px;
-    position: relative;
-    padding-left: 60px; /* Nömrə üçün yer saxlayırıq */
-}
-
-li.question-item::before { /* Xüsusi nömrələmə */
-    counter-increment: question-counter;
-    content: counter(question-counter) ".";
-    position: absolute;
-    left: 25px;
-    top: 25px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--primary-color, #3b82f6);
-}
-
-p.question-text {
-    font-size: 1.15rem;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-size: 1rem;
     font-weight: 600;
-    color: var(--text-dark, #1f2937);
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-/* --- Cavab Variantları Qrupu --- */
-.options-group {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Variantlar arasında boşluq */
-}
-
-/* --- Custom Radio Buttons (Bootstrap .form-check override) --- */
-.form-check.custom-radio {
-    display: flex;
-    align-items: flex-start; /* Mətn uzun olduqda yuxarıdan başlasın */
-    padding-left: 0 !important;
-    margin-bottom: 0 !important;
-}
-
-.form-check.custom-radio label.form-check-label {
-    position: relative;
-    padding-left: 35px; /* Radio işarəsi üçün yer saxlayır */
     cursor: pointer;
-    font-size: 1rem;
-    color: var(--text-dark, #374151);
-    font-weight: 500;
-    display: flex;
-    align-items: center; /* Mətn ilə işarəni ortalaşdırır */
-    min-height: 24px; /* Minimum hündürlük radio button ilə uyğunlaşmaq üçün */
-}
-
-.form-check.custom-radio input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-radio-mark {
-    position: absolute;
-    left: 0;
-    top: 0; /* Align with text start */
-    height: 24px;
-    width: 24px;
-    background-color: #f9fafb;
-    border: 2px solid #d1d5db;
-    border-radius: 50%; /* Dairəvi radio button */
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.form-check.custom-radio input[type="radio"]:checked ~ .custom-radio-mark {
-    background-color: var(--primary-color, #3b82f6);
-    border-color: var(--primary-color, #3b82f6);
-}
-
-.custom-radio-mark::after { /* Daxili nöqtə */
-    content: "";
-    position: absolute;
-    display: none;
-    top: 6px;
-    left: 6px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: white;
-}
-
-.form-check.custom-radio input[type="radio"]:checked ~ .custom-radio-mark::after {
-    display: block;
-}
-
-/* --- Custom Checkboxes (Bootstrap .form-check override) --- */
-.form-check.custom-checkbox {
-    display: flex;
-    align-items: flex-start;
-    padding-left: 0 !important;
-    margin-bottom: 0 !important;
-}
-
-.form-check.custom-checkbox label.form-check-label {
-    position: relative;
-    padding-left: 35px;
-    cursor: pointer;
-    font-size: 1rem;
-    color: var(--text-dark, #374151);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    min-height: 24px;
-}
-
-.form-check.custom-checkbox input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-checkbox-mark {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 24px;
-    width: 24px;
-    background-color: #f9fafb;
-    border: 2px solid #d1d5db;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.form-check.custom-checkbox input[type="checkbox"]:checked ~ .custom-checkbox-mark {
-    background-color: var(--primary-color, #3b82f6);
-    border-color: var(--primary-color, #3b82f6);
-}
-
-.custom-checkbox-mark::after { /* Check işarəsi */
-    content: "";
-    position: absolute;
-    display: none;
-    left: 8px;
-    top: 4px;
-    width: 6px;
-    height: 12px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.form-check.custom-checkbox input[type="checkbox"]:checked ~ .custom-checkbox-mark::after {
-    display: block;
-}
-
-/* --- Textarea (Bootstrap .form-control override) --- */
-textarea.form-control {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: #f9fafb;
-    outline: none;
-    font-family: inherit;
-    min-height: 120px;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-textarea.form-control:focus {
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    background-color: #ffffff;
-}
-
-/* --- Düymələr (Actions) --- */
-.form-actions {
-    margin-top: 50px;
-    padding-top: 30px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end; /* Sağ tərəfə yasla */
-    gap: 15px;
-}
-
-.form-actions .btn { /* Ümumi düymə stili */
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    border: 1px solid transparent;
-}
-
-/* "Yadda saxla" düyməsi */
-.form-actions .btn.btn-secondary {
-    background-color: transparent;
-    color: #6b7280;
-    border-color: #d1d5db;
-}
-
-.form-actions .btn.btn-secondary:hover {
-    background-color: #f3f4f6;
-    color: #374151;
-}
-
-/* "İmtahanı bitir" düyməsi */
-.form-actions .btn.btn-primary {
-    background-color: var(--primary-color, #3b82f6);
-    color: white;
     border: none;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+    transition: transform 0.1s ease;
 }
 
-.form-actions .btn.btn-primary:hover {
-    background-color: var(--primary-dark, #1e3a8a);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
-    color: white;
+.nav-btn:active {
+    transform: scale(0.96);
 }
 
-/* --- RESPONSIVE --- */
+.btn-outline {
+    background: transparent;
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+}
+.btn-outline:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-success {
+    background: #10b981;
+    color: #fff;
+}
+.btn-success:hover {
+    background: #059669;
+}
+
+/* Mobile Uyğunlaşdırma */
 @media (max-width: 768px) {
-    .container.my-4 {
-        padding: 20px;
-        margin: 20px auto;
+    .exam-container { margin: 15px; }
+    .question-slide { padding: 25px; }
+    .q-text { font-size: 1.2rem; }
+    .exam-footer { 
+        gap: 15px;
     }
-    .container.my-4 h1 {
-        font-size: 1.8rem;
-        margin-bottom: 20px;
-    }
-    p.exam-info {
-        font-size: 0.95rem;
-        margin-bottom: 20px;
-    }
-    #exam-timer {
-        font-size: 1.1rem;
+    .nav-btn {
+        flex: 1;
         padding: 12px 15px;
-        margin-bottom: 25px;
-    }
-    li.question-item {
-        padding: 20px 20px 20px 50px;
-        margin-bottom: 20px;
-    }
-    li.question-item::before {
-        left: 20px;
-        top: 20px;
-        font-size: 1.1rem;
-    }
-    p.question-text {
-        font-size: 1.05rem;
-        margin-bottom: 15px;
-    }
-    .options-group {
-        gap: 12px;
-    }
-    .form-check.custom-radio label.form-check-label,
-    .form-check.custom-checkbox label.form-check-label {
-        font-size: 0.95rem;
-        padding-left: 30px;
-    }
-    .custom-radio-mark, .custom-checkbox-mark {
-        height: 22px;
-        width: 22px;
-    }
-    .custom-radio-mark::after {
-        top: 5px;
-        left: 5px;
-        width: 8px;
-        height: 8px;
-    }
-    .custom-checkbox-mark::after {
-        left: 7px;
-        top: 3px;
-        width: 5px;
-        height: 10px;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse; /* Düymələr sütun şəklində, "Bitir" yuxarıda */
-        gap: 10px;
-        margin-top: 40px;
-        padding-top: 25px;
-    }
-    .form-actions .btn {
-        width: 100%;
-        justify-content: center;
     }
 }
