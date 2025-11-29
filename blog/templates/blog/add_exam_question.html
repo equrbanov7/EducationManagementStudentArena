@@ -3,94 +3,143 @@
 {% block title %}{{ exam.title }} - Yeni sual{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/add_exam_question.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    {% if editing %}
-         <h1>{{ exam.title }} – sualı redaktə et</h1>
-    {% else %}
-         <h1>{{ exam.title }} üçün yeni sual</h1>
-    {% endif %}
- 
+<div class="question-container">
+    <div class="form-header">
+        {% if editing %}
+             <h1>Sualı Redaktə Et</h1>
+             <p class="subtitle">{{ exam.title }}</p>
+        {% else %}
+             <h1>Yeni Sual Əlavə Et</h1>
+            
+             {% if exam.exam_type == "test" %}
+                 <p class="info-text">Test imtahanı üçün yeni sual əlavə edirsiniz.</p>
+             {% else %}
+                 <p class="info-text">Yazılı imtahanı üçün yeni sual əlavə edirsiniz.</p>
+             {% endif %}
+
+        {% endif %}
+    </div>
 
     <form method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
 
-        <div class="mb-3">
-            {{ form.text.label_tag }}
+        <div class="form-group">
+            <label for="{{ form.text.id_for_label }}">Sualın mətni:</label>
             {{ form.text }}
-            {{ form.text.errors }}
+            <div class="error-msg">{{ form.text.errors }}</div>
         </div>
 
         {% if exam.exam_type == "test" %}
-            <div class="mb-3">
-                {{ form.answer_mode.label_tag }}
-                {{ form.answer_mode }}
-                {{ form.answer_mode.errors }}
-            </div>
-        {% endif %}
-
-        <div class="mb-3">
-            {{ form.time_limit_seconds.label_tag }}
-            {{ form.time_limit_seconds }}
-            {{ form.time_limit_seconds.errors }}
-        </div>
-
-        {% if exam.exam_type == "written" %}
-            <div class="mb-3">
-                {{ form.correct_answer.label_tag }}
-                {{ form.correct_answer }}
-                {{ form.correct_answer.errors }}
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="{{ form.answer_mode.id_for_label }}">Cavab rejimi:</label>
+                    {{ form.answer_mode }}
+                    <div class="error-msg">{{ form.answer_mode.errors }}</div>
+                </div>
+                <div class="form-group half">
+                    <label for="{{ form.time_limit_seconds.id_for_label }}">Vaxt limiti (saniyə):</label>
+                    {{ form.time_limit_seconds }}
+                    <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
+                </div>
             </div>
         {% else %}
-            <h4>Variantlar</h4>
-            <div class="mb-2">
-                {{ form.option1_text.label_tag }}<br>
-                {{ form.option1_text }}
-                <div class="form-check">
-                    {{ form.option1_is_correct }}
-                    {{ form.option1_is_correct.label_tag }}
-                </div>
+            <div class="form-group">
+                <label for="{{ form.time_limit_seconds.id_for_label }}">Vaxt limiti (saniyə):</label>
+                {{ form.time_limit_seconds }}
+                <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
             </div>
-            <div class="mb-2">
-                {{ form.option2_text.label_tag }}<br>
-                {{ form.option2_text }}
-                <div class="form-check">
-                    {{ form.option2_is_correct }}
-                    {{ form.option2_is_correct.label_tag }}
-                </div>
+        {% endif %}
+
+        {% if exam.exam_type == "written" %}
+            <div class="form-group">
+                <label for="{{ form.correct_answer.id_for_label }}">Düzgün cavab (nümunə):</label>
+                {{ form.correct_answer }}
+                <div class="error-msg">{{ form.correct_answer.errors }}</div>
             </div>
-            <div class="mb-2">
-                {{ form.option3_text.label_tag }}<br>
-                {{ form.option3_text }}
-                <div class="form-check">
-                    {{ form.option3_is_correct }}
-                    {{ form.option3_is_correct.label_tag }}
+        {% else %}
+            <div class="variants-section">
+                <h4>Variantlar</h4>
+                <p class="info-text">Zəhmət olmasa variantları daxil edin və düzgün olanı işarələyin.</p>
+                
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>1-ci variant:</label>
+                        {{ form.option1_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option1_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">Bu variant düzgündür</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-2">
-                {{ form.option4_text.label_tag }}<br>
-                {{ form.option4_text }}
-                <div class="form-check">
-                    {{ form.option4_is_correct }}
-                    {{ form.option4_is_correct.label_tag }}
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>2-ci variant:</label>
+                        {{ form.option2_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option2_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">Bu variant düzgündür</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>3-cü variant:</label>
+                        {{ form.option3_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option3_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">Bu variant düzgündür</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>4-cü variant:</label>
+                        {{ form.option4_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option4_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">Bu variant düzgündür</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         {% endif %}
 
-        <button type="submit" name="save" class="btn btn-success">
-            Yadda saxla
-        </button>
-        <button type="submit" name="save_and_continue" class="btn btn-outline-primary">
-            Yadda saxla və yeni sual əlavə et
-        </button>
-        <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary">
-            Ləğv et
-        </a>
+        <div class="form-actions">
+            <button type="submit" name="save" class="btn-save">
+                Yadda saxla
+            </button>
+            <button type="submit" name="save_and_continue" class="btn-save-add">
+                Yadda saxla və yeni sual
+            </button>
+            <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel">
+                Ləğv et
+            </a>
+        </div>
     </form>
 </div>
 {% endblock %}
