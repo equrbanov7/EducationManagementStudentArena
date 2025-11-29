@@ -4,41 +4,40 @@
 {% block title %}{{ category.name }} | Kateqoriya{% endblock %}
 
 {% block extraCss %}
-    {# Ana səhifənin dizaynını istifadə edirik #}
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/categoryDetail.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/sideBar.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<section class="hero" style="background: #f4f7f6; padding: 40px 0; text-align: center; margin-bottom: 40px;">
-  <div class="container">
-    <span style="color: #666; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">KATEQORİYA</span>
-    <h1 style="color: #2c3e50; margin-top: 10px;">{{ category.name }}</h1>
-    <p style="color: #7f8c8d;">Bu mövzuda cəmi {{ posts.count }} məqalə tapıldı.</p>
-  </div>
+<section class="category-hero-section">
+    <div class="category-container">
+        <span class="category-label">KATEQORİYA</span>
+        <h1 class="category-hero-title">{{ category.name }}</h1>
+        <p class="category-hero-desc">Bu mövzuda cəmi {{ posts.count }} məqalə tapıldı.</p>
+    </div>
 </section>
 
-<main class="container">
-  
-  <div class="content-wrapper">
-    
-    <section id="blogContainer" class="blog-grid">
-      {% for post in posts %}
-        {# Eyni kart dizaynını istifadə edirik #}
-        {% include "partials/_blogCard.html" with post=post %} 
-      {% empty %}
-        <div style="text-align: center; grid-column: 1/-1; padding: 50px;">
-            <h3>Bu kateqoriyada hələ məqalə yoxdur.</h3>
-            <a href="{% url 'home' %}" style="color: #3498db;">Ana səhifəyə qayıt</a>
+<div class="category-container">
+    <div class="category-layout">
+        
+        <div class="category-content-area">
+            <div class="category-grid">
+                {% for post in posts %}
+                    {% include "partials/_blogCard.html" with post=post %} 
+                {% empty %}
+                    <div class="category-empty-state">
+                        <h3>Bu kateqoriyada hələ məqalə yoxdur.</h3>
+                        <a href="{% url 'home' %}" class="category-back-btn">Ana səhifəyə qayıt</a>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-      {% endfor %}
-    </section>
 
-    {% include "partials/_sideBar.html" with categories=categories %} 
+        {% include "partials/_sideBar.html" with categories=categories %} 
 
-  </div>
-</main>
+    </div>
+</div>
 
 {% endblock %}

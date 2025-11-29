@@ -4,7 +4,9 @@
 {% block title %}Texnologiya Xəbərləri və Yeniliklər{% endblock %}
 
 {% block extraCss %} 
- <link rel="stylesheet" href="{% static 'css/technology.css' %}">
+    <link rel="stylesheet" href="{% static 'css/technology.css' %}">
+    {# Paginasiya CSS-ni buraya əlavə etdik #}
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %} 
 
 {% block content %}
@@ -18,13 +20,14 @@
     </header>
 
     <section class="blog-grid">
-        {% for post in posts %}
+        {# DİQQƏT: 'posts' əvəzinə 'page_obj' istifadə edirik #}
+        {% for post in page_obj %}
             <article class="blog-card">
                 <div class="card-img-wrapper">
                     <a href="{% url 'post_detail' post.slug %}">
                         
                         <img 
-                            src="{{ post.image_url }}" 
+                            src="{{ post.get_image }}" 
                             alt="{{ post.title }}" 
                             class="card-img-top"
                             onerror="this.onerror=null; this.src='{% static 'images/tech-placeholder.svg' %}';"
@@ -54,7 +57,9 @@
                     <div class="card-footer">
                         <div class="author-info">
                             <span class="author-avatar">👤</span> 
-                            <span class="author-name">{{ post.author.username|title }}</span>
+                            <a href="{% url 'user_profile' post.author.username %}">  
+                                <span class="author-name">{{ post.author.username|title }}</span> 
+                            </a>
                         </div>
                         <a href="{% url 'post_detail' post.slug %}" class="read-more-btn">Oxu &rarr;</a>
                     </div>
@@ -68,6 +73,9 @@
             </div>
         {% endfor %}
     </section>
+
+   
+    {% include "partials/_pagination.html" %}
 
 </div>
 {% endblock %}

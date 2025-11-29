@@ -5,6 +5,8 @@ from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 from django.utils import timezone
 from django.contrib.auth.models import Group
+import itertools
+from django.templatetags.static import static
 
 # ---- Models for Category functionality ----
 
@@ -21,12 +23,21 @@ class Category(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # slug boşdursa avtomatik name-dən generasiya et
+        # Slug boşdursa və ya dəyişdirilibsə yenilə
         if not self.slug:
             self.slug = slugify(self.name)
+            
+            # Əgər bu slug artıq varsa, sonuna rəqəm artır (nadir halda)
+            original_slug = self.slug
+            for x in itertools.count(1):
+                if not Category.objects.filter(slug=self.slug).exists():
+                    break
+                self.slug = '%s-%d' % (original_slug, x)
+                
         super().save(*args, **kwargs)
 
-# ---- Models for Post functionality ----
+
+# ---- Post Model ----
 
 class Post(models.Model):
     author = models.ForeignKey(
@@ -34,22 +45,24 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         related_name="posts",
     )
+    # Burada related_name="posts" qalsa yaxşıdır, kateqoriyadan postları çağırmaq üçün
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET_NULL,
+        on_delete=models.SET_NULL, # Kateqoriya silinsə, məqalə silinməsin, kategoriyasız qalsın
         null=True,
         blank=True,
-        related_name="posts",
+        related_name="posts", 
     )
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=220, unique=True)
+    slug = models.SlugField(max_length=220, unique=True, blank=True) # Blank=True qoyduq ki, admin paneldə məcburi istəməsin
     excerpt = models.TextField(blank=True)
     content = models.TextField()
-    # Sadəlik üçün şəkil faylı yox, URL saxlayırıq
-    image_url = models.URLField(blank=True)
+    
+    image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -58,19 +71,40 @@ class Post(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        # slug boşdursa başlıqdan generasiya et
+        # 1. Slug yarat (əgər yoxdursa)
         if not self.slug:
             self.slug = slugify(self.title)
+
+        # 2. Unikallığı yoxla (Eyni adlı məqalə varsa xəta verməsin, sonuna rəqəm atsın)
+        # Məsələn: "python-dersleri" varsa, "python-dersleri-1" olsun.
+        original_slug = self.slug
+        for x in itertools.count(1):
+            if not Post.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                break
+            self.slug = '%s-%d' % (original_slug, x)
+
         super().save(*args, **kwargs)
 
     @property
     def average_rating(self):
-        """
-        Bu post üçün orta rating dəyərini qaytarır.
-        Şərh yoxdursa 0 qaytarır.
-        """
+        # Comments modelin varsa bu işləyəcək
         agg = self.comments.aggregate(models.Avg("rating"))
         return agg["rating__avg"] or 0
+    
+    @property
+    def get_image(self):
+        """
+        Bu metod yoxlayır:
+        1. Fayl yüklənib? -> Faylın yolunu qaytar.
+        2. URL var? -> URL-i qaytar.
+        3. Heç biri yoxdur? -> Default şəkli qaytar.
+        """
+        if self.image:
+            return self.image.url
+        elif self.image_url:
+            return self.image_url
+        else:
+            return static('img/default-post.jpg') # Default şəklin yeri
 
 # ---- Models for Comment functionality ----
 

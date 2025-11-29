@@ -1,7 +1,7 @@
 {% load static %}
 <article class="blog-card">
-    <div class="card-img" style="background-image: url('{{ post.image_url }}')"></div>
-    <div class="card-body">
+    
+    <div class="card-img" style="background-image: url('{{ post.get_image }}')"></div> <div class="card-body">
         <span class="card-category">{{ post.category }}</span>
         <h2 class="card-title">
             <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a> {# Linki buraya da əlavə etdim #}

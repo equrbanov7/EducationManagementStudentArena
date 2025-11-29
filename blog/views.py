@@ -11,6 +11,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string 
 from django.conf import settings
 from django.utils import timezone
+from django.utils.text import slugify
+from django.core.paginator import Paginator
 from datetime import timedelta
 from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
 from .forms import (
@@ -23,36 +25,36 @@ from .forms import (
 )
 
 
+
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
 def home(request):
-    """
-    Ana səhifə – ən son postları və yan paneldə kateqoriyaları göstərir
-    """
     
-    # 1. Postları çəkirik (Sənin yazdığın optimallaşdırılmış sorğu)
-    # is_published=True əlavə etdim ki, yalnız yayımlanmışlar görsənsin
-    posts = (
+    
+    post_list = (
         Post.objects
         .filter(is_published=True) 
         .select_related("category", "author")
         .order_by("-created_at")
     )
 
-    # 2. Kateqoriyaları və içindəki post sayını hesablayırıq
-    # filter=Q(...) hissəsi yalnız is_published=True olan postları sayır
+ 
+    paginator = Paginator(post_list, 6) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     categories = (
         Category.objects
         .annotate(
             post_count=Count('posts', filter=Q(posts__is_published=True))
         )
-        .filter(post_count__gt=0)  # İçi boş (0 post olan) kateqoriyaları göstərmir
+        .filter(post_count__gt=0)
         .order_by('name')
     )
 
-    # 3. Hər ikisini kontekstə qoyuruq
+ 
     context = {
-        "posts": posts,
+        "page_obj": page_obj,  
         "categories": categories,
     }
 
@@ -62,21 +64,32 @@ def home(request):
 def about(request):
     return render(request, "blog/about.html")
 
-
 def technology(request):
-    """
-    Texnologiya kateqoriyasına aid postlar.
-    Category modelində 'technology' slug-u varsa ona görə filter edirik.
-    Yoxdursa, sadəcə hamını qaytaracaq.
-    """
-    tech_posts = (
-    Post.objects
-    .filter(category__slug__in=["proqramlasdirma", "suni-intellekt"])
-    .select_related("category", "author")
-    .order_by("-created_at")
-)
+   
+    TECH_CATEGORIES = [
+        "proqramlasdirma", 
+        "suni-intellekt", 
+        "python", 
+        "django", 
+        "texnologiya", 
+        "backend"
+    ]
     
-    return render(request, "blog/technology.html", {"posts": tech_posts})
+    
+    post_list = (
+        Post.objects
+        .filter(category__slug__in=TECH_CATEGORIES)
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+
+  
+    paginator = Paginator(post_list, 6) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+
+    return render(request, "blog/technology.html", {"page_obj": page_obj})
 
 
 def contact(request):
@@ -198,26 +211,39 @@ def subscribe_page(request):
 
 # ------------------- POST CRUD ------------------- #
 
-from django.utils.text import slugify
-from .models import Post
+
 
 @login_required
 def create_post(request):
     if request.method == "POST":
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
 
-            base_slug = slugify(post.title)
-            slug = base_slug
-            counter = 1 
+            new_cat_name = form.cleaned_data.get('new_category')
+            selected_cat = form.cleaned_data.get('category')
 
-            while Post.objects.filter(slug=slug).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
+            if new_cat_name:
+              
+                category, created = Category.objects.get_or_create(name=new_cat_name)
+                post.category = category
+                
+                if created:
+                    messages.info(request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı.")
 
-            post.slug = slug
+            elif selected_cat:
+                # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
+                post.category = selected_cat
+            
+            else:
+                # 3. Heç nə seçməyibsə (istəyə bağlı):
+                # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
+                pass
+
+            # --- SLUG MƏNTİQİ SİLİNDİ ---
+            # Sənin Post modelinin save() metodu slug-ı və unikallığı 
+            # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
 
             post.save()
             messages.success(request, "Post uğurla yaradıldı.")
@@ -226,7 +252,6 @@ def create_post(request):
         form = PostForm()
 
     return render(request, "post_form.html", {"form": form})
-
 
 
 

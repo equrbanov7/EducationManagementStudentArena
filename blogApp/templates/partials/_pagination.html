@@ -1,0 +1,51 @@
+{% if page_obj.has_other_pages %}
+<div class="pagination-wrapper">
+    <ul class="pagination">
+        
+        {# --- GERİ DÜYMƏSİ --- #}
+        {% if page_obj.has_previous %}
+            <li>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link prev-next">
+                    <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span class="page-link prev-next disabled">
+                    <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                </span>
+            </li>
+        {% endif %}
+
+        {# --- SƏHİFƏ NÖMRƏLƏRİ --- #}
+        {% for num in page_obj.paginator.page_range %}
+            
+            {# Hazırkı səhifə #}
+            {% if page_obj.number == num %}
+                <li><span class="page-link active">{{ num }}</span></li>
+            
+            {# Aktiv səhifənin ətrafındakı +/- 3 səhifəni göstər #}
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li><a href="?page={{ num }}" class="page-link">{{ num }}</a></li>
+            {% endif %}
+
+        {% endfor %}
+
+        {# --- İRƏLİ DÜYMƏSİ --- #}
+        {% if page_obj.has_next %}
+            <li>
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link prev-next">
+                    <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span class="page-link prev-next disabled">
+                    <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                </span>
+            </li>
+        {% endif %}
+
+    </ul>
+</div>
+{% endif %}

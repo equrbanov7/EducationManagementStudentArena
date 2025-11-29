@@ -29,8 +29,7 @@
 /* --- Grid Sistemi --- */
 .blog-grid {
     display: grid;
-    /* Avtomatik sütun sayı: ekran kiçildikcə sütunlar azalır */
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 30px;
 }
 
@@ -167,4 +166,16 @@
     background: #f8f9fa;
     border-radius: 10px;
     border: 2px dashed #dfe6e9;
+}
+
+@media (max-width: 992px) {
+    .blog-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .blog-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+  
 }

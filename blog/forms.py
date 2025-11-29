@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption
+from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category
 
 
 class SubscriptionForm(forms.Form):
@@ -66,9 +66,19 @@ class RegisterForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    # Modeldə olmayan, amma yeni kateqoriya yaratmaq üçün lazım olan sahə
+    new_category = forms.CharField(
+        label="Yeni Kateqoriya",
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Siyahıda yoxdursa, yenisini bura yazın..."
+        })
+    )
+
     class Meta:
         model = Post
-        fields = ["title", "category", "excerpt", "content", "image_url"]
+        fields = ["title", "category", "excerpt", "content", "image_url","image"] # new_category bura daxil edilmir!
         widgets = {
             "title": forms.TextInput(attrs={
                 "class": "form-control",
@@ -91,7 +101,19 @@ class PostForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "Şəklin URL-i (məs: https://...)",
             }),
+            "image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Kateqoriya seçimini məcburi etmirik (istifadəçi yenisini yaza bilsin deyə)
+        self.fields['category'].required = False
+        self.fields['category'].empty_label = "--- Kateqoriya Seçin ---"
+        #Image və image_url sahələrindən yalnız biri doldurulmalıdır
+        self.fields['image'].required = False
+        self.fields['image_url'].required = False
 
 
 class CommentForm(forms.ModelForm):

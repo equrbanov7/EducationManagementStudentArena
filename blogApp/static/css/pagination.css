@@ -1,0 +1,84 @@
+/* static/css/pagination.css */
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Düymələrin ümumi görünüşü */
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px; /* Kvadrat formalı */
+    height: 40px;
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4b5563; /* Tünd boz */
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* Hover effekti */
+.page-link:hover:not(.active):not(.disabled) {
+    background-color: #eff6ff; /* Açıq mavi */
+    color: #2563eb; /* Əsas mavi */
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Aktiv (Seçili) Səhifə */
+.page-link.active {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    pointer-events: none; /* Aktiv səhifəyə təkrar kliklənməsin */
+}
+
+/* Geri/İrəli düymələri üçün xüsusi */
+.prev-next {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    gap: 8px; /* İkonla yazı arası məsafə */
+    padding: 0 18px; /* Daha geniş olsun */
+}
+
+/* Deaktiv düymə (Məs: 1-ci səhifədə 'Geri' işləməsin) */
+.page-link.disabled {
+    background-color: #f9fafb;
+    color: #d1d5db;
+    border-color: #f3f4f6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Mobil uyğunluq */
+@media (max-width: 600px) {
+    .page-link {
+        min-width: 35px;
+        height: 35px;
+        font-size: 14px;
+        padding: 0 8px;
+    }
+    .prev-next span {
+        display: none; /* Mobildə "Geri/İrəli" yazısını gizlət, ancaq ikon qalsın */
+    }
+}

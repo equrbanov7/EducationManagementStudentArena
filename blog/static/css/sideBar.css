@@ -2,12 +2,19 @@
 
 
   /* --- Yan Panel (Sidebar) --- */
+
   .sidebar .widget {
     background: var(--card-bg);
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .sidebar .widget .category-list {
+    height: 250px;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
   }
 
   .widget h3 {

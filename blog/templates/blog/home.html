@@ -1,58 +1,49 @@
 {% extends "base.html" %}
 {% load static %}
 
- {% block title %}Minimal Blog | Ana Səhifə{% endblock%} 
- {% block extraCss %}
+{% block title %}Minimal Blog | Ana Səhifə{% endblock%} 
+{% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    {% comment %} <link rel="stylesheet" href="{% static 'css/search.css' %}"> {% endcomment %}
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/sideBar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %} 
 
 {% block content %}
 
-{# KLAS DƏYİŞİKLİYİ: hero -> home-hero-section #}
 <section class="home-hero-section">
-  <div class="site-main-container"> {# Əlavə edilib: Ümumi konteyner #}
+  <div class="site-main-container">
     <h1>Düşüncələr və Hekayələr</h1>
     <p>Texnologiya, proqramlaşdırma və həyat tərzi haqqında ən son yazılar.</p>
   </div>
 </section>
 
-
-
-
-
-<main class="site-main-container"> {# Əlavə edilib: Ümumi konteyner #}
-  {# KLAS DƏYİŞİKLİYİ: search-container -> home-search-wrapper #}
+<main class="site-main-container">
   <div class="home-search-wrapper">
-    {# KLAS DƏYİŞİKLİYİ: id="searchInput" class-a əlavə edilib #}
     <input type="text" id="searchInput" class="home-search-input" placeholder="Məqalə axtar..." />
   </div>
 
-  {# KLAS DƏYİŞİKLİYİ: content-wrapper -> home-content-layout #}
   <div class="home-content-layout">
     
-    {# KLAS DƏYİŞİKLİYİ: blog-grid -> home-blog-grid #}
-    <section id="blogContainer" class="home-blog-grid">
-      {% for post in posts %}
-       {% include "partials/_blogCard.html" with post=post %} 
-      {% empty %}
-      {# KLAS DƏYİŞİKLİYİ: "Heç bir yazı yoxdur" mesajı üçün stil əlavə edilib #}
-      <p class="home-no-posts-message">Hələ heç bir yazı yoxdur.</p>
-      {% endfor %}
-    </section>
+    <div class="home-left-column">
+        <section id="blogContainer" class="home-blog-grid">
+          {% for post in page_obj %}
+           {% include "partials/_blogCard.html" with post=post %} 
+          {% empty %}
+          <p class="home-no-posts-message">Hələ heç bir yazı yoxdur.</p>
+          {% endfor %}
+        </section>
+
+        {% include "partials/_pagination.html" %}
+    </div>
 
     {% include "partials/_sideBar.html" with categories=categories %}
  
   </div>
 </main>
 
-
 {% block extraJs %}
     <script src="{% static 'js/search.js' %}"></script>
 {% endblock %}
-
-
 
 {% endblock %}

@@ -147,3 +147,10 @@ EMAIL_USE_SSL = True      # Bunu yandırırıq (SSL daha etibarlıdır)
 EMAIL_HOST_USER = 'equrbanov724@gmail.com'  
 EMAIL_HOST_PASSWORD = 'Qku-Redacted-Secret-6' 
 DEFAULT_FROM_EMAIL = 'equrbanov724@gmail.com' 
+
+
+
+# Media files (Uploaded by users)
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
