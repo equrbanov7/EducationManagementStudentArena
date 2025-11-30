@@ -144,6 +144,94 @@
     border-top: 1px solid #eee;
 }
 
+/* --- Modal Overlay və Content --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6); /* qaranlıq overlay */
+    display: none;              /* default: GİZLİ */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;              /* showModal çağıranda görünür */
+}
+
+.modal-content {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px 24px 20px;
+    max-width: 520px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.modal-large {
+    max-width: 700px;
+}
+
+/* Modal düymələri */
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-cancel-btn,
+.modal-confirm-btn,
+.warning-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modal-cancel-btn {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.modal-cancel-btn:hover {
+    background-color: #d1d5db;
+}
+
+.modal-confirm-btn {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+.modal-confirm-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.warning-btn {
+    background-color: #f97316;
+    color: #fff;
+}
+
+.warning-btn:hover {
+    background-color: #ea580c;
+}
+
+/* Mövcud .delete-btn stilin varsa saxla, yoxdursa: */
+.delete-btn {
+    background-color: #dc2626;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #b91c1c;
+}
+
+
 /* --- Responsive Dizayn --- */
 @media (max-width: 768px) {
     .profile-section-header h1 {

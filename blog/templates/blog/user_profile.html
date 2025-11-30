@@ -9,7 +9,6 @@
 
 {% block content %}
 <div class="profile-page-wrapper">
-
     <header class="profile-section-header">
         <h1><span>{{ profile_user.username }}</span> Profili</h1>
         <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
@@ -28,26 +27,6 @@
                  </a>
             {% endif %}
         {% endif %}
-
-
-        {% comment %} {% if request.user.is_authenticated and request.user == profile_user %}
-            {# Post yarat düyməsi #}
-            <a href="{% url 'create_post' %}" class="profile-create-post-btn">
-                <i class="fas fa-plus-circle"></i> Yeni post yarat
-            </a>
-
-            {# ƏGƏR teacher-dirsə, sual düymələri də görünsün #}
-            {% if request.user.is_teacher %}
-                <a href="{% url 'create_question' %}" class="profile-create-post-btn">
-                    <i class="fas fa-question-circle"></i> Yeni sual yarat
-                </a>
-                <a href="{% url 'my_questions' %}" class="profile-create-post-btn">
-                    <i class="fas fa-list"></i> Mənim suallarım
-                </a>
-            {% endif %}
-        {% endif %} {% endcomment %}
-
-
     </header>
 
     <section class="profile-posts-section">
@@ -61,6 +40,24 @@
                     </h3>
                     <p>{{ post.excerpt|default:post.content|truncatewords:25 }}</p>
                     <small>📅 {{ post.created_at|date:"d M Y" }}</small>
+
+                    {% if request.user == profile_user %}
+                        <div class="post-actions">
+                            <button class="action-btn edit-btn js-edit-post"
+                                    data-post-id="{{ post.pk }}"
+                                    data-title="{{ post.title|escapejs }}"
+                                    data-content="{{ post.content|escapejs }}"
+                                    data-category="{{ post.category.id|default_if_none:'' }}"
+                                    data-excerpt="{{ post.excerpt|default_if_none:''|escapejs }}">
+                                <i class="fas fa-edit"></i> Redaktə
+                            </button>
+                            <button class="action-btn delete-btn js-open-delete"
+                                    data-post-id="{{ post.pk }}"
+                                    data-title="{{ post.title|escapejs }}">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    {% endif %}
                 </article>
             {% endfor %}
         {% else %}
@@ -68,5 +65,73 @@
         {% endif %}
     </section>
 
+    {# Edit Modal #}
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Postu Redaktə Et</h3>
+                <button class="modal-close-btn" id="closeEditModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="editTitle">Başlıq</label>
+                    <input type="text" id="editTitle" name="title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Kateqoriya</label>
+                    <select id="editCategory" name="category" class="form-control" required>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editExcerpt">Qısa məzmun</label>
+                    <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editContent">Məzmun</label>
+                    <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" id="cancelEdit" class="modal-cancel-btn">Ləğv Et</button>
+                    <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>Yadda Saxla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Delete Confirmation Modal #}
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Silinməni Təsdiqlə</h3>
+            <p>Əminsiniz ki, <span id="deleteTitle" class="fw-bold"></span> başlıqlı postu silmək istəyirsiniz?</p>
+            <div class="modal-buttons">
+                <button id="cancelDelete" class="modal-cancel-btn">Ləğv Et</button>
+                {# Burda .delete-btn yalnız dizayn üçündür, JS selektoru artıq .js-open-delete-dir #}
+                <button id="confirmDelete" class="modal-confirm-btn delete-btn">Sil</button>
+            </div>
+        </div>
+    </div>
+
+    {# Unsaved Changes Warning Modal #}
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Yadda Saxlanılmamış Dəyişikliklər</h3>
+            <p>Postda etdiyiniz dəyişikliklər yadda saxlanılmayıb. Saxlamadan çıxmaq istəyirsiniz?</p>
+            <div class="modal-buttons">
+                <button id="stayOnModal" class="modal-cancel-btn">Qal</button>
+                <button id="discardChanges" class="modal-confirm-btn warning-btn">Saxlamadan Çıx</button>
+            </div>
+        </div>
+    </div>
+
 </div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'js/user_profile.js' %}"></script>
 {% endblock %}

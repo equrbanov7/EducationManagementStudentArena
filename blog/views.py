@@ -264,45 +264,50 @@ def create_post(request):
 
 
 
+# blog/views.py faylına əlavə et (əgər yoxdursa)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.decorators import login_required
+from .models import Post
+from .forms import PostForm # PostFormu import etdiyinə əmin ol
+
+
+# 1. POSTU REDAKTƏ ET (AJAX Endpoint)
 @login_required
 def edit_post(request, post_id):
-    """
-    Postu redaktə etmək.
-    Yalnız həmin postun müəllifi redaktə edə bilər.
-    """
     post = get_object_or_404(Post, pk=post_id, author=request.user)
-
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
+    
+    if request.method == 'POST':
+        # AJAX ilə məlumat gəldikdə
+        form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
-            messages.success(request, "Post yeniləndi.")
-            return redirect("post_detail", post_id=post.id)
+            return JsonResponse({'success': True}) # Uğurlu olduğunu JS-ə bildir
+        else:
+            # Əgər validasiya səhvi varsa, formun HTML-ni qaytar
+            return HttpResponse(form.as_p(), status=400) # JS bu səhvləri modalda göstərəcək
+
+    # GET: Redaktə modalı açılan kimi formanı yükləmək üçün
     else:
         form = PostForm(instance=post)
-
-    context = {
-        "form": form,
-        "post": post,
-        "is_edit": True,
-    }
-    return render(request, "blog/post_form.html", context)
+        # Formun HTML-ni birbaşa göndəririk ki, JS onu modala qoysun
+        return render(request, 'partials/_form_snippet.html', {'form': form, 'post': post})
 
 
+# 2. POSTU SİLMƏ (Təsdiqdən sonra)
 @login_required
 def delete_post(request, post_id):
-    """
-    Postu silmək – sadə variant.
-    Confirmation üçün ayrıca template istifadə edə bilərik.
-    """
     post = get_object_or_404(Post, pk=post_id, author=request.user)
 
-    if request.method == "POST":
+    if request.method == 'POST':
+        # Yalnız POST gələndə silməni icra et (silmə düyməsi POST göndərməlidir)
         post.delete()
-        messages.success(request, "Post silindi.")
-        return redirect("home")
-
-    return render(request, "blog/post_confirm_delete.html", {"post": post})
+        # Və ya sadəcə redirect edirik (çünki JS modalı bağlayıb səhifəni yeniləyir)
+        return redirect('user_profile', username=request.user.username)
+    
+    # Əgər GET gələrsə, xəta veririk və ya sadəcə silməni icra etmədən geri göndəririk
+    return redirect('user_profile', username=request.user.username)
 
 
 def list_posts(request):
