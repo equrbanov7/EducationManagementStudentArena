@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -28,81 +29,140 @@
             {% endif %}
         {% endif %}
     </header>
-
     <section class="profile-posts-section">
         {% if posts %}
             {% for post in posts %}
                 <article class="profile-post-card">
-                    <h3>
-                        <a href="{% url 'post_detail' post.slug %}">
-                            {{ post.title }}
-                        </a>
-                    </h3>
-                    <p>{{ post.excerpt|default:post.content|truncatewords:25 }}</p>
-                    <small>📅 {{ post.created_at|date:"d M Y" }}</small>
-
+                    
                     {% if request.user == profile_user %}
-                        <div class="post-actions">
-                            <button class="action-btn edit-btn js-edit-post"
-                                    data-post-id="{{ post.pk }}"
-                                    data-title="{{ post.title|escapejs }}"
-                                    data-content="{{ post.content|escapejs }}"
-                                    data-category="{{ post.category.id|default_if_none:'' }}"
-                                    data-excerpt="{{ post.excerpt|default_if_none:''|escapejs }}">
-                                <i class="fas fa-edit"></i> Redaktə
-                            </button>
-                            <button class="action-btn delete-btn js-open-delete"
-                                    data-post-id="{{ post.pk }}"
-                                    data-title="{{ post.title|escapejs }}">
-                                <i class="fas fa-trash"></i> Sil
-                            </button>
+                        <div class="post-controls">
+                            {# Status Etiketi #}
+                            <span class="post-status-badge 
+                                {% if post.is_published %}status-published{% else %}status-draft{% endif %}">
+                                {% if post.is_published %}
+                                    <i class="fas fa-check-circle"></i> Nəşr olunub
+                                {% else %}
+                                    <i class="fas fa-pencil-alt"></i> Qaralama
+                                {% endif %}
+                            </span>
+
+                            {# Redaktə və Sil İkonları - Artıq yeni bir konteyner içərisində #}
+                            <div class="action-icons">
+                                <button class="icon-action-btn edit-btn js-edit-post"
+                                        data-post-id="{{ post.pk }}"
+                                        data-title="{{ post.title|escape }}"
+                                        data-content="{{ post.content|escape }}"
+                                        data-category="{{ post.category.id|default_if_none:'' }}"
+                                        data-excerpt="{{ post.excerpt|default_if_none:''|escape }}"
+                                        data-image-url="{{ post.image_url|default_if_none:''|escape }}"
+                                        data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
+                                        data-is-published="{{ post.is_published|yesno:'true,false' }}"
+                                        data-slug="{{ post.slug|escape }}"
+                                        data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
+                                        data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
+                                        title="Redaktə et">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            
+                                <button class="icon-action-btn delete-btn js-open-delete"
+                                        data-post-id="{{ post.pk }}"
+                                        data-title="{{ post.title|escape }}"
+                                        title="Sil">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     {% endif %}
+                    
+                    {% include "partials/_blogCard.html" with post=post %} 
                 </article>
             {% endfor %}
         {% else %}
             <p class="profile-no-posts-message">Bu istifadəçinin hələ heç bir postu yoxdur.</p>
         {% endif %}
     </section>
+    
 
-    {# Edit Modal #}
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>Postu Redaktə Et</h3>
-                <button class="modal-close-btn" id="closeEditModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="editForm">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="editTitle">Başlıq</label>
-                    <input type="text" id="editTitle" name="title" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label for="editCategory">Kateqoriya</label>
-                    <select id="editCategory" name="category" class="form-control" required>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editExcerpt">Qısa məzmun</label>
-                    <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="editContent">Məzmun</label>
-                    <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" id="cancelEdit" class="modal-cancel-btn">Ləğv Et</button>
-                    <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>Yadda Saxla</button>
-                </div>
-            </form>
+  
+   {# Edit Modal #}
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Postu Redaktə Et</h3>
+            <button class="modal-close-btn" id="closeEditModal">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+
+        {# Meta məlumat bloku #}
+        <div class="form-meta">
+            <p><strong>Slug:</strong> <span id="editSlugInfo"></span></p>
+            <p><strong>Yaradılma:</strong> <span id="editCreatedAtInfo"></span></p>
+            <p><strong>Son yenilənmə:</strong> <span id="editUpdatedAtInfo"></span></p>
+        </div>
+
+        <form id="editForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="editTitle">Başlıq</label>
+                <input type="text" id="editTitle" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editCategory">Kateqoriya</label>
+                <select id="editCategory" name="category" class="form-control" required>
+                    <option value="" disabled>Kateqoriya seçin</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                
+            </div>
+
+            <div class="form-group">
+                <label for="editExcerpt">Qısa məzmun</label>
+                <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editContent">Məzmun</label>
+                <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
+            </div>
+
+            {# Şəkil preview + yeni şəkil + URL #}
+            <div class="form-group">
+                <label>Mövcud şəkil</label>
+                <div id="editImagePreviewWrapper" class="image-preview-wrapper">
+                    <img id="editImagePreview" src="" alt="Post şəkli" class="image-preview" style="display:none;">
+                    <p id="noImageText" class="no-image-text">Şəkil təyin edilməyib</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="editImage">Yeni şəkil yüklə (optional)</label>
+                <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label for="editImageUrl">Şəkil URL (əgər fayl yoxdursa)</label>
+                <input type="url" id="editImageUrl" name="image_url" class="form-control">
+            </div>
+
+            <div class="form-group form-check">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="editIsPublished" name="is_published">
+                    Məqalə dərc olunsun
+                </label>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" id="cancelEdit" class="modal-cancel-btn">Ləğv Et</button>
+                <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>Yadda Saxla</button>
+            </div>
+        </form>
     </div>
+</div>
+
 
     {# Delete Confirmation Modal #}
     <div id="deleteModal" class="modal-overlay">

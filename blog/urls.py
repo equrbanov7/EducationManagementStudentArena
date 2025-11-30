@@ -25,12 +25,7 @@ urlpatterns = [
     # --- Postlarla bağlı URL-lər ---
     path("posts/create/", views.create_post, name="create_post"),
     path("posts/<slug:slug>/", views.post_detail, name="post_detail"),
-    path("posts/<int:post_id>/edit/", views.edit_post, name="edit_post"),
-    # 1. EDIT üçün endpoint (AJAX-la formanı gətirmək və POST qəbul etmək üçün)
-    path("posts/<int:post_id>/edit/", views.edit_post, name="edit_post"), 
-
-    # 2. DELETE üçün endpoint (Silinməni təsdiqləmək üçün)
-    path("posts/<int:post_id>/delete/", views.delete_post, name="delete_post"),
+    path("post/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
 
     # ---- Category URL-ləri ----
     path("category/<slug:slug>/", views.category_detail, name="category_detail"),

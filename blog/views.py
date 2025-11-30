@@ -1,6 +1,6 @@
 # blog/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse 
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
@@ -111,7 +111,12 @@ def post_detail(request, slug):
     Bir postun detal səhifəsi + şərhlər və rating forması.
     Rating yalnız ilk şərhdə nəzərə alınır.
     """
-    post = get_object_or_404(Post, slug=slug, is_published=True)
+    # 1) Postu statusdan asılı olmayaraq tap
+    post = get_object_or_404(Post, slug=slug)
+
+    # 2) Əgər post nəşr olunmayıbsa və bu user author DEYİLSƏ -> 404
+    if not post.is_published and request.user != post.author:
+        raise Http404("No Post matches the given query.")
 
     comments = (
         post.comments
@@ -119,7 +124,6 @@ def post_detail(request, slug):
         .order_by("-created_at")
     )
 
-    
     user_first_comment = None
     if request.user.is_authenticated:
         user_first_comment = Comment.objects.filter(
@@ -136,19 +140,19 @@ def post_detail(request, slug):
 
         if form.is_valid():
             if user_first_comment is None:
-                # ✅ İlk dəfə şərh yazır → həm text, həm rating götürürük
+                # İlk dəfə şərh yazır → həm text, həm rating götürürük
                 comment = form.save(commit=False)
                 comment.post = post
                 comment.user = request.user
                 comment.save()
                 messages.success(request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐")
             else:
-                # ✅ Artıq bu posta şərhi var → YENİ şərh yazsın, amma rating DƏYİŞMƏSİN
+                # Artıq bu posta şərhi var → yeni şərh, eyni rating
                 comment = Comment(
                     post=post,
                     user=request.user,
                     text=form.cleaned_data["text"],
-                    rating=user_first_comment.rating  # rating-i köhnədən götürürük
+                    rating=user_first_comment.rating,
                 )
                 comment.save()
                 messages.success(request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂")
@@ -161,7 +165,7 @@ def post_detail(request, slug):
         "post": post,
         "comments": comments,
         "comment_form": form,
-        "user_first_comment": user_first_comment,  # template-də istifadə edərsən
+        "user_first_comment": user_first_comment,
     }
     return render(request, "blog/postDetail.html", context)
 
@@ -266,33 +270,61 @@ def create_post(request):
 
 # blog/views.py faylına əlavə et (əgər yoxdursa)
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
-from django.contrib.auth.decorators import login_required
-from .models import Post
-from .forms import PostForm # PostFormu import etdiyinə əmin ol
+
 
 
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
-@login_required
-def edit_post(request, post_id):
-    post = get_object_or_404(Post, pk=post_id, author=request.user)
-    
-    if request.method == 'POST':
-        # AJAX ilə məlumat gəldikdə
-        form = PostForm(request.POST, request.FILES, instance=post)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True}) # Uğurlu olduğunu JS-ə bildir
-        else:
-            # Əgər validasiya səhvi varsa, formun HTML-ni qaytar
-            return HttpResponse(form.as_p(), status=400) # JS bu səhvləri modalda göstərəcək
+from django.views.decorators.http import require_POST
 
-    # GET: Redaktə modalı açılan kimi formanı yükləmək üçün
+@login_required
+@require_POST
+def post_edit_ajax(request, pk):
+    # Yalnız öz postunu düzəldə bilsin
+    post = get_object_or_404(Post, pk=pk, author=request.user)
+
+    title = request.POST.get("title", "").strip()
+    content = request.POST.get("content", "").strip()
+    excerpt = request.POST.get("excerpt", "").strip()
+    category_id = request.POST.get("category")  # select name="category"
+    image_url = request.POST.get("image_url", "").strip()
+    is_published = bool(request.POST.get("is_published"))  # "on" gəlir
+
+    # Sadə validasiya (istəsən form ilə də edə bilərsən)
+    if not title or not content:
+        return JsonResponse(
+            {"success": False, "message": "Başlıq və məzmun tələb olunur."},
+            status=400,
+        )
+
+    # Məlumatları post-a yaz
+    post.title = title
+    post.content = content
+    post.excerpt = excerpt
+
+    # Kateqoriya
+    if category_id:
+        try:
+            post.category = Category.objects.get(pk=category_id)
+        except Category.DoesNotExist:
+            post.category = None
     else:
-        form = PostForm(instance=post)
-        # Formun HTML-ni birbaşa göndəririk ki, JS onu modala qoysun
-        return render(request, 'partials/_form_snippet.html', {'form': form, 'post': post})
+        post.category = None
+
+    # Şəkil faylı
+    image_file = request.FILES.get("image")
+    if image_file:
+        post.image = image_file
+
+    # Şəkil URL
+    post.image_url = image_url or None
+
+    # Dərc statusu
+    post.is_published = is_published
+
+    # Save
+    post.save()
+
+    return JsonResponse({"success": True})
 
 
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
@@ -372,16 +404,29 @@ def user_profile(request, username):
     Məsələn: /blog/users/elvin/
     """
     profile_user = get_object_or_404(User, username=username)
-    user_posts = (
-        Post.objects
-        .filter(author=profile_user)
-        .select_related("category")
-        .order_by("-created_at")
-    )
+    if request.user == profile_user:
+        # Öz profilinə baxanda – bütün postlar (qaralama da)
+        user_posts = (
+            Post.objects
+            .filter(author=profile_user)
+            .select_related("category")
+            .order_by("-created_at")
+        )
+    else:
+        # Başqasının profilinə baxanda – yalnız dərc olunmuşlar
+        user_posts = (
+            Post.objects
+            .filter(author=profile_user, is_published=True)
+            .select_related("category")
+            .order_by("-created_at")
+        )
+    
+    categories = Category.objects.all().order_by('name') 
 
     context = {
         "profile_user": profile_user,
         "posts": user_posts,
+        "categories": categories,
     }
     return render(request, "blog/user_profile.html", context)
 

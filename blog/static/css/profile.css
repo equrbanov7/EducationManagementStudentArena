@@ -2,7 +2,7 @@
 
 /* --- Ümumi Səhifə Konteyneri --- */
 .profile-page-wrapper {
-    max-width: 900px; /* Səhifənin əsas eni */
+    max-width: 900px;
     margin: 40px auto;
     padding: 0 20px;
     font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
@@ -13,18 +13,18 @@
     text-align: center;
     margin-bottom: 50px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .profile-section-header h1 {
     font-size: 2.8rem;
-    color: var(--primary-color, #2563eb); /* Əsas rəng */
+    color: var(--primary-color, #2563eb);
     margin-bottom: 10px;
     font-weight: 800;
 }
 
 .profile-section-header h1 span {
-    color: var(--text-dark, #1f2937); /* İstifadəçi adının rəngi */
+    color: var(--text-dark, #1f2937);
 }
 
 .profile-section-header .profile-subheading {
@@ -44,6 +44,7 @@
     font-size: 1rem;
     font-weight: 600;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 5px;
 }
 
 .profile-create-post-btn:hover {
@@ -51,37 +52,9 @@
     transform: translateY(-2px);
 }
 
-/* --- Profil Məlumat Kartı (optional, əlavə info varsa) --- */
-/* Hazırda bu səhifədə user info yoxdur, amma gələcəkdə əlavə etsəniz: */
-/*
-.profile-info-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    padding: 30px;
-    margin-bottom: 40px;
-    text-align: left;
-}
-.profile-info-card p {
-    margin-bottom: 10px;
-    font-size: 1.05rem;
-    color: var(--text-dark, #1f2937);
-}
-.profile-info-card p strong {
-    color: var(--primary-color, #2563eb);
-}
-*/
-
 /* --- İstifadəçi Postları Bölməsi --- */
 .profile-posts-section {
     margin-top: 50px;
-}
-
-.profile-posts-section h2 {
-    font-size: 2rem;
-    color: var(--text-dark, #1f2937);
-    margin-bottom: 30px;
-    text-align: center;
 }
 
 .profile-no-posts-message {
@@ -94,90 +67,272 @@
     border: 1px dashed #e0e0e0;
 }
 
-
-/* --- Post Kartları --- */
+/* --- Post Kartı (profile-post-card) --- */
 .profile-post-card {
+    position: relative;
+    padding-top: 50px; /* Kontrollara yer açmaq üçün */
+}
+
+/* --- Kontrol Bloku: Status və Redaktə/Sil --- */
+.post-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-end;
+    gap: 8px;
+    z-index: 10;
+}
+
+/* Nəşr Statusu Etiketi (Kapsul Dizaynı) */
+.post-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.status-published {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #6ee7b7;
+}
+
+.status-draft {
+    background-color: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fcd34d;
+}
+
+/* Redaktə/Sil İkonları Konteyneri */
+.action-icons {
+    display: flex;
+    gap: 5px;
+}
+
+/* Redaktə/Sil İkon Düymələri */
+.icon-action-btn {
     background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    padding: 25px;
-    margin-bottom: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #f0f0f0;
-    text-align: left;
-}
-
-.profile-post-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.profile-post-card h3 { /* Postun adı h2 yerinə h3 olacaq */
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    line-height: 1.4;
-}
-
-.profile-post-card h3 a {
-    text-decoration: none;
-    color: var(--text-dark, #1f2937);
-    transition: color 0.2s;
-}
-
-.profile-post-card h3 a:hover {
-    color: var(--primary-color, #2563eb);
-}
-
-.profile-post-card p {
-    color: var(--text-light, #6b7280);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-.profile-post-card small {
-    color: #9ca3af;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     font-size: 0.9rem;
-    display: block; /* Vaxtı yeni sətirdən başla */
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* --- Modal Overlay və Content --- */
+.icon-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.edit-btn:hover {
+    color: #2563eb;
+    border-color: #2563eb;
+}
+
+.delete-btn:hover {
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+
+/* --- MODAL DİZAYNININ YAXŞILAŞDIRILMASI --- */
+
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.6); /* qaranlıq overlay */
-    display: none;              /* default: GİZLİ */
+    background-color: rgba(15, 23, 42, 0.7); /* Bir az daha tünd overlay */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
 
 .modal-overlay.active {
-    display: flex;              /* showModal çağıranda görünür */
+    display: flex;
 }
 
 .modal-content {
     background: #ffffff;
     border-radius: 12px;
-    padding: 24px 24px 20px;
+    padding: 30px; /* Daha böyük padding */
     max-width: 520px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease-out;
+}
+/* Modalın açılma animasiyası */
+.modal-overlay.active .modal-content {
+    transform: scale(1);
 }
 
 .modal-large {
-    max-width: 700px;
+    max-width: 800px; /* Redaktə modalı üçün daha geniş */
 }
 
-/* Modal düymələri */
+/* Modal Başlığı */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    font-weight: 700;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #4b5563;
+}
+
+/* Form Qrupları və Kontrolları */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #4b5563;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box; /* Padding eni artırmır */
+    background-color: #ffffff;
+}
+
+.form-control:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+/* Meta Məlumat Bloku */
+.form-meta {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    border-left: 4px solid #2563eb;
+    background-color: #eff6ff; /* Açıq mavi fon */
+    border-radius: 4px;
+}
+
+.form-meta p {
+    margin: 0 0 6px;
+}
+
+/* Şəkil Preview */
+.image-preview-wrapper {
+    border: 2px dashed #d1d5db;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 6px;
+    display: block;
+    margin: 0 auto;
+    object-fit: cover;
+}
+
+.no-image-text {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 0.95rem;
+    padding: 10px 0;
+}
+
+/* Checkbox */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #9ca3af;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+    content: '\f00c'; /* Font Awesome check icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: white;
+    font-size: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+/* Modal Düymələri */
 .modal-buttons {
-    margin-top: 20px;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #f3f4f6;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -186,30 +341,37 @@
 .modal-cancel-btn,
 .modal-confirm-btn,
 .warning-btn {
-    padding: 8px 18px;
-    border-radius: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.1s;
 }
 
 .modal-cancel-btn {
-    background-color: #e5e7eb;
-    color: #374151;
+    background-color: #f3f4f6;
+    color: #4b5563;
 }
 
 .modal-cancel-btn:hover {
-    background-color: #d1d5db;
+    background-color: #e5e7eb;
 }
 
-.modal-confirm-btn {
+.modal-confirm-btn:not(:disabled) {
     background-color: #2563eb;
     color: #fff;
 }
 
-.modal-confirm-btn:hover {
+.modal-confirm-btn:not(:disabled):hover {
     background-color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.modal-confirm-btn:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
 }
 
 .warning-btn {
@@ -221,7 +383,7 @@
     background-color: #ea580c;
 }
 
-/* Mövcud .delete-btn stilin varsa saxla, yoxdursa: */
+/* Delete Modal üçün */
 .delete-btn {
     background-color: #dc2626;
     color: white;
@@ -231,7 +393,6 @@
     background-color: #b91c1c;
 }
 
-
 /* --- Responsive Dizayn --- */
 @media (max-width: 768px) {
     .profile-section-header h1 {
@@ -240,10 +401,21 @@
     .profile-section-header .profile-subheading {
         font-size: 1rem;
     }
-    .profile-post-card {
-        padding: 20px;
+    .post-controls {
+        top: 10px;
+        right: 10px;
     }
-    .profile-post-card h3 {
-        font-size: 1.3rem;
+    .modal-content {
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .modal-large {
+        max-width: 95%;
+    }
+    .modal-buttons {
+        flex-direction: column-reverse; /* Mobil görünüşdə daha yaxşıdır */
+    }
+    .modal-buttons button {
+        width: 100%;
     }
 }
