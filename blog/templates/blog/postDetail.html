@@ -23,7 +23,7 @@
             <div class="article-meta">
                 <span><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}</span>
                 {% if post.author %}
-                    <span>• <a href="{% url 'user_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
+                    <span><a href="{% url 'user_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
                 {% endif %}
                 {% if post.average_rating %}
                     <span>• <i class="fas fa-star"></i> {{ post.average_rating|floatformat:1 }} / 5</span>

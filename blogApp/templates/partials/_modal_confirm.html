@@ -1,0 +1,13 @@
+<div id="{{ modal_id }}" class="modal-overlay">
+    <div class="modal-content">
+        <h3>{{ modal_title }}</h3>
+        {# Body mətnini |safe ilə gətiririk ki, JS-dən gələn span teqləri işləsin #}
+        <p>{{ modal_body_text|safe }}</p> 
+        <div class="modal-buttons">
+            <button id="{{ cancel_btn_id }}" class="modal-cancel-btn">Ləğv Et</button>
+            <a id="{{ confirm_btn_id }}" href="{{ action_link }}" class="modal-confirm-btn {{ confirm_btn_class }}">
+                {{ confirm_text }}
+            </a>
+        </div>
+    </div>
+</div>
