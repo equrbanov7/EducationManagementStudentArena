@@ -20,8 +20,17 @@
 
 <main class="site-main-container">
   <div class="home-search-wrapper">
-    <input type="text" id="searchInput" class="home-search-input" placeholder="Məqalə axtar..." />
-  </div>
+    <form method="get" action="{% url 'home' %}" class="search-form">
+        <input 
+            type="text" 
+            name="q" 
+            value="{{ query|default:'' }}" 
+            id="searchInput" 
+            class="home-search-input" 
+            placeholder="Məqalə axtar..." 
+        />
+        </form>
+</div>
 
   <div class="home-content-layout">
     
@@ -34,13 +43,63 @@
           {% endfor %}
         </section>
 
-        {% include "partials/_pagination.html" %}
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-wrapper">
+            <ul class="pagination">
+                
+                {# --- GERİ --- #}
+                {% if page_obj.has_previous %}
+                    <li>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
+                            <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                        </a>
+                    </li>
+                {% else %}
+                     <li><span class="page-link disabled prev-next"><i class="fas fa-chevron-left"></i> <span>Geri</span></span></li>
+                {% endif %}
+        
+                {# --- RƏQƏMLƏR --- #}
+                {% for num in page_obj.paginator.page_range %}
+                    
+                    {% if page_obj.number == num %}
+                        <li><span class="page-link active">{{ num }}</span></li>
+                    
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li>
+                            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="page-link">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+        
+                {% endfor %}
+        
+                {# --- İRƏLİ --- #}
+                {% if page_obj.has_next %}
+                    <li>
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
+                            <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li><span class="page-link disabled prev-next"><span>İrəli</span> <i class="fas fa-chevron-right"></i></span></li>
+                {% endif %}
+        
+            </ul>
+        </div>
+        {% endif %}
+
+
     </div>
 
+   
     {% include "partials/_sideBar.html" with categories=categories %}
  
   </div>
 </main>
+
+
+
 
 {% block extraJs %}
     <script src="{% static 'js/search.js' %}"></script>

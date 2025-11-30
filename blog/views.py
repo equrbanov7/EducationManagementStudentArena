@@ -30,7 +30,7 @@ from .forms import (
 
 def home(request):
     
-    
+    query = request.GET.get("q", "").strip()
     post_list = (
         Post.objects
         .filter(is_published=True) 
@@ -38,6 +38,13 @@ def home(request):
         .order_by("-created_at")
     )
 
+    if query:
+        post_list = post_list.filter(
+            Q(title__icontains=query) |
+            Q(excerpt__icontains=query) |
+            Q(content__icontains=query)
+        ).distinct()
+        
  
     paginator = Paginator(post_list, 6) 
     page_number = request.GET.get('page')
@@ -56,6 +63,7 @@ def home(request):
     context = {
         "page_obj": page_obj,  
         "categories": categories,
+        "search_query": query,
     }
 
     return render(request, "blog/home.html", context)
