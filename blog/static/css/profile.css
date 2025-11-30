@@ -2,7 +2,7 @@
 
 /* --- Ümumi Səhifə Konteyneri --- */
 .profile-page-wrapper {
-    max-width: 900px;
+    max-width: 960px; /* Max eni bir qədər artırdım ki, 3 sütun daha yaxşı görünsün */
     margin: 40px auto;
     padding: 0 20px;
     font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
@@ -67,10 +67,18 @@
     border: 1px dashed #e0e0e0;
 }
 
+/* Blog kartlarını grid sistemində düzmək üçün yeni konteyner */
+.blog-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Əsasən 3 sütun */
+    gap: 30px; /* Kartlar arasında boşluq */
+    margin-top: 30px;
+}
+
 /* --- Post Kartı (profile-post-card) --- */
 .profile-post-card {
     position: relative;
-    padding-top: 50px; /* Kontrollara yer açmaq üçün */
+    padding-top: 0; /* Grid system öz boşluğunu təmin edəcək */
 }
 
 /* --- Kontrol Bloku: Status və Redaktə/Sil --- */
@@ -394,12 +402,45 @@ textarea.form-control {
 }
 
 /* --- Responsive Dizayn --- */
+
+/* 1024px və daha böyük ekranlar üçün (desktop) */
+@media (min-width: 1024px) {
+    .blog-grid-container {
+        grid-template-columns: repeat(3, 1fr); /* 3 sütun */
+    }
+}
+
+/* 769px ilə 1023px arası ekranlar üçün (tablet) */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .blog-grid-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 sütun */
+        gap: 25px; /* Boşluğu biraz azaldırıq */
+    }
+    .profile-page-wrapper {
+        max-width: 720px; /* Tablet üçün max-width-i düzəldirik */
+    }
+}
+
+/* 768px və daha kiçik ekranlar üçün (mobil) */
 @media (max-width: 768px) {
+    .profile-page-wrapper {
+        margin: 20px auto;
+        padding: 0 15px;
+        max-width: 100%;
+    }
     .profile-section-header h1 {
         font-size: 2.2rem;
     }
     .profile-section-header .profile-subheading {
         font-size: 1rem;
+    }
+    .profile-create-post-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    .blog-grid-container {
+        grid-template-columns: 1fr; /* 1 sütun */
+        gap: 20px;
     }
     .post-controls {
         top: 10px;
@@ -413,7 +454,8 @@ textarea.form-control {
         max-width: 95%;
     }
     .modal-buttons {
-        flex-direction: column-reverse; /* Mobil görünüşdə daha yaxşıdır */
+        flex-direction: column-reverse; /* Mobil görünüşdə düymələri alt-alta düzürük */
+        gap: 8px;
     }
     .modal-buttons button {
         width: 100%;

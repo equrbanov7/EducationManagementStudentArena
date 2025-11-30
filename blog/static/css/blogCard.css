@@ -7,11 +7,12 @@
     transition: transform 0.3s ease;
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .blog-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Hover kölgəsini gücləndirdim */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); 
 }
 
 .card-img {

@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import timedelta
 from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
 from .forms import (
@@ -402,11 +402,13 @@ def user_profile(request, username):
     """
     İstifadəçi profili – həmin user-in yazdığı postlar.
     Məsələn: /blog/users/elvin/
+    Hər səhifədə maks. 9 blog görünəcək.
     """
     profile_user = get_object_or_404(User, username=username)
+
     if request.user == profile_user:
         # Öz profilinə baxanda – bütün postlar (qaralama da)
-        user_posts = (
+        user_posts_list = ( # List adını dəyişdik ki, paqinator üçün ayrı qalsın
             Post.objects
             .filter(author=profile_user)
             .select_related("category")
@@ -414,18 +416,32 @@ def user_profile(request, username):
         )
     else:
         # Başqasının profilinə baxanda – yalnız dərc olunmuşlar
-        user_posts = (
+        user_posts_list = ( # List adını dəyişdik ki, paqinator üçün ayrı qalsın
             Post.objects
             .filter(author=profile_user, is_published=True)
             .select_related("category")
             .order_by("-created_at")
         )
     
+    # --- Pagination əlavə edirik ---
+    paginator = Paginator(user_posts_list, 4) # Hər səhifədə 4 blog
+    
+    page_number = request.GET.get('page')
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        # Əgər səhifə nömrəsi tam ədəd deyilsə, birinci səhifəni göstər
+        posts = paginator.page(1)
+    except EmptyPage:
+        # Əgər səhifə nömrəsi mövcud səhifələrin sayından çoxdursa, sonuncu səhifəni göstər
+        posts = paginator.page(paginator.num_pages)
+    # --- Pagination sonu ---
+
     categories = Category.objects.all().order_by('name') 
 
     context = {
         "profile_user": profile_user,
-        "posts": user_posts,
+        "posts": posts, # Artıq bu, Paginator obyekti olacaq (Page obyekti)
         "categories": categories,
     }
     return render(request, "blog/user_profile.html", context)
