@@ -1,0 +1,35 @@
+# Core Django
+Django==5.2.8
+sqlparse==0.4.2
+asgiref==3.8.1
+tzdata==2024.2
+
+# Database (PostgreSQL support)
+psycopg2-binary==2.9.9
+dj-database-url==2.0.0
+
+# Environment variables
+python-decouple==3.8
+
+# Images
+Pillow==11.0.0
+
+# Production server
+gunicorn==21.2.0
+whitenoise==6.5.0
+
+# Phone numbers (əgər istifadə edirsinizsə)
+django-phonenumber-field==8.0.0
+phonenumbers==8.13.50
+
+# Search (əgər istifadə edirsinizsə)
+django-haystack==3.3.0
+
+# Markdown (əgər blog-da markdown varsa)
+Markdown==3.2.1
+
+# Utilities
+python-dateutil==2.9.0.post0
+requests==2.32.3
+beautifulsoup4==4.12.3
+soupsieve==2.6
