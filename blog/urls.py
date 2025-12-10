@@ -83,11 +83,18 @@ urlpatterns = [
         views.exam_result,
         name="exam_result",
     ),
-
+    
+    path('student/my-history/', views.student_exam_history, name='student_exam_history'),
     # --- Teacher statistikası ---
+    path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
     path(
         "exams/<slug:slug>/results/",
         views.teacher_exam_results,
         name="teacher_exam_results",
+    ),
+     path(
+        "exams/<slug:slug>/attempt/<int:attempt_id>/check/",
+        views.teacher_check_attempt,
+        name="teacher_check_attempt",
     ),
 ]

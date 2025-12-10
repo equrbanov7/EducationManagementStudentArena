@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - Yoxlama{% endblock %}
+
+{% block extraCss %} 
+    <link rel="stylesheet" href="{% static 'css/teacher_check_attempt.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <div class="exam-header">
+        <h1>{{ exam.title }} – Yoxlama</h1>
+        </div>
+
+    <form method="post" id="gradingForm">
+        {% csrf_token %}
+        <ul class="questions-grid">
+            {% for item in qa_list %}
+                {% with q=item.question ans=item.answer %}
+                    <li class="question-card" data-question-id="{{ q.id }}">
+                        <div class="question-card-header">
+                            <span>Sual #{{ forloop.counter }}</span>
+                            <span class="status-badge 
+                                {% if ans.teacher_score is not None %}status-scored
+                                {% elif not ans.text_answer %}status-empty
+                                {% else %}status-not-checked{% endif %}" 
+                                id="badge_{{ q.id }}">
+                                {% if ans.teacher_score is not None %}{{ ans.teacher_score }} Bal
+                                {% elif not ans.text_answer %}Boş Cavab
+                                {% else %}Yoxlanmayıb{% endif %}
+                            </span>
+                        </div>
+
+                        <p class="mb-2">{{ q.text|truncatewords:8 }}</p>
+
+                        <input type="hidden" id="hidden_score_{{ q.id }}" name="score_{{ q.id }}" 
+                               value="{% if ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
+                        
+                        <textarea style="display:none;" id="hidden_feedback_{{ q.id }}" name="feedback_{{ q.id }}">{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
+
+                        <div class="data-store" style="display:none;"
+                             data-q-text="{{ q.text|escape }}"
+                             data-ans-text="{{ ans.text_answer|default:''|escape }}">
+                        </div>
+
+                        <div class="answer-preview">
+                             {% if ans and ans.text_answer %}
+                                {{ ans.text_answer|truncatewords:10 }}
+                            {% else %}
+                                <span class="not-answered">Cavab yoxdur</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endwith %}
+            {% endfor %}
+        </ul>
+
+        <div class="main-actions sticky-bottom">
+            <a href="{% url 'teacher_exam_results' exam.slug %}" class="btn btn-secondary" id="backBtn">
+                <i class="fas fa-arrow-left"></i> Geri
+            </a>
+            <button type="submit" class="btn btn-success" id="mainSaveBtn" disabled>
+                <i class="fas fa-save"></i> Dəyişiklik yoxdur
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="modal-content-wrapper" id="questionModal">
+    <div class="modal-header">
+        <span id="modalTitle">Sual</span>
+        <button type="button" class="close-btn" onclick="attemptCloseModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <div class="question-detail" id="modalQuestionText"></div>
+        <div class="answer-detail" id="modalAnswerText"></div>
+        
+        <div class="grading-area">
+            <label>Bal:</label>
+            <input type="number" id="modalScoreInput" class="form-control mb-2">
+            
+            <label>Rəy:</label>
+            <textarea id="modalFeedbackInput" rows="3" class="form-control"></textarea>
+            
+            <input type="hidden" id="currentQuestionId">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="attemptCloseModal()">İmtina</button>
+        <button type="button" class="btn btn-primary" onclick="saveFromModal()">Təsdiqlə (Müvəqqəti)</button>
+    </div>
+</div>
+
+<div class="custom-alert-overlay" id="warningModal" style="display: none;">
+    <div class="custom-alert-box">
+        <div class="alert-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3>Dəyişikliklər yadda saxlanmadı!</h3>
+        <p>Pəncərəni bağlasanız, yazdığınız bal və rəy itəcək. Davam etmək istəyirsiniz?</p>
+        <div class="alert-actions">
+            <button class="btn btn-secondary" onclick="closeWarningModal()">Xeyr, Qayıt</button>
+            <button class="btn btn-danger" onclick="forceCloseModal()">Bəli, Bağla</button>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'js/teacher_check_attempt.js' %}"></script>
+{% endblock %}

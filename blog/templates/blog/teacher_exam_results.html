@@ -4,19 +4,18 @@
 {% block title %}{{ exam.title }} - Nəticələr{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/teacher_exam_results.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <h1>{{ exam.title }} - Nəticələr</h1>
+    <h1 class="h3 mb-3">{{ exam.title }} - Nəticələr</h1>
 
     <p>
         Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
         Status:
         {% if exam.is_active %}
-            <span class="badge bg-success">Aktiv</span>
+            <span class="badge bg-success">AKTIV</span>
         {% else %}
             <span class="badge bg-secondary">Deaktiv</span>
         {% endif %}
@@ -27,7 +26,7 @@
     <h3>İştirakçıların nəticələri</h3>
     {% if attempts %}
         <div class="table-responsive">
-            <table class="table table-striped table-sm">
+            <table class="table table-striped table-sm align-middle">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -39,6 +38,7 @@
                         <th>Başlama</th>
                         <th>Bitmə</th>
                         <th>Müddət (san)</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,10 +46,23 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ att.user.username }}</td>
-                            <td>{{ att.get_status_display }}</td>
+                            <td>
+                                {{ att.get_status_display }}
+                                {% if att.checked_by_teacher %}
+                                    <span class="badge bg-info text-dark ms-1">
+                                        Yoxlanıb
+                                    </span>
+                                {% endif %}
+                            </td>
                             <td>{{ att.correct_count }}</td>
                             <td>{{ att.wrong_count }}</td>
-                            <td>{{ att.score_percent }}</td>
+                            <td>
+                                {% if att.teacher_score is not None %}
+                                    {{ att.teacher_score }}%
+                                {% else %}
+                                    {{ att.score_percent }}%
+                                {% endif %}
+                            </td>
                             <td>{{ att.started_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if att.finished_at %}
@@ -65,6 +78,12 @@
                                     -
                                 {% endif %}
                             </td>
+                            <td>
+                                <a href="{% url 'teacher_check_attempt' exam.slug att.id %}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    {% if att.checked_by_teacher %}Yenidən aç{% else %}Yoxla{% endif %}
+                                </a>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -72,29 +91,6 @@
         </div>
     {% else %}
         <p class="empty-message">Hələ heç kim bu imtahanı verməyib.</p>
-    {% endif %}
-
-    <hr>
-
-    <h3>Sual üzrə statistika</h3>
-    {% if question_stats %}
-        <ol class="question-stats-list">
-            {% for item in question_stats %}
-                <li class="stat-item">
-                    <p class="question-text"><strong>{{ item.question.text }}</strong></p>
-                    <p class="stat-details">
-                        Ümumi cavab: <strong>{{ item.total }}</strong>,
-                        Düzgün: <strong class="correct-stat">{{ item.correct }}</strong>,
-                        Səhv: <strong class="wrong-stat">{{ item.wrong }}</strong>
-                        {% if item.total %}
-                            (<span class="percentage-stat">{{ item.correct|divisibleby:item.total }}%</span>)
-                        {% endif %}
-                    </p>
-                </li>
-            {% endfor %}
-        </ol>
-    {% else %}
-        <p class="empty-message">Bu imtahan üçün hələ cavab yoxdur.</p>
     {% endif %}
 
     <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary mt-3">

@@ -1,0 +1,133 @@
+/* --- YALNIZ İMTAHAN TARİXÇƏSİ ÜÇÜN UNİKAL STILLƏR (eh- PREFİKSİ İLƏ) --- */
+
+/* Əsas Konteyner və Başlıq */
+.eh-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.eh-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef; /* Ayırıcı xətt */
+}
+
+.eh-header-bar h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #343a40; 
+}
+
+/* Əsas Kart Konteyneri */
+.eh-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* --- Cədvəl Stilləri --- */
+
+.eh-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Cədvəl Başlığı (Header) */
+.eh-table thead th {
+    background-color: #f8f9fa; 
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 15px 15px;
+    border-bottom: 2px solid #dee2e6;
+    vertical-align: middle;
+}
+
+/* Cədvəl Sıraları və Hover */
+.eh-table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.eh-table tbody tr:hover {
+    background-color: #fcfcfc;
+}
+
+.eh-table tbody td {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f1f1f1;
+    vertical-align: middle;
+}
+
+/* İmtahan Adı Vurğusu */
+.eh-exam-title {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+/* --- Status Badges (Nişanlar) --- */
+
+.eh-badge {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 4px;
+    white-space: nowrap;
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+}
+
+/* Xüsusi Status Rəngləri */
+.eh-status-test {
+    background-color: #e0f7fa; /* Açıq Mavi */
+    color: #00796b;
+}
+
+.eh-status-written {
+    background-color: #fff3e0; /* Açıq Sarı */
+    color: #ff8f00;
+}
+
+.eh-status-pending {
+    background-color: #f0f0f0; 
+    color: #6c757d;
+    /* Yoxlanılır üçün yüngül animasiya */
+    animation: eh-pulse 1.5s infinite;
+}
+
+/* Bal Rəngləri */
+.eh-score {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.eh-score-pass {
+    color: #28a745;
+}
+
+.eh-score-fail {
+    color: #dc3545;
+}
+
+/* --- Animasiya --- */
+@keyframes eh-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* --- Boş Nəticə Hissəsi --- */
+.eh-no-results {
+    padding: 50px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+    background-color: #fafafa;
+    border-radius: 10px;
+}

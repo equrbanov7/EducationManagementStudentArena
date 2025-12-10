@@ -23,8 +23,9 @@ from .forms import (
     QuestionForm,
     ExamForm, ExamQuestionCreateForm
 )
-
-
+from django.views.decorators.http import require_POST
+from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
@@ -268,13 +269,13 @@ def create_post(request):
 
 
 
-# blog/views.py faylına əlavə et (əgər yoxdursa)
+
 
 
 
 
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
-from django.views.decorators.http import require_POST
+
 
 @login_required
 @require_POST
@@ -397,18 +398,20 @@ def register_view(request):
 
     return render(request, "blog/register.html", {"form": form})
 
-
 def user_profile(request, username):
     """
-    İstifadəçi profili – həmin user-in yazdığı postlar.
-    Məsələn: /blog/users/elvin/
-    Hər səhifədə maks. 9 blog görünəcək.
+    İstifadəçi profili.
+    + Müəllimlər üçün yoxlanmamış (pending) imtahan sayı hesablanır.
+    Məntiq: Statusu 'submitted' və ya 'expired' olan, 
+            hələ 'checked_by_teacher=False' olan 
+            və tipi 'test' OLMAYAN cəhdlər.
     """
     profile_user = get_object_or_404(User, username=username)
 
+    # 1. Postların Filterlənməsi
     if request.user == profile_user:
-        # Öz profilinə baxanda – bütün postlar (qaralama da)
-        user_posts_list = ( # List adını dəyişdik ki, paqinator üçün ayrı qalsın
+        # Öz profilinə baxanda – bütün postlar
+        user_posts_list = (
             Post.objects
             .filter(author=profile_user)
             .select_related("category")
@@ -416,33 +419,44 @@ def user_profile(request, username):
         )
     else:
         # Başqasının profilinə baxanda – yalnız dərc olunmuşlar
-        user_posts_list = ( # List adını dəyişdik ki, paqinator üçün ayrı qalsın
+        user_posts_list = (
             Post.objects
             .filter(author=profile_user, is_published=True)
             .select_related("category")
             .order_by("-created_at")
         )
     
-    # --- Pagination əlavə edirik ---
-    paginator = Paginator(user_posts_list, 4) # Hər səhifədə 4 blog
-    
+    # 2. Pagination
+    paginator = Paginator(user_posts_list, 4)
     page_number = request.GET.get('page')
     try:
         posts = paginator.page(page_number)
     except PageNotAnInteger:
-        # Əgər səhifə nömrəsi tam ədəd deyilsə, birinci səhifəni göstər
         posts = paginator.page(1)
     except EmptyPage:
-        # Əgər səhifə nömrəsi mövcud səhifələrin sayından çoxdursa, sonuncu səhifəni göstər
         posts = paginator.page(paginator.num_pages)
-    # --- Pagination sonu ---
 
+    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI (Düzəliş edilən hissə)
+    pending_count = 0
+    
+    # Şərt: Login olub + Öz profilidir + Müəllimdir
+    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, 'is_teacher', False):
+        pending_count = ExamAttempt.objects.filter(
+            exam__author=request.user,           # Müəllimin öz imtahanları
+            status__in=['submitted', 'expired'], # Tələbə bitirib (və ya vaxtı bitib)
+            checked_by_teacher=False             # Müəllim hələ "Təsdiq" etməyib
+        ).exclude(
+            exam__exam_type='test'               # ƏSAS DÜZƏLİŞ: Testləri siyahıdan çıxarırıq
+        ).count()
+
+    # 4. Kateqoriyalar
     categories = Category.objects.all().order_by('name') 
 
     context = {
         "profile_user": profile_user,
-        "posts": posts, # Artıq bu, Paginator obyekti olacaq (Page obyekti)
+        "posts": posts,
         "categories": categories,
+        "pending_count": pending_count, 
     }
     return render(request, "blog/user_profile.html", context)
 
@@ -942,36 +956,217 @@ def exam_result(request, slug, attempt_id):
     })
 
 
+@login_required
+def student_exam_history(request):
+    # Tələbənin bitirdiyi və ya vaxtı bitmiş bütün cəhdləri gətiririk
+    attempts = ExamAttempt.objects.filter(
+        user=request.user, 
+        status__in=['submitted', 'graded', 'expired']
+    ).order_by('-started_at')
+
+    context = {
+        'attempts': attempts
+    }
+    return render(request, 'blog/student_exam_history.html', context)
+
 # ---------------- TEACHER EXAM RESULTS ------------------- #
 
 @login_required
 def teacher_exam_results(request, slug):
     """
     Müəllim üçün imtahan nəticələri:
-    - hər attempt üçün user, nəticə, müddət
-    - sonradan filtrlər əlavə edə bilərik.
+    - solda bütün cəhdlər cədvəli
+    - aşağıda/sağda seçilmiş cəhdin cavabları + qiymətləndirmə formu
     """
     _ensure_teacher(request.user)
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
 
     attempts = exam.attempts.select_related("user").order_by("-started_at")
 
-    # Ən tez bitirənlər üçün ayrıca sort da göstərə bilərik.
+    selected_attempt = None
+    selected_answers = None
+
+    # ---------- POST: müəllim bal + feedback saxlayır ----------
+    if request.method == "POST":
+        attempt_id = request.POST.get("attempt_id")
+        score_raw = request.POST.get("teacher_score", "").strip()
+        feedback = request.POST.get("teacher_feedback", "").strip()
+
+        selected_attempt = get_object_or_404(
+            ExamAttempt,
+            id=attempt_id,
+            exam=exam
+        )
+
+        if score_raw:
+            try:
+                score_val = int(score_raw)
+            except ValueError:
+                messages.error(request, "Bal tam ədəd olmalıdır.")
+            else:
+                if 0 <= score_val <= 100:
+                    selected_attempt.teacher_score = score_val
+                    selected_attempt.teacher_feedback = feedback
+                    selected_attempt.mark_checked()
+                    messages.success(request, "Bal və rəy yadda saxlanıldı.")
+                    # yenidən eyni attempt seçilmiş halda geri dön
+                    return redirect(f"{request.path}?attempt={selected_attempt.id}")
+                else:
+                    messages.error(request, "Bal 0–100 aralığında olmalıdır.")
+        else:
+            # yalnız feedback saxlanılır
+            selected_attempt.teacher_score = None
+            selected_attempt.teacher_feedback = feedback
+            selected_attempt.checked_by_teacher = False
+            selected_attempt.save(
+                update_fields=["teacher_score", "teacher_feedback", "checked_by_teacher"]
+            )
+            messages.success(request, "Rəy yadda saxlanıldı.")
+            return redirect(f"{request.path}?attempt={selected_attempt.id}")
+
+    # ---------- GET: hansı attempt seçilib? ----------
+    if selected_attempt is None:
+        attempt_param = request.GET.get("attempt")
+        if attempt_param:
+            selected_attempt = (
+                exam.attempts
+                .filter(id=attempt_param)
+                .select_related("user")
+                .first()
+            )
+
+    if selected_attempt:
+        selected_answers = (
+            ExamAnswer.objects
+            .filter(attempt=selected_attempt)
+            .select_related("question")
+            .order_by("question__order", "question__id")
+        )
+
+    # Statistikalar (sənin əvvəlki kodun kimi qalsın)
     fastest_attempts = sorted(
         [a for a in attempts if a.duration_seconds],
         key=lambda a: a.duration_seconds
     )[:5]
 
-    # Ən çox səhv edilən suallar:
     questions = exam.questions.all()
     hardest_questions = sorted(
         questions,
         key=lambda q: q.correct_ratio
-    )[:5]  # ratio ən aşağı olanlar
+    )[:5]
 
     return render(request, "blog/teacher_exam_results.html", {
         "exam": exam,
         "attempts": attempts,
         "fastest_attempts": fastest_attempts,
         "hardest_questions": hardest_questions,
+        "selected_attempt": selected_attempt,
+        "selected_answers": selected_answers,
     })
+
+
+@login_required
+def teacher_check_attempt(request, slug, attempt_id):
+    """
+    Müəllim yazılı/praktiki imtahandakı BİR cəhdi sual-sual yoxlayır.
+    Hər suala bal və feedback yaza bilir.
+    """
+    _ensure_teacher(request.user)
+
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+
+    # İstəsən yalnız yazılı imtahanları məhdudlaşdıra bilərik
+    # if exam.exam_type != "written":
+    #     return redirect("teacher_exam_results", slug=exam.slug)
+
+    questions = exam.questions.all().order_by("order", "id")
+
+    # Mövcud cavabları xəritəyə çeviririk
+    existing_answers = {
+        a.question_id: a
+        for a in ExamAnswer.objects.filter(
+            attempt=attempt,
+            question__exam=exam
+        )
+    }
+
+    if request.method == "POST":
+        total_score = 0
+        any_score = False
+
+        for q in questions:
+            ans = existing_answers.get(q.id)
+            if not ans:
+                # Normalda hamısı olmalıdır, amma safety üçün:
+                ans = ExamAnswer.objects.create(
+                    attempt=attempt,
+                    question=q,
+                )
+
+            score_raw = request.POST.get(f"score_{q.id}", "").strip()
+            feedback = request.POST.get(f"feedback_{q.id}", "").strip()
+
+            if score_raw == "":
+                ans.teacher_score = None
+            else:
+                try:
+                    score_val = int(score_raw)
+                except ValueError:
+                    score_val = 0
+                ans.teacher_score = score_val
+                total_score += score_val
+                any_score = True
+
+            ans.teacher_feedback = feedback
+            ans.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
+
+        # Cəmi balı attempt səviyyəsinə yazırıq.
+        # Sən özün qərar verərsən ki, sual ballarını elə böləsən ki,
+        # cəmi 100 olsun.
+        attempt.teacher_score = total_score if any_score else None
+        attempt.checked_by_teacher = True
+        attempt.save(update_fields=["teacher_score", "checked_by_teacher"])
+
+        messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
+        return redirect("teacher_exam_results", slug=exam.slug)
+
+    # GET sorğusu – suallar + cavablar siyahısı
+    qa_list = []
+    for q in questions:
+        qa_list.append({
+            "question": q,
+            "answer": existing_answers.get(q.id),
+        })
+
+    context = {
+        "exam": exam,
+        "attempt": attempt,
+        "qa_list": qa_list,
+    }
+    return render(request, "blog/teacher_check_attempt.html", context)
+
+
+@login_required
+def teacher_pending_attempts(request):
+    """
+    Müəllimin bütün imtahanlarından yığılmış, 
+    yoxlanılmağı gözləyən (Pending) işlərin siyahısı.
+    """
+    # Yalnız müəllimlər görə bilsin
+    if not getattr(request.user, 'is_teacher', False):
+        return render(request, '403_forbidden.html') # Və ya redirect
+
+    # Yoxlanılacaq işləri tapırıq
+    pending_attempts = ExamAttempt.objects.filter(
+        exam__author=request.user,           # Bu müəllimin imtahanları
+        status__in=['submitted', 'expired'], # Bitmiş imtahanlar
+        checked_by_teacher=False             # Hələ yoxlanmayıb
+    ).exclude(
+        exam__exam_type='test'               # Testləri çıxarırıq
+    ).select_related('user', 'exam').order_by('finished_at') # Ən köhnədən yeniyə
+
+    context = {
+        'pending_attempts': pending_attempts,
+    }
+    return render(request, 'blog/teacher_pending_attempts.html', context)

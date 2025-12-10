@@ -409,6 +409,11 @@ class ExamAttempt(models.Model):
         ("submitted", "Təslim edilib"),
         ("expired", "Vaxt bitib"),
     )
+    
+    checked_by_teacher = models.BooleanField(
+        "Müəllim tərəfindən yoxlanılıb?",
+        default=False
+    )
 
     user = models.ForeignKey(
         User,
@@ -446,6 +451,18 @@ class ExamAttempt(models.Model):
     # Test üçün ümumi nəticə:
     correct_count = models.PositiveIntegerField(default=0)
     wrong_count = models.PositiveIntegerField(default=0)
+    
+    teacher_score = models.PositiveIntegerField(
+        "Müəllimin verdiyi bal (%)",
+        blank=True,
+        null=True,
+        help_text="0–100 arası bal."
+    )
+
+    teacher_feedback = models.TextField(
+        "Müəllimin rəyi",
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "İmtahan cəhdi"
@@ -488,6 +505,11 @@ class ExamAttempt(models.Model):
         self.correct_count = qs.filter(is_correct=True).count()
         self.wrong_count = qs.filter(is_correct=False).count()
         self.save(update_fields=["correct_count", "wrong_count"])
+    
+    def mark_checked(self):
+        self.checked_by_teacher = True
+        self.save(update_fields=["checked_by_teacher"])
+
 
 
 
@@ -525,6 +547,20 @@ class ExamAnswer(models.Model):
     is_correct = models.BooleanField(
         "Düzgündür?",
         default=False
+    )
+    
+    
+    # --- MÜƏLLİM YOXLAMASI (SUAL SƏVİYYƏSİNDƏ) ---
+    teacher_score = models.PositiveIntegerField(
+        "Müəllim balı (sual üzrə)",
+        blank=True,
+        null=True,
+        help_text="Bu suala verilən bal. (məs: 0–10 və ya 0–20 və s.)"
+    )
+
+    teacher_feedback = models.TextField(
+        "Müəllim rəyi (sual üzrə)",
+        blank=True,
     )
 
     # Autosave və draft üçün vacib:

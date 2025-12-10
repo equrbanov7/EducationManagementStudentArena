@@ -4,99 +4,179 @@
 {% block title %}{{ exam.title }} - Nəticə{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/exam_result.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1>{{ exam.title }} - Nəticəniz</h1>
+<div class="result-container container">
+    
+    <div class="text-center mb-5">
+        <h1 class="page-title">{{ exam.title }} - Nəticəniz</h1>
+    </div>
 
     <div class="summary-card">
-        <p class="summary-status">
-            Status:
-            {% if attempt.status == "submitted" %}
-                <span class="badge bg-success">Təslim edilib</span>
-            {% elif attempt.status == "expired" %}
-                <span class="badge bg-danger">Vaxt bitib</span>
+        
+        <div class="summary-header">
+            <span class="text-uppercase tracking-wider text-muted small fw-bold">İmtahan Statusu</span>
+            <div class="mt-2">
+                {% if attempt.status == "submitted" %}
+                    <span class="status-badge badge-success">Təslim edilib</span>
+                {% elif attempt.status == "expired" %}
+                    <span class="status-badge badge-danger">Vaxt bitib</span>
+                {% else %}
+                    <span class="status-badge badge-secondary">{{ attempt.get_status_display }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="summary-body">
+            {% if exam.exam_type == 'test' %}
+                
+                <div class="stat-item main-score w-100 mb-4">
+                    <span class="stat-label">Bal</span>
+                    <span class="stat-value text-primary">{{ attempt.score_percent }}%</span>
+                </div>
+
+                <div class="test-stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Düzgün</span>
+                        <span class="stat-value text-success">{{ attempt.correct_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Səhv</span>
+                        <span class="stat-value text-danger">{{ attempt.wrong_count }}</span>
+                    </div>
+                </div>
+
             {% else %}
-                <span class="badge bg-secondary">{{ attempt.get_status_display }}</span>
+                <div class="final-score-area w-100">
+                    {% if attempt.checked_by_teacher %}
+                        <span class="stat-label">Yekun Bal</span>
+                        <span class="stat-value text-primary">{{ attempt.teacher_score }}</span>
+                        <small class="text-muted d-block mt-1">Müəllim tərəfindən qiymətləndirilib</small>
+                    {% else %}
+                        <span class="stat-value">
+                            <span class="badge bg-warning text-dark px-3 py-2">Müəllim yoxlaması gözlənilir...</span>
+                        </span>
+                    {% endif %}
+                </div>
             {% endif %}
-        </p>
-        <p class="summary-detail">
-            Düzgün: <strong class="correct-count">{{ attempt.correct_count }}</strong><br>
-            Səhv: <strong class="wrong-count">{{ attempt.wrong_count }}</strong><br>
-            Bal: <strong class="score-percent">{{ attempt.score_percent }}%</strong><br>
+
             {% if attempt.duration_seconds %}
-                Müddət: {{ attempt.duration_seconds }} saniyə
+                <span class="duration-info"><i class="far fa-clock"></i> Müddət: {{ attempt.duration_seconds }} saniyə</span>
             {% endif %}
-        </p>
+        </div>
     </div>
 
-    <hr>
 
-    <h3>Sual - nəticə</h3>
-    <ol class="question-results-list">
+
+    <div class="section-divider"></div>
+
+    <h3 class="section-title">Sual - Nəticə Təhlili</h3>
+    
+    <div class="questions-list">
         {% for q in questions %}
             {% with ans=answers_by_qid|get_item:q.id %}
-            <li class="question-result-item">
-                <p class="question-text"><strong>{{ forloop.counter }}. {{ q.text }}</strong></p>
+            <div class="question-card">
+                <div class="q-header">
+                    <span class="q-number">{{ forloop.counter }}</span>
+                    <div class="q-text">
+                        {{ q.text|linebreaks }}
+                    </div>
+                </div>
 
-                {% if exam.exam_type == "test" %}
-                    <ul class="option-list">
-                        {% for opt in q.options.all %}
-                            <li class="option-item
-                                {% if opt.is_correct %}correct-option{% endif %}
-                                {% if ans and opt in ans.selected_options.all and not opt.is_correct %}wrong-selected{% endif %}
-                                {% if ans and opt in ans.selected_options.all and opt.is_correct %}correct-selected{% endif %}
-                            ">
-                                {% if opt.is_correct %}
-                                    <i class="fas fa-check-circle correct-icon"></i>
-                                {% else %}
-                                    <i class="far fa-circle option-icon"></i>
-                                {% endif %}
-                                {{ opt.text }}
-                                {% comment %} {% if ans and opt in ans.selected_options.all %}
-                                    <span class="badge your-choice-badge">Sənin seçimin</span>
-                                {% endif %} {% endcomment %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <div class="question-feedback">
-                        {% if ans %}
-                            {% if ans.is_correct %}
-                                <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> Düzgün cavab</span>
-                            {% else %}
-                                <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> Səhv cavab</span>
-                            {% endif %}
-                        {% else %}
-                            <span class="badge bg-warning text-dark feedback-badge"><i class="fas fa-exclamation-triangle"></i> Cavab verməmisən</span>
-                        {% endif %}
-                    </div>
-                {% else %} {# Yazılı imtahan #}
-                    <div class="written-answer-section">
-                        <p class="answer-heading"><em>Sənin cavabın:</em></p>
-                        {% if ans and ans.text_answer %}
-                            <pre class="user-answer-pre">{{ ans.text_answer }}</pre>
-                        {% else %}
-                            <p><span class="badge bg-warning text-dark feedback-badge"><i class="fas fa-exclamation-triangle"></i> Cavab verməmisən</span></p>
-                        {% endif %}
+                <div class="q-body">
+                    {% if exam.exam_type == "test" %}
+                        <ul class="option-list">
+                            {% for opt in q.options.all %}
+                                <li class="option-item
+                                    {% if opt.is_correct %}correct-option{% endif %}
+                                    {% if ans and opt in ans.selected_options.all and not opt.is_correct %}wrong-selected{% endif %}
+                                    {% if ans and opt in ans.selected_options.all and opt.is_correct %}correct-selected{% endif %}
+                                ">
+                                    <div class="d-flex align-items-center">
+                                        {% if opt.is_correct %}
+                                            <i class="fas fa-check-circle correct-icon"></i>
+                                        {% elif ans and opt in ans.selected_options.all and not opt.is_correct %}
+                                            <i class="fas fa-times-circle wrong-icon"></i>
+                                        {% else %}
+                                            <i class="far fa-circle option-icon"></i>
+                                        {% endif %}
+                                        <span class="option-text">{{ opt.text }}</span>
+                                    </div>
+                                    
+                                    {% if ans and opt in ans.selected_options.all %}
+                                        <span class="badge bg-light text-dark border">Sizin seçim</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
                         
-                        {% if q.correct_answer %}
-                            <p class="answer-heading"><em>İdeal cavab nümunəsi:</em></p>
-                            <pre class="correct-answer-pre">{{ q.correct_answer }}</pre>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </li>
+                        <div class="feedback-status mt-3 text-end">
+                            {% if ans %}
+                                {% if ans.is_correct %}
+                                    <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> Düzgün</span>
+                                {% else %}
+                                    <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> Səhv</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-warning text-dark feedback-badge">Cavab verməmisən</span>
+                            {% endif %}
+                        </div>
+
+                    {% else %} 
+                        <div class="written-response-area">
+                            <div class="mb-3">
+                                <label class="response-label text-primary mb-2"><i class="fas fa-pen-alt"></i> Sənin cavabın:</label>
+                                {% if ans and ans.text_answer %}
+                                    <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
+                                {% else %}
+                                    <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Cavab verməmisən</div>
+                                {% endif %}
+                            </div>
+
+                            {% if attempt.checked_by_teacher %}
+                                <div class="teacher-feedback-box">
+                                    <div class="tf-header">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="tf-avatar">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                            </div>
+                                            <span class="tf-title">Müəllim Rəyi</span>
+                                        </div>
+                                        <div class="tf-score">
+                                            Bal: <strong>{{ ans.teacher_score|default:"0" }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="tf-body">
+                                        {{ ans.teacher_feedback|default:"Rəy qeyd olunmayıb."|linebreaks }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% if q.correct_answer %}
+                                    <div class="mt-4">
+                                        <label class="response-label text-success mb-2"><i class="fas fa-check-double"></i> İdeal cavab nümunəsi:</label>
+                                        <pre class="code-block correct-answer">{{ q.correct_answer }}</pre>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
             {% endwith %}
         {% endfor %}
-    </ol>
+    </div>
 
-    <div class="text-center mt-5 exam-result-back-btn">
-        <a href="{% url 'student_exam_list' %}" class="btn btn-primary">
-            <i class="fas fa-arrow-left"></i> İmtahanlara qayıt
+    <div class="action-footer">
+        <a href="{% url 'student_exam_list' %}" class="btn custom-blue-btn">
+            <i class="fas fa-arrow-left me-2"></i> İmtahanlara qayıt
+        </a>
+
+        <a href="{% url 'student_exam_history' %}" class="btn custom-blue-btn">
+             Tarixçəyə Qayıt  <i class="fas fa-history ms-2"></i>
         </a>
     </div>
-</div>
+
+</div> 
 {% endblock %}

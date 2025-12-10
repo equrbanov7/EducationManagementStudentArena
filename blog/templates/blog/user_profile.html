@@ -24,9 +24,18 @@
                  <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
                       <i class="fas fa-file-alt"></i> İmtahanlarım
                  </a>
+                 {% if pending_count > 0 %}
+                    <a href="{% url 'teacher_pending_attempts' %}" class="profile-create-post-btn btn-warning-pulse">
+                        <i class="fas fa-bell"></i> Yoxlanılacaq
+                        <span class="pending-badge">{{ pending_count }}</span>
+                    </a>
+                 {% endif %}
                  <a href="{% url 'create_exam' %}" class="profile-create-post-btn">
                       <i class="fas fa-plus-square"></i> Yeni imtahan yarat
                  </a>
+                 <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
+                    <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
+                </a>
             {% endif %}
         {% endif %}
     </header>

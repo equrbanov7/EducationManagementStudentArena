@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/student_exam_history.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="eh-container container">
+    
+    <div class="eh-header-bar">
+        <h3><i class="fas fa-history"></i> İmtahan Tarixçəm</h3>
+        <a href="{% url 'student_exam_list' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Yeni İmtahan
+        </a>
+    </div>
+
+    <div class="eh-card card">
+        <div class="card-body p-0">
+            <table class="eh-table table">
+                <thead>
+                    <tr>
+                        <th>İmtahan Adı</th>
+                        <th>Tarix</th>
+                        <th>Növ</th>
+                        <th>Status / Bal</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                    <tr>
+                        <td class="eh-exam-title">
+                            {{ attempt.exam.title }}
+                        </td>
+
+                        <td class="text-muted">
+                            {{ attempt.started_at|date:"d.m.Y H:i" }}
+                        </td>
+
+                        <td>
+                            {% if attempt.exam.exam_type == 'test' %}
+                                <span class="eh-badge eh-status-test">Test</span>
+                            {% else %}
+                                <span class="eh-badge eh-status-written">Yazılı/Praktiki</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if attempt.exam.exam_type == 'test' %}
+                                <span class="eh-score {% if attempt.score_percent >= 51 %}eh-score-pass{% else %}eh-score-fail{% endif %}">
+                                    {{ attempt.score_percent }}%
+                                </span>
+                            {% else %}
+                                {% if attempt.checked_by_teacher %}
+                                    <span class="eh-score {% if attempt.teacher_score >= 51 %}eh-score-pass{% else %}eh-score-fail{% endif %}">
+                                        {{ attempt.teacher_score }} Bal
+                                    </span>
+                                    <small class="d-block text-muted" style="font-size: 0.75rem;">Qiymətləndirildi</small>
+                                {% else %}
+                                    <span class="eh-badge eh-status-pending">
+                                        Yoxlanılır...
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if attempt.exam.exam_type == 'test' %}
+                                <a href="{% url 'exam_result' slug=attempt.exam.slug attempt_id=attempt.id %}" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i> Bax
+                                </a>
+                            {% else %}
+                                {% if attempt.checked_by_teacher %}
+                                    <a href="{% url 'exam_result' slug=attempt.exam.slug attempt_id=attempt.id %}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i> Bax
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-hourglass-half"></i> Gözləyin
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="eh-no-results">
+                                <i class="far fa-frown fa-2x d-block mb-2"></i>
+                                Hələ heç bir imtahan verməmisiniz. Başlamaq üçün yuxarıdakı düymədən istifadə edin.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
