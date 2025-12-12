@@ -6,7 +6,6 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/take_exam.css' %}">
-    {# Sual timeri üçün kiçik stil əlavəsi #}
     <style>
         .question-timer-badge {
             background-color: #e0f2fe;
@@ -24,6 +23,89 @@
             background-color: #fee2e2;
             color: #dc2626;
         }
+
+        /* Bitirmə təsdiq modul üçün stil */
+        .confirm-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .confirm-modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 28px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+            text-align: center;
+        }
+        .confirm-modal-box h3 {
+            margin-bottom: 8px;
+        }
+        .confirm-modal-box p {
+            margin-bottom: 16px;
+            color: #4b5563;
+        }
+        .confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Fayl preview üçün kiçik stil */
+        .file-preview-area {
+            margin-top: 8px;
+        }
+        .file-preview-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        .file-preview-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-icon {
+            font-size: 1.1rem;
+        }
+        .file-name {
+            word-break: break-all;
+        }
+        .file-remove-btn {
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .file-remove-btn:hover {
+            color: #dc2626;
+        }
+
+        .add-file-btn {
+            margin-top: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px dashed #60a5fa;
+            background: #eff6ff;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .add-file-btn:hover {
+            background: #dbeafe;
+        }
     </style>
 {% endblock %}
 
@@ -37,13 +119,13 @@
             </div>
 
             <div style="display: flex; gap: 10px;">
-                {# --- YENİ: Sual Timeri --- #}
+                {# Sual timeri #}
                 <div class="question-timer-badge" id="question-timer-container" style="display: none;">
                     <i class="fas fa-hourglass-half"></i> 
                     Sual vaxtı: <span id="question-timer-value">--:--</span>
                 </div>
 
-                {# Mövcud: Ümumi İmtahan Timeri #}
+                {# Ümumi imtahan timeri #}
                 <div class="timer-badge" id="exam-timer-container">
                     <i class="fas fa-clock"></i> 
                     Ümumi: <span id="timer-value">--:--</span>
@@ -62,13 +144,16 @@
         </div>
     </div>
 
-    <form method="post" id="exam-form">
+    <form method="post"
+          id="exam-form"
+          enctype="multipart/form-data"
+          data-exam-id="{{ exam.id }}"
+          data-attempt-id="{{ attempt.id }}">
         {% csrf_token %}
 
         <div class="slides-wrapper">
             {% for q in questions %}
                 {% with ans=answers_by_qid|get_item:q.id %}
-                {# --- DƏYİŞİKLİK: data-time-limit atributu əlavə edildi --- #}
                 <div class="question-slide" 
                      data-index="{{ forloop.counter0 }}" 
                      id="slide-{{ forloop.counter0 }}"
@@ -76,9 +161,9 @@
                     
                     <div class="question-content">
                         <span class="q-number">Sual {{ forloop.counter }}</span>
-                        <p class="q-text">{{ q.text }}</p>
+                        <p class="q-text">{{ q.text|linebreaks }}</p>
 
-                        {# --- Variantlar --- #}
+                        {# --- TEST SUALLARI --- #}
                         {% if exam.exam_type == "test" %}
                             
                             {% if q.answer_mode == "single" %}
@@ -112,12 +197,48 @@
                                 </div>
                             {% endif %}
 
+                        {# --- YAZILI SUALLAR --- #}
                         {% else %}
-                            {# Yazılı Sual #}
                             <textarea name="q_{{ q.id }}" 
                                       class="written-answer" 
                                       placeholder="Cavabınızı bura yazın..."
                                       oninput="updateProgress()">{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
+                            <br>
+
+                            <div class="file-dropzone" 
+                                 data-qid="{{ q.id }}" 
+                                 ondrop="handleDrop(event, {{ q.id }})"
+                                 ondragover="event.preventDefault(); this.classList.add('hover');"
+                                 ondragleave="this.classList.remove('hover');">
+
+                                <p>Faylları buraya atın və ya klikləyin</p>
+
+                                <input type="file" 
+                                       name="file_{{ q.id }}[]" 
+                                       class="file-input" 
+                                       accept=".pdf,.png,.jpg,.jpeg,.zip"
+                                       multiple 
+                                       onchange="handleFiles(event, {{ q.id }})">
+                            </div>
+
+                            <button type="button"
+                                    class="add-file-btn"
+                                    onclick="triggerFileInput({{ q.id }})">
+                                + Əlavə fayl əlavə et
+                            </button>
+
+                            <div id="file-preview-{{ q.id }}" class="file-preview-area">
+                                {% if ans %}
+                                    {% for f in ans.files.all %}
+                                        <div class="file-preview-item">
+                                            <div class="file-preview-left">
+                                                <span class="file-icon">{{ f.filename|slice:"-3:"|upper }}</span>
+                                                <a href="{{ f.file.url }}" target="_blank">{{ f.filename }}</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
@@ -129,218 +250,402 @@
             <button type="button" id="prev-btn" class="nav-btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Əvvəlki
             </button>
-
+        
             <button type="button" id="next-btn" class="nav-btn btn-primary">
                 Növbəti <i class="fas fa-arrow-right"></i>
             </button>
-
-            <button type="submit" name="submit_action" value="finish" id="finish-btn" class="nav-btn btn-success" style="display: none;">
+        
+            <button type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
+                <i class="fas fa-save"></i> Draft kimi saxla
+            </button>
+        
+            <button type="button" name="submit_action" value="finish" 
+                    id="finish-btn" class="nav-btn btn-success" style="display: none;">
                 İmtahanı Bitir <i class="fas fa-check"></i>
             </button>
         </div>
     </form>
 </div>
 
+{# ---- Bitirmə təsdiq modali ---- #}
+<div class="confirm-modal-backdrop" id="finishConfirmBackdrop">
+    <div class="confirm-modal-box">
+        <h3>İmtahanı bitirmək istəyirsiniz?</h3>
+        <p>İmtahanı bitirdikdən sonra cavablarınızı dəyişə bilməyəcəksiniz.</p>
+        <div class="confirm-actions">
+            <button type="button" class="nav-btn btn-outline-secondary" id="cancelFinishBtn">
+                Xeyr, geri qayıt
+            </button>
+            <button type="button" class="nav-btn btn-danger" id="confirmFinishBtn">
+                Bəli, imtahanı bitir
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const slides = document.querySelectorAll('.question-slide');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const finishBtn = document.getElementById('finish-btn');
-        const currentQNum = document.getElementById('current-question-num');
-        const answeredCountEl = document.getElementById('answered-count');
-        const progressFill = document.getElementById('progress-fill');
-        const examForm = document.getElementById('exam-form');
-        
-        const qTimerContainer = document.getElementById('question-timer-container');
-        const qTimerValue = document.getElementById('question-timer-value');
-        let questionTimerInterval = null;
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.question-slide');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const currentQNum = document.getElementById('current-question-num');
+    const answeredCountEl = document.getElementById('answered-count');
+    const progressFill = document.getElementById('progress-fill');
+    const examForm = document.getElementById('exam-form');
+    const saveDraftBtn = document.getElementById('save-draft-btn');
 
-        let currentIndex = 0;
-        const totalSlides = slides.length;
+    const qTimerContainer = document.getElementById('question-timer-container');
+    const qTimerValue = document.getElementById('question-timer-value');
 
-        function formatTime(totalSeconds) {
-            if (totalSeconds < 0) totalSeconds = 0;
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    let questionTimerInterval = null;
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let hasUnsavedChanges = false;
+
+    // localStorage üçün key (refresh-də eyni suala qayıtmaq)
+    const examId = examForm.dataset.examId;
+    const attemptId = examForm.dataset.attemptId;
+    const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
+
+    // Fayl state
+    const fileState = {}; // { [qid]: File[] }
+
+    function formatTime(totalSeconds) {
+        if (totalSeconds < 0) totalSeconds = 0;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function disableSlideInputs(slideElement) {
+        const inputs = slideElement.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+        slideElement.style.opacity = '0.7';
+        slideElement.style.pointerEvents = 'none';
+    }
+
+    function startQuestionTimer(slideElement) {
+        if (questionTimerInterval) {
+            clearInterval(questionTimerInterval);
+            qTimerContainer.classList.remove('danger');
         }
 
-        // --- YENİ: Inputları deaktiv edən funksiya ---
-        function disableSlideInputs(slideElement) {
-            // Slayd daxilindəki bütün input və textarea-ları tapıb disabled edirik
-            const inputs = slideElement.querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                input.disabled = true;
-            });
-            // Vizual olaraq solğunlaşdırırıq
-            slideElement.style.opacity = '0.7';
-            // Kliklənmənin qarşısını alırıq
-            slideElement.style.pointerEvents = 'none';
+        if (slideElement.getAttribute('data-time-expired') === 'true') {
+            qTimerContainer.style.display = 'flex';
+            qTimerValue.textContent = "00:00";
+            qTimerContainer.classList.add('danger');
+            disableSlideInputs(slideElement);
+            return;
         }
 
-        // --- Sual Timeri Funksiyası (Yenilənmiş) ---
-        function startQuestionTimer(slideElement) {
-            if (questionTimerInterval) {
-                clearInterval(questionTimerInterval);
-                qTimerContainer.classList.remove('danger');
-            }
+        let timeLimit = parseInt(slideElement.getAttribute('data-time-limit')) || 0;
 
-            // Əgər bu sualın vaxtı artıq bitibsə (geri qayıdanda)
-            if (slideElement.getAttribute('data-time-expired') === 'true') {
-                qTimerContainer.style.display = 'flex';
-                qTimerValue.textContent = "00:00";
-                qTimerContainer.classList.add('danger');
-                disableSlideInputs(slideElement); // Yenidən deaktiv et ki, əmin olaq
-                return;
-            }
+        if (timeLimit > 0) {
+            qTimerContainer.style.display = 'flex';
+            qTimerValue.textContent = formatTime(timeLimit);
 
-            // Vaxt limitini HTML-dən alırıq
-            let timeLimit = parseInt(slideElement.getAttribute('data-time-limit')) || 0;
-
-            if (timeLimit > 0) {
-                qTimerContainer.style.display = 'flex';
+            questionTimerInterval = setInterval(() => {
+                timeLimit--;
+                slideElement.setAttribute('data-time-limit', timeLimit);
+                
                 qTimerValue.textContent = formatTime(timeLimit);
 
-                questionTimerInterval = setInterval(() => {
-                    timeLimit--;
-                    // Qalan vaxtı slaydda yadda saxlayırıq (geri qayıtmaq üçün)
-                    slideElement.setAttribute('data-time-limit', timeLimit);
-                    
-                    qTimerValue.textContent = formatTime(timeLimit);
+                if (timeLimit <= 10 && timeLimit > 0) {
+                    qTimerContainer.classList.add('danger');
+                }
 
-                    if (timeLimit <= 10 && timeLimit > 0) {
-                        qTimerContainer.classList.add('danger');
+                if (timeLimit <= 0) {
+                    clearInterval(questionTimerInterval);
+                    slideElement.setAttribute('data-time-expired', 'true');
+                    disableSlideInputs(slideElement);
+
+                    if (currentIndex < totalSlides - 1) {
+                        showSlide(currentIndex + 1);
+                    } else {
+                        localStorage.removeItem(storageKey);
+                        examForm.submit();
                     }
-
-                    // --- VAXT BİTDİ ---
-                    if (timeLimit <= 0) {
-                        clearInterval(questionTimerInterval);
-                        
-                        // 1. Slayda "vaxt bitdi" damğası vururuq
-                        slideElement.setAttribute('data-time-expired', 'true');
-                        
-                        // 2. Inputları deaktiv edirik
-                        disableSlideInputs(slideElement);
-
-                        // 3. Avtomatik növbəti suala keçirik
-                        if (currentIndex < totalSlides - 1) {
-                            showSlide(currentIndex + 1);
-                        } else {
-                            // Son sualdırsa, imtahanı bitiririk
-                            examForm.submit();
-                        }
-                        // Progress barı yeniləyirik (disabled olanlar sayılmasın deyə)
-                        updateProgress();
-                    }
-                }, 1000);
-            } else {
-                qTimerContainer.style.display = 'none';
-            }
-        }
-
-        // 1. Slaydı göstərmə funksiyası
-        function showSlide(index) {
-            slides.forEach(slide => {
-                slide.classList.remove('active');
-            });
-
-            const currentSlide = slides[index];
-            currentSlide.classList.add('active');
-            
-            currentQNum.textContent = index + 1;
-
-            prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
-            if (index === totalSlides - 1) {
-                nextBtn.style.display = 'none';
-                finishBtn.style.display = 'flex';
-            } else {
-                nextBtn.style.display = 'flex';
-                finishBtn.style.display = 'none';
-            }
-
-            currentIndex = index;
-            startQuestionTimer(currentSlide);
-            updateProgress(); // Slayd dəyişəndə progressi yoxla
-        }
-
-        // 2. İrəli / Geri
-        nextBtn.addEventListener('click', () => {
-            if (currentIndex < totalSlides - 1) showSlide(currentIndex + 1);
-        });
-        prevBtn.addEventListener('click', () => {
-            if (currentIndex > 0) showSlide(currentIndex - 1);
-        });
-
-        // 3. Cavablananları saymaq (Yenilənmiş: yalnız aktivləri sayır)
-        window.updateProgress = function() {
-            let answeredCount = 0;
-            slides.forEach(slide => {
-                // Yalnız :not(:disabled) olanları sayırıq
-                const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
-                const textareas = slide.querySelectorAll('textarea:not(:disabled)');
-                let hasText = false;
-                if (textareas.length > 0) {
-                    if (textareas[0].value.trim().length > 0) hasText = true;
-                }
-                if (inputs.length > 0 || hasText) {
-                    answeredCount++;
-                }
-            });
-            answeredCountEl.textContent = answeredCount;
-            const percent = (answeredCount / totalSlides) * 100;
-            progressFill.style.width = percent + '%';
-        }
-
-        // Başlanğıc
-        showSlide(0);
-        // updateProgress(); // showSlide içində çağırılır onsuz da
-
-        // 4. Ümumi Timer Məntiqi (Backend-dən gələn dəyərlə işləyir)
-        {% if remaining_seconds is not None %}
-        // Django şablonundan dəyəri alıb rəqəmə çeviririk
-        let remainingSeconds = parseInt("{{ remaining_seconds }}");
-        
-        if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
-            const timerValueElement = document.getElementById('timer-value');
-            const timerContainer = document.getElementById('exam-timer-container');
-            
-            timerValueElement.textContent = formatTime(remainingSeconds);
-
-            const timerInterval = setInterval(() => {
-                remainingSeconds--;
-                
-                if (remainingSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    if (questionTimerInterval) clearInterval(questionTimerInterval);
-                    timerValueElement.textContent = "00:00";
-
-                    var hiddenInput = document.createElement("input");
-                    hiddenInput.setAttribute("type", "hidden");
-                    hiddenInput.setAttribute("name", "submit_action");
-                    hiddenInput.setAttribute("value", "finish");
-                    examForm.appendChild(hiddenInput);
-
-                    // Vaxt bitdi, formu göndər
-                    examForm.submit();
-                    return;
-                }
-                
-                timerValueElement.textContent = formatTime(remainingSeconds);
-                
-                if (remainingSeconds < 60) {
-                    timerContainer.style.backgroundColor = '#fee2e2';
-                    timerContainer.style.color = '#dc2626';
+                    updateProgress();
                 }
             }, 1000);
         } else {
-             // Vaxt bitibsə və ya səhv gəlibsə
-             document.getElementById('timer-value').textContent = "00:00";
+            qTimerContainer.style.display = 'none';
         }
-        {% endif %}
+    }
+
+    function showSlide(index) {
+        slides.forEach(slide => slide.classList.remove('active'));
+
+        const currentSlide = slides[index];
+        currentSlide.classList.add('active');
+        
+        currentQNum.textContent = index + 1;
+
+        prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
+        if (index === totalSlides - 1) {
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'flex';
+        } else {
+            nextBtn.style.display = 'flex';
+            finishBtn.style.display = 'none';
+        }
+
+        currentIndex = index;
+        localStorage.setItem(storageKey, index);
+        startQuestionTimer(currentSlide);
+        updateProgress();
+    }
+
+    window.updateProgress = function() {
+        let answeredCount = 0;
+        slides.forEach(slide => {
+            const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
+            const textareas = slide.querySelectorAll('textarea:not(:disabled)');
+            let hasText = false;
+            if (textareas.length > 0) {
+                if (textareas[0].value.trim().length > 0) hasText = true;
+            }
+            if (inputs.length > 0 || hasText) {
+                answeredCount++;
+            }
+        });
+        answeredCountEl.textContent = answeredCount;
+        const percent = (answeredCount / totalSlides) * 100;
+        progressFill.style.width = percent + '%';
+    };
+
+    // Ümumi imtahan timeri
+    {% if remaining_seconds is not None %}
+    let remainingSeconds = parseInt("{{ remaining_seconds }}");
+    
+    if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
+        const timerValueElement = document.getElementById('timer-value');
+        const timerContainer = document.getElementById('exam-timer-container');
+        
+        timerValueElement.textContent = formatTime(remainingSeconds);
+
+        const timerInterval = setInterval(() => {
+            remainingSeconds--;
+            
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                if (questionTimerInterval) clearInterval(questionTimerInterval);
+                timerValueElement.textContent = "00:00";
+
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "submit_action";
+                hiddenInput.value = "finish";
+                examForm.appendChild(hiddenInput);
+
+                localStorage.removeItem(storageKey);
+                examForm.submit();
+                return;
+            }
+            
+            timerValueElement.textContent = formatTime(remainingSeconds);
+            
+            if (remainingSeconds < 60) {
+                timerContainer.style.backgroundColor = '#fee2e2';
+                timerContainer.style.color = '#dc2626';
+            }
+        }, 1000);
+    } else {
+        document.getElementById('timer-value').textContent = "00:00";
+    }
+    {% endif %}
+
+    // ---- Fayl helper-ləri ----
+    function syncInputFiles(qid) {
+        const input = document.querySelector(`input[name="file_${qid}[]"]`);
+        if (!input) return;
+
+        const dt = new DataTransfer();
+        (fileState[qid] || []).forEach(f => dt.items.add(f));
+        input.files = dt.files;
+    }
+
+    function renderPreview(qid) {
+        const container = document.getElementById(`file-preview-${qid}`);
+        if (!container) return;
+
+        const files = fileState[qid] || [];
+        container.innerHTML = "";
+
+        files.forEach((f, idx) => {
+            let icon = "📄";
+            const nameLower = f.name.toLowerCase();
+            if (nameLower.endsWith(".pdf")) icon = "📕";
+            if (nameLower.endsWith(".zip")) icon = "🗂️";
+            if (f.type.startsWith("image/")) icon = "🖼️";
+
+            container.innerHTML += `
+                <div class="file-preview-item" data-index="${idx}">
+                    <div class="file-preview-left">
+                        <span class="file-icon">${icon}</span>
+                        <span class="file-name">${f.name}</span>
+                    </div>
+                    <button type="button" class="file-remove-btn" onclick="removeFile(${qid}, ${idx})">
+                        &times;
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    window.handleFiles = function(event, qid) {
+        const selected = Array.from(event.target.files);
+        if (!fileState[qid]) fileState[qid] = [];
+        fileState[qid] = fileState[qid].concat(selected);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    window.handleDrop = function(event, qid) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('hover');
+
+        const selected = Array.from(event.dataTransfer.files);
+        if (!fileState[qid]) fileState[qid] = [];
+        fileState[qid] = fileState[qid].concat(selected);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    window.triggerFileInput = function(qid) {
+        const input = document.querySelector(`input[name="file_${qid}[]"]`);
+        if (input) {
+            input.click();
+        }
+    };
+
+    window.removeFile = function(qid, index) {
+        if (!fileState[qid]) return;
+        fileState[qid].splice(index, 1);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    // Form dəyişikliklərində draft flag
+    examForm.addEventListener("input", () => {
+        hasUnsavedChanges = true;
     });
+    examForm.addEventListener("change", () => {
+        hasUnsavedChanges = true;
+    });
+
+    // Draft / autosave – AJAX
+    function sendDraft(action = "autosave") {
+        if (action === "autosave" && !hasUnsavedChanges) return;
+
+        const formData = new FormData(examForm);
+        formData.append("submit_action", action);
+
+        fetch(window.location.href, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            hasUnsavedChanges = false;
+
+            if (data.finished && data.redirect_url) {
+                localStorage.removeItem(storageKey);
+                window.location.href = data.redirect_url;
+                return;
+            }
+
+            if (action === "save_draft") {
+                const originalText = saveDraftBtn.innerHTML;
+                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Draft saxlanıldı';
+                saveDraftBtn.disabled = true;
+                setTimeout(() => {
+                    saveDraftBtn.innerHTML = originalText;
+                    saveDraftBtn.disabled = false;
+                }, 2000);
+            }
+        })
+        .catch(err => {
+            console.error("Draft saxlanarkən xəta:", err);
+            if (action === "save_draft") {
+                alert("Draft saxlanarkən xəta baş verdi. Yenidən cəhd edin.");
+            }
+        });
+    }
+
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener("click", function () {
+            sendDraft("save_draft");
+        });
+    }
+
+    // 5 dəqiqədən bir autosave
+    setInterval(() => {
+        sendDraft("autosave");
+    }, 5 * 60 * 1000);
+
+    // Səhifədən çıxanda xəbərdarlıq
+    window.addEventListener("beforeunload", function (e) {
+        if (!hasUnsavedChanges) return;
+        e.preventDefault();
+        e.returnValue = "";
+    });
+
+    // Finish confirm modal
+    const finishConfirmBackdrop = document.getElementById('finishConfirmBackdrop');
+    const cancelFinishBtn = document.getElementById('cancelFinishBtn');
+    const confirmFinishBtn = document.getElementById('confirmFinishBtn');
+
+    finishBtn.addEventListener('click', () => {
+        finishConfirmBackdrop.style.display = 'flex';
+    });
+
+    cancelFinishBtn.addEventListener('click', () => {
+        finishConfirmBackdrop.style.display = 'none';
+    });
+
+    finishConfirmBackdrop.addEventListener('click', (e) => {
+        if (e.target === finishConfirmBackdrop) {
+            finishConfirmBackdrop.style.display = 'none';
+        }
+    });
+
+    confirmFinishBtn.addEventListener('click', () => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'submit_action';
+        hiddenInput.value = 'finish';
+        examForm.appendChild(hiddenInput);
+
+        localStorage.removeItem(storageKey);
+        examForm.submit();
+    });
+
+    // Navigasiya düymələri
+    nextBtn.addEventListener('click', () => {
+        if (currentIndex < totalSlides - 1) showSlide(currentIndex + 1);
+    });
+    prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) showSlide(currentIndex - 1);
+    });
+
+    // Başlanğıc slayd – localStorage-dan oxu
+    const savedIndex = parseInt(localStorage.getItem(storageKey));
+    if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < totalSlides) {
+        currentIndex = savedIndex;
+    } else {
+        currentIndex = 0;
+    }
+    showSlide(currentIndex);
+});
 </script>
-
-
-
 {% endblock %}

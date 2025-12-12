@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.contrib.auth.models import Group
 import itertools
 from django.templatetags.static import static
+from .validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 # ---- Models for Category functionality ----
 
@@ -528,6 +529,7 @@ class ExamAnswer(models.Model):
         on_delete=models.CASCADE,
         related_name="answers"
     )
+    
 
     # Test üçün: seçilən variantlar (single/multiple)
     selected_options = models.ManyToManyField(
@@ -601,6 +603,28 @@ class ExamAnswer(models.Model):
             self.is_correct = (selected == correct_options)
 
         self.save()
+
+
+class ExamAnswerFile(models.Model):
+    answer = models.ForeignKey(
+        "ExamAnswer",
+        on_delete=models.CASCADE,
+        related_name="files",
+        verbose_name="Cavab"
+    )
+    file = models.FileField(
+        "Fayl",
+        upload_to="exam_uploads/",
+        validators=[validate_file_extension, validate_file_size, validate_zip_contents]
+    )
+    uploaded_at = models.DateTimeField("Yüklənmə tarixi", auto_now_add=True)
+
+    def filename(self):
+        return self.file.name.split("/")[-1]
+
+    def __str__(self):
+        return f"{self.filename()} ({self.answer_id})"
+
 
 
 

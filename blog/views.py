@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q
 from django.core.mail import send_mail 
 from django.template.loader import render_to_string 
@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import timedelta
-from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
+from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile
 from .forms import (
     SubscriptionForm,
     RegisterForm,
@@ -846,8 +846,6 @@ def start_exam(request, slug):
 
     return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
-
-
 @login_required
 def take_exam(request, slug, attempt_id):
     attempt = get_object_or_404(
@@ -862,11 +860,13 @@ def take_exam(request, slug, attempt_id):
     if attempt.is_finished:
         return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
-    questions = ExamQuestion.objects.filter(exam=exam).order_by('order', 'id').prefetch_related("options")
+    questions = ExamQuestion.objects.filter(
+        exam=exam
+    ).order_by('order', 'id').prefetch_related("options")
 
     # --- Server tərəfli Vaxt Hesablaması ---
     remaining_seconds = None
-    is_time_up = False # Vaxtın bitib-bitməməsi bayrağı
+    is_time_up = False
 
     if exam.total_duration_minutes and attempt.started_at:
         now = timezone.now()
@@ -875,17 +875,21 @@ def take_exam(request, slug, attempt_id):
         total_seconds = diff.total_seconds()
         
         if total_seconds <= 0:
-            is_time_up = True # Vaxt bitib!
+            is_time_up = True
             remaining_seconds = 0
         else:
             remaining_seconds = int(total_seconds)
 
     if request.method == "POST":
-        action = request.POST.get("submit_action")
+        action = (request.POST.get("submit_action") or "").strip()
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
-        # 1. Cavabları Yadda Saxla (Vaxt bitsə belə son seçilənlər yadda qalsın)
+        # 1. Cavabları yadda saxla
         for q in questions:
-            ans, created = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+            ans, created = ExamAnswer.objects.get_or_create(
+                attempt=attempt,
+                question=q
+            )
             ans.selected_options.clear()
 
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
@@ -893,37 +897,60 @@ def take_exam(request, slug, attempt_id):
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
                         opt = q.options.filter(id=opt_id).first()
-                        if opt: ans.selected_options.add(opt)
+                        if opt:
+                            ans.selected_options.add(opt)
                 else:
                     for opt in q.options.all():
                         if request.POST.get(f"q_{q.id}_opt_{opt.id}"):
                             ans.selected_options.add(opt)
+
                 ans.text_answer = ""
                 ans.auto_evaluate()
+
             else:
                 text = request.POST.get(f"q_{q.id}", "").strip()
                 ans.text_answer = text
                 ans.is_correct = False
                 ans.save()
 
+                # Fayllar (yazılı suallar üçün)
+                files = request.FILES.getlist(f"file_{q.id}[]")
+                if files:
+                    # köhnə faylları silib yenisini yazırıq (duplikat olmasın deyə)
+                    ans.files.all().delete()
+                    for f in files:
+                        ExamAnswerFile.objects.create(answer=ans, file=f)
+
         if exam.exam_type == "test":
             attempt.recalculate_score()
 
-        # 2. QƏRAR VERMƏ ANI
-        # Əgər istifadəçi "Bitir" basıbsa VƏ YA Serverdə vaxt bitibsə -> İmtahanı Sonlandır
+        # 2. Status qərarı
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"
             attempt.mark_finished(status=status)
+
+            if is_ajax:
+                return JsonResponse({
+                    "success": True,
+                    "finished": True,
+                    "redirect_url": reverse(
+                        "exam_result",
+                        kwargs={"slug": exam.slug, "attempt_id": attempt.id}
+                    ),
+                })
             return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
-        
-        else:
-            # Vaxt hələ var, sadəcə yadda saxlayır
-            attempt.status = "draft"
-            attempt.save(update_fields=["status"])
-            return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+
+        # autosave və ya "draft kimi saxla"
+        attempt.status = "draft"
+        attempt.save(update_fields=["status"])
+
+        if is_ajax:
+            return JsonResponse({"success": True, "finished": False})
+
+        return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
     # GET sorğusu
-    answers = attempt.answers.select_related("question").prefetch_related("selected_options")
+    answers = attempt.answers.select_related("question").prefetch_related("selected_options", "files")
     answers_by_qid = {a.question_id: a for a in answers}
 
     context = {
@@ -936,6 +963,8 @@ def take_exam(request, slug, attempt_id):
     return render(request, "blog/take_exam.html", context)
 
 
+
+
 @login_required
 def exam_result(request, slug, attempt_id):
     """
@@ -945,7 +974,11 @@ def exam_result(request, slug, attempt_id):
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
 
     questions = exam.questions.all().order_by("order").prefetch_related("options")
-    answers = ExamAnswer.objects.filter(attempt=attempt).prefetch_related("selected_options")
+    answers = (
+        ExamAnswer.objects
+        .filter(attempt=attempt)
+        .prefetch_related("selected_options", "files")
+    )
     answers_by_qid = {a.question_id: a for a in answers}
 
     return render(request, "blog/exam_result.html", {

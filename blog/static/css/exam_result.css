@@ -338,6 +338,77 @@
     color: #ffffff;
 }
 
+
+/* --- Yüklənmiş fayllar (student result) --- */
+
+.answer-files {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    border: 1px dashed #e5e7eb;
+}
+
+.answer-files .response-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.file-list {
+    list-style: none;
+    margin: 0;
+    margin-top: 0.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.file-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.file-icon {
+    width: 20px;
+    text-align: center;
+    color: #4b5563;
+    opacity: 0.9;
+}
+
+.file-link {
+    font-size: 0.9rem;
+    color: #1d4ed8;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.file-link:hover {
+    text-decoration: underline;
+}
+
+.file-thumb {
+    margin-left: 26px; /* icon + boşluq qədər */
+    margin-top: 2px;
+}
+
+.file-thumb img {
+    max-width: 220px;
+    max-height: 150px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.16);
+}
+
+
 /* Mobile üçün uyğunlaşdırma */
 @media (max-width: 600px) {
     .action-footer {

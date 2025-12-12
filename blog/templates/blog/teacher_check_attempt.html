@@ -11,7 +11,7 @@
 <div class="review-container">
     <div class="exam-header">
         <h1>{{ exam.title }} – Yoxlama</h1>
-        </div>
+    </div>
 
     <form method="post" id="gradingForm">
         {% csrf_token %}
@@ -21,36 +21,99 @@
                     <li class="question-card" data-question-id="{{ q.id }}">
                         <div class="question-card-header">
                             <span>Sual #{{ forloop.counter }}</span>
+
                             <span class="status-badge 
-                                {% if ans.teacher_score is not None %}status-scored
-                                {% elif not ans.text_answer %}status-empty
-                                {% else %}status-not-checked{% endif %}" 
+                                {% if not ans %}
+                                    status-empty
+                                {% elif ans.teacher_score is not None %}
+                                    status-scored
+                                {% elif not ans.text_answer %}
+                                    status-empty
+                                {% else %}
+                                    status-not-checked
+                                {% endif %}" 
                                 id="badge_{{ q.id }}">
-                                {% if ans.teacher_score is not None %}{{ ans.teacher_score }} Bal
-                                {% elif not ans.text_answer %}Boş Cavab
-                                {% else %}Yoxlanmayıb{% endif %}
+                                
+                                {% if not ans %}
+                                    Cavab yoxdur
+                                {% elif ans.teacher_score is not None %}
+                                    {{ ans.teacher_score }} Bal
+                                {% elif not ans.text_answer %}
+                                    Boş Cavab
+                                {% else %}
+                                    Yoxlanmayıb
+                                {% endif %}
                             </span>
                         </div>
 
                         <p class="mb-2">{{ q.text|truncatewords:8 }}</p>
 
-                        <input type="hidden" id="hidden_score_{{ q.id }}" name="score_{{ q.id }}" 
-                               value="{% if ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
+                        {# ---- GİZLİ SCORE INPUT ---- #}
+                        <input type="hidden"
+                               id="hidden_score_{{ q.id }}"
+                               name="score_{{ q.id }}" 
+                               value="{% if ans and ans.teacher_score is not None %}{{ ans.teacher_score }}{% endif %}">
                         
-                        <textarea style="display:none;" id="hidden_feedback_{{ q.id }}" name="feedback_{{ q.id }}">{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
+                        {# ---- GİZLİ FEEDBACK TEXTAREA ---- #}
+                        <textarea style="display:none;"
+                                  id="hidden_feedback_{{ q.id }}"
+                                  name="feedback_{{ q.id }}">{% if ans %}{{ ans.teacher_feedback }}{% endif %}</textarea>
 
+                        {# ---- JS ÜÇÜN MƏLUMAT STORAGE ---- #}
                         <div class="data-store" style="display:none;"
                              data-q-text="{{ q.text|escape }}"
-                             data-ans-text="{{ ans.text_answer|default:''|escape }}">
+                             data-ans-text="{% if ans %}{{ ans.text_answer|escape }}{% else %}{% endif %}">
                         </div>
 
                         <div class="answer-preview">
-                             {% if ans and ans.text_answer %}
+                            {% if ans and ans.text_answer %}
                                 {{ ans.text_answer|truncatewords:10 }}
                             {% else %}
                                 <span class="not-answered">Cavab yoxdur</span>
                             {% endif %}
                         </div>
+
+                        {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
+                        {% if ans and ans.files.all %}
+                            <div class="answer-files">
+                                <span class="files-title">Yüklənmiş fayllar:</span>
+                                <ul class="file-list">
+                                    {% for f in ans.files.all %}
+                                        {% with name=f.filename|lower %}
+                                            <li class="file-item">
+                                                <span class="file-icon">
+                                                    {% if ".pdf" in name %}
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    {% elif ".zip" in name %}
+                                                        <i class="fas fa-file-archive"></i>
+                                                    {% elif ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                        <i class="fas fa-image"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-file"></i>
+                                                    {% endif %}
+                                                </span>
+                                                
+                                                <a href="{{ f.file.url }}" 
+                                                   target="_blank" 
+                                                   class="file-link">
+                                                    {{ f.filename }}
+                                                </a>
+
+                                                {# Şəkillər üçün kiçik inline preview #}
+                                                {% if ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                    <div class="file-thumb">
+                                                        <img src="{{ f.file.url }}" 
+                                                             alt="{{ f.filename }}">
+                                                    </div>
+                                                {% endif %}
+                                            </li>
+                                        {% endwith %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        {# ====== /YENİ BLOK ====== #}
+
                     </li>
                 {% endwith %}
             {% endfor %}
@@ -106,9 +169,6 @@
         </div>
     </div>
 </div>
-
-
-
 {% endblock %}
 
 {% block extraJs %}

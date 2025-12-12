@@ -249,6 +249,134 @@ body {
     background: #059669;
 }
 
+.file-dropzone {
+    border: 2px dashed #6c8bf0;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #f9fbff;
+    transition: 0.2s;
+}
+
+.file-dropzone.hover {
+    background: #eef3ff;
+    border-color: #325dff;
+}
+
+.file-preview-area {
+    margin-top: 10px;
+}
+
+.file-preview-item {
+    padding: 6px;
+    background: #f1f5ff;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-icon {
+    font-size: 20px;
+}
+
+.preview-image {
+    max-width: 300px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.teacher-file-item {
+    margin-bottom: 15px;
+}
+
+.file-dropzone {
+    border: 2px dashed #93c5fd;
+    background: #eff6ff;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    margin-top: 12px;
+}
+
+.file-dropzone.hover {
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+.file-input {
+    margin-top: 8px;
+}
+
+.add-file-btn {
+    margin-top: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #3b82f6;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.add-file-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.file-preview-area {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.file-preview-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-icon {
+    font-size: 1.1rem;
+}
+
+.file-name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 260px;
+}
+
+.file-remove-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0 4px;
+    color: #dc2626;
+}
+
+.file-remove-btn:hover {
+    color: #b91c1c;
+}
+
+
 /* Mobile Uyğunlaşdırma */
 @media (max-width: 768px) {
     .exam-container { margin: 15px; }
