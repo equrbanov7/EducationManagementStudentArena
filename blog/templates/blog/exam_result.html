@@ -68,8 +68,6 @@
         </div>
     </div>
 
-
-
     <div class="section-divider"></div>
 
     <h3 class="section-title">Sual - Nəticə Təhlili</h3>
@@ -127,13 +125,60 @@
                     {% else %} 
                         <div class="written-response-area">
                             <div class="mb-3">
-                                <label class="response-label text-primary mb-2"><i class="fas fa-pen-alt"></i> Sənin cavabın:</label>
+                                <label class="response-label text-primary mb-2">
+                                    <i class="fas fa-pen-alt"></i> Sənin cavabın:
+                                </label>
                                 {% if ans and ans.text_answer %}
                                     <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
                                 {% else %}
-                                    <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Cavab verməmisən</div>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Cavab verməmisən
+                                    </div>
                                 {% endif %}
                             </div>
+
+                            {# ==== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ==== #}
+                            {% if ans and ans.files.all %}
+                                <div class="answer-files mb-3">
+                                    <label class="response-label text-secondary mb-2">
+                                        <i class="fas fa-paperclip"></i> Yüklənmiş fayllar:
+                                    </label>
+                                    <ul class="file-list">
+                                        {% for f in ans.files.all %}
+                                            {% with name=f.filename|lower %}
+                                                <li class="file-item">
+                                                    <div class="file-main">
+                                                        <span class="file-icon">
+                                                            {% if ".pdf" in name %}
+                                                                <i class="fas fa-file-pdf"></i>
+                                                            {% elif ".zip" in name %}
+                                                                <i class="fas fa-file-archive"></i>
+                                                            {% elif ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                                <i class="fas fa-image"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-file"></i>
+                                                            {% endif %}
+                                                        </span>
+                                                        <a href="{{ f.file.url }}" 
+                                                           target="_blank" 
+                                                           class="file-link">
+                                                            {{ f.filename }}
+                                                        </a>
+                                                    </div>
+
+                                                    {# şəkillər üçün kiçik preview #}
+                                                    {% if ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                        <div class="file-thumb">
+                                                            <img src="{{ f.file.url }}" alt="{{ f.filename }}">
+                                                        </div>
+                                                    {% endif %}
+                                                </li>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            {# ==== /YENİ BLOK ==== #}
 
                             {% if attempt.checked_by_teacher %}
                                 <div class="teacher-feedback-box">
@@ -155,7 +200,9 @@
                             {% else %}
                                 {% if q.correct_answer %}
                                     <div class="mt-4">
-                                        <label class="response-label text-success mb-2"><i class="fas fa-check-double"></i> İdeal cavab nümunəsi:</label>
+                                        <label class="response-label text-success mb-2">
+                                            <i class="fas fa-check-double"></i> İdeal cavab nümunəsi:
+                                        </label>
                                         <pre class="code-block correct-answer">{{ q.correct_answer }}</pre>
                                     </div>
                                 {% endif %}

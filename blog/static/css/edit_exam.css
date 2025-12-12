@@ -126,6 +126,22 @@ div.form-check input[type="checkbox"] {
     width: 0;
 }
 
+div.form-exam-checkbox {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+div.form-exam-checkbox input[type="checkbox"] {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    opacity: 1;
+    top: -3px;
+}
+ 
 /* Yeni checkbox qutusu (Bootstrap .form-check-input yerinə) */
 div.form-check label.form-check-label::before { /* Bu hissəni Bootstrap-ın default checkbox-unu stilizə etmək üçün istifadə edirik */
     content: "";

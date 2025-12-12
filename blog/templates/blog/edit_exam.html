@@ -34,7 +34,7 @@
             {{ form.exam_type.errors }}
         </div>
 
-        <div class="form-check mb-3">
+        <div class="form-check mb-3 form-exam-checkbox">
             {{ form.is_active }}
             {{ form.is_active.label_tag }}
             {{ form.is_active.errors }}
@@ -51,7 +51,7 @@
             {{ form.default_question_time_seconds }}
             {{ form.default_question_time_seconds.errors }}
         </div>
-
+ 
         <div class="mb-3">
             {{ form.max_attempts_per_user.label_tag }}
             {{ form.max_attempts_per_user }}
