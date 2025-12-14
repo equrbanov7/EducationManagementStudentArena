@@ -1,0 +1,86 @@
+.create-group-page {
+    padding-top: 32px;
+    padding-bottom: 40px;
+}
+
+.create-group-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    overflow: hidden;
+}
+
+.card-header-custom {
+    padding: 18px 20px 10px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    background: linear-gradient(120deg, #f8fafc, #eef2ff);
+}
+
+.card-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.card-subtitle {
+    font-size: 0.95rem;
+}
+
+.card-body-custom {
+    padding: 18px 20px 20px;
+}
+
+.card-hint {
+    padding: 10px 16px 14px;
+    font-size: 0.9rem;
+    background: #fefce8;
+    border-top: 1px dashed rgba(234, 179, 8, 0.6);
+    color: #854d0e;
+}
+
+/* Form fields */
+.create-group-card label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.create-group-card input[type="text"],
+.create-group-card select,
+.create-group-card textarea {
+    border-radius: 10px;
+}
+
+/* Multiple select aydın görünsün */
+.create-group-card select[multiple] {
+    min-height: 180px;
+}
+
+/* Footer buttons */
+.form-footer {
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.form-footer .btn {
+    min-width: 130px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .card-header-custom,
+    .card-body-custom,
+    .card-hint {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .form-footer {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .form-footer .btn {
+        width: 100%;
+    }
+}

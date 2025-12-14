@@ -4,7 +4,6 @@
 {% block title %}Yeni imtahan{% endblock %}
 
 {% block extraCss %}
-    {# Yeni CSS faylını qoşuruq #}
     <link rel="stylesheet" href="{% static 'css/create_exam.css' %}">
 {% endblock %}
 
@@ -19,7 +18,6 @@
         <form method="post" class="exam-form" novalidate>
             {% csrf_token %}
             
-            {# Ümumi forma xətaları #}
             {% if form.non_field_errors %}
                 <div class="form-global-errors">
                     {{ form.non_field_errors }}
@@ -27,7 +25,7 @@
             {% endif %}
 
             <div class="form-grid">
-                {# Tam genişlikdə olan sahələr (span-full) #}
+                {# --- Başlıq --- #}
                 <div class="form-group span-full">
                     {{ form.title.label_tag }}
                     {{ form.title }}
@@ -36,71 +34,153 @@
                     {% endif %}
                 </div>
 
+                {# --- Təsvir --- #}
                 <div class="form-group span-full">
                     {{ form.description.label_tag }}
                     {{ form.description }}
-                    <small class="form-text text-muted">İmtahan haqqında qısa məlumat.</small>
-                     {% if form.description.errors %}
+                    <small class="form-text text-muted">
+                        İmtahan haqqında qısa məlumat.
+                    </small>
+                    {% if form.description.errors %}
                         <div class="field-error">{{ form.description.errors.0 }}</div>
                     {% endif %}
                 </div>
 
-                {# Yan-yana olan sahələr #}
+                {# --- Tip + Aktivlik --- #}
                 <div class="form-group">
                     {{ form.exam_type.label_tag }}
                     {{ form.exam_type }}
-                     {% if form.exam_type.errors %}
+                    {% if form.exam_type.errors %}
                         <div class="field-error">{{ form.exam_type.errors.0 }}</div>
                     {% endif %}
                 </div>
 
-                 <div class="form-group checkbox-group">
-                    {# Checkbox üçün xüsusi struktur #}
+                <div class="form-group checkbox-group">
                     <label for="{{ form.is_active.id_for_label }}" class="checkbox-label-wrapper">
                         {{ form.is_active }}
                         <span class="custom-checkbox-box"></span>
                         {{ form.is_active.label }}
                     </label>
-                     {% if form.is_active.errors %}
+                    {% if form.is_active.errors %}
                         <div class="field-error">{{ form.is_active.errors.0 }}</div>
                     {% endif %}
                 </div>
 
+                {# --- Vaxt parametrləri --- #}
                 <div class="form-group">
                     {{ form.total_duration_minutes.label_tag }}
                     <div class="input-with-icon">
                         {{ form.total_duration_minutes }}
                         <i class="far fa-clock icon"></i>
                     </div>
-                    <small class="form-text text-muted">Ümumi imtahan müddəti (dəqiqə).</small>
-                     {% if form.total_duration_minutes.errors %}
+                    <small class="form-text text-muted">
+                        Ümumi imtahan müddəti (dəqiqə). Boş buraxsan, ümumi limit olmayacaq.
+                    </small>
+                    {% if form.total_duration_minutes.errors %}
                         <div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     {{ form.default_question_time_seconds.label_tag }}
-                     <div class="input-with-icon">
+                    <div class="input-with-icon">
                         {{ form.default_question_time_seconds }}
                         <i class="fas fa-stopwatch icon"></i>
                     </div>
-                    <small class="form-text text-muted">Hər sual üçün varsayılan vaxt (saniyə).</small>
-                     {% if form.default_question_time_seconds.errors %}
+                    <small class="form-text text-muted">
+                        Hər sual üçün varsayılan vaxt (saniyə). Boş buraxsan, sual-sual limit olmayacaq.
+                    </small>
+                    {% if form.default_question_time_seconds.errors %}
                         <div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     {{ form.max_attempts_per_user.label_tag }}
-                     <div class="input-with-icon">
-                         {{ form.max_attempts_per_user }}
-                         <i class="fas fa-redo icon"></i>
-                     </div>
-                     {% if form.max_attempts_per_user.errors %}
+                    <div class="input-with-icon">
+                        {{ form.max_attempts_per_user }}
+                        <i class="fas fa-redo icon"></i>
+                    </div>
+                    <small class="form-text text-muted">
+                        Bir istifadəçi üçün maksimum cəhd sayı. Boş buraxsan, limitsiz olacaq.
+                    </small>
+                    {% if form.max_attempts_per_user.errors %}
                         <div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>
                     {% endif %}
                 </div>
 
+                {# ================= GİRİŞ HÜQUQLARI BLOKU ================= #}
+                <div class="form-section-title span-full">
+                    <h2>Giriş hüquqları</h2>
+                    <p>İmtahanı kimlərin görə biləcəyini burada idarə et.</p>
+                </div>
+
+                {# --- Hamı üçün açıq? --- #}
+                <div class="form-group checkbox-group span-full">
+                    <label for="{{ form.is_public.id_for_label }}" class="checkbox-label-wrapper">
+                        {{ form.is_public }}
+                        <span class="custom-checkbox-box"></span>
+                        <span>
+                            Hamı üçün açıqdır?
+                            <small class="checkbox-help">
+                                İşarələsən, bütün tələbələr imtahanı görə biləcək. 
+                                İşarəni götürsən, yalnız seçdiyin qrup və istifadəçilər görə bilər.
+                            </small>
+                        </span>
+                    </label>
+                    {% if form.is_public.errors %}
+                        <div class="field-error">{{ form.is_public.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                {# --- Məhdudlaşdırılmış giriş: Qruplar + fərdi user-lər --- #}
+                <div id="access-restrictions" class="access-section span-full">
+                    <div class="access-section-grid">
+                        <div class="form-group">
+                            {{ form.allowed_groups.label_tag }}
+                            {{ form.allowed_groups }}
+                            <small class="form-text text-muted">
+                                Seçilən qruplardakı bütün tələbələr imtahanı görə biləcək.
+                            </small>
+                            {% if form.allowed_groups.errors %}
+                                <div class="field-error">{{ form.allowed_groups.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.allowed_users.label_tag }}
+                            {{ form.allowed_users }}
+                            <small class="form-text text-muted">
+                                Ctrl (və ya Mac-də ⌘) ilə birdən çox tələbə seçə bilərsən.
+                            </small>
+                            {% if form.allowed_users.errors %}
+                                <div class="field-error">{{ form.allowed_users.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="access-help">
+                        Heç qrup və ya istifadəçi seçməsən, amma <strong>“Hamı üçün açıqdır?”</strong> 
+                        işarəli deyilsə, imtahanı heç kim görməyəcək. 
+                    </p>
+                </div>
+
+                {# --- İmtahan kodu (optional) --- #}
+                <div class="form-group span-full">
+                    {{ form.access_code.label_tag }}
+                    <div class="input-with-icon">
+                        {{ form.access_code }}
+                        <i class="fas fa-key icon"></i>
+                    </div>
+                    <small class="form-text text-muted">
+                        Optional: 6 rəqəmli kod yazsan, imtahana girməzdən əvvəl tələbədən bu kod tələb olunacaq.
+                        Boş buraxsan, kod tələb olunmayacaq.
+                    </small>
+                    {% if form.access_code.errors %}
+                        <div class="field-error">{{ form.access_code.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                {# ================= GİRİŞ HÜQUQLARI BLOKU SON ================= #}
             </div>
 
             <div class="form-actions">
@@ -112,4 +192,26 @@
         </form>
     </div>
 </div>
+
+<script>
+    // is_public dəyişəndən asılı olaraq qrup / user seçimlərini gizlət / göstər
+    document.addEventListener("DOMContentLoaded", function () {
+        const isPublicCheckbox = document.getElementById("{{ form.is_public.id_for_label }}");
+        const accessBlock = document.getElementById("access-restrictions");
+
+        function toggleAccessBlock() {
+            if (!isPublicCheckbox || !accessBlock) return;
+            if (isPublicCheckbox.checked) {
+                accessBlock.style.display = "none";
+            } else {
+                accessBlock.style.display = "block";
+            }
+        }
+
+        if (isPublicCheckbox && accessBlock) {
+            toggleAccessBlock();
+            isPublicCheckbox.addEventListener("change", toggleAccessBlock);
+        }
+    });
+</script>
 {% endblock %}

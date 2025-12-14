@@ -45,6 +45,9 @@ urlpatterns = [
 
     # İmtahan yaratmaq (müəllim)
     path("exams/create/", views.create_exam, name="create_exam"),
+    
+    path("exams/code-check/", views.exam_code_check, name="exam_code_check"),
+
 
     # Slug-lı bütün exam URL-ləri – MÜTLƏQ bunlardan sonra gəlməlidir
     path("exams/<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),
@@ -83,10 +86,13 @@ urlpatterns = [
         views.exam_result,
         name="exam_result",
     ),
-    
+
     path('student/my-history/', views.student_exam_history, name='student_exam_history'),
     # --- Teacher statistikası ---
     path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
+    path("teacher/groups/", views.teacher_group_list, name="teacher_group_list"),
+    path("teacher/groups/create/", views.create_student_group, name="create_student_group"),
+
     path(
         "exams/<slug:slug>/results/",
         views.teacher_exam_results,
@@ -97,4 +103,5 @@ urlpatterns = [
         views.teacher_check_attempt,
         name="teacher_check_attempt",
     ),
+    
 ]

@@ -1,6 +1,7 @@
 # blog/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, Http404, JsonResponse 
+from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotAllowed, HttpResponseForbidden
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
@@ -14,18 +15,21 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import timedelta
-from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile
+from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile, StudentGroup
 from .forms import (
     SubscriptionForm,
     RegisterForm,
     PostForm,
     CommentForm,
     QuestionForm,
-    ExamForm, ExamQuestionCreateForm
+    ExamForm, ExamQuestionCreateForm,
+    StudentGroupForm
+    
 )
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
@@ -577,23 +581,20 @@ def teacher_exam_list(request):
 
 @login_required
 def create_exam(request):
-   
     _ensure_teacher(request.user)
 
     if request.method == "POST":
-        form = ExamForm(request.POST)
+        form = ExamForm(request.POST, user=request.user)
         if form.is_valid():
             exam = form.save(commit=False)
             exam.author = request.user
             exam.save()
-            # form.save(commit=False) etdiyimiz üçün related sahələri sonra saxlayırıq
+            form.save_m2m()
             return redirect("teacher_exam_detail", slug=exam.slug)
     else:
-        form = ExamForm()
+        form = ExamForm(user=request.user)
 
-    return render(request, "blog/create_exam.html", {
-        "form": form,
-    })
+    return render(request, "blog/create_exam.html", {"form": form})
 
 
 @login_required
@@ -679,26 +680,22 @@ def toggle_exam_active(request, slug):
 
 @login_required
 def edit_exam(request, slug):
-    """
-    Mövcud imtahanın parametrlərini redaktə etmək.
-    (ad, tip, vaxt, attempt limiti, aktiv/passiv və s.)
-    """
     _ensure_teacher(request.user)
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
 
     if request.method == "POST":
-        form = ExamForm(request.POST, instance=exam)
+        form = ExamForm(request.POST, instance=exam, user=request.user)
         if form.is_valid():
             form.save()
-            # Sadə success sonrası imtahan detalına qayıdırıq
             return redirect("teacher_exam_detail", slug=exam.slug)
     else:
-        form = ExamForm(instance=exam)
+        form = ExamForm(instance=exam, user=request.user)
 
     return render(request, "blog/edit_exam.html", {
         "exam": exam,
         "form": form,
     })
+
 
 
 @login_required
@@ -789,62 +786,116 @@ def delete_exam_question(request, slug, question_id):
 
 # ---------------- STUDENT TƏRƏFİ -------------------
 
+
 @login_required
 def student_exam_list(request):
-    """
-    Tələbə üçün görünən imtahanlar:
-    - is_active = True
-    - attempts_left > 0 (əgər limit qoyulubsa)
-    """
+    user = request.user
     exams = Exam.objects.filter(is_active=True).order_by("-created_at")
-    available_exams = []
+
+    exam_items = []
+
     for exam in exams:
-        left = exam.attempts_left_for(request.user)
-        # left == None → limitsiz, yoxsa 0-dan böyük olmalıdır
-        if left is None or left > 0:
-            available_exams.append((exam, left))
+        # Bu user ümumiyyətlə bu imtahan kartını görməlidir?
+        if not exam.can_user_see(user):
+            continue
+
+        # Cəhd limiti
+        left = exam.attempts_left_for(user)
+        if left is not None and left <= 0:
+            # Kartı göstərməyə dəymir – cəhd qalmayıb
+            continue
+
+        # Kod tələb olunub–olunmamağı user-ə görə hesablayırıq
+        can_without_code, _ = exam.can_user_start(user, code=None)
+
+        requires_code = False
+        if exam.access_code and not can_without_code:
+            requires_code = True
+
+        # Ekrandakı status yazısı – imtahan konfiqinə görə
+        if exam.access_code:
+            access_label = "Kod tələb olunur"
+        elif exam.is_public:
+            access_label = "Hamı üçün açıq"
+        else:
+            access_label = "Yalnız icazəli istifadəçilər"
+
+        exam_items.append({
+            "exam": exam,
+            "left": left,
+            "requires_code": requires_code,
+            "access_label": access_label,
+        })
 
     return render(request, "blog/student_exam_list.html", {
-        "exam_items": available_exams,
+        "exam_items": exam_items,
     })
+
+
+
+
+
+
+def _start_or_resume_attempt(request, exam: Exam):
+    user = request.user
+
+    qs = exam.attempts.filter(user=user).order_by("-started_at")
+
+    # Davam edən attempt varsa – ora gedək
+    current = qs.filter(status__in=["draft", "in_progress"]).first()
+    if current:
+        return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
+
+    # Bitmiş cəhdlər
+    finished_qs = qs.filter(status__in=["submitted", "expired"])
+    finished_count = finished_qs.count()
+
+    max_attempts = exam.max_attempts_per_user or 1
+    if finished_count >= max_attempts:
+        last = finished_qs.first()
+        if last:
+            return redirect("exam_result", slug=exam.slug, attempt_id=last.id)
+        return redirect("student_exam_list")
+
+    attempt_number = finished_count + 1
+    attempt = ExamAttempt.objects.create(
+        user=user,
+        exam=exam,
+        attempt_number=attempt_number,
+        status="in_progress",
+    )
+    return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
 
 @login_required
 def start_exam(request, slug):
     exam = get_object_or_404(Exam, slug=slug, is_active=True)
 
-    # Bu userin bu imtahan üzrə bütün cəhdləri
-    qs = exam.attempts.filter(user=request.user).order_by("-started_at")
-
-    # 1) Davam edən attempt varsa → ora yönləndir
-    current = qs.filter(status__in=["draft", "in_progress"]).first()
-    if current:
-        return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
-
-    # 2) Bitmiş cəhdlərin sayı
-    finished_qs = qs.filter(status__in=["submitted", "expired"])
-    finished_count = finished_qs.count()
-
-    # 3) Max attempt – default 1 olsun
-    max_attempts = exam.max_attempts_per_user or 1
-
-    if finished_count >= max_attempts:
-        # Artıq yeni attempt YOX, sadəcə son nəticəyə buraxırıq
-        last = finished_qs.first()
-        if last:
-            return redirect("exam_result", slug=exam.slug, attempt_id=last.id)
+    can_start, reason = exam.can_user_start(request.user, code=None)
+    if not can_start:
+        messages.error(request, reason or "Bu imtahana başlaya bilmirsiniz.")
         return redirect("student_exam_list")
 
-    # 4) Yeni attempt yaradılır
-    attempt_number = finished_count + 1
-    attempt = ExamAttempt.objects.create(
-        user=request.user,
-        exam=exam,
-        attempt_number=attempt_number,
-        status="in_progress",
-    )
+    return _start_or_resume_attempt(request, exam)
 
-    return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+
+@csrf_exempt   # DEV üçün CSRF-dən azad edirik (sonra istəsən götürərsən)
+@login_required
+@require_POST
+def exam_code_check(request):
+    slug = request.POST.get("exam_slug")
+    code = (request.POST.get("access_code") or "").strip()
+
+    exam = get_object_or_404(Exam, slug=slug, is_active=True)
+
+    can_start, reason = exam.can_user_start(request.user, code=code)
+    if not can_start:
+        messages.error(request, reason or "İmtahana başlamaq mümkün olmadı.")
+        return redirect("student_exam_list")
+
+    return _start_or_resume_attempt(request, exam)
+
+
 
 @login_required
 def take_exam(request, slug, attempt_id):
@@ -961,6 +1012,7 @@ def take_exam(request, slug, attempt_id):
         "remaining_seconds": remaining_seconds,
     }
     return render(request, "blog/take_exam.html", context)
+
 
 
 
@@ -1203,3 +1255,29 @@ def teacher_pending_attempts(request):
         'pending_attempts': pending_attempts,
     }
     return render(request, 'blog/teacher_pending_attempts.html', context)
+
+@login_required
+def teacher_group_list(request):
+    _ensure_teacher(request.user)
+    groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related("students")
+    return render(request, "blog/teacher_group_list.html", {"groups": groups})
+
+
+@login_required
+def create_student_group(request):
+    _ensure_teacher(request.user)
+
+    if request.method == "POST":
+        form = StudentGroupForm(request.POST, teacher=request.user)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.teacher = request.user
+            group.save()
+            form.save_m2m()
+            messages.success(request, "Qrup uğurla yaradıldı.")
+            return redirect("teacher_group_list")
+    else:
+        form = StudentGroupForm(teacher=request.user)
+
+    return render(request, "blog/create_student_group.html", {"form": form})
+

@@ -4,46 +4,175 @@
 {% block title %}İmtahanlar{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/student_exam_list.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1>Mövcud imtahanlar</h1>
+        <div class="container my-4">
+            <h1>Mövcud imtahanlar</h1>
 
-    {% if exam_items %}
-        <ul class="list-group">
-            {% for exam, left in exam_items %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ exam.title }}</strong><br>
-                        <small>
-                            Tip: {{ exam.get_exam_type_display }} |
-                            Müəllif: {{ exam.author.username }} |
-                            Yaradılma: {{ exam.created_at|date:"d.m.Y H:i" }}
-                        </small><br>
-                        {% if exam.total_duration_minutes %}
-                            <small>Ümumi müddət: {{ exam.total_duration_minutes }} dəq</small>
-                        {% endif %}
-                    </div>
-                    <div>
-                        {% if left %}
-                            {% if left == None %}
-                                <span class="badge bg-secondary">Attempts: limitsiz</span>
-                            {% else %}
-                                <span class="badge bg-secondary">Qalan cəhd: {{ left }}</span>
-                            {% endif %}
-                        {% endif %}
-                        <a href="{% url 'start_exam' exam.slug %}" class="btn btn-primary ms-3">
-                            İmtahana başla
-                        </a>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Hal-hazırda sizin üçün aktiv imtahan yoxdur.</p>
-    {% endif %}
-</div>
+            {% if exam_items %}
+                <ul class="list-group">
+                    {% for item in exam_items %}
+                        {% with exam=item.exam left=item.left %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ exam.title }}</strong><br>
+                                <small>
+                                    Tip: {{ exam.get_exam_type_display }} |
+                                    Müəllif: {{ exam.author.username }} |
+                                    Yaradılma: {{ exam.created_at|date:"d.m.Y H:i" }}
+                                </small><br>
+
+                                {% if exam.total_duration_minutes %}
+                                    <small>Ümumi müddət: {{ exam.total_duration_minutes }} dəq</small><br>
+                                {% endif %}
+
+                                {% if item.access_label %}
+                                    <small class="{% if item.requires_code %}status-red{% endif %}">
+                                        {{ item.access_label }}
+                                    </small>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-end">
+                                {% if left %}
+                                    <span class="badge bg-secondary">
+                                        Qalan cəhd: {{ left }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        Attempts: limitsiz
+                                    </span>
+                                {% endif %}
+
+                                {# Kod tələb olunursa – modal açan düymə #}
+                                {% if item.requires_code %}
+                                    <button type="button"
+                                            class="btn btn-outline-primary ms-3 customBtn"
+                                            data-exam-slug="{{ exam.slug }}"
+                                            data-exam-title="{{ exam.title }}"
+                                            onclick="openExamCodeModal(this)">
+                                        İmtahana başla
+                                    </button>
+                                {% else %}
+                                    {# Əks halda birbaşa start_exam #}
+                                    <a href="{% url 'start_exam' exam.slug %}"
+                                    class="btn btn-primary ms-3">
+                                        İmtahana başla
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endwith %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Hal-hazırda sizin üçün aktiv imtahan yoxdur.</p>
+            {% endif %}
+        </div>
+
+    {# ================= KOD MODALI (Modern Dizayn) ================= #}
+    <div id="exam-code-backdrop" class="exam-code-backdrop">
+        <div class="exam-code-modal">
+            
+            <button type="button" class="exam-code-close-btn" onclick="closeExamCodeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="exam-code-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+
+            <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
+            
+            <p id="exam-code-text" class="exam-code-text">
+                İmtahana başlamaq üçün 6 rəqəmli kodu daxil edin.
+            </p>
+
+            <form id="exam-code-form" method="post" action="{% url 'exam_code_check' %}">
+                {% csrf_token %}
+                <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
+            
+                <div class="exam-input-wrapper">
+                    <input type="text"
+                        name="access_code"
+                        id="exam-code-input"
+                        class="exam-code-input"
+                        maxlength="6"
+                        placeholder="• • • • • •"
+                        autocomplete="off"
+                        inputmode="numeric"
+                        required>
+                </div>
+            
+                <div class="exam-code-actions">
+                    <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">
+                        Ləğv et
+                    </button>
+                    <button type="submit" class="btn-modal btn-confirm">
+                        Təsdiqlə
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <script>
+        // Elementləri seçirik
+        const backdrop = document.getElementById("exam-code-backdrop");
+        const titleEl = document.getElementById("exam-code-title");
+        const textEl = document.getElementById("exam-code-text");
+        const slugInput = document.getElementById("exam-code-exam-slug");
+        const codeInput = document.getElementById("exam-code-input");
+    
+        function openExamCodeModal(button) {
+            const slug = button.getAttribute("data-exam-slug");
+            const title = button.getAttribute("data-exam-title");
+    
+            slugInput.value = slug;
+            titleEl.textContent = `Giriş Kodu`; 
+            textEl.innerHTML = `<strong>"${title}"</strong> imtahanına keçid üçün kodu yazın.`;
+    
+            codeInput.value = "";
+    
+            // Modalı göstər
+            backdrop.style.display = "flex";
+            
+            // Animasiyanı işə sal
+            setTimeout(() => {
+                backdrop.classList.add("show");
+                codeInput.focus();
+            }, 10);
+        }
+    
+        function closeExamCodeModal() {
+            // Animasiyanı geri al
+            backdrop.classList.remove("show");
+            
+            // CSS transition bitəndən sonra gizlət
+            setTimeout(() => {
+                backdrop.style.display = "none";
+            }, 300);
+        }
+    
+        // ==========================================
+        // YENİ HİSSƏ: Overlay (Backdrop) Klikləmə
+        // ==========================================
+        backdrop.addEventListener('click', function (e) {
+            // e.target -> kliklənən elementdir
+            // Biz yoxlayırıq ki, kliklənən yer Backdrop-durmu? 
+            // (Yəni modalın içinə yox, qırağına basılıb?)
+            if (e.target === backdrop) {
+                closeExamCodeModal();
+            }
+        });
+    
+        // Inputa yalnız rəqəm yazılmasını təmin edən kod
+        codeInput.addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+    
 {% endblock %}

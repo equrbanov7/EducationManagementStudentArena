@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category
+from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category, ExamAttempt, ExamAnswer, StudentGroup
 
 
 class SubscriptionForm(forms.Form):
@@ -161,6 +161,7 @@ class QuestionForm(forms.ModelForm):
         }
 
 
+
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
@@ -169,6 +170,10 @@ class ExamForm(forms.ModelForm):
             "description",
             "exam_type",
             "is_active",
+            "is_public",
+            "allowed_users",
+            "allowed_groups",
+            "access_code",
             "total_duration_minutes",
             "default_question_time_seconds",
             "max_attempts_per_user",
@@ -189,6 +194,20 @@ class ExamForm(forms.ModelForm):
             "is_active": forms.CheckboxInput(attrs={
                 "class": "form-check-input",
             }),
+            "is_public": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+            "allowed_users": forms.SelectMultiple(attrs={
+                "class": "form-control",
+            }),
+            "allowed_groups": forms.SelectMultiple(attrs={
+                "class": "form-control",
+            }),
+            "access_code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Məs: 123456 (6 rəqəm)",
+                "maxlength": "6",
+            }),
             "total_duration_minutes": forms.NumberInput(attrs={
                 "class": "form-control",
                 "placeholder": "Məs: 30 (dəqiqə)",
@@ -207,10 +226,49 @@ class ExamForm(forms.ModelForm):
             "description": "Qısa izah",
             "exam_type": "İmtahan tipi",
             "is_active": "Aktiv olsun?",
+            "is_public": "Hamı üçün açıqdır?",
+            "allowed_users": "Fərdi icazəli istifadəçilər",
+            "allowed_groups": "İcazəli qruplar",
+            "access_code": "İmtahan kodu (6 rəqəm)",
             "total_duration_minutes": "Ümumi müddət (dəqiqə)",
             "default_question_time_seconds": "Hər sual üçün default vaxt (saniyə)",
             "max_attempts_per_user": "Bir istifadəçi üçün maksimum cəhd sayı",
         }
+
+    def __init__(self, *args, **kwargs):
+        """
+        Teacher-ə uyğun olaraq seçimləri filtr eləmək üçün
+        view-dən ExamForm(user=request.user, ...) şəklində çağırmaq məqsədi ilə.
+        """
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        # Default querysets
+        self.fields["allowed_users"].queryset = User.objects.all().order_by("username")
+        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by("name")
+
+        # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
+        if user is not None:
+            # Məsələn, bütün user-lar + özünü çıxmaq (istəsən burada filter şərtini sərtləşdirə bilərsən)
+            self.fields["allowed_users"].queryset = User.objects.exclude(
+                id=user.id
+            ).order_by("username")
+
+            # Yalnız HƏMİN müəllimin yaratdığı qruplar
+            self.fields["allowed_groups"].queryset = StudentGroup.objects.filter(
+                teacher=user
+            ).order_by("name")
+
+    def clean_access_code(self):
+        code = (self.cleaned_data.get("access_code") or "").strip()
+        if not code:
+            return ""  # boş buraxmaq olar
+
+        if not code.isdigit() or len(code) != 6:
+            raise forms.ValidationError("Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456).")
+
+        return code
+
 
 class ExamQuestionCreateForm(forms.ModelForm):
     """
@@ -374,3 +432,36 @@ class ExamQuestionCreateForm(forms.ModelForm):
         """
         question_instance.options.all().delete()
         self.create_options(question_instance)
+
+
+class StudentGroupForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ["name", "students"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Məs: 875i, 842A1 və s.",
+            }),
+            "students": forms.SelectMultiple(attrs={
+                "class": "form-select",
+            }),
+        }
+        labels = {
+            "name": "Qrup adı / nömrəsi",
+            "students": "Qrupdakı tələbələr",
+        }
+        help_texts = {
+            "students": "Birdən çox tələbə seçmək üçün Ctrl/Cmd düyməsini basılı saxlayın.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        teacher = kwargs.pop("teacher", None)
+        super().__init__(*args, **kwargs)
+
+        qs = User.objects.filter(is_active=True).order_by("username")
+
+        if teacher is not None:
+            qs = qs.exclude(id=teacher.id)
+
+        self.fields["students"].queryset = qs

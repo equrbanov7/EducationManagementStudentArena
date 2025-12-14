@@ -1,0 +1,122 @@
+.group-page {
+    padding-top: 24px;
+    padding-bottom: 32px;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.page-subtitle {
+    font-size: 0.95rem;
+}
+
+.create-group-btn {
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Group card */
+.group-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.group-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.group-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.group-meta {
+    font-size: 0.85rem;
+}
+
+.group-stats .badge {
+    font-size: 0.85rem;
+}
+
+/* Students list */
+.group-card-body {
+    border-top: 1px dashed rgba(148, 163, 184, 0.6);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.students-title {
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+.students-badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.student-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f3f4ff;
+    color: #1e293b;
+    border: 1px solid rgba(129, 140, 248, 0.4);
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 40px 16px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.empty-icon {
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+    color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .create-group-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .group-card {
+        padding: 14px;
+    }
+}

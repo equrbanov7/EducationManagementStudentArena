@@ -65,6 +65,7 @@ li.list-group-item small {
     display: block; /* Hər small elementi yeni sətirə keçsin */
 }
 
+
 /* --- Cəhd Sayı Badgesi (Bootstrap .badge .bg-secondary override) --- */
 li.list-group-item .badge.bg-secondary {
     background-color: #e0e7ff !important; /* Açıq mavi */
@@ -78,7 +79,7 @@ li.list-group-item .badge.bg-secondary {
 }
 
 /* --- İmtahana Başla Düyməsi (Bootstrap .btn .btn-primary override) --- */
-li.list-group-item .btn.btn-primary {
+li.list-group-item .btn.btn-primary, .customBtn {
     background-color: var(--primary-color, #3b82f6);
     color: white;
     border: none;
@@ -90,16 +91,23 @@ li.list-group-item .btn.btn-primary {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    cursor: pointer;
     gap: 8px;
     box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
     margin-left: 15px !important; /* Bootstrap ms-3-ü override edir */
 }
 
-li.list-group-item .btn.btn-primary:hover {
+li.list-group-item .btn.btn-primary:hover,
+li.list-group-item .customBtn:hover {
     background-color: var(--primary-dark, #1e3a8a);
     transform: translateY(-2px);
     box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.5);
-    color: white; /* Hover zamanı mətn rəngini qoru */
+    color: #fff;
+}
+
+li.list-group-item .status-red {
+    color: #dc2626; /* Qırmızı rəng */
+    font-weight: 700; /* Qalın şrift (opsional) */
 }
 
 
@@ -115,6 +123,167 @@ li.list-group-item .btn.btn-primary:hover {
     margin-top: 30px;
 }
 
+
+/* ========================================= */
+/* YENİ MODAL DİZAYNI (Custom + Bootstrap)   */
+/* ========================================= */
+
+/* ================= MODAL DİZAYNI ================= */
+
+/* 1. Arxa Fon (Backdrop) */
+.exam-code-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.65); /* Tünd mavi-boz ton */
+    backdrop-filter: blur(8px); /* Güclü bulanıqlıq effekti */
+    z-index: 1050;
+    display: none; /* JS ilə flex olacaq */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.exam-code-backdrop.show {
+    opacity: 1;
+}
+
+/* 2. Modal Qutusu */
+.exam-code-modal {
+    background: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    padding: 35px 30px;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.exam-code-backdrop.show .exam-code-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* 3. Kilid İkonu */
+.exam-code-icon {
+    width: 60px;
+    height: 60px;
+    background: #eff6ff;
+    color: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 20px auto;
+}
+
+/* 4. Mətnlər */
+.exam-code-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.exam-code-text {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+/* 5. Input Sahəsi (PIN Stilində) */
+.exam-input-wrapper {
+    margin-bottom: 30px;
+}
+
+.exam-code-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b82f6;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    text-align: center;
+    letter-spacing: 12px; /* Rəqəmləri aralayır */
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: monospace;
+}
+
+.exam-code-input:focus {
+    border-color: #3b82f6;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.exam-code-input::placeholder {
+    color: #cbd5e1;
+    letter-spacing: 4px;
+    font-size: 1.5rem;
+    transform: translateY(-2px);
+}
+
+/* 6. Düymələr */
+.exam-code-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-modal {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+}
+.btn-cancel:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.btn-confirm {
+    background: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+.btn-confirm:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+}
+
+/* 7. Bağla (X) Düyməsi */
+.exam-code-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.exam-code-close-btn:hover {
+    color: #ef4444;
+}
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
@@ -161,6 +330,8 @@ li.list-group-item .btn.btn-primary:hover {
         font-size: 1rem;
     }
 }
+
+
 
 @media (max-width: 480px) {
     li.list-group-item strong {

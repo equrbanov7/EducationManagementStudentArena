@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Yeni tələbə qrupu yarat{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/create_student_group.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container create-group-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="create-group-card">
+                <div class="card-header-custom">
+                    <h1 class="card-title">Yeni tələbə qrupu</h1>
+                    <p class="card-subtitle text-muted mb-0">
+                        Məsələn: <strong>875i</strong>, <strong>842A1</strong> və s. Qrupa tələbələri əlavə etdikdən sonra
+                        imtahanları birbaşa bu qruplara aça biləcəksən.
+                    </p>
+                </div>
+
+                <div class="card-body-custom">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {% if form.name.help_text %}
+                                <div class="form-text">{{ form.name.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.name.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.students.label_tag }}
+                            {{ form.students }}
+                            {% if form.students.help_text %}
+                                <div class="form-text">{{ form.students.help_text }}</div>
+                            {% else %}
+                                <div class="form-text">
+                                    Birdən çox tələbə seçmək üçün 
+                                    <strong>Ctrl</strong> (Windows) və ya <strong>Cmd</strong> (Mac)
+                                    düyməsini basılı saxlayaraq click et.
+                                </div>
+                            {% endif %}
+                            {% for error in form.students.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-footer d-flex justify-content-between align-items-center">
+                            <a href="{% url 'teacher_group_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Qruplara qayıt
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Qrupu yarat
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-hint">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Daha sonra imtahan yaradarkən <strong>İcazəli qruplar</strong> hissəsindən bu qrupu seçə biləcəksən.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

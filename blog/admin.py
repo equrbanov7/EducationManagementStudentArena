@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Post, Comment, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer
+from .models import Category, Post, Comment, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, StudentGroup
 
 
 @admin.register(Category)
@@ -39,8 +39,8 @@ class ExamQuestionOptionInline(admin.TabularInline):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ("title", "exam_type", "author", "is_active", "created_at")
-    list_filter = ("exam_type", "is_active", "author")
+    list_display = ("title", "exam_type", "author", "is_active", "is_public", "created_at")
+    list_filter = ("exam_type", "is_active", "is_public", "author")
     search_fields = ("title", "description", "author__username")
 
 
@@ -68,3 +68,12 @@ class ExamAnswerAdmin(admin.ModelAdmin):
     list_display = ("attempt", "question", "is_correct", "updated_at")
     list_filter = ("question__exam", "is_correct")
     search_fields = ("attempt__user__username", "question__text")
+
+
+
+@admin.register(StudentGroup)
+class StudentGroupAdmin(admin.ModelAdmin):
+    list_display = ("name", "teacher", "created_at")
+    search_fields = ("name", "teacher__username", "students__username")
+    filter_horizontal = ("students",)
+

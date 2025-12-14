@@ -36,6 +36,14 @@
                  <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
                     <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
                 </a>
+                            {# --- YENİ: Qruplar düymələri --- #}
+                <a href="{% url 'teacher_group_list' %}" class="profile-create-post-btn">
+                    <i class="fas fa-users"></i> Qruplarım
+                </a>
+
+                <a href="{% url 'create_student_group' %}" class="profile-create-post-btn">
+                    <i class="fas fa-user-plus"></i> Qrup yarat
+                </a>
             {% endif %}
         {% endif %}
     </header>

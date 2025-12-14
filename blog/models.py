@@ -199,6 +199,46 @@ class Question(models.Model):
 
 # ---- Models for Exam functionality ----
 
+
+
+class StudentGroup(models.Model):
+    """
+    Müəllimin yaratdığı tələbə qrupu.
+    Məs: 875i, 842A1 və s.
+    """
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="student_groups",
+        verbose_name="Müəllim"
+    )
+    name = models.CharField("Qrup adı / nömrəsi", max_length=50)
+
+    students = models.ManyToManyField(
+        User,
+        related_name="student_groups_as_student",
+        blank=True,
+        verbose_name="Tələbələr"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Tələbə qrupu"
+        verbose_name_plural = "Tələbə qrupları"
+        unique_together = ("teacher", "name")  # eyni müəllimdə eyni adda iki qrup olmasın
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.teacher.username})"
+
+    def has_student(self, user: User) -> bool:
+        """
+        Verilən user bu qrupun üzvüdürmü?
+        """
+        return self.students.filter(id=user.id).exists()
+
+
 class Exam(models.Model):
     EXAM_TYPE_CHOICES = (
         ("test", "Test imtahanı"),
@@ -252,6 +292,37 @@ class Exam(models.Model):
         help_text="Məs: 1, 2, 3... Boş saxlasanız, attempts limitsiz olacaq."
     )
 
+    # --- Giriş məhdudiyyətləri ---
+
+    is_public = models.BooleanField(
+        "Hamı üçün açıqdır?",
+        default=True,
+        help_text="Aktivdirsə, imtahan tələbə siyahısı məhdudiyyəti olmadan görünə bilər."
+    )
+
+    allowed_users = models.ManyToManyField(
+        User,
+        related_name="allowed_exams",
+        blank=True,
+        verbose_name="İcazəli tələbələr (fərdi)",
+        help_text="Yalnız bu istifadəçilər imtahanı görə / başlaya bilsin (qrupdan əlavə olaraq)."
+    )
+
+    allowed_groups = models.ManyToManyField(
+        StudentGroup,
+        related_name="exams",
+        blank=True,
+        verbose_name="İcazəli qruplar",
+        help_text="Bu qruplardakı bütün tələbələr imtahana giriş icazəsi alır."
+    )
+
+    access_code = models.CharField(
+        "İmtahan kodu (6 rəqəm)",
+        max_length=6,
+        blank=True,
+        help_text="İstəyə görə əlavə təhlükəsizlik üçün 6 rəqəmli kod."
+    )
+
     slug = models.SlugField(max_length=220, unique=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -264,38 +335,170 @@ class Exam(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_exam_type_display()})"
 
+    # ---------- SLUG ----------
+
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
+            # slug unikallığı üçün random əlavə edirik
             self.slug = f"{base_slug}-{get_random_string(6)}"
         super().save(*args, **kwargs)
 
-    # ---- İstifadəçi üçün attempt limiti ilə bağlı köməkçi metodlar ----
+    # ---------- ATTEMPT LIMIT MƏNTİQİ ----------
 
-    def attempts_left_for(self, user) -> int | None:
+    def attempts_left_for(self, user: User) -> int | None:
         """
         Bu user üçün neçə attempt qalıb?
         None → limitsiz deməkdir.
         Draft attempt-lər limitsayımda nəzərə alınmır.
+
+        Qeyd: ExamAttempt modeli bu Exam-ə FK ilə `related_name="attempts"`
+        verildiyi üçün burada `self.attempts` istifadə olunur.
         """
         if not self.max_attempts_per_user:
             return None  # limitsiz
 
-        used = self.attempts.filter(user=user).exclude(
-            status="draft"
-        ).count()
+        used = (
+            self.attempts
+            .filter(user=user)
+            .exclude(status="draft")  # draft = davam edən / saxlanmış
+            .count()
+        )
         left = self.max_attempts_per_user - used
         return max(left, 0)
 
-    def can_user_start(self, user) -> bool:
+    # ---------- ACCESS NƏZARƏTİ (user + qrup + kod) ----------
+
+
+    def _user_in_allowed_groups(self, user: User) -> bool:
         """
-        View-də istifadə üçün: bu user yeni attempt başlada bilərmi?
+        User hər hansı icazəli qrupun üzvüdürmü?
         """
+        return self.allowed_groups.filter(students=user).exists()
+
+    def can_user_see(self, user: User) -> bool:
+        """
+        Student imtahan kartını / məlumatını görməlidirmi?
+        Burada hələ cəhd limiti yoxlanmır, yalnız 'görmə' hüququ.
+        """
+        # 1) Imtahan müəllifi hər zaman görür
+        if user == self.author:
+            return True
+
+        # 2) Aktiv deyilsə – heç kimə göstərməyək
         if not self.is_active:
             return False
-        if not self.max_attempts_per_user:
+
+        # 3) Tam public + heç bir əlavə məhdudiyyət yoxdursa
+        if (
+            self.is_public
+            and not self.allowed_users.exists()
+            and not self.allowed_groups.exists()
+            and not self.access_code
+        ):
             return True
-        return self.attempts_left_for(user) > 0
+
+        # 4) Fərdi user kimi icazəlidir
+        if self.allowed_users.filter(id=user.id).exists():
+            return True
+
+        # 5) Qrup vasitəsilə icazəlidir
+        if self._user_in_allowed_groups(user):
+            return True
+
+        # 6) Kodla giriş: kart görünsün, amma start üçün kod tələb olunacaq
+        if self.access_code:
+            return True
+
+        # 7) Ümumiyyətlə giriş icazəsi yoxdur
+        return False
+
+    def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
+        """
+        Student yeni attempt başlaya bilərmi?
+
+        Geri qaytarır:
+        - (True, None)    → hər şey qaydasındadır, başlaya bilər
+        - (False, reason) → niyə başlaya bilmədiyi barədə mesaj
+        """
+        # 1) Aktiv deyil
+        if not self.is_active:
+            return False, "Bu imtahan hazırda aktiv deyil."
+
+        # 2) Cəhd limiti
+        left = self.attempts_left_for(user)
+        if left is not None and left <= 0:
+            return False, "Artıq bütün icazə verilən cəhdlərinizi istifadə etmisiniz."
+
+        # 3) Müəllif (exam sahibi) – cəhd limiti keçməyibsə, hər zaman başlaya bilər
+        if user == self.author:
+            return True, None
+
+        in_allowed_any = (
+            self.allowed_users.filter(id=user.id).exists()
+            or self._user_in_allowed_groups(user)
+        )
+
+        # 4) Ümumiyyətlə kod təyin olunmayıbsa
+        if not self.access_code:
+            # Publicdirsə – hamı başlaya bilər
+            if self.is_public:
+                return True, None
+
+            # Public deyil, amma user icazəli siyahıdadırsa
+            if in_allowed_any:
+                return True, None
+
+            return False, "Bu imtahan üçün giriş icazəniz yoxdur."
+
+        # 5) Kod təyin olunubsa
+        # 5.1: User allowed_users və ya allowed_groupdadırsa – kod tələb etməyək
+        if in_allowed_any:
+            return True, None
+
+        # 5.2: Yalnız kodla giriş
+        if not code:
+            return False, "İmtahan kodu tələb olunur."
+        if code != self.access_code:
+            return False, "İmtahan kodu yanlışdır."
+
+        return True, None
+
+    
+    def requires_code_for(self, user: User) -> bool:
+        """
+        Bu user imtahana başlamaq üçün kod yazmalıdırmı?
+
+        müəllif və ya ümumi müəllim → yox
+        access_code boşdursa → yox
+        allowed_users / allowed_groups içindədirsə → yox
+        qalan hallarda, access_code varsa → bəli (kod tələb olunur)
+        """
+        # müəllim və ya müəllif üçün kod tələb etmirik
+        if user == self.author or getattr(user, "is_teacher", False):
+            return False
+
+        # imtahan aktiv deyilsə, ümumiyyətlə girmək olmaz
+        if not self.is_active:
+            return False
+
+        # heç bir kod təyin olunmayıbsa
+        if not self.access_code:
+            return False
+
+        # fərdi icazəsi varsa
+        if self.allowed_users.filter(id=user.id).exists():
+            return False
+
+        # qrup vasitəsilə icazəsi varsa
+        if self._user_in_allowed_groups(user):
+            return False
+
+        # yuxarıdakılardan heç biri deyilsə, kod tələb olunur
+        return True
+
+    
+    
 
 
 class ExamQuestion(models.Model):
@@ -624,6 +827,9 @@ class ExamAnswerFile(models.Model):
 
     def __str__(self):
         return f"{self.filename()} ({self.answer_id})"
+
+
+
 
 
 

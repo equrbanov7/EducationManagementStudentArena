@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tələbə qruplarım{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/teacher_group_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container group-page">
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">Tələbə qruplarım</h1>
+            <p class="page-subtitle text-muted mb-0">
+                Buradan qruplarını idarə edə və tələbələri qruplara əlavə edə bilərsən.
+            </p>
+        </div>
+        <a href="{% url 'create_student_group' %}" class="btn btn-primary create-group-btn">
+            <i class="fas fa-users me-2"></i> Yeni qrup yarat
+        </a>
+    </div>
+
+    {% if groups %}
+        <div class="group-list">
+            {% for group in groups %}
+                <div class="group-card">
+                    <div class="group-card-header">
+                        <div>
+                            <h2 class="group-name">{{ group.name }}</h2>
+                            <p class="group-meta text-muted mb-0">
+                                {{ group.created_at|date:"d.m.Y H:i" }} tarixində yaradılıb
+                            </p>
+                        </div>
+                        <div class="group-stats">
+                            <span class="badge rounded-pill bg-light text-dark">
+                                <i class="fas fa-user-graduate me-1"></i>
+                                {{ group.students.count }} tələbə
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="group-card-body">
+                        <h6 class="students-title text-muted">Qrupun tələbələri:</h6>
+                        {% if group.students.all %}
+                            <div class="students-badge-list">
+                                {% for student in group.students.all %}
+                                    <span class="student-badge">
+                                        <i class="fas fa-user me-1"></i>{{ student.username }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-users-slash"></i>
+            </div>
+            <h3>Hələ qrup yaratmamısan</h3>
+            <p class="text-muted">
+                Qruplar vasitəsilə imtahanları daha rahat idarə edə bilərsən. Başlamaq üçün yeni qrup yarat.
+            </p>
+            <a href="{% url 'create_student_group' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i> İlk qrupunu yarat
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

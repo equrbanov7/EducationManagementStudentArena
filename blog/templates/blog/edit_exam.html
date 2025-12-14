@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% load static %} {# static tagını unutmayın #}
+{% load static %}
 
 {% block title %}{{ exam.title }} - Redaktə{% endblock %}
 
 {% block extraCss %}
-    {# Bu hissəni əlavə edin və ya mövcud olanı dəyişdirin #}
     <link rel="stylesheet" href="{% static 'css/edit_exam.css' %}">
 {% endblock %}
 
@@ -14,7 +13,13 @@
 
     <form method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
+
+        {# Ümumi forma xətaları #}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
 
         <div class="mb-3">
             {{ form.title.label_tag }}
@@ -58,10 +63,92 @@
             {{ form.max_attempts_per_user.errors }}
         </div>
 
+        {# ================= GİRİŞ HÜQUQLARI BLOKU ================= #}
+        <hr class="my-4">
+
+        <h3 class="mb-2">Giriş hüquqları</h3>
+        <p class="text-muted mb-3" style="font-size: 0.9rem;">
+            İmtahanı kimlərin görə biləcəyini burada idarə et.
+        </p>
+
+        {# Hamı üçün açıq? #}
+        <div class="form-check mb-3 form-exam-checkbox">
+            {{ form.is_public }}
+            {{ form.is_public.label_tag }}
+            {{ form.is_public.errors }}
+            <small class="text-muted d-block" style="font-size: 0.85rem;">
+                İşarələsən, imtahan bütün tələbələrə açıq olacaq. İşarəni götürsən,
+                yalnız seçdiyin qruplar və istifadəçilər görə bilər.
+            </small>
+        </div>
+
+        {# Qrup və fərdi istifadəçi seçimi #}
+        <div id="access-restrictions" class="mb-3 p-3 border rounded">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.allowed_groups.label_tag }}
+                    {{ form.allowed_groups }}
+                    {{ form.allowed_groups.errors }}
+                    <small class="text-muted d-block" style="font-size: 0.85rem;">
+                        Seçilən qruplardakı bütün tələbələr bu imtahanı görə biləcək.
+                    </small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form.allowed_users.label_tag }}
+                    {{ form.allowed_users }}
+                    {{ form.allowed_users.errors }}
+                    <small class="text-muted d-block" style="font-size: 0.85rem;">
+                        Ctrl (və ya Mac-də ⌘) ilə birdən çox tələbə seçə bilərsən.
+                    </small>
+                </div>
+            </div>
+
+            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                Heç qrup və istifadəçi seçməsən, amma <strong>“Hamı üçün açıqdır?”</strong>
+                işarəli deyilsə, imtahan heç kimə görünməyəcək.
+            </p>
+        </div>
+
+        {# İmtahan kodu (optional) #}
+        <div class="mb-3">
+            {{ form.access_code.label_tag }}
+            {{ form.access_code }}
+            {{ form.access_code.errors }}
+            <small class="text-muted d-block" style="font-size: 0.85rem;">
+                Optional: 6 rəqəmli kod (məs: 123456). Əgər doldursan, tələbə imtahana
+                başlamazdan əvvəl bu kodu daxil etməlidir. Boş buraxsan, kod tələb olunmayacaq.
+            </small>
+        </div>
+        {# ================= GİRİŞ HÜQUQLARI BLOKU SON ================= #}
+
         <button type="submit" class="btn btn-success">Yadda saxla</button>
         <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-secondary">
             Ləğv et
         </a>
     </form>
 </div>
+
+<script>
+    // is_public dəyişəndən asılı olaraq qrup / user hissəsini gizlət/göstər
+    document.addEventListener("DOMContentLoaded", function () {
+        const isPublicCheckbox = document.getElementById("{{ form.is_public.id_for_label }}");
+        const accessBlock = document.getElementById("access-restrictions");
+
+        function toggleAccessBlock() {
+            if (!isPublicCheckbox || !accessBlock) return;
+            if (isPublicCheckbox.checked) {
+                accessBlock.style.display = "none";
+            } else {
+                accessBlock.style.display = "block";
+            }
+        }
+
+        toggleAccessBlock();
+
+        if (isPublicCheckbox) {
+            isPublicCheckbox.addEventListener("change", toggleAccessBlock);
+        }
+    });
+</script>
 {% endblock %}
