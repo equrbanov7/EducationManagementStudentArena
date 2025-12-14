@@ -41,9 +41,9 @@
                     <i class="fas fa-users"></i> Qruplarım
                 </a>
 
-                <a href="{% url 'create_student_group' %}" class="profile-create-post-btn">
+                {% comment %} <a href="{% url 'create_student_group' %}" class="profile-create-post-btn">
                     <i class="fas fa-user-plus"></i> Qrup yarat
-                </a>
+                </a> {% endcomment %}
             {% endif %}
         {% endif %}
     </header>

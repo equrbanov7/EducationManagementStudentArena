@@ -90,8 +90,13 @@ urlpatterns = [
     path('student/my-history/', views.student_exam_history, name='student_exam_history'),
     # --- Teacher statistikası ---
     path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
-    path("teacher/groups/", views.teacher_group_list, name="teacher_group_list"),
-    path("teacher/groups/create/", views.create_student_group, name="create_student_group"),
+    
+    path('teacher/groups/', views.teacher_group_list, name='teacher_group_list'),
+    
+    # Modal üçün lazım olan URL-lər:
+    path('teacher/groups/create/', views.teacher_create_group, name='teacher_create_group'),
+    path('teacher/groups/update/<int:group_id>/', views.teacher_update_group, name='teacher_update_group'),
+    path('teacher/groups/delete/<int:group_id>/', views.teacher_delete_group, name='teacher_delete_group'),
 
     path(
         "exams/<slug:slug>/results/",

@@ -66,6 +66,8 @@
     min-width: 130px;
 }
 
+
+
 /* Responsive */
 @media (max-width: 576px) {
     .card-header-custom,
