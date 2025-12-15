@@ -431,7 +431,7 @@ def user_profile(request, username):
         )
     
     # 2. Pagination
-    paginator = Paginator(user_posts_list, 4)
+    paginator = Paginator(user_posts_list, 6)
     page_number = request.GET.get('page')
     try:
         posts = paginator.page(page_number)
@@ -786,15 +786,36 @@ def delete_exam_question(request, slug, question_id):
 
 # ---------------- STUDENT TƏRƏFİ -------------------
 
-
 @login_required
 def student_exam_list(request):
     user = request.user
-    exams = Exam.objects.filter(is_active=True).order_by("-created_at")
+    
+    # 1. BAZA SORĞUSU (İlkin Filter)
+    # Hələ icazələri yoxlamırıq, sadəcə aktivləri gətiririk
+    exams_qs = Exam.objects.filter(is_active=True).select_related('author')
 
+    # --- SEARCH (Axtarış) ---
+    search_query = request.GET.get('q')
+    if search_query:
+        # İmtahan adı və ya müəllim adına görə axtarış
+        exams_qs = exams_qs.filter(
+            Q(title__icontains=search_query) | 
+            Q(author__username__icontains=search_query)
+        )
+
+    # --- FILTER (Tipə görə) ---
+    filter_type = request.GET.get('type')
+    if filter_type:
+        exams_qs = exams_qs.filter(exam_type=filter_type)
+    
+    # Sıralama
+    exams_qs = exams_qs.order_by("-created_at")
+
+    # 2. PYTHON MƏNTİQİ (Permissions & List Construction)
+    # Bazadan gələn nəticələri yoxlayıb siyahıya yığırıq
     exam_items = []
 
-    for exam in exams:
+    for exam in exams_qs:
         # Bu user ümumiyyətlə bu imtahan kartını görməlidir?
         if not exam.can_user_see(user):
             continue
@@ -812,7 +833,7 @@ def student_exam_list(request):
         if exam.access_code and not can_without_code:
             requires_code = True
 
-        # Ekrandakı status yazısı – imtahan konfiqinə görə
+        # Ekrandakı status yazısı
         if exam.access_code:
             access_label = "Kod tələb olunur"
         elif exam.is_public:
@@ -827,10 +848,26 @@ def student_exam_list(request):
             "access_label": access_label,
         })
 
-    return render(request, "blog/student_exam_list.html", {
-        "exam_items": exam_items,
-    })
+    # 3. PAGINATION (Səhifələmə)
+    # Hər səhifədə 6 imtahan göstərək
+    paginator = Paginator(exam_items, 2) 
+    page_number = request.GET.get('page')
 
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        # Əgər page rəqəm deyilsə, birinci səhifəni göstər
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # Əgər səhifə limitdən kənardırsa, sonuncu səhifəni göstər
+        page_obj = paginator.page(paginator.num_pages)
+
+    context = {
+        "page_obj": page_obj,      # Pagination idarəetməsi üçün (_pagination.html buna baxır)
+        "exam_items": page_obj,    # Siyahını dövr etmək üçün (Template-dəki for loop buna baxır)
+    }
+
+    return render(request, "blog/student_exam_list.html", context)
 
 
 

@@ -278,6 +278,141 @@ div.mb-3:has(.errorlist) textarea {
     color: #374151;
 }
 
+/* =========================================
+   CUSTOM MULTI-SELECT STYLES (Edit Page)
+   ========================================= */
+
+   .custom-selector-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label-custom {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+    display: block;
+    font-size: 0.95rem;
+}
+
+/* Axtarış Qutusu */
+.search-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    z-index: 2;
+}
+
+input.custom-search-input {
+    width: 100%;
+    padding: 10px 10px 10px 36px !important; /* Sol tərəfdən ikon üçün yer */
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    background-color: #ffffff;
+}
+
+input.custom-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Siyahı Konteyneri */
+.custom-list-container {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    height: 200px;
+    overflow-y: auto;
+    background: #f9fafb;
+}
+
+.list-item-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.list-item-row:last-child {
+    border-bottom: none;
+}
+
+.list-item-row:hover {
+    background-color: #eef2ff;
+}
+
+/* Custom Checkbox */
+.custom-item-checkbox {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #3b82f6;
+}
+
+.custom-item-label {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #374151;
+    flex: 1;
+    user-select: none;
+    margin-bottom: 0;
+}
+
+/* Sayğac */
+.selection-counter {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 6px;
+    text-align: right;
+}
+
+.loading-text {
+    padding: 15px;
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* ================= ANIMASİYALI KEÇİD ================= */
+
+#access-restrictions {
+    /* Başlanğıc vəziyyəti (Açıq) */
+    max-height: 1000px; /* Məzmunun sığacağı qədər böyük bir rəqəm */
+    opacity: 1;
+    overflow: hidden; /* Animasiya zamanı daşmaların qarşısını almaq üçün */
+    
+    /* Animasiya parametrləri */
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Mövcud stilin qorunması */
+    transform-origin: top;
+}
+
+/* Bağlı vəziyyət üçün klass */
+#access-restrictions.closed {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    
+    /* Padding və margin-i sıfırlayırıq ki, boşluq qalmasın */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border: none !important;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .container.my-4 {

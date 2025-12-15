@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const qId = card.getAttribute('data-question-id');
             openModal(qId);
         });
-    });
+    }); 
 
     // 2. Modalı açmaq
     function openModal(qId) {
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataStore = card.querySelector('.data-store');
         
         document.getElementById('modalTitle').textContent = `Sual #${qId} Təfərrüatları`;
-        document.getElementById('modalQuestionText').innerHTML = dataStore.getAttribute('data-q-text');
+        document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
         
         const ansText = dataStore.getAttribute('data-ans-text');
         document.getElementById('modalAnswerText').innerHTML = ansText ? ansText : '<i class="text-danger">Cavab yoxdur</i>';

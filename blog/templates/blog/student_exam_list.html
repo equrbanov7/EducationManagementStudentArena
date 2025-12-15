@@ -5,174 +5,260 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/student_exam_list.css' %}">
+    {# Paginasiya CSS-ni buraya əlavə etdik #}
+     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
-        <div class="container my-4">
-            <h1>Mövcud imtahanlar</h1>
+<div class="container my-4">
+    <h1>Mövcud imtahanlar</h1>
 
-            {% if exam_items %}
-                <ul class="list-group">
-                    {% for item in exam_items %}
-                        {% with exam=item.exam left=item.left %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ exam.title }}</strong><br>
-                                <small>
-                                    Tip: {{ exam.get_exam_type_display }} |
-                                    Müəllif: {{ exam.author.username }} |
-                                    Yaradılma: {{ exam.created_at|date:"d.m.Y H:i" }}
-                                </small><br>
+    <form method="get" class="exam-toolbar">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text"
+                   name="q"
+                   class="form-control"
+                   placeholder="İmtahan adı və ya müəllim..."
+                   value="{{ request.GET.q|default:'' }}">
+        </div>
+    
+        <div class="filter-box">
+            <select name="type" class="form-select" onchange="this.form.submit()">
+                <option value="">Bütün tiplər</option>
+                <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
+                    Test
+                </option>
+                <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
+                    Yazılı / praktiki
+                </option>
+            </select>
+        </div>
+    
+        <button type="submit" class="btn btn-primary search-btn">Axtar</button>
+    
+        {% if request.GET.q or request.GET.type %}
+            <a href="{% url 'student_exam_list' %}" class="btn btn-outline-secondary">
+                Sıfırla
+            </a>
+        {% endif %}
+    </form>
+    
+    {# ================= PANELİN SONU ================= #}
 
-                                {% if exam.total_duration_minutes %}
-                                    <small>Ümumi müddət: {{ exam.total_duration_minutes }} dəq</small><br>
-                                {% endif %}
 
-                                {% if item.access_label %}
-                                    <small class="{% if item.requires_code %}status-red{% endif %}">
-                                        {{ item.access_label }}
-                                    </small>
-                                {% endif %}
-                            </div>
+    {# ================= SİYAHI HİSSƏSİ ================= #}
+    {% if exam_items %}
+        <ul class="list-group">
+            {% for item in exam_items %}
+                {% with exam=item.exam left=item.left %}
+                <li class="list-group-item">
+                    
+                    {# Sol tərəf: Məlumatlar #}
+                    <div class="exam-info">
+                        <strong>{{ exam.title }}</strong>
+                        <div class="exam-meta">
+                            <span><i class="fas fa-tag"></i> {{ exam.get_exam_type_display }}</span>
+                            <span><i class="fas fa-user"></i> {{ exam.author.username }}</span>
+                            <span><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
 
-                            <div class="text-end">
-                                {% if left %}
-                                    <span class="badge bg-secondary">
-                                        Qalan cəhd: {{ left }}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-secondary">
-                                        Attempts: limitsiz
-                                    </span>
-                                {% endif %}
+                        <div class="exam-details mt-2">
+                            {% if exam.total_duration_minutes %}
+                                <small class="me-3"><i class="far fa-clock"></i> {{ exam.total_duration_minutes }} dəq</small>
+                            {% endif %}
+                            
+                            {% if item.access_label %}
+                                <small class="{% if item.requires_code %}status-red{% endif %}">
+                                    {% if item.requires_code %}<i class="fas fa-lock me-1"></i>{% endif %}
+                                    {{ item.access_label }}
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                                {# Kod tələb olunursa – modal açan düymə #}
-                                {% if item.requires_code %}
-                                    <button type="button"
-                                            class="btn btn-outline-primary ms-3 customBtn"
-                                            data-exam-slug="{{ exam.slug }}"
-                                            data-exam-title="{{ exam.title }}"
-                                            onclick="openExamCodeModal(this)">
-                                        İmtahana başla
-                                    </button>
-                                {% else %}
-                                    {# Əks halda birbaşa start_exam #}
-                                    <a href="{% url 'start_exam' exam.slug %}"
-                                    class="btn btn-primary ms-3">
-                                        İmtahana başla
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </li>
-                        {% endwith %}
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>Hal-hazırda sizin üçün aktiv imtahan yoxdur.</p>
+                    {# Sağ tərəf: Düymələr #}
+                    <div class="exam-actions">
+                        {% if left %}
+                            <span class="badge bg-secondary mb-2 d-inline-block">
+                                Qalan cəhd: {{ left }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary mb-2 d-inline-block">
+                                Attempts: limitsiz
+                            </span>
+                        {% endif %}
+
+                        {# Kod tələb olunursa – modal açan düymə #}
+                        {% if item.requires_code %}
+                            <button type="button"
+                                    class="btn btn-outline-primary customBtn"
+                                    data-exam-slug="{{ exam.slug }}"
+                                    data-exam-title="{{ exam.title }}"
+                                    onclick="openExamCodeModal(this)">
+                                İmtahana başla
+                            </button>
+                        {% else %}
+                            {# Əks halda birbaşa start_exam #}
+                            <a href="{% url 'start_exam' exam.slug %}" class="btn btn-primary customBtn">
+                                İmtahana başla
+                            </a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endwith %}
+            {% endfor %}
+        </ul>
+
+        {# ================= PAGINATION (SƏHİFƏLƏMƏ) ================= #}
+        {# _pagination.html faylını bura daxil edirik #}
+      
+        {% include "partials/_pagination.html" %}
+
+    {% else %}
+        {# ================= BOŞ VƏZİYYƏT (Heç nə tapılmadı) ================= #}
+        <div class="empty-state-box">
+            <i class="far fa-folder-open empty-icon"></i>
+            <p>Axtarışınıza uyğun heç bir imtahan tapılmadı.</p>
+            {% if request.GET.q or request.GET.type %}
+                <a href="{% url 'student_exam_list' %}" class="btn btn-sm btn-outline-primary mt-2">Bütün imtahanları göstər</a>
             {% endif %}
         </div>
+    {% endif %}
+</div>
 
-    {# ================= KOD MODALI (Modern Dizayn) ================= #}
-    <div id="exam-code-backdrop" class="exam-code-backdrop">
-        <div class="exam-code-modal">
-            
-            <button type="button" class="exam-code-close-btn" onclick="closeExamCodeModal()">
-                <i class="fas fa-times"></i>
-            </button>
+{# ================= KOD MODALI (Olduğu kimi qalır) ================= #}
+<div id="exam-code-backdrop" class="exam-code-backdrop">
+    <div class="exam-code-modal">
+        <button type="button" class="exam-code-close-btn" onclick="closeExamCodeModal()">
+            <i class="fas fa-times"></i>
+        </button>
 
-            <div class="exam-code-icon">
-                <i class="fas fa-lock"></i>
+        <div class="exam-code-icon"><i class="fas fa-lock"></i></div>
+        <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
+        <p id="exam-code-text" class="exam-code-text">Kod daxil edin.</p>
+
+        <form id="exam-code-form" method="post" action="{% url 'exam_code_check' %}">
+            {% csrf_token %}
+            <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
+            <div class="exam-input-wrapper">
+                <input type="text" name="access_code" id="exam-code-input" class="exam-code-input" maxlength="6" placeholder="• • • • • •" autocomplete="off" inputmode="numeric" required>
             </div>
-
-            <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
-            
-            <p id="exam-code-text" class="exam-code-text">
-                İmtahana başlamaq üçün 6 rəqəmli kodu daxil edin.
-            </p>
-
-            <form id="exam-code-form" method="post" action="{% url 'exam_code_check' %}">
-                {% csrf_token %}
-                <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
-            
-                <div class="exam-input-wrapper">
-                    <input type="text"
-                        name="access_code"
-                        id="exam-code-input"
-                        class="exam-code-input"
-                        maxlength="6"
-                        placeholder="• • • • • •"
-                        autocomplete="off"
-                        inputmode="numeric"
-                        required>
-                </div>
-            
-                <div class="exam-code-actions">
-                    <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">
-                        Ləğv et
-                    </button>
-                    <button type="submit" class="btn-modal btn-confirm">
-                        Təsdiqlə
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="exam-code-actions">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">Ləğv et</button>
+                <button type="submit" class="btn-modal btn-confirm">Təsdiqlə</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    
-    <script>
-        // Elementləri seçirik
-        const backdrop = document.getElementById("exam-code-backdrop");
-        const titleEl = document.getElementById("exam-code-title");
-        const textEl = document.getElementById("exam-code-text");
-        const slugInput = document.getElementById("exam-code-exam-slug");
-        const codeInput = document.getElementById("exam-code-input");
-    
-        function openExamCodeModal(button) {
-            const slug = button.getAttribute("data-exam-slug");
-            const title = button.getAttribute("data-exam-title");
-    
-            slugInput.value = slug;
-            titleEl.textContent = `Giriş Kodu`; 
-            textEl.innerHTML = `<strong>"${title}"</strong> imtahanına keçid üçün kodu yazın.`;
-    
-            codeInput.value = "";
-    
-            // Modalı göstər
-            backdrop.style.display = "flex";
-            
-            // Animasiyanı işə sal
-            setTimeout(() => {
-                backdrop.classList.add("show");
-                codeInput.focus();
-            }, 10);
-        }
-    
-        function closeExamCodeModal() {
-            // Animasiyanı geri al
-            backdrop.classList.remove("show");
-            
-            // CSS transition bitəndən sonra gizlət
-            setTimeout(() => {
-                backdrop.style.display = "none";
-            }, 300);
-        }
-    
-        // ==========================================
-        // YENİ HİSSƏ: Overlay (Backdrop) Klikləmə
-        // ==========================================
+<script>
+    // ============================================================
+    // 1. MODAL MƏNTİQİ (GLOBAL SCOPE)
+    // HTML-də onclick="openExamCodeModal()" işləsin deyə bu funksiyalar
+    // DOMContentLoaded daxilində deyil, çöldə qalmalıdır.
+    // ============================================================
+    const backdrop = document.getElementById("exam-code-backdrop");
+    const titleEl = document.getElementById("exam-code-title");
+    const textEl = document.getElementById("exam-code-text");
+    const slugInput = document.getElementById("exam-code-exam-slug");
+    const codeInput = document.getElementById("exam-code-input");
+
+    function openExamCodeModal(button) {
+        const slug = button.getAttribute("data-exam-slug");
+        const title = button.getAttribute("data-exam-title");
+        
+        slugInput.value = slug;
+        titleEl.textContent = `Giriş Kodu`; 
+        textEl.innerHTML = `<strong>"${title}"</strong> imtahanına keçid üçün kodu yazın.`;
+        codeInput.value = "";
+        
+        // Modalı göstər
+        backdrop.style.display = "flex";
+        setTimeout(() => { 
+            backdrop.classList.add("show"); 
+            codeInput.focus(); 
+        }, 10);
+    }
+
+    function closeExamCodeModal() {
+        backdrop.classList.remove("show");
+        setTimeout(() => { 
+            backdrop.style.display = "none"; 
+        }, 300);
+    }
+
+    // Modalın arxa fonuna (boşluğa) klikləyəndə bağlansın
+    if(backdrop) {
         backdrop.addEventListener('click', function (e) {
-            // e.target -> kliklənən elementdir
-            // Biz yoxlayırıq ki, kliklənən yer Backdrop-durmu? 
-            // (Yəni modalın içinə yox, qırağına basılıb?)
-            if (e.target === backdrop) {
-                closeExamCodeModal();
-            }
+            if (e.target === backdrop) closeExamCodeModal();
         });
-    
-        // Inputa yalnız rəqəm yazılmasını təmin edən kod
+    }
+
+    // Inputa yalnız rəqəm yazılsın
+    if(codeInput) {
         codeInput.addEventListener('input', function (e) {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
-    </script>
-    
+    }
+
+
+    // ============================================================
+    // 2. DOM YÜKLƏNƏNDƏN SONRAKİ ƏMƏLİYYATLAR
+    // (Pagination və Live Search)
+    // ============================================================
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- A) PAGINATION PARAMETER FIX ---
+        // Səhifə dəyişəndə axtarış sözünün (q) və tipin (type) itməməsini təmin edir.
+        const paginationLinks = document.querySelectorAll('.page-link');
+        
+        if(paginationLinks.length > 0) {
+            const currentUrlParams = new URLSearchParams(window.location.search);
+            
+            paginationLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('?page=')) {
+                    const pageNum = href.split('=')[1];
+                    currentUrlParams.set('page', pageNum);
+                    link.setAttribute('href', '?' + currentUrlParams.toString());
+                }
+            });
+        }
+
+        // --- B) LIVE SEARCH (DEBOUNCE 1 saniyə) ---
+        const searchInput = document.querySelector('input[name="q"]');
+        const searchForm = document.querySelector('.exam-toolbar');
+
+        if (searchInput && searchForm) {
+            let debounceTimer;
+
+            searchInput.addEventListener('input', function() {
+                // 1. Hər hərf yazılanda köhnə timer-i ləğv et (sıfırla)
+                clearTimeout(debounceTimer);
+
+                // 2. Yeni timer başlat (1000ms = 1 saniyə)
+                debounceTimer = setTimeout(() => {
+                    searchForm.submit(); // Vaxt bitəndə formu göndər
+                }, 1000);
+            });
+
+            // Əgər istifadəçi "Enter" basarsa və ya düyməyə klikləyərsə,
+            // timer-i ləğv et ki, iki dəfə sorğu getməsin.
+            searchForm.addEventListener('submit', function() {
+                clearTimeout(debounceTimer);
+            });
+            
+            // UX: Səhifə yenilənəndə kursoru qorumaq
+            // Əgər inputda dəyər varsa, kursoru sona gətiririk
+            if(searchInput.value) {
+                searchInput.focus();
+                const val = searchInput.value;
+                searchInput.value = '';
+                searchInput.value = val;
+            }
+        }
+    });
+</script>
+
 {% endblock %}
