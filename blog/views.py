@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import timedelta
-from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile, StudentGroup
+from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile, StudentGroup, QuestionBlock
 from .forms import (
     SubscriptionForm,
     RegisterForm,
@@ -30,7 +30,8 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-
+import random  # Faylın ən başında olsun
+import re
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
 def home(request):
@@ -663,6 +664,124 @@ def add_exam_question(request, slug):
     })
 
 
+# 1. Səhifəni açan view (YENİLƏNİB)
+def create_question_bank(request, slug):
+    exam = get_object_or_404(Exam, slug=slug)
+    
+    # Mövcud blokları gətiririk ki, ekranda görsənsin
+    blocks = exam.question_blocks.all().order_by('order')
+    
+    # Hər blok üçün sualları mətn formatına çeviririk (Textarea üçün)
+    # Məsələn: [ {block_obj: block, text_content: "1. Salam\n2. Necəsən"}, ... ]
+    blocks_data = []
+    for block in blocks:
+        questions = block.questions.all().order_by('order')
+        # Sualları "1. Sual mətni" formatında birləşdiririk
+        text_content = "\n".join([f"{q.order}. {q.text}" for q in questions])
+        
+        blocks_data.append({
+            'obj': block,
+            'text_content': text_content
+        })
+
+    return render(request, 'blog/create_question_bank.html', {
+        'exam': exam,
+        'blocks_data': blocks_data
+    })
+
+# views.py (Yalnız bu funksiyanı yeniləyin)
+
+def process_question_bank(request, slug):
+    exam = get_object_or_404(Exam, slug=slug)
+    
+    if request.method == "POST":
+        # 1. Silinməli olan blokları silirik
+        # Frontend-dən vergüllə ayrılmış ID-lər gələcək (məs: "5,8,12")
+        deleted_ids = request.POST.get('deleted_block_ids', '').split(',')
+        for d_id in deleted_ids:
+            if d_id.strip():
+                QuestionBlock.objects.filter(id=d_id, exam=exam).delete()
+
+        # 2. Ümumi sual sayını yenilə
+        random_count = request.POST.get('random_question_count')
+        if random_count:
+            exam.random_question_count = int(random_count)
+            exam.save()
+
+        # Adların təkrar olub-olmadığını yoxlamaq üçün set
+        used_names = set()
+
+        # 3. Blokları emal edirik
+        for key, value in request.POST.items():
+            if key.startswith('block_name_'):
+                ui_id = key.split('_')[-1]
+                block_name = value.strip()
+                
+                # Validation: Eyni sorğuda dublikat ad varmı?
+                if block_name.lower() in used_names:
+                    messages.error(request, f"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin.")
+                    return redirect('create_question_bank', slug=exam.slug)
+                used_names.add(block_name.lower())
+
+                content_key = f'block_content_{ui_id}'
+                content_text = request.POST.get(content_key, '')
+                time_key = f'block_time_{ui_id}'
+                time_val = request.POST.get(time_key)
+                db_id_key = f'block_db_id_{ui_id}'
+                db_id = request.POST.get(db_id_key)
+
+                # Validation: Bazada başqa blok eyni adda varmı? (özü xaric)
+                existing_check = QuestionBlock.objects.filter(exam=exam, name__iexact=block_name)
+                if db_id:
+                    existing_check = existing_check.exclude(id=db_id)
+                
+                if existing_check.exists():
+                    messages.error(request, f"'{block_name}' adlı blok artıq bazada mövcuddur.")
+                    return redirect('create_question_bank', slug=exam.slug)
+
+                if block_name:
+                    # Blok Yaradılması/Yenilənməsi
+                    if db_id:
+                        # Bazada yoxlayırıq ki, silinməyibsə (concurrency üçün)
+                        block_qs = QuestionBlock.objects.filter(id=db_id)
+                        if block_qs.exists():
+                            block = block_qs.first()
+                            block.name = block_name
+                            block.time_limit_minutes = int(time_val) if time_val else None
+                            block.save()
+                            # Sualları yeniləyirik
+                            block.questions.all().delete()
+                        else:
+                            continue # Blok tapılmadısa keçirik
+                    else:
+                        block = QuestionBlock.objects.create(
+                            exam=exam,
+                            name=block_name,
+                            time_limit_minutes=int(time_val) if time_val else None,
+                            order=ui_id
+                        )
+
+                    # Sualların Parse edilməsi
+                    if content_text.strip():
+                        pattern = r'(?:\n|^)\s*\d+[\.\)]\s+'
+                        questions = re.split(pattern, content_text)
+                        questions = [q.strip() for q in questions if q.strip()]
+                        
+                        for index, q_text in enumerate(questions, start=1):
+                            ExamQuestion.objects.create(
+                                exam=exam,
+                                block=block,
+                                text=q_text,
+                                order=index,
+                                answer_mode='single'
+                            )
+        
+        messages.success(request, "Sual bankı uğurla yadda saxlanıldı!")
+        return redirect('teacher_exam_detail', slug=exam.slug)
+    
+    return redirect('create_question_bank', slug=exam.slug)
+
+
 
 @login_required
 def toggle_exam_active(request, slug):
@@ -901,6 +1020,9 @@ def _start_or_resume_attempt(request, exam: Exam):
         attempt_number=attempt_number,
         status="in_progress",
     )
+    
+    generate_random_questions_for_attempt(attempt)
+    
     return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
 
@@ -934,6 +1056,62 @@ def exam_code_check(request):
 
 
 
+
+def generate_random_questions_for_attempt(attempt):
+    """
+    Bu funksiya yeni yaradılan cəhd (attempt) üçün sualları seçir.
+    Əgər 'random_question_count' varsa, bloklardan bərabər sayda seçir.
+    Yoxdursa, bütün sualları götürür.
+    """
+    exam = attempt.exam
+    
+    # Əgər random limiti yoxdursa (0), bütün sualları seç
+    if not exam.random_question_count:
+        selected_qs = list(exam.questions.all().order_by('order'))
+    else:
+        # Sual Bankı Məntiqi
+        all_blocks = list(exam.question_blocks.all())
+        selected_qs = []
+        total_needed = exam.random_question_count
+
+        if all_blocks:
+            # Bloklar varsa, bərabər bölmək
+            blocks_count = len(all_blocks)
+            base_count = total_needed // blocks_count # Hər bloka düşən əsas pay
+            remainder = total_needed % blocks_count   # Qalıq suallar
+
+            # Qalıq sualları paylamaq üçün blokları qarışdırırıq
+            # Məsələn: 2 qalıq varsa, təsadüfi 2 fərqli blokdan 1 əlavə sual götürəcəyik
+            random.shuffle(all_blocks)
+
+            for i, block in enumerate(all_blocks):
+                # Bu blokdan neçə sual götürməliyik?
+                count_to_take = base_count
+                if i < remainder:
+                    count_to_take += 1
+                
+                # Blokun suallarını qarışdırıb götürürük
+                block_qs = list(block.questions.all())
+                random.shuffle(block_qs)
+                selected_qs.extend(block_qs[:count_to_take])
+            
+            # Əgər bloklardan gələn sual sayı azdırsa (məsələn blokda sual çatmırsa),
+            # çatışmayanları random doldura bilərik (optional)
+        else:
+            # Blok yoxdursa, sadəcə bütün suallardan random seç
+            all_qs = list(exam.questions.all())
+            random.shuffle(all_qs)
+            selected_qs = all_qs[:total_needed]
+
+    # Seçilmiş sualları ExamAnswer cədvəlinə əlavə edirik (boş cavabla)
+    # Bu bizə imkan verir ki, tələbə refresh edəndə suallar dəyişməsin
+    final_questions = []
+    for q in selected_qs:
+        ExamAnswer.objects.create(
+            attempt=attempt,
+            question=q
+        )
+
 @login_required
 def take_exam(request, slug, attempt_id):
     attempt = get_object_or_404(
@@ -944,24 +1122,38 @@ def take_exam(request, slug, attempt_id):
     )
     exam = attempt.exam
 
-    # Əgər artıq bitibsə, nəticəyə at
     if attempt.is_finished:
         return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
-    questions = ExamQuestion.objects.filter(
-        exam=exam
-    ).order_by('order', 'id').prefetch_related("options")
+    # --- DÜZƏLİŞ: Sualları Attempt-ə bağlanmış cavablardan götürürük ---
+    # Bu sayədə yalnız seçilmiş (random) suallar görünür.
+    answers_qs = attempt.answers.select_related("question").order_by('id') 
+    # order_by('id') qoyduq ki, qarışıq gələn suallar hər dəfə yerini dəyişməsin
+    
+    # Əgər nəsə xəta olub suallar yaranmayıbsa (köhnə koddan qalan attemptlər üçün)
+    if not answers_qs.exists():
+         generate_random_questions_for_attempt(attempt)
+         answers_qs = attempt.answers.select_related("question").order_by('id')
 
-    # --- Server tərəfli Vaxt Hesablaması ---
+    # Template-ə ötürmək üçün suallar siyahısı
+    questions = [a.question for a in answers_qs] 
+    # Options-ları da yükləmək üçün (prefetch manual edilir)
+    from django.db.models import Prefetch
+    # Bu hissə bir az performance üçün optimallaşdırıla bilər, amma sadə yol:
+    for q in questions:
+        # options-ları template-də q.options.all kimi işlətmək üçün cache edirik
+        pass 
+        # Django template-də q.options.all çağıranda onsuzda işləyəcək, 
+        # amma prefetch_related işlətmək istəsəniz ExamQuestion səviyyəsində edə bilərsiz.
+    
+    # --- Server tərəfli Vaxt Hesablaması (Olduğu kimi qalır) ---
     remaining_seconds = None
     is_time_up = False
-
     if exam.total_duration_minutes and attempt.started_at:
         now = timezone.now()
         finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
         diff = finish_time - now
         total_seconds = diff.total_seconds()
-        
         if total_seconds <= 0:
             is_time_up = True
             remaining_seconds = 0
@@ -972,39 +1164,35 @@ def take_exam(request, slug, attempt_id):
         action = (request.POST.get("submit_action") or "").strip()
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
-        # 1. Cavabları yadda saxla
+        # DÜZƏLİŞ: Yalnız seçilmiş suallar üzərindən dövr edirik
         for q in questions:
-            ans, created = ExamAnswer.objects.get_or_create(
-                attempt=attempt,
-                question=q
-            )
+            # Cavab obyekti artıq var, onu tapırıq
+            ans = ExamAnswer.objects.get(attempt=attempt, question=q)
+            
             ans.selected_options.clear()
 
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
                 if q.answer_mode == "single":
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
-                        opt = q.options.filter(id=opt_id).first()
+                        # Variantın düzgün suala aid olduğunu yoxla
+                        opt = ExamQuestionOption.objects.filter(id=opt_id, question=q).first()
                         if opt:
                             ans.selected_options.add(opt)
                 else:
                     for opt in q.options.all():
                         if request.POST.get(f"q_{q.id}_opt_{opt.id}"):
                             ans.selected_options.add(opt)
-
                 ans.text_answer = ""
                 ans.auto_evaluate()
-
             else:
                 text = request.POST.get(f"q_{q.id}", "").strip()
                 ans.text_answer = text
                 ans.is_correct = False
                 ans.save()
-
-                # Fayllar (yazılı suallar üçün)
+                
                 files = request.FILES.getlist(f"file_{q.id}[]")
                 if files:
-                    # köhnə faylları silib yenisini yazırıq (duplikat olmasın deyə)
                     ans.files.all().delete()
                     for f in files:
                         ExamAnswerFile.objects.create(answer=ans, file=f)
@@ -1012,39 +1200,30 @@ def take_exam(request, slug, attempt_id):
         if exam.exam_type == "test":
             attempt.recalculate_score()
 
-        # 2. Status qərarı
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"
             attempt.mark_finished(status=status)
-
             if is_ajax:
                 return JsonResponse({
-                    "success": True,
-                    "finished": True,
-                    "redirect_url": reverse(
-                        "exam_result",
-                        kwargs={"slug": exam.slug, "attempt_id": attempt.id}
-                    ),
+                    "success": True, 
+                    "finished": True, 
+                    "redirect_url": reverse("exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
                 })
             return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
-        # autosave və ya "draft kimi saxla"
         attempt.status = "draft"
         attempt.save(update_fields=["status"])
-
         if is_ajax:
             return JsonResponse({"success": True, "finished": False})
-
         return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
-    # GET sorğusu
-    answers = attempt.answers.select_related("question").prefetch_related("selected_options", "files")
-    answers_by_qid = {a.question_id: a for a in answers}
+    # GET sorğusu üçün answers map
+    answers_by_qid = {a.question_id: a for a in answers_qs}
 
     context = {
         "exam": exam,
         "attempt": attempt,
-        "questions": questions,
+        "questions": questions, # Artıq bu filterlənmiş suallardır
         "answers_by_qid": answers_by_qid,
         "remaining_seconds": remaining_seconds,
     }
@@ -1058,17 +1237,31 @@ def take_exam(request, slug, attempt_id):
 def exam_result(request, slug, attempt_id):
     """
     Student üçün konkret attempt-in nəticə səhifəsi.
+    Yalnız həmin attempt üçün seçilmiş suallar göstərilir.
     """
     exam = get_object_or_404(Exam, slug=slug)
-    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
-
-    questions = exam.questions.all().order_by("order").prefetch_related("options")
-    answers = (
-        ExamAnswer.objects
-        .filter(attempt=attempt)
-        .prefetch_related("selected_options", "files")
+    attempt = get_object_or_404(
+        ExamAttempt,
+        id=attempt_id,
+        exam=exam,
+        user=request.user
     )
-    answers_by_qid = {a.question_id: a for a in answers}
+
+    # YALNIZ bu attempt-ə düşən suallar:
+    answers_qs = (
+        attempt.answers
+        .select_related("question")
+        .prefetch_related(
+            "selected_options",
+            "files",
+            "question__options",
+        )
+        .order_by("id")  # attempt yaranma ardıcıllığı ilə
+    )
+
+    # Template-də istifadə üçün:
+    questions = [a.question for a in answers_qs]
+    answers_by_qid = {a.question_id: a for a in answers_qs}
 
     return render(request, "blog/exam_result.html", {
         "exam": exam,
@@ -1076,6 +1269,7 @@ def exam_result(request, slug, attempt_id):
         "questions": questions,
         "answers_by_qid": answers_by_qid,
     })
+
 
 
 @login_required
@@ -1191,61 +1385,58 @@ def teacher_exam_results(request, slug):
 def teacher_check_attempt(request, slug, attempt_id):
     """
     Müəllim yazılı/praktiki imtahandakı BİR cəhdi sual-sual yoxlayır.
-    Hər suala bal və feedback yaza bilir.
+    Yalnız həmin attempt-ə düşən sualları göstərir.
     """
     _ensure_teacher(request.user)
 
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
-    # İstəsən yalnız yazılı imtahanları məhdudlaşdıra bilərik
-    # if exam.exam_type != "written":
-    #     return redirect("teacher_exam_results", slug=exam.slug)
+    # ✅ YALNIZ attempt-də yaranmış cavablar (yəni düşən suallar)
+    answers_qs = (
+        attempt.answers
+        .select_related("question")
+        .prefetch_related("files", "selected_options", "question__options")
+        .order_by("id")
+    )
 
-    questions = exam.questions.all().order_by("order", "id")
-
-    # Mövcud cavabları xəritəyə çeviririk
-    existing_answers = {
-        a.question_id: a
-        for a in ExamAnswer.objects.filter(
-            attempt=attempt,
-            question__exam=exam
+    # attempt-də cavablar yoxdursa (köhnə attemptlər üçün safety)
+    if not answers_qs.exists():
+        generate_random_questions_for_attempt(attempt)
+        answers_qs = (
+            attempt.answers
+            .select_related("question")
+            .prefetch_related("files", "selected_options", "question__options")
+            .order_by("id")
         )
-    }
+
+    # Template üçün sual+cavab listi (artıq hamısı attempt-ə aid)
+    qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
 
     if request.method == "POST":
         total_score = 0
         any_score = False
 
-        for q in questions:
-            ans = existing_answers.get(q.id)
-            if not ans:
-                # Normalda hamısı olmalıdır, amma safety üçün:
-                ans = ExamAnswer.objects.create(
-                    attempt=attempt,
-                    question=q,
-                )
+        for a in answers_qs:
+            q = a.question
 
-            score_raw = request.POST.get(f"score_{q.id}", "").strip()
-            feedback = request.POST.get(f"feedback_{q.id}", "").strip()
+            score_raw = (request.POST.get(f"score_{q.id}") or "").strip()
+            feedback = (request.POST.get(f"feedback_{q.id}") or "").strip()
 
             if score_raw == "":
-                ans.teacher_score = None
+                a.teacher_score = None
             else:
                 try:
                     score_val = int(score_raw)
                 except ValueError:
                     score_val = 0
-                ans.teacher_score = score_val
+                a.teacher_score = score_val
                 total_score += score_val
                 any_score = True
 
-            ans.teacher_feedback = feedback
-            ans.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
+            a.teacher_feedback = feedback
+            a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
 
-        # Cəmi balı attempt səviyyəsinə yazırıq.
-        # Sən özün qərar verərsən ki, sual ballarını elə böləsən ki,
-        # cəmi 100 olsun.
         attempt.teacher_score = total_score if any_score else None
         attempt.checked_by_teacher = True
         attempt.save(update_fields=["teacher_score", "checked_by_teacher"])
@@ -1253,20 +1444,13 @@ def teacher_check_attempt(request, slug, attempt_id):
         messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
         return redirect("teacher_exam_results", slug=exam.slug)
 
-    # GET sorğusu – suallar + cavablar siyahısı
-    qa_list = []
-    for q in questions:
-        qa_list.append({
-            "question": q,
-            "answer": existing_answers.get(q.id),
-        })
-
     context = {
         "exam": exam,
         "attempt": attempt,
         "qa_list": qa_list,
     }
     return render(request, "blog/teacher_check_attempt.html", context)
+
 
 
 @login_required

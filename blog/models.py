@@ -291,6 +291,11 @@ class Exam(models.Model):
         null=True,
         help_text="Məs: 1, 2, 3... Boş saxlasanız, attempts limitsiz olacaq."
     )
+    random_question_count = models.PositiveIntegerField(
+        "Tələbəyə göstəriləcək sual sayı",
+        default=0,
+        help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir."
+    )
 
     # --- Giriş məhdudiyyətləri ---
 
@@ -499,6 +504,28 @@ class Exam(models.Model):
 
     
     
+# --- BU YENİ MODELİ ƏLAVƏ EDİN (Exam modelindən sonra, ExamQuestion-dan əvvəl) ---
+class QuestionBlock(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='question_blocks', verbose_name="İmtahan")
+    name = models.CharField("Blok adı", max_length=100)
+    order = models.PositiveIntegerField("Sıra", default=1)
+    
+    # --- YENİ SAHƏ: Blok üçün vaxt limiti (dəqiqə ilə) ---
+    time_limit_minutes = models.PositiveIntegerField(
+        "Blok vaxtı (dəqiqə)", 
+        null=True, 
+        blank=True,
+        help_text="Bu blokdakı sualları həll etmək üçün ayrılan vaxt. Boş olsa, limit yoxdur."
+    )
+
+    class Meta:
+        verbose_name = "Sual Bloku"
+        verbose_name_plural = "Sual Blokları"
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.exam.title} - {self.name}"
+# ---------------------------------------------------------------------------------
 
 
 class ExamQuestion(models.Model):
@@ -513,6 +540,19 @@ class ExamQuestion(models.Model):
         related_name="questions",
         verbose_name="İmtahan bloku"
     )
+    
+    # --- BURANI ƏLAVƏ EDİN (START) ---
+    block = models.ForeignKey(
+        QuestionBlock, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='questions', 
+        verbose_name="Sual Bloku"
+    )
+    # --- BURANI ƏLAVƏ EDİN (END) ---
+
+  
     text = models.TextField("Sual mətni")
 
     # Test üçün "ideal" cavab mətni lazım olsa, yazılı üçün də istifadə etmək olar
