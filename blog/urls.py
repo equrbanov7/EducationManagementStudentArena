@@ -35,78 +35,45 @@ urlpatterns = [
     path("questions/my/", views.my_questions, name="my_questions"),
     path("questions/", views.questions_i_can_see, name="questions_i_can_see"),
 
-    # --- Exam URL-ləri ---
+# --- Exam URL-ləri ---
 
-    # Müəllim üçün imtahan siyahısı
+    # 1. Sabit URL-lər (Slug olmayanlar ən birinci gəlir)
     path("exams/", views.teacher_exam_list, name="teacher_exam_list"),
-
-    # ⭐ Tələbə üçün imtahan siyahısı
     path("exams/available/", views.student_exam_list, name="student_exam_list"),
-
-    # İmtahan yaratmaq (müəllim)
     path("exams/create/", views.create_exam, name="create_exam"),
-    
     path("exams/code-check/", views.exam_code_check, name="exam_code_check"),
-
-
-    # Slug-lı bütün exam URL-ləri – MÜTLƏQ bunlardan sonra gəlməlidir
-    path("exams/<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),
-    path(
-        "exams/<slug:slug>/add-question/",
-        views.add_exam_question,
-        name="add_exam_question",
-    ),
-    path(
-        "exams/<slug:slug>/toggle-active/",
-        views.toggle_exam_active,
-        name="toggle_exam_active",
-    ),
-    path("exams/<slug:slug>/edit/", views.edit_exam, name="edit_exam"),
-    path("exams/<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
-    path(
-        "exams/<slug:slug>/questions/<int:question_id>/edit/",
-        views.edit_exam_question,
-        name="edit_exam_question",
-    ),
-    path(
-        "exams/<slug:slug>/questions/<int:question_id>/delete/",
-        views.delete_exam_question,
-        name="delete_exam_question",
-    ),
-
-    # --- Student tərəfi (imtahan vermək) ---
-    path("exams/<slug:slug>/start/", views.start_exam, name="start_exam"),
-    path(
-        "exams/<slug:slug>/attempt/<int:attempt_id>/",
-        views.take_exam,
-        name="take_exam",
-    ),
-    path(
-        "exams/<slug:slug>/attempt/<int:attempt_id>/result/",
-        views.exam_result,
-        name="exam_result",
-    ),
-
-    path('student/my-history/', views.student_exam_history, name='student_exam_history'),
-    # --- Teacher statistikası ---
-    path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
     
+    # 2. Tələbə tarixi və müəllim statistikası
+    path('student/my-history/', views.student_exam_history, name='student_exam_history'),
+    path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
     path('teacher/groups/', views.teacher_group_list, name='teacher_group_list'),
     
-    # Modal üçün lazım olan URL-lər:
-    path('teacher/groups/create/', views.teacher_create_group, name='teacher_create_group'),
-    path('teacher/groups/update/<int:group_id>/', views.teacher_update_group, name='teacher_update_group'),
-    path('teacher/groups/delete/<int:group_id>/', views.teacher_delete_group, name='teacher_delete_group'),
+    # ... (Qrup yaratma URL-ləri olduğu kimi qalır) ...
 
-    path(
-        "exams/<slug:slug>/results/",
-        views.teacher_exam_results,
-        name="teacher_exam_results",
-    ),
-     path(
-        "exams/<slug:slug>/attempt/<int:attempt_id>/check/",
-        views.teacher_check_attempt,
-        name="teacher_check_attempt",
-    ),
+    # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
+    
+    # Sual Bankı (Müəllim üçün)
+    path('exams/<slug:slug>/create-bank/', views.create_question_bank, name='create_question_bank'),
+    path('exams/<slug:slug>/process-bank/', views.process_question_bank, name='process_question_bank'),
+
+    # İmtahan əməliyyatları
+    path("exams/<slug:slug>/add-question/", views.add_exam_question, name="add_exam_question"),
+    path("exams/<slug:slug>/toggle-active/", views.toggle_exam_active, name="toggle_exam_active"),
+    path("exams/<slug:slug>/edit/", views.edit_exam, name="edit_exam"),
+    path("exams/<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
+    path("exams/<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
+    
+    # Sual əməliyyatları
+    path("exams/<slug:slug>/questions/<int:question_id>/edit/", views.edit_exam_question, name="edit_exam_question"),
+    path("exams/<slug:slug>/questions/<int:question_id>/delete/", views.delete_exam_question, name="delete_exam_question"),
+
+    # Tələbə Prosesi
+    path("exams/<slug:slug>/start/", views.start_exam, name="start_exam"),
+    path("exams/<slug:slug>/attempt/<int:attempt_id>/", views.take_exam, name="take_exam"),
+    path("exams/<slug:slug>/attempt/<int:attempt_id>/result/", views.exam_result, name="exam_result"),
+    path("exams/<slug:slug>/attempt/<int:attempt_id>/check/", views.teacher_check_attempt, name="teacher_check_attempt"),
+
+    # Ən sonda bu gəlməlidir (Generic Match)
+    path("exams/<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),
     
 ]

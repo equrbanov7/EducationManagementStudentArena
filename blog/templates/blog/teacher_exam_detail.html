@@ -57,6 +57,10 @@
                     <a href="{% url 'add_exam_question' exam.slug %}" class="action-btn primary-btn">
                         <i class="fas fa-plus-circle"></i> Yeni sual əlavə et
                     </a>
+                    {# Sual Bankı Düyməsi #}
+                    <a href="{% url 'create_question_bank' exam.slug %}" class="action-btn info-btn" style="background-color: #6c5ce7; color: white;">
+                        <i class="fas fa-layer-group"></i> Sual Bankı / Bloklar
+                    </a>
                     <a href="{% url 'teacher_exam_results' exam.slug %}" class="action-btn secondary-btn">
                         <i class="fas fa-poll"></i> Nəticələrə bax
                     </a>

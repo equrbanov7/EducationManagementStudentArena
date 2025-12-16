@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sual Bankı - {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .bank-container {
+        max-width: 900px;
+        margin: 40px auto;
+        position: relative;
+        padding: 0 12px;
+    }
+
+    .settings-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #dfe6e9;
+        margin-bottom: 30px;
+    }
+
+    .block-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    .block-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .block-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .block-body { padding: 20px; }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dfe6e9;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        outline: none;
+    }
+    .form-control-custom:focus{
+        border-color: #74b9ff;
+        box-shadow: 0 0 0 3px rgba(116,185,255,0.25);
+    }
+
+    textarea.form-control-custom {
+        font-family: 'Courier New', monospace;
+        line-height: 1.5;
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .time-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    .time-input-group input { width: 120px; }
+
+    .btn-add-block {
+        width: 100%;
+        padding: 15px;
+        background: #dfe6e9;
+        border: 2px dashed #b2bec3;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 90px; /* action-bar üst-üstə gəlməsin */
+    }
+    .btn-add-block:hover{
+        background:#e9eef0;
+    }
+
+    .btn-delete {
+        background: #ff7675;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-delete:hover { background: #d63031; }
+
+    /* ===== Action bar (ortada fixed) ===== */
+    .action-bar {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,0.97);
+        padding: 14px 16px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        display: flex;
+        gap: 12px;
+        border: 1px solid #eee;
+        backdrop-filter: blur(6px);
+        z-index: 9999;
+    }
+
+    .btn-save-main {
+        background: #0984e3;
+        color: #fff;
+        padding: 12px 28px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-save-main:hover { background: #0771c6; }
+
+    .btn-cancel-main {
+        background: #ff7675;
+        color: #fff;
+        padding: 12px 26px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-cancel-main:hover { background: #d63031; }
+
+    @media (max-width: 576px) {
+        .action-bar {
+            width: calc(100% - 24px);
+            left: 12px;
+            transform: none;
+            justify-content: space-between;
+        }
+        .btn-save-main, .btn-cancel-main{
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 12px;
+    }
+    .modal-box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        animation: fadeIn 0.2s ease;
+    }
+    .modal-buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .btn-confirm {
+        background: #ff7675;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-cancel {
+        background: #b2bec3;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bank-container">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; margin-bottom: 20px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="bank-header" style="text-align: center; margin-bottom: 30px;">
+        <h2>{{ exam.title }} <span style="color:#6c5ce7">Sual Bankı</span></h2>
+    </div>
+
+    <form method="post" action="{% url 'process_question_bank' exam.slug %}" id="bankForm">
+        {% csrf_token %}
+
+        <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
+
+        <div class="settings-card">
+            <label><i class="fas fa-random"></i> Tələbəyə göstəriləcək ümumi sual sayı:</label>
+            <input type="number"
+                   name="random_question_count"
+                   class="form-control-custom"
+                   value="{{ exam.random_question_count|default:0 }}"
+                   placeholder="0 = Bütün suallar">
+            <small style="color:grey">
+                0 yazsanız, bütün suallar düşəcək. Rəqəm yazsanız (məs: 20), bloklardan ümumi 20 sual seçiləcək.
+            </small>
+        </div>
+
+        <div id="blocks-wrapper">
+            {% if blocks_data %}
+                {% for item in blocks_data %}
+                <div class="block-card block-item" id="block-card-{{ forloop.counter }}">
+                    <div class="block-header">
+                        <h5 class="block-title"><i class="fas fa-cube"></i> Blok (Mövcud)</h5>
+
+                        <input type="hidden" class="block-db-id" name="block_db_id_{{ forloop.counter }}" value="{{ item.obj.id }}">
+
+                        <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </div>
+
+                    <div class="block-body">
+                        <div class="form-group">
+                            <label>Blok Adı:</label>
+                            <input type="text"
+                                   name="block_name_{{ forloop.counter }}"
+                                   value="{{ item.obj.name }}"
+                                   class="form-control-custom block-name-input"
+                                   required>
+                        </div>
+
+                        <div class="form-group time-input-group">
+                            <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
+                            <input type="number"
+                                   name="block_time_{{ forloop.counter }}"
+                                   value="{{ item.obj.time_limit_minutes|default:'' }}"
+                                   class="form-control-custom"
+                                   placeholder="Limitsiz">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Suallar:</label>
+                            <textarea name="block_content_{{ forloop.counter }}" class="form-control-custom">{{ item.text_content }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="block-card block-item" id="block-card-1">
+                    <div class="block-header">
+                        <h5 class="block-title"><i class="fas fa-cube"></i> Blok 1</h5>
+                        <input type="hidden" class="block-db-id" name="block_db_id_1" value="">
+                        <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </div>
+
+                    <div class="block-body">
+                        <div class="form-group">
+                            <label>Blok Adı:</label>
+                            <input type="text" name="block_name_1" value="Blok 1" class="form-control-custom block-name-input" required>
+                        </div>
+
+                        <div class="form-group time-input-group">
+                            <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
+                            <input type="number" name="block_time_1" class="form-control-custom" placeholder="Limitsiz">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Suallar:</label>
+                            <textarea name="block_content_1" class="form-control-custom" placeholder="1. Sual..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="button" id="add-new-block-btn" class="btn-add-block">
+            <i class="fas fa-plus-circle"></i> Yeni Blok Əlavə Et
+        </button>
+
+        <div class="action-bar">
+            <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel-main">
+                <i class="fas fa-times"></i> Ləğv et
+            </a>
+
+            <button type="submit" class="btn-save-main" id="saveBtn">
+                <i class="fas fa-save"></i> Yadda Saxla
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div style="font-size: 40px; color: #ff7675; margin-bottom: 10px;">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h3>Əminsiniz?</h3>
+        <p style="color: #636e72;">
+            Bu sual blokunu silmək istədiyinizə əminsiniz? Bu əməliyyat "Yadda Saxla" dedikdən sonra geri qaytarıla bilməz.
+        </p>
+        <div class="modal-buttons">
+            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Xeyr, Ləğv et</button>
+            <button type="button" class="btn-confirm" onclick="confirmDelete()">Bəli, Sil</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let blockToDelete = null;
+let blockCounter = {{ blocks_data|length|default:1 }};
+if (blockCounter === 0) blockCounter = 1;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const wrapper = document.getElementById('blocks-wrapper');
+    const addBtn = document.getElementById('add-new-block-btn');
+
+    addBtn.addEventListener('click', function() {
+        blockCounter++;
+        const uniqueID = Date.now();
+
+        const newBlockHTML = `
+            <div class="block-card block-item" id="block-card-${uniqueID}">
+                <div class="block-header">
+                    <h5 class="block-title"><i class="fas fa-cube"></i> Yeni Blok</h5>
+                    <input type="hidden" class="block-db-id" name="block_db_id_${uniqueID}" value="">
+                    <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                        <i class="fas fa-trash"></i> Sil
+                    </button>
+                </div>
+                <div class="block-body">
+                    <div class="form-group">
+                        <label>Blok Adı:</label>
+                        <input type="text" name="block_name_${uniqueID}" value="Blok ${blockCounter}"
+                               class="form-control-custom block-name-input" required>
+                    </div>
+                    <div class="form-group time-input-group">
+                        <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
+                        <input type="number" name="block_time_${uniqueID}" class="form-control-custom" placeholder="Limitsiz">
+                    </div>
+                    <div class="form-group">
+                        <label>Suallar (Copy/Paste):</label>
+                        <textarea name="block_content_${uniqueID}" class="form-control-custom"
+                                  placeholder="1. Sualın mətni..."></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = newBlockHTML.trim();
+        wrapper.appendChild(tempDiv.firstElementChild);
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+
+    document.getElementById('bankForm').addEventListener('submit', function(e) {
+        const inputs = document.querySelectorAll('.block-name-input');
+        const names = [];
+        let hasDuplicate = false;
+
+        inputs.forEach(input => {
+            const parentBlock = input.closest('.block-item');
+            if (!parentBlock) return;
+
+            const val = input.value.trim().toLowerCase();
+            if (!val) return;
+
+            if (names.includes(val)) {
+                hasDuplicate = true;
+                input.style.borderColor = 'red';
+                alert(`Diqqət: "${input.value}" adlı blok artıq mövcuddur. Zəhmət olmasa adları fərqli edin.`);
+            } else {
+                input.style.borderColor = '#dfe6e9';
+                names.push(val);
+            }
+        });
+
+        if (hasDuplicate) e.preventDefault();
+    });
+});
+
+function openDeleteModal(btn) {
+    blockToDelete = btn.closest('.block-item');
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    blockToDelete = null;
+}
+
+function confirmDelete() {
+    if (!blockToDelete) return;
+
+    const dbIdInput = blockToDelete.querySelector('.block-db-id');
+    const dbId = dbIdInput ? dbIdInput.value : '';
+
+    if (dbId) {
+        const deletedInput = document.getElementById('deleted_block_ids');
+        const currentIds = deletedInput.value ? deletedInput.value.split(',') : [];
+        currentIds.push(dbId);
+        deletedInput.value = currentIds.join(',');
+    }
+
+    blockToDelete.remove();
+    closeDeleteModal();
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) closeDeleteModal();
+}
+</script>
+{% endblock %}
