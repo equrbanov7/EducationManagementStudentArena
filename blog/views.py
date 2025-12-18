@@ -626,9 +626,14 @@ def add_exam_question(request, slug):
     """
     _ensure_teacher(request.user)
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    blocks = QuestionBlock.objects.filter(exam=exam).order_by('order')
 
     if request.method == "POST":
-        form = ExamQuestionCreateForm(request.POST, exam_type=exam.exam_type)
+        form = ExamQuestionCreateForm(
+            request.POST,
+            exam_type=exam.exam_type,
+            subject_blocks=blocks
+            )
         if form.is_valid():
             # Sualı yaradıq
             last_q = exam.questions.order_by("-order").first()
@@ -652,11 +657,11 @@ def add_exam_question(request, slug):
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
                 return redirect("add_exam_question", slug=exam.slug)
-            else:
+            else: 
                 # Sadəcə imtahan detalına qayıt
                 return redirect("teacher_exam_detail", slug=exam.slug)
     else:
-        form = ExamQuestionCreateForm(exam_type=exam.exam_type)
+        form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks)
 
     return render(request, "blog/add_exam_question.html", {
         "exam": exam,
@@ -838,20 +843,27 @@ def delete_exam(request, slug):
     return render(request, "blog/confirm_delete_exam.html", {"exam": exam})
 
 
+
+
 @login_required
 def edit_exam_question(request, slug, question_id):
     """
-    Mövcud sualı redaktə etmək (text, cavab rejimi, vaxt, variantlar və s.).
+    Mövcud sualı redaktə etmək (text, blok, cavab rejimi, vaxt, variantlar və s.).
     """
     _ensure_teacher(request.user)
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
+
+    # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
+    blocks = QuestionBlock.objects.filter(exam=exam).order_by('order')
+    # ------------------------------------------------------------
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             request.POST,
             instance=question,
             exam_type=exam.exam_type,
+            subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
         )
         if form.is_valid():
             q = form.save(commit=False)
@@ -870,6 +882,7 @@ def edit_exam_question(request, slug, question_id):
         form = ExamQuestionCreateForm(
             instance=question,
             exam_type=exam.exam_type,
+            subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
         )
 
     return render(request, "blog/add_exam_question.html", {
@@ -878,7 +891,6 @@ def edit_exam_question(request, slug, question_id):
         "editing": True,
         "question": question,
     })
-
 
 
 @login_required

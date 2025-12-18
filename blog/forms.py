@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category, ExamAttempt, ExamAnswer, StudentGroup
+from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category, ExamAttempt, ExamAnswer, StudentGroup, QuestionBlock
 
 
 class SubscriptionForm(forms.Form):
@@ -323,12 +323,15 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
     class Meta:
         model = ExamQuestion
-        fields = ["text", "answer_mode", "time_limit_seconds", "correct_answer"]
+        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer"]
         widgets = {
             "text": forms.Textarea(attrs={
                 "class": "form-control",
                 "rows": 3,
                 "placeholder": "Sual mətni..."
+            }),
+            "block": forms.Select(attrs={
+                "class": "form-control"
             }),
             "answer_mode": forms.Select(attrs={
                 "class": "form-control",
@@ -345,12 +348,13 @@ class ExamQuestionCreateForm(forms.ModelForm):
         }
         labels = {
             "text": "Sual",
+            "block": "Mövzu Bloku",
             "answer_mode": "Cavab rejimi",
             "time_limit_seconds": "Bu sual üçün vaxt limiti",
             "correct_answer": "Yazılı/praktiki üçün ideal cavab",
         }
 
-    def __init__(self, *args, exam_type=None, **kwargs):
+    def __init__(self, *args, exam_type=None, subject_blocks=None, **kwargs):
         """
         exam_type (test / written) view-dən ötürülür.
         - written üçün: answer_mode required olmasın.
@@ -359,6 +363,14 @@ class ExamQuestionCreateForm(forms.ModelForm):
         self.exam_type = exam_type
         super().__init__(*args, **kwargs)
 
+        # 1. Blokları dropdown-a doldururuq
+        if subject_blocks is not None:
+            self.fields['block'].queryset = subject_blocks
+            self.fields['block'].empty_label = "Ümumi (Heç bir bloka aid deyil)"
+        else: 
+            # Əgər blok göndərilməyibsə, boş siyahı olsun
+            self.fields['block'].queryset = QuestionBlock.objects.none()
+            
         # Yazılı imtahanlarda answer_mode-u məcburi etməyək
         if self.exam_type == "written":
             self.fields["answer_mode"].required = False
