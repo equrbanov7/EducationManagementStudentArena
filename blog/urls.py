@@ -48,9 +48,24 @@ urlpatterns = [
     path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
     path('teacher/groups/', views.teacher_group_list, name='teacher_group_list'),
     
-    # ... (Qrup yaratma URL-ləri olduğu kimi qalır) ...
 
-    # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
+    # --- Teacher statistikası ---
+
+    path('teacher/pending-work/', views.teacher_pending_attempts, name='teacher_pending_attempts'),
+
+
+    path('teacher/groups/', views.teacher_group_list, name='teacher_group_list'),
+
+
+    # Modal üçün lazım olan URL-lər:
+
+    path('teacher/groups/create/', views.teacher_create_group, name='teacher_create_group'),
+
+    path('teacher/groups/update/<int:group_id>/', views.teacher_update_group, name='teacher_update_group'),
+
+    path('teacher/groups/delete/<int:group_id>/', views.teacher_delete_group, name='teacher_delete_group'),
+
+        # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
     
     # Sual Bankı (Müəllim üçün)
     path('exams/<slug:slug>/create-bank/', views.create_question_bank, name='create_question_bank'),
