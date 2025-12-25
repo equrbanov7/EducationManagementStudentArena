@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 {% endblock %}
 
-{% block content %}
+{% block content %} 
 <div class="bulk-page-wrapper">
     
     <header class="page-header">
@@ -16,56 +16,44 @@
             <h1 class="page-title">{{ exam.title }}</h1>
             <p class="page-subtitle">Sual Bankı İdarəetmə Paneli</p>
         </div>
-
+    
         <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
-               
-                  <!-- ✅ Yeni: Sual sayı + Default bal -->
-                <div class="quick-settings">
-                    <div class="qs-item">
-                        <span class="qs-label">Sual sayı</span>
-                        <input
-                            id="rqInput"
-                            type="number"
-                            min="1"
-                            value="{{ rq_value }}"
-                        >
+            <div class="stat-card settings-card">
+                <div class="stat-icon blue"><i class="bi bi-gear-fill"></i></div>
+                <div class="card-content-wrapper">
+                    <div class="quick-settings">
+                        <div class="qs-item">
+                            <label for="rqInput">Sual sayı</label>
+                            <input id="rqInput" type="number" min="1" value="{{ rq_value }}">
+                        </div>
+                        <div class="qs-item">
+                            <label for="dpInput">Default bal</label>
+                            <input id="dpInput" type="number" min="1" value="{{ dp_value }}">
+                        </div>
                     </div>
-
-                    <div class="qs-item">
-                        <span class="qs-label">Default bal</span>
-                        <input
-                            id="dpInput"
-                            type="number"
-                            min="1"
-                            value="{{ dp_value }}"
-                        >
+                    <div class="stat-divider"></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Toplam Sual</span>
+                        <span class="stat-value">{{ parsed|length }}</span>
                     </div>
-                </div>
-
-                <div class="stat-info">
-                    <span class="stat-label">Toplam Sual</span>
-                    <span class="stat-value">{{ parsed|length }}</span>
                 </div>
             </div>
-
+    
             <div class="stat-card">
                 <div class="stat-icon yellow"><i class="bi bi-exclamation-triangle"></i></div>
                 <div class="stat-info">
-                  <span class="stat-label">Xəbərdarlıq</span>
-                  <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
+                    <span class="stat-label">Xəbərdarlıq</span>
+                    <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
                 </div>
-              </div>
-              
-              <div class="stat-card">
+            </div>
+            
+            <div class="stat-card">
                 <div class="stat-icon red"><i class="bi bi-layers"></i></div>
                 <div class="stat-info">
-                  <span class="stat-label">Təkrar</span>
-                  <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
+                    <span class="stat-label">Təkrar</span>
+                    <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
                 </div>
-              </div>
-              
+            </div>
         </div>
     </header>
 
@@ -99,19 +87,34 @@
                     </label>
                 </div>
                 
-                <div class="format-tags">
-                    <span>DOCX</span>
-                    <span class="pdf-tag">PDF</span>
-                    <span>TXT</span>
+                <div class="format-tags" id="formatTags">
+                    <span class="format-tag" data-ext="docx">DOCX</span>
+                    <span class="format-tag" data-ext="pdf">PDF</span>
+                    <span class="format-tag" data-ext="txt">TXT</span>
                 </div>
+                  
+
             </aside>
         
             <main class="editor-main">
                 <div class="editor-toolbar">
                     <h5 class="section-title"><i class="bi bi-code-square"></i> Editor</h5>
-                    <button class="preview-btn" type="submit">
-                        Preview (Baxış) <i class="bi bi-eye-fill"></i>
-                    </button>
+
+                    <div class="toolbar-actions">
+
+                        <button class="clear-btn" type="button" id="clearBtn">
+                            Təmizlə <i class="bi bi-trash3"></i>
+                        </button>
+                          
+
+                        <button class="preview-btn" type="submit">
+                            Preview (Baxış) <i class="bi bi-eye-fill"></i>
+                        </button>
+                
+                        
+                        
+                    </div>
+
                 </div>
 
                 <div class="textarea-container">
@@ -196,17 +199,7 @@
                 {% endfor %}
             </div>
 
-            <div class="settings-row">
-                <div class="field">
-                  <label>Tələbəyə göstəriləcək sual sayı (0 = hamısı)</label>
-                  <input type="number" min="0" value="{{ rq_value|default:10 }}" disabled>
-                </div>
-              
-                <div class="field">
-                  <label>Default bal (hər sual üçün)</label>
-                  <input type="number" min="1" value="{{ dp_value|default:1 }}" disabled>
-                </div>
-            </div>
+        
               
             <div class="sticky-footer">
                 <button class="save-btn" type="submit">

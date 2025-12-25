@@ -24,37 +24,116 @@ body {
 }
 
 /* Header & Stats */
+/* Header Ümumi Struktur */
 .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 40px;
+    align-items: center; /* Daha balanslı görünüş üçün */
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 15px;
 }
 
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.page-subtitle {
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* Stat Kartları Təkmilləşdirmə */
 .stats-container {
     display: flex;
-    gap: 20px;
+    gap: 15px;
+    align-items: stretch;
 }
 
 .stat-card {
     background: var(--card-bg);
-    padding: 15px 25px;
-    border-radius: 12px;
+    padding: 12px 20px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     gap: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     border: 1px solid var(--border);
+    transition: all 0.3s ease;
 }
 
-.stat-icon {
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
+.stat-card:hover {
+    box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    border-color: #d1d5db;
+}
+
+/* Ayarlar Bölməsi (Sual sayı & Bal) */
+.card-content-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    gap: 20px;
+}
+
+.quick-settings {
+    display: flex;
+    gap: 15px;
+}
+
+.qs-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.qs-item label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qs-item input {
+    width: 70px;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: #f8faff;
+    transition: 0.2s;
+}
+
+.qs-item input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.stat-divider {
+    width: 1px;
+    height: 35px;
+    background: var(--border);
+}
+
+/* Responsive tənzimləmə */
+@media (max-width: 1100px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    
+    .stats-container {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
 }
 
 .stat-icon.blue { background: #eef2ff; color: var(--primary); }
@@ -139,6 +218,18 @@ body {
 }
 
 .preview-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+.toolbar-actions{ display:flex; gap:10px; align-items:center; }
+
+.clear-btn{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  padding:10px 16px;
+  border-radius:10px;
+  font-weight:600;
+}
+.clear-btn:hover{ background:#f3f4f6; }
+
 
 /* Textarea Sahəsi */
 .textarea-container {
@@ -242,12 +333,34 @@ body {
 }
 
 
-
-.format-tags span.pdf-tag {
-    background: #ffe3e3;
-    color: #e74c3c;
-    border-color: #ffc9c9;
+.format-tags{
+    margin-top: 15px;
+    text-align: center;
 }
+
+.format-tag{
+    display:inline-flex;
+    align-items:center;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid #e5e7eb;
+    background:#fff;
+    font-weight:600;
+    font-size:12px;
+    opacity:.65;
+  }
+  
+  /* aktiv olanda */
+  .format-tag.is-active{
+    opacity:1;
+    border-color: currentColor;
+  }
+  
+  /* tipə görə rəng */
+  .format-tag.is-pdf{ color:#e74c3c; background:#fff5f5; }
+  .format-tag.is-docx{ color:#2b6cb0; background:#ebf8ff; }
+  .format-tag.is-txt{ color:#2f855a; background:#f0fff4; }
+  
 
 /* Seçim Düymələri (Select All / Deselect) */
 .action-btns {
@@ -312,7 +425,21 @@ body {
   
   .file-name-tag.show{
     display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
   }
+
+ 
+  
+  #fileNameDisplay span{
+    min-width: 0;              /* flex ellipsis üçün vacib */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  
   
 
 /* Textarea focus halı */

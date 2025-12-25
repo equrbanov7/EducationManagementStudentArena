@@ -38,13 +38,14 @@
             {{ form.text }}
             <div class="error-msg">{{ form.text.errors }}</div>
         </div>
+        {% if exam.exam_type == "written" %}
         <div class="form-group">
             <label for="{{ form.block.id_for_label }}">Mövzu Bloku (Fənn/Bölmə):</label>
             {{ form.block }}
             <div class="error-msg">{{ form.block.errors }}</div>
             <p class="help-text" style="font-size: 0.85em; color: #666;">Əgər sual heç bir bloka aid deyilsə, boş saxlaya bilərsiniz.</p>
         </div>
-
+        {% endif %}
         {% if exam.exam_type == "test" %}
             <div class="form-row">
                 <div class="form-group half">
