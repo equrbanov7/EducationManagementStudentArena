@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - Sual Bankı{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/test_question_bank.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block content %}
+<div class="bulk-page-wrapper">
+    
+    <header class="page-header">
+        <div class="title-section">
+            <h1 class="page-title">{{ exam.title }}</h1>
+            <p class="page-subtitle">Sual Bankı İdarəetmə Paneli</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="bi bi-list-check"></i></div>
+               
+                  <!-- ✅ Yeni: Sual sayı + Default bal -->
+                <div class="quick-settings">
+                    <div class="qs-item">
+                        <span class="qs-label">Sual sayı</span>
+                        <input
+                            id="rqInput"
+                            type="number"
+                            min="1"
+                            value="{{ rq_value }}"
+                        >
+                    </div>
+
+                    <div class="qs-item">
+                        <span class="qs-label">Default bal</span>
+                        <input
+                            id="dpInput"
+                            type="number"
+                            min="1"
+                            value="{{ dp_value }}"
+                        >
+                    </div>
+                </div>
+
+                <div class="stat-info">
+                    <span class="stat-label">Toplam Sual</span>
+                    <span class="stat-value">{{ parsed|length }}</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon yellow"><i class="bi bi-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Xəbərdarlıq</span>
+                  <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
+                </div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-icon red"><i class="bi bi-layers"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">Təkrar</span>
+                  <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
+                </div>
+              </div>
+              
+        </div>
+    </header>
+
+    <div class="main-card">
+        <form method="post" enctype="multipart/form-data" class="split-layout" onsubmit="return syncBankSettings();">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="preview"/>
+
+            <!-- ✅ ƏLAVƏ: Preview klikində də sual sayı və default bal POST getsin -->
+            <input type="hidden" name="random_question_count" id="rqHiddenPreview" value="{{ rq_value }}">
+            <input type="hidden" name="default_points" id="dpHiddenPreview" value="{{ dp_value }}">
+
+            <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+            
+            <aside class="upload-sidebar">
+                <h5 class="section-title"><i class="bi bi-file-earmark-arrow-up"></i> Fayldan Yüklə</h5>
+                <p class="section-desc">DOCX, PDF və ya TXT faylları.</p>
+                
+                <div class="upload-zone-wrapper">
+                    <input class="file-input-hidden"
+                    type="file"
+                    name="upload_file"
+                    id="fileInput"
+                    accept=".docx,.pdf,.txt"
+                    onchange="fileSelected(this)">
+                                 <label for="fileInput" class="upload-zone" id="dropZone">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        <strong>Faylı seçin</strong>
+                        <span>və ya bura sürüşdürün</span>
+                        <div id="fileNameDisplay" class="file-name-tag"></div>
+                    </label>
+                </div>
+                
+                <div class="format-tags">
+                    <span>DOCX</span>
+                    <span class="pdf-tag">PDF</span>
+                    <span>TXT</span>
+                </div>
+            </aside>
+        
+            <main class="editor-main">
+                <div class="editor-toolbar">
+                    <h5 class="section-title"><i class="bi bi-code-square"></i> Editor</h5>
+                    <button class="preview-btn" type="submit">
+                        Preview (Baxış) <i class="bi bi-eye-fill"></i>
+                    </button>
+                </div>
+
+                <div class="textarea-container">
+                    <div class="textarea-header">Format: 1) Sual... *A) Cavab...</div>
+                    <textarea name="raw_text" class="custom-editor" 
+                    placeholder="Sualları buraya yapışdırın...">{{ raw_text }}</textarea>
+                </div>
+            </main>
+        </form>
+        
+    </div>
+
+    {% if parsed %}
+    <div class="results-container animate-up">
+        <div class="results-header">
+            <div class="results-title">
+                <h4>Nəticəni Yoxlayın</h4>
+                <p>Sualları seçərək bazaya əlavə edin.</p>
+            </div>
+            <div class="action-btns">
+                <button type="button" class="btn-action select-all" onclick="toggleAll(true)">
+                    <i class="bi bi-check2-all"></i> Hamısını Seç
+                </button>
+                <button type="button" class="btn-action deselect-all" onclick="toggleAll(false)">
+                    <i class="bi bi-x-circle"></i> Seçimi Ləğv Et
+                </button>
+            </div>
+        </div>
+
+        <form method="post" id="saveForm" onsubmit="return syncBankSettings();">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save"/>
+
+            <!-- ✅ ƏLAVƏ: Save klikində də sual sayı və default bal getsin -->
+            <input type="hidden" name="random_question_count" id="rqHiddenSave" value="{{ rq_value }}">
+            <input type="hidden" name="default_points" id="dpHiddenSave" value="{{ dp_value }}">
+
+            <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+
+            <div class="question-list">
+                {% for q in parsed %}
+                <div class="q-card" onclick="toggleRow(this, event)">
+                    <div class="q-checkbox-wrapper">
+                        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}">
+                    </div>
+
+                    <div class="points-mini">
+                        <label>Bal:</label>
+                        <input
+                            type="number"
+                            name="points_{{ forloop.counter }}"
+                            min="1"
+                            value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}"
+                            style="width:70px;"
+                        >
+                    </div>
+                      
+                    <div class="q-content">
+                        <div class="q-header">
+                            <span class="q-num">#{{ forloop.counter }}</span>
+                            <span class="q-text">{{ q.text }}</span>
+                        </div>
+
+                        <div class="options-grid">
+                            {% for lab, txt in q.options.items %}
+                            <div class="opt-box {% if lab in q.correct %}correct{% endif %}">
+                                <span class="opt-label">{{ lab }}</span>
+                                <span class="opt-text">{{ txt }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if q.warnings %}
+                        <div class="warning-box">
+                            {% for w in q.warnings %}
+                            <div class="warning-msg"><i class="bi bi-exclamation-circle"></i> {{ w.msg }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="settings-row">
+                <div class="field">
+                  <label>Tələbəyə göstəriləcək sual sayı (0 = hamısı)</label>
+                  <input type="number" min="0" value="{{ rq_value|default:10 }}" disabled>
+                </div>
+              
+                <div class="field">
+                  <label>Default bal (hər sual üçün)</label>
+                  <input type="number" min="1" value="{{ dp_value|default:1 }}" disabled>
+                </div>
+            </div>
+              
+            <div class="sticky-footer">
+                <button class="save-btn" type="submit">
+                    <i class="bi bi-cloud-check"></i> Seçilənləri Yadda Saxla
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+{% block extraJs %}
+<script src="{% static 'js/testQuestionBank.js' %}"></script>
+
+<script>
+function syncBankSettings(){
+    const rq = document.getElementById("rqInput");
+    const dp = document.getElementById("dpInput");
+
+    const rqVal = rq && rq.value ? rq.value : "{{ rq_value|default:10 }}";
+    const dpVal = dp && dp.value ? dp.value : "{{ dp_value|default:1 }}";
+
+    const a = document.getElementById("rqHiddenPreview");
+    const b = document.getElementById("dpHiddenPreview");
+    const c = document.getElementById("rqHiddenSave");
+    const d = document.getElementById("dpHiddenSave");
+
+    if(a) a.value = rqVal;
+    if(b) b.value = dpVal;
+    if(c) c.value = rqVal;
+    if(d) d.value = dpVal;
+
+    return true;
+}
+</script>
+{% endblock %}
+
+{% endblock %}

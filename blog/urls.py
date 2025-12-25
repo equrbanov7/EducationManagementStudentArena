@@ -35,7 +35,7 @@ urlpatterns = [
     path("questions/my/", views.my_questions, name="my_questions"),
     path("questions/", views.questions_i_can_see, name="questions_i_can_see"),
 
-# --- Exam URL-ləri ---
+    # --- Exam URL-ləri ---
 
     # 1. Sabit URL-lər (Slug olmayanlar ən birinci gəlir)
     path("exams/", views.teacher_exam_list, name="teacher_exam_list"),
@@ -65,9 +65,14 @@ urlpatterns = [
 
     path('teacher/groups/delete/<int:group_id>/', views.teacher_delete_group, name='teacher_delete_group'),
 
-        # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
+    # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
     
     # Sual Bankı (Müəllim üçün)
+    path(
+        "teacher/exams/<slug:slug>/test-bank/",
+        views.test_question_bank,
+        name="test_question_bank"
+         ),
     path('exams/<slug:slug>/create-bank/', views.create_question_bank, name='create_question_bank'),
     path('exams/<slug:slug>/process-bank/', views.process_question_bank, name='process_question_bank'),
 

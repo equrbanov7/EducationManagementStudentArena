@@ -240,6 +240,12 @@ class StudentGroup(models.Model):
 
 
 class Exam(models.Model):
+    
+  
+    
+    
+   
+    
     EXAM_TYPE_CHOICES = (
         ("test", "Test imtahanı"),
         ("written", "Yazılı / praktiki"),
@@ -293,9 +299,11 @@ class Exam(models.Model):
     )
     random_question_count = models.PositiveIntegerField(
         "Tələbəyə göstəriləcək sual sayı",
-        default=0,
+        default=10,
         help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir."
     )
+    
+    default_question_points = models.PositiveIntegerField(default=1)
 
     # --- Giriş məhdudiyyətləri ---
 
@@ -529,6 +537,8 @@ class QuestionBlock(models.Model):
 
 
 class ExamQuestion(models.Model):
+    points = models.PositiveIntegerField(default=1)
+    fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
     ANSWER_MODE_CHOICES = (
         ("single", "Tək düzgün cavab"),
         ("multiple", "Birdən çox düzgün cavab"),
@@ -628,6 +638,10 @@ class ExamQuestion(models.Model):
 
 
 class ExamQuestionOption(models.Model):
+    LABEL_CHOICES = (
+        ("A","A"), ("B","B"), ("C","C"), ("D","D"), ("E","E"),
+    )
+    label = models.CharField(max_length=1, choices=LABEL_CHOICES, null=True, blank=True)
     question = models.ForeignKey(
         ExamQuestion,
         on_delete=models.CASCADE,

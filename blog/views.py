@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Max
 from django.core.mail import send_mail 
 from django.template.loader import render_to_string 
 from django.conf import settings
@@ -32,6 +32,147 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 import random  # Faylın ən başında olsun
 import re
+from django.db.models import Prefetch
+from django.db.models import Q
+import re
+import json
+from collections import defaultdict
+from docx import Document
+import os
+try:
+    from pypdf import PdfReader
+except Exception:
+    PdfReader = None
+import random
+
+from django.db import transaction
+
+
+LABELS = ["A", "B", "C", "D", "E"]
+QUESTION_RE = re.compile(r"^\s*(\d+)\s*[\)\.]\s*(.+)\s*$")
+OPTION_RE = re.compile(r"^\s*(\*)?\s*([A-E])\s*[\)\.]\s*(.+)\s*$", re.IGNORECASE)
+
+ANSWERLINE_RE = re.compile(
+    r"^\s*(cavab|duz\s*cavab|düz\s*cavab|correct)\s*[:\-]\s*([A-E](?:\s*[,;/]\s*[A-E])*)\s*$",
+    re.IGNORECASE
+)
+
+def _norm(text: str) -> str:
+    if not text:
+        return ""
+    t = text.strip().lower()
+    t = re.sub(r"\s+", " ", t)
+    return t
+
+
+
+
+def normalize_pdf_extracted_text(text: str) -> str:
+    """
+    PDF-dən çıxan mətni parser üçün uyğun formaya salır:
+    - sual nömrələrinin qabağına boş sətir əlavə edir (… \n\n12) …)
+    - A–E variantlarının qabağına newline əlavə edir (… \nA) …)
+    - "Cavab:" sətrini yeni sətrə keçirir
+    - '*' işarəsi ilə variant arasında boşluğu düzəldir (*A) kimi)
+    """
+    if not text:
+        return ""
+
+    t = text.replace("\r", "\n")
+
+    # çoxlu boşluqları normallaşdır
+    t = re.sub(r"[ \t]+", " ", t)
+
+    # "Cavab:" həmişə yeni sətirdən başlasın
+    t = re.sub(r"(?i)\s+(Cavab\s*:)", r"\n\1", t)
+
+    # "* A)" kimi çıxırsa "*A)" et
+    t = re.sub(r"\*\s+([A-E])", r"*\1", t, flags=re.IGNORECASE)
+
+    # Sual nömrələri: " 12)" və ya " 12." -> yeni blok kimi başlasın
+    # (Variant daxilində 1) 2) olsa belə parser artıq IN_OPT-də bunu sual saymır, problem olmur.)
+    t = re.sub(r"(?<!\n)\s+(\d{1,4})\s*([\)\.])", r"\n\n\1\2", t)
+
+    # Variantlar: " A)" / " *A)" / " B." və s -> yeni sətirdən başlasın
+    t = re.sub(r"(?<!\n)\s+(\*?[A-E])\s*([\)\.])", r"\n\1\2", t, flags=re.IGNORECASE)
+
+    # 3+ boş sətiri 2-yə sal
+    t = re.sub(r"\n{3,}", "\n\n", t)
+
+    return t.strip()
+
+
+
+def build_shuffled_options(attempt_id, question):
+    opts = list(question.options.all())
+    rnd = random.Random(f"{attempt_id}:{question.id}")
+    rnd.shuffle(opts)
+    packed = []
+    for i, opt in enumerate(opts):
+        packed.append({
+            "id": opt.id,
+            "label": LABELS[i] if i < len(LABELS) else "",
+            "text": opt.text
+        })
+    return packed
+
+def _effective_needed_count(exam) -> int:
+    """
+    0 -> hamısı
+    1 -> 1
+    10 -> 10
+    boş/None -> 10 (default)
+    """
+    total = exam.questions.count()
+
+    val = getattr(exam, "random_question_count", None)
+    if val is None:
+        return min(10, total)
+
+    try:
+        val = int(val)
+    except (TypeError, ValueError):
+        return min(10, total)
+
+    if val <= 0:
+        return total  # 0 -> hamısı
+
+    return min(val, total)
+
+
+
+def _attempt_has_any_answer(attempt) -> bool:
+    """
+    Tələbə həqiqətən nəsə yazıb/seçibsə True.
+    False-positive verməsin deyə count-based yoxlayırıq.
+    """
+    # text
+    if attempt.answers.exclude(text_answer__isnull=True).exclude(text_answer="").exists():
+        return True
+
+    # selected options
+    if attempt.answers.filter(selected_options__isnull=False).distinct().exists():
+        # bu da bəzən false-positive ola bilər, ona görə bir addım da:
+        return attempt.answers.filter(selected_options__isnull=False).values("id").distinct().count() > 0
+
+    # files
+    if attempt.answers.filter(files__isnull=False).distinct().exists():
+        return True
+
+    return False
+
+
+# # Regex pattern-lər
+# QUESTION_RE = re.compile(r'^(\d+)[\.\)]\s*(.+)$')
+# OPTION_RE = re.compile(r'^(\*?)\s*([A-Ea-e])[\.\)]\s*(.+)$')
+# ANSWERLINE_RE = re.compile(r'^(Cavab|Düz cavab|Answer):\s*(.+)$', re.IGNORECASE)
+
+# def _norm(text):
+#     """Mətn normallaşdırması - boşluqları təmizləyir, kiçik hərflərə çevirir"""
+#     if not text:
+#         return ""
+#     return re.sub(r'\s+', ' ', text.strip().lower())
+
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
 def home(request):
@@ -270,11 +411,6 @@ def create_post(request):
         form = PostForm()
 
     return render(request, "post_form.html", {"form": form})
-
-
-
-
-
 
 
 
@@ -543,7 +679,7 @@ def questions_i_can_see(request):
     + author = user olanlar,
     + visible_users siyahısında user olanlar.
     """
-    from django.db.models import Q
+    
 
     questions = (
         Question.objects
@@ -669,7 +805,7 @@ def add_exam_question(request, slug):
     })
 
 
-# 1. Səhifəni açan view (YENİLƏNİB)
+# 1. Səhifəni açan view (YENİLƏNİB) Yazili
 def create_question_bank(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
     
@@ -694,7 +830,7 @@ def create_question_bank(request, slug):
         'blocks_data': blocks_data
     })
 
-# views.py (Yalnız bu funksiyanı yeniləyin)
+
 
 def process_question_bank(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
@@ -785,6 +921,470 @@ def process_question_bank(request, slug):
         return redirect('teacher_exam_detail', slug=exam.slug)
     
     return redirect('create_question_bank', slug=exam.slug)
+
+
+def extract_text_from_upload(uploaded_file) -> str:
+    name = uploaded_file.name.lower()
+    ext = os.path.splitext(name)[1]
+
+    # təhlükəsizlik: böyük fayl limiti (məs: 5MB)
+    if uploaded_file.size > 5 * 1024 * 1024:
+        raise ValueError("Fayl çox böyükdür (max 5MB).")
+
+    if ext == ".txt":
+        return uploaded_file.read().decode("utf-8", errors="ignore")
+
+    if ext == ".docx":
+        # docx.Document file-like də qəbul edir
+        doc = Document(uploaded_file)
+        lines = []
+        for p in doc.paragraphs:
+            t = (p.text or "").strip()
+            if t:
+                lines.append(t)
+        return "\n".join(lines)
+
+    if ext == ".pdf":
+        if PdfReader is None:
+            raise ValueError("PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin.")
+
+        reader = PdfReader(uploaded_file)
+        parts = []
+        for page in reader.pages:
+            txt = page.extract_text() or ""
+            txt = txt.strip()
+            if txt:
+                parts.append(txt)
+
+        raw = "\n\n".join(parts)
+
+        # ✅ əsas fix burada
+        return normalize_pdf_extracted_text(raw)
+
+
+    raise ValueError("Yalnız .docx, .pdf, .txt qəbul olunur.")
+
+
+def parse_bulk_mcq(raw_text: str):
+    """
+    Output:
+      questions: list[
+        {
+          "q_no": "12" (mətn içindəki nömrə),
+          "text": "...",
+          "options": {"A": "...", ..., "E": "..."},
+          "correct": ["A"] or ["A","C"],
+          "answer_mode": "single"|"multiple",
+          "warnings": [ {type, msg, ref?}, ... ]
+        }
+      ]
+    """
+    lines = raw_text.splitlines()
+    OUTSIDE, IN_Q, IN_OPT = 0, 1, 2
+
+    state = OUTSIDE
+    current = None
+    current_opt_label = None
+
+    def close_option():
+        nonlocal current_opt_label
+        current_opt_label = None
+
+    def close_question():
+        nonlocal current, current_opt_label, state
+        if not current:
+            return
+        close_option()
+
+        # Correct müəyyən et:
+        # 1) option-larda * ilə işarələnənlər
+        if not current["correct"]:
+            # 2) Cavab: A,C sətri ilə verilənlər
+            if current.get("_answerline_correct"):
+                current["correct"] = current["_answerline_correct"]
+
+        # 3) Heç biri yoxdursa default A
+        if not current["correct"]:
+            current["correct"] = ["A"]
+
+        # answer_mode set
+        current["answer_mode"] = "multiple" if len(current["correct"]) > 1 else "single"
+
+        # cleanup
+        current.pop("_answerline_correct", None)
+        questions.append(current)
+
+        current = None
+        current_opt_label = None
+        state = OUTSIDE
+
+    questions = []
+
+    for raw in lines:
+        line = raw.rstrip("\n")
+        if not line.strip():
+            continue
+
+        # Answer line (istənilən yerdə ola bilər)
+        m_ans = ANSWERLINE_RE.match(line)
+        if m_ans and current:
+            labels = re.split(r"\s*[,;/]\s*", m_ans.group(2).upper())
+            labels = [x for x in labels if x in list("ABCDE")]
+            # uniq preserve order
+            seen = set()
+            uniq = []
+            for x in labels:
+                if x not in seen:
+                    uniq.append(x)
+                    seen.add(x)
+            current["_answerline_correct"] = uniq
+            continue
+
+        # OPTION?
+        m_opt = OPTION_RE.match(line)
+        if m_opt and current:
+            star = bool(m_opt.group(1))
+            label = m_opt.group(2).upper()
+            text = m_opt.group(3).strip()
+
+            current["options"][label] = text
+            current_opt_label = label
+            state = IN_OPT
+            if star and label not in current["correct"]:
+                current["correct"].append(label)
+            continue
+
+        # QUESTION START?
+        m_q = QUESTION_RE.match(line)
+
+        if state == OUTSIDE and m_q:
+            # yeni sual
+            current = {
+                "q_no": m_q.group(1),
+                "text": m_q.group(2).strip(),
+                "options": {},
+                "correct": [],
+                "answer_mode": "single",
+                "warnings": [],
+            }
+            state = IN_Q
+            continue
+
+        # Əgər artıq sualın içindəyiksə:
+        if current:
+            # Əgər option bitib və yeni sual başlayırsa
+            if state == IN_OPT and m_q and len(current["options"]) >= 4:
+                # əvvəlki sualı bağla, yenisini başlat
+                close_question()
+                current = {
+                    "q_no": m_q.group(1),
+                    "text": m_q.group(2).strip(),
+                    "options": {},
+                    "correct": [],
+                    "answer_mode": "single",
+                    "warnings": [],
+                }
+                state = IN_Q
+                continue
+            # IN_Q vəziyyətində və yeni sual gəlirsə
+            elif state == IN_Q and m_q and current["options"]:
+                close_question()
+                current = {
+                    "q_no": m_q.group(1),
+                    "text": m_q.group(2).strip(),
+                    "options": {},
+                    "correct": [],
+                    "answer_mode": "single",
+                    "warnings": [],
+                }
+                state = IN_Q
+                continue
+
+            # Əks halda bu sətir ya sualın davamıdır, ya da variantın davamıdır
+            if state == IN_OPT and current_opt_label:
+                current["options"][current_opt_label] += " " + line.strip()
+            else:
+                current["text"] += " " + line.strip()
+        else:
+            # OUTSIDE ikən sual formatına düşməyən mətn → ignore
+            pass
+
+    # axırı bağla
+    if current:
+        close_question()
+
+    # Validations per question
+    for q in questions:
+        # missing A-D
+        for must in ["A", "B", "C", "D"]:
+            if must not in q["options"]:
+                q["warnings"].append({
+                    "type": "missing_option",
+                    "msg": f"{must} variantı tapılmadı."
+                })
+
+        # E optional warning
+        if "E" not in q["options"]:
+            q["warnings"].append({
+                "type": "missing_option_e",
+                "msg": "E variantı yoxdur (opsional)."
+            })
+
+        # duplicate options text warning
+        norm_map = defaultdict(list)
+        for lab, txt in q["options"].items():
+            norm_map[_norm(txt)].append(lab)
+
+        dup_groups = [labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1]
+        for labs in dup_groups:
+            q["warnings"].append({
+                "type": "duplicate_option_text",
+                "msg": f"Təkrar variant mətni: {', '.join(labs)} eynidir."
+            })
+
+        # correct label exists?
+        for c in q["correct"]:
+            if c not in q["options"]:
+                q["warnings"].append({
+                    "type": "correct_missing",
+                    "msg": f"Düz cavab kimi işarələnən {c} variantı yoxdur."
+                })
+
+    return questions
+
+
+
+
+def test_question_bank(request, slug):
+    exam = get_object_or_404(Exam, slug=slug)
+
+    # yalnız test imtahanı üçün
+    if exam.exam_type != "test":
+        return render(request, "404.html", status=404)
+
+    blocks = exam.question_blocks.all().order_by("order", "id")
+
+    raw_text = ""
+    parsed = []
+    selected = set()
+
+    warning_count = 0
+    duplicate_count = 0
+
+    # >>> YENİ: UI dəyərləri (Preview klikində sıfırlanmasın deyə)
+    # NOTE: 0 = hamısı; None/boş = default 10 göstər
+    total_q = exam.questions.count()
+    exam_rq = getattr(exam, "random_question_count", None)
+    rq_default = min(10, total_q) if exam_rq is None else exam_rq
+
+    exam_dp = getattr(exam, "default_question_points", None) or 1
+    dp_default = exam_dp
+
+    # GET-də və POST-da input-ların value-ları buradan gedəcək
+    rq_value = str(rq_default)
+    dp_value = str(dp_default)
+
+    def build_fp_from_parsed(q):
+        return _norm(q["text"]) + "||" + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
+
+    def build_fp_from_db(eq):
+        # DB-də option-lar label saxlamadığı üçün sıra ilə götürürük (A..E)
+        opt_map = {}
+        opts = list(eq.options.all())
+        labels = list("ABCDE")
+        for i, opt in enumerate(opts[:5]):
+            opt_map[labels[i]] = opt.text
+        return _norm(eq.text) + "||" + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
+
+    # GET
+    if request.method != "POST":
+        return render(request, "blog/test_question_bank.html", {
+            "exam": exam,
+            "blocks": blocks,
+            "raw_text": raw_text,
+            "parsed": parsed,
+            "selected": selected,
+            "warning_count": warning_count,
+            "duplicate_count": duplicate_count,
+
+            # >>> YENİ: input-ların value-ları
+            "rq_value": rq_value,
+            "dp_value": dp_value,
+        })
+
+    # POST
+    action = request.POST.get("action", "preview")
+
+    # >>> YENİ: Preview-də də input dəyərlərini saxla (DB-yə yazmadan!)
+    rq_post = (request.POST.get("random_question_count") or "").strip()
+    dp_post = (request.POST.get("default_points") or "").strip()
+
+    if rq_post != "":
+        rq_value = rq_post  # typed dəyər geri qayıtsın
+    if dp_post != "":
+        dp_value = dp_post  # typed dəyər geri qayıtsın
+
+    # 1) raw_text-i formdan al (save formunda hidden textarea olmalıdır!)
+    raw_text = request.POST.get("raw_text", "")
+
+    # 2) fayl varsa onu oxu (paste varsa fallback kimi qalır)
+    uploaded = request.FILES.get("upload_file")
+    if uploaded:
+        try:
+            raw_text = extract_text_from_upload(uploaded)
+        except Exception as e:
+            # burada fallback: textarea-dakı raw_text qalsın
+            messages.error(request, f"Fayl oxunmadı: {e}")
+
+    # 3) preview/save üçün parse et
+    if action in ("preview", "save"):
+        parsed = parse_bulk_mcq(raw_text) or []
+
+        # təhlükəsizlik: warnings açarı hər sualda olsun
+        for q in parsed:
+            q.setdefault("warnings", [])
+
+        # ---- Duplicate check: import daxilində ----
+        fp_first = {}
+        for idx, q in enumerate(parsed, start=1):
+            fp = build_fp_from_parsed(q)
+            if fp in fp_first:
+                q["warnings"].append({
+                    "type": "duplicate_in_import",
+                    "msg": f"Təkrar sual: #{idx} sualı əvvəlki #{fp_first[fp]} ilə eynidir.",
+                    "ref": fp_first[fp]
+                })
+            else:
+                fp_first[fp] = idx
+
+        # ---- Duplicate check: DB-də artıq var? ----
+        existing = ExamQuestion.objects.filter(exam=exam).prefetch_related("options")
+        existing_fp = {build_fp_from_db(eq) for eq in existing}
+
+        for idx, q in enumerate(parsed, start=1):
+            fp = build_fp_from_parsed(q)
+            if fp in existing_fp:
+                q["warnings"].append({
+                    "type": "already_in_exam",
+                    "msg": f"Bu sual artıq imtahanda mövcuddur (import # {idx})."
+                })
+
+        # ---- Seçilən suallar ----
+        selected_list = request.POST.getlist("selected")
+        if selected_list:
+            selected = set(int(x) for x in selected_list)
+        else:
+            selected = set(range(1, len(parsed) + 1))
+
+        # ---- warning sayları (üst panel üçün) ----
+        warning_count = sum(len(q.get("warnings", [])) for q in parsed)
+        duplicate_count = sum(
+            1
+            for q in parsed
+            for w in q.get("warnings", [])
+            if w.get("type") in ("duplicate_in_import", "already_in_exam")
+        )
+
+    # 4) SAVE
+    if action == "save":
+        # ---- Exam settings: random_question_count + default_points(+ optional default_question_points) ----
+        rq_raw = (request.POST.get("random_question_count") or "").strip()
+        dp_raw = (request.POST.get("default_points") or "").strip()
+
+        update_fields = []
+
+        # random_question_count: 0 = hamısı, 10 = 10, 1 = 1 və s.
+        if rq_raw.isdigit():
+            exam.random_question_count = int(rq_raw)
+            update_fields.append("random_question_count")
+
+        # default_points: formdan gəlmirsə, exam.default_question_points varsa onu götür, yoxdursa 1
+        if dp_raw.isdigit() and int(dp_raw) > 0:
+            default_points = int(dp_raw)
+        else:
+            default_points = getattr(exam, "default_question_points", None) or 1
+
+        # Exam-də də saxla (əgər field varsa) – köhnə məntiqi pozmur
+        if hasattr(exam, "default_question_points"):
+            exam.default_question_points = default_points
+            update_fields.append("default_question_points")
+
+        if update_fields:
+            exam.save(update_fields=update_fields)
+
+        # ---- blok seçimi / yeni blok ----
+        block_id = request.POST.get("block_id")
+        new_block_name = (request.POST.get("new_block_name") or "").strip()
+        block_obj = None
+
+        if new_block_name:
+            max_order = blocks.aggregate(m=Max("order")).get("m") or 0
+            block_obj = QuestionBlock.objects.create(
+                exam=exam,
+                name=new_block_name,
+                order=max_order + 1
+            )
+        elif block_id:
+            block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
+
+        # ---- order başlanğıcı ----
+        start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
+
+        created_count = 0
+        skipped_count = 0
+
+        for idx, q in enumerate(parsed, start=1):
+            if idx not in selected:
+                continue
+
+            # minimum şərt: A-D olsun
+            if any(x not in q["options"] for x in ["A", "B", "C", "D"]):
+                skipped_count += 1
+                continue
+
+            # per-question points (opsional input: points_1, points_2, ...)
+            p_raw = (request.POST.get(f"points_{idx}") or "").strip()
+            points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
+
+            eq = ExamQuestion.objects.create(
+                exam=exam,
+                block=block_obj,
+                text=q["text"],
+                answer_mode=q["answer_mode"],
+                order=start_order,
+                points=points,
+            )
+            start_order += 1
+
+            # options create (A–E varsa)
+            for lab in "ABCDE":
+                if lab in q["options"]:
+                    ExamQuestionOption.objects.create(
+                        question=eq,
+                        text=q["options"][lab],
+                        is_correct=(lab in q["correct"])
+                    )
+
+            created_count += 1
+
+        messages.success(request, f"{created_count} sual əlavə olundu. ({skipped_count} sual keçildi)")
+        return redirect("test_question_bank", slug=exam.slug)
+
+    # PREVIEW və ya parse sonrası eyni səhifəni göstər
+    return render(request, "blog/test_question_bank.html", {
+        "exam": exam,
+        "blocks": blocks,
+        "raw_text": raw_text,
+        "parsed": parsed,
+        "selected": selected,
+        "warning_count": warning_count,
+        "duplicate_count": duplicate_count,
+
+        # >>> YENİ: Preview refresh olsa da input-lar dolu qalsın
+        "rq_value": rq_value,
+        "dp_value": dp_value,
+    })
+
 
 
 
@@ -1012,7 +1612,18 @@ def _start_or_resume_attempt(request, exam: Exam):
     # Davam edən attempt varsa – ora gedək
     current = qs.filter(status__in=["draft", "in_progress"]).first()
     if current:
+        desired = _effective_needed_count(exam)
+        current_count = current.answers.count()
+
+        # DEBUG (müvəqqəti)
+        print("DEBUG desired:", desired, "current_count:", current_count, "exam.rq:", exam.random_question_count)
+        print("DEBUG has_any_answer:", _attempt_has_any_answer(current))
+
+        if current_count != desired and not _attempt_has_any_answer(current):
+            generate_random_questions_for_attempt(current, force_rebuild=True)
+
         return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
+
 
     # Bitmiş cəhdlər
     finished_qs = qs.filter(status__in=["submitted", "expired"])
@@ -1069,60 +1680,93 @@ def exam_code_check(request):
 
 
 
-def generate_random_questions_for_attempt(attempt):
+
+
+def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = False):
     """
-    Bu funksiya yeni yaradılan cəhd (attempt) üçün sualları seçir.
-    Əgər 'random_question_count' varsa, bloklardan bərabər sayda seçir.
-    Yoxdursa, bütün sualları götürür.
+    Yeni attempt üçün sualları random seçir və ExamAnswer yaradır.
+    - default: 10 sual
+    - 0: hamısı (amma random order)
+    - blok varsa: bərabər pay + çatışmayanı digər suallardan doldurur
+    - refresh edəndə dəyişməsin deyə ExamAnswer-da sabitlənir
     """
     exam = attempt.exam
-    
-    # Əgər random limiti yoxdursa (0), bütün sualları seç
-    if not exam.random_question_count:
-        selected_qs = list(exam.questions.all().order_by('order'))
+
+    # Əgər artıq suallar yaradılıbsa:
+    if attempt.answers.exists():
+        if not force_rebuild:
+            return
+        # force rebuild istənirsə, amma tələbə cavab yazıbsa toxunmuruq
+        if _attempt_has_any_answer(attempt):
+            return
+        attempt.answers.all().delete()
+
+    total_needed = _effective_needed_count(exam)
+
+    # bütün sualları al (DB hit az olsun)
+    all_qs = list(exam.questions.all())
+
+    if not all_qs:
+        return
+
+    # Əgər tələb olunan say hamısından çoxdursa -> hamısını götür
+    if total_needed >= len(all_qs):
+        selected_qs = all_qs[:]
+        random.shuffle(selected_qs)  # “hamısı” olsa belə random sıra
     else:
-        # Sual Bankı Məntiqi
-        all_blocks = list(exam.question_blocks.all())
         selected_qs = []
-        total_needed = exam.random_question_count
+        blocks = list(exam.question_blocks.all())
 
-        if all_blocks:
-            # Bloklar varsa, bərabər bölmək
-            blocks_count = len(all_blocks)
-            base_count = total_needed // blocks_count # Hər bloka düşən əsas pay
-            remainder = total_needed % blocks_count   # Qalıq suallar
+        if blocks:
+            blocks_count = len(blocks)
+            base = total_needed // blocks_count
+            rem = total_needed % blocks_count
 
-            # Qalıq sualları paylamaq üçün blokları qarışdırırıq
-            # Məsələn: 2 qalıq varsa, təsadüfi 2 fərqli blokdan 1 əlavə sual götürəcəyik
-            random.shuffle(all_blocks)
+            random.shuffle(blocks)
 
-            for i, block in enumerate(all_blocks):
-                # Bu blokdan neçə sual götürməliyik?
-                count_to_take = base_count
-                if i < remainder:
-                    count_to_take += 1
-                
-                # Blokun suallarını qarışdırıb götürürük
+            picked_ids = set()
+
+            # bloklardan payla
+            for i, block in enumerate(blocks):
+                take = base + (1 if i < rem else 0)
+
                 block_qs = list(block.questions.all())
                 random.shuffle(block_qs)
-                selected_qs.extend(block_qs[:count_to_take])
-            
-            # Əgər bloklardan gələn sual sayı azdırsa (məsələn blokda sual çatmırsa),
-            # çatışmayanları random doldura bilərik (optional)
+
+                for q in block_qs:
+                    if len(selected_qs) >= total_needed:
+                        break
+                    if q.id in picked_ids:
+                        continue
+                    selected_qs.append(q)
+                    picked_ids.add(q.id)
+                    if len(selected_qs) >= total_needed or len(selected_qs) - len(picked_ids) >= take:
+                        # yuxarıdakı “take” limitini yumşaq saxlayırıq,
+                        # əsas məqsəd total_needed-ə çatmaqdır
+                        pass
+
+                # blokda sual çatmadısa, problem deyil – aşağıda fill edəcəyik
+
+            # çatmayanı digər suallardan doldur
+            if len(selected_qs) < total_needed:
+                remaining = [q for q in all_qs if q.id not in picked_ids]
+                random.shuffle(remaining)
+                selected_qs.extend(remaining[: (total_needed - len(selected_qs))])
+
+            # son dəfə də ümumi sıranı qarışdır (blok “izləri” qalmasın)
+            random.shuffle(selected_qs)
+
         else:
-            # Blok yoxdursa, sadəcə bütün suallardan random seç
-            all_qs = list(exam.questions.all())
+            # blok yoxdursa — ümumi pool-dan random seç
             random.shuffle(all_qs)
             selected_qs = all_qs[:total_needed]
 
-    # Seçilmiş sualları ExamAnswer cədvəlinə əlavə edirik (boş cavabla)
-    # Bu bizə imkan verir ki, tələbə refresh edəndə suallar dəyişməsin
-    final_questions = []
-    for q in selected_qs:
-        ExamAnswer.objects.create(
-            attempt=attempt,
-            question=q
-        )
+    # ExamAnswer-ları bulk yarat
+    ExamAnswer.objects.bulk_create(
+        [ExamAnswer(attempt=attempt, question=q) for q in selected_qs],
+        ignore_conflicts=True
+    )
+
 
 @login_required
 def take_exam(request, slug, attempt_id):
@@ -1138,26 +1782,46 @@ def take_exam(request, slug, attempt_id):
         return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
     # --- DÜZƏLİŞ: Sualları Attempt-ə bağlanmış cavablardan götürürük ---
-    # Bu sayədə yalnız seçilmiş (random) suallar görünür.
-    answers_qs = attempt.answers.select_related("question").order_by('id') 
-    # order_by('id') qoyduq ki, qarışıq gələn suallar hər dəfə yerini dəyişməsin
-    
-    # Əgər nəsə xəta olub suallar yaranmayıbsa (köhnə koddan qalan attemptlər üçün)
+    answers_qs = (
+        attempt.answers
+        .select_related("question")
+        .prefetch_related("question__options", "selected_options")  # (səndə var)
+        .order_by("id")
+    )
+
     if not answers_qs.exists():
-         generate_random_questions_for_attempt(attempt)
-         answers_qs = attempt.answers.select_related("question").order_by('id')
+        generate_random_questions_for_attempt(attempt)
+        answers_qs = (
+            attempt.answers
+            .select_related("question")
+            .prefetch_related("question__options", "selected_options")
+            .order_by("id")
+        )
+
+    # order_by('id') qoyduq ki, qarışıq gələn suallar hər dəfə yerini dəyişməsin
+
+    # Əgər nəsə xəta olub suallar yaranmayıbsa (köhnə koddan qalan attemptlər üçün)
+    # (SİLMİRİK, sadəcə 2-ci dəfə generate çağırılmasın deyə "pass" edirik)
+    if not answers_qs.exists():
+        # generate_random_questions_for_attempt(attempt)   # ƏVVƏL VAR İDİ
+        # answers_qs = attempt.answers.select_related("question").order_by('id')
+        # ✅ ƏLAVƏ: təhlükəsiz fallback — yeni generate etmirik, sadəcə yenidən oxuyuruq
+        answers_qs = attempt.answers.select_related("question").prefetch_related("question__options", "selected_options").order_by("id")
 
     # Template-ə ötürmək üçün suallar siyahısı
-    questions = [a.question for a in answers_qs] 
-    # Options-ları da yükləmək üçün (prefetch manual edilir)
-    from django.db.models import Prefetch
-    # Bu hissə bir az performance üçün optimallaşdırıla bilər, amma sadə yol:
+    questions = [a.question for a in answers_qs]
+
+    # ✅ ƏLAVƏ: answers map (POST-da get_or_create üçün də rahat)
+    answers_by_qid = {a.question_id: a for a in answers_qs}
+
+    # ✅ DƏYİŞİKLİK: q_payload – yalnız test sualında opts doldururuq
+    q_payload = []
     for q in questions:
-        # options-ları template-də q.options.all kimi işlətmək üçün cache edirik
-        pass 
-        # Django template-də q.options.all çağıranda onsuzda işləyəcək, 
-        # amma prefetch_related işlətmək istəsəniz ExamQuestion səviyyəsində edə bilərsiz.
-    
+        opts = []
+        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+            opts = build_shuffled_options(attempt.id, q)
+        q_payload.append({"q": q, "opts": opts})
+
     # --- Server tərəfli Vaxt Hesablaması (Olduğu kimi qalır) ---
     remaining_seconds = None
     is_time_up = False
@@ -1178,31 +1842,39 @@ def take_exam(request, slug, attempt_id):
 
         # DÜZƏLİŞ: Yalnız seçilmiş suallar üzərindən dövr edirik
         for q in questions:
-            # Cavab obyekti artıq var, onu tapırıq
-            ans = ExamAnswer.objects.get(attempt=attempt, question=q)
-            
+            # ✅ DƏYİŞİKLİK: get() yerinə get_or_create (risk olmasın)
+            ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+
             ans.selected_options.clear()
 
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
                 if q.answer_mode == "single":
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
-                        # Variantın düzgün suala aid olduğunu yoxla
                         opt = ExamQuestionOption.objects.filter(id=opt_id, question=q).first()
                         if opt:
                             ans.selected_options.add(opt)
+
                 else:
-                    for opt in q.options.all():
-                        if request.POST.get(f"q_{q.id}_opt_{opt.id}"):
-                            ans.selected_options.add(opt)
+                    # ✅ KRİTİK DƏYİŞİKLİK:
+                    # Köhnə: name="q_{id}_opt_{optid}" oxuyurdu
+                    # Yeni: checkbox-ların hamısı name="q_{id}" olacaq, id-ləri getlist ilə gələcək
+                    opt_ids = request.POST.getlist(f"q_{q.id}")
+                    if opt_ids:
+                        opts = list(ExamQuestionOption.objects.filter(question=q, id__in=opt_ids))
+                        if opts:
+                            ans.selected_options.add(*opts)
+
                 ans.text_answer = ""
                 ans.auto_evaluate()
+
             else:
+                # Yazılı sual
                 text = request.POST.get(f"q_{q.id}", "").strip()
                 ans.text_answer = text
                 ans.is_correct = False
                 ans.save()
-                
+
                 files = request.FILES.getlist(f"file_{q.id}[]")
                 if files:
                     ans.files.all().delete()
@@ -1217,8 +1889,8 @@ def take_exam(request, slug, attempt_id):
             attempt.mark_finished(status=status)
             if is_ajax:
                 return JsonResponse({
-                    "success": True, 
-                    "finished": True, 
+                    "success": True,
+                    "finished": True,
                     "redirect_url": reverse("exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
                 })
             return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
@@ -1229,17 +1901,19 @@ def take_exam(request, slug, attempt_id):
             return JsonResponse({"success": True, "finished": False})
         return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
-    # GET sorğusu üçün answers map
+    # GET sorğusu üçün answers map (qalır – səndə də var idi)
     answers_by_qid = {a.question_id: a for a in answers_qs}
 
     context = {
         "exam": exam,
         "attempt": attempt,
-        "questions": questions, # Artıq bu filterlənmiş suallardır
+        "questions": questions,           # köhnə template qırılmasın deyə saxlayırıq
+        "q_payload": q_payload,           # ✅ random variant üçün yeni
         "answers_by_qid": answers_by_qid,
         "remaining_seconds": remaining_seconds,
     }
     return render(request, "blog/take_exam.html", context)
+
 
 
 

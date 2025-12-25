@@ -135,8 +135,9 @@
         
         <div class="progress-area">
             <div class="progress-info">
-                <span>Sual: <strong id="current-question-num">1</strong> / {{ questions|length }}</span>
-                <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ questions|length }}</span>
+                <span>Sual: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
+                <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
+                
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
@@ -152,7 +153,8 @@
         {% csrf_token %}
 
         <div class="slides-wrapper">
-            {% for q in questions %}
+            {% for item in q_payload %}
+                {% with q=item.q %}
                 {% with ans=answers_by_qid|get_item:q.id %}
                 <div class="question-slide" 
                      data-index="{{ forloop.counter0 }}" 
@@ -167,31 +169,31 @@
                         {% if exam.exam_type == "test" %}
                             
                             {% if q.answer_mode == "single" %}
-                                <div class="options-group">
-                                    {% for opt in q.options.all %}
-                                        <label class="option-card">
-                                            <input type="radio" 
-                                                   name="q_{{ q.id }}" 
-                                                   value="{{ opt.id }}" 
-                                                   onchange="updateProgress()"
-                                                   {% if ans and opt in ans.selected_options.all %}checked{% endif %}>
-                                            <span class="circle-mark"></span>
-                                            <span class="opt-text">{{ opt.text }}</span>
-                                        </label>
-                                    {% endfor %}
-                                </div>
+                            <div class="options-group">
+                                {% for opt in item.opts %}
+                                    <label class="option-card">
+                                        <input type="radio"
+                                               name="q_{{ q.id }}"
+                                               value="{{ opt.id }}"
+                                               onchange="updateProgress()"
+                                               {% if ans and opt.obj in ans.selected_options.all %}checked{% endif %}>
+                                        <span class="circle-mark"></span>
+                                        <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
 
                             {% elif q.answer_mode == "multiple" %}
                                 <div class="options-group">
-                                    {% for opt in q.options.all %}
+                                    {% for opt in item.opts %}
                                         <label class="option-card">
-                                            <input type="checkbox" 
-                                                   name="q_{{ q.id }}_opt_{{ opt.id }}" 
-                                                   value="{{ opt.id }}"
-                                                   onchange="updateProgress()"
-                                                   {% if ans and opt in ans.selected_options.all %}checked{% endif %}>
+                                            <input type="checkbox"
+                                                name="q_{{ q.id }}"
+                                                value="{{ opt.id }}"
+                                                onchange="updateProgress()"
+                                                {% if ans and opt.obj in ans.selected_options.all %}checked{% endif %}>
                                             <span class="box-mark"></span>
-                                            <span class="opt-text">{{ opt.text }}</span>
+                                            <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
@@ -242,6 +244,7 @@
                         {% endif %}
                     </div>
                 </div>
+                {% endwith %}
                 {% endwith %}
             {% endfor %}
         </div>
