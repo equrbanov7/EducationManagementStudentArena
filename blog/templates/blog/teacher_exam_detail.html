@@ -49,6 +49,12 @@
                     <span class="info-value">{{ exam.max_attempts_per_user }}</span>
                 </div>
                 {% endif %}
+
+                <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
+                class="btn btn-success">
+                🚀 Live başlat
+                </a>
+
             </section>
 
             {# --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- #}

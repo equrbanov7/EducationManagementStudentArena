@@ -41,6 +41,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 INSTALLED_APPS = [
     "blog",
+    "channels",
+    "liveExam",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -78,6 +80,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "blogApp.wsgi.application"
+
+
+
+ASGI_APPLICATION = "blogApp.asgi.application"  # core = sənin project adı
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # Database

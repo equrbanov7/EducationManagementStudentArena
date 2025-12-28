@@ -1,0 +1,56 @@
+<h2>Live Game</h2>
+<div id="screen"></div>
+
+<script>
+  const pin = "{{ session.pin }}";
+  const ws = new WebSocket(`ws://${window.location.host}/ws/live/${pin}/play/`);
+
+  let currentQuestionId = null;
+  let questionStart = null;
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+
+    if (data.type === "question_published") {
+      const q = data.question;
+      currentQuestionId = q.id;
+      questionStart = Date.now();
+
+      let html = `<h3>${q.text}</h3>`;
+      html += `<div>Vaxt: ${q.time_limit}s | Xal: ${q.points}</div><br/>`;
+
+      q.options.forEach(opt => {
+        html += `<button onclick="sendAnswer(${opt.id})">${opt.label}) ${opt.text}</button><br/><br/>`;
+      });
+
+      document.getElementById("screen").innerHTML = html;
+    }
+
+    if (data.type === "reveal") {
+      document.getElementById("screen").innerHTML =
+        `<h3>Nəticə</h3>
+         <div>Düzgün cavab ID-lər: ${data.correct_option_ids.join(", ")}</div>
+         <h4>TOP</h4>
+         <pre>${JSON.stringify(data.top, null, 2)}</pre>`;
+    }
+
+    if (data.type === "finished") {
+      document.getElementById("screen").innerHTML =
+        `<h3>Oyun bitdi</h3><pre>${JSON.stringify(data.top, null, 2)}</pre>`;
+    }
+  };
+
+  function sendAnswer(optionId) {
+    if (!currentQuestionId) return;
+    const answerMs = Date.now() - questionStart;
+
+    ws.send(JSON.stringify({
+      type: "answer",
+      question_id: currentQuestionId,
+      option_id: optionId,
+      answer_ms: answerMs
+    }));
+
+    document.getElementById("screen").innerHTML = "<h3>Cavab göndərildi ✅</h3>";
+  }
+</script>

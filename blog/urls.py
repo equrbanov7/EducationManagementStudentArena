@@ -42,6 +42,8 @@ urlpatterns = [
     path("exams/available/", views.student_exam_list, name="student_exam_list"),
     path("exams/create/", views.create_exam, name="create_exam"),
     path("exams/code-check/", views.exam_code_check, name="exam_code_check"),
+    path("exams/assigned/", views.assigned_student_exam_list, name="assigned_exam_list"),
+
     
     # 2. Tələbə tarixi və müəllim statistikası
     path('student/my-history/', views.student_exam_history, name='student_exam_history'),

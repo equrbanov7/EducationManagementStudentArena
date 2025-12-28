@@ -1,0 +1,52 @@
+<h2>PIN: {{ session.pin }}</h2>
+
+<div>
+  <label>Nickname</label><br/>
+  <input id="nickname" maxlength="32" placeholder="Adını yaz..." />
+</div>
+
+<div style="margin-top:12px;">
+  <label>Avatar seç</label>
+  <div id="avatars" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+    {% for a in avatars %}
+      <button type="button" class="avatarBtn" data-key="{{ a }}">{{ a }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<button id="joinBtn" style="margin-top:12px;">Qoşul</button>
+
+<script>
+  let selectedAvatar = "avatar_1";
+
+  document.querySelectorAll(".avatarBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedAvatar = btn.dataset.key;
+      document.querySelectorAll(".avatarBtn").forEach(b => b.style.border = "1px solid #ccc");
+      btn.style.border = "2px solid #000";
+    });
+  });
+
+  document.getElementById("joinBtn").addEventListener("click", async () => {
+    const nickname = document.getElementById("nickname").value.trim();
+    const form = new FormData();
+    form.append("nickname", nickname);
+    form.append("avatar_key", selectedAvatar);
+
+    const res = await fetch("{% url 'liveExam:join_enter' session.pin %}", {
+      method: "POST",
+      body: form,
+      headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    });
+
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.message || "Xəta baş verdi");
+      return;
+    }
+    // hələlik eyni səhifədə qalır; Step 2.4-də lobby websocket-ə qoşduracağıq
+    document.getElementById("joinBtn").disabled = true;
+    document.getElementById("joinBtn").textContent = "Qoşuldu ✅";
+
+  });
+</script>

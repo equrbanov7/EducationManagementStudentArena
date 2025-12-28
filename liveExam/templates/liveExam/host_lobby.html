@@ -1,0 +1,66 @@
+<h2>Live İmtahan Lobby</h2>
+
+<div style="margin: 12px 0;">
+  <div style="font-size:18px;">
+    <b>Game PIN:</b>
+    <span style="font-size:28px; letter-spacing: 4px;">{{ session.pin }}</span>
+  </div>
+
+  <div style="margin-top:10px;">
+    <b>QR ilə qoşul:</b><br/>
+    <img src="{{ qr_url }}" alt="QR code" style="width:220px;height:220px;border:1px solid #ddd;border-radius:10px;padding:8px;">
+  </div>
+
+  <div style="margin-top:10px;">
+    <b>Link:</b>
+    <a href="{{ join_url }}" target="_blank">{{ join_url }}</a>
+  </div>
+</div>
+
+<hr>
+
+<!-- Host control buttons -->
+<form method="post" action="{% url 'liveExam:host_start_game' session.pin %}" style="display:inline-block;">
+  {% csrf_token %}
+  <button type="submit">Start Game</button>
+</form>
+
+<button onclick="postAction('{% url 'liveExam:host_next_question' session.pin %}')">Next Question</button>
+<button onclick="postAction('{% url 'liveExam:host_reveal' session.pin %}')">Reveal</button>
+<button onclick="postAction('{% url 'liveExam:host_finish' session.pin %}')">Finish</button>
+
+<hr>
+
+<h3>Qoşulanlar</h3>
+<div><b>Say:</b> <span id="playersCount">0</span></div>
+<ul id="playersList"></ul>
+
+<script>
+  // realtime lobby list
+  const pin = "{{ session.pin }}";
+  const ws = new WebSocket(`ws://${window.location.host}/ws/live/${pin}/lobby/`);
+
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === "lobby_state") {
+      document.getElementById("playersCount").textContent = data.count || 0;
+
+      const ul = document.getElementById("playersList");
+      ul.innerHTML = "";
+      (data.players || []).forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = `${p.nickname} (${p.avatar_key})`;
+        ul.appendChild(li);
+      });
+    }
+  };
+
+  async function postAction(url){
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    });
+    const data = await res.json().catch(()=>({}));
+    console.log(data);
+  }
+</script>

@@ -4,7 +4,7 @@ from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotAllo
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q, Max
@@ -47,6 +47,7 @@ import random
 
 from django.db import transaction
 
+User = get_user_model()
 
 LABELS = ["A", "B", "C", "D", "E"]
 QUESTION_RE = re.compile(r"^\s*(\d+)\s*[\)\.]\s*(.+)\s*$")
@@ -162,16 +163,7 @@ def _attempt_has_any_answer(attempt) -> bool:
     return False
 
 
-# # Regex pattern-lər
-# QUESTION_RE = re.compile(r'^(\d+)[\.\)]\s*(.+)$')
-# OPTION_RE = re.compile(r'^(\*?)\s*([A-Ea-e])[\.\)]\s*(.+)$')
-# ANSWERLINE_RE = re.compile(r'^(Cavab|Düz cavab|Answer):\s*(.+)$', re.IGNORECASE)
 
-# def _norm(text):
-#     """Mətn normallaşdırması - boşluqları təmizləyir, kiçik hərflərə çevirir"""
-#     if not text:
-#         return ""
-#     return re.sub(r'\s+', ' ', text.strip().lower())
 
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
@@ -539,13 +531,29 @@ def register_view(request):
 
     return render(request, "blog/register.html", {"form": form})
 
+from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
+
+from .models import Post, Category, ExamAttempt, Exam
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
 def user_profile(request, username):
     """
     İstifadəçi profili.
+
     + Müəllimlər üçün yoxlanmamış (pending) imtahan sayı hesablanır.
-    Məntiq: Statusu 'submitted' və ya 'expired' olan, 
-            hələ 'checked_by_teacher=False' olan 
-            və tipi 'test' OLMAYAN cəhdlər.
+      Məntiq: Statusu 'submitted' və ya 'expired' olan,
+              hələ 'checked_by_teacher=False' olan
+              və tipi 'test' OLMAYAN cəhdlər.
+
+    + İstifadəçi (öz profilində) üçün təyin olunmuş (assigned) imtahan sayı hesablanır:
+      - Exam.allowed_users içindədirsə
+      - və ya Exam.allowed_groups içində olub, həmin qrupun students-i içindədirsə
+      - is_active=True
     """
     profile_user = get_object_or_404(User, username=username)
 
@@ -566,7 +574,7 @@ def user_profile(request, username):
             .select_related("category")
             .order_by("-created_at")
         )
-    
+
     # 2. Pagination
     paginator = Paginator(user_posts_list, 6)
     page_number = request.GET.get('page')
@@ -577,29 +585,52 @@ def user_profile(request, username):
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
 
-    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI (Düzəliş edilən hissə)
+    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
     pending_count = 0
-    
-    # Şərt: Login olub + Öz profilidir + Müəllimdir
-    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, 'is_teacher', False):
-        pending_count = ExamAttempt.objects.filter(
-            exam__author=request.user,           # Müəllimin öz imtahanları
-            status__in=['submitted', 'expired'], # Tələbə bitirib (və ya vaxtı bitib)
-            checked_by_teacher=False             # Müəllim hələ "Təsdiq" etməyib
-        ).exclude(
-            exam__exam_type='test'               # ƏSAS DÜZƏLİŞ: Testləri siyahıdan çıxarırıq
-        ).count()
 
-    # 4. Kateqoriyalar
-    categories = Category.objects.all().order_by('name') 
+    # Şərt: Login olub + Öz profilidir + Müəllimdir
+    if (
+        request.user.is_authenticated
+        and request.user == profile_user
+        and getattr(request.user, 'is_teacher', False)
+    ):
+        pending_count = (
+            ExamAttempt.objects
+            .filter(
+                exam__author=request.user,            # Müəllimin öz imtahanları
+                status__in=['submitted', 'expired'],  # Tələbə bitirib (və ya vaxtı bitib)
+                checked_by_teacher=False              # Müəllim hələ "Təsdiq" etməyib
+            )
+            .exclude(exam__exam_type='test')          # Testləri çıxarırıq
+            .count()
+        )
+
+    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI (YENİ)
+    assigned_count = 0
+    if request.user.is_authenticated and request.user == profile_user:
+        assigned_count = (
+            Exam.objects
+            .filter(is_active=True)
+            .filter(
+                Q(allowed_users=request.user) |
+                Q(allowed_groups__students=request.user)
+            )
+            .distinct()
+            .count()
+        )
+
+    # 5. Kateqoriyalar
+    categories = Category.objects.all().order_by('name')
 
     context = {
         "profile_user": profile_user,
         "posts": posts,
         "categories": categories,
-        "pending_count": pending_count, 
+        "pending_count": pending_count,
+        "assigned_count": assigned_count,   # YENİ
     }
     return render(request, "blog/user_profile.html", context)
+
 
 
 def logout_view(request):
@@ -1517,6 +1548,98 @@ def delete_exam_question(request, slug, question_id):
 
 # ---------------- STUDENT TƏRƏFİ -------------------
 
+
+@login_required
+def assigned_student_exam_list(request):
+    user = request.user
+
+    # 1) BAZA SORĞUSU (İlkin Filter)
+    # Fərq burdadır: yalnız user-ə təyin olunmuş aktiv imtahanlar
+    exams_qs = (
+        Exam.objects
+        .filter(is_active=True)
+        .filter(
+            Q(allowed_users=user) |
+            Q(allowed_groups__students=user)
+        )
+        .distinct()
+        .select_related('author')
+    )
+
+    # --- SEARCH (Axtarış) ---
+    search_query = request.GET.get('q')
+    if search_query:
+        exams_qs = exams_qs.filter(
+            Q(title__icontains=search_query) |
+            Q(author__username__icontains=search_query)
+        )
+
+    # --- FILTER (Tipə görə) ---
+    filter_type = request.GET.get('type')
+    if filter_type:
+        exams_qs = exams_qs.filter(exam_type=filter_type)
+
+    # Sıralama
+    exams_qs = exams_qs.order_by("-created_at")
+
+    # 2) PYTHON MƏNTİQİ (Permissions & List Construction) — EYNİDİR
+    exam_items = []
+
+    for exam in exams_qs:
+        # bu user ümumiyyətlə bu imtahan kartını görməlidir?
+        if not exam.can_user_see(user):
+            continue
+
+        # cəhd limiti
+        left = exam.attempts_left_for(user)
+        if left is not None and left <= 0:
+            continue
+
+        # kod tələb olunub-olunmamağı user-ə görə hesablayırıq
+        can_without_code, _ = exam.can_user_start(user, code=None)
+
+        requires_code = False
+        if exam.access_code and not can_without_code:
+            requires_code = True
+
+        # ekrandakı status yazısı
+        if exam.access_code:
+            access_label = "Kod tələb olunur"
+        elif exam.is_public:
+            access_label = "Hamı üçün açıq"
+        else:
+            access_label = "Yalnız icazəli istifadəçilər"
+
+        exam_items.append({
+            "exam": exam,
+            "left": left,
+            "requires_code": requires_code,
+            "access_label": access_label,
+        })
+
+    # 3) PAGINATION (Səhifələmə) — eyni saxla
+    paginator = Paginator(exam_items, 2)
+    page_number = request.GET.get('page')
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    context = {
+        "page_obj": page_obj,
+        "exam_items": page_obj,
+
+        
+         "page_title": "Təyin olunmuş imtahanlarım",
+         "current_url_name": "assigned_exam_list",
+    }
+
+    
+    return render(request, "blog/student_exam_list.html", context)
+
 @login_required
 def student_exam_list(request):
     user = request.user
@@ -1596,6 +1719,7 @@ def student_exam_list(request):
     context = {
         "page_obj": page_obj,      # Pagination idarəetməsi üçün (_pagination.html buna baxır)
         "exam_items": page_obj,    # Siyahını dövr etmək üçün (Template-dəki for loop buna baxır)
+        "current_url_name": "student_exam_list",
     }
 
     return render(request, "blog/student_exam_list.html", context)

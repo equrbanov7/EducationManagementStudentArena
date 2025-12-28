@@ -20,6 +20,13 @@
                <i class="fas fa-plus-circle"></i> Yeni post yarat
              </a>
 
+             {% if assigned_count > 0 %}
+                <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
+                    <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlarım
+                    <span class="pending-badge">{{ assigned_count }}</span>
+                </a>
+             {% endif %}
+
              {% if request.user.is_teacher %}
                  <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
                       <i class="fas fa-file-alt"></i> İmtahanlarım

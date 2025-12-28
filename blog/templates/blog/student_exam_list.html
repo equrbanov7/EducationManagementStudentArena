@@ -11,7 +11,8 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1>Mövcud imtahanlar</h1>
+    <h1>{{ page_title|default:"Mövcud imtahanlar" }}</h1>
+
 
     <form method="get" class="exam-toolbar">
         <div class="search-box">
@@ -38,9 +39,11 @@
         <button type="submit" class="btn btn-primary search-btn">Axtar</button>
     
         {% if request.GET.q or request.GET.type %}
-            <a href="{% url 'student_exam_list' %}" class="btn btn-outline-secondary">
+            <a href="{% url current_url_name|default:'student_exam_list' %}" class="btn btn-outline-secondary">
                 Sıfırla
             </a>
+        
+        
         {% endif %}
     </form>
     
@@ -121,8 +124,12 @@
             <i class="far fa-folder-open empty-icon"></i>
             <p>Axtarışınıza uyğun heç bir imtahan tapılmadı.</p>
             {% if request.GET.q or request.GET.type %}
-                <a href="{% url 'student_exam_list' %}" class="btn btn-sm btn-outline-primary mt-2">Bütün imtahanları göstər</a>
-            {% endif %}
+                <a href="{% url current_url_name|default:'student_exam_list' %}"
+                class="btn btn-sm btn-outline-primary mt-2">
+                    Bütün imtahanları göstər
+                </a>
+        {% endif %}
+        
         </div>
     {% endif %}
 </div>
