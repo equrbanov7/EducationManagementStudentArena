@@ -23,6 +23,18 @@
     }
     .opt:disabled { opacity:.55; cursor:not-allowed; }
     .opt.selected { border:2px solid #000; }
+
+    .actions { margin-top: 12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+
     .status { margin-top:10px; font-weight:600; }
     .good { color: #0a7d2a; }
     .bad { color: #b30000; }
@@ -50,6 +62,12 @@
 
       <div class="grid" id="optionsGrid" style="display:none;"></div>
 
+      <!-- ✅ Multi üçün submit -->
+      <div class="actions" id="actionBar" style="display:none;">
+        <button class="btn" id="submitBtn" type="button" disabled>Submit</button>
+        <span class="pill" id="multiHint" style="display:none;"></span>
+      </div>
+
       <div class="status" id="statusLine"></div>
       <div class="small" id="metaLine"></div>
 
@@ -74,12 +92,17 @@
   const statusLine = document.getElementById("statusLine");
   const metaLine = document.getElementById("metaLine");
 
+  const actionBar = document.getElementById("actionBar");
+  const submitBtn = document.getElementById("submitBtn");
+  const multiHint = document.getElementById("multiHint");
+
   const lbWrap = document.getElementById("lbWrap");
   const lbList = document.getElementById("lbList");
   const resultList = document.getElementById("resultList");
 
-  let currentQuestion = null;   // {id, text, options, ends_at, started_at, index, total, ...}
-  let selectedOptionId = null;
+  let currentQuestion = null;   // {id, text, options, ends_at, started_at, index, total, multi, max_select}
+  let selectedOptionId = null;  // single
+  let selectedOptionIds = new Set(); // multi
   let answered = false;
   let timerInterval = null;
 
@@ -100,6 +123,11 @@
     timerBox.textContent = "--";
   }
 
+  function stopAnswerUI(){
+    document.querySelectorAll(".opt").forEach(b => b.disabled = true);
+    submitBtn.disabled = true;
+  }
+
   function startTimer(endsAtISO){
     clearTimer();
     if (!endsAtISO) return;
@@ -115,9 +143,11 @@
       timerBox.textContent = `${fmt2(mm)}:${fmt2(ss)}`;
 
       if (diff <= 0){
-        // vaxt bitdi
         stopAnswerUI();
-        statusLine.textContent = "Vaxt bitdi. Nəticə gözlənilir...";
+        if (!answered) {
+          statusLine.textContent = "Vaxt bitdi. Nəticə gözlənilir...";
+          statusLine.className = "status";
+        }
       }
     }
 
@@ -125,10 +155,31 @@
     timerInterval = setInterval(tick, 250);
   }
 
+  function isMulti(q){
+    return !!(q && q.multi);
+  }
+
+  function maxSelect(q){
+    const v = Number(q && q.max_select);
+    return Number.isFinite(v) && v > 0 ? v : 1;
+  }
+
+  function updateMultiHint(){
+    if (!isMulti(currentQuestion)) {
+      multiHint.style.display = "none";
+      return;
+    }
+    multiHint.style.display = "inline-block";
+    const maxS = maxSelect(currentQuestion);
+    multiHint.textContent = `Multi: ${selectedOptionIds.size}/${maxS}`;
+  }
+
   function resetUIForQuestion(q){
     currentQuestion = q;
-    selectedOptionId = null;
     answered = false;
+
+    selectedOptionId = null;
+    selectedOptionIds = new Set();
 
     lbWrap.style.display = "none";
     lbList.innerHTML = "";
@@ -136,76 +187,136 @@
 
     statusLine.textContent = "";
     statusLine.className = "status";
-    metaLine.textContent = q?.index && q?.total ? `Sual: ${q.index}/${q.total}` : "";
+
+    metaLine.textContent = (q?.index && q?.total) ? `Sual: ${q.index}/${q.total}` : "";
 
     qText.textContent = q?.text || "Sual...";
     optionsGrid.innerHTML = "";
     optionsGrid.style.display = "grid";
 
+    // ✅ action bar (submit) yalnız multi üçün
+    if (isMulti(q)) {
+      actionBar.style.display = "flex";
+      submitBtn.disabled = true;
+      updateMultiHint();
+    } else {
+      actionBar.style.display = "none";
+    }
+
     (q.options || []).forEach((opt, idx) => {
-        const btn = document.createElement("button");
-        btn.className = "opt";
-        btn.type = "button";
-        btn.dataset.id = opt.id;
-      
-        const letters = ["A","B","C","D","E","F"];
-        const label = (opt.label ?? opt.key ?? opt.code ?? letters[idx] ?? String(idx+1));
-        const text  = (opt.text ?? opt.title ?? opt.content ?? "").toString();
-      
-        btn.textContent = `${label}) ${text}`;
-        btn.onclick = () => chooseOption(opt.id, btn);
-        optionsGrid.appendChild(btn);
-      });
-      
+      const btn = document.createElement("button");
+      btn.className = "opt";
+      btn.type = "button";
+      btn.dataset.id = opt.id;
+
+      const letters = ["A","B","C","D","E","F"];
+      const label = (opt.label ?? opt.key ?? opt.code ?? letters[idx] ?? String(idx+1));
+      const text  = (opt.text ?? opt.title ?? opt.content ?? opt.answer ?? "").toString();
+
+      btn.textContent = `${label}) ${text}`;
+
+      btn.onclick = () => {
+        if (answered) return;
+
+        if (!isMulti(q)) {
+          // single: click -> submit immediately
+          selectedOptionId = opt.id;
+          document.querySelectorAll(".opt").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          submitAnswerSingle();
+          return;
+        }
+
+        // multi: toggle selection with max_select limit
+        const maxS = maxSelect(q);
+
+        if (selectedOptionIds.has(opt.id)) {
+          selectedOptionIds.delete(opt.id);
+          btn.classList.remove("selected");
+        } else {
+          if (selectedOptionIds.size >= maxS) return;
+          selectedOptionIds.add(opt.id);
+          btn.classList.add("selected");
+        }
+
+        submitBtn.disabled = (selectedOptionIds.size === 0);
+        updateMultiHint();
+      };
+
+      optionsGrid.appendChild(btn);
+    });
+
+    // ✅ multi submit
+    submitBtn.onclick = () => {
+      if (!isMulti(currentQuestion) || answered) return;
+      if (selectedOptionIds.size === 0) return;
+      submitAnswerMulti();
+    };
 
     startTimer(q.ends_at);
   }
 
-  function chooseOption(optionId, btn){
-    if (answered) return;
-    selectedOptionId = optionId;
-    document.querySelectorAll(".opt").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    submitAnswer();
+  function calcAnswerMs(){
+    const startedAt = currentQuestion?.started_at ? new Date(currentQuestion.started_at).getTime() : null;
+    return startedAt ? Math.max(0, Date.now() - startedAt) : 0;
   }
 
-  function stopAnswerUI(){
-    document.querySelectorAll(".opt").forEach(b => b.disabled = true);
-  }
-
-  async function submitAnswer(){
+  function submitAnswerSingle(){
     if (!currentQuestion || !selectedOptionId) return;
 
     answered = true;
     stopAnswerUI();
 
-    const startedAt = currentQuestion.started_at ? new Date(currentQuestion.started_at).getTime() : null;
-    const answerMs = startedAt ? Math.max(0, Date.now() - startedAt) : 0;
-
     statusLine.textContent = "Cavab göndərildi. Nəticə gözlənilir...";
     statusLine.className = "status";
 
-    // Cavab websocket-lə göndərilir (consumer bunu gözləyir)
     try {
       playWs.send(JSON.stringify({
         type: "answer",
         question_id: currentQuestion.id,
         option_id: selectedOptionId,
-        answer_ms: answerMs
+        answer_ms: calcAnswerMs()
       }));
-    } catch(e) {
-      // WS problem olsa da UI-da qalır
-    }
+    } catch(e) {}
+  }
+
+  function submitAnswerMulti(){
+    if (!currentQuestion) return;
+
+    answered = true;
+    stopAnswerUI();
+
+    statusLine.textContent = "Cavab göndərildi. Nəticə gözlənilir...";
+    statusLine.className = "status";
+
+    try {
+      playWs.send(JSON.stringify({
+        type: "answer",
+        question_id: currentQuestion.id,
+        option_ids: Array.from(selectedOptionIds),
+        answer_ms: calcAnswerMs()
+      }));
+    } catch(e) {}
   }
 
   function renderReveal(msg){
     clearTimer();
     stopAnswerUI();
 
-    const correctIds = msg.correct_option_ids || [];
-    const isCorrect = correctIds.includes(selectedOptionId);
+    const correctIds = (msg.correct_option_ids || []).map(Number);
+    const correctSet = new Set(correctIds);
 
-    if (answered){
+    let isCorrect = false;
+
+    if (answered) {
+      if (isMulti(currentQuestion)) {
+        const sel = new Set(Array.from(selectedOptionIds).map(Number));
+        // perfect match (consumer də perfect flag saxlayır)
+        isCorrect = (sel.size === correctSet.size) && Array.from(sel).every(x => correctSet.has(x));
+      } else {
+        isCorrect = correctSet.has(Number(selectedOptionId));
+      }
+
       statusLine.textContent = isCorrect ? "✅ Düz cavab!" : "❌ Səhv cavab.";
       statusLine.className = "status " + (isCorrect ? "good" : "bad");
     } else {
@@ -222,7 +333,7 @@
       lbList.appendChild(li);
     });
 
-    // Bu sual üzrə nəticələr (kim nə qazandı, düz yazdı?)
+    // Bu sual üzrə nəticələr
     resultList.innerHTML = "";
     (msg.results || []).slice(0, 20).forEach(r => {
       const li = document.createElement("li");
@@ -230,7 +341,6 @@
       resultList.appendChild(li);
     });
 
-    // Next sual host tərəfdən gələnə qədər gözləmə
     metaLine.textContent = (currentQuestion?.index && currentQuestion?.total)
       ? `Sual: ${currentQuestion.index}/${currentQuestion.total} — Növbəti sual gözlənilir...`
       : "Növbəti sual gözlənilir...";
@@ -241,6 +351,7 @@
     stopAnswerUI();
     qText.textContent = "Oyun bitdi ✅";
     optionsGrid.style.display = "none";
+    actionBar.style.display = "none";
 
     lbWrap.style.display = "block";
     lbList.innerHTML = "";
@@ -258,12 +369,11 @@
   playWs.onopen = async () => {
     setConn(true);
 
-    // ✅ Fallback: WS qoşulandan sonra cari vəziyyəti HTTP ilə çək (miss olmasın)
+    // Fallback: cari vəziyyəti HTTP ilə çək
     try {
       const res = await fetch(`/live/state/${pin}/`, { headers: { "Accept": "application/json" }});
       const st = await res.json();
 
-      // state question/reveal isə sualı göstər
       if (st.ok && st.question) {
         resetUIForQuestion(st.question);
         if (st.state === "reveal") {
@@ -281,6 +391,16 @@
 
     if (msg.type === "question_published") {
       resetUIForQuestion(msg.question);
+      return;
+    }
+
+    // ✅ consumer cavabdan sonra bunu qaytarır
+    if (msg.type === "answer_saved") {
+      // bonus + fraction kimi məlumatları user-ə göstərə bilərik
+      const frac = (msg.fraction != null) ? ` (fraction ${msg.fraction})` : "";
+      const pts = (msg.awarded_points != null) ? ` +${msg.awarded_points} bal` : "";
+      statusLine.textContent = `Cavab saxlanıldı.${pts}${frac} — Nəticə gözlənilir...`;
+      statusLine.className = "status";
       return;
     }
 
