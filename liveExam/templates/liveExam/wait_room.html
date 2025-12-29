@@ -1,0 +1,99 @@
+<h2>PIN: {{ session.pin }}</h2>
+
+<div style="margin:10px 0;">
+  Qoşulanlar: <b id="count">0</b> —
+  <span id="wsStatus">WS: qoşulur...</span>
+</div>
+
+<ul id="playersList" style="padding-left:18px;"></ul>
+
+{{ players|json_script:"initialPlayers" }}
+
+<script>
+  const PIN = "{{ session.pin }}";
+  const WS_PATH = `/ws/live/${PIN}/lobby/`;
+
+  const listEl = document.getElementById("playersList");
+  const countEl = document.getElementById("count");
+  const wsStatusEl = document.getElementById("wsStatus");
+
+  function renderPlayers(players) {
+    const arr = Array.isArray(players) ? players : [];
+    countEl.textContent = arr.length;
+
+    listEl.innerHTML = "";
+    if (arr.length === 0) {
+      const li = document.createElement("li");
+      li.textContent = "Hələ heç kim qoşulmayıb.";
+      listEl.appendChild(li);
+      return;
+    }
+
+    arr.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.nickname} (${p.avatar_key})`;
+      listEl.appendChild(li);
+    });
+  }
+
+  // ✅ ilkin render
+  try {
+    const initial = JSON.parse(document.getElementById("initialPlayers").textContent || "[]");
+    renderPlayers(initial);
+  } catch (e) {
+    renderPlayers([]);
+  }
+
+  function wsUrl() {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    return `${proto}://${location.host}${WS_PATH}`;
+  }
+
+  let socket = null;
+  let reconnectTimer = null;
+
+  function connectWs() {
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+
+    wsStatusEl.textContent = "WS: qoşulur...";
+    socket = new WebSocket(wsUrl());
+
+    socket.onopen = () => {
+      wsStatusEl.textContent = "WS: qoşuldu ✅";
+    };
+
+    socket.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+
+        // server formatı:
+        // A) {type:"lobby_state", ...}
+        // B) {data:{type:"lobby_state", ...}}  (bizim broadcast formatı)
+        const payload = msg.data ? msg.data : msg;
+
+        // ✅ START GAME -> redirect
+        if (payload.type === "game_started" && payload.redirect) {
+          window.location.href = payload.redirect;
+          return;
+        }
+
+        // ✅ lobby players update
+        if (payload.type === "lobby_state" && Array.isArray(payload.players)) {
+          renderPlayers(payload.players);
+        }
+      } catch (_) {}
+    };
+
+    socket.onclose = () => {
+      wsStatusEl.textContent = "WS: kəsildi ❌ (yenidən qoşulur...)";
+      reconnectTimer = setTimeout(connectWs, 1200);
+    };
+
+    socket.onerror = () => {
+      wsStatusEl.textContent = "WS: xəta ❌";
+      try { socket.close(); } catch(e) {}
+    };
+  }
+
+  connectWs();
+</script>

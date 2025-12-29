@@ -1,56 +1,299 @@
-<h2>Live Game</h2>
-<div id="screen"></div>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Live Player</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 18px; }
+    .wrap { max-width: 900px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .pin { font-weight:700; font-size:18px; }
+    .timer { font-size:18px; font-weight:700; padding:8px 12px; border:1px solid #eee; border-radius:10px; min-width:110px; text-align:center; }
+    .card { margin-top:14px; padding:14px; border:1px solid #eee; border-radius:14px; }
+    .qtext { font-size:20px; font-weight:700; margin-bottom:12px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .opt {
+      padding:14px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      background:#fff;
+      cursor:pointer;
+      font-size:16px;
+      text-align:left;
+    }
+    .opt:disabled { opacity:.55; cursor:not-allowed; }
+    .opt.selected { border:2px solid #000; }
+    .status { margin-top:10px; font-weight:600; }
+    .good { color: #0a7d2a; }
+    .bad { color: #b30000; }
+    .small { opacity:.75; font-size:13px; }
+
+    .lb { margin-top:12px; }
+    .lb h3 { margin: 0 0 8px; }
+    .lb ol { margin: 0; padding-left: 18px; }
+    .lb li { margin: 6px 0; }
+    .pill { display:inline-block; padding:4px 10px; border:1px solid #eee; border-radius:999px; font-size:12px; opacity:.8; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="pin">PIN: {{ session.pin }}</div>
+      <div>
+        <span class="pill" id="connPill">WS: qoşulur...</span>
+      </div>
+      <div class="timer" id="timerBox">--</div>
+    </div>
+
+    <div class="card" id="mainCard">
+      <div class="qtext" id="qText">Gözləyin... müəllim oyunu başladır.</div>
+
+      <div class="grid" id="optionsGrid" style="display:none;"></div>
+
+      <div class="status" id="statusLine"></div>
+      <div class="small" id="metaLine"></div>
+
+      <div class="lb" id="lbWrap" style="display:none;">
+        <h3>🏆 Leaderboard</h3>
+        <ol id="lbList"></ol>
+
+        <div style="margin-top:10px;">
+          <div class="pill">Bu sual üzrə nəticələr</div>
+          <ol id="resultList" style="margin-top:8px;"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
   const pin = "{{ session.pin }}";
-  const ws = new WebSocket(`ws://${window.location.host}/ws/live/${pin}/play/`);
+  const connPill = document.getElementById("connPill");
+  const timerBox = document.getElementById("timerBox");
+  const qText = document.getElementById("qText");
+  const optionsGrid = document.getElementById("optionsGrid");
+  const statusLine = document.getElementById("statusLine");
+  const metaLine = document.getElementById("metaLine");
 
-  let currentQuestionId = null;
-  let questionStart = null;
+  const lbWrap = document.getElementById("lbWrap");
+  const lbList = document.getElementById("lbList");
+  const resultList = document.getElementById("resultList");
 
-  ws.onmessage = (e) => {
-    const data = JSON.parse(e.data);
+  let currentQuestion = null;   // {id, text, options, ends_at, started_at, index, total, ...}
+  let selectedOptionId = null;
+  let answered = false;
+  let timerInterval = null;
 
-    if (data.type === "question_published") {
-      const q = data.question;
-      currentQuestionId = q.id;
-      questionStart = Date.now();
+  function wsUrl(path){
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    return `${proto}://${location.host}${path}`;
+  }
 
-      let html = `<h3>${q.text}</h3>`;
-      html += `<div>Vaxt: ${q.time_limit}s | Xal: ${q.points}</div><br/>`;
+  function fmt2(n){ return String(n).padStart(2, "0"); }
 
-      q.options.forEach(opt => {
-        html += `<button onclick="sendAnswer(${opt.id})">${opt.label}) ${opt.text}</button><br/><br/>`;
+  function setConn(ok){
+    connPill.textContent = ok ? "WS: qoşuldu ✅" : "WS: kəsildi ❌";
+  }
+
+  function clearTimer(){
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+    timerBox.textContent = "--";
+  }
+
+  function startTimer(endsAtISO){
+    clearTimer();
+    if (!endsAtISO) return;
+
+    const ends = new Date(endsAtISO).getTime();
+
+    function tick(){
+      const now = Date.now();
+      const diff = Math.max(0, ends - now);
+      const sec = Math.ceil(diff / 1000);
+      const mm = Math.floor(sec / 60);
+      const ss = sec % 60;
+      timerBox.textContent = `${fmt2(mm)}:${fmt2(ss)}`;
+
+      if (diff <= 0){
+        // vaxt bitdi
+        stopAnswerUI();
+        statusLine.textContent = "Vaxt bitdi. Nəticə gözlənilir...";
+      }
+    }
+
+    tick();
+    timerInterval = setInterval(tick, 250);
+  }
+
+  function resetUIForQuestion(q){
+    currentQuestion = q;
+    selectedOptionId = null;
+    answered = false;
+
+    lbWrap.style.display = "none";
+    lbList.innerHTML = "";
+    resultList.innerHTML = "";
+
+    statusLine.textContent = "";
+    statusLine.className = "status";
+    metaLine.textContent = q?.index && q?.total ? `Sual: ${q.index}/${q.total}` : "";
+
+    qText.textContent = q?.text || "Sual...";
+    optionsGrid.innerHTML = "";
+    optionsGrid.style.display = "grid";
+
+    (q.options || []).forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.type = "button";
+        btn.dataset.id = opt.id;
+      
+        const letters = ["A","B","C","D","E","F"];
+        const label = (opt.label ?? opt.key ?? opt.code ?? letters[idx] ?? String(idx+1));
+        const text  = (opt.text ?? opt.title ?? opt.content ?? "").toString();
+      
+        btn.textContent = `${label}) ${text}`;
+        btn.onclick = () => chooseOption(opt.id, btn);
+        optionsGrid.appendChild(btn);
       });
+      
 
-      document.getElementById("screen").innerHTML = html;
+    startTimer(q.ends_at);
+  }
+
+  function chooseOption(optionId, btn){
+    if (answered) return;
+    selectedOptionId = optionId;
+    document.querySelectorAll(".opt").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    submitAnswer();
+  }
+
+  function stopAnswerUI(){
+    document.querySelectorAll(".opt").forEach(b => b.disabled = true);
+  }
+
+  async function submitAnswer(){
+    if (!currentQuestion || !selectedOptionId) return;
+
+    answered = true;
+    stopAnswerUI();
+
+    const startedAt = currentQuestion.started_at ? new Date(currentQuestion.started_at).getTime() : null;
+    const answerMs = startedAt ? Math.max(0, Date.now() - startedAt) : 0;
+
+    statusLine.textContent = "Cavab göndərildi. Nəticə gözlənilir...";
+    statusLine.className = "status";
+
+    // Cavab websocket-lə göndərilir (consumer bunu gözləyir)
+    try {
+      playWs.send(JSON.stringify({
+        type: "answer",
+        question_id: currentQuestion.id,
+        option_id: selectedOptionId,
+        answer_ms: answerMs
+      }));
+    } catch(e) {
+      // WS problem olsa da UI-da qalır
+    }
+  }
+
+  function renderReveal(msg){
+    clearTimer();
+    stopAnswerUI();
+
+    const correctIds = msg.correct_option_ids || [];
+    const isCorrect = correctIds.includes(selectedOptionId);
+
+    if (answered){
+      statusLine.textContent = isCorrect ? "✅ Düz cavab!" : "❌ Səhv cavab.";
+      statusLine.className = "status " + (isCorrect ? "good" : "bad");
+    } else {
+      statusLine.textContent = "Vaxt bitdi / cavab vermədin.";
+      statusLine.className = "status bad";
     }
 
-    if (data.type === "reveal") {
-      document.getElementById("screen").innerHTML =
-        `<h3>Nəticə</h3>
-         <div>Düzgün cavab ID-lər: ${data.correct_option_ids.join(", ")}</div>
-         <h4>TOP</h4>
-         <pre>${JSON.stringify(data.top, null, 2)}</pre>`;
-    }
+    // Leaderboard
+    lbWrap.style.display = "block";
+    lbList.innerHTML = "";
+    (msg.top || []).forEach((p, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i+1}. ${p.nickname} — ${p.score} bal`;
+      lbList.appendChild(li);
+    });
 
-    if (data.type === "finished") {
-      document.getElementById("screen").innerHTML =
-        `<h3>Oyun bitdi</h3><pre>${JSON.stringify(data.top, null, 2)}</pre>`;
-    }
+    // Bu sual üzrə nəticələr (kim nə qazandı, düz yazdı?)
+    resultList.innerHTML = "";
+    (msg.results || []).slice(0, 20).forEach(r => {
+      const li = document.createElement("li");
+      li.textContent = `${r.nickname}: ${r.is_correct ? "✅" : "❌"} +${r.awarded_points} (total ${r.total_score})`;
+      resultList.appendChild(li);
+    });
+
+    // Next sual host tərəfdən gələnə qədər gözləmə
+    metaLine.textContent = (currentQuestion?.index && currentQuestion?.total)
+      ? `Sual: ${currentQuestion.index}/${currentQuestion.total} — Növbəti sual gözlənilir...`
+      : "Növbəti sual gözlənilir...";
+  }
+
+  function renderFinished(msg){
+    clearTimer();
+    stopAnswerUI();
+    qText.textContent = "Oyun bitdi ✅";
+    optionsGrid.style.display = "none";
+
+    lbWrap.style.display = "block";
+    lbList.innerHTML = "";
+    (msg.top || []).forEach((p, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i+1}. ${p.nickname} — ${p.score} bal`;
+      lbList.appendChild(li);
+    });
+    resultList.innerHTML = "";
+  }
+
+  // ✅ WebSocket
+  const playWs = new WebSocket(wsUrl(`/ws/live/${pin}/play/`));
+
+  playWs.onopen = async () => {
+    setConn(true);
+
+    // ✅ Fallback: WS qoşulandan sonra cari vəziyyəti HTTP ilə çək (miss olmasın)
+    try {
+      const res = await fetch(`/live/state/${pin}/`, { headers: { "Accept": "application/json" }});
+      const st = await res.json();
+
+      // state question/reveal isə sualı göstər
+      if (st.ok && st.question) {
+        resetUIForQuestion(st.question);
+        if (st.state === "reveal") {
+          renderReveal({ correct_option_ids: st.correct_option_ids || [], top: [], results: [] });
+        }
+      }
+    } catch(e){}
   };
 
-  function sendAnswer(optionId) {
-    if (!currentQuestionId) return;
-    const answerMs = Date.now() - questionStart;
+  playWs.onclose = () => setConn(false);
+  playWs.onerror = () => setConn(false);
 
-    ws.send(JSON.stringify({
-      type: "answer",
-      question_id: currentQuestionId,
-      option_id: optionId,
-      answer_ms: answerMs
-    }));
+  playWs.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
 
-    document.getElementById("screen").innerHTML = "<h3>Cavab göndərildi ✅</h3>";
-  }
+    if (msg.type === "question_published") {
+      resetUIForQuestion(msg.question);
+      return;
+    }
+
+    if (msg.type === "reveal") {
+      renderReveal(msg);
+      return;
+    }
+
+    if (msg.type === "finished") {
+      renderFinished(msg);
+      return;
+    }
+  };
 </script>
+</body>
+</html>

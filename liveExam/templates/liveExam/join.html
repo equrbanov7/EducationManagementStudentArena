@@ -19,6 +19,12 @@
 <script>
   let selectedAvatar = "avatar_1";
 
+  // default border setup
+  document.querySelectorAll(".avatarBtn").forEach(btn => {
+    btn.style.border = "1px solid #ccc";
+    if (btn.dataset.key === selectedAvatar) btn.style.border = "2px solid #000";
+  });
+
   document.querySelectorAll(".avatarBtn").forEach(btn => {
     btn.addEventListener("click", () => {
       selectedAvatar = btn.dataset.key;
@@ -27,26 +33,69 @@
     });
   });
 
-  document.getElementById("joinBtn").addEventListener("click", async () => {
-    const nickname = document.getElementById("nickname").value.trim();
+  const joinBtn = document.getElementById("joinBtn");
+  const nicknameInput = document.getElementById("nickname");
+
+  // enter ilə də qoşulsun
+  nicknameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") joinBtn.click();
+  });
+
+  joinBtn.addEventListener("click", async () => {
+    const nickname = nicknameInput.value.trim();
+    if (!nickname) {
+      alert("Nickname boş ola bilməz.");
+      nicknameInput.focus();
+      return;
+    }
+
+    joinBtn.disabled = true;
+    joinBtn.textContent = "Gözləyin...";
+
     const form = new FormData();
     form.append("nickname", nickname);
     form.append("avatar_key", selectedAvatar);
 
-    const res = await fetch("{% url 'liveExam:join_enter' session.pin %}", {
-      method: "POST",
-      body: form,
-      headers: { "X-CSRFToken": "{{ csrf_token }}" }
-    });
+    try {
+      const res = await fetch("{% url 'liveExam:join_enter' session.pin %}", {
+        method: "POST",
+        body: form,
+        credentials: "same-origin",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "X-Requested-With": "XMLHttpRequest",
+          "Accept": "application/json"
+        }
+      });
 
-    const data = await res.json();
-    if (!data.ok) {
-      alert(data.message || "Xəta baş verdi");
-      return;
+      let data;
+      try {
+        data = await res.json();
+      } catch (_) {
+        data = null;
+      }
+
+      if (!res.ok || !data || !data.ok) {
+        const msg = (data && data.message) ? data.message : "Xəta baş verdi";
+        alert(msg);
+        joinBtn.disabled = false;
+        joinBtn.textContent = "Qoşul";
+        return;
+      }
+
+      // ✅ ƏSAS: join olduqdan sonra wait_room/lobby səhifəsinə keç
+      if (data.redirect) {
+        window.location.href = data.redirect;
+        return;
+      }
+
+      // fallback (əgər backend redirect qaytarmadısa)
+      joinBtn.textContent = "Qoşuldu ✅";
+
+    } catch (err) {
+      alert("Şəbəkə xətası. Yenidən yoxla.");
+      joinBtn.disabled = false;
+      joinBtn.textContent = "Qoşul";
     }
-    // hələlik eyni səhifədə qalır; Step 2.4-də lobby websocket-ə qoşduracağıq
-    document.getElementById("joinBtn").disabled = true;
-    document.getElementById("joinBtn").textContent = "Qoşuldu ✅";
-
   });
 </script>

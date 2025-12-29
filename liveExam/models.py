@@ -36,6 +36,17 @@ class LiveSession(models.Model):
     question_ends_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    current_index = models.PositiveIntegerField(default=0)
+
+    # ✅ NEW: aktiv sualın id-si (optional, amma çox rahatdır)
+    current_question_id = models.IntegerField(null=True, blank=True, db_index=True)
+
+    # ✅ NEW: sessiya üçün default sual vaxtı (Kahoot kimi)
+    question_seconds = models.PositiveIntegerField(default=15)
+
+    question_started_at = models.DateTimeField(null=True, blank=True)
+    question_ends_at = models.DateTimeField(null=True, blank=True)
 
     def _ensure_unique_pin(self):
         tries = 0
