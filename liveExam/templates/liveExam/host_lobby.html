@@ -22,6 +22,18 @@
 <!-- ✅ Host control buttons -->
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
   <button id="startBtn">Start Game</button>
+  <label style="display:flex;align-items:center;gap:6px;margin-left:8px;">
+    Sual sayı:
+    <input id="questionCount"
+           type="number"
+           min="1"
+           step="1"
+           value="10"
+           style="width:90px;padding:6px 8px;border:1px solid #ddd;border-radius:8px;">
+  </label>
+  
+  <small id="qCountHint" style="opacity:.7;"></small>
+  
   <button id="nextBtn" disabled>Next Question</button>
   <button id="revealBtn" disabled>Reveal</button>
   <button id="finishBtn">Finish</button>
@@ -99,6 +111,36 @@
   const qMetaEl = document.getElementById("qMeta");
   const qTextEl = document.getElementById("qText");
   const qOptionsEl = document.getElementById("qOptions");
+  const qCountHint = document.getElementById("qCountHint");
+const questionCountEl = document.getElementById("questionCount");
+
+// Əgər view-dan exam total göndərsən: {{ exam_total_questions }}
+const EXAM_TOTAL = Number("{{ exam_total_questions|default:'0' }}") || 0;
+
+function updateHint(){
+  if (!qCountHint || !questionCountEl) return;
+  const v = Number(questionCountEl.value || 0);
+
+  if (!EXAM_TOTAL){
+    qCountHint.textContent = "";
+    return;
+  }
+
+  if (!v){
+    qCountHint.textContent = `(Boş buraxsan: hamısı oynanacaq. Exam: ${EXAM_TOTAL})`;
+    return;
+  }
+
+  if (v > EXAM_TOTAL){
+    qCountHint.textContent = `⚠️ Exam-də ${EXAM_TOTAL} sual var. ${v} olmaz.`;
+  } else {
+    qCountHint.textContent = `(Exam: ${EXAM_TOTAL} sual — seçiləcək: ${v})`;
+  }
+}
+
+questionCountEl?.addEventListener("input", updateHint);
+updateHint();
+
 
   function logLine(s){
     hostLog.textContent = (hostLog.textContent + "\n" + s).trim();
@@ -364,12 +406,30 @@
   startBtn.onclick = async () => {
     try {
       logLine("▶️ Start Game...");
-      const data = await postAction("{% url 'liveExam:start_game' session.pin %}");
+  
+      const qcEl = document.getElementById("questionCount");
+      const qcRaw = (qcEl?.value || "").trim();
+  
+      const form = new FormData();
+      // boş buraxsa hamısı oynansın
+      if (qcRaw) form.append("question_count", qcRaw);
+  
+      const res = await fetch("{% url 'liveExam:start_game' session.pin %}", {
+        method: "POST",
+        body: form,
+        headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" }
+      });
+  
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "HTTP error");
+  
       logLine("✅ Started: " + JSON.stringify(data));
-    } catch(e){
+    } catch (e) {
       logLine("❌ " + e.message);
+      alert(e.message);
     }
   };
+  
 
   revealBtn.onclick = async () => {
     try {

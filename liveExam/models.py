@@ -47,6 +47,11 @@ class LiveSession(models.Model):
 
     question_started_at = models.DateTimeField(null=True, blank=True)
     question_ends_at = models.DateTimeField(null=True, blank=True)
+        # ✅ Host neçə sual oynanacağını seçəcək
+    question_limit = models.PositiveIntegerField(default=10)
+
+    # ✅ Random seçilən sualların ID-ləri (order burada saxlanır)
+    selected_question_ids = models.JSONField(default=list, blank=True)
 
     def _ensure_unique_pin(self):
         tries = 0
@@ -107,9 +112,14 @@ class LiveAnswer(models.Model):
     player = models.ForeignKey(LivePlayer, on_delete=models.CASCADE, related_name="answers")
 
     question_id = models.IntegerField()
-    choice_id = models.IntegerField()
 
-    is_correct = models.BooleanField(default=False)
+    # köhnə single üçün saxla (geri uyğunluq)
+    choice_id = models.IntegerField(null=True, blank=True)
+
+    # ✅ yeni multi üçün
+    choice_ids = models.JSONField(default=list, blank=True)
+
+    is_correct = models.BooleanField(default=False)  # “perfect match” kimi saxlayacağıq
     answer_ms = models.IntegerField(default=0)
     awarded_points = models.IntegerField(default=0)
 
