@@ -148,7 +148,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / "blogApp" / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / "blogApp" / "static",
+    BASE_DIR / "liveExam" / "static",
+    ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
@@ -176,3 +179,13 @@ DEFAULT_FROM_EMAIL = 'equrbanov724@gmail.com'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# settings.py
+LAN_HOST = "192.168.1.73:8000"
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://192.168.1.73:8000",
+]

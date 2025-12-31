@@ -1,101 +1,46 @@
-<h2>PIN: {{ session.pin }}</h2>
+{% extends "base.html" %}
+{% load static %}
 
-<div>
-  <label>Nickname</label><br/>
-  <input id="nickname" maxlength="32" placeholder="Adını yaz..." />
-</div>
+{% block title %}Oyuna Qoşul | {{ session.pin }}{% endblock %}
 
-<div style="margin-top:12px;">
-  <label>Avatar seç</label>
-  <div id="avatars" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-    {% for a in avatars %}
-      <button type="button" class="avatarBtn" data-key="{{ a }}">{{ a }}</button>
-    {% endfor %}
-  </div>
-</div>
+{% block extraCss %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/join.css' %}">
+{% endblock %}
 
-<button id="joinBtn" style="margin-top:12px;">Qoşul</button>
+{% block content %}
+    <div class="join-card">
+        
+        <h2 style="margin:0; color:#546e7a; font-size:1rem; text-transform:uppercase;">Game PIN</h2>
+        <div class="pin-badge">{{ session.pin }}</div>
 
-<script>
-  let selectedAvatar = "avatar_1";
+        <div class="input-group">
+            <label class="input-label">Adın nədir?</label>
+            <input id="nickname" class="custom-input" maxlength="15" placeholder="Adını bura yaz..." autocomplete="off">
+        </div>
 
-  // default border setup
-  document.querySelectorAll(".avatarBtn").forEach(btn => {
-    btn.style.border = "1px solid #ccc";
-    if (btn.dataset.key === selectedAvatar) btn.style.border = "2px solid #000";
-  });
+        <div class="input-group">
+            <label class="input-label">Avatarını Seç</label>
+            <div id="avatarGrid" class="avatar-grid">
+                {% for a in avatars %}
+                    <button type="button" class="avatar-btn" data-key="{{ a }}"></button>
+                {% endfor %}
+            </div>
+        </div>
 
-  document.querySelectorAll(".avatarBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      selectedAvatar = btn.dataset.key;
-      document.querySelectorAll(".avatarBtn").forEach(b => b.style.border = "1px solid #ccc");
-      btn.style.border = "2px solid #000";
-    });
-  });
+        <button id="joinBtn" class="join-btn">Hadi Başlayaq! 🚀</button>
 
-  const joinBtn = document.getElementById("joinBtn");
-  const nicknameInput = document.getElementById("nickname");
+    </div>
 
-  // enter ilə də qoşulsun
-  nicknameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") joinBtn.click();
-  });
+{% endblock %}
 
-  joinBtn.addEventListener("click", async () => {
-    const nickname = nicknameInput.value.trim();
-    if (!nickname) {
-      alert("Nickname boş ola bilməz.");
-      nicknameInput.focus();
-      return;
-    }
-
-    joinBtn.disabled = true;
-    joinBtn.textContent = "Gözləyin...";
-
-    const form = new FormData();
-    form.append("nickname", nickname);
-    form.append("avatar_key", selectedAvatar);
-
-    try {
-      const res = await fetch("{% url 'liveExam:join_enter' session.pin %}", {
-        method: "POST",
-        body: form,
-        credentials: "same-origin",
-        headers: {
-          "X-CSRFToken": "{{ csrf_token }}",
-          "X-Requested-With": "XMLHttpRequest",
-          "Accept": "application/json"
-        }
-      });
-
-      let data;
-      try {
-        data = await res.json();
-      } catch (_) {
-        data = null;
-      }
-
-      if (!res.ok || !data || !data.ok) {
-        const msg = (data && data.message) ? data.message : "Xəta baş verdi";
-        alert(msg);
-        joinBtn.disabled = false;
-        joinBtn.textContent = "Qoşul";
-        return;
-      }
-
-      // ✅ ƏSAS: join olduqdan sonra wait_room/lobby səhifəsinə keç
-      if (data.redirect) {
-        window.location.href = data.redirect;
-        return;
-      }
-
-      // fallback (əgər backend redirect qaytarmadısa)
-      joinBtn.textContent = "Qoşuldu ✅";
-
-    } catch (err) {
-      alert("Şəbəkə xətası. Yenidən yoxla.");
-      joinBtn.disabled = false;
-      joinBtn.textContent = "Qoşul";
-    }
-  });
-</script>
+{% block extraJs %}
+    <script>
+        // Backend dəyərlərini JS-ə ötürürük
+        const CONFIG = {
+            joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
+            csrf: "{{ csrf_token }}"
+        };
+    </script>
+    <script src="{% static 'js/join.js' %}"></script>
+{% endblock %}

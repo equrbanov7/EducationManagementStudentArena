@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+:root {
+    --primary: #006064;
+    --accent: #ff4081;
+    --success: #00c853;
+    --dark: #263238;
+    --light: #fff;
+    --bg-anim: linear-gradient(-45deg, #004d40, #00695c, #00838f, #0277bd);
+}
+
+* { box-sizing: border-box; }
+
+
+
+body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-anim);
+    background-size: 400% 400%;
+    animation: gradientBG 20s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+body .blog-header{
+    display: none !important;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Main Card */
+.join-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 450px; /* Mobildə tam ekran, desktopda kart */
+    border-radius: 25px;
+    padding: 30px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    animation: slideUp 0.5s ease;
+
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* PIN Badge */
+.pin-badge {
+    background: #e0f7fa;
+    color: var(--primary);
+    display: inline-block;
+    padding: 8px 25px;
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    margin-bottom: 25px;
+    border: 2px solid #b2ebf2;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Input Styling */
+.input-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.input-label {
+    font-weight: 800;
+    color: #546e7a;
+    margin-left: 10px;
+    margin-bottom: 5px;
+    display: block;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    border: 3px solid #eceff1;
+    border-radius: 15px;
+    background: #f9f9f9;
+    font-weight: 700;
+    color: var(--dark);
+    transition: all 0.3s;
+    outline: none;
+}
+
+.custom-input:focus {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 96, 100, 0.2);
+}
+
+/* Avatar Grid */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 sütun */
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.avatar-btn {
+    aspect-ratio: 1;
+    background: #fff;
+    border: 3px solid #eceff1;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+}
+
+.avatar-btn:hover {
+    background: #f0f0f0;
+}
+
+/* Selected Avatar State */
+.avatar-btn.selected {
+    border-color: var(--accent);
+    background: #fce4ec;
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3);
+    z-index: 2;
+}
+
+/* Join Button */
+.join-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--dark);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.1s;
+    box-shadow: 0 6px 0 #000;
+    margin-top: 10px;
+}
+
+.join-btn:active {
+    transform: translateY(6px);
+    box-shadow: none;
+}
+
+.join-btn:disabled {
+    background: #78909c;
+    box-shadow: none;
+    transform: translateY(6px);
+    cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 400px) {
+    .join-card { padding: 20px 15px; }
+    .avatar-grid { grid-template-columns: repeat(3, 1fr); }
+    .pin-badge { font-size: 1.2rem; }
+}
+

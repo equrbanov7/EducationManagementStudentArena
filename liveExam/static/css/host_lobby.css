@@ -1,0 +1,310 @@
+/* --- Global & Animated Background --- */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+:root {
+    --primary: #006064;    /* Deep Teal (Əsas rəng) */
+    --accent: #ff4081;     /* Pink (Vurğu üçün) */
+    --success: #00c853;    /* Green */
+    --info: #00bcd4;       /* Cyan */
+    --warning: #ffab00;    /* Amber */
+    --dark: #263238;
+    --light: #fff;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    color: var(--dark);
+    /* Göz yormayan, axıcı Dərin Okean qradiyenti */
+    background: linear-gradient(-45deg, #004d40, #00695c, #00838f, #0277bd);
+    background-size: 400% 400%;
+    animation: gradientBG 20s ease infinite;
+}
+body .blog-header{
+    display: none !important;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Container */
+.host-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* --- Header Area (Glassmorphism) --- */
+.lobby-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.5s ease;
+}
+
+/* Oyun başlayanda Header gizlənəcək */
+.lobby-header.hidden {
+    display: none;
+}
+
+.lobby-title {
+    font-size: 1.1rem;
+    color: #546e7a;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.pin-display {
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--primary);
+    background: #e0f7fa;
+    display: inline-block;
+    padding: 5px 40px;
+    border-radius: 15px;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+    letter-spacing: 10px;
+    margin-bottom: 20px;
+    border: 2px solid #b2ebf2;
+}
+
+.join-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* QR Code Style */
+.qr-box img {
+    border-radius: 15px;
+    border: 5px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s;
+    cursor: zoom-in; /* Büyütmək işarəsi */
+}
+.qr-box img:hover { transform: scale(1.05); }
+
+/* --- QR Modal (Zoom üçün) --- */
+.qr-modal {
+    display: none; /* Default gizli */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    cursor: zoom-out;
+}
+
+.qr-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 20px;
+    border: 10px solid white;
+    box-shadow: 0 0 50px rgba(255,255,255,0.2);
+    animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* --- Control Bar --- */
+.control-bar {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.btn-3d {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-3d:active:not(:disabled) { top: 4px; box-shadow: none !important; transform: translateY(4px); }
+.btn-3d:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); box-shadow: none !important; }
+
+/* Colors tailored to Ocean Theme */
+.btn-start { background: var(--success); box-shadow: 0 5px 0 #009624; }
+.btn-reveal { background: var(--warning); color: #333; box-shadow: 0 5px 0 #ff6f00; }
+.btn-next { background: var(--info); box-shadow: 0 5px 0 #008394; }
+.btn-finish { background: var(--accent); box-shadow: 0 5px 0 #c51162; }
+
+.settings-group {
+    background: #eceff1;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #455a64;
+}
+
+/* --- Question Preview --- */
+#questionWrap {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.5s ease;
+}
+
+.q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #cfd8dc;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.timer-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--info);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
+}
+
+.q-text {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--dark);
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.opt-card {
+    padding: 20px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+.opt-bg-0 { background: #ef5350; } /* Red-ish */
+.opt-bg-1 { background: #42a5f5; } /* Blue-ish */
+.opt-bg-2 { background: #ffca28; color: #333; } /* Yellow-ish */
+.opt-bg-3 { background: #66bb6a; } /* Green-ish */
+
+/* --- Players List --- */
+.players-section {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.players-header {
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.player-chip {
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.2s;
+}
+
+.player-chip:hover { transform: translateY(-5px); }
+.player-avatar { font-size: 2.5rem; display: block; margin-bottom: 5px; }
+.player-name { font-weight: 800; color: #37474f; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- Leaderboard --- */
+#leaderWrap {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.leader-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f1f8e9;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #33691e;
+}
+
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@media (max-width: 768px) {
+    .pin-display { font-size: 3rem; letter-spacing: 5px; padding: 10px 20px; }
+    .lobby-header { padding: 20px 10px; }
+    .options-grid { grid-template-columns: 1fr; }
+    .join-info { flex-direction: column; gap: 20px; }
+}
