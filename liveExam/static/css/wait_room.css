@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+:root {
+    --primary: #006064;
+    --accent: #ff4081;
+    --success: #00c853;
+    --dark: #263238;
+    --light: #ffffff;
+    --bg-anim: linear-gradient(-45deg, #004d40, #00695c, #00838f, #0277bd);
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg-anim);
+    background-size: 400% 400%;
+    animation: gradientBG 20s ease infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    color: var(--dark);
+}
+
+body .blog-header{
+    display: none !important;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Main Status Card */
+.wait-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 25px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Success Message */
+.success-msg {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+/* My Profile Area */
+.my-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.my-avatar {
+    font-size: 5rem;
+    background: #e0f7fa;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 96, 100, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(0, 96, 100, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 96, 100, 0); }
+}
+
+.my-nickname {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-top: 10px;
+    color: var(--dark);
+}
+
+/* Status Bar */
+.status-bar {
+    background: #f1f8e9;
+    color: #33691e;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    display: inline-block;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.loading-dots:after {
+    content: '.';
+    animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+}
+
+/* Footer Info */
+.lobby-info {
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-top: auto;
+}
+
+/* Players Grid (Other players) */
+.others-container {
+    width: 100%;
+    max-width: 500px;
+}
+.others-title {
+    color: white;
+    font-weight: 800;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+}
+.mini-player {
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 5px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }

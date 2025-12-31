@@ -4,11 +4,14 @@ import re
 import uuid
 import qrcode
 import random
+import hashlib
+
 
 
 
 from django.contrib.auth.decorators import login_required
 from django.core import signing
+from django.conf import settings
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -20,6 +23,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from liveExam.models import LiveSession, LivePlayer, LiveAnswer
+from liveExam.constants import AVATAR_EMOJI
 from blog.models import Exam, ExamQuestion, ExamQuestionOption
 
 
@@ -268,22 +272,31 @@ def _get_option_label(opt) -> str:
     return ""
 
 
-def _build_options(eq: ExamQuestion) -> List[Dict[str, Any]]:
+def _options_seed(pin: str, question_id: int, started_at) -> int:
+    seed_str = f"{pin}:{int(question_id)}:{started_at.isoformat()}"
+    h = hashlib.sha256(seed_str.encode("utf-8")).hexdigest()
+    return int(h[:8], 16)  # 32-bit seed
+
+def _build_options(eq, *, seed: int | None = None):
     """
-    Player-ə gedən variantlar.
-    label yoxdursa A,B,C... verir.
-    text boşdursa "Variant A" kimi fallback edir.
+    ✅ Variantları qarışdırır.
+    seed verilsə, shuffle deterministik olur (refresh-də dəyişmir).
     """
     letters = ["A", "B", "C", "D", "E", "F"]
 
     qs = (
         ExamQuestionOption.objects
-        .filter(question=eq)   # ✅ səndə FK adı question görünür
-        .order_by("id")
+        .filter(question=eq)
+        .order_by("id")  # baza stabil olsun
     )
 
-    out: List[Dict[str, Any]] = []
-    for i, opt in enumerate(qs):
+    opts = list(qs)
+
+    rnd = random.Random(seed) if seed is not None else random
+    rnd.shuffle(opts)
+
+    out = []
+    for i, opt in enumerate(opts):
         label = _get_option_label(opt) or (letters[i] if i < len(letters) else str(i + 1))
         text = _get_option_text(opt) or f"Variant {label}"
         out.append({"id": opt.id, "label": label, "text": text})
@@ -329,16 +342,14 @@ def _detect_multi(eq: ExamQuestion) -> Tuple[bool, int, List[int]]:
 # ------------------------
 
 def _build_question_payload(session: LiveSession, eq: ExamQuestion, idx: int, total: int):
-    """
-    question_published event-i.
-    ✅ geri uyğunluq: əvvəlki UI `options` və s. ilə işləyirdi
-    ✅ yeni: multi, max_select, correct_option_ids (host reveal üçün ayrıca da gedir)
-    """
     time_limit = _question_time_limit(session, eq)
     now = timezone.now()
     ends = now + timezone.timedelta(seconds=time_limit)
 
     multi, max_select, correct_ids = _detect_multi(eq)
+
+    # ✅ deterministik shuffle seed
+    seed = _options_seed(session.pin, eq.id, now)
 
     payload = {
         "type": "question_published",
@@ -347,13 +358,11 @@ def _build_question_payload(session: LiveSession, eq: ExamQuestion, idx: int, to
             "text": _get_question_text(eq),
             "time_limit": time_limit,
             "points": _question_points(session, eq),
-
-            # ✅ yeni (UI checkbox/submit üçün)
             "multi": multi,
             "max_select": max_select,
 
-            # ✅ null problem fix
-            "options": _build_options(eq),
+            # ✅ qarışdırılmış options
+            "options": _build_options(eq, seed=seed),
 
             "started_at": now.isoformat(),
             "ends_at": ends.isoformat(),
@@ -445,9 +454,11 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404("Not allowed.")
 
-    join_url = request.build_absolute_uri(
-        reverse("liveExam:join_page", kwargs={"pin": session.pin})
-    )
+    # join_url = request.build_absolute_uri(
+    #     reverse("liveExam:join_page", kwargs={"pin": session.pin})
+    # )
+    host = getattr(settings, "LAN_HOST", None) or request.get_host()
+    join_url = f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
 
     context = {
         "session": session,
@@ -525,17 +536,29 @@ def live_join_enter(request, pin):
     return resp
 
 
+# def live_qr_png(request, pin):
+#     session = get_object_or_404(LiveSession, pin=pin)
+#     join_url = request.build_absolute_uri(
+#         reverse("liveExam:join_page", kwargs={"pin": session.pin})
+#     )
+
+#     img = qrcode.make(join_url)
+#     buf = io.BytesIO()
+#     img.save(buf, format="PNG")
+#     return HttpResponse(buf.getvalue(), content_type="image/png")
+
 def live_qr_png(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
-    join_url = request.build_absolute_uri(
-        reverse("liveExam:join_page", kwargs={"pin": session.pin})
-    )
+
+    host = getattr(settings, "LAN_HOST", None) or request.get_host()
+    join_url = f"http://{host}{session.join_url_path()}"
 
     img = qrcode.make(join_url)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
-    return HttpResponse(buf.getvalue(), content_type="image/png")
+    buf.seek(0)
 
+    return HttpResponse(buf.getvalue(), content_type="image/png")
 
 def live_wait_room(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
@@ -577,25 +600,43 @@ def live_state_json(request, pin):
         "question_ends_at": session.question_ends_at.isoformat() if session.question_ends_at else None,
     }
 
-    # cari sual (index-dən)
-    eq = _get_question_by_index(session, int(session.current_index or 0))
-    if eq:
-        # reveal olduqda correct ids də lazımdır
-        correct_ids = list(
-            ExamQuestionOption.objects.filter(question=eq, is_correct=True)
-            .values_list("id", flat=True)
-        )
-        # question payload (timer üçün ends_at)
-        payload, now, ends = _build_question_payload(session, eq, int(session.current_index or 0), total)
+    idx = int(session.current_index or 0)
+    eq = _get_question_by_index(session, idx)
+    if not eq:
+        return JsonResponse(data)
 
-        # payload-dakı started/ends-i session-dan override edək (əgər artıq publish olunubsa)
-        if session.question_started_at:
-            payload["question"]["started_at"] = session.question_started_at.isoformat()
-        if session.question_ends_at:
-            payload["question"]["ends_at"] = session.question_ends_at.isoformat()
+    # ✅ started/ends session-dan gəlməlidir (refresh-də dəyişməsin)
+    started = session.question_started_at
+    ends = session.question_ends_at
 
-        data["question"] = payload["question"]
-        data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
+    # fallback: əgər started var, ends yoxdursa -> time_limit ilə hesabla
+    time_limit = _question_time_limit(session, eq)
+    if started and not ends:
+        ends = started + timezone.timedelta(seconds=time_limit)
+
+    multi, max_select, correct_ids = _detect_multi(eq)
+
+    # ✅ deterministik shuffle seed (refresh-də eyni olsun)
+    seed = _options_seed(session.pin, eq.id, started) if started else None
+
+    question = {
+        "id": eq.id,
+        "text": _get_question_text(eq),
+        "time_limit": time_limit,
+        "points": _question_points(session, eq),
+        "multi": multi,
+        "max_select": max_select,
+        "options": _build_options(eq, seed=seed),  # ✅ eyni sıra
+        "started_at": started.isoformat() if started else None,
+        "ends_at": ends.isoformat() if ends else None,
+        "index": idx + 1,
+        "total": total,
+    }
+
+    data["question"] = question
+
+    # reveal-də correct ids lazımdır
+    data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
 
     return JsonResponse(data)
 

@@ -1,99 +1,53 @@
-<h2>PIN: {{ session.pin }}</h2>
+{% extends "base.html" %}
+{% load static %}
 
-<div style="margin:10px 0;">
-  Qoşulanlar: <b id="count">0</b> —
-  <span id="wsStatus">WS: qoşulur...</span>
-</div>
+{% block title %}Gözləmə Otağı | {{ session.pin }}{% endblock %}
 
-<ul id="playersList" style="padding-left:18px;"></ul>
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/wait_room.css' %}">
+{% endblock %}
 
-{{ players|json_script:"initialPlayers" }}
+{% block content %}
 
-<script>
-  const PIN = "{{ session.pin }}";
-  const WS_PATH = `/ws/live/${PIN}/lobby/`;
+    <div class="wait-card">
+        <div class="success-msg">Sən Artıq İçəridəsən!</div>
+        
+        <div class="my-profile">
+            <div id="myAvatar" class="my-avatar"></div> 
+            <div id="myNickname" class="my-nickname">{{ my_nickname }}</div>
+        </div>
 
-  const listEl = document.getElementById("playersList");
-  const countEl = document.getElementById("count");
-  const wsStatusEl = document.getElementById("wsStatus");
+        <div class="status-bar">
+            Müəllim oyunu başladır<span class="loading-dots"></span>
+        </div>
+    </div>
 
-  function renderPlayers(players) {
-    const arr = Array.isArray(players) ? players : [];
-    countEl.textContent = arr.length;
+    <div class="others-container">
+        <div class="others-title">
+            <span>Digər oyunçular:</span>
+            <span id="count" style="background:white; color:#006064; padding:2px 8px; border-radius:10px;">0</span>
+        </div>
+        <div id="playersList" class="players-grid">
+            </div>
+    </div>
 
-    listEl.innerHTML = "";
-    if (arr.length === 0) {
-      const li = document.createElement("li");
-      li.textContent = "Hələ heç kim qoşulmayıb.";
-      listEl.appendChild(li);
-      return;
-    }
+    <div class="lobby-info">
+        <p>PIN: {{ session.pin }}</p>
+        <small id="wsStatus" style="opacity:0.8;">Bağlantı...</small>
+    </div>
 
-    arr.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.nickname} (${p.avatar_key})`;
-      listEl.appendChild(li);
-    });
-  }
+    {{ players|json_script:"initialPlayers" }}
 
-  // ✅ ilkin render
-  try {
-    const initial = JSON.parse(document.getElementById("initialPlayers").textContent || "[]");
-    renderPlayers(initial);
-  } catch (e) {
-    renderPlayers([]);
-  }
+{% endblock %}
 
-  function wsUrl() {
-    const proto = location.protocol === "https:" ? "wss" : "ws";
-    return `${proto}://${location.host}${WS_PATH}`;
-  }
-
-  let socket = null;
-  let reconnectTimer = null;
-
-  function connectWs() {
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-
-    wsStatusEl.textContent = "WS: qoşulur...";
-    socket = new WebSocket(wsUrl());
-
-    socket.onopen = () => {
-      wsStatusEl.textContent = "WS: qoşuldu ✅";
-    };
-
-    socket.onmessage = (e) => {
-      try {
-        const msg = JSON.parse(e.data);
-
-        // server formatı:
-        // A) {type:"lobby_state", ...}
-        // B) {data:{type:"lobby_state", ...}}  (bizim broadcast formatı)
-        const payload = msg.data ? msg.data : msg;
-
-        // ✅ START GAME -> redirect
-        if (payload.type === "game_started" && payload.redirect) {
-          window.location.href = payload.redirect;
-          return;
-        }
-
-        // ✅ lobby players update
-        if (payload.type === "lobby_state" && Array.isArray(payload.players)) {
-          renderPlayers(payload.players);
-        }
-      } catch (_) {}
-    };
-
-    socket.onclose = () => {
-      wsStatusEl.textContent = "WS: kəsildi ❌ (yenidən qoşulur...)";
-      reconnectTimer = setTimeout(connectWs, 1200);
-    };
-
-    socket.onerror = () => {
-      wsStatusEl.textContent = "WS: xəta ❌";
-      try { socket.close(); } catch(e) {}
-    };
-  }
-
-  connectWs();
-</script>
+{% block extraJs %}
+    <script>
+        // Backend-dən gələn məlumatlar JS-ə ötürülür
+        const CONFIG = {
+            wsPath: `/ws/live/{{ session.pin }}/lobby/`,
+            myNickname: "{{ my_nickname }}",     // View-da context-ə 'my_nickname' əlavə et
+            myAvatarKey: "{{ my_avatar_key }}"   // View-da context-ə 'my_avatar_key' əlavə et
+        };
+    </script>
+    <script src="{% static 'js/wait_room.js' %}"></script>
+{% endblock %}

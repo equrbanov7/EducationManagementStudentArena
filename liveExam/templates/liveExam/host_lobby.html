@@ -1,466 +1,138 @@
-<h2>Live İmtahan Lobby</h2>
+{% extends "base.html" %}
+{% load static %}
 
-<div style="margin: 12px 0;">
-  <div style="font-size:18px;">
-    <b>Game PIN:</b>
-    <span style="font-size:28px; letter-spacing: 4px;">{{ session.pin }}</span>
-  </div>
+{% block title %}Game Host | {{ session.pin }}{% endblock %}
 
-  <div style="margin-top:10px;">
-    <b>QR ilə qoşul:</b><br/>
-    <img src="{{ qr_url }}" alt="QR code" style="width:220px;height:220px;border:1px solid #ddd;border-radius:10px;padding:8px;">
-  </div>
+{% block extraCss %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
+{% endblock %}
 
-  <div style="margin-top:10px;">
-    <b>Link:</b>
-    <a href="{{ join_url }}" target="_blank">{{ join_url }}</a>
-  </div>
-</div>
+{% block content %}
+    <div class="host-container">
+        
+        <header id="lobbyHeader" class="lobby-header">
+            <div class="lobby-title">🚀 Live İmtahan Lobby</div>
+            <div class="pin-display" id="displayPin">{{ session.pin }}</div>
+            
+            <div class="join-info">
+                <div class="qr-box">
+                    <img src="{{ qr_url }}" alt="QR Code" width="160" onclick="toggleQR(true)" title="Böyütmək üçün kliklə">
+                </div>
+                <div class="link-box">
+                    <div style="font-size: 0.9rem; color:#888; margin-bottom:5px;">Brauzerdə yaz:</div>
+                    <a href="{{ join_url }}" target="_blank" style="color:#00bcd4; font-weight:bold; font-size:1.5rem; text-decoration:none;">
+                       LearnHub.it / {{ session.pin }}
+                    </a>
+                </div>
+            </div>
+        </header>
 
-<hr>
+        <div class="control-bar">
+            <button id="startBtn" class="btn-3d btn-start">
+                <i class="fas fa-play"></i> Start
+            </button>
 
-<!-- ✅ Host control buttons -->
-<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-  <button id="startBtn">Start Game</button>
-  <label style="display:flex;align-items:center;gap:6px;margin-left:8px;">
-    Sual sayı:
-    <input id="questionCount"
-           type="number"
-           min="1"
-           step="1"
-           value="10"
-           style="width:90px;padding:6px 8px;border:1px solid #ddd;border-radius:8px;">
-  </label>
-  
-  <small id="qCountHint" style="opacity:.7;"></small>
-  
-  <button id="nextBtn" disabled>Next Question</button>
-  <button id="revealBtn" disabled>Reveal</button>
-  <button id="finishBtn">Finish</button>
+            <div class="settings-group">
+                <i class="fas fa-list-ol"></i>
+                <input id="questionCount" type="number" min="1" value="10" style="width:50px; border:none; background:transparent; font-weight:bold; color:#455a64;">
+            </div>
 
-  <label style="margin-left:10px;">
-    <input type="checkbox" id="autoMode" checked>
-    Auto (vaxt bitəndə reveal + sonra next)
-  </label>
+            <button id="revealBtn" class="btn-3d btn-reveal" disabled>
+                <i class="fas fa-eye"></i> Reveal
+            </button>
+            
+            <button id="nextBtn" class="btn-3d btn-next" disabled>
+                <i class="fas fa-forward"></i> Next
+            </button>
+            
+            <button id="finishBtn" class="btn-3d btn-finish">
+                <i class="fas fa-stop"></i> Finish
+            </button>
 
-  <span id="gameState" style="margin-left:8px;opacity:.8;">state: lobby</span>
-</div>
+            <div class="settings-group" style="cursor:pointer;" onclick="document.getElementById('autoMode').click()">
+                <input type="checkbox" id="autoMode" checked>
+                <span style="font-size:0.9rem;">Auto</span>
+            </div>
 
-<!-- ✅ Host-da da sual görünsün -->
-<div id="questionWrap" style="display:none;margin-top:12px;max-width:980px;border:1px solid #eee;border-radius:12px;padding:12px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-    <div style="font-weight:700;font-size:18px;">Sual Preview</div>
-    <div style="font-weight:700;border:1px solid #eee;border-radius:999px;padding:6px 12px;">
-      ⏳ <span id="qTimer">--</span>
+            <span id="gameState" style="background:#263238; color:#00e676; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-family:monospace;">LOBBY</span>
+        </div>
+
+        <div id="questionWrap" style="display:none;">
+            <div class="q-header">
+                <span id="qMeta" style="font-weight:700; color:#888; font-size:1.1rem;">Sual 1/10</span>
+                <div class="timer-circle" id="qTimer">--</div>
+            </div>
+            <div id="qText" class="q-text">Sual mətni...</div>
+            <div id="qOptions" class="options-grid"></div>
+        </div>
+
+        <div id="leaderWrap" style="display:none;">
+            <h2 style="text-align:center; color:var(--primary); font-weight:900; margin-bottom:20px;">
+                <i class="fas fa-trophy" style="color:gold;"></i> Leaderboard
+            </h2>
+            <div id="leaderList"></div>
+        </div>
+
+        <div class="players-section">
+            <div class="players-header">
+                <h3 style="margin:0; font-weight:800;">
+                    <i class="fas fa-users"></i> Qoşulanlar: 
+                    <span id="playersCount" style="background:white; color:var(--primary); padding:2px 10px; border-radius:10px;">0</span>
+                </h3>
+                <small style="opacity:0.8;">Total: {{ exam_total_questions }} sual</small>
+            </div>
+            <div id="playersList" class="players-grid"></div>
+        </div>
+
+        <div style="margin-top:20px; opacity:0.75; text-align:center;">
+            <button id="debugBtn" type="button"
+                    style="background:none;border:none;cursor:pointer;color:white;font-weight:700;">
+              Debug Logs ▸
+            </button>
+          
+            <div id="hostLog"
+                 style="display:none;text-align:left;background:#000;color:#0f0;
+                        padding:12px;max-height:160px;overflow:auto;margin-top:10px;
+                        border-radius:10px;white-space:pre-wrap;
+                        font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+                        line-height:1.35;">
+              Ready.
+            </div>
+          </div>
+          
+
     </div>
-  </div>
 
-  <div id="qMeta" style="margin-top:6px;opacity:.75;"></div>
-
-  <div id="qText" style="margin-top:10px;font-size:20px;font-weight:800;"></div>
-
-  <div id="qOptions" style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
-</div>
-
-<div id="hostLog"
-     style="margin-top:10px;padding:10px;border:1px solid #eee;border-radius:10px;white-space:pre-wrap;max-width:980px;">
-  Ready.
-</div>
-
-<hr>
-
-<h3>Qoşulanlar</h3>
-<div><b>Say:</b> <span id="playersCount">0</span></div>
-<ul id="playersList"></ul>
-
-<hr>
-
-<!-- ✅ Reveal sonrası host üçün leaderboard -->
-<div id="leaderWrap" style="display:none;max-width:980px;border:1px solid #eee;border-radius:12px;padding:12px;">
-  <h3 style="margin:0 0 10px;">🏆 Leaderboard</h3>
-  <ol id="leaderList" style="margin:0;padding-left:18px;"></ol>
-
-  <div style="margin-top:12px;">
-    <div style="display:inline-block;border:1px solid #eee;border-radius:999px;padding:5px 10px;opacity:.8;font-size:12px;">
-      Bu sual üzrə nəticələr
+    <div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
+        <img src="{{ qr_url }}" alt="QR Big">
+        <p style="position:absolute; bottom:5%; color:white; font-weight:bold; font-size:1.5rem;">Qoşulmaq üçün skan et!</p>
     </div>
-    <ol id="resultList" style="margin-top:10px;padding-left:18px;"></ol>
-  </div>
-</div>
 
-<script>
-  const pin = "{{ session.pin }}";
-  const csrf = "{{ csrf_token }}";
+    {% block extraJs %}
+        <script>
+            const GAME_CONFIG = {
+                pin: "{{ session.pin }}",
+                csrf: "{{ csrf_token }}",
+                urls: {
+                    start: "{% url 'liveExam:start_game' session.pin %}",
+                    endQuestion: "{% url 'liveExam:end_question' session.pin %}",
+                    nextQuestion: "{% url 'liveExam:next_question' session.pin %}",
+                    finish: "{% url 'liveExam:finish_game' session.pin %}"
+                }
+            };
 
-  const hostLog = document.getElementById("hostLog");
-  const gameStateEl = document.getElementById("gameState");
+            // QR Modal Funksiyası
+            function toggleQR(show) {
+                const modal = document.getElementById('qrModal');
+                // Əgər oyun başlayıbsa (lobbyHeader gizlidirsə) modalı açmağa icazə vermə
+                const header = document.getElementById('lobbyHeader');
+                if (show && header.style.display === 'none') return;
+                
+                modal.style.display = show ? 'flex' : 'none';
+            }
+        </script>
+        <script src="{% static 'js/host_lobby.js' %}"></script>
+    {% endblock %}
 
-  const startBtn = document.getElementById("startBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  const revealBtn = document.getElementById("revealBtn");
-  const finishBtn = document.getElementById("finishBtn");
-  const autoModeEl = document.getElementById("autoMode");
-
-  const leaderWrap = document.getElementById("leaderWrap");
-  const leaderList = document.getElementById("leaderList");
-  const resultList = document.getElementById("resultList");
-
-  // Question preview elements
-  const questionWrap = document.getElementById("questionWrap");
-  const qTimerEl = document.getElementById("qTimer");
-  const qMetaEl = document.getElementById("qMeta");
-  const qTextEl = document.getElementById("qText");
-  const qOptionsEl = document.getElementById("qOptions");
-  const qCountHint = document.getElementById("qCountHint");
-const questionCountEl = document.getElementById("questionCount");
-
-// Əgər view-dan exam total göndərsən: {{ exam_total_questions }}
-const EXAM_TOTAL = Number("{{ exam_total_questions|default:'0' }}") || 0;
-
-function updateHint(){
-  if (!qCountHint || !questionCountEl) return;
-  const v = Number(questionCountEl.value || 0);
-
-  if (!EXAM_TOTAL){
-    qCountHint.textContent = "";
-    return;
-  }
-
-  if (!v){
-    qCountHint.textContent = `(Boş buraxsan: hamısı oynanacaq. Exam: ${EXAM_TOTAL})`;
-    return;
-  }
-
-  if (v > EXAM_TOTAL){
-    qCountHint.textContent = `⚠️ Exam-də ${EXAM_TOTAL} sual var. ${v} olmaz.`;
-  } else {
-    qCountHint.textContent = `(Exam: ${EXAM_TOTAL} sual — seçiləcək: ${v})`;
-  }
-}
-
-questionCountEl?.addEventListener("input", updateHint);
-updateHint();
-
-
-  function logLine(s){
-    hostLog.textContent = (hostLog.textContent + "\n" + s).trim();
-  }
-
-  function wsUrl(path){
-    const proto = location.protocol === "https:" ? "wss" : "ws";
-    return `${proto}://${location.host}${path}`;
-  }
-
-  async function postAction(url){
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" }
-    });
-    const data = await res.json().catch(()=>({}));
-    if (!res.ok) throw new Error(data.message || "HTTP error");
-    return data;
-  }
-
-  // --------------------------
-  // Lobby WS (qoşulanlar)
-  // --------------------------
-  const lobbyWs = new WebSocket(wsUrl(`/ws/live/${pin}/lobby/`));
-  lobbyWs.onopen = () => logLine("✅ Lobby WS qoşuldu");
-  lobbyWs.onclose = () => logLine("❌ Lobby WS kəsildi");
-  lobbyWs.onerror = () => logLine("❌ Lobby WS error");
-
-  lobbyWs.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-
-    if (data.type === "lobby_state") {
-      document.getElementById("playersCount").textContent = data.count || 0;
-      const ul = document.getElementById("playersList");
-      ul.innerHTML = "";
-      (data.players || []).forEach(p => {
-        const li = document.createElement("li");
-        li.textContent = `${p.nickname} (${p.avatar_key})`;
-        ul.appendChild(li);
-      });
-    }
-  };
-
-  // --------------------------
-  // Play WS (sual/reveal/finish)
-  // --------------------------
-  const playWs = new WebSocket(wsUrl(`/ws/live/${pin}/play/`));
-  playWs.onopen = () => logLine("✅ Play WS qoşuldu");
-  playWs.onclose = () => logLine("❌ Play WS kəsildi");
-  playWs.onerror = () => logLine("❌ Play WS error");
-
-  // UI state
-  let state = "lobby";
-  let currentQuestion = null;
-  let qTimerInterval = null;
-
-  // auto timers
-  let autoRevealTimer = null;
-  let autoNextTimer = null;
-
-  function clearAutoTimers(){
-    if (autoRevealTimer) clearTimeout(autoRevealTimer);
-    if (autoNextTimer) clearTimeout(autoNextTimer);
-    autoRevealTimer = null;
-    autoNextTimer = null;
-  }
-
-  function clearQuestionTimer(){
-    if (qTimerInterval) clearInterval(qTimerInterval);
-    qTimerInterval = null;
-    qTimerEl.textContent = "--";
-  }
-
-  function setState(newState){
-    state = newState;
-    gameStateEl.textContent = "state: " + state;
-
-    if (state === "lobby") {
-      startBtn.disabled = false;
-      revealBtn.disabled = true;
-      nextBtn.disabled = true;
-      questionWrap.style.display = "none";
-      leaderWrap.style.display = "none";
-      clearQuestionTimer();
-      clearAutoTimers();
-    }
-
-    if (state === "question") {
-      startBtn.disabled = true;
-      revealBtn.disabled = false;
-      nextBtn.disabled = true;
-      leaderWrap.style.display = "none";
-    }
-
-    if (state === "reveal") {
-      startBtn.disabled = true;
-      revealBtn.disabled = true;
-      nextBtn.disabled = false;
-      clearQuestionTimer();
-    }
-
-    if (state === "finished") {
-      startBtn.disabled = true;
-      revealBtn.disabled = true;
-      nextBtn.disabled = true;
-      clearQuestionTimer();
-      clearAutoTimers();
-    }
-  }
-
-  function fmt2(n){ return String(n).padStart(2, "0"); }
-
-  function startQuestionTimer(endsAtISO){
-    clearQuestionTimer();
-    if (!endsAtISO) return;
-
-    const ends = new Date(endsAtISO).getTime();
-
-    function tick(){
-      const diff = Math.max(0, ends - Date.now());
-      const sec = Math.ceil(diff / 1000);
-      const mm = Math.floor(sec / 60);
-      const ss = sec % 60;
-      qTimerEl.textContent = `${fmt2(mm)}:${fmt2(ss)}`;
-
-      if (diff <= 0){
-        qTimerEl.textContent = "00:00";
-        clearQuestionTimer();
-      }
-    }
-
-    tick();
-    qTimerInterval = setInterval(tick, 250);
-  }
-
-  function renderQuestionPreview(q){
-    currentQuestion = q;
-    questionWrap.style.display = "block";
-
-    qMetaEl.textContent = (q?.index && q?.total) ? `Sual: ${q.index}/${q.total} — id=${q.id}` : `id=${q.id}`;
-    qTextEl.textContent = q?.text || "";
-
-    qOptionsEl.innerHTML = "";
-    const letters = ["A","B","C","D","E","F"];
-
-    (q.options || []).forEach((opt, idx) => {
-      const label = (opt.label ?? opt.key ?? opt.code ?? letters[idx] ?? String(idx+1));
-      const text  = (opt.text ?? opt.title ?? opt.content ?? "").toString();
-
-      const div = document.createElement("div");
-      div.style.border = "1px solid #eee";
-      div.style.borderRadius = "12px";
-      div.style.padding = "12px";
-      div.style.opacity = ".95";
-      div.textContent = `${label}) ${text}`;
-      qOptionsEl.appendChild(div);
-    });
-
-    startQuestionTimer(q.ends_at);
-  }
-
-  function renderHostLeaderboard(top, results){
-    leaderWrap.style.display = "block";
-    leaderList.innerHTML = "";
-    resultList.innerHTML = "";
-
-    (top || []).forEach((p, i) => {
-      const li = document.createElement("li");
-      li.textContent = `${i+1}. ${p.nickname} — ${p.score} bal`;
-      leaderList.appendChild(li);
-    });
-
-    (results || []).slice(0, 30).forEach(r => {
-      const li = document.createElement("li");
-      li.textContent = `${r.nickname}: ${r.is_correct ? "✅" : "❌"} +${r.awarded_points} (total ${r.total_score})`;
-      resultList.appendChild(li);
-    });
-  }
-
-  // ✅ WS messages
-  playWs.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-
-    if (msg.type === "question_published") {
-      setState("question");
-      renderQuestionPreview(msg.question);
-
-      logLine(`📌 Sual yayımlandı: #${msg.question?.index}/${msg.question?.total} (id=${msg.question?.id})`);
-      logLine(`⏳ ends_at: ${msg.question?.ends_at}`);
-
-      // ✅ AUTO: vaxt bitəndə reveal
-      clearAutoTimers();
-      if (autoModeEl?.checked && msg.question?.ends_at) {
-        const ends = new Date(msg.question.ends_at).getTime();
-        const ms = Math.max(0, ends - Date.now());
-
-        autoRevealTimer = setTimeout(async () => {
-          try {
-            if (state !== "question") return;
-            logLine("⏳ Auto Reveal (time ended)...");
-            await postAction("{% url 'liveExam:end_question' session.pin %}");
-          } catch(e){
-            logLine("❌ Auto Reveal error: " + e.message);
-          }
-        }, ms + 80);
-      }
-
-      return;
-    }
-
-    if (msg.type === "answer_progress") {
-      // BONUS: hamı cavab veribsə dərhal reveal
-      logLine(`🧮 Answers: ${msg.answered_count}/${msg.total_players}`);
-
-      if (autoModeEl?.checked && state === "question" && msg.total_players > 0 && msg.answered_count >= msg.total_players) {
-        clearAutoTimers();
-        (async () => {
-          try {
-            if (state !== "question") return;
-            logLine("⚡ Auto Reveal (all answered)...");
-            await postAction("{% url 'liveExam:end_question' session.pin %}");
-          } catch(e){
-            logLine("❌ Auto Reveal(all) error: " + e.message);
-          }
-        })();
-      }
-      return;
-    }
-
-    if (msg.type === "reveal") {
-      setState("reveal");
-      renderHostLeaderboard(msg.top || [], msg.results || []);
-      logLine(`🏁 Reveal: question_id=${msg.question_id}`);
-
-      // ✅ AUTO: reveal-dan sonra next
-      clearAutoTimers();
-      if (autoModeEl?.checked) {
-        autoNextTimer = setTimeout(async () => {
-          try {
-            if (state !== "reveal") return;
-            logLine("⏭️ Auto Next...");
-            await postAction("{% url 'liveExam:next_question' session.pin %}");
-          } catch(e){
-            logLine("❌ Auto Next error: " + e.message);
-          }
-        }, 3500);
-      }
-
-      return;
-    }
-
-    if (msg.type === "finished") {
-      setState("finished");
-      renderHostLeaderboard(msg.top || [], []);
-      logLine("✅ Oyun bitdi");
-      return;
-    }
-  };
-
-  // --------------------------
-  // Button actions
-  // --------------------------
-  startBtn.onclick = async () => {
-    try {
-      logLine("▶️ Start Game...");
-  
-      const qcEl = document.getElementById("questionCount");
-      const qcRaw = (qcEl?.value || "").trim();
-  
-      const form = new FormData();
-      // boş buraxsa hamısı oynansın
-      if (qcRaw) form.append("question_count", qcRaw);
-  
-      const res = await fetch("{% url 'liveExam:start_game' session.pin %}", {
-        method: "POST",
-        body: form,
-        headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" }
-      });
-  
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || "HTTP error");
-  
-      logLine("✅ Started: " + JSON.stringify(data));
-    } catch (e) {
-      logLine("❌ " + e.message);
-      alert(e.message);
-    }
-  };
-  
-
-  revealBtn.onclick = async () => {
-    try {
-      logLine("👀 Reveal...");
-      await postAction("{% url 'liveExam:end_question' session.pin %}");
-      logLine("✅ Reveal sent");
-    } catch(e){
-      logLine("❌ " + e.message);
-    }
-  };
-
-  nextBtn.onclick = async () => {
-    try {
-      logLine("⏭️ Next Question...");
-      const data = await postAction("{% url 'liveExam:next_question' session.pin %}");
-      logLine("✅ Next: " + JSON.stringify(data));
-    } catch(e){
-      logLine("❌ " + e.message);
-    }
-  };
-
-  finishBtn.onclick = async () => {
-    try {
-      logLine("🏁 Finish...");
-      await postAction("{% url 'liveExam:finish_game' session.pin %}");
-      logLine("✅ Finished");
-      setState("finished");
-    } catch(e){
-      logLine("❌ " + e.message);
-    }
-  };
-
-  setState("lobby");
-</script>
+{% endblock %}
