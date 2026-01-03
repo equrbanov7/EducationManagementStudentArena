@@ -39,7 +39,11 @@
                     <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
                 {% endif %}
             </div>
-            <a href="{% url 'password_reset' %}">Şifrəni unutdum</a>
+
+            <div class="auth-forgot-password "> 
+                <a class="auth-forget-password-link" href="{% url 'password_reset' %}">Şifrəni unutdun?</a>
+            </div>
+            
 
             <button type="submit" class="auth-submit-btn">Daxil ol</button> {# auth-btn -> auth-submit-btn #}
         </form>

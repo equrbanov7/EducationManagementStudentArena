@@ -1,18 +1,29 @@
 /* static/css/auth.css */
 
+/* --- Dəyişənlər (İstəyə görə rəngləri burdan dəyişə bilərsən) --- */
+:root {
+    --primary-color: #2563eb;       /* Əsas rəng (Mavi) */
+    --primary-hover: #1e40af;       /* Hover rəngi (Tünd Mavi) */
+    --text-dark: #1f2937;           /* Tünd mətn */
+    --text-light: #6b7280;          /* Açıq mətn */
+    --bg-gradient-start: #e0f2f7;
+    --bg-gradient-end: #f0f8ff;
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 /* --- Ümumi Səhifə Fonu və Mərkəzləşdirmə --- */
-.auth-page-wrapper { /* register-page-wrapper -> auth-page-wrapper */
+.auth-page-wrapper {
     min-height: calc(100vh - 170px);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, #e0f2f7 0%, #f0f8ff 100%);
-    font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    font-family: var(--font-main);
 }
 
-/* --- Qeydiyyat/Daxilolma Kartı (Formanın olduğu əsas qutu) --- */
-.auth-card { /* register-card -> auth-card */
+/* --- Qeydiyyat/Daxilolma Kartı --- */
+.auth-card {
     background: #ffffff;
     max-width: 450px;
     width: 100%;
@@ -23,22 +34,22 @@
     border: 1px solid #e0e0e0;
 }
 
-/* --- Başlıq və Altyazı --- */
-.auth-heading { /* register-heading -> auth-heading */
+/* --- Başlıqlar --- */
+.auth-heading {
     font-size: 2rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark);
     margin-bottom: 10px;
     font-weight: 700;
 }
 
-.auth-subheading { /* register-subheading -> auth-subheading */
-    color: var(--text-light, #6b7280);
+.auth-subheading {
+    color: var(--text-light);
     font-size: 1rem;
     margin-bottom: 30px;
 }
 
-/* --- Xəta Mesajları (Form-un yuxarısında) --- */
-.auth-global-errors { /* register-global-errors -> auth-global-errors */
+/* --- Xəta Mesajları (Global) --- */
+.auth-global-errors {
     background-color: #fee2e2;
     color: #991b1b;
     padding: 15px;
@@ -50,21 +61,21 @@
 }
 
 /* --- Forma Stili --- */
-.auth-form { /* register-form -> auth-form */
+.auth-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 20px; /* Elementlər arası ümumi məsafə */
 }
 
-/* Forma Sahəsi (Label, Input, Error) */
-.auth-form-field { /* register-form-field -> auth-form-field */
+/* Label və Input Sahəsi */
+.auth-form-field {
     text-align: left;
 }
 
 .auth-form-field label {
     display: block;
     font-size: 0.9rem;
-    color: var(--text-dark, #1f2937);
+    color: var(--text-dark);
     margin-bottom: 8px;
     font-weight: 600;
 }
@@ -81,28 +92,49 @@
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     font-family: inherit;
     background-color: #f9fafb;
+    box-sizing: border-box; /* Padding input ölçüsünü pozmasın deyə */
 }
 
-.auth-form-field input[type="text"]:focus,
-.auth-form-field input[type="email"]:focus,
-.auth-form-field input[type="password"]:focus {
-    border-color: var(--primary-color, #2563eb);
+.auth-form-field input:focus {
+    border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     background-color: #ffffff;
 }
 
-/* Forma Sahəsinin Xətası */
-.auth-field-error { /* register-field-error -> auth-field-error */
+/* Input Altı Xəta Mesajı */
+.auth-field-error {
     color: #ef4444;
     font-size: 0.85rem;
     margin-top: 5px;
 }
 
+/* --- Şifrəni Unutmusunuz Linki (DÜZƏLİŞ EDİLDİ) --- */
+.auth-forgot-password {
+    text-align: right;
+    /* Yuxarıdakı 'gap: 20px' təsirini azaltmaq üçün mənfi margin veririk */
+    margin-top: -12px; 
+    /* Düymə ilə məsafəni tənzimləmək üçün */
+    margin-bottom: -5px;
+}
+
+.auth-forgot-password .auth-forget-password-link {
+    color: var(--primary-color);
+    font-size: 0.9rem; /* Yazı xətası düzəldildi */
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.auth-forgot-password .auth-forget-password-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
 /* --- Göndər Düyməsi --- */
-.auth-submit-btn { /* register-submit-btn -> auth-submit-btn */
+.auth-submit-btn {
     width: 100%;
     padding: 14px;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 8px;
@@ -110,34 +142,37 @@
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-top: 10px;
 }
 
 .auth-submit-btn:hover {
-    background-color: #1e40af;
+    background-color: var(--primary-hover);
     transform: translateY(-2px);
 }
 
-/* --- Kartın Alt Mətni (Login/Register linki) --- */
-.auth-footer-text { /* register-footer-text -> auth-footer-text */
+.auth-submit-btn:active {
+    transform: translateY(0);
+}
+
+/* --- Alt Hissə (Login/Register keçidi) --- */
+.auth-footer-text {
     margin-top: 30px;
-    color: var(--text-light, #6b7280);
+    color: var(--text-light);
     font-size: 0.95rem;
 }
 
 .auth-footer-text a {
-    color: var(--primary-color, #2563eb);
+    color: var(--primary-color);
     font-weight: 600;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .auth-footer-text a:hover {
-    color: #1e40af;
+    color: var(--primary-hover);
     text-decoration: underline;
 }
 
-/* --- Responsive Dizayn --- */
+/* --- Responsive --- */
 @media (max-width: 500px) {
     .auth-card {
         padding: 30px 20px;
