@@ -1,4 +1,5 @@
 # blog/views.py
+import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseNotAllowed, HttpResponseForbidden
 from django.views.decorators.http import require_POST
@@ -9,13 +10,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Q, Max
 from django.core.mail import send_mail 
+from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.template.loader import render_to_string 
 from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import timedelta
-from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile, StudentGroup, QuestionBlock
+from .models import Post, Category, Comment, Subscriber, Question, Exam, ExamQuestion, ExamQuestionOption, ExamAttempt, ExamAnswer, ExamAnswerFile, StudentGroup, QuestionBlock, EmailOTP
 from .forms import (
     SubscriptionForm,
     RegisterForm,
@@ -43,11 +45,12 @@ try:
     from pypdf import PdfReader
 except Exception:
     PdfReader = None
-import random
 
+from .utils import generate_otp, send_verify_email
 from django.db import transaction
 
 User = get_user_model()
+signer = TimestampSigner()
 
 LABELS = ["A", "B", "C", "D", "E"]
 QUESTION_RE = re.compile(r"^\s*(\d+)\s*[\)\.]\s*(.+)\s*$")
@@ -513,32 +516,91 @@ def search_posts(request):
 # ------------------- USER REGISTER / PROFILE / LOGOUT ------------------- #
 
 def register_view(request):
-    """
-    Yeni istifadəçi qeydiyyatı.
-    Qeydiyyat uğurlu olduqda user-i login edib onun profil səhifəsinə yönləndiririk.
-    """
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
+
+            # password set
             password = form.cleaned_data["password"]
-            user.set_password(password)  # şifrəni hash-lə saxla
+            user.set_password(password)
+
+            # email təsdiqlənənə qədər giriş qadağan
+            user.is_active = False
             user.save()
-            login(request, user)        # qeydiyyatdan sonra avtomatik login
-            return redirect("user_profile", username=user.username)
+
+            code = generate_otp()
+            EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
+            send_verify_email(user, code)
+
+            request.session["pending_verify_email"] = user.email
+            messages.success(request, "Email-ə təsdiq kodu göndərildi.")
+            return redirect("verify_code")
     else:
         form = RegisterForm()
 
     return render(request, "blog/register.html", {"form": form})
 
-from django.shortcuts import render, get_object_or_404
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Q
+def verify_code_view(request):
+    email = request.session.get("pending_verify_email")
+    if not email:
+        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
+        return redirect("register")
 
-from .models import Post, Category, ExamAttempt, Exam
-from django.contrib.auth import get_user_model
+    if request.method == "POST":
+        code = request.POST.get("code", "").strip()
 
-User = get_user_model()
+        user = User.objects.filter(email=email).first()
+        if not user:
+            messages.error(request, "User tapılmadı.")
+            return redirect("register")
+
+        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
+        if not otp or otp.is_expired():
+            messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
+            return render(request, "blog/verify_code.html", {"email": email})
+
+        otp.is_used = True
+        otp.save()
+
+        user.is_active = True
+        user.save()
+
+        messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
+        return redirect("login")
+
+    return render(request, "blog/verify_code.html", {"email": email})
+
+def verify_email_link_view(request):
+    token = request.GET.get("token", "")
+    try:
+        user_id = signer.unsign(token, max_age=60 * 10)  # 10 dəqiqə
+        user = User.objects.get(pk=user_id)
+        user.is_active = True
+        user.save()
+        messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
+        return redirect("login")
+    except (BadSignature, SignatureExpired, User.DoesNotExist):
+        messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
+        return redirect("register")
+
+def resend_code_view(request):
+    email = request.session.get("pending_verify_email")
+    if not email:
+        messages.error(request, "Email tapılmadı.")
+        return redirect("register")
+
+    user = User.objects.filter(email=email).first()
+    if not user:
+        messages.error(request, "User tapılmadı.")
+        return redirect("register")
+
+    code = generate_otp()
+    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
+    send_verify_email(user, code)
+
+    messages.success(request, "Yeni kod göndərildi.")
+    return redirect("verify_code")
 
 
 def user_profile(request, username):

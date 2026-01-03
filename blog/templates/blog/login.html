@@ -6,7 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
 {% endblock %}
-
+ 
 {% block content %}
 <div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
     <div class="auth-card">
@@ -39,6 +39,7 @@
                     <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
                 {% endif %}
             </div>
+            <a href="{% url 'password_reset' %}">Şifrəni unutdum</a>
 
             <button type="submit" class="auth-submit-btn">Daxil ol</button> {# auth-btn -> auth-submit-btn #}
         </form>

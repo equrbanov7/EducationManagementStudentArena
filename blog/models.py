@@ -1,13 +1,35 @@
 # blog/models.py
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.models import Group
 import itertools
 from django.templatetags.static import static
 from .validators import validate_file_extension, validate_file_size, validate_zip_contents
+
+
+
+# Email OTP modeli
+
+class EmailOTP(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=10)
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
 
 # ---- Models for Category functionality ----
 

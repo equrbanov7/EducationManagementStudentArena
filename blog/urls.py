@@ -12,13 +12,19 @@ urlpatterns = [
 
     # --- Auth (istifadəçi qeydiyyatı və giriş) ---
     path("register/", views.register_view, name="register"),
+    path("verify-code/", views.verify_code_view, name="verify_code"),
+    path("verify-email/", views.verify_email_link_view, name="verify_email_link"),
+    path("resend-code/", views.resend_code_view, name="resend_code"),
     path(
         "login/",
         auth_views.LoginView.as_view(template_name="blog/login.html"),
         name="login",
     ),
     path("logout/", views.logout_view, name="logout"),
-
+        path("password-reset/", auth_views.PasswordResetView.as_view(template_name="blog/password_reset.html"), name="password_reset"),
+    path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(template_name="blog/password_reset_done.html"), name="password_reset_done"),
+    path("reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(template_name="blog/password_reset_confirm.html"), name="password_reset_confirm"),
+    path("reset/done/", auth_views.PasswordResetCompleteView.as_view(template_name="blog/password_reset_complete.html"), name="password_reset_complete"),
     # --- User profil səhifəsi ---
     path("users/<str:username>/", views.user_profile, name="user_profile"),
 

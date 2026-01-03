@@ -34,7 +34,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+#ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+# deploy zamani silin!!
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
 
 
 # Application definition
@@ -136,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Baku"
 
 USE_I18N = True
 
@@ -168,11 +171,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True      # Bunu yandırırıq (SSL daha etibarlıdır)
-EMAIL_HOST_USER = 'equrbanov724@gmail.com'  
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  
 #use .env
 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'equrbanov724@gmail.com' 
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL') 
 
 
 # Media files (Uploaded by users)
@@ -184,8 +187,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # settings.py
 LAN_HOST = "192.168.1.73:8000"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://192.168.1.73:8000",
 ]
+SITE_URL = "http://127.0.0.1:8000"
+
