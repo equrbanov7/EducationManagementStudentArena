@@ -1,5 +1,5 @@
 """
-ASGI config for blogApp project.
+ASGI config for emsarena project.
 
 HTTP request-lər üçün Django ASGI app,
 WebSocket (real-time) üçün isə Django Channels routing istifadə olunur.
@@ -13,7 +13,7 @@ from channels.auth import AuthMiddlewareStack
 
 import liveExam.routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "blogApp.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "emsarena.settings")
 
 django_asgi_app = get_asgi_application()
 

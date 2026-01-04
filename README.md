@@ -24,7 +24,7 @@ Before starting, you should have:
 
 ```bash
 git clone <repository-url>
-cd blogApp
+cd emsarena
 ````
 
 Replace `<repository-url>` with your actual Git repository URL.
@@ -177,9 +177,9 @@ http://127.0.0.1:8000/
 ## 📁 Project Structure (Simplified)
 
 ```text
-blogApp/
+emsarena/
 │── blog/               # Main app: blog & exam logic
-│── blogApp/            # Django project settings, URLs, WSGI/ASGI
+│── emsarena/            # Django project settings, URLs, WSGI/ASGI
 │── media/              # Uploaded files (if any)
 │── venv/               # Virtual environment (do not commit)
 │── requirements.txt    # Project dependencies
@@ -212,7 +212,7 @@ For deployment to a platform like Render:
 5. Start command:
 
    ```bash
-   gunicorn blogApp.wsgi:application --bind 0.0.0.0:$PORT
+   gunicorn emsarena.wsgi:application --bind 0.0.0.0:$PORT
    ```
 
 6. For static files:

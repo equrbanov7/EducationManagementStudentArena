@@ -27,6 +27,10 @@
                 </a>
              {% endif %}
 
+             <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
+                <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
+             </a>
+
              {% if request.user.is_teacher %}
                  <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
                       <i class="fas fa-file-alt"></i> İmtahanlarım
@@ -40,9 +44,7 @@
                  <a href="{% url 'create_exam' %}" class="profile-create-post-btn">
                       <i class="fas fa-plus-square"></i> Yeni imtahan yarat
                  </a>
-                 <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
-                    <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
-                </a>
+                
                             {# --- YENİ: Qruplar düymələri --- #}
                 <a href="{% url 'teacher_group_list' %}" class="profile-create-post-btn">
                     <i class="fas fa-users"></i> Qruplarım
