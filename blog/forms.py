@@ -320,10 +320,28 @@ class ExamQuestionCreateForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
     )
+      # ---- Media (optional) ----
+    image = forms.ImageField(
+        label="Şəkil (optional)",
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            "class": "form-control",
+            "accept": "image/*"
+        })
+    )
+
+    video = forms.FileField(
+        label="Video (optional)",
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            "class": "form-control",
+            "accept": "video/mp4,video/webm,video/quicktime"
+        })
+    )
 
     class Meta:
         model = ExamQuestion
-        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer"]
+        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer", "image", "video", "enable_paint", "enable_paint"]
         widgets = {
             "text": forms.Textarea(attrs={
                 "class": "form-control",
@@ -345,6 +363,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 "rows": 3,
                 "placeholder": "Yazılı/praktiki üçün ideal cavab (istəyə görə)...",
             }),
+            
         }
         labels = {
             "text": "Sual",
@@ -352,6 +371,8 @@ class ExamQuestionCreateForm(forms.ModelForm):
             "answer_mode": "Cavab rejimi",
             "time_limit_seconds": "Bu sual üçün vaxt limiti",
             "correct_answer": "Yazılı/praktiki üçün ideal cavab",
+            "image": "Sual şəkli (optional)",
+            "video": "Sual videosu (optional)",
         }
 
     def __init__(self, *args, exam_type=None, subject_blocks=None, **kwargs):
@@ -363,6 +384,9 @@ class ExamQuestionCreateForm(forms.ModelForm):
         self.exam_type = exam_type
         super().__init__(*args, **kwargs)
 
+        if self.exam_type != "written":
+            self.fields.pop("enable_paint", None)
+            
         # 1. Blokları dropdown-a doldururuq
         if subject_blocks is not None:
             self.fields['block'].queryset = subject_blocks

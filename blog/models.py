@@ -10,6 +10,8 @@ from django.contrib.auth.models import Group
 import itertools
 from django.templatetags.static import static
 from .validators import validate_file_extension, validate_file_size, validate_zip_contents
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 
 
@@ -260,6 +262,15 @@ class StudentGroup(models.Model):
         """
         return self.students.filter(id=user.id).exists()
 
+
+def question_media_path(instance, filename):
+    return f"question_media/exam_{instance.exam_id}/q_{instance.id or 'new'}/{filename}"
+
+def validate_video_size(f):
+    # 30MB limit nümunə (istəsən dəyiş)
+    max_mb = 30
+    if f.size > max_mb * 1024 * 1024:
+        raise ValidationError(f"Video faylı {max_mb}MB-dan böyük ola bilməz.")
 
 class Exam(models.Model):
     
@@ -611,6 +622,29 @@ class ExamQuestion(models.Model):
         null=True,
         help_text="Boş saxlasanız, Exam.default_question_time_seconds istifadə olunacaq."
     )
+    
+    image = models.ImageField(
+        "Sual şəkli (optional)",
+        upload_to=question_media_path,
+        blank=True,
+        null=True
+    )
+
+    video = models.FileField(
+        "Sual videosu (optional)",
+        upload_to=question_media_path,
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "webm", "mov"]),
+            validate_video_size
+        ]
+    )
+    
+    enable_paint = models.BooleanField(
+        default=False,
+        help_text="Yalnız yazılı imtahanda tələbə cavab üçün çəkim (paint) edə bilsin."
+    )
 
     class Meta:
         verbose_name = "İmtahan sualı"
@@ -897,7 +931,7 @@ class ExamAnswerFile(models.Model):
         validators=[validate_file_extension, validate_file_size, validate_zip_contents]
     )
     uploaded_at = models.DateTimeField("Yüklənmə tarixi", auto_now_add=True)
-
+    
     def filename(self):
         return self.file.name.split("/")[-1]
 

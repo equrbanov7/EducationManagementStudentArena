@@ -78,9 +78,28 @@
             <div class="question-card">
                 <div class="q-header">
                     <span class="q-number">{{ forloop.counter }}</span>
-                    <div class="q-text">
-                        {{ q.text|linebreaks }}
+
+                    <div class="questionAndMedia">
+                        <div class="q-text">
+                            {{ q.text|linebreaks }}
+                        </div>
+                        {% if q.image %}
+                            <div class="question-media">
+                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            </div>
+                        {% endif %}
+                      
+                        {% if q.video %}
+                            <div class="question-media">
+                            <video controls preload="metadata" playsinline>
+                                <source src="{{ q.video.url }}">
+                                Brauzeriniz video göstərə bilmir.
+                            </video>
+                            </div>
+                        {% endif %}
                     </div>
+                
+                  
                 </div>
 
                 <div class="q-body">

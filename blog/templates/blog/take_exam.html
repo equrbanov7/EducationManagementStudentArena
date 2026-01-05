@@ -106,6 +106,39 @@
         .add-file-btn:hover {
             background: #dbeafe;
         }
+        /* Sual mediası üçün konteyner */
+        .question-media {
+            display: flex;
+            justify-content: center; /* Şəkli/videonu mərkəzə gətirir */
+            align-items: center;
+            margin: 15px 0;
+            width: 100%;
+            background-color: #f8fafc; /* Şəkil arxasına yüngül fon (optional) */
+            border-radius: 12px;
+            padding: 10px; /* Şəklin kənarlara yapışmaması üçün */
+            box-sizing: border-box;
+        }
+        
+        /* Şəkil və Video üçün ortaq stil */
+        .question-media img,
+        .question-media video {
+            max-width: 100%;      /* Konteynerin enindən çox olmasın */
+            max-height: 400px;    /* Hündürlüyü limitləyir (çox uzun olmasın) */
+            width: auto;          /* Orijinal nisbəti qoruyur */
+            height: auto;         /* Orijinal nisbəti qoruyur */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Yüngül kölgə */
+            object-fit: contain;  /* Şəklin kəsilməməsini təmin edir */
+        }
+        
+        /* Mobil ekranlar üçün hündürlüyü bir az da azalda bilərsən */
+        @media (max-width: 768px) {
+            .question-media img,
+            .question-media video {
+                max-height: 250px;
+            }
+        }
+          
     </style>
 {% endblock %}
 
@@ -151,7 +184,7 @@
           data-exam-id="{{ exam.id }}"
           data-attempt-id="{{ attempt.id }}">
         {% csrf_token %}
-
+ 
         <div class="slides-wrapper">
             {% for item in q_payload %}
                 {% with q=item.q %}
@@ -164,6 +197,22 @@
                     <div class="question-content">
                         <span class="q-number">Sual {{ forloop.counter }}</span>
                         <p class="q-text">{{ q.text|linebreaks }}</p>
+
+                        {% if q.image %}
+                            <div class="question-media">
+                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            </div>
+                        {% endif %}
+                      
+                        {% if q.video %}
+                            <div class="question-media">
+                            <video controls preload="metadata" playsinline>
+                                <source src="{{ q.video.url }}">
+                                Brauzeriniz video göstərmir.
+                            </video>
+                            </div>
+                        {% endif %}
+                      
 
                         {# --- TEST SUALLARI --- #}
                         {% if exam.exam_type == "test" %}
@@ -206,7 +255,9 @@
                                       placeholder="Cavabınızı bura yazın..."
                                       oninput="updateProgress()">{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
                             <br>
+                                
 
+                            
                             <div class="file-dropzone" 
                                  data-qid="{{ q.id }}" 
                                  ondrop="handleDrop(event, {{ q.id }})"
