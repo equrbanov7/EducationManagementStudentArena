@@ -113,7 +113,15 @@
                             </div>
                         {% endif %}
                         {# ====== /YENİ BLOK ====== #}
-
+                        {% if 'paint' in f.filename|lower %}
+                            <div class="paint-preview-section">
+                                <h4>
+                                    <i class="fas fa-paint-brush"></i>
+                                    Paint Cavabı
+                                </h4>
+                                <img src="{{ f.file.url }}" alt="Paint" class="paint-preview-img">
+                            </div>
+                        {% endif %}
                     </li>
                 {% endwith %}
             {% endfor %}

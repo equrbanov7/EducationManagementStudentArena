@@ -1,8 +1,9 @@
 /* --- Ümumi Konteyner --- */
 .result-container {
-    max-width: 900px; /* Genişlik optimaldır */
+    max-width: 900px;
     margin: 40px auto;
-    padding-bottom: 60px;
+    padding-bottom: 80px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .page-title {
@@ -12,113 +13,116 @@
     margin-bottom: 10px;
 }
 
-/* --- Nəticə Ümumi Kartının Yeni Stili --- */
+/* --- Nəticə Ümumi Kartı (Summary Card) --- */
 .summary-card {
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Daha yumşaq kölgə */
     padding: 30px;
-    max-width: 450px; /* Kartı mərkəzləşdirmək üçün daraldırıq */
+    max-width: 500px;
     margin: 30px auto 50px auto;
-    text-align: center; /* Hər şeyi mərkəzə çəkirik */
-    border: 1px solid #e5e7eb;
+    text-align: center;
+    border: 1px solid #f3f4f6;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Header (Status) */
+/* Yuxarıdakı rəngli zolaq (dekorativ) */
+.summary-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #3b82f6, #6366f1);
+}
+
 .summary-header {
     padding-bottom: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: center; /* Mərkəzləşdiririk */
+    border-bottom: 1px solid #f3f4f6;
 }
 
-/* Status Badge */
+/* Status Badges */
 .status-badge {
-    padding: 8px 18px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 30px;
     font-size: 0.9rem;
     font-weight: 600;
     display: inline-block;
+    letter-spacing: 0.3px;
 }
-.badge-success { background-color: #d1fae5; color: #065f46; } /* Təslim edilib */
-.badge-danger { background-color: #fee2e2; color: #991b1b; } /* Vaxt bitib */
+.badge-success { background-color: #dcfce7; color: #166534; }
+.badge-danger { background-color: #fee2e2; color: #991b1b; }
+.badge-secondary { background-color: #f3f4f6; color: #4b5563; }
+.badge-warning { background-color: #fef3c7; color: #92400e; }
 
-/* Body (Statistikalar) */
+/* Statistikalar */
 .summary-body {
     display: flex;
-    flex-wrap: wrap; /* Elementləri alt-alta düzmək üçün */
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 15px 30px; /* Statistikalar arası məsafə */
+    gap: 20px;
 }
 
 .stat-item {
     text-align: center;
-    padding: 0 10px;
+    padding: 10px;
+    min-width: 80px;
 }
 
 .stat-label {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #6b7280;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .stat-value {
     display: block;
     font-size: 1.5rem;
     font-weight: 700;
-}
-
-/* Əsas Bal (Böyük font) */
-.main-score .stat-label {
-    font-size: 1rem;
-    font-weight: 600;
     color: #1f2937;
 }
 
-.main-score .stat-value {
-    font-size: 3rem !important; /* Çox böyük font */
-    font-weight: 800;
-    color: #3b82f6; /* Mavi rəng */
-    line-height: 1.1;
-}
-
-/* Müddət məlumatı */
-.duration-info {
-    font-size: 0.9rem;
-    color: #6b7280;
-    display: block;
+/* Əsas Bal (Böyük) */
+.main-score {
     width: 100%;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #f3f4f6;
+    margin-bottom: 10px;
+}
+.main-score .stat-value {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #3b82f6; /* Brand Blue */
+    line-height: 1;
 }
 
-/* Test üçün Düzgün/Səhv/Bal statistikasını yan-yana qoymaq üçün */
+/* Test Statistikaları Grid */
 .test-stats-grid {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 30px;
     width: 100%;
-    margin-bottom: 20px;
+    margin-top: 10px;
 }
 
-.test-stats-grid .stat-item {
-    flex-basis: 33%;
+/* Müddət */
+.duration-info {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #e5e7eb;
 }
 
-/* Yekun Bal (Yazılı imtahan) */
-.final-score-area {
-    text-align: center;
-    padding: 20px 0;
-}
 /* --- Divider --- */
 .section-divider {
     height: 1px;
-    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
-    margin: 40px 0;
+    background: #e5e7eb;
+    margin: 50px 0 30px 0;
 }
 
 .section-title {
@@ -126,26 +130,32 @@
     font-weight: 700;
     color: #374151;
     margin-bottom: 25px;
-    padding-left: 10px;
-    border-left: 4px solid #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-title::before {
+    content: "";
+    display: block;
+    width: 5px;
+    height: 24px;
+    background: #3b82f6;
+    border-radius: 4px;
 }
 
-/* --- Question Cards List --- */
+/* --- Sual Kartları --- */
 .questions-list {
     display: flex;
     flex-direction: column;
-    gap: 30px; /* Kartlar arası məsafə */
+    gap: 25px;
 }
 
-/* --- Individual Question Card --- */
 .question-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
     overflow: hidden;
-    transition: transform 0.2s;
-    width: 100%; /* Tam genişlik */
 }
 
 .q-header {
@@ -159,271 +169,224 @@
 .q-number {
     background: #3b82f6;
     color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 700;
     flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .q-text {
     font-size: 1.05rem;
-    font-weight: 600;
-    color: #1f2937;
-    line-height: 1.5;
+    font-weight: 500;
+    color: #111827;
+    line-height: 1.6;
+}
+
+/* --- MEDIA FIX (Əsas hissə) --- */
+.question-media {
+    display: flex;
+    justify-content: center; /* Mərkəzləşdirmə */
+    align-items: center;
+    margin: 15px 0;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.question-media img,
+.question-media video {
+    max-width: 100%;
+    max-height: 400px; /* Hündürlüyü limitləyir */
+    width: auto;       /* Nisbəti qoruyur */
+    height: auto;
+    border-radius: 6px;
+    object-fit: contain;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .q-body {
     padding: 25px;
 }
 
-/* --- Option List (Test) --- */
+/* --- Test Variantları --- */
 .option-list {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .option-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 15px;
+    padding: 14px 18px;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 10px;
     transition: all 0.2s;
+    background: #fff;
 }
 
-.option-icon, .correct-icon, .wrong-icon {
-    font-size: 1.2rem;
-    margin-right: 12px;
-}
+.option-icon { font-size: 1.2rem; margin-right: 12px; color: #d1d5db; }
+.correct-icon { font-size: 1.2rem; margin-right: 12px; color: #10b981; }
+.wrong-icon { font-size: 1.2rem; margin-right: 12px; color: #ef4444; }
 
+/* Variant rəngləri */
 .correct-option {
-    background-color: #ecfdf5;
-    border-color: #10b981;
-    color: #065f46;
+    background-color: #f0fdf4; /* Açıq yaşıl */
+    border-color: #86efac;
+    color: #15803d;
 }
-.correct-icon { color: #10b981; }
 
 .wrong-selected {
-    background-color: #fef2f2;
-    border-color: #ef4444;
-    color: #991b1b;
+    background-color: #fef2f2; /* Açıq qırmızı */
+    border-color: #fca5a5;
+    color: #b91c1c;
 }
-.wrong-icon { color: #ef4444; }
 
 .correct-selected {
-    background-color: #d1fae5;
-    border-color: #059669;
-    font-weight: bold;
+    background-color: #ecfdf5;
+    border-color: #34d399;
+    font-weight: 600;
 }
 
-/* --- Written Response Area --- */
+/* --- Yazılı Cavab & Fayllar --- */
 .response-label {
-    font-weight: 700;
-    font-size: 0.95rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #4b5563;
     display: block;
+    margin-bottom: 8px;
 }
 
 .code-block {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 20px;
-    font-family: 'Courier New', Courier, monospace;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
     font-size: 0.95rem;
     color: #334155;
     white-space: pre-wrap;
-    word-wrap: break-word;
+    word-break: break-word;
 }
-
 .user-answer { border-left: 4px solid #3b82f6; }
 .correct-answer { border-left: 4px solid #10b981; background: #f0fdf4; }
 
-/* --- Teacher Feedback Box (UX Improvement) --- */
+/* File list */
+.answer-files {
+    background: #f9fafb;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px dashed #cbd5e1;
+}
+
+.file-item {
+    margin-bottom: 10px;
+}
+.file-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.file-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+.file-link:hover { text-decoration: underline; }
+
+.file-thumb img {
+    margin-top: 5px;
+    margin-left: 28px;
+    max-width: 150px;
+    max-height: 100px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+}
+
+/* --- Teacher Feedback --- */
 .teacher-feedback-box {
     margin-top: 25px;
     background: #fff;
-    border: 2px solid #e0e7ff; /* Açıq indigo rəng */
+    border: 1px solid #c7d2fe;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .tf-header {
-    background: #eef2ff; /* Çox açıq mavi/indigo */
-    padding: 15px 20px;
+    background: #eef2ff;
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #e0e7ff;
 }
-
 .tf-avatar {
-    width: 36px;
-    height: 36px;
+    width: 32px; height: 32px;
     background: #4f46e5;
     color: white;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
 }
-
-.tf-title {
-    font-weight: 700;
-    color: #3730a3;
-    font-size: 1.05rem;
-}
-
+.tf-title { color: #3730a3; font-weight: 700; margin-left: 8px; }
 .tf-score {
-    background: #ffffff;
-    padding: 5px 15px;
-    border-radius: 20px;
-    border: 1px solid #c7d2fe;
+    background: #fff;
     color: #4338ca;
-    font-size: 0.95rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    border: 1px solid #c7d2fe;
 }
+.tf-body { padding: 20px; color: #1f2937; line-height: 1.6; }
 
-.tf-body {
-    padding: 25px; /* Geniş boşluq */
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: #1f2937;
-    background-color: #ffffff;
-}
-
-/* --- Footer Action Buttons --- */
+/* --- Footer Düymələr --- */
 .action-footer {
     display: flex;
-    /* Düymələri biri sağa, biri sola atmaq üçün */
-    justify-content: space-between; 
+    justify-content: space-between;
     align-items: center;
     margin-top: 40px;
     padding-top: 30px;
     border-top: 1px solid #e5e7eb;
-    gap: 15px; /* Mobile-da yapışmasınlar deyə */
 }
 
-/* Göndərdiyiniz şəkildəki Mavi Button Dizaynı */
 .custom-blue-btn {
-    background-color: #3b82f6; /* Sizin mavi rəng */
-    color: #ffffff;
+    background-color: #3b82f6;
+    color: #fff;
     border: none;
-    border-radius: 12px; /* Yumru künclər */
-    padding: 12px 25px;
+    border-radius: 10px;
+    padding: 12px 24px;
     font-size: 1rem;
     font-weight: 600;
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25); /* Yüngül kölgə */
-    transition: all 0.3s ease;
+    text-decoration: none;
     display: inline-flex;
+    align-items: center;
     gap: 8px;
-    align-items: center;
-    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-
-/* Hover effekti (Üzərinə gələndə) */
 .custom-blue-btn:hover {
-    background-color: #2563eb; /* Bir az tündləşir */
-    transform: translateY(-2px); /* Bir az yuxarı qalxır */
-    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.35);
-    color: #ffffff;
+    background-color: #2563eb;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
 }
 
-
-/* --- Yüklənmiş fayllar (student result) --- */
-
-.answer-files {
-    background: #f9fafb;
-    border-radius: 8px;
-    padding: 0.75rem 0.9rem;
-    border: 1px dashed #e5e7eb;
-}
-
-.answer-files .response-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.file-list {
-    list-style: none;
-    margin: 0;
-    margin-top: 0.25rem;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.file-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.file-main {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.file-icon {
-    width: 20px;
-    text-align: center;
-    color: #4b5563;
-    opacity: 0.9;
-}
-
-.file-link {
-    font-size: 0.9rem;
-    color: #1d4ed8;
-    text-decoration: none;
-    word-break: break-all;
-}
-
-.file-link:hover {
-    text-decoration: underline;
-}
-
-.file-thumb {
-    margin-left: 26px; /* icon + boşluq qədər */
-    margin-top: 2px;
-}
-
-.file-thumb img {
-    max-width: 220px;
-    max-height: 150px;
-    border-radius: 6px;
-    object-fit: cover;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.16);
-}
-
-
-/* Mobile üçün uyğunlaşdırma */
-@media (max-width: 600px) {
+/* Mobil Uyğunluq */
+@media (max-width: 768px) {
+    .summary-card { padding: 20px; }
+    .main-score .stat-value { font-size: 2.5rem; }
     .action-footer {
-        flex-direction: column; /* Alt-alta olsunlar */
+        flex-direction: column;
         gap: 15px;
     }
-    .custom-blue-btn {
-        width: 100%; /* Tam ekran tutsun */
-        justify-content: center;
-    }
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .summary-body { flex-direction: column; }
-    .action-footer { flex-direction: column; gap: 15px; }
-    .action-footer .btn { width: 100%; }
+    .custom-blue-btn { width: 100%; justify-content: center; }
+    .question-media img, .question-media video { max-height: 250px; }
 }

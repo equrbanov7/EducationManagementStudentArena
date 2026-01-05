@@ -860,6 +860,7 @@ def add_exam_question(request, slug):
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             request.POST,
+            request.FILES,
             exam_type=exam.exam_type,
             subject_blocks=blocks
             )
@@ -1554,6 +1555,7 @@ def edit_exam_question(request, slug, question_id):
     if request.method == "POST":
         form = ExamQuestionCreateForm(
             request.POST,
+            request.FILES,
             instance=question,
             exam_type=exam.exam_type,
             subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
@@ -1570,6 +1572,10 @@ def edit_exam_question(request, slug, question_id):
             if exam.exam_type == "test":
                 form.save_options(q)
 
+            # (istəsən) save_and_continue düyməsi işləsin:
+            if "save_and_continue" in request.POST:
+                return redirect("add_exam_question", slug=exam.slug)
+            
             return redirect("teacher_exam_detail", slug=exam.slug)
     else:
         form = ExamQuestionCreateForm(
