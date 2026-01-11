@@ -68,10 +68,17 @@
                         <div class="answer-preview">
                             {% if ans and ans.text_answer %}
                                 {{ ans.text_answer|truncatewords:10 }}
+                        
+                            {% elif ans and ans.paint_image %}
+                                <span class="answered-with-paint">
+                                    <i class="fas fa-paint-brush"></i> Paint ilə cavab verilib
+                                </span>
+                        
                             {% else %}
                                 <span class="not-answered">Cavab yoxdur</span>
                             {% endif %}
                         </div>
+                        
 
                         {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
                         {% if ans and ans.files.all %}
@@ -113,15 +120,24 @@
                             </div>
                         {% endif %}
                         {# ====== /YENİ BLOK ====== #}
-                        {% if 'paint' in f.filename|lower %}
-                            <div class="paint-preview-section">
-                                <h4>
-                                    <i class="fas fa-paint-brush"></i>
-                                    Paint Cavabı
+                       {# ====== PAINT CAVABI (ExamAnswer.paint_image) ====== #}
+                        {% if ans and ans.paint_image %}
+                        <div class="paint-preview-section">
+                        <h4>
+                            <i class="fas fa-paint-brush"></i>
+                            Paint Cavabı
+                            {% if ans.paint_updated_at %}
+                                <small style="opacity:.7; font-weight:400;">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
+                            {% endif %}
                                 </h4>
-                                <img src="{{ f.file.url }}" alt="Paint" class="paint-preview-img">
-                            </div>
+
+                                <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
+                                    <img src="{{ ans.paint_image.url }}" alt="Paint" class="paint-preview-img">
+                                </a>
+                                </div>
                         {% endif %}
+                        {# ====== /PAINT CAVABI ====== #}
+
                     </li>
                 {% endwith %}
             {% endfor %}

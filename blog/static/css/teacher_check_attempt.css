@@ -98,6 +98,53 @@
 .status-scored { background-color: #28a745; }
 .status-empty { background-color: #dc3545; }
 
+
+/* ===== Paint preview (Teacher) ===== */
+
+.paint-preview-section{
+    margin-top: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+    overflow: hidden;            /* əsas fix: qırağa çıxanları kəs */
+  }
+  
+  .paint-preview-section h4{
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  
+  /* şəkil üçün çərçivə */
+  .paint-open-link{
+    display: block;
+    text-decoration: none;
+  }
+  
+  .paint-preview-img{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 250px;               /* şəkil nisbəti pozulmasın */
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    object-fit: contain;
+  }
+  
+  /* çox böyük paint-lər üçün limiti də verək */
+  .paint-preview-section .paint-open-link{
+    max-height: 520px;          /* istəsən 400/600 et */
+    overflow: auto;             /* böyükdürsə scroll olsun */
+    border-radius: 10px;
+  }
+  
+
+
 /* ==================================== */
 /* Modal Dizaynı */
 /* ==================================== */

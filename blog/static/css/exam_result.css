@@ -379,6 +379,36 @@
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
 }
 
+
+/* ===== Student paint preview ===== */
+.paint-answer-box{
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+  
+  .paint-open-link{
+    display: block;
+    text-decoration: none;
+    border-radius: 10px;
+    overflow: auto;      /* böyükdürsə scroll olsun */
+    max-height: 520px;   /* istəsən 400/600 et */
+  }
+  
+  .paint-answer-img{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 250px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    object-fit: contain;
+  }
+  
+
 /* Mobil Uyğunluq */
 @media (max-width: 768px) {
     .summary-card { padding: 20px; }

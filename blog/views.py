@@ -46,7 +46,7 @@ try:
 except Exception:
     PdfReader = None
 
-from .utils import generate_otp, send_verify_email
+from .utils import generate_otp, send_verify_email, _save_paint_png_to_answer, _clear_paint_from_answer
 from django.db import transaction
 
 User = get_user_model()
@@ -1572,7 +1572,6 @@ def edit_exam_question(request, slug, question_id):
             if exam.exam_type == "test":
                 form.save_options(q)
 
-            # (istəsən) save_and_continue düyməsi işləsin:
             if "save_and_continue" in request.POST:
                 return redirect("add_exam_question", slug=exam.slug)
             
@@ -1797,60 +1796,119 @@ def student_exam_list(request):
 
 
 def _start_or_resume_attempt(request, exam: Exam):
+    """
+    İstifadəçi üçün attempt yaradır və ya mövcud attempt-ə yönləndirir.
+    """
     user = request.user
 
-    qs = exam.attempts.filter(user=user).order_by("-started_at")
-
-    # Davam edən attempt varsa – ora gedək
-    current = qs.filter(status__in=["draft", "in_progress"]).first()
+    # ✅ DƏYİŞİKLİK: Bitməmiş attempt-i yoxla
+    current = exam.attempts.filter(
+        user=user,
+        status__in=["draft", "in_progress"]
+    ).order_by("-started_at").first()
+    
     if current:
+        # Suallar düzgün generate edilib?
         desired = _effective_needed_count(exam)
         current_count = current.answers.count()
-
-        # DEBUG (müvəqqəti)
-        print("DEBUG desired:", desired, "current_count:", current_count, "exam.rq:", exam.random_question_count)
-        print("DEBUG has_any_answer:", _attempt_has_any_answer(current))
-
+        
+        # Əgər sual sayı düzgün deyilsə və heç cavab yazılmayıbsa, yenidən generate et
         if current_count != desired and not _attempt_has_any_answer(current):
             generate_random_questions_for_attempt(current, force_rebuild=True)
-
+        
         return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
 
-
-    # Bitmiş cəhdlər
-    finished_qs = qs.filter(status__in=["submitted", "expired"])
+    # ✅ Bitmiş cəhdləri yoxla
+    finished_qs = exam.attempts.filter(
+        user=user,
+        status__in=["submitted", "expired"]
+    ).order_by("-started_at")
+    
     finished_count = finished_qs.count()
-
-    max_attempts = exam.max_attempts_per_user or 1
-    if finished_count >= max_attempts:
+    
+    # ✅ DƏYİŞİKLİK: Boş olduqda limitsiz cəhd
+    max_attempts = exam.max_attempts_per_user
+    
+    # Əgər max_attempts təyin edilib VƏ limite çatılıbsa
+    if max_attempts and finished_count >= max_attempts:
         last = finished_qs.first()
         if last:
+            messages.info(request, f"Siz bu imtahana maksimum {max_attempts} dəfə cəhd edə bilərsiniz.")
             return redirect("exam_result", slug=exam.slug, attempt_id=last.id)
         return redirect("student_exam_list")
 
-    attempt_number = finished_count + 1
+    # ✅ DƏYİŞİKLİK: Attempt number-i düzgün hesabla
+    # Bütün attemptlərdən (bitmiş və bitməmiş) ən böyük nömrəni tap
+    last_attempt = exam.attempts.filter(user=user).order_by('-attempt_number').first()
+    
+    if last_attempt:
+        next_attempt_number = last_attempt.attempt_number + 1
+    else:
+        next_attempt_number = 1
+    
+    # ✅ Yeni attempt yarat
     attempt = ExamAttempt.objects.create(
         user=user,
         exam=exam,
-        attempt_number=attempt_number,
+        attempt_number=next_attempt_number,
         status="in_progress",
     )
     
+    # Sualları generate et
     generate_random_questions_for_attempt(attempt)
     
+    messages.success(request, f"İmtahan başladı! (Cəhd #{next_attempt_number})")
     return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
 
 @login_required
 def start_exam(request, slug):
+    """
+    İmtahan başlatma view-ı
+    """
     exam = get_object_or_404(Exam, slug=slug, is_active=True)
 
+    # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
     if not can_start:
         messages.error(request, reason or "Bu imtahana başlaya bilmirsiniz.")
         return redirect("student_exam_list")
 
     return _start_or_resume_attempt(request, exam)
+
+
+# ✅ ƏLAVƏ: Helper funksiya - attempt-də cavab var?
+def _attempt_has_any_answer(attempt):
+    """
+    Attempt-də heç olmasa bir doldurulmuş cavab var?
+    """
+    # Test cavabları
+    if attempt.answers.filter(selected_options__isnull=False).exists():
+        return True
+    
+    # Yazılı cavablar
+    if attempt.answers.exclude(text_answer="").exists():
+        return True
+    
+    # Fayllar
+    from .models import ExamAnswerFile
+    if ExamAnswerFile.objects.filter(answer__attempt=attempt).exists():
+        return True
+    
+    return False
+
+
+def _effective_needed_count(exam):
+    """
+    Bu exam üçün neçə sual lazımdır?
+    """
+    # ✅ Əgər random_question_count təyin edilibsə, onu istifadə et
+    if exam.random_question_count and exam.random_question_count > 0:
+        return exam.random_question_count
+    
+    # ✅ Əks halda, bütün sualların sayını qaytar
+    return exam.questions.count()
+
 
 
 @csrf_exempt   # DEV üçün CSRF-dən azad edirik (sonra istəsən götürərsən)
@@ -1973,11 +2031,11 @@ def take_exam(request, slug, attempt_id):
     if attempt.is_finished:
         return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
-    # --- DÜZƏLİŞ: Sualları Attempt-ə bağlanmış cavablardan götürürük ---
+    # Sualları Attempt-ə bağlanmış cavablardan götürürük
     answers_qs = (
         attempt.answers
         .select_related("question")
-        .prefetch_related("question__options", "selected_options")  # (səndə var)
+        .prefetch_related("question__options", "selected_options", "files")
         .order_by("id")
     )
 
@@ -1986,27 +2044,24 @@ def take_exam(request, slug, attempt_id):
         answers_qs = (
             attempt.answers
             .select_related("question")
-            .prefetch_related("question__options", "selected_options")
+            .prefetch_related("question__options", "selected_options","files")
             .order_by("id")
         )
 
-    # order_by('id') qoyduq ki, qarışıq gələn suallar hər dəfə yerini dəyişməsin
-
-    # Əgər nəsə xəta olub suallar yaranmayıbsa (köhnə koddan qalan attemptlər üçün)
-    # (SİLMİRİK, sadəcə 2-ci dəfə generate çağırılmasın deyə "pass" edirik)
     if not answers_qs.exists():
-        # generate_random_questions_for_attempt(attempt)   # ƏVVƏL VAR İDİ
-        # answers_qs = attempt.answers.select_related("question").order_by('id')
-        # ✅ ƏLAVƏ: təhlükəsiz fallback — yeni generate etmirik, sadəcə yenidən oxuyuruq
-        answers_qs = attempt.answers.select_related("question").prefetch_related("question__options", "selected_options").order_by("id")
+        answers_qs = attempt.answers.select_related("question").prefetch_related("question__options", "selected_options","files").order_by("id")
 
-    # Template-ə ötürmək üçün suallar siyahısı
     questions = [a.question for a in answers_qs]
+    
+    # ✅ Hər cavab üçün seçilmiş option ID-lərini set olaraq saxla
+    answers_by_qid = {}
+    for a in answers_qs:
+        answers_by_qid[a.question_id] = {
+            'answer': a,
+            'selected_option_ids': set(a.selected_options.values_list('id', flat=True))
+        }
 
-    # ✅ ƏLAVƏ: answers map (POST-da get_or_create üçün də rahat)
-    answers_by_qid = {a.question_id: a for a in answers_qs}
-
-    # ✅ DƏYİŞİKLİK: q_payload – yalnız test sualında opts doldururuq
+    # q_payload yaradırıq
     q_payload = []
     for q in questions:
         opts = []
@@ -2014,7 +2069,7 @@ def take_exam(request, slug, attempt_id):
             opts = build_shuffled_options(attempt.id, q)
         q_payload.append({"q": q, "opts": opts})
 
-    # --- Server tərəfli Vaxt Hesablaması (Olduğu kimi qalır) ---
+    # Server tərəfli Vaxt Hesablaması
     remaining_seconds = None
     is_time_up = False
     if exam.total_duration_minutes and attempt.started_at:
@@ -2028,18 +2083,19 @@ def take_exam(request, slug, attempt_id):
         else:
             remaining_seconds = int(total_seconds)
 
+    
     if request.method == "POST":
         action = (request.POST.get("submit_action") or "").strip()
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
-        # DÜZƏLİŞ: Yalnız seçilmiş suallar üzərindən dövr edirik
+        # ✅ KRİTİK: Hər sual üçün cavabı yenilə
         for q in questions:
-            # ✅ DƏYİŞİKLİK: get() yerinə get_or_create (risk olmasın)
             ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
 
-            ans.selected_options.clear()
-
             if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+                # ✅ Əvvəlcə mövcud seçimləri təmizlə
+                ans.selected_options.clear()
+
                 if q.answer_mode == "single":
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
@@ -2047,21 +2103,24 @@ def take_exam(request, slug, attempt_id):
                         if opt:
                             ans.selected_options.add(opt)
 
-                else:
-                    # ✅ KRİTİK DƏYİŞİKLİK:
-                    # Köhnə: name="q_{id}_opt_{optid}" oxuyurdu
-                    # Yeni: checkbox-ların hamısı name="q_{id}" olacaq, id-ləri getlist ilə gələcək
+                else:  # multiple
                     opt_ids = request.POST.getlist(f"q_{q.id}")
                     if opt_ids:
                         opts = list(ExamQuestionOption.objects.filter(question=q, id__in=opt_ids))
                         if opts:
                             ans.selected_options.add(*opts)
 
+                # ✅ Test cavabları üçün text_answer-ı boşalt
                 ans.text_answer = ""
+                ans.has_paint = False
+                if getattr(ans, "paint_image", None):
+                    _clear_paint_from_answer(ans)
+                
+                # ✅ Auto-evaluate et
                 ans.auto_evaluate()
+                ans.save()
 
-            else:
-                # Yazılı sual
+            else:  # Yazılı sual
                 text = request.POST.get(f"q_{q.id}", "").strip()
                 ans.text_answer = text
                 ans.is_correct = False
@@ -2072,10 +2131,27 @@ def take_exam(request, slug, attempt_id):
                     ans.files.all().delete()
                     for f in files:
                         ExamAnswerFile.objects.create(answer=ans, file=f)
+                
+                # Paint hissəsi
+                paint_enabled = (request.POST.get(f"paint_enabled_{q.id}") == "1")
+                paint_clear = (request.POST.get(f"paint_clear_{q.id}") == "1")
+                paint_data_url = (request.POST.get(f"paint_data_{q.id}") or "").strip()
 
+                if paint_clear:
+                    _clear_paint_from_answer(ans)
+
+                if paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
+                    _save_paint_png_to_answer(ans, paint_data_url)
+                elif not paint_enabled:
+                    pass
+                
+                ans.save()
+
+        # ✅ Test imtahanı üçün score-u yenilə
         if exam.exam_type == "test":
             attempt.recalculate_score()
 
+        # ✅ Finish və ya time up
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"
             attempt.mark_finished(status=status)
@@ -2087,28 +2163,27 @@ def take_exam(request, slug, attempt_id):
                 })
             return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
 
-        attempt.status = "draft"
-        attempt.save(update_fields=["status"])
+        # ✅ Draft olaraq saxla (autosave və ya manual save_draft)
+        if action in ("autosave", "save_draft"):
+            attempt.status = "draft"
+            attempt.save(update_fields=["status"])
+            
         if is_ajax:
             return JsonResponse({"success": True, "finished": False})
+        
+        # ✅ Normal POST (AJAX deyilsə) - səhifəni yenilə
         return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
 
-    # GET sorğusu üçün answers map (qalır – səndə də var idi)
-    answers_by_qid = {a.question_id: a for a in answers_qs}
-
+    # GET sorğusu
     context = {
         "exam": exam,
         "attempt": attempt,
-        "questions": questions,           # köhnə template qırılmasın deyə saxlayırıq
-        "q_payload": q_payload,           # ✅ random variant üçün yeni
+        "questions": questions,
+        "q_payload": q_payload,
         "answers_by_qid": answers_by_qid,
         "remaining_seconds": remaining_seconds,
     }
     return render(request, "blog/take_exam.html", context)
-
-
-
-
 
 
 @login_required

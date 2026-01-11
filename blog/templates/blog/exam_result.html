@@ -147,13 +147,22 @@
                                 <label class="response-label text-primary mb-2">
                                     <i class="fas fa-pen-alt"></i> Sənin cavabın:
                                 </label>
+                          
                                 {% if ans and ans.text_answer %}
-                                    <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
+                                     <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
+                             
+                                {% elif ans and ans.paint_image %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-paint-brush"></i> Paint ilə cavab verilib
+                                    </div>
+                            
                                 {% else %}
                                     <div class="alert alert-warning">
                                         <i class="fas fa-exclamation-triangle"></i> Cavab verməmisən
                                     </div>
                                 {% endif %}
+                            
+
                             </div>
 
                             {# ==== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ==== #}
@@ -197,6 +206,24 @@
                                     </ul>
                                 </div>
                             {% endif %}
+
+                            {# ==== PAINT CAVABI (tələbə üçün) ==== #}
+                            {% if ans and ans.paint_image %}
+                                <div class="paint-answer-box mb-3">
+                                    <label class="response-label text-secondary mb-2">
+                                        <i class="fas fa-paint-brush"></i> Paint cavabı:
+                                        {% if ans.paint_updated_at %}
+                                            <small class="text-muted">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
+                                        {% endif %}
+                                    </label>
+
+                                    <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
+                                        <img src="{{ ans.paint_image.url }}" alt="Paint cavabı" class="paint-answer-img">
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {# ==== /PAINT CAVABI ==== #}
+
                             {# ==== /YENİ BLOK ==== #}
 
                             {% if attempt.checked_by_teacher %}

@@ -377,6 +377,138 @@ body {
     color: #b91c1c;
 }
 
+.question-timer-badge {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 15px;
+}
+.question-timer-badge.danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+/* Bitirmə təsdiq modul üçün stil */
+.confirm-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.confirm-modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+    text-align: center;
+}
+.confirm-modal-box h3 {
+    margin-bottom: 8px;
+}
+.confirm-modal-box p {
+    margin-bottom: 16px;
+    color: #4b5563;
+}
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Fayl preview üçün kiçik stil */
+.file-preview-area {
+    margin-top: 8px;
+}
+.file-preview-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+.file-preview-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.file-icon {
+    font-size: 1.1rem;
+}
+.file-name {
+    word-break: break-all;
+}
+.file-remove-btn {
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+}
+.file-remove-btn:hover {
+    color: #dc2626;
+}
+
+.add-file-btn {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px dashed #60a5fa;
+    background: #eff6ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.add-file-btn:hover {
+    background: #dbeafe;
+}
+/* Sual mediası üçün konteyner */
+.question-media {
+    display: flex;
+    justify-content: center; /* Şəkli/videonu mərkəzə gətirir */
+    align-items: center;
+    margin: 15px 0;
+    width: 100%;
+    background-color: #f8fafc; /* Şəkil arxasına yüngül fon (optional) */
+    border-radius: 12px;
+    padding: 10px; /* Şəklin kənarlara yapışmaması üçün */
+    box-sizing: border-box;
+}
+
+/* Şəkil və Video üçün ortaq stil */
+.question-media img,
+.question-media video {
+    max-width: 100%;      /* Konteynerin enindən çox olmasın */
+    max-height: 400px;    /* Hündürlüyü limitləyir (çox uzun olmasın) */
+    width: auto;          /* Orijinal nisbəti qoruyur */
+    height: auto;         /* Orijinal nisbəti qoruyur */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Yüngül kölgə */
+    object-fit: contain;  /* Şəklin kəsilməməsini təmin edir */
+}
+
+/* Mobil ekranlar üçün hündürlüyü bir az da azalda bilərsən */
+@media (max-width: 768px) {
+    .question-media img,
+    .question-media video {
+        max-height: 250px;
+    }
+}
+
 
 /* Mobile Uyğunlaşdırma */
 @media (max-width: 768px) {

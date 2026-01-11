@@ -782,7 +782,14 @@ class ExamAttempt(models.Model):
         verbose_name = "İmtahan cəhdi"
         verbose_name_plural = "İmtahan cəhdləri"
         ordering = ["-started_at"]
-        unique_together = ("user", "exam", "attempt_number")
+        # ✅ DƏYİŞİKLİK: unique_together silindi
+        # unique_together = ("user", "exam", "attempt_number")  # SİLİNDİ
+        
+        # ✅ ƏLAVƏ: Performans üçün index-lər
+        indexes = [
+            models.Index(fields=['user', 'exam', 'status']),
+            models.Index(fields=['user', 'exam', '-started_at']),
+        ]
 
     def __str__(self):
         return f"{self.user.username} → {self.exam.title} (#{self.attempt_number})"
@@ -803,8 +810,6 @@ class ExamAttempt(models.Model):
         Attempt-i bitmiş kimi işarələyir, finished_at və duration_seconds hesablayır.
         """
         self.status = status
-        # yalnız bir dəfə set etmək istəyirsənsə, bu cür də yaza bilərsən:
-        # if not self.finished_at:
         self.finished_at = timezone.now()
         if self.finished_at and self.started_at:
             delta = self.finished_at - self.started_at
@@ -823,8 +828,6 @@ class ExamAttempt(models.Model):
     def mark_checked(self):
         self.checked_by_teacher = True
         self.save(update_fields=["checked_by_teacher"])
-
-
 
 
 class ExamAnswer(models.Model):
@@ -880,6 +883,13 @@ class ExamAnswer(models.Model):
 
     # Autosave və draft üçün vacib:
     updated_at = models.DateTimeField(auto_now=True)
+    
+    has_paint = models.BooleanField(default=False)  # bu sualda paint aktivdir?
+    paint_image = models.ImageField(upload_to="exam_paints/%Y/%m/", null=True, blank=True)
+    paint_updated_at = models.DateTimeField(null=True, blank=True)
+
+    # istəsən raw data (debug üçün) saxlaya bilərsən, amma vacib deyil
+    paint_data_url = models.TextField(null=True, blank=True)  # optional
 
     class Meta:
         verbose_name = "Sual cavabı"

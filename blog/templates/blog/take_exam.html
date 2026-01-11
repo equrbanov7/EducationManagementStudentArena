@@ -6,139 +6,18 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/take_exam.css' %}">
+    <link rel="stylesheet" href="{% static 'css/paint_answer.css' %}">
     <style>
-        .question-timer-badge {
-            background-color: #e0f2fe;
-            color: #0284c7;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: 15px;
-        }
-        .question-timer-badge.danger {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        /* Bitirmə təsdiq modul üçün stil */
-        .confirm-modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .confirm-modal-box {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px 28px;
-            max-width: 420px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
-            text-align: center;
-        }
-        .confirm-modal-box h3 {
-            margin-bottom: 8px;
-        }
-        .confirm-modal-box p {
-            margin-bottom: 16px;
-            color: #4b5563;
-        }
-        .confirm-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* Fayl preview üçün kiçik stil */
-        .file-preview-area {
-            margin-top: 8px;
-        }
-        .file-preview-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-        .file-preview-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .file-icon {
-            font-size: 1.1rem;
-        }
-        .file-name {
-            word-break: break-all;
-        }
-        .file-remove-btn {
-            border: none;
-            background: transparent;
-            font-size: 1.1rem;
-            cursor: pointer;
-            line-height: 1;
-        }
-        .file-remove-btn:hover {
-            color: #dc2626;
-        }
-
-        .add-file-btn {
-            margin-top: 8px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px dashed #60a5fa;
-            background: #eff6ff;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        .add-file-btn:hover {
-            background: #dbeafe;
-        }
-        /* Sual mediası üçün konteyner */
-        .question-media {
-            display: flex;
-            justify-content: center; /* Şəkli/videonu mərkəzə gətirir */
-            align-items: center;
-            margin: 15px 0;
-            width: 100%;
-            background-color: #f8fafc; /* Şəkil arxasına yüngül fon (optional) */
-            border-radius: 12px;
-            padding: 10px; /* Şəklin kənarlara yapışmaması üçün */
-            box-sizing: border-box;
-        }
-        
-        /* Şəkil və Video üçün ortaq stil */
-        .question-media img,
-        .question-media video {
-            max-width: 100%;      /* Konteynerin enindən çox olmasın */
-            max-height: 400px;    /* Hündürlüyü limitləyir (çox uzun olmasın) */
-            width: auto;          /* Orijinal nisbəti qoruyur */
-            height: auto;         /* Orijinal nisbəti qoruyur */
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Yüngül kölgə */
-            object-fit: contain;  /* Şəklin kəsilməməsini təmin edir */
-        }
-        
-        /* Mobil ekranlar üçün hündürlüyü bir az da azalda bilərsən */
-        @media (max-width: 768px) {
-            .question-media img,
-            .question-media video {
-                max-height: 250px;
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
-          
     </style>
 {% endblock %}
 
@@ -170,7 +49,6 @@
             <div class="progress-info">
                 <span>Sual: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
                 <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
-                
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
@@ -182,13 +60,14 @@
           id="exam-form"
           enctype="multipart/form-data"
           data-exam-id="{{ exam.id }}"
-          data-attempt-id="{{ attempt.id }}">
+          data-attempt-id="{{ attempt.id }}"
+          data-exam-type="{{ exam.exam_type }}">
         {% csrf_token %}
  
         <div class="slides-wrapper">
             {% for item in q_payload %}
                 {% with q=item.q %}
-                {% with ans=answers_by_qid|get_item:q.id %}
+                {% with ans_data=answers_by_qid|get_item:q.id %}
                 <div class="question-slide" 
                      data-index="{{ forloop.counter0 }}" 
                      id="slide-{{ forloop.counter0 }}"
@@ -224,8 +103,8 @@
                                         <input type="radio"
                                                name="q_{{ q.id }}"
                                                value="{{ opt.id }}"
-                                               onchange="updateProgress()"
-                                               {% if ans and opt.obj in ans.selected_options.all %}checked{% endif %}>
+                                               data-question-id="{{ q.id }}"
+                                               {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                         <span class="circle-mark"></span>
                                         <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
                                     </label>
@@ -239,8 +118,8 @@
                                             <input type="checkbox"
                                                 name="q_{{ q.id }}"
                                                 value="{{ opt.id }}"
-                                                onchange="updateProgress()"
-                                                {% if ans and opt.obj in ans.selected_options.all %}checked{% endif %}>
+                                                data-question-id="{{ q.id }}"
+                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                             <span class="box-mark"></span>
                                             <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
                                         </label>
@@ -252,12 +131,14 @@
                         {% else %}
                             <textarea name="q_{{ q.id }}" 
                                       class="written-answer" 
-                                      placeholder="Cavabınızı bura yazın..."
-                                      oninput="updateProgress()">{% if ans %}{{ ans.text_answer }}{% endif %}</textarea>
+                                      placeholder="Cavabınızı bura yazın...">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
                             <br>
                                 
+                            {# --- PAINT CAVABI --- #}
+                            {% if q.enable_paint %}
+                                 {% include "partials/_paint_answer.html" with q=q ans=ans_data.answer %}
+                            {% endif %}
 
-                            
                             <div class="file-dropzone" 
                                  data-qid="{{ q.id }}" 
                                  ondrop="handleDrop(event, {{ q.id }})"
@@ -281,8 +162,8 @@
                             </button>
 
                             <div id="file-preview-{{ q.id }}" class="file-preview-area">
-                                {% if ans %}
-                                    {% for f in ans.files.all %}
+                                {% if ans_data and ans_data.answer %}
+                                    {% for f in ans_data.answer.files.all %}
                                         <div class="file-preview-item">
                                             <div class="file-preview-left">
                                                 <span class="file-icon">{{ f.filename|slice:"-3:"|upper }}</span>
@@ -309,10 +190,11 @@
                 Növbəti <i class="fas fa-arrow-right"></i>
             </button>
         
-            <button type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
+            {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
+            <button style = "display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
                 <i class="fas fa-save"></i> Draft kimi saxla
             </button>
-        
+            
             <button type="button" name="submit_action" value="finish" 
                     id="finish-btn" class="nav-btn btn-success" style="display: none;">
                 İmtahanı Bitir <i class="fas fa-check"></i>
@@ -357,13 +239,82 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalSlides = slides.length;
     let hasUnsavedChanges = false;
 
-    // localStorage üçün key (refresh-də eyni suala qayıtmaq)
+    // Exam type
+    const examType = examForm.dataset.examType;
+    console.log('Exam Type:', examType);
+    console.log('Save Draft Button:', saveDraftBtn);
+    
+    // Debug: Yüklənmiş cavabları yoxla
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    console.log('Checked radios on load:', checkedRadios.length);
+    console.log('Checked checkboxes on load:', checkedCheckboxes.length);
+    
+    // Seçilmiş cavabları göstər
+    checkedRadios.forEach(radio => {
+        console.log('Radio checked:', radio.name, '=', radio.value);
+    });
+    checkedCheckboxes.forEach(checkbox => {
+        console.log('Checkbox checked:', checkbox.name, '=', checkbox.value);
+    });
+
+    // localStorage üçün key
     const examId = examForm.dataset.examId;
     const attemptId = examForm.dataset.attemptId;
     const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
 
     // Fayl state
-    const fileState = {}; // { [qid]: File[] }
+    const fileState = {};
+
+    // ✅ ƏLAVƏ: Bildiriş funksiyaları
+    function showNotification(message, type = "info", duration = 0) {
+        const notification = document.createElement('div');
+        notification.className = `auto-save-notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            transition: opacity 0.3s ease;
+        `;
+        
+        if (type === "success") {
+            notification.style.backgroundColor = "#10b981";
+            notification.style.color = "white";
+        } else if (type === "error") {
+            notification.style.backgroundColor = "#ef4444";
+            notification.style.color = "white";
+        } else {
+            notification.style.backgroundColor = "#3b82f6";
+            notification.style.color = "white";
+        }
+        
+        document.body.appendChild(notification);
+        
+        if (duration > 0) {
+            setTimeout(() => hideNotification(notification), duration);
+        }
+        
+        return notification;
+    }
+
+    function hideNotification(notification) {
+        if (notification && notification.parentNode) {
+            notification.style.opacity = "0";
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
 
     function formatTime(totalSeconds) {
         if (totalSeconds < 0) totalSeconds = 0;
@@ -453,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateProgress();
     }
 
-    window.updateProgress = function() {
+    function updateProgress() {
         let answeredCount = 0;
         slides.forEach(slide => {
             const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
@@ -469,7 +420,41 @@ document.addEventListener('DOMContentLoaded', function() {
         answeredCountEl.textContent = answeredCount;
         const percent = (answeredCount / totalSlides) * 100;
         progressFill.style.width = percent + '%';
-    };
+    }
+
+    // Test suallarında radio/checkbox dəyişikliyini izlə
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', function() {
+            console.log('Input changed:', this.name, this.value);
+            hasUnsavedChanges = true;
+            updateProgress();
+            
+            // ✅ ƏLAVƏ: Test suallarında avtomatik draft saxla
+            if (examType === 'test') {
+                // Debounce ilə - 1 saniyə gözlə, sonra saxla
+                clearTimeout(window.autoSaveTimer);
+                window.autoSaveTimer = setTimeout(() => {
+                    console.log('Auto-saving test answer...');
+                    sendDraft("autosave");
+                }, 1000);
+            }
+        });
+    });
+
+    // Yazılı cavablarda textarea dəyişikliyini izlə
+    document.querySelectorAll('textarea.written-answer').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            hasUnsavedChanges = true;
+            updateProgress();
+            
+            // ✅ ƏLAVƏ: Yazılı suallarda da avtomatik draft saxla (3 saniyə debounce)
+            clearTimeout(window.autoSaveTimer);
+            window.autoSaveTimer = setTimeout(() => {
+                console.log('Auto-saving written answer...');
+                sendDraft("autosave");
+            }, 3000); // Yazılı cavablar üçün 3 saniyə gözlə
+        });
+    });
 
     // Ümumi imtahan timeri
     {% if remaining_seconds is not None %}
@@ -586,20 +571,23 @@ document.addEventListener('DOMContentLoaded', function() {
         renderPreview(qid);
     };
 
-    // Form dəyişikliklərində draft flag
-    examForm.addEventListener("input", () => {
-        hasUnsavedChanges = true;
-    });
-    examForm.addEventListener("change", () => {
-        hasUnsavedChanges = true;
-    });
-
     // Draft / autosave – AJAX
     function sendDraft(action = "autosave") {
-        if (action === "autosave" && !hasUnsavedChanges) return;
+        if (action === "autosave" && !hasUnsavedChanges) {
+            console.log('No unsaved changes, skipping autosave');
+            return;
+        }
+
+        console.log('Sending draft, action:', action, 'hasUnsavedChanges:', hasUnsavedChanges);
 
         const formData = new FormData(examForm);
         formData.append("submit_action", action);
+
+        // ✅ ƏLAVƏ: Vizual feedback - kiçik bildiriş göstər
+        let notification = null;
+        if (action === "autosave") {
+            notification = showNotification("Saxlanılır...", "info");
+        }
 
         fetch(window.location.href, {
             method: "POST",
@@ -610,7 +598,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(data => {
+            console.log('Draft response:', data);
             hasUnsavedChanges = false;
+
+            // ✅ ƏLAVƏ: Uğurlu bildiriş
+            if (notification) {
+                hideNotification(notification);
+            }
+            if (action === "autosave") {
+                showNotification("✓ Saxlanıldı", "success", 2000);
+            }
 
             if (data.finished && data.redirect_url) {
                 localStorage.removeItem(storageKey);
@@ -630,21 +627,74 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.error("Draft saxlanarkən xəta:", err);
+            if (notification) {
+                hideNotification(notification);
+            }
+            showNotification("Xəta baş verdi", "error", 3000);
+            
             if (action === "save_draft") {
                 alert("Draft saxlanarkən xəta baş verdi. Yenidən cəhd edin.");
             }
         });
     }
 
+    // Draft düyməsi click
     if (saveDraftBtn) {
         saveDraftBtn.addEventListener("click", function () {
-            sendDraft("save_draft");
+            console.log('Draft button clicked');
+            
+            // Düyməni disable et
+            const originalText = saveDraftBtn.innerHTML;
+            saveDraftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saxlanılır...';
+            saveDraftBtn.disabled = true;
+            
+            // Draft saxla
+            const formData = new FormData(examForm);
+            formData.append("submit_action", "save_draft");
+
+            fetch(window.location.href, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Manual draft response:', data);
+                hasUnsavedChanges = false;
+
+                if (data.finished && data.redirect_url) {
+                    localStorage.removeItem(storageKey);
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+
+                // Uğur mesajı
+                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Saxlanıldı!';
+                showNotification("✓ Draft saxlanıldı", "success", 2000);
+                
+                setTimeout(() => {
+                    saveDraftBtn.innerHTML = originalText;
+                    saveDraftBtn.disabled = false;
+                }, 2000);
+            })
+            .catch(err => {
+                console.error("Draft saxlanarkən xəta:", err);
+                saveDraftBtn.innerHTML = originalText;
+                saveDraftBtn.disabled = false;
+                showNotification("Xəta baş verdi", "error", 3000);
+            });
         });
     }
 
-    // 5 dəqiqədən bir autosave
+    // ✅ DƏYİŞİKLİK: 5 dəqiqəlik interval-ı silmək olar, çünki artıq avtomatik saxlama var
+    // Amma təhlükəsizlik üçün saxlaya bilərik (backup kimi)
     setInterval(() => {
-        sendDraft("autosave");
+        if (hasUnsavedChanges) {
+            console.log('Periodic auto-save (backup)...');
+            sendDraft("autosave");
+        }
     }, 5 * 60 * 1000);
 
     // Səhifədən çıxanda xəbərdarlıq
@@ -692,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentIndex > 0) showSlide(currentIndex - 1);
     });
 
-    // Başlanğıc slayd – localStorage-dan oxu
+    // Başlanğıc slayd
     const savedIndex = parseInt(localStorage.getItem(storageKey));
     if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < totalSlides) {
         currentIndex = savedIndex;
@@ -702,4 +752,9 @@ document.addEventListener('DOMContentLoaded', function() {
     showSlide(currentIndex);
 });
 </script>
+
+{% block extraJs %}
+    <script src="{% static 'js/paint_answer.js' %}"></script>
+{% endblock %}
+
 {% endblock %}
