@@ -170,6 +170,8 @@ class ExamForm(forms.ModelForm):
             "description",
             "exam_type",
             "is_active",
+            "start_datetime",      # ✅ YENİ
+            "end_datetime",        # ✅ YENİ
             "is_public",
             "allowed_users",
             "allowed_groups",
@@ -194,6 +196,20 @@ class ExamForm(forms.ModelForm):
             "is_active": forms.CheckboxInput(attrs={
                 "class": "form-check-input",
             }),
+            
+            # ✅ YENİ: DateTime widget-ləri
+            "start_datetime": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local",
+                "placeholder": "Başlama tarixi və vaxtı",
+            }, format='%Y-%m-%dT%H:%M'),
+            
+            "end_datetime": forms.DateTimeInput(attrs={
+                "class": "form-control",
+                "type": "datetime-local",
+                "placeholder": "Bitmə tarixi və vaxtı",
+            }, format='%Y-%m-%dT%H:%M'),
+            
             "is_public": forms.CheckboxInput(attrs={
                 "class": "form-check-input",
             }),
@@ -226,6 +242,8 @@ class ExamForm(forms.ModelForm):
             "description": "Qısa izah",
             "exam_type": "İmtahan tipi",
             "is_active": "Aktiv olsun?",
+            "start_datetime": "Başlama tarixi və vaxtı",  # ✅ YENİ
+            "end_datetime": "Bitmə tarixi və vaxtı",      # ✅ YENİ
             "is_public": "Hamı üçün açıqdır?",
             "allowed_users": "Fərdi icazəli istifadəçilər",
             "allowed_groups": "İcazəli qruplar",
@@ -243,18 +261,20 @@ class ExamForm(forms.ModelForm):
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        # ✅ YENİ: DateTime field-lərini input_formats ilə düzəlt
+        self.fields['start_datetime'].input_formats = ['%Y-%m-%dT%H:%M']
+        self.fields['end_datetime'].input_formats = ['%Y-%m-%dT%H:%M']
+
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.all().order_by("username")
         self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by("name")
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
-            # Məsələn, bütün user-lar + özünü çıxmaq (istəsən burada filter şərtini sərtləşdirə bilərsən)
             self.fields["allowed_users"].queryset = User.objects.exclude(
                 id=user.id
             ).order_by("username")
 
-            # Yalnız HƏMİN müəllimin yaratdığı qruplar
             self.fields["allowed_groups"].queryset = StudentGroup.objects.filter(
                 teacher=user
             ).order_by("name")
@@ -268,12 +288,28 @@ class ExamForm(forms.ModelForm):
             raise forms.ValidationError("Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456).")
 
         return code
+    
+    def clean(self):
+        """
+        ✅ YENİ: Tarix validasiyası
+        """
+        cleaned_data = super().clean()
+        start_dt = cleaned_data.get('start_datetime')
+        end_dt = cleaned_data.get('end_datetime')
+
+        # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
+        if start_dt and end_dt:
+            if start_dt >= end_dt:
+                raise forms.ValidationError(
+                    "Bitmə tarixi başlama tarixindən sonra olmalıdır."
+                )
+
+        return cleaned_data
 
 
 class ExamQuestionCreateForm(forms.ModelForm):
     """
-    Bu forma 1 sualı + 3-4 variantı eyni formda yaratmaq/edə bilmək üçündür (test tipində).
-    Yazılı imtahan üçün options hissəsini istifadə etməyəcəyik.
+    Bu forma 1 sualı + 3-4 variantı eyni formda yaratmaq/edit edə bilmək üçündür.
     """
 
     # ---- Variant field-ləri ----
@@ -320,28 +356,10 @@ class ExamQuestionCreateForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
     )
-      # ---- Media (optional) ----
-    image = forms.ImageField(
-        label="Şəkil (optional)",
-        required=False,
-        widget=forms.ClearableFileInput(attrs={
-            "class": "form-control",
-            "accept": "image/*"
-        })
-    )
-
-    video = forms.FileField(
-        label="Video (optional)",
-        required=False,
-        widget=forms.ClearableFileInput(attrs={
-            "class": "form-control",
-            "accept": "video/mp4,video/webm,video/quicktime"
-        })
-    )
 
     class Meta:
         model = ExamQuestion
-        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer", "image", "video", "enable_paint", "enable_paint"]
+        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer", "image", "video", "enable_paint"]
         widgets = {
             "text": forms.Textarea(attrs={
                 "class": "form-control",
@@ -363,7 +381,15 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 "rows": 3,
                 "placeholder": "Yazılı/praktiki üçün ideal cavab (istəyə görə)...",
             }),
-            
+            # ✅ DƏYİŞİKLİK: ClearableFileInput ilə clear funksionallığı
+            "image": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "image/*"
+            }),
+            "video": forms.ClearableFileInput(attrs={
+                "class": "form-control",
+                "accept": "video/mp4,video/webm,video/quicktime"
+            }),
         }
         labels = {
             "text": "Sual",
@@ -378,21 +404,19 @@ class ExamQuestionCreateForm(forms.ModelForm):
     def __init__(self, *args, exam_type=None, subject_blocks=None, **kwargs):
         """
         exam_type (test / written) view-dən ötürülür.
-        - written üçün: answer_mode required olmasın.
-        - edit zamanı mövcud variantlar inputlara dolsun.
         """
         self.exam_type = exam_type
         super().__init__(*args, **kwargs)
 
+        # Yazılı imtahanlarda enable_paint field-ini silmə
         if self.exam_type != "written":
             self.fields.pop("enable_paint", None)
             
-        # 1. Blokları dropdown-a doldururuq
+        # Blokları dropdown-a doldururuq
         if subject_blocks is not None:
             self.fields['block'].queryset = subject_blocks
             self.fields['block'].empty_label = "Ümumi (Heç bir bloka aid deyil)"
         else: 
-            # Əgər blok göndərilməyibsə, boş siyahı olsun
             self.fields['block'].queryset = QuestionBlock.objects.none()
             
         # Yazılı imtahanlarda answer_mode-u məcburi etməyək
@@ -407,17 +431,15 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 self.fields[f"option{idx}_text"].initial = opt.text
                 self.fields[f"option{idx}_is_correct"].initial = opt.is_correct
 
-    # ---- Validasiya ----
     def clean(self):
         cleaned_data = super().clean()
         answer_mode = cleaned_data.get("answer_mode")
 
-        # Yazılı imtahanda options validasiyasını tam skip edirik
+        # Yazılı imtahanda options validasiyasını skip edirik
         if self.exam_type == "written":
-            # answer_mode boş olsa belə, sonradan view-də single kimi set edəcəyik
             return cleaned_data
 
-        # Burdan aşağısı yalnız TEST üçündür
+        # TEST üçün variant validasiyası
         opts = []
         for i in range(1, 5):
             text = cleaned_data.get(f"option{i}_text")
@@ -425,7 +447,6 @@ class ExamQuestionCreateForm(forms.ModelForm):
             if text:
                 opts.append((text, is_correct))
 
-        # Əgər cavab rejimi single/multiple-dirsə və heç bir variant verilməyibsə:
         if answer_mode in ("single", "multiple") and not opts:
             raise forms.ValidationError("Heç bir variant daxil edilməyib.")
 
@@ -442,12 +463,9 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
         return cleaned_data
 
-    # ---- Yeni sual yaradanda variantları yaratmaq üçün ----
     def create_options(self, question_instance: ExamQuestion):
         """
-        Form valid olandan sonra ExamQuestion yarandıqdan sonra
-        bu metod çağırılaraq ExamQuestionOption obyektləri yaradılır.
-        Boş text olan variantlar ignore olunur.
+        Yeni sual yaradılanda variantları yarat
         """
         for i in range(1, 5):
             text = self.cleaned_data.get(f"option{i}_text")
@@ -459,12 +477,9 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     is_correct=bool(is_correct),
                 )
 
-    # ---- Edit zamanı köhnə variantları silib yenidən yaratmaq üçün ----
     def save_options(self, question_instance: ExamQuestion):
         """
-        Edit zamanı:
-        1. Köhnə variantların hamısını silir,
-        2. Formdan gələn yeni dəyərlərə uyğun variantlar yaradır.
+        Edit zamanı köhnə variantları sil və yenilərini yarat
         """
         question_instance.options.all().delete()
         self.create_options(question_instance)

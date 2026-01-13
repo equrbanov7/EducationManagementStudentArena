@@ -274,11 +274,6 @@ def validate_video_size(f):
 
 class Exam(models.Model):
     
-  
-    
-    
-   
-    
     EXAM_TYPE_CHOICES = (
         ("test", "Test imtahanı"),
         ("written", "Yazılı / praktiki"),
@@ -298,6 +293,21 @@ class Exam(models.Model):
         max_length=20,
         choices=EXAM_TYPE_CHOICES,
         default="test",
+    )
+
+    # ✅ YENİ: Başlama və Bitmə tarixləri
+    start_datetime = models.DateTimeField(
+        "Başlama tarixi və vaxtı",
+        blank=True,
+        null=True,
+        help_text="İmtahan bu tarixdən əvvəl başlamaq olmaz. Boş saxlasanız, hər zaman başlamaq olar."
+    )
+    
+    end_datetime = models.DateTimeField(
+        "Bitmə tarixi və vaxtı",
+        blank=True,
+        null=True,
+        help_text="İmtahan bu tarixdən sonra başlamaq olmaz. Boş saxlasanız, son tarix olmaz."
     )
 
     # Exam aktivdir?
@@ -330,6 +340,7 @@ class Exam(models.Model):
         null=True,
         help_text="Məs: 1, 2, 3... Boş saxlasanız, attempts limitsiz olacaq."
     )
+    
     random_question_count = models.PositiveIntegerField(
         "Tələbəyə göstəriləcək sual sayı",
         default=10,
@@ -370,7 +381,6 @@ class Exam(models.Model):
     )
 
     slug = models.SlugField(max_length=220, unique=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -381,14 +391,30 @@ class Exam(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_exam_type_display()})"
 
-    # ---------- SLUG ----------
-
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
-            # slug unikallığı üçün random əlavə edirik
             self.slug = f"{base_slug}-{get_random_string(6)}"
         super().save(*args, **kwargs)
+
+    # ✅ YENİ: Tarix yoxlaması metodları
+    def is_before_start(self) -> bool:
+        """İmtahan hələ başlamayıb?"""
+        if not self.start_datetime:
+            return False
+        from django.utils import timezone
+        return timezone.now() < self.start_datetime
+    
+    def is_after_end(self) -> bool:
+        """İmtahan bitib?"""
+        if not self.end_datetime:
+            return False
+        from django.utils import timezone
+        return timezone.now() > self.end_datetime
+    
+    def is_currently_active(self) -> bool:
+        """İmtahan indi aktiv vaxt aralığındadır?"""
+        return not self.is_before_start() and not self.is_after_end()
 
     # ---------- ATTEMPT LIMIT MƏNTİQİ ----------
 
@@ -396,46 +422,33 @@ class Exam(models.Model):
         """
         Bu user üçün neçə attempt qalıb?
         None → limitsiz deməkdir.
-        Draft attempt-lər limitsayımda nəzərə alınmır.
-
-        Qeyd: ExamAttempt modeli bu Exam-ə FK ilə `related_name="attempts"`
-        verildiyi üçün burada `self.attempts` istifadə olunur.
         """
         if not self.max_attempts_per_user:
-            return None  # limitsiz
+            return None
 
         used = (
             self.attempts
             .filter(user=user)
-            .exclude(status="draft")  # draft = davam edən / saxlanmış
+            .exclude(status="draft")
             .count()
         )
         left = self.max_attempts_per_user - used
         return max(left, 0)
 
-    # ---------- ACCESS NƏZARƏTİ (user + qrup + kod) ----------
-
+    # ---------- ACCESS NƏZARƏTİ ----------
 
     def _user_in_allowed_groups(self, user: User) -> bool:
-        """
-        User hər hansı icazəli qrupun üzvüdürmü?
-        """
+        """User hər hansı icazəli qrupun üzvüdürmü?"""
         return self.allowed_groups.filter(students=user).exists()
 
     def can_user_see(self, user: User) -> bool:
-        """
-        Student imtahan kartını / məlumatını görməlidirmi?
-        Burada hələ cəhd limiti yoxlanmır, yalnız 'görmə' hüququ.
-        """
-        # 1) Imtahan müəllifi hər zaman görür
+        """Student imtahan kartını görməlidirmi?"""
         if user == self.author:
             return True
 
-        # 2) Aktiv deyilsə – heç kimə göstərməyək
         if not self.is_active:
             return False
 
-        # 3) Tam public + heç bir əlavə məhdudiyyət yoxdursa
         if (
             self.is_public
             and not self.allowed_users.exists()
@@ -444,39 +457,40 @@ class Exam(models.Model):
         ):
             return True
 
-        # 4) Fərdi user kimi icazəlidir
         if self.allowed_users.filter(id=user.id).exists():
             return True
 
-        # 5) Qrup vasitəsilə icazəlidir
         if self._user_in_allowed_groups(user):
             return True
 
-        # 6) Kodla giriş: kart görünsün, amma start üçün kod tələb olunacaq
         if self.access_code:
             return True
 
-        # 7) Ümumiyyətlə giriş icazəsi yoxdur
         return False
 
     def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
         """
         Student yeni attempt başlaya bilərmi?
-
-        Geri qaytarır:
-        - (True, None)    → hər şey qaydasındadır, başlaya bilər
-        - (False, reason) → niyə başlaya bilmədiyi barədə mesaj
         """
         # 1) Aktiv deyil
         if not self.is_active:
             return False, "Bu imtahan hazırda aktiv deyil."
+
+        # ✅ YENİ: Tarix yoxlaması
+        if self.is_before_start():
+            from django.utils import timezone
+            start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
+            return False, f"İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"
+        
+        if self.is_after_end():
+            return False, "İmtahan müddəti bitib."
 
         # 2) Cəhd limiti
         left = self.attempts_left_for(user)
         if left is not None and left <= 0:
             return False, "Artıq bütün icazə verilən cəhdlərinizi istifadə etmisiniz."
 
-        # 3) Müəllif (exam sahibi) – cəhd limiti keçməyibsə, hər zaman başlaya bilər
+        # 3) Müəllif
         if user == self.author:
             return True, None
 
@@ -485,24 +499,18 @@ class Exam(models.Model):
             or self._user_in_allowed_groups(user)
         )
 
-        # 4) Ümumiyyətlə kod təyin olunmayıbsa
+        # 4) Kod yoxdursa
         if not self.access_code:
-            # Publicdirsə – hamı başlaya bilər
             if self.is_public:
                 return True, None
-
-            # Public deyil, amma user icazəli siyahıdadırsa
             if in_allowed_any:
                 return True, None
-
             return False, "Bu imtahan üçün giriş icazəniz yoxdur."
 
-        # 5) Kod təyin olunubsa
-        # 5.1: User allowed_users və ya allowed_groupdadırsa – kod tələb etməyək
+        # 5) Kod varsa
         if in_allowed_any:
             return True, None
 
-        # 5.2: Yalnız kodla giriş
         if not code:
             return False, "İmtahan kodu tələb olunur."
         if code != self.access_code:
@@ -510,37 +518,23 @@ class Exam(models.Model):
 
         return True, None
 
-    
     def requires_code_for(self, user: User) -> bool:
-        """
-        Bu user imtahana başlamaq üçün kod yazmalıdırmı?
-
-        müəllif və ya ümumi müəllim → yox
-        access_code boşdursa → yox
-        allowed_users / allowed_groups içindədirsə → yox
-        qalan hallarda, access_code varsa → bəli (kod tələb olunur)
-        """
-        # müəllim və ya müəllif üçün kod tələb etmirik
+        """Bu user imtahana başlamaq üçün kod yazmalıdırmı?"""
         if user == self.author or getattr(user, "is_teacher", False):
             return False
 
-        # imtahan aktiv deyilsə, ümumiyyətlə girmək olmaz
         if not self.is_active:
             return False
 
-        # heç bir kod təyin olunmayıbsa
         if not self.access_code:
             return False
 
-        # fərdi icazəsi varsa
         if self.allowed_users.filter(id=user.id).exists():
             return False
 
-        # qrup vasitəsilə icazəsi varsa
         if self._user_in_allowed_groups(user):
             return False
 
-        # yuxarıdakılardan heç biri deyilsə, kod tələb olunur
         return True
 
     

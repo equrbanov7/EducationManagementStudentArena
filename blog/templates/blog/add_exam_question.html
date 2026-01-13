@@ -4,6 +4,55 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/add_exam_question.css' %}">
+    <style>
+        .media-preview {
+            margin-top: 15px;
+            padding: 15px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .media-preview img,
+        .media-preview video {
+            max-width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .media-preview-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        .clear-media-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .clear-media-btn:hover {
+            background: #dc2626;
+        }
+        .file-input-wrapper {
+            position: relative;
+        }
+        .file-name-display {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -24,7 +73,7 @@
         {% endif %}
     </div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="question-form">
         {% csrf_token %}
         
         {% if form.non_field_errors %}
@@ -37,47 +86,74 @@
             <label for="{{ form.text.id_for_label }}">Sualın mətni:</label>
             {{ form.text }}
             <div class="error-msg">{{ form.text.errors }}</div>
+            
             <div class="form-row">
+                <!-- Şəkil -->
                 <div class="form-group half">
-                  <label for="{{ form.image.id_for_label }}">Şəkil (optional):</label>
-                  {{ form.image }}
-                  <div class="error-msg">{{ form.image.errors }}</div>
-              
-                  {% if editing and form.instance.image %}
-                    <div style="margin-top:10px;">
-                      <img src="{{ form.instance.image.url }}" alt="Sual şəkli" style="max-width:100%; border-radius:12px;">
+                    <label for="{{ form.image.id_for_label }}">Şəkil (optional):</label>
+                    <div class="file-input-wrapper">
+                        {{ form.image }}
+                        <div id="image-file-name" class="file-name-display" style="display: none;"></div>
                     </div>
-                  {% endif %}
+                    <div class="error-msg">{{ form.image.errors }}</div>
+                
+                    {% if editing and form.instance.image %}
+                        <div class="media-preview" id="current-image-preview">
+                            <span class="media-preview-label">Mövcud şəkil:</span>
+                            <img src="{{ form.instance.image.url }}" alt="Sual şəkli" id="current-image">
+                            <button type="button" class="clear-media-btn" onclick="clearImage()">
+                                Şəkli sil
+                            </button>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="media-preview" id="new-image-preview" style="display: none;">
+                        <span class="media-preview-label">Yeni şəkil:</span>
+                        <img src="" alt="Preview" id="new-image">
+                    </div>
                 </div>
-              
+            
+                <!-- Video -->
                 <div class="form-group half">
-                  <label for="{{ form.video.id_for_label }}">Video (optional):</label>
-                  {{ form.video }}
-                  <div class="error-msg">{{ form.video.errors }}</div>
-              
-                  {% if editing and form.instance.video %}
-                    <div style="margin-top:10px;">
-                      <video controls style="width:100%; border-radius:12px;">
-                        <source src="{{ form.instance.video.url }}">
-                      </video>
+                    <label for="{{ form.video.id_for_label }}">Video (optional):</label>
+                    <div class="file-input-wrapper">
+                        {{ form.video }}
+                        <div id="video-file-name" class="file-name-display" style="display: none;"></div>
                     </div>
-                  {% endif %}
+                    <div class="error-msg">{{ form.video.errors }}</div>
+                
+                    {% if editing and form.instance.video %}
+                        <div class="media-preview" id="current-video-preview">
+                            <span class="media-preview-label">Mövcud video:</span>
+                            <video controls style="width:100%; border-radius:8px;" id="current-video">
+                                <source src="{{ form.instance.video.url }}">
+                            </video>
+                            <button type="button" class="clear-media-btn" onclick="clearVideo()">
+                                Videonu sil
+                            </button>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="media-preview" id="new-video-preview" style="display: none;">
+                        <span class="media-preview-label">Yeni video:</span>
+                        <video controls style="width:100%; border-radius:8px;" id="new-video">
+                            <source src="" id="new-video-source">
+                        </video>
+                    </div>
                 </div>
 
                 {% if form.enable_paint %}
                     <div class="form-check mt-2">
-                    {{ form.enable_paint }}
-                    <label class="form-check-label" for="{{ form.enable_paint.id_for_label }}">
-                        Paint cavabı aktiv olsun
-                    </label>
-                    {% if form.enable_paint.errors %}
-                        <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
-                    {% endif %}
+                        {{ form.enable_paint }}
+                        <label class="form-check-label" for="{{ form.enable_paint.id_for_label }}">
+                            Paint cavabı aktiv olsun
+                        </label>
+                        {% if form.enable_paint.errors %}
+                            <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
+                        {% endif %}
                     </div>
-              {% endif %}
-              
-              </div>
-              
+                {% endif %}
+            </div>
         </div>
         
         {% if exam.exam_type == "written" %}
@@ -88,6 +164,7 @@
             <p class="help-text" style="font-size: 0.85em; color: #666;">Əgər sual heç bir bloka aid deyilsə, boş saxlaya bilərsiniz.</p>
         </div>
         {% endif %}
+        
         {% if exam.exam_type == "test" %}
             <div class="form-row">
                 <div class="form-group half">
@@ -124,7 +201,7 @@
                     <div class="variant-input">
                         <label>1-ci variant:</label>
                         {{ form.option1_text }}
-                    </div>
+                    </div> 
                     <div class="variant-check">
                         <label class="custom-checkbox-container">
                             {{ form.option1_is_correct }}
@@ -191,4 +268,124 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[name="image"]');
+    const videoInput = document.querySelector('input[name="video"]');
+    const imageFileName = document.getElementById('image-file-name');
+    const videoFileName = document.getElementById('video-file-name');
+    const newImagePreview = document.getElementById('new-image-preview');
+    const newVideoPreview = document.getElementById('new-video-preview');
+    const newImage = document.getElementById('new-image');
+    const newVideo = document.getElementById('new-video');
+    const newVideoSource = document.getElementById('new-video-source');
+
+    // Şəkil seçiləndə preview göstər
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Fayl adını göstər
+                imageFileName.textContent = file.name;
+                imageFileName.style.display = 'block';
+
+                // Preview göstər
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newImage.src = e.target.result;
+                    newImagePreview.style.display = 'block';
+                    
+                    // Köhnə preview-i gizlət (əgər varsa)
+                    const currentPreview = document.getElementById('current-image-preview');
+                    if (currentPreview) {
+                        currentPreview.style.opacity = '0.5';
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imageFileName.style.display = 'none';
+                newImagePreview.style.display = 'none';
+            }
+        });
+    }
+
+    // Video seçiləndə preview göstər
+    if (videoInput) {
+        videoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Fayl adını göstər
+                videoFileName.textContent = file.name;
+                videoFileName.style.display = 'block';
+
+                // Preview göstər
+                const url = URL.createObjectURL(file);
+                newVideoSource.src = url;
+                newVideo.load();
+                newVideoPreview.style.display = 'block';
+                
+                // Köhnə preview-i gizlət (əgər varsa)
+                const currentPreview = document.getElementById('current-video-preview');
+                if (currentPreview) {
+                    currentPreview.style.opacity = '0.5';
+                }
+            } else {
+                videoFileName.style.display = 'none';
+                newVideoPreview.style.display = 'none';
+            }
+        });
+    }
+});
+
+// Şəkli silmək
+function clearImage() {
+    if (confirm('Şəkli silmək istədiyinizə əminsiniz?')) {
+        const imageInput = document.querySelector('input[name="image"]');
+        const clearCheckbox = document.querySelector('input[name="image-clear"]');
+        
+        if (clearCheckbox) {
+            clearCheckbox.checked = true;
+        }
+        
+        // Preview-i gizlət
+        const currentPreview = document.getElementById('current-image-preview');
+        if (currentPreview) {
+            currentPreview.style.display = 'none';
+        }
+        
+        // Input-u təmizlə
+        if (imageInput) {
+            imageInput.value = '';
+        }
+        
+        alert('Şəkil silinəcək. Dəyişiklikləri saxlamaq üçün "Yadda saxla" düyməsinə basın.');
+    }
+}
+
+// Videonu silmək
+function clearVideo() {
+    if (confirm('Videonu silmək istədiyinizə əminsiniz?')) {
+        const videoInput = document.querySelector('input[name="video"]');
+        const clearCheckbox = document.querySelector('input[name="video-clear"]');
+        
+        if (clearCheckbox) {
+            clearCheckbox.checked = true;
+        }
+        
+        // Preview-i gizlət
+        const currentPreview = document.getElementById('current-video-preview');
+        if (currentPreview) {
+            currentPreview.style.display = 'none';
+        }
+        
+        // Input-u təmizlə
+        if (videoInput) {
+            videoInput.value = '';
+        }
+        
+        alert('Video silinəcək. Dəyişiklikləri saxlamaq üçün "Yadda saxla" düyməsinə basın.');
+    }
+}
+</script>
 {% endblock %}

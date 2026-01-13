@@ -46,7 +46,7 @@ urlpatterns = [
     # 1. Sabit URL-lər (Slug olmayanlar ən birinci gəlir)
     path("exams/", views.teacher_exam_list, name="teacher_exam_list"),
     path("exams/available/", views.student_exam_list, name="student_exam_list"),
-    path("exams/create/", views.create_exam, name="create_exam"),
+    path("exams/create/", views.createAndEditExamView, name="create_exam"),
     path("exams/code-check/", views.exam_code_check, name="exam_code_check"),
     path("exams/assigned/", views.assigned_student_exam_list, name="assigned_exam_list"),
 
@@ -87,7 +87,7 @@ urlpatterns = [
     # İmtahan əməliyyatları
     path("exams/<slug:slug>/add-question/", views.add_exam_question, name="add_exam_question"),
     path("exams/<slug:slug>/toggle-active/", views.toggle_exam_active, name="toggle_exam_active"),
-    path("exams/<slug:slug>/edit/", views.edit_exam, name="edit_exam"),
+    path("exams/<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("exams/<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
     path("exams/<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
     

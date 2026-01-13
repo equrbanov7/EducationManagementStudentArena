@@ -38,7 +38,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # deploy zamani silin!!
 # ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
-ALLOWED_HOSTS = ["172.20.10.11", "localhost", "127.0.0.1","0.0.0.0","192.168.1.73","172.20.10.11"]
+ALLOWED_HOSTS = ["172.20.10.11", "localhost", "127.0.0.1","0.0.0.0","192.168.1.73","172.20.10.11","192.168.1.77"]
 
 
 
