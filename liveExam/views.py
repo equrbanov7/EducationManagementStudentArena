@@ -454,21 +454,28 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404("Not allowed.")
 
-    # join_url = request.build_absolute_uri(
-    #     reverse("liveExam:join_page", kwargs={"pin": session.pin})
-    # )
     host = getattr(settings, "LAN_HOST", None) or request.get_host()
     join_url = f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
+
+    exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
+
+    selected = _get_total_questions(session)  # səndə necə hesablanırsa
+    # ✅ təhlükəsizlik: selected max-dan böyük ola bilməsin
+    if exam_total > 0:
+        selected = max(1, min(selected, exam_total))
+    else:
+        selected = 0
 
     context = {
         "session": session,
         "join_url": join_url,
         "qr_url": reverse("liveExam:qr_png", kwargs={"pin": session.pin}),
-        "total_questions": _get_total_questions(session),
-        "exam_total_questions": ExamQuestion.objects.filter(exam=session.exam).count(),
-        "selected_total_questions": _get_total_questions(session),
+        "total_questions": selected,
+        "exam_total_questions": exam_total,
+        "selected_total_questions": selected,
     }
     return render(request, "liveExam/host_lobby.html", context)
+
 
 
 # ------------------------
@@ -685,7 +692,7 @@ def host_start_game(request, pin):
     else:
         session.selected_question_ids = random.sample(all_ids, k=desired)
         session.question_limit = desired
-
+ 
     # 3) Oyun reset
     session.current_index = 0
     session.state = LiveSession.STATE_QUESTION

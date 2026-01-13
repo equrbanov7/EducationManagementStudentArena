@@ -1,18 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Yeni imtahan{% endblock %}
+{% block title %}
+    {% if is_editing %}
+        {{ exam.title }} - Redaktə
+    {% else %}
+        Yeni imtahan
+    {% endif %}
+{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/create_exam.css' %}">
+    <link rel="stylesheet" href="{% static 'css/createAndEditExam.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="create-exam-page-wrapper">
         <div class="create-exam-card">
             <div class="card-header">
-                <h1>Yeni imtahan yarat</h1>
-                <p>Tələbələr üçün yeni bir bilik yoxlaması hazırlayın.</p>
+                {% if is_editing %}
+                    <h1><i class="fas fa-edit"></i> İmtahanı redaktə et</h1>
+                    <p>"{{ exam.title }}" imtahanını yeniləyin.</p>
+                {% else %}
+                    <h1><i class="fas fa-plus-circle"></i> Yeni imtahan yarat</h1>
+                    <p>Tələbələr üçün yeni bir bilik yoxlaması hazırlayın.</p>
+                {% endif %}
             </div>
 
             <form method="post" class="exam-form" novalidate>
@@ -66,7 +77,63 @@
                         {% endif %}
                     </div>
 
-                    {# --- Vaxt parametrləri --- #}
+                    {# ================= TARIX BLOKU ================= #}
+                    <div class="form-section-title span-full">
+                        <h2><i class="far fa-clock text-primary"></i> Tarix məhdudiyyətləri</h2>
+                        <p>İmtahanın aktiv qalacağı müddəti təyin edin.</p>
+                    </div>
+
+                    <div class="date-range-wrapper span-full">
+                        
+                        {# --- START DATE --- #}
+                        <div class="date-card">
+                            <div class="date-card-header">
+                                <span class="badge-start">Başlama</span>
+                                <i class="far fa-calendar-alt icon-faded"></i>
+                            </div>
+                            <div class="date-input-container">
+                                {{ form.start_datetime }}
+                            </div>
+                            <div class="date-footer">
+                                <small>Bu tarixdən tez başlamaq olmaz.</small>
+                                <small>Boş buraxsan, hər zaman başlamaq olar.</small>
+                            </div>
+                            {% if form.start_datetime.errors %}
+                                <div class="field-error-floating">{{ form.start_datetime.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        {# --- ARROW INDICATOR --- #}
+                        <div class="date-separator">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+
+                        {# --- END DATE --- #}
+                        <div class="date-card">
+                            <div class="date-card-header">
+                                <span class="badge-end">Bitmə</span>
+                                <i class="far fa-calendar-times icon-faded"></i>
+                            </div>
+                            <div class="date-input-container">
+                                {{ form.end_datetime }}
+                            </div>
+                            <div class="date-footer">
+                                <small>Bu tarixdən sonra deaktiv olur.</small>
+                                <small>Boş buraxsan, heç vaxt bitməz.</small>
+                            </div>
+                            {% if form.end_datetime.errors %}
+                                <div class="field-error-floating">{{ form.end_datetime.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    {# ================= VAXT PARAMETRLƏRİ ================= #}
+                    <div class="form-section-title span-full">
+                        <h2><i class="fas fa-stopwatch text-info"></i> Vaxt parametrləri</h2>
+                        <p>İmtahan müddəti və sual vaxtlarını təyin edin.</p>
+                    </div>
+
                     <div class="form-group">
                         {{ form.total_duration_minutes.label_tag }}
                         <div class="input-with-icon">
@@ -111,7 +178,7 @@
 
                     {# ================= GİRİŞ HÜQUQLARI BLOKU ================= #}
                     <div class="form-section-title span-full">
-                        <h2>Giriş hüquqları</h2>
+                        <h2><i class="fas fa-users text-success"></i> Giriş hüquqları</h2>
                         <p>İmtahanı kimlərin görə biləcəyini burada idarə et.</p>
                     </div>
 
@@ -133,68 +200,68 @@
                         {% endif %}
                     </div>
 
-        {# --- Məhdudlaşdırılmış giriş: Qruplar + fərdi user-lər --- #}
-        <div id="access-restrictions" class="access-section span-full">
-            <div class="access-section-grid">
-                
-                <div class="form-group custom-selector-group">
-                    <label class="form-label-custom">İcazəli Qruplar</label>
-                    
-                    <div class="search-wrapper">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="groupSearchInput" class="custom-search-input" placeholder="Qrup axtar...">
+                    {# --- Məhdudlaşdırılmış giriş --- #}
+                    <div id="access-restrictions" class="access-section span-full">
+                        <div class="access-section-grid">
+                            
+                            <div class="form-group custom-selector-group">
+                                <label class="form-label-custom">İcazəli Qruplar</label>
+                                
+                                <div class="search-wrapper">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="groupSearchInput" class="custom-search-input" placeholder="Qrup axtar...">
+                                </div>
+
+                                <div id="groupListContainer" class="custom-list-container">
+                                    <div class="loading-text">Yüklənir...</div>
+                                </div>
+
+                                <div class="selection-counter">
+                                    Seçilib: <span id="groupSelectedCount">0</span>
+                                </div>
+
+                                <div style="display: none;">
+                                    {{ form.allowed_groups }}
+                                </div>
+                                
+                                {% if form.allowed_groups.errors %}
+                                    <div class="field-error">{{ form.allowed_groups.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group custom-selector-group">
+                                <label class="form-label-custom">İcazəli Tələbələr (Fərdi)</label>
+                                
+                                <div class="search-wrapper">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="userSearchInput" class="custom-search-input" placeholder="Tələbə axtar (ad, username)...">
+                                </div>
+
+                                <div id="userListContainer" class="custom-list-container">
+                                    <div class="loading-text">Yüklənir...</div>
+                                </div>
+
+                                <div class="selection-counter">
+                                    Seçilib: <span id="userSelectedCount">0</span>
+                                </div>
+
+                                <div style="display: none;">
+                                    {{ form.allowed_users }}
+                                </div>
+
+                                {% if form.allowed_users.errors %}
+                                    <div class="field-error">{{ form.allowed_users.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <p class="access-help mt-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Əgər heç kim seçilməsə və "Hamı üçün açıq" deyilsə, imtahanı yalnız siz görə biləcəksiniz.
+                        </p>
                     </div>
 
-                    <div id="groupListContainer" class="custom-list-container">
-                        <div class="loading-text">Yüklənir...</div>
-                    </div>
-
-                    <div class="selection-counter">
-                        Seçilib: <span id="groupSelectedCount">0</span>
-                    </div>
-
-                    <div style="display: none;">
-                        {{ form.allowed_groups }}
-                    </div>
-                    
-                    {% if form.allowed_groups.errors %}
-                        <div class="field-error">{{ form.allowed_groups.errors.0 }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group custom-selector-group">
-                    <label class="form-label-custom">İcazəli Tələbələr (Fərdi)</label>
-                    
-                    <div class="search-wrapper">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="userSearchInput" class="custom-search-input" placeholder="Tələbə axtar (ad, username)...">
-                    </div>
-
-                    <div id="userListContainer" class="custom-list-container">
-                        <div class="loading-text">Yüklənir...</div>
-                    </div>
-
-                    <div class="selection-counter">
-                        Seçilib: <span id="userSelectedCount">0</span>
-                    </div>
-
-                    <div style="display: none;">
-                        {{ form.allowed_users }}
-                    </div>
-
-                    {% if form.allowed_users.errors %}
-                        <div class="field-error">{{ form.allowed_users.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <p class="access-help mt-3">
-                <i class="fas fa-info-circle me-1"></i>
-                Əgər heç kim seçilməsə və "Hamı üçün açıq" deyilsə, imtahanı yalnız siz görə biləcəksiniz.
-            </p>
-        </div>
-
-                    {# --- İmtahan kodu (optional) --- #}
+                    {# --- İmtahan kodu --- #}
                     <div class="form-group span-full">
                         {{ form.access_code.label_tag }}
                         <div class="input-with-icon">
@@ -209,70 +276,62 @@
                             <div class="field-error">{{ form.access_code.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    {# ================= GİRİŞ HÜQUQLARI BLOKU SON ================= #}
                 </div>
 
                 <div class="form-actions">
-                    <a href="javascript:history.back()" class="btn-cancel">Ləğv et</a>
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-check"></i> Yarat
-                    </button>
+                    {% if is_editing %}
+                        <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel">
+                            <i class="fas fa-times"></i> Ləğv et
+                        </a>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-save"></i> Dəyişiklikləri saxla
+                        </button>
+                    {% else %}
+                        <a href="javascript:history.back()" class="btn-cancel">
+                            <i class="fas fa-times"></i> Ləğv et
+                        </a>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-check"></i> Yarat
+                        </button>
+                    {% endif %}
                 </div>
             </form>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
     
-            // ============================================================
-            // 1. PUBLIC / PRIVATE TOGGLE (ANIMASİYALI GÖRÜNÜŞ)
-            // ============================================================
-            // Django formunun checkbox ID-sini və idarə olunacaq bloku tapırıq
+            // PUBLIC / PRIVATE TOGGLE
             const isPublicCheckbox = document.getElementById("{{ form.is_public.id_for_label }}");
             const accessBlock = document.getElementById("access-restrictions");
     
             function toggleAccessBlock() {
                 if (!isPublicCheckbox || !accessBlock) return;
                 
-                // Əgər "Hamı üçün açıq" seçilibsə -> Bloku bağla (.closed əlavə et)
-                // Bu, CSS-dəki transition ilə animasiyalı bağlanacaq
                 if (isPublicCheckbox.checked) {
                     accessBlock.classList.add('closed');
                 } else {
-                    // Əks halda bloku aç (.closed sil)
                     accessBlock.classList.remove('closed');
                 }
             }
     
             if (isPublicCheckbox && accessBlock) {
-                // Səhifə yüklənəndə vəziyyəti yoxla (Edit zamanı vacibdir)
                 toggleAccessBlock();
-                
-                // Checkbox dəyişəndə funksiyanı yenidən çağır
                 isPublicCheckbox.addEventListener("change", toggleAccessBlock);
             }
     
-    
-            // ============================================================
-            // 2. SEARCHABLE MULTI-SELECT MƏNTİQİ (UNIVERSAL)
-            // ============================================================
-            /**
-            * Bu funksiya Django-nun gizli select elementini oxuyur və 
-            * bizim yaratdığımız Custom (checkbox-lu) siyahını qurur.
-            */
+            // SEARCHABLE MULTI-SELECT
             function setupCustomSelector(selectId, containerId, searchInputId, counterId) {
-                // Elementləri tapırıq
                 const hiddenSelect = document.getElementById(selectId);
                 const container = document.getElementById(containerId);
                 const searchInput = document.getElementById(searchInputId);
                 const counterSpan = document.getElementById(counterId);
     
-                // Əgər elementlər yoxdursa, heç nə etmə (xəta verməsin)
                 if (!hiddenSelect || !container) return;
     
-                // --- A) Siyahını Qurmaq ---
                 function buildList() {
-                    container.innerHTML = ''; // Siyahını təmizləyirik ki, dublikat olmasın
+                    container.innerHTML = '';
                     const options = Array.from(hiddenSelect.options);
     
                     if (options.length === 0) {
@@ -281,39 +340,27 @@
                     }
     
                     options.forEach(option => {
-                        // Sətir (Row) yaradırıq
                         const row = document.createElement('div');
                         row.className = 'list-item-row';
-                        // Axtarış üçün mətni kiçik hərflə data atributuna yazırıq
                         row.setAttribute('data-search', option.text.toLowerCase());
     
-                        // Unikal ID yaradırıq (label və input əlaqəsi üçün)
                         const checkboxId = `cb_${selectId}_${option.value}`;
     
-                        // HTML strukturunu qururuq
-                        // option.selected ? 'checked' : '' -> Edit zamanı seçilənləri işarələyir
                         row.innerHTML = `
                             <input type="checkbox" id="${checkboxId}" class="custom-item-checkbox" value="${option.value}" ${option.selected ? 'checked' : ''}>
                             <label for="${checkboxId}" class="custom-item-label">${option.text}</label>
                         `;
     
-                        // Checkbox elementini seçirik
                         const checkbox = row.querySelector('input');
     
-                        // EVENT 1: Checkbox dəyişəndə
                         checkbox.addEventListener('change', function() {
-                            // 1. Django-nun gizli select-ində uyğun option-u seçirik və ya seçimdən çıxarırıq
                             option.selected = this.checked;
-                            // 2. Sayğacı yeniləyirik
                             updateCounter();
                         });
     
-                        // EVENT 2: Sətrə (boşluğa) klikləyəndə də checkbox işləsin
                         row.addEventListener('click', function(e) {
-                            // Əgər birbaşa checkboxa və ya label-a basılmayıbsa
                             if (e.target !== checkbox && e.target.tagName !== 'LABEL') {
                                 checkbox.checked = !checkbox.checked;
-                                // 'change' eventini əl ilə işə salırıq ki, yuxarıdakı məntiq işləsin
                                 checkbox.dispatchEvent(new Event('change'));
                             }
                         });
@@ -322,16 +369,13 @@
                     });
                 }
     
-                // --- B) Sayğacı Yeniləmək ---
                 function updateCounter() {
                     if (counterSpan) {
-                        // Gizli select-də neçə dənə seçilibsə onu göstər
                         const count = hiddenSelect.selectedOptions.length;
                         counterSpan.textContent = count;
                     }
                 }
     
-                // --- C) Axtarış Məntiqi ---
                 if (searchInput) {
                     searchInput.addEventListener('input', function() {
                         const filter = this.value.toLowerCase();
@@ -339,7 +383,6 @@
     
                         rows.forEach(row => {
                             const text = row.getAttribute('data-search');
-                            // Mətn uyğundursa göstər (flex), deyilsə gizlət (none)
                             if (text.includes(filter)) {
                                 row.style.display = 'flex';
                             } else {
@@ -349,34 +392,25 @@
                     });
                 }
     
-                // Başlanğıcda funksiyaları işə sal
                 buildList();
                 updateCounter();
             }
     
-    
-            // ============================================================
-            // 3. FUNKSİYALARI İŞƏ SALMAQ
-            // ============================================================
-    
-            // A) Qruplar üçün (Django ID: id_allowed_groups)
             setupCustomSelector(
-                "id_allowed_groups",      // Gizli select ID
-                "groupListContainer",     // Siyahı qutusu ID
-                "groupSearchInput",       // Axtarış input ID
-                "groupSelectedCount"      // Sayğac ID
+                "id_allowed_groups",
+                "groupListContainer",
+                "groupSearchInput",
+                "groupSelectedCount"
             );
     
-            // B) İstifadəçilər üçün (Django ID: id_allowed_users)
             setupCustomSelector(
-                "id_allowed_users",       // Gizli select ID
-                "userListContainer",      // Siyahı qutusu ID
-                "userSearchInput",        // Axtarış input ID
-                "userSelectedCount"       // Sayğac ID
+                "id_allowed_users",
+                "userListContainer",
+                "userSearchInput",
+                "userSelectedCount"
             );
     
         });
     </script>
-
 
 {% endblock %}

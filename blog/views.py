@@ -808,23 +808,77 @@ def teacher_exam_list(request):
         "exams": exams,
     })
 
-
+ 
+ 
 @login_required
-def create_exam(request):
+def createAndEditExamView(request, slug=None):
+    """
+    Birləşdirilmiş view: Create və Edit
+    slug=None -> Yeni imtahan
+    slug=<value> -> Mövcud imtahanı redaktə
+    """
     _ensure_teacher(request.user)
+    
+    # Əgər slug varsa -> Edit mode
+    if slug:
+        exam = get_object_or_404(Exam, slug=slug, author=request.user)
+        is_editing = True
+    else:
+        exam = None
+        is_editing = False
 
     if request.method == "POST":
-        form = ExamForm(request.POST, user=request.user)
+        if is_editing:
+            # Edit mode
+            form = ExamForm(request.POST, instance=exam, user=request.user)
+        else:
+            # Create mode
+            form = ExamForm(request.POST, user=request.user)
+        
         if form.is_valid():
-            exam = form.save(commit=False)
-            exam.author = request.user
-            exam.save()
-            form.save_m2m()
-            return redirect("teacher_exam_detail", slug=exam.slug)
+            exam_instance = form.save(commit=False)
+            
+            # Yeni imtahanda author-u set et
+            if not is_editing:
+                exam_instance.author = request.user
+            
+            exam_instance.save()
+            form.save_m2m()  # ManyToMany field-ləri saxla
+            
+            messages.success(
+                request, 
+                "İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"
+            )
+            return redirect("teacher_exam_detail", slug=exam_instance.slug)
     else:
-        form = ExamForm(user=request.user)
+        # GET request
+        if is_editing:
+            form = ExamForm(instance=exam, user=request.user)
+        else:
+            form = ExamForm(user=request.user)
 
-    return render(request, "blog/create_exam.html", {"form": form})
+    return render(request, "blog/createAndEditExam.html", {
+        "form": form,
+        "exam": exam,
+        "is_editing": is_editing,
+    })
+ 
+# @login_required
+# def create_exam(request):
+#     _ensure_teacher(request.user)
+
+#     if request.method == "POST":
+#         form = ExamForm(request.POST, user=request.user)
+#         if form.is_valid():
+#             exam = form.save(commit=False)
+#             exam.author = request.user
+#             exam.save()
+#             form.save_m2m()
+#             return redirect("teacher_exam_detail", slug=exam.slug)
+#     else:
+#         form = ExamForm(user=request.user)
+
+#     return render(request, "blog/create_exam.html", {"form": form})
 
 
 @login_required
@@ -1496,23 +1550,23 @@ def toggle_exam_active(request, slug):
     return redirect("teacher_exam_detail", slug=exam.slug)
 
 
-@login_required
-def edit_exam(request, slug):
-    _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+# @login_required
+# def edit_exam(request, slug):
+#     _ensure_teacher(request.user)
+#     exam = get_object_or_404(Exam, slug=slug, author=request.user)
 
-    if request.method == "POST":
-        form = ExamForm(request.POST, instance=exam, user=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect("teacher_exam_detail", slug=exam.slug)
-    else:
-        form = ExamForm(instance=exam, user=request.user)
+#     if request.method == "POST":
+#         form = ExamForm(request.POST, instance=exam, user=request.user)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("teacher_exam_detail", slug=exam.slug)
+#     else:
+#         form = ExamForm(instance=exam, user=request.user)
 
-    return render(request, "blog/edit_exam.html", {
-        "exam": exam,
-        "form": form,
-    })
+#     return render(request, "blog/edit_exam.html", {
+#         "exam": exam,
+#         "form": form,
+#     })
 
 
 
@@ -1610,7 +1664,7 @@ def delete_exam_question(request, slug, question_id):
     })
 
 
-
+ 
 
 
 # ---------------- STUDENT TƏRƏFİ -------------------
@@ -1707,20 +1761,25 @@ def assigned_student_exam_list(request):
     
     return render(request, "blog/student_exam_list.html", context)
 
+
 @login_required
 def student_exam_list(request):
     user = request.user
-    
-    # 1. BAZA SORĞUSU (İlkin Filter)
-    # Hələ icazələri yoxlamırıq, sadəcə aktivləri gətiririk
-    exams_qs = Exam.objects.filter(is_active=True).select_related('author')
+    now = timezone.now()
 
-    # --- SEARCH (Axtarış) ---
+    # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
+    exams_qs = (
+        Exam.objects
+        .filter(is_active=True)
+        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
+        .select_related('author')
+    )
+
+    # --- SEARCH ---
     search_query = request.GET.get('q')
     if search_query:
-        # İmtahan adı və ya müəllim adına görə axtarış
         exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query) | 
+            Q(title__icontains=search_query) |
             Q(author__username__icontains=search_query)
         )
 
@@ -1728,33 +1787,26 @@ def student_exam_list(request):
     filter_type = request.GET.get('type')
     if filter_type:
         exams_qs = exams_qs.filter(exam_type=filter_type)
-    
-    # Sıralama
+
     exams_qs = exams_qs.order_by("-created_at")
 
-    # 2. PYTHON MƏNTİQİ (Permissions & List Construction)
-    # Bazadan gələn nəticələri yoxlayıb siyahıya yığırıq
     exam_items = []
 
     for exam in exams_qs:
-        # Bu user ümumiyyətlə bu imtahan kartını görməlidir?
+        # 2) SAFETY: hər ehtimala qarşı (timezone / query bypass)
+        if exam.is_after_end():
+            continue
+
         if not exam.can_user_see(user):
             continue
 
-        # Cəhd limiti
         left = exam.attempts_left_for(user)
         if left is not None and left <= 0:
-            # Kartı göstərməyə dəymir – cəhd qalmayıb
             continue
 
-        # Kod tələb olunub–olunmamağı user-ə görə hesablayırıq
         can_without_code, _ = exam.can_user_start(user, code=None)
+        requires_code = bool(exam.access_code and not can_without_code)
 
-        requires_code = False
-        if exam.access_code and not can_without_code:
-            requires_code = True
-
-        # Ekrandakı status yazısı
         if exam.access_code:
             access_label = "Kod tələb olunur"
         elif exam.is_public:
@@ -1769,26 +1821,21 @@ def student_exam_list(request):
             "access_label": access_label,
         })
 
-    # 3. PAGINATION (Səhifələmə)
-    # Hər səhifədə 6 imtahan göstərək
-    paginator = Paginator(exam_items, 2) 
+    paginator = Paginator(exam_items, 2)
     page_number = request.GET.get('page')
 
     try:
         page_obj = paginator.page(page_number)
     except PageNotAnInteger:
-        # Əgər page rəqəm deyilsə, birinci səhifəni göstər
         page_obj = paginator.page(1)
     except EmptyPage:
-        # Əgər səhifə limitdən kənardırsa, sonuncu səhifəni göstər
         page_obj = paginator.page(paginator.num_pages)
 
     context = {
-        "page_obj": page_obj,      # Pagination idarəetməsi üçün (_pagination.html buna baxır)
-        "exam_items": page_obj,    # Siyahını dövr etmək üçün (Template-dəki for loop buna baxır)
+        "page_obj": page_obj,
+        "exam_items": page_obj,
         "current_url_name": "student_exam_list",
     }
-
     return render(request, "blog/student_exam_list.html", context)
 
 

@@ -354,6 +354,18 @@ const AVATARS = {
   els.revealBtn && (els.revealBtn.onclick = () => sendAction(GAME_CONFIG.urls.endQuestion));
   els.nextBtn && (els.nextBtn.onclick = () => sendAction(GAME_CONFIG.urls.nextQuestion));
   els.finishBtn && (els.finishBtn.onclick = () => sendAction(GAME_CONFIG.urls.finish));
+
+const qc = document.getElementById("questionCount");
+const maxQ = parseInt(qc.getAttribute("max") || "1", 10);
+
+qc.addEventListener("input", () => {
+  let v = parseInt(qc.value || "1", 10);
+  if (isNaN(v)) v = 1;
+  if (v < 1) v = 1;
+  if (v > maxQ) v = maxQ;
+  qc.value = v;
+});
+
   
   /* Init */
   updateUIState("lobby");

@@ -25,7 +25,7 @@
                        LearnHub.it / {{ session.pin }}
                     </a>
                 </div>
-            </div>
+            </div> 
         </header>
 
         <div class="control-bar">
@@ -35,8 +35,22 @@
 
             <div class="settings-group">
                 <i class="fas fa-list-ol"></i>
-                <input id="questionCount" type="number" min="1" value="10" style="width:50px; border:none; background:transparent; font-weight:bold; color:#455a64;">
+                <span style="font-size:0.9rem; font-weight:700; color:#455a64;">Sual sayı:</span>
+            
+                <input
+                    id="questionCount"
+                    type="number"
+                    min="1"
+                    max="{{ exam_total_questions }}"
+                    value="5"
+                    style="width:55px; border:none; background:transparent; font-weight:900; color:#455a64; text-align:center;"
+                />
+            
+                <small style="opacity:0.7; font-weight:700; color:#455a64;">
+                    / {{ exam_total_questions }}
+                </small>
             </div>
+            
 
             <button id="revealBtn" class="btn-3d btn-reveal" disabled>
                 <i class="fas fa-eye"></i> Reveal
