@@ -1,0 +1,396 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   COURSE DASHBOARD STYLING
+   
+   Kurs profil səhifəsinin stilləri.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+   :root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CARD STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.card {
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 8px 8px 0 0;
+    color: white;
+    font-weight: 600;
+    padding: 1.5rem;
+    border: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ACCORDION STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.accordion {
+    border: none;
+}
+
+.accordion-item {
+    border: 1px solid #e9ecef;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.accordion-button {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    background-color: #fff;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--light-color);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.accordion-body {
+    padding: 1.5rem;
+    background-color: #ffffff;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BADGE STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.badge-primary {
+    background-color: var(--primary-color);
+}
+
+.badge-success {
+    background-color: var(--success-color);
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+    color: #000;
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LIST GROUP STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.list-group-item {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--light-color);
+    border-color: var(--primary-color);
+    transform: translateX(4px);
+}
+
+.list-group-item.border-start {
+    padding-left: 1.5rem;
+}
+
+.list-group-item-action:hover {
+    background-color: var(--light-color);
+    cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BUTTON STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.btn {
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FORM STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.form-control,
+.form-select {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   MODAL STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.16);
+}
+
+.modal-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ALERT STYLING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SIDEBAR STICKY POSITIONING
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.sticky-top {
+    top: 20px;
+    z-index: 1000;
+}
+
+@media (max-width: 992px) {
+    .sticky-top {
+        position: static;
+        top: auto;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .accordion-button {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .accordion-body {
+        padding: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+.border-start-primary {
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.border-start-success {
+    border-left: 4px solid var(--success-color) !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LOADING ANIMATION
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slideInUp {
+    animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in;
+}

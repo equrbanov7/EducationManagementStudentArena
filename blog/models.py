@@ -383,6 +383,14 @@ class Exam(models.Model):
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    enable_paint = models.BooleanField(
+        "Paint cavabı aktiv olsun",
+        default=False,
+        help_text="Aktiv edilsə, tələbə cavabı paint ilə çəkib göndərə bilər."
+    )
+    
+    
+    
     class Meta:
         verbose_name = "İmtahan bloku"
         verbose_name_plural = "İmtahan blokları"

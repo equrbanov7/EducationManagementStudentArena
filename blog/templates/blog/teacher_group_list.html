@@ -4,380 +4,431 @@
 {% block title %}Tələbə qruplarım{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/teacher_group_list.css' %}">
+  <link rel="stylesheet" href="{% static 'css/teacher_group_list.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container group-page">
-    
-    <div class="page-header-wrapper mb-4">
-        <div class="header-text">
-            <h1 class="page-title">Tələbə qruplarım</h1>
-            <p class="page-subtitle text-muted mb-0">
-                Qrupları idarə et və imtahanlar üçün tələbə siyahıları yarat.
-            </p>
-        </div>
 
-        <div class="header-actions-toolbar">
-            <div class="group-search-box">
-                <i class="fas fa-search search-icon-main"></i>
-                <input type="text" id="groupListSearch" placeholder="Qrup adı axtar..." class="group-search-input">
-            </div>
-
-            <button type="button" class="btn-create-new" onclick="openModal('create')">
-                <i class="fas fa-plus"></i>
-                <span>Yeni qrup yarat</span>
-            </button>
-        </div>
+  <div class="page-header-wrapper mb-4">
+    <div class="header-text">
+      <h1 class="page-title">Tələbə qruplarım</h1>
+      <p class="page-subtitle text-muted mb-0">
+        Qrupları idarə et və imtahanlar üçün tələbə siyahıları yarat.
+      </p>
     </div>
 
-    {% if groups %}
-        <div class="group-list" id="mainGroupList">
-            {% for group in groups %}
-                <div class="group-card">
-                    <div class="group-card-header">
-                        <div>
-                            <h2 class="group-name">{{ group.name }}</h2>
-                            <p class="group-meta text-muted mb-0">
-                                {{ group.created_at|date:"d.m.Y H:i" }}
-                            </p>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="group-stats">
-                                <span class="badge rounded-pill bg-light text-dark">
-                                    <i class="fas fa-user-graduate me-1"></i>
-                                    {{ group.students.count }}
-                                </span>
-                            </div>
-                            
-                            <button class="btn btn-sm btn-outline-secondary btn-edit-custom" 
-                                    onclick="openModal('edit', '{{ group.id }}', '{{ group.name }}', [
-                                        {% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}
-                                    ])">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                        </div>
-                    </div>
+    <div class="header-actions-toolbar">
+      <div class="group-search-box">
+        <i class="fas fa-search search-icon-main"></i>
+        <input type="text" id="groupListSearch" placeholder="Qrup adı axtar..." class="group-search-input">
+      </div>
 
-                    <div class="group-card-body">
-                        <h6 class="students-title text-muted">Qrupun tələbələri:</h6>
-                        {% if group.students.all %}
-                            <div class="students-badge-list">
-                                {% for student in group.students.all %}
-                                    <span class="student-badge">
-                                        <i class="fas fa-user me-1"></i>{{ student.username }}
-                                    </span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-            
-            <div id="noGroupFound" style="display: none; text-align: center; padding: 20px; color: #64748b;">
-                <i class="fas fa-search me-2"></i> Heç bir qrup tapılmadı.
+      {# onclick YOX! #}
+      <button
+        type="button"
+        class="btn-create-new"
+        id="btnOpenCreateGroup"
+        data-create-url="{% url 'teacher_create_group' %}"
+      >
+        <i class="fas fa-plus"></i>
+        <span>Yeni qrup yarat</span>
+      </button>
+    </div>
+  </div>
+
+  {% if groups %}
+    <div class="group-list" id="mainGroupList">
+      {% for group in groups %}
+        <div class="group-card">
+          <div class="group-card-header">
+            <div>
+              <h2 class="group-name">{{ group.name }}</h2>
+              <p class="group-meta text-muted mb-0">{{ group.created_at|date:"d.m.Y H:i" }}</p>
             </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <div class="group-stats">
+                <span class="badge rounded-pill bg-light text-dark">
+                  <i class="fas fa-user-graduate me-1"></i>
+                  {{ group.students.count }}
+                </span>
+              </div>
+
+              {# onclick YOX! Data ilə veririk. group.name escapejs mütləq! #}
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary btn-edit-custom jsOpenEditGroup"
+                data-group-id="{{ group.id }}"
+                data-group-name="{{ group.name|escapejs }}"
+                data-students="[{% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
+              >
+                <i class="fas fa-pen"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="group-card-body">
+            <h6 class="students-title text-muted">Qrupun tələbələri:</h6>
+            {% if group.students.all %}
+              <div class="students-badge-list">
+                {% for student in group.students.all %}
+                  <span class="student-badge">
+                    <i class="fas fa-user me-1"></i>{{ student.username }}
+                  </span>
+                {% endfor %}
+              </div>
+            {% else %}
+              <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
+            {% endif %}
+          </div>
         </div>
-    {% else %}
-        <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
-            <h3>Hələ qrup yaratmamısan</h3>
-            <p class="text-muted">Başlamaq üçün yeni qrup yarat.</p>
-            <button type="button" class="btn-create-new mt-3" onclick="openModal('create')">
-                İlk qrupunu yarat
-            </button>
-        </div>
-    {% endif %}
+      {% endfor %}
+
+      <div id="noGroupFound" style="display:none; text-align:center; padding:20px; color:#64748b;">
+        <i class="fas fa-search me-2"></i> Heç bir qrup tapılmadı.
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
+      <h3>Hələ qrup yaratmamısan</h3>
+      <p class="text-muted">Başlamaq üçün yeni qrup yarat.</p>
+
+      <button
+        type="button"
+        class="btn-create-new mt-3"
+        id="btnOpenCreateGroupEmpty"
+        data-create-url="{% url 'teacher_create_group' %}"
+      >
+        İlk qrupunu yarat
+      </button>
+    </div>
+  {% endif %}
 </div>
 
-    <div id="groupModal" class="custom-modal-overlay">
-        <div class="custom-modal-content">
-            
-            <div class="modal-header-custom">
-                <h3 id="modalTitle">Qrup Redaktəsi</h3>
-                <button type="button" class="close-modal-btn" onclick="tryCloseModal()">&times;</button>
-            </div>
+{# ================= MODAL ================= #}
+<div
+  id="groupModal"
+  class="custom-modal-overlay"
+  data-update-url-template="/teacher/groups/update/__ID__/"
+  data-delete-url-template="/teacher/groups/delete/__ID__/"
+>
+  <div class="custom-modal-content">
 
-            <form id="groupForm" method="post" action=""> 
-                {% csrf_token %}
-                <div class="modal-body-custom">
-                    
-                    <div class="mb-4">
-                        <label for="id_name" class="form-label-custom">Qrup adı</label>
-                        {{ form.name }} 
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label-custom">Tələbələri seç</label>
-                        
-                        <div class="student-search-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="Ad və ya username axtar...">
-                        </div>
-
-                        <div id="studentListContainer" class="student-list-container">
-                            <div class="text-center text-muted p-3">Yüklənir...</div>
-                        </div>
-
-                        <div class="selection-counter">
-                            Seçilib: <span id="selectedCount">0</span> tələbə
-                        </div>
-
-                        <div style="display: none;">
-                            {{ form.students }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer-custom">
-                    <a href="#" id="deleteBtn" class="btn-delete-custom" style="display: none;">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
-
-                    <div class="action-buttons">
-                        <button type="button" class="btn-action btn-cancel" onclick="tryCloseModal()">
-                            Ləğv et
-                        </button>
-                        <button type="submit" class="btn-action btn-save">
-                            Yadda saxla
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+    <div class="modal-header-custom">
+      <h3 id="modalTitle">Qrup</h3>
+      <button type="button" class="close-modal-btn" id="btnCloseGroupModal">&times;</button>
     </div>
 
-    <div id="warningModal" class="custom-modal-overlay" style="z-index: 10000;">
-        <div class="warning-modal-box">
-            <div class="warning-icon">
-                <i class="fas fa-exclamation"></i>
-            </div>
-            <h3>Dəyişikliklər var!</h3>
-            <p>Yadda saxlanmamış dəyişiklikləriniz var. Pəncərəni bağlasanız, bütün dəyişikliklər itəcək.</p>
-            
-            <div class="warning-actions">
-                <button class="btn-warning-action btn-stay" onclick="closeWarningModal()">
-                    Geri qayıt
-                </button>
-                <button class="btn-warning-action btn-discard" onclick="forceCloseGroupModal()">
-                    Bağla və İtirmək
-                </button>
-            </div>
+    <form id="groupForm" method="post" action="">
+      {% csrf_token %}
+      <div class="modal-body-custom">
+
+        <div class="mb-4">
+          <label for="id_name" class="form-label-custom">Qrup adı</label>
+          {{ form.name }}
         </div>
+
+        <div class="mb-3">
+          <label class="form-label-custom">Tələbələri seç</label>
+
+          <div class="student-search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="Ad və ya username axtar...">
+          </div>
+
+          <div id="studentListContainer" class="student-list-container">
+            <div class="text-center text-muted p-3">Yüklənir...</div>
+          </div>
+
+          <div class="selection-counter">
+            Seçilib: <span id="selectedCount">0</span> tələbə
+          </div>
+
+          <div style="display:none;">
+            {{ form.students }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-custom">
+        <a href="#" id="deleteBtn" class="btn-delete-custom" style="display:none;">
+          <i class="fas fa-trash-alt"></i>
+        </a>
+
+        <div class="action-buttons">
+          <button type="button" class="btn-action btn-cancel" id="btnCancelGroupModal">
+            Ləğv et
+          </button>
+          <button type="submit" class="btn-action btn-save">
+            Yadda saxla
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ========= Warning modal ========= #}
+<div id="warningModal" class="custom-modal-overlay" style="z-index:10000; display:none;">
+  <div class="warning-modal-box">
+    <div class="warning-icon"><i class="fas fa-exclamation"></i></div>
+    <h3>Dəyişikliklər var!</h3>
+    <p>Yadda saxlanmamış dəyişiklikləriniz var. Pəncərəni bağlasanız, bütün dəyişikliklər itəcək.</p>
+
+    <div class="warning-actions">
+      <button class="btn-warning-action btn-stay" id="btnWarningStay">Geri qayıt</button>
+      <button class="btn-warning-action btn-discard" id="btnWarningDiscard">Bağla və İtirmək</button>
     </div>
+  </div>
+</div>
+{% endblock %}
 
-    <script>
-        // === DOM ELEMENTLƏRİ ===
-        const groupModal = document.getElementById('groupModal');
-        const warningModal = document.getElementById('warningModal');
-        const groupForm = document.getElementById('groupForm');
-        const modalTitle = document.getElementById('modalTitle');
-        const deleteBtn = document.getElementById('deleteBtn');
-        
-        // Custom Student List Elementləri
-        const studentListContainer = document.getElementById('studentListContainer');
-        const studentSearchInput = document.getElementById('studentSearchInput');
-        const selectedCountSpan = document.getElementById('selectedCount');
-        const hiddenDjangoSelect = document.getElementById('id_students'); // Django-nun yaratdığı select ID-si
-        const nameInput = document.getElementById('id_name');
-    
-        let initialFormData = null; // Dəyişiklikləri izləmək üçün
+{% block extraJs %}
+<script>
+(function () {
+  // === DOM ===
+  const groupModal = document.getElementById('groupModal');
+  const warningModal = document.getElementById('warningModal');
+  const groupForm = document.getElementById('groupForm');
+  const modalTitle = document.getElementById('modalTitle');
+  const deleteBtn = document.getElementById('deleteBtn');
 
-        const groupSearchInput = document.getElementById('groupListSearch');
-        const groupCards = document.querySelectorAll('.group-card');
-        const noGroupMsg = document.getElementById('noGroupFound');
+  const studentListContainer = document.getElementById('studentListContainer');
+  const studentSearchInput = document.getElementById('studentSearchInput');
+  const selectedCountSpan = document.getElementById('selectedCount');
 
-        if(groupSearchInput) {
-            groupSearchInput.addEventListener('input', function(e) {
-                const filter = e.target.value.toLowerCase();
-                let hasVisible = false;
+  const hiddenDjangoSelect = document.getElementById('id_students');
+  const nameInput = document.getElementById('id_name');
 
-                groupCards.forEach(card => {
-                    const name = card.querySelector('.group-name').innerText.toLowerCase();
-                    if (name.includes(filter)) {
-                        card.style.display = 'block';
-                        hasVisible = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
+  const btnOpenCreate = document.getElementById('btnOpenCreateGroup');
+  const btnOpenCreateEmpty = document.getElementById('btnOpenCreateGroupEmpty');
 
-                // Heç nə tapılmadısa mesaj göstər
-                if(noGroupMsg) {
-                    noGroupMsg.style.display = hasVisible ? 'none' : 'block';
-                }
-            });
+  const btnClose = document.getElementById('btnCloseGroupModal');
+  const btnCancel = document.getElementById('btnCancelGroupModal');
+
+  const btnWarningStay = document.getElementById('btnWarningStay');
+  const btnWarningDiscard = document.getElementById('btnWarningDiscard');
+
+  const groupSearchInput = document.getElementById('groupListSearch');
+  const noGroupMsg = document.getElementById('noGroupFound');
+
+  let initialFormData = null;
+
+  // ===== Guard =====
+  function assertEl(el, name) {
+    if (!el) console.error(`[GroupModal] Missing element: ${name}`);
+    return !!el;
+  }
+  if (!assertEl(groupModal, "groupModal") || !assertEl(groupForm, "groupForm")) return;
+
+  // ===== Search filter =====
+  if (groupSearchInput) {
+    groupSearchInput.addEventListener('input', function (e) {
+      const filter = (e.target.value || "").toLowerCase();
+      let hasVisible = false;
+
+      document.querySelectorAll('.group-card').forEach(card => {
+        const titleEl = card.querySelector('.group-name');
+        const name = (titleEl ? titleEl.innerText : "").toLowerCase();
+
+        if (name.includes(filter)) {
+          card.style.display = 'block';
+          hasVisible = true;
+        } else {
+          card.style.display = 'none';
         }
-    
-        // Səhifə yüklənəndə Django Select-dən dataları oxuyub Custom List yaradırıq
-        document.addEventListener("DOMContentLoaded", function() {
-            buildCustomStudentList();
-        });
-    
-        // 1. GİZLİ SELECT-DƏN SİYAHINI QURMAQ
-        function buildCustomStudentList() {
-            studentListContainer.innerHTML = '';
-            const options = hiddenDjangoSelect.options;
-            
-            if (options.length === 0) {
-                studentListContainer.innerHTML = '<div class="p-3 text-muted">Tələbə tapılmadı.</div>';
-                return;
-            }
-    
-            // Hər option üçün bir checkbox div yaradırıq
-            Array.from(options).forEach(option => {
-                const row = document.createElement('div');
-                row.className = 'student-item-row';
-                // Axtarış üçün data atributu
-                row.setAttribute('data-search', option.text.toLowerCase()); 
-                
-                row.innerHTML = `
-                    <input type="checkbox" class="student-checkbox" value="${option.value}" id="chk_${option.value}">
-                    <label class="student-label" for="chk_${option.value}">${option.text}</label>
-                `;
-                
-                // Checkbox dəyişəndə Django select-i yenilə
-                const checkbox = row.querySelector('input');
-                checkbox.addEventListener('change', function() {
-                    option.selected = this.checked; // Django select-də seçimi sinxronlaşdır
-                    updateCounter();
-                });
-    
-                // Sətrə klikləyəndə də checkbox işləsin
-                row.addEventListener('click', function(e) {
-                    if (e.target !== checkbox) {
-                        checkbox.checked = !checkbox.checked;
-                        // Eventi əllə tetiklə ki, yuxarıdakı listener işə düşsün
-                        checkbox.dispatchEvent(new Event('change'));
-                    }
-                });
-    
-                studentListContainer.appendChild(row);
-            });
+      });
+
+      if (noGroupMsg) noGroupMsg.style.display = hasVisible ? 'none' : 'block';
+    });
+  }
+
+  // ===== Build custom student list =====
+  function buildCustomStudentList() {
+    if (!hiddenDjangoSelect) {
+      studentListContainer.innerHTML = '<div class="p-3 text-danger">id_students tapılmadı. form.students render olunmayıb.</div>';
+      return;
+    }
+
+    studentListContainer.innerHTML = '';
+    const options = Array.from(hiddenDjangoSelect.options);
+
+    if (options.length === 0) {
+      studentListContainer.innerHTML = '<div class="p-3 text-muted">Tələbə tapılmadı.</div>';
+      return;
+    }
+
+    options.forEach(option => {
+      const row = document.createElement('div');
+      row.className = 'student-item-row';
+      row.setAttribute('data-search', (option.text || '').toLowerCase());
+
+      row.innerHTML = `
+        <input type="checkbox" class="student-checkbox" value="${option.value}" id="chk_${option.value}">
+        <label class="student-label" for="chk_${option.value}">${option.text}</label>
+      `;
+
+      const checkbox = row.querySelector('input');
+
+      checkbox.addEventListener('change', function () {
+        option.selected = this.checked;
+        updateCounter();
+      });
+
+      row.addEventListener('click', function (e) {
+        if (e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change'));
         }
-    
-        // 2. SAYĞACI YENİLƏMƏK
-        function updateCounter() {
-            const count = hiddenDjangoSelect.selectedOptions.length;
-            selectedCountSpan.textContent = count;
-        }
-    
-        // 3. AXTARIŞ FUNKSİYASI
-        studentSearchInput.addEventListener('input', function() {
-            const filter = this.value.toLowerCase();
-            const rows = studentListContainer.querySelectorAll('.student-item-row');
-            
-            rows.forEach(row => {
-                const text = row.getAttribute('data-search');
-                if (text.includes(filter)) {
-                    row.style.display = 'flex';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    
-        // 4. MODALI AÇMAQ
-        function openModal(mode, groupId = null, groupName = '', studentIds = []) {
-            groupForm.reset();
-            studentSearchInput.value = '';
-            
-            // Bütün checkboxları təmizlə
-            const checkboxes = studentListContainer.querySelectorAll('.student-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = false;
-                // Django select-i də təmizləyirik (sync logic ilə)
-            });
-            Array.from(hiddenDjangoSelect.options).forEach(opt => opt.selected = false);
-            updateCounter();
-    
-            // Axtarış filtrini sıfırla (hamısını göstər)
-            studentListContainer.querySelectorAll('.student-item-row').forEach(row => row.style.display = 'flex');
-    
-            if (mode === 'edit') {
-                modalTitle.innerText = "Qrupu Redaktə Et";
-                if(nameInput) nameInput.value = groupName;
-                groupForm.action = `/teacher/groups/update/${groupId}/`; 
-                
-                deleteBtn.style.display = 'inline-flex';
-                deleteBtn.href = `/teacher/groups/delete/${groupId}/`;
-    
-                // Mövcud tələbələri seçili et
-                if (Array.isArray(studentIds)) {
-                    studentIds.forEach(id => {
-                        const chk = document.getElementById(`chk_${id}`);
-                        if (chk) {
-                            chk.checked = true;
-                            // Django select-də uyğun optionu tapıb selected et
-                            for(let i=0; i<hiddenDjangoSelect.options.length; i++) {
-                                if(hiddenDjangoSelect.options[i].value == id) {
-                                    hiddenDjangoSelect.options[i].selected = true;
-                                    break;
-                                }
-                            }
-                        }
-                    });
-                    updateCounter();
-                }
-    
-            } else {
-                modalTitle.innerText = "Yeni Qrup Yarat";
-                groupForm.action = "{% url 'teacher_create_group' %}"; 
-                deleteBtn.style.display = 'none';
-                if(nameInput) nameInput.value = "";
-            }
-    
-            // Modalı göstər
-            groupModal.style.display = 'flex';
-            setTimeout(() => { groupModal.classList.add('active'); }, 10);
-    
-            // İlkin vəziyyəti yadda saxla
-            saveInitialState();
-        }
-    
-        // 5. BAĞLAMAQ CƏHDİ (Unsaved Changes)
-        function saveInitialState() {
-            const formData = new FormData(groupForm);
-            initialFormData = new URLSearchParams(formData).toString();
-        }
-    
-        function tryCloseModal() {
-            const currentFormData = new FormData(groupForm);
-            const currentDataString = new URLSearchParams(currentFormData).toString();
-    
-            if (initialFormData !== currentDataString) {
-                // Xəbərdarlıq modalını aç
-                warningModal.style.display = 'flex';
-                setTimeout(() => { warningModal.classList.add('active'); }, 10);
-            } else {
-                // Dəyişiklik yoxdursa birbaşa bağla
-                forceCloseGroupModal();
-            }
-        }
-    
-        // Xəbərdarlıq modalını bağla (Geri qayıt)
-        function closeWarningModal() {
-            warningModal.classList.remove('active');
-            setTimeout(() => { warningModal.style.display = 'none'; }, 300);
-        }
-    
-        // Hər şeyi bağla (Məcburi)
-        function forceCloseGroupModal() {
-            closeWarningModal(); // Əgər açıqdırsa
-            groupModal.classList.remove('active');
-            setTimeout(() => { groupModal.style.display = 'none'; }, 300);
-        }
-    
-        // Overlay click eventləri
-        groupModal.addEventListener('click', function(e) {
-            if (e.target === groupModal) tryCloseModal();
-        });
-    
-        warningModal.addEventListener('click', function(e) {
-            if (e.target === warningModal) closeWarningModal(); // Xəbərdarlığın qırağına basanda sadəcə xəbərdarlıq bağlansın, əsas modal qalsın
-        });
-    </script>
+      });
+
+      studentListContainer.appendChild(row);
+    });
+
+    updateCounter();
+  }
+
+  function updateCounter() {
+    if (!hiddenDjangoSelect) return;
+    selectedCountSpan.textContent = hiddenDjangoSelect.selectedOptions.length;
+  }
+
+  if (studentSearchInput) {
+    studentSearchInput.addEventListener('input', function () {
+      const filter = (this.value || "").toLowerCase();
+      studentListContainer.querySelectorAll('.student-item-row').forEach(row => {
+        const text = row.getAttribute('data-search') || '';
+        row.style.display = text.includes(filter) ? 'flex' : 'none';
+      });
+    });
+  }
+
+  // ===== Modal open/close =====
+  function saveInitialState() {
+    initialFormData = new URLSearchParams(new FormData(groupForm)).toString();
+  }
+
+  function forceCloseGroupModal() {
+    groupModal.classList.remove('active');
+    setTimeout(() => { groupModal.style.display = 'none'; }, 250);
+  }
+
+  function closeWarningModal() {
+    warningModal.classList.remove('active');
+    setTimeout(() => { warningModal.style.display = 'none'; }, 250);
+  }
+
+  function tryCloseModal() {
+    const currentDataString = new URLSearchParams(new FormData(groupForm)).toString();
+    if (initialFormData !== currentDataString) {
+      warningModal.style.display = 'flex';
+      setTimeout(() => warningModal.classList.add('active'), 10);
+    } else {
+      forceCloseGroupModal();
+    }
+  }
+
+  function clearSelections() {
+    if (hiddenDjangoSelect) {
+      Array.from(hiddenDjangoSelect.options).forEach(opt => opt.selected = false);
+    }
+    studentListContainer.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+    updateCounter();
+    if (studentSearchInput) studentSearchInput.value = '';
+    studentListContainer.querySelectorAll('.student-item-row').forEach(row => row.style.display = 'flex');
+  }
+
+  function openModalCreate(createUrl) {
+    groupForm.reset();
+    clearSelections();
+
+    modalTitle.innerText = "Yeni Qrup Yarat";
+    groupForm.action = createUrl;
+    deleteBtn.style.display = 'none';
+    if (nameInput) nameInput.value = "";
+
+    groupModal.style.display = 'flex';
+    setTimeout(() => groupModal.classList.add('active'), 10);
+    saveInitialState();
+  }
+
+  function openModalEdit(groupId, groupName, studentIds) {
+    groupForm.reset();
+    clearSelections();
+
+    modalTitle.innerText = "Qrupu Redaktə Et";
+    if (nameInput) nameInput.value = groupName || "";
+
+    const updateTpl = groupModal.dataset.updateUrlTemplate || "/teacher/groups/update/__ID__/";
+    const deleteTpl = groupModal.dataset.deleteUrlTemplate || "/teacher/groups/delete/__ID__/";
+
+    groupForm.action = updateTpl.replace("__ID__", groupId);
+    deleteBtn.style.display = 'inline-flex';
+    deleteBtn.href = deleteTpl.replace("__ID__", groupId);
+
+    // select existing students
+    (studentIds || []).forEach(id => {
+      const chk = document.getElementById(`chk_${id}`);
+      if (chk) chk.checked = true;
+
+      if (hiddenDjangoSelect) {
+        const opt = Array.from(hiddenDjangoSelect.options).find(o => String(o.value) === String(id));
+        if (opt) opt.selected = true;
+      }
+    });
+
+    updateCounter();
+
+    groupModal.style.display = 'flex';
+    setTimeout(() => groupModal.classList.add('active'), 10);
+    saveInitialState();
+  }
+
+  // ===== Wire buttons =====
+  function getCreateUrl(btn) {
+    return (btn && btn.dataset && btn.dataset.createUrl) ? btn.dataset.createUrl : "{% url 'teacher_create_group' %}";
+  }
+
+  if (btnOpenCreate) {
+    btnOpenCreate.addEventListener('click', () => openModalCreate(getCreateUrl(btnOpenCreate)));
+  }
+  if (btnOpenCreateEmpty) {
+    btnOpenCreateEmpty.addEventListener('click', () => openModalCreate(getCreateUrl(btnOpenCreateEmpty)));
+  }
+
+  // Edit buttons
+  document.querySelectorAll('.jsOpenEditGroup').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const groupId = btn.dataset.groupId;
+      const groupName = btn.dataset.groupName || "";
+      let studentIds = [];
+      try {
+        studentIds = JSON.parse(btn.dataset.students || "[]");
+      } catch (e) {
+        console.error("students parse error:", e);
+      }
+      openModalEdit(groupId, groupName, studentIds);
+    });
+  });
+
+  // Close actions
+  if (btnClose) btnClose.addEventListener('click', tryCloseModal);
+  if (btnCancel) btnCancel.addEventListener('click', tryCloseModal);
+
+  // Overlay click
+  groupModal.addEventListener('click', (e) => { if (e.target === groupModal) tryCloseModal(); });
+  warningModal.addEventListener('click', (e) => { if (e.target === warningModal) closeWarningModal(); });
+
+  // Warning actions
+  if (btnWarningStay) btnWarningStay.addEventListener('click', closeWarningModal);
+  if (btnWarningDiscard) btnWarningDiscard.addEventListener('click', () => { closeWarningModal(); forceCloseGroupModal(); });
+
+  // Init list
+  document.addEventListener('DOMContentLoaded', buildCustomStudentList);
+})();
+</script>
+
 
 {% endblock %}

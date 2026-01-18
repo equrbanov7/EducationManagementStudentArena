@@ -1,4 +1,5 @@
-/* static/css/create_exam.css */
+/* static/css/createAndEditExam.css */
+/* Partial-a aid hissələr çıxarılmışdır */
 
 /* =========================================
    1. LAYOUT & CARD STYLES
@@ -61,11 +62,10 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    position: relative; /* Context positioning */
+    position: relative;
 }
 
-.form-group label, 
-.form-label-custom {
+.form-group label {
     font-weight: 600;
     color: var(--text-dark, #374151);
     margin-bottom: 8px;
@@ -76,8 +76,6 @@
 /* =========================================
    3. STANDARD INPUTS
    ========================================= */
-/* Specificity note: We use direct child or general descent. 
-   To prevent conflict with custom search, we can use :not or rely on cascade/specificity. */
 .form-group input[type="text"],
 .form-group input[type="number"],
 .form-group select,
@@ -93,7 +91,7 @@
     font-family: inherit;
 }
 
-/* Textarea fixes */
+/* Textarea */
 .form-group textarea {
     min-height: 100px;
     resize: vertical;
@@ -108,13 +106,15 @@
     background-color: #ffffff;
 }
 
-/* Icons inside standard inputs (e.g. Duration) */
+/* Icons inside inputs */
 .input-with-icon {
     position: relative;
 }
+
 .input-with-icon input {
     padding-right: 40px; 
 }
+
 .input-with-icon .icon {
     position: absolute;
     right: 15px;
@@ -190,106 +190,31 @@
     display: block;
 }
 
+.checkbox-help {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
 /* =========================================
-   5. CUSTOM MULTI-SELECT (SEARCHABLE)
+   5. ACCESS SECTION (Grid layout)
    ========================================= */
-/* Grid for Access Rights Section */
 .access-section-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
 }
 
-.custom-selector-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.search-wrapper {
-    position: relative;
-    margin-bottom: 10px;
-}
-
-.search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-    pointer-events: none;
-    z-index: 2; /* Ensure icon is above input */
-}
-
-/* FIX: Boost specificity to override generic .form-group input[type="text"] */
-.search-wrapper input.custom-search-input {
-    width: 100%;
-    padding: 10px 10px 10px 36px; /* Left padding space for icon */
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.2s;
-    outline: none;
-    background-color: #ffffff;
-}
-
-.search-wrapper input.custom-search-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.custom-list-container {
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    height: 200px; 
-    overflow-y: auto;
-    background: #f9fafb;
-}
-
-.list-item-row {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border-bottom: 1px solid #e5e7eb;
-    cursor: pointer;
-    transition: background 0.1s;
-}
-
-.list-item-row:last-child {
-    border-bottom: none;
-}
-
-.list-item-row:hover {
-    background-color: #eef2ff;
-}
-
-.custom-item-checkbox {
-    width: 16px;
-    height: 16px;
-    margin-right: 10px;
-    cursor: pointer;
-    accent-color: #3b82f6;
-}
-
-.custom-item-label {
-    cursor: pointer;
+.access-help {
     font-size: 0.9rem;
-    color: #374151;
-    flex: 1;
-    user-select: none;
-}
-
-.selection-counter {
-    font-size: 0.85rem;
     color: #6b7280;
-    margin-top: 6px;
-    text-align: right;
-}
-
-.loading-text {
-    padding: 15px;
-    text-align: center;
-    color: #9ca3af;
-    font-style: italic;
+    margin-top: 15px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-color, #3b82f6);
 }
 
 /* =========================================
@@ -319,7 +244,149 @@
 }
 
 /* =========================================
-   7. ACTIONS (BUTTONS)
+   7. FORM SECTION TITLES
+   ========================================= */
+.form-section-title {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.form-section-title h2 {
+    font-size: 1.3rem;
+    color: var(--text-dark, #1f2937);
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-section-title p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* =========================================
+   8. DATE RANGE DESIGN
+   ========================================= */
+.date-range-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.date-card {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.date-card:hover, 
+.date-card:focus-within {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.date-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.badge-start, 
+.badge-end {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.badge-start {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-end {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.icon-faded {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.date-input-container input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 1.1rem;
+    font-family: monospace;
+    color: #334155;
+    padding: 5px 0;
+    outline: none;
+    font-weight: 600;
+}
+
+.date-input-container input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.date-input-container input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.date-footer {
+    margin-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
+}
+
+.date-footer small {
+    color: #64748b;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 2px;
+}
+
+.date-separator {
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.field-error-floating {
+    position: absolute;
+    bottom: -22px;
+    left: 0;
+    font-size: 0.75rem;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* =========================================
+   9. FORM ACTIONS (Buttons)
    ========================================= */
 .form-actions {
     margin-top: 40px;
@@ -330,7 +397,8 @@
     gap: 15px;
 }
 
-.btn-submit, .btn-cancel {
+.btn-submit, 
+.btn-cancel {
     padding: 12px 24px;
     border-radius: 8px;
     font-weight: 600;
@@ -367,172 +435,30 @@
     color: #374151;
 }
 
-/* ================= ANIMASİYALI KEÇİD (TOGGLE) ================= */
-
+/* =========================================
+   10. ACCESS RESTRICTIONS TOGGLE ANIMATION
+   ========================================= */
 #access-restrictions {
-    /* Açıq vəziyyət */
-    max-height: 2000px; /* Məzmunun sığacağı qədər böyük rəqəm */
+    max-height: 2000px;
     opacity: 1;
-    overflow: hidden; /* Animasiya vaxtı daşmaların qarşısını almaq üçün */
+    overflow: hidden;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: top;
 }
 
-/* Bağlı vəziyyət üçün klass */
 #access-restrictions.closed {
     max-height: 0;
     opacity: 0;
-    
-    /* Boşluqları ləğv edirik ki, tam bağlansın */
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     border: none;
-    pointer-events: none; /* Bağlı olanda kliklənə bilməsin */
+    pointer-events: none;
 }
 
 /* =========================================
-   DATE RANGE UX DESİGN
-   ========================================= */
-
-/* Konteyner: Inputları yan-yana düzür */
-.date-range-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    background: #f8fafc;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px dashed #cbd5e1;
-    margin-bottom: 20px;
-}
-
-/* Kart Dizaynı */
-.date-card {
-    flex: 1;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 15px;
-    transition: all 0.3s ease;
-    position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.date-card:hover, .date-card:focus-within {
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.15);
-    transform: translateY(-2px);
-}
-
-/* Kartın başlığı (Etiket və İkon) */
-.date-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.badge-start, .badge-end {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.badge-start {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.badge-end {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.icon-faded {
-    color: #94a3b8;
-    font-size: 1.1rem;
-}
-
-/* Input sahəsi */
-.date-input-container input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 1.1rem; /* Tarixi böyük göstəririk */
-    font-family: monospace; /* Rəqəmlər düzgün düzülsün */
-    color: #334155;
-    padding: 5px 0;
-    outline: none;
-    font-weight: 600;
-}
-
-/* Brauzerin standart tarix ikonunu təmizləyirik (öz stilimiz üçün)
-   və ya saxlayırıq - burada saxlamaq daha yaxşıdır, amma stil veririk */
-.date-input-container input::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.6;
-    transition: 0.2s;
-}
-.date-input-container input::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-/* Footer (Help text) */
-.date-footer {
-    margin-top: 8px;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 8px;
-}
-.date-footer small {
-    color: #64748b;
-    font-size: 0.8rem;
-}
-
-/* Ortadakı ox işarəsi */
-.date-separator {
-    color: #cbd5e1;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Xətalar üçün üzən mesaj */
-.field-error-floating {
-    position: absolute;
-    bottom: -22px;
-    left: 0;
-    font-size: 0.75rem;
-    color: #dc2626;
-    font-weight: 600;
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-    .date-range-wrapper {
-        flex-direction: column;
-        gap: 15px;
-        border-style: solid; /* Mobildə daha sadə görünüş */
-    }
-
-    .date-separator {
-        transform: rotate(90deg); /* Oxu aşağı çevir */
-    }
-    
-    .date-card {
-        width: 100%;
-    }
-}
-
-/* =========================================
-   8. RESPONSIVE
+   11. RESPONSIVE
    ========================================= */
 @media (max-width: 768px) {
     .create-exam-page-wrapper {
@@ -544,18 +470,32 @@
         padding: 20px;
     }
 
-    /* Grid sütunlarını tək sütuna salırıq */
     .form-grid,
     .access-section-grid {
         grid-template-columns: 1fr;
     }
 
     .form-actions {
-        flex-direction: column-reverse; /* Mobildə düymələr alt-alta */
+        flex-direction: column-reverse;
     }
 
-    .btn-submit, .btn-cancel {
+    .btn-submit, 
+    .btn-cancel {
         width: 100%;
         justify-content: center;
+    }
+
+    .date-range-wrapper {
+        flex-direction: column;
+        gap: 15px;
+        border-style: solid;
+    }
+
+    .date-separator {
+        transform: rotate(90deg);
+    }
+    
+    .date-card {
+        width: 100%;
     }
 }

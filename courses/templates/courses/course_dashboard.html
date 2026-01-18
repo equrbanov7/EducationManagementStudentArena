@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ course.title }} - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row">
+        <!-- SIDEBAR: Kurs Məlumatı -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                <!-- Cover Image -->
+                <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 200px;">
+                    {% if course.cover_image %}
+                        <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" 
+                             class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book fa-5x text-white opacity-50"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Course Info -->
+                <div class="card-body">
+                    <h5 class="card-title mb-2">{{ course.title }}</h5>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-user"></i> Müəllim: <strong>{{ course.owner.get_full_name|default:course.owner.username }}</strong>
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-calendar"></i> Yaradıldı: <strong>{{ course.created_at|date:"d.m.Y" }}</strong>
+                        </small>
+                    </div>
+                    
+                    <!-- Status Badge -->
+                    <div class="mb-3">
+                        {% if course.status == 'published' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-globe"></i> Yayımlandı
+                            </span>
+                        {% elif course.status == 'draft' %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-edit"></i> Draft
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-archive"></i> Arxivləndi
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="row text-center border-top pt-3">
+                        <div class="col-6 mb-3">
+                            <div class="fw-bold text-primary fs-5">{{ topics|length }}</div>
+                            <small class="text-muted">Mövzu</small>
+                        </div>
+
+                       <div class="col-6 mb-3">
+                            <div class="fw-bold text-success fs-5" id="sidebar-members-count">{{ members|length }}</div>
+                            <small class="text-muted">Üzv</small>
+                       </div>
+
+
+                    </div>
+                    
+                    <!-- Edit & Delete Buttons (Owner only) -->
+                    {% if is_owner %}
+                        <div class="btn-group w-100 mt-3" role="group">
+                            <a href="{% url 'courses:edit_course' course.id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> Redaktə
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteCourse({{ course.id }})">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- MAIN: Accordion Dashboard -->
+        <div class="col-lg-9">
+            <!-- Description -->
+            {% if course.description %}
+                <div class="alert alert-light border-start border-primary border-5 mb-4">
+                    <p class="mb-0">{{ course.description }}</p>
+                </div>
+            {% endif %}
+            
+            <!-- Accordion Container -->
+            <div class="accordion" id="courseDashboard">
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 1: MÖVZULAR (Topics)                                 -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                {% include 'courses/partials/_topic_accordion.html' %}
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 2: SƏRBƏST İŞLƏR (Assignments)                        -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#assignmentCollapse">
+                            <i class="fas fa-tasks text-warning me-2"></i>
+                            <strong>Sərbəst İşlər</strong>
+                            <span class="badge bg-warning ms-2">TODO</span>
+                        </button>
+                    </h2>
+                    <div id="assignmentCollapse" class="accordion-collapse collapse" 
+                         data-bs-parent="#courseDashboard">
+                        <div class="accordion-body">
+                            <p class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Sərbəst işlər hələ hazırlanmır (Assignments app)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 3: LAB İŞLƏRİ (Labs)                                  -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#labCollapse">
+                            <i class="fas fa-flask text-danger me-2"></i>
+                            <strong>Lab İşləri</strong>
+                            <span class="badge bg-danger ms-2">TODO</span>
+                        </button>
+                    </h2>
+                    <div id="labCollapse" class="accordion-collapse collapse" 
+                         data-bs-parent="#courseDashboard">
+                        <div class="accordion-body">
+                            <p class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Lab işləri hələ hazırlanmır (Labs app)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 4: KURS İŞİ (Course Projects)                         -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#projectCollapse">
+                            <i class="fas fa-project-diagram text-info me-2"></i>
+                            <strong>Kurs İşi</strong>
+                            <span class="badge bg-info ms-2">TODO</span>
+                        </button>
+                    </h2>
+                    <div id="projectCollapse" class="accordion-collapse collapse" 
+                         data-bs-parent="#courseDashboard">
+                        <div class="accordion-body">
+                            <p class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Kurs işləri hələ hazırlanmır (Projects app)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 5: RESURSLAR (Resources)                              -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                {% include 'courses/partials/_resource_accordion.html' %}
+                
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                <!-- ACCORDION 6: ÜZVLƏRİ (Members)                                  -->
+                <!-- ════════════════════════════════════════════════════════════════ -->
+                {% include 'courses/partials/_member_accordion.html' %}
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════════════ -->
+<!-- MODALS                                                                           -->
+<!-- ════════════════════════════════════════════════════════════════════════════════ -->
+
+<!-- Topic Modal -->
+{% if is_owner %}
+    {% include 'courses/partials/_topic_form_modal.html' %}
+    {% include 'courses/partials/_resource_form_modal.html' %}
+    {% include 'courses/partials/_member_form_modal.html' %}
+{% endif %}
+
+<!-- Delete Course Script -->
+<script>
+function deleteCourse(courseId) {
+    if (confirm('Bu kursu silmək istədiniz?\n\nBu əməliyyat geri qaytarıla bilməz!\n\nBütün mövzular, işlər, resurslar silinəcək.')) {
+        // POST request to delete course
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/courses/${courseId}/delete/`;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+    .sticky-top {
+        z-index: 1000;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa;
+        box-shadow: none;
+    }
+    
+    .accordion-item {
+        border: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+    }
+    
+    .accordion-header .accordion-button {
+        padding: 1rem;
+        font-weight: 600;
+    }
+    
+    .accordion-body {
+        padding: 1.5rem;
+    }
+    
+    .card {
+        border-radius: 8px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+</style>
+
+<script>
+    // Bu funksiyanı QLOBAL edirik (window.deleteMember)
+    // Beləliklə HTML-dəki onclick="deleteMember(...)" bunu mütləq görür.
+    window.deleteMember = function(memberId, userName) {
+        
+        // 1. Təsdiqləmə
+        if(!confirm(userName + " adlı tələbəni kursdan silmək istədiyinizə əminsiniz?")) {
+            return;
+        }
+
+        // 2. CSRF Tokeni tapırıq
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // 3. URL-i düzəldirik (memberId-ni yerinə qoyuruq)
+        // DİQQƏT: URL-in düzgünlüyünə əmin ol (views.py-da 'delete_member' adı olmalıdır)
+        const url = "{% url 'courses:delete_member' course.id 0 %}".replace('0', memberId);
+
+        // 4. Sorğunu göndəririk
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // ==========================================================
+                // ƏN VACİB HİSSƏ: Uğurlu olarsa SƏHİFƏNİ YENİLƏYİRİK
+                // ==========================================================
+                window.location.reload(); 
+            } else {
+                alert("Xəta baş verdi: " + (data.error || "Silinmədi"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Server xətası baş verdi.');
+        });
+    };
+</script>
+{% endblock %}

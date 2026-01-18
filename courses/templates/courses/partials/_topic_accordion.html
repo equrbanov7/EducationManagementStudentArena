@@ -1,0 +1,107 @@
+<!-- ACCORDION 1: MÖVZULAR (Topics) -->
+<!-- courses/templates/courses/partials/_topic_accordion.html -->
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#topicCollapse">
+            <i class="fas fa-list text-primary me-2"></i>
+            <strong>Mövzular ({{ topics|length }})</strong>
+            {% if is_owner %}
+                <span class="badge bg-primary ms-2">{{ topics|length }}</span>
+            {% endif %}
+        </button>
+    </h2>
+    <div id="topicCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            <!-- Add Topic Button (Owner only) -->
+            {% if is_owner %}
+                <button type="button" class="btn btn-primary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#topicFormModal">
+                    <i class="fas fa-plus-circle"></i> Yeni Mövzu Əlavə Et
+                </button>
+            {% endif %}
+            
+            <!-- Topics List -->
+            {% if topics %}
+                <div class="list-group">
+                    {% for topic in topics %}
+                        <div class="list-group-item border-start border-primary border-5">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <i class="fas fa-bookmark text-primary"></i>
+                                        {{ topic.order }}. {{ topic.title }}
+                                    </h6>
+                                    
+                                    {% if topic.description %}
+                                        <p class="mb-2 text-muted small">{{ topic.description }}</p>
+                                    {% endif %}
+                                    
+                                    <!-- Topic Resources Count -->
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-alt"></i>
+                                        {{ topic.resources.count }} resurs
+                                    </small>
+                                </div>
+                                
+                                <!-- Action Buttons (Owner only) -->
+                                {% if is_owner %}
+                                    <div class="btn-group btn-group-sm ms-2" role="group">
+                                        <!-- Edit Button (TODO) -->
+                                        <button type="button" class="btn btn-outline-warning"
+                                                onclick="editTopic({{ topic.id }})"
+                                                title="Redaktə et">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        
+                                        <!-- Delete Button -->
+                                        <button type="button" class="btn btn-outline-danger"
+                                                onclick="deleteTopic({{ course.id }}, {{ topic.id }})"
+                                                title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    Hələ mövzu əlavə olunmayıb.
+                    {% if is_owner %}
+                        <button type="button" class="btn btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#topicFormModal">
+                            Birinci mövzunuzu əlavə edin →
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Topic Script -->
+<script>
+function deleteTopic(courseId, topicId) {
+    if (confirm('Bu mövzunu silmək istədiniz?\n\nMövzuya aid bütün məlumatlar silinəcək.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/courses/${courseId}/topic/${topicId}/delete/`;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function editTopic(topicId) {
+    alert('Mövzu redaksiyası hələ hazırlanmır');
+    // TODO: Edit modal açılacaq
+}
+</script>
