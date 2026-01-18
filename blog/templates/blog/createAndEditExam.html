@@ -11,8 +11,9 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/createAndEditExam.css' %}">
+    <link rel="stylesheet" href="{% static 'css/_searchable_multi_select.css' %}">
 {% endblock %}
-
+ 
 {% block content %}
     <div class="create-exam-page-wrapper">
         <div class="create-exam-card">
@@ -63,6 +64,23 @@
                         {{ form.exam_type }}
                         {% if form.exam_type.errors %}
                             <div class="field-error">{{ form.exam_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group span-full">
+                        {% if form.enable_paint %}
+                            <div class="form-check mt-2">
+                                {{ form.enable_paint }}
+                                <label class="form-check-label" for="{{ form.enable_paint.id_for_label }}">
+                                    Paint cavabı aktiv olsun
+                                </label>
+                                <small class="form-text text-muted">
+                                    Aktiv edilsə, tələbələr cavabı çəkmə (paint) ilə göndərə biləcək.
+                                </small>
+                                {% if form.enable_paint.errors %}
+                                    <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
 
@@ -200,59 +218,16 @@
                         {% endif %}
                     </div>
 
-                    {# --- Məhdudlaşdırılmış giriş --- #}
+                    {# --- Məhdudlaşdırılmış giriş (PARTIAL İSTİFADƏSİ) --- #}
                     <div id="access-restrictions" class="access-section span-full">
                         <div class="access-section-grid">
                             
-                            <div class="form-group custom-selector-group">
-                                <label class="form-label-custom">İcazəli Qruplar</label>
-                                
-                                <div class="search-wrapper">
-                                    <i class="fas fa-search search-icon"></i>
-                                    <input type="text" id="groupSearchInput" class="custom-search-input" placeholder="Qrup axtar...">
-                                </div>
+                            {# PARTIAL 1: Qruplar üçün #}
+                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_groups label="İcazəli Qruplar" search_placeholder="Qrup axtar..." container_id="groupSelector" %}
 
-                                <div id="groupListContainer" class="custom-list-container">
-                                    <div class="loading-text">Yüklənir...</div>
-                                </div>
+                            {# PARTIAL 2: Tələbələr üçün #}
+                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_users label="İcazəli Tələbələr (Fərdi)" search_placeholder="Tələbə axtar (ad, username)..." container_id="userSelector" %}
 
-                                <div class="selection-counter">
-                                    Seçilib: <span id="groupSelectedCount">0</span>
-                                </div>
-
-                                <div style="display: none;">
-                                    {{ form.allowed_groups }}
-                                </div>
-                                
-                                {% if form.allowed_groups.errors %}
-                                    <div class="field-error">{{ form.allowed_groups.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="form-group custom-selector-group">
-                                <label class="form-label-custom">İcazəli Tələbələr (Fərdi)</label>
-                                
-                                <div class="search-wrapper">
-                                    <i class="fas fa-search search-icon"></i>
-                                    <input type="text" id="userSearchInput" class="custom-search-input" placeholder="Tələbə axtar (ad, username)...">
-                                </div>
-
-                                <div id="userListContainer" class="custom-list-container">
-                                    <div class="loading-text">Yüklənir...</div>
-                                </div>
-
-                                <div class="selection-counter">
-                                    Seçilib: <span id="userSelectedCount">0</span>
-                                </div>
-
-                                <div style="display: none;">
-                                    {{ form.allowed_users }}
-                                </div>
-
-                                {% if form.allowed_users.errors %}
-                                    <div class="field-error">{{ form.allowed_users.errors.0 }}</div>
-                                {% endif %}
-                            </div>
                         </div>
 
                         <p class="access-help mt-3">
@@ -320,96 +295,6 @@
                 toggleAccessBlock();
                 isPublicCheckbox.addEventListener("change", toggleAccessBlock);
             }
-    
-            // SEARCHABLE MULTI-SELECT
-            function setupCustomSelector(selectId, containerId, searchInputId, counterId) {
-                const hiddenSelect = document.getElementById(selectId);
-                const container = document.getElementById(containerId);
-                const searchInput = document.getElementById(searchInputId);
-                const counterSpan = document.getElementById(counterId);
-    
-                if (!hiddenSelect || !container) return;
-    
-                function buildList() {
-                    container.innerHTML = '';
-                    const options = Array.from(hiddenSelect.options);
-    
-                    if (options.length === 0) {
-                        container.innerHTML = '<div class="loading-text">Məlumat tapılmadı.</div>';
-                        return;
-                    }
-    
-                    options.forEach(option => {
-                        const row = document.createElement('div');
-                        row.className = 'list-item-row';
-                        row.setAttribute('data-search', option.text.toLowerCase());
-    
-                        const checkboxId = `cb_${selectId}_${option.value}`;
-    
-                        row.innerHTML = `
-                            <input type="checkbox" id="${checkboxId}" class="custom-item-checkbox" value="${option.value}" ${option.selected ? 'checked' : ''}>
-                            <label for="${checkboxId}" class="custom-item-label">${option.text}</label>
-                        `;
-    
-                        const checkbox = row.querySelector('input');
-    
-                        checkbox.addEventListener('change', function() {
-                            option.selected = this.checked;
-                            updateCounter();
-                        });
-    
-                        row.addEventListener('click', function(e) {
-                            if (e.target !== checkbox && e.target.tagName !== 'LABEL') {
-                                checkbox.checked = !checkbox.checked;
-                                checkbox.dispatchEvent(new Event('change'));
-                            }
-                        });
-    
-                        container.appendChild(row);
-                    });
-                }
-    
-                function updateCounter() {
-                    if (counterSpan) {
-                        const count = hiddenSelect.selectedOptions.length;
-                        counterSpan.textContent = count;
-                    }
-                }
-    
-                if (searchInput) {
-                    searchInput.addEventListener('input', function() {
-                        const filter = this.value.toLowerCase();
-                        const rows = container.querySelectorAll('.list-item-row');
-    
-                        rows.forEach(row => {
-                            const text = row.getAttribute('data-search');
-                            if (text.includes(filter)) {
-                                row.style.display = 'flex';
-                            } else {
-                                row.style.display = 'none';
-                            }
-                        });
-                    });
-                }
-    
-                buildList();
-                updateCounter();
-            }
-    
-            setupCustomSelector(
-                "id_allowed_groups",
-                "groupListContainer",
-                "groupSearchInput",
-                "groupSelectedCount"
-            );
-    
-            setupCustomSelector(
-                "id_allowed_users",
-                "userListContainer",
-                "userSearchInput",
-                "userSelectedCount"
-            );
-    
         });
     </script>
 

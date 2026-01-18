@@ -1550,23 +1550,7 @@ def toggle_exam_active(request, slug):
     return redirect("teacher_exam_detail", slug=exam.slug)
 
 
-# @login_required
-# def edit_exam(request, slug):
-#     _ensure_teacher(request.user)
-#     exam = get_object_or_404(Exam, slug=slug, author=request.user)
 
-#     if request.method == "POST":
-#         form = ExamForm(request.POST, instance=exam, user=request.user)
-#         if form.is_valid():
-#             form.save()
-#             return redirect("teacher_exam_detail", slug=exam.slug)
-#     else:
-#         form = ExamForm(instance=exam, user=request.user)
-
-#     return render(request, "blog/edit_exam.html", {
-#         "exam": exam,
-#         "form": form,
-#     })
 
 
 
@@ -2451,7 +2435,7 @@ def teacher_check_attempt(request, slug, attempt_id):
     }
     return render(request, "blog/teacher_check_attempt.html", context)
 
-
+ 
 
 @login_required
 def teacher_pending_attempts(request):

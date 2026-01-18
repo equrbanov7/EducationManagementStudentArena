@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Kurslarım{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
+<style>
+  .my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
+  .course-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px; }
+  .course-card { border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; background:#fff; box-shadow: 0 6px 18px rgba(15,23,42,.06); }
+  .course-cover { height: 140px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .course-cover img { width:100%; height:100%; object-fit:cover; }
+  .course-body { padding:14px 14px 12px; }
+  .course-title { font-size:18px; font-weight:700; margin:0 0 6px; }
+  .course-desc { color:#64748b; font-size:14px; min-height: 40px; margin:0 0 10px; }
+  .course-meta { display:flex; gap:10px; flex-wrap:wrap; color:#334155; font-size:13px; }
+  .pill { background:#f1f5f9; border:1px solid #e2e8f0; padding:6px 10px; border-radius:999px; }
+  .course-actions { padding: 12px 14px 14px; display:flex; gap:10px; }
+  .btn-soft { border-radius: 12px; padding:10px 12px; font-weight:600; border:1px solid #e2e8f0; background:#fff; }
+  .btn-primary-soft { border-radius: 12px; padding:10px 12px; font-weight:700; border:0; background:#2563eb; color:#fff; }
+  .empty { text-align:center; padding:60px 10px; color:#64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-courses-wrap">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="mb-1" style="font-weight:800;">Kurslarım</h1>
+      <div class="text-muted">Yaratdığın bütün kurslar burada görünür.</div>
+    </div>
+
+    <a class="btn-primary-soft" href="{% url 'courses:create_course' %}">
+      <i class="fas fa-plus me-2"></i>Yeni Kurs
+    </a>
+  </div>
+
+  {% if courses %}
+    <div class="course-grid">
+      {% for course in courses %}
+        <div class="course-card">
+          <div class="course-cover">
+            {% if course.cover_image %}
+              <img src="{{ course.cover_image.url }}" alt="{{ course.title }}">
+            {% else %}
+              <div class="text-muted"><i class="fas fa-image me-2"></i>Cover yoxdur</div>
+            {% endif %}
+          </div>
+
+          <div class="course-body">
+            <div class="course-title">{{ course.title }}</div>
+            <p class="course-desc">
+              {% if course.description %}
+                {{ course.description|truncatechars:90 }}
+              {% else %}
+                Təsvir əlavə edilməyib.
+              {% endif %}
+            </p>
+
+            <div class="course-meta">
+              <span class="pill"><i class="fas fa-circle me-1"></i>{{ course.get_status_display }}</span>
+              <span class="pill"><i class="fas fa-layer-group me-1"></i>{{ course.topic_count }} mövzu</span>
+              <span class="pill"><i class="fas fa-user-graduate me-1"></i>{{ course.student_count }} tələbə</span>
+            </div>
+          </div>
+
+          <div class="course-actions">
+            <a class="btn-primary-soft" href="{% url 'courses:course_dashboard' course.id %}">
+              <i class="fas fa-rocket me-2"></i>Dashboard
+            </a>
+            <a class="btn-soft" href="#">
+              <i class="fas fa-eye me-2"></i>Bax
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+      <div class="d-flex justify-content-center mt-4">
+        <nav>
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Əvvəl</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Sonra</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty">
+      <div style="font-size:44px; margin-bottom:10px;"><i class="fas fa-graduation-cap"></i></div>
+      <h3 style="font-weight:800; color:#0f172a;">Hələ kurs yaratmamısan</h3>
+      <p>İlk kursunu yarat və dashboard-da mövzular, sərbəst işlər, lab işləri əlavə et.</p>
+      <a class="btn-primary-soft" href="{% url 'courses:create_course' %}">
+        <i class="fas fa-plus me-2"></i>Yeni Kurs Yarat
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

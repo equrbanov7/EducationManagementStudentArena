@@ -1,0 +1,451 @@
+{% load static %}
+{% load custom_filters %}
+
+<style>
+    /* Custom Selector Styles */
+    .custom-selector-wrapper {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+    }
+
+    .search-input-group {
+        position: relative;
+        margin-bottom: 10px;
+    }
+
+    .search-input-group i {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .custom-search-input {
+        width: 100%;
+        padding: 8px 10px 8px 35px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .custom-list-container {
+        max-height: 250px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+    }
+
+    .list-item-row {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid #f1f1f1;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .list-item-row:last-child {
+        border-bottom: none;
+    }
+
+    .list-item-row:hover {
+        background-color: #e9ecef;
+    }
+
+    .custom-item-checkbox {
+        margin-right: 10px;
+        transform: scale(1.2);
+        cursor: pointer;
+    }
+
+    .custom-item-label {
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .selection-counter {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-align: right;
+    }
+
+    /* Modal Styles */
+    .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 1rem);
+    }
+    .modal-content {
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .modal-body {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Tələbə Əlavə Et
+                </h5>
+                <button type="button" class="btn-close btn-close-white" 
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="addStudentForm" method="post" 
+                  action="{% url 'courses:add_member' course.id %}">
+                {% csrf_token %}
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="groupNameInput" class="form-label">
+                            <i class="fas fa-users"></i> Qrup Adı (istəyə bağlı)
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="groupNameInput" 
+                               name="group_name"
+                               placeholder="Məs: 940, 950, 842A1...">
+                    </div>
+
+                    <div class="custom-selector-wrapper">
+                        <label class="form-label fw-bold mb-2">Tələbələr</label>
+                        
+                        <div class="search-input-group">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="student_search_input" class="custom-search-input" 
+                                   placeholder="Tələbə axtar (ad, username)...">
+                        </div>
+
+                        <div id="student_list_container" class="custom-list-container">
+                            {% if all_users %}
+                                {% for user in all_users %}
+                                <div class="list-item-row" data-search="{{ user.username|lower }} {{ user.get_full_name|lower }}">
+                                    <input type="checkbox" 
+                                           id="user_{{ user.id }}" 
+                                           name="user_ids" 
+                                           value="{{ user.id }}" 
+                                           class="custom-item-checkbox">
+                                    <label for="user_{{ user.id }}" class="custom-item-label">
+                                        {{ user.username }} 
+                                        {% if user.get_full_name %}
+                                            <span class="text-muted">({{ user.get_full_name }})</span>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="p-3 text-center text-muted">İstifadəçi tapılmadı.</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="selection-counter">
+                            Seçilib: <span id="student_counter">0</span>
+                        </div>
+                    </div>
+                    
+                    <div id="studentLoadingIndicator" class="text-center mt-3" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yüklənir...</span>
+                        </div>
+                        <p class="text-muted mt-2">Tələbələr əlavə olunur...</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Ləğv et
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Əlavə Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addGroupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-users-cog"></i> Qrup Əlavə Et
+                </h5>
+                <button type="button" class="btn-close btn-close-white" 
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="addGroupForm" method="post" 
+                  action="{% url 'courses:add_members_bulk' course.id %}">
+                {% csrf_token %}
+                
+                <div class="modal-body">
+                    
+                    <div class="custom-selector-wrapper">
+                        <label class="form-label fw-bold mb-2">Qruplar</label>
+                        
+                        <div class="search-input-group">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="group_search_input" class="custom-search-input" 
+                                   placeholder="Qrup axtar...">
+                        </div>
+
+                        <div id="group_list_container" class="custom-list-container">
+                            {% if all_groups %}
+                                {% for group in all_groups %}
+                                <div class="list-item-row" data-search="{{ group.name|lower }}">
+                                    <input type="checkbox" 
+                                           id="group_{{ group.id }}" 
+                                           name="group_ids" 
+                                           value="{{ group.id }}" 
+                                           class="custom-item-checkbox">
+                                    <label for="group_{{ group.id }}" class="custom-item-label">
+                                        {{ group.name }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="p-3 text-center text-muted">Qrup tapılmadı.</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="selection-counter">
+                            Seçilib: <span id="group_counter">0</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        Seçilən qruplardakı <strong>bütün tələbələr</strong> kursa əlavə ediləcək.
+                    </div>
+
+                    <div id="groupLoadingIndicator" class="text-center mt-3" style="display: none;">
+                        <div class="spinner-border text-secondary" role="status">
+                            <span class="visually-hidden">Yüklənir...</span>
+                        </div>
+                        <p class="text-muted mt-2">Qruplar əlavə olunur...</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Ləğv et
+                    </button>
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-check"></i> Qrupları Əlavə Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    
+        // ==========================================================
+        // 1. SELECTOR LOGIC (Axtarış, Seçim və Sayğac)
+        // ==========================================================
+        function initSelectorLogic(containerId, searchInputId, counterId) {
+            const container = document.getElementById(containerId);
+            const searchInput = document.getElementById(searchInputId);
+            const counter = document.getElementById(counterId);
+          
+            if (!container) return;
+          
+            function updateCount() {
+              const count = container.querySelectorAll('input[type="checkbox"]:checked').length;
+              if (counter) counter.innerText = count;
+            }
+          
+            // Live search
+            if (searchInput) {
+              searchInput.addEventListener('keyup', function (e) {
+                const term = e.target.value.toLowerCase();
+                const rows = container.querySelectorAll('.list-item-row');
+          
+                rows.forEach(row => {
+                  const searchData = row.getAttribute('data-search') || "";
+                  row.style.display = searchData.includes(term) ? 'flex' : 'none';
+                });
+              });
+            }
+          
+            // Row click -> toggle (amma checkbox/label daxilində klikdirsə qarışma!)
+            container.addEventListener('click', function (e) {
+              const row = e.target.closest('.list-item-row');
+              if (!row) return;
+          
+              // checkbox-un özünə klik -> browser özü toggle edir
+              if (e.target.closest('input[type="checkbox"]')) return;
+          
+              // label və label-in içi -> browser özü toggle edir, biz qarışmırıq
+              if (e.target.closest('label')) {
+                // toggle sonrası sayğac yenilənsin
+                setTimeout(updateCount, 0);
+                return;
+              }
+          
+              // row-un boş yerinə klik -> biz toggle edirik
+              const checkbox = row.querySelector('input[type="checkbox"]');
+              if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                updateCount();
+              }
+            });
+          
+            // checkbox change -> sayğac yenilə
+            container.addEventListener('change', function (e) {
+              if (e.target.type === 'checkbox') updateCount();
+            });
+          
+            // init
+            updateCount();
+          }
+          
+    
+        // Funksiyaları başlat
+        initSelectorLogic('student_list_container', 'student_search_input', 'student_counter');
+        initSelectorLogic('group_list_container', 'group_search_input', 'group_counter');
+    
+    
+        // ==========================================================
+        // 2. TƏLƏBƏ ƏLAVƏ ET (AJAX + RELOAD)
+        // ==========================================================
+        const studentForm = document.getElementById('addStudentForm');
+        
+        if (studentForm) {
+            studentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const btn = this.querySelector('button[type="submit"]');
+                const formData = new FormData(this);
+                const userIds = formData.getAll('user_ids'); // Bütün seçimləri al
+    
+                if (userIds.length === 0) {
+                    alert('Ən azı bir tələbə seçin!');
+                    return;
+                }
+    
+                // Düyməni deaktiv et
+                const originalText = btn.innerText;
+                btn.innerText = 'Əlavə edilir...';
+                btn.disabled = true;
+    
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Uğurludursa, SƏHİFƏNİ YENİLƏ (Bu vacibdir!)
+                        location.reload(); 
+                    } else {
+                        alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Server xətası baş verdi.');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+            });
+        }
+    
+        // ==========================================================
+        // 3. QRUP ƏLAVƏ ET (AJAX + RELOAD)
+        // ==========================================================
+        const groupForm = document.getElementById('addGroupForm');
+        
+        if (groupForm) {
+            groupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const formData = new FormData(this);
+                const groupIds = formData.getAll('group_ids');
+    
+                if (groupIds.length === 0) {
+                    alert('Ən azı bir qrup seçin!');
+                    return;
+                }
+    
+                const originalText = btn.innerText;
+                btn.innerText = 'Əlavə edilir...';
+                btn.disabled = true;
+    
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Səhifəni yenilə
+                    } else {
+                        alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+            });
+        }
+    
+        // ==========================================================
+        // 4. SİLMƏ FUNKSİYASI (DELETE MEMBER)
+        // ==========================================================
+        // Bu funksiyanı qlobal edirik ki, HTML-dəki onclick="..." görə bilsin
+        window.deleteMember = function(memberId, name) {
+            if(!confirm(name + " adlı tələbəni kursdan silmək istəyirsiniz?")) return;
+    
+            // CSRF Tokeni tap
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // URL-i dinamik düzəlt
+            const url = "{% url 'courses:delete_member' course.id 0 %}".replace('0', memberId);
+    
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // VACİB: Silinəndən sonra səhifəni yeniləyirik.
+                    // Beləliklə, silinən tələbə avtomatik olaraq "Tələbə Əlavə Et" modalına düşəcək.
+                    location.reload();
+                } else {
+                    alert("Silinmədi: " + (data.error || 'Xəta'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Server xətası.');
+            });
+        };
+    });
+</script>

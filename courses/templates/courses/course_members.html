@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ course.title }} - Üzvlər{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'courses/css/course_members.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="members-page-wrapper">
+    <div class="members-container">
+        
+        <div class="members-header">
+            <div class="header-left">
+                <a href="{% url 'courses:course_dashboard' course.id %}" class="back-btn">
+                    <i class="fas fa-arrow-left me-1"></i> Dashboard
+                </a>
+                <div class="mt-2">
+                    <h1>Üzvlər</h1>
+                    <p>{{ course.title }}</p>
+                </div>
+            </div>
+            
+            {% if is_owner %}
+            <div class="header-actions">
+                <button class="btn-custom btn-primary-custom" onclick="openModal('addStudentModal')">
+                    <i class="fas fa-user-plus"></i> Tələbə Əlavə Et
+                </button>
+                <button class="btn-custom btn-secondary-custom" onclick="openModal('addGroupModal')">
+                    <i class="fas fa-users-cog"></i> Qrup Əlavə Et
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if teacher %}
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i class="fas fa-chalkboard-teacher me-2"></i> Müəllim</h3>
+            </div>
+            <div class="member-list">
+                <div class="member-item">
+                    <div class="member-avatar">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="member-info">
+                        <strong>{{ teacher.user.get_full_name|default:teacher.user.username }}</strong>
+                        <small>@{{ teacher.user.username }}</small>
+                    </div>
+                    <span class="badge-role badge-teacher">Kurs Sahibi</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if students %}
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i class="fas fa-user-friends me-2"></i> Tələbələr</h3>
+                <span class="count-badge">{{ students.count }} nəfər</span>
+            </div>
+            
+            {% regroup students by group_name as grouped_students %}
+            
+            {% for group in grouped_students %}
+            <div class="group-section-wrapper">
+                <div class="group-header">
+                    <div class="group-title">
+                        <i class="fas fa-layer-group text-primary"></i>
+                        {% if group.grouper %}
+                            Qrup: {{ group.grouper }}
+                        {% else %}
+                            Qrupsuz Tələbələr
+                        {% endif %}
+                        <span class="text-muted small">({{ group.list|length }})</span>
+                    </div>
+
+                    {% if is_owner and group.grouper %}
+                    <form method="POST" action="{% url 'courses:delete_group_from_course' course.id %}" onsubmit="return confirm('BU QRUPU SİLMƏK İSTƏYİRSİNİZ?\n\n{{ group.grouper }} qrupundakı bütün tələbələr kursdan çıxarılacaq!')">
+                        {% csrf_token %}
+                        <input type="hidden" name="group_name" value="{{ group.grouper }}">
+                        <button type="submit" class="btn-delete-group">
+                            <i class="fas fa-trash-alt me-1"></i> Qrupu Sil
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+
+                <div class="member-list">
+                    {% for student in group.list %}
+                    <div class="member-item">
+                        <div class="member-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="member-info">
+                            <strong>{{ student.user.get_full_name|default:student.user.username }}</strong>
+                            <small>@{{ student.user.username }}</small>
+                        </div>
+                        <div class="member-actions">
+                            {% if is_owner %}
+                            <button class="btn-icon-delete" onclick="deleteMember({{ student.id }}, '{{ student.user.username }}')">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="alert alert-info text-center m-4">
+                <i class="fas fa-info-circle me-2"></i> Kursa hələ tələbə əlavə olunmayıb.
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% if is_owner %}
+<!-- Action Buttons -->
+    {% include 'courses/partials/_member_form_modal.html' %}
+
+{% endif %}
+
+
+
+
+{% endblock %}

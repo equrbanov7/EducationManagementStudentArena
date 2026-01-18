@@ -1,7 +1,7 @@
 // static/js/paint_answer.js
 (function () {
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-  
+   
     function initPaintCard(card) {
       const qid = card.dataset.qid;
   

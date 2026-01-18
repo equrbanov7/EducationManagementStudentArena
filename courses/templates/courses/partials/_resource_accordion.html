@@ -1,0 +1,142 @@
+<!-- ACCORDION 5: RESURSLAR (Resources) -->
+<!-- courses/templates/courses/partials/_resource_accordion.html -->
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#resourceCollapse">
+            <i class="fas fa-folder-open text-success me-2"></i>
+            <strong>Resurslar ({{ resources|length }})</strong>
+            {% if is_owner %}
+                <span class="badge bg-success ms-2">{{ resources|length }}</span>
+            {% endif %}
+        </button>
+    </h2>
+    <div id="resourceCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            <!-- Add Resource Button (Owner only) -->
+            {% if is_owner %}
+                <button type="button" class="btn btn-success btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
+                    <i class="fas fa-plus-circle"></i> Yeni Resurs Əlavə Et
+                </button>
+            {% endif %}
+            
+            <!-- Resources List -->
+            {% if resources %}
+                <div class="row">
+                    {% for resource in resources %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100 border-left-success" style="border-left: 4px solid #28a745;">
+                                <div class="card-body">
+                                    <!-- Resource Icon & Title -->
+                                    <div class="d-flex align-items-start mb-2">
+                                        {% if resource.resource_type == 'file' %}
+                                            <i class="fas fa-file-pdf text-danger fa-lg me-2 mt-1"></i>
+                                        {% elif resource.resource_type == 'link' %}
+                                            <i class="fas fa-link text-info fa-lg me-2 mt-1"></i>
+                                        {% elif resource.resource_type == 'document' %}
+                                            <i class="fas fa-file-alt text-primary fa-lg me-2 mt-1"></i>
+                                        {% elif resource.resource_type == 'video' %}
+                                            <i class="fas fa-video text-warning fa-lg me-2 mt-1"></i>
+                                        {% endif %}
+                                        
+                                        <div class="flex-grow-1">
+                                            <h6 class="card-title mb-1">{{ resource.title }}</h6>
+                                            <small class="text-muted d-block">
+                                                {{ resource.get_resource_type_display }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Resource Description -->
+                                    {% if resource.description %}
+                                        <p class="card-text small text-muted mb-2">{{ resource.description|truncatewords:20 }}</p>
+                                    {% endif %}
+                                    
+                                    <!-- Resource Topic Badge -->
+                                    {% if resource.topic %}
+                                        <div class="mb-2">
+                                            <span class="badge bg-light text-dark">
+                                                {{ resource.topic.title }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2">
+                                        <!-- Download/Open Button -->
+                                        {% if resource.file %}
+                                            <a href="{{ resource.file.url }}" class="btn btn-sm btn-primary" 
+                                               download target="_blank">
+                                                <i class="fas fa-download"></i> Endir
+                                            </a>
+                                        {% elif resource.url %}
+                                            <a href="{{ resource.url }}" class="btn btn-sm btn-info" 
+                                               target="_blank" rel="noopener noreferrer">
+                                                <i class="fas fa-external-link-alt"></i> Aç
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <!-- Delete Button (Owner only) -->
+                                        {% if is_owner %}
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    onclick="deleteResource({{ course.id }}, {{ resource.id }})"
+                                                    title="Sil">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    Hələ resurs əlavə olunmayıb.
+                    {% if is_owner %}
+                        <button type="button" class="btn btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
+                            Birinci resursunuzu əlavə edin →
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Resource Script -->
+<script>
+function deleteResource(courseId, resourceId) {
+    if (confirm('Bu resursu silmək istədiniz?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/courses/${courseId}/resource/${resourceId}/delete/`;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+<style>
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+</style>

@@ -135,9 +135,12 @@
                             <br>
                                 
                             {# --- PAINT CAVABI --- #}
-                            {% if q.enable_paint %}
-                                 {% include "partials/_paint_answer.html" with q=q ans=ans_data.answer %}
+                            {% if exam.enable_paint or q.enable_paint %}
+                                {% include "partials/_paint_answer.html" with q=q ans=ans_data.answer %}
                             {% endif %}
+                        
+                        
+                        
 
                             <div class="file-dropzone" 
                                  data-qid="{{ q.id }}" 
@@ -752,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
     showSlide(currentIndex);
 });
 </script>
-
+ 
 {% block extraJs %}
     <script src="{% static 'js/paint_answer.js' %}"></script>
 {% endblock %}

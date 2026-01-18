@@ -1,0 +1,152 @@
+<!-- MODAL: Mövzu Əlavə Etmə -->
+<!-- courses/templates/courses/partials/_topic_form_modal.html -->
+
+<div class="modal fade" id="topicFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle"></i> Yeni Mövzu Əlavə Et
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="topicForm" method="post" action="{% url 'courses:add_topic' course.id %}">
+                    {% csrf_token %}
+                    
+                    <!-- Title Field -->
+                    <div class="mb-3">
+                        <label for="topicTitle" class="form-label">
+                            <strong>Mövzu Adı</strong>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="topicTitle" 
+                               name="title" placeholder="Məs: Həftə 1: Giriş"
+                               required>
+                        <small class="text-muted">
+                            Məs: "Həftə 1", "Bölmə 1: Əsas Konseptlər"
+                        </small>
+                    </div>
+                    
+                    <!-- Description Field -->
+                    <div class="mb-3">
+                        <label for="topicDescription" class="form-label">
+                            <strong>Mövzu Təsviri</strong>
+                        </label>
+                        <textarea class="form-control" id="topicDescription" 
+                                  name="description" rows="3" 
+                                  placeholder="Bu mövzuda nə öyrənilir?"></textarea>
+                        <small class="text-muted">
+                            Tələbələr üçün bu mövzunun məqsədini yazın
+                        </small>
+                    </div>
+                    
+                    <!-- Error Messages Container -->
+                    <div id="topicErrors" class="alert alert-danger d-none" role="alert"></div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="fas fa-save"></i> Mövzu Əlavə Et
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Ləğv Et
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Topic Form AJAX Handler -->
+<script>
+document.getElementById('topicForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const actionUrl = this.action;
+    
+    // Loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Əlavə olunur...';
+    
+    fetch(actionUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('topicFormModal')).hide();
+            
+            // Clear form
+            document.getElementById('topicForm').reset();
+            
+            // Show success message
+            showNotification(data.message, 'success');
+            
+            // Reload page after 1 second
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            // Show errors
+            showFormErrors('topicErrors', data.errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+
+// Helper functions (in shared forms.js)
+function showFormErrors(containerId, errors) {
+    const container = document.getElementById(containerId);
+    let errorHtml = '<strong>Xətalar:</strong><ul class="mb-0">';
+    
+    for (const [field, messages] of Object.entries(errors)) {
+        errorHtml += `<li>${messages[0]}</li>`;
+    }
+    
+    errorHtml += '</ul>';
+    container.innerHTML = errorHtml;
+    container.classList.remove('d-none');
+}
+
+function showNotification(message, type = 'info') {
+    // See notifications.js
+    notify(message, type);
+}
+</script>
+
+<style>
+    #topicForm .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    #topicForm .form-control {
+        border-radius: 6px;
+    }
+    
+    #topicForm .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+</style>

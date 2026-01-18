@@ -38,16 +38,18 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # deploy zamani silin!!
 # ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
-ALLOWED_HOSTS = ["172.20.10.11", "localhost", "127.0.0.1","0.0.0.0","192.168.1.73","172.20.10.11","192.168.1.77"]
+ALLOWED_HOSTS = ["172.20.10.11", "localhost", "127.0.0.1","0.0.0.0","192.168.1.73","172.20.10.11","192.168.1.77","192.168.1.115"]
 
 
 
 # Application definition
 
 INSTALLED_APPS = [
+   "courses.apps.CoursesConfig",
     "blog",
     "channels",
     "liveExam",
+   "accounts.apps.AccountsConfig",
     "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -198,3 +200,15 @@ CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 
 SITE_URL = "http://127.0.0.1:8000"
 
+
+
+# 6. MESSAGE_TAGS (Toast message styling)
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}

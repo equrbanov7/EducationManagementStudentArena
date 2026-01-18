@@ -1,0 +1,130 @@
+{% comment %}
+    Yenidən istifadəyə yararlı Searchable Multi-Select Partial
+    
+    Parametrlər:
+    - field: Form field obyekti (məs: form.allowed_groups)
+    - label: Göstəriləcək etiket (məs: "İcazəli Qruplar")
+    - search_placeholder: Axtarış inputu üçün placeholder
+    - container_id: Unikal ID (məs: "groupSelector")
+{% endcomment %}
+
+<div class="form-group custom-selector-group">
+    <label class="form-label-custom">{{ label }}</label>
+    
+    <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+            type="text" 
+            id="{{ container_id }}_search" 
+            class="custom-search-input" 
+            placeholder="{{ search_placeholder }}">
+    </div>
+
+    <div id="{{ container_id }}_list" class="custom-list-container">
+        <div class="loading-text">Yüklənir...</div>
+    </div>
+
+    <div class="selection-counter">
+        Seçilib: <span id="{{ container_id }}_count">0</span>
+    </div>
+
+    <div style="display: none;">
+        {{ field }}
+    </div>
+    
+    {% if field.errors %}
+        <div class="field-error">{{ field.errors.0 }}</div>
+    {% endif %}
+</div>
+
+<script>
+(function() {
+    const config = {
+        selectId: "{{ field.id_for_label }}",
+        containerId: "{{ container_id }}_list",
+        searchInputId: "{{ container_id }}_search",
+        counterId: "{{ container_id }}_count"
+    };
+
+    function initSearchableMultiSelect(cfg) {
+        const hiddenSelect = document.getElementById(cfg.selectId);
+        const container = document.getElementById(cfg.containerId);
+        const searchInput = document.getElementById(cfg.searchInputId);
+        const counterSpan = document.getElementById(cfg.counterId);
+
+        if (!hiddenSelect || !container) return;
+
+        function buildList() {
+            container.innerHTML = '';
+            const options = Array.from(hiddenSelect.options);
+
+            if (options.length === 0) {
+                container.innerHTML = '<div class="loading-text">Məlumat tapılmadı.</div>';
+                return;
+            }
+
+            options.forEach(option => {
+                const row = document.createElement('div');
+                row.className = 'list-item-row';
+                row.setAttribute('data-search', option.text.toLowerCase());
+
+                const checkboxId = `cb_${cfg.selectId}_${option.value}`;
+
+                row.innerHTML = `
+                    <input type="checkbox" id="${checkboxId}" class="custom-item-checkbox" value="${option.value}" ${option.selected ? 'checked' : ''}>
+                    <label for="${checkboxId}" class="custom-item-label">${option.text}</label>
+                `;
+
+                const checkbox = row.querySelector('input');
+
+                checkbox.addEventListener('change', function() {
+                    option.selected = this.checked;
+                    updateCounter();
+                });
+
+                row.addEventListener('click', function(e) {
+                    if (e.target !== checkbox && e.target.tagName !== 'LABEL') {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                container.appendChild(row);
+            });
+        }
+
+        function updateCounter() {
+            if (counterSpan) {
+                const count = hiddenSelect.selectedOptions.length;
+                counterSpan.textContent = count;
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                const rows = container.querySelectorAll('.list-item-row');
+
+                rows.forEach(row => {
+                    const text = row.getAttribute('data-search');
+                    if (text.includes(filter)) {
+                        row.style.display = 'flex';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        buildList();
+        updateCounter();
+    }
+
+    // DOMContentLoaded və ya dərhal işə sal
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => initSearchableMultiSelect(config));
+    } else {
+        initSearchableMultiSelect(config);
+    }
+})();
+</script>

@@ -26,6 +26,7 @@ urlpatterns = [
     path('blog/', include('blog.urls') ),
     path('', include('blog.urls') ),
     path("", include("liveExam.urls")),
+    path('courses/', include('courses.urls')),
 ]
 
 # Serving media files during development

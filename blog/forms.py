@@ -1,6 +1,8 @@
 # blog/forms.py
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
 
 from .models import Post, Comment, Question,Exam, ExamQuestion, ExamQuestionOption,Category, ExamAttempt, ExamAnswer, StudentGroup, QuestionBlock
 
@@ -170,8 +172,8 @@ class ExamForm(forms.ModelForm):
             "description",
             "exam_type",
             "is_active",
-            "start_datetime",      # ✅ YENİ
-            "end_datetime",        # ✅ YENİ
+            "start_datetime",     
+            "end_datetime",       
             "is_public",
             "allowed_users",
             "allowed_groups",
@@ -179,6 +181,7 @@ class ExamForm(forms.ModelForm):
             "total_duration_minutes",
             "default_question_time_seconds",
             "max_attempts_per_user",
+            "enable_paint",
         ]
         widgets = {
             "title": forms.TextInput(attrs={
@@ -296,6 +299,11 @@ class ExamForm(forms.ModelForm):
         cleaned_data = super().clean()
         start_dt = cleaned_data.get('start_datetime')
         end_dt = cleaned_data.get('end_datetime')
+        enable_paint = cleaned_data.get("enable_paint")
+        exam_type = cleaned_data.get("exam_type")
+
+        if exam_type == "test" and enable_paint:
+            raise ValidationError("Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər.")
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:

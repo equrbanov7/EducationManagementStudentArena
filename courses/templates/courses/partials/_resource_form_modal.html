@@ -1,0 +1,200 @@
+<!-- MODAL: Resurs Əlavə Etmə -->
+<!-- courses/templates/courses/partials/_resource_form_modal.html -->
+
+<div class="modal fade" id="resourceFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle"></i> Yeni Resurs Əlavə Et
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="resourceForm" method="post" action="{% url 'courses:add_resource' course.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Title Field -->
+                    <div class="mb-3">
+                        <label for="resourceTitle" class="form-label">
+                            <strong>Resurs Adı</strong>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="resourceTitle" 
+                               name="title" placeholder="Məs: Python Dokumentasiyası"
+                               required>
+                    </div>
+                    
+                    <!-- Description Field -->
+                    <div class="mb-3">
+                        <label for="resourceDescription" class="form-label">
+                            <strong>Açıqlama</strong>
+                        </label>
+                        <textarea class="form-control" id="resourceDescription" 
+                                  name="description" rows="2" 
+                                  placeholder="Bu resurs nə haqqındadır?"></textarea>
+                    </div>
+                    
+                    <!-- Resource Type Field -->
+                    <div class="mb-3">
+                        <label for="resourceType" class="form-label">
+                            <strong>Resurs Tipi</strong>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="resourceType" name="resource_type" required onchange="toggleResourceInput()">
+                            <option value="">-- Seç --</option>
+                            <option value="file">Fayl (PDF, ZIP, IMG)</option>
+                            <option value="link">Xarici Link</option>
+                            <option value="document">Sənəd</option>
+                            <option value="video">Video</option>
+                        </select>
+                    </div>
+                    
+                    <!-- File Input (shown when type is 'file') -->
+                    <div class="mb-3" id="fileInputDiv" style="display: none;">
+                        <label for="resourceFile" class="form-label">
+                            <strong>Fayl Yüklə</strong>
+                        </label>
+                        <input type="file" class="form-control" id="resourceFile" 
+                               name="file" accept=".pdf,.zip,.jpg,.png,.mp4,.mov">
+                        <small class="text-muted">
+                            Dəstəklənən formatlar: PDF, ZIP, JPG, PNG, MP4, MOV (max 50MB)
+                        </small>
+                    </div>
+                    
+                    <!-- URL Input (shown when type is not 'file') -->
+                    <div class="mb-3" id="urlInputDiv" style="display: none;">
+                        <label for="resourceUrl" class="form-label">
+                            <strong>Linki</strong>
+                        </label>
+                        <input type="url" class="form-control" id="resourceUrl" 
+                               name="url" placeholder="https://example.com/...">
+                    </div>
+                    
+                    <!-- Topic Assignment (Optional) -->
+                    <div class="mb-3">
+                        <label for="resourceTopic" class="form-label">
+                            <strong>Mövzu (Isteğe Bağlı)</strong>
+                        </label>
+                        <select class="form-select" id="resourceTopic" name="topic">
+                            <option value="">-- Seçmə --</option>
+                            {% for topic in topics %}
+                                <option value="{{ topic.id }}">{{ topic.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">
+                            Bu resurs hansı mövzuya aiddir?
+                        </small>
+                    </div>
+                    
+                    <!-- Error Messages Container -->
+                    <div id="resourceErrors" class="alert alert-danger d-none" role="alert"></div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success flex-grow-1">
+                            <i class="fas fa-save"></i> Resurs Əlavə Et
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Ləğv Et
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resource Form AJAX Handler -->
+<script>
+// Toggle file/URL inputs based on resource type
+function toggleResourceInput() {
+    const resourceType = document.getElementById('resourceType').value;
+    const fileInputDiv = document.getElementById('fileInputDiv');
+    const urlInputDiv = document.getElementById('urlInputDiv');
+    const fileInput = document.getElementById('resourceFile');
+    const urlInput = document.getElementById('resourceUrl');
+    
+    if (resourceType === 'file') {
+        fileInputDiv.style.display = 'block';
+        urlInputDiv.style.display = 'none';
+        fileInput.required = true;
+        urlInput.required = false;
+    } else if (resourceType) {
+        fileInputDiv.style.display = 'none';
+        urlInputDiv.style.display = 'block';
+        fileInput.required = false;
+        urlInput.required = true;
+    } else {
+        fileInputDiv.style.display = 'none';
+        urlInputDiv.style.display = 'none';
+        fileInput.required = false;
+        urlInput.required = false;
+    }
+}
+
+// Form submission
+document.getElementById('resourceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const actionUrl = this.action;
+    
+    // Loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Əlavə olunur...';
+    
+    fetch(actionUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('resourceFormModal')).hide();
+            document.getElementById('resourceForm').reset();
+            showNotification(data.message, 'success');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showFormErrors('resourceErrors', data.errors);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+</script>
+
+<style>
+    #resourceForm .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    #resourceForm .form-control,
+    #resourceForm .form-select {
+        border-radius: 6px;
+    }
+    
+    #resourceForm .form-control:focus,
+    #resourceForm .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+</style>
