@@ -149,62 +149,64 @@ class CreateCourseView(IsTeacherMixin, CreateView):
 # ════════════════════════════════════════════════════════════════════════════
 # VIEW 2: Kurs Dashboard (Accordion)
 # ════════════════════════════════════════════════════════════════════════════
-
 class CourseDashboardView(LoginRequiredMixin, DetailView):
-    """
-    Kurs dashboard səhifəsi (Accordion).
-    
-    FIX: Context-ə all_users və all_groups əlavə olunub
-    (Modal-lar üçün lazımdır)
-    """
-    
     model = Course
     template_name = 'courses/course_dashboard.html'
     context_object_name = 'course'
     pk_url_kwarg = 'course_id'
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
-        
+
         # Accordion məlumatları
         context['topics'] = course.topics.all().order_by('order')
         context['resources'] = course.resources.all().order_by('-created_at')
         context['members'] = course.memberships.all().order_by('joined_at')
-        
+
         # Formalar (modal-lar üçün)
         context['topic_form'] = CourseTopicForm()
         context['resource_form'] = CourseResourceForm()
-        
+
         # Owner check
         context['is_owner'] = course.owner == self.request.user
-        
-        # ← FIX: Modal-lar üçün lazımlı məlumatlar
+
+        # ✅ ASSIGNMENT MODAL üçün: Kursdakı real qruplar (CourseMembership.group_name)
+        context['assignment_groups'] = list(
+            course.memberships
+            .filter(role='student')
+            .exclude(group_name__isnull=True)
+            .exclude(group_name__exact='')
+            .values_list('group_name', flat=True)
+            .distinct()
+            .order_by('group_name')
+        )
+
+        # Modal-lar üçün owner-ə məxsus şeylər
         if context['is_owner']:
             # Kursa hələ əlavə olmamış tələbələr
             course_user_ids = course.memberships.values_list('user_id', flat=True)
             context['all_users'] = (
                 User.objects
                 .exclude(id__in=course_user_ids)
-                .filter(groups__name='student')   # ✅ Yalnız tələbələr (Group ilə)
+                .filter(groups__name='student')
                 .distinct()
                 .order_by('username')
-)
+            )
 
-            
-            # Bütün tələbə qrupları (StudentGroup)
-        try:
-            from blog.models import StudentGroup
-            context['all_groups'] = StudentGroup.objects.all().order_by('name')
-
-            # Əgər qruplar müəllimə görə bağlıdırsa, bunu istifadə et:
-            # context['all_groups'] = StudentGroup.objects.filter(teacher=self.request.user).order_by('name')
-
-        except ImportError:
+            # Bütün tələbə qrupları (StudentGroup) — səndə ayrıca model kimi qalır
+            try:
+                from blog.models import StudentGroup
+                context['all_groups'] = StudentGroup.objects.all().order_by('name')
+            except ImportError:
+                context['all_groups'] = []
+        else:
+            # owner deyilsə də template error verməsin
+            context['all_users'] = []
             context['all_groups'] = []
 
-        
         return context
+
 
 
 # ════════════════════════════════════════════════════════════════════════════

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "blog",
     "channels",
     "liveExam",
+    "assignments",
    "accounts.apps.AccountsConfig",
     "daphne",
     "django.contrib.admin",

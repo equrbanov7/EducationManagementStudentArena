@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Sərəbəst İş Məlumatları -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ assignment.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <p>{{ assignment.description }}</p>
+
+                    <div class="row text-muted">
+                        <div class="col-md-6">
+                            <small>
+                                <i class="bi bi-calendar-event"></i> 
+                                <strong>Müddət:</strong> 
+                                {{ assignment.deadline|date:"d.m.Y H:i" }}
+                                {% if assignment.is_deadline_passed %}
+                                <span class="badge bg-danger ms-2">Müddət Keçib</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small>
+                                <i class="bi bi-repeat"></i>
+                                <strong>Cəhdlər:</strong> 
+                                {{ submissions.count }} / {{ assignment.max_attempts }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cavab Forması (Draft varsa) -->
+            {% if current_submission %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Cavab (Qaralama)</h5>
+                </div>
+                <form id="submitForm" method="post" action="{% url 'assignments:submit_assignment' assignment.id %}">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Cavab *</label>
+                            <textarea name="text_answer" class="form-control" rows="6" required>
+                                {{ current_submission.text_answer }}
+                            </textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fayllar</label>
+                            <input type="file" name="files" class="form-control" multiple>
+                            <small class="text-muted">Çoxlu fayl seçə bilərsən (PDF, DOC, IMG, etc)</small>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success" 
+                                {% if assignment.is_deadline_passed %}disabled{% endif %}>
+                            <i class="bi bi-send"></i> Göndər
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% elif can_submit %}
+            <div class="alert alert-info">Yeni cəhd başlamaq üçün formanı doldurun</div>
+            {% else %}
+            <div class="alert alert-warning">Cəhd sayı limitini keçdin</div>
+            {% endif %}
+
+            <!-- Əvvəlki Cavablar -->
+            {% if submissions %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Əvvəlki Cavablar</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for submission in submissions %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">Cəhd {{ submission.attempt_number }}</h6>
+                                <small class="text-muted">
+                                    Göndərildi: {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                                </small>
+                                <div class="mt-2">{{ submission.text_answer|truncatewords:20 }}</div>
+                            </div>
+                            <div class="ms-2 text-end">
+                                <span class="badge bg-{{ submission.get_status_color }}">
+                                    {{ submission.get_status_display }}
+                                </span>
+                                {% if submission.status == 'graded' %}
+                                <div class="mt-2">
+                                    <strong class="text-success">{{ submission.score }}/{{ submission.max_score }}</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if submission.feedback %}
+                        <div class="mt-2 p-2 bg-light rounded">
+                            <strong>Rəy:</strong> {{ submission.feedback }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar: Cari Nəticə -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Cari Balın</h6>
+                    {% if submissions|dictsort:"status"|last.status == 'graded' %}
+                        <h3 class="text-success">
+                            {{ submissions|dictsort:"status"|last.score }}/{{ submissions|dictsort:"status"|last.max_score }}
+                        </h3>
+                    {% else %}
+                        <h3 class="text-muted">Gözləyən...</h3>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('submitForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch("{% url 'assignments:submit_assignment' assignment.id %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Xəta: ' + JSON.stringify(data.errors));
+        }
+    });
+});
+</script>
+{% endblock %}

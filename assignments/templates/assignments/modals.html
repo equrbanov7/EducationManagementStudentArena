@@ -1,0 +1,133 @@
+<div class="modal fade" id="addAssignmentModal" tabindex="-1" >
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Sərbəst İş Əlavə Et</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addAssignmentModalContent">
+                <form id="addAssignmentForm" method="post" action="{% url 'assignments:add_assignment' course.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-5 border-end">
+                            <h6 class="fw-bold mb-3">Əsas Məlumatlar</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Başlıq</label>
+                                <input type="text" name="title" class="form-control" required placeholder="Məs: Lab 1">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Təsvir</label>
+                                <textarea name="description" class="form-control" rows="3"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Başlama Tarixi</label>
+                                    <input type="datetime-local" name="start_date" class="form-control">
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Bitmə Tarixi</label>
+                                    <input type="datetime-local" name="deadline" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Cəhd Limiti</label>
+                                    <input type="number" name="max_attempts" class="form-control" value="1">
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Maks. Bal</label>
+                                    <input type="number" name="max_score" class="form-control" value="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-3">Kimə Təyin Olunsun?</h6>
+                            
+                            <input type="hidden" name="target_groups" id="hidden_target_groups">
+                            <input type="hidden" name="target_user_ids" id="hidden_target_users">
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header bg-light py-2">
+                                            <ul class="nav nav-tabs card-header-tabs" id="selectionTabs" role="tablist">
+                                                <li class="nav-item">
+                                                    <button class="nav-link active py-1" data-bs-toggle="tab" data-bs-target="#tab-groups" type="button">Qruplar</button>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <button class="nav-link py-1" data-bs-toggle="tab" data-bs-target="#tab-students" type="button">Tələbələr</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade show active" id="tab-groups">
+                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="Qrup axtar...">
+                                                    <div class="list-group list-group-flush border rounded overflow-auto js-source-list" style="max-height: 250px;">
+                                                        {% for grp in all_groups %}
+                                                        <label class="list-group-item list-group-item-action py-1 d-flex align-items-center">
+                                                            <input class="form-check-input me-2 js-group-checkbox" type="checkbox" value="{{ grp }}" data-name="{{ grp }}">
+                                                            <span class="js-text">{{ grp }}</span>
+                                                        </label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab-students">
+                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="Tələbə axtar...">
+                                                    <div class="list-group list-group-flush border rounded overflow-auto js-source-list" style="max-height: 250px;">
+                                                        {% for m in course_students %}
+                                                        <label class="list-group-item list-group-item-action py-1 d-flex align-items-center">
+                                                            <input class="form-check-input me-2 js-student-checkbox" type="checkbox" value="{{ m.user.id }}" data-name="{{ m.user.get_full_name|default:m.user.username }} ({{ m.group_name }})">
+                                                            <span class="js-text small">{{ m.user.get_full_name|default:m.user.username }}</span>
+                                                            <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">{{ m.group_name }}</span>
+                                                        </label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card shadow-sm h-100">
+                                        <div class="card-header bg-light py-2 fw-bold small text-success">
+                                            Seçilənlər
+                                        </div>
+                                        <div class="card-body p-2 bg-white" style="min-height: 200px;">
+                                            <div id="selected-items-container" class="d-flex flex-wrap gap-1">
+                                                <span class="text-muted small w-100 text-center mt-4 js-placeholder">Heç nə seçilməyib</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer mt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveAssignment">Yadda Saxla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editAssignmentModal" tabindex="-1" >
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div id="editAssignmentModalContent">
+                </div>
+        </div>
+    </div>
+</div>

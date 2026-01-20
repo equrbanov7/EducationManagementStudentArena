@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ assignment.title }} - Cavablar{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3>
+                <i class="bi bi-file-earmark-check"></i>
+                {{ assignment.title }} - Cavablar
+            </h3>
+            <p class="text-muted mb-0">
+                Kurs: <strong>{{ assignment.course.title }}</strong>
+            </p>
+        </div>
+        <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Geriyə
+        </a>
+    </div>
+    
+    <!-- Submissions List -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            
+            {% if submissions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tələbə</th>
+                                <th>Göndərilmə Tarixi</th>
+                                <th>Status</th>
+                                <th>Qiymət</th>
+                                <th>Əməliyyatlar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in submissions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
+                                </td>
+                                <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    {% if submission.status == 'pending' %}
+                                        <span class="badge bg-warning">Gözləyir</span>
+                                    {% elif submission.status == 'graded' %}
+                                        <span class="badge bg-success">Qiymətləndirilib</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Rədd</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if submission.grade %}
+                                        <strong class="text-success">{{ submission.grade }}</strong>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary view-submission-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#submissionModal"
+                                            data-id="{{ submission.id }}"
+                                            data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
+                                            data-content="{{ submission.content }}"
+                                            data-file="{% if submission.file %}{{ submission.file.url }}{% endif %}"
+                                            data-grade="{{ submission.grade|default:'' }}"
+                                            data-feedback="{{ submission.feedback }}">
+                                        <i class="bi bi-eye"></i> Bax
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-light text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3 mb-0">Hələ ki cavab yoxdur</p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+    
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SUBMISSION REVIEW MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-text"></i>
+                    Cavaba Bax
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body">
+                
+                <div class="mb-3">
+                    <strong>Tələbə:</strong>
+                    <p id="modal-student"></p>
+                </div>
+                
+                <div class="mb-3">
+                    <strong>Cavab:</strong>
+                    <div class="border rounded p-3 bg-light">
+                        <p id="modal-content" style="white-space: pre-wrap;"></p>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="modal-file-container" style="display: none;">
+                    <strong>Fayl:</strong>
+                    <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-download"></i> Yüklə
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <!-- Grading Form -->
+                <form id="gradeForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="submission-id" name="submission_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Qiymət:</label>
+                        <input type="number" id="grade-input" name="grade" class="form-control" 
+                               step="0.01" min="0" max="100" placeholder="0-100">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Rəy:</label>
+                        <textarea id="feedback-input" name="feedback" class="form-control" rows="4"
+                                  placeholder="Tələbəyə rəy yazın..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Qiymət Ver
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// Open submission modal and populate data
+document.querySelectorAll('.view-submission-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const submissionId = this.dataset.id;
+        const student = this.dataset.student;
+        const content = this.dataset.content;
+        const file = this.dataset.file;
+        const grade = this.dataset.grade;
+        const feedback = this.dataset.feedback;
+        
+        document.getElementById('submission-id').value = submissionId;
+        document.getElementById('modal-student').textContent = student;
+        document.getElementById('modal-content').textContent = content;
+        document.getElementById('grade-input').value = grade;
+        document.getElementById('feedback-input').value = feedback;
+        
+        // Handle file
+        if (file) {
+            document.getElementById('modal-file-container').style.display = 'block';
+            document.getElementById('modal-file-link').href = file;
+        } else {
+            document.getElementById('modal-file-container').style.display = 'none';
+        }
+    });
+});
+
+// Submit grading
+document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submissionId = document.getElementById('submission-id').value;
+    const formData = new FormData(this);
+    
+    fetch(`/assignments/submission/${submissionId}/grade/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('Qiymət verildi!');
+            location.reload();
+        } else {
+            alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Server xətası');
+    });
+});
+</script>
+
+{% endblock %}
