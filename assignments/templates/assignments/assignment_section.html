@@ -1,0 +1,115 @@
+<div class="accordion-item">
+    <h2 class="accordion-header d-flex align-items-center" id="assignmentHeading">
+        <button class="accordion-button collapsed flex-grow-1" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#assignmentCollapse" aria-expanded="false" aria-controls="assignmentCollapse">
+            <i class="fa-solid fa-clipboard-list me-2 fs-5" style="color: #ff9800;"></i>
+            <span class="fw-bold">Sərbəst İşlər</span>
+            <span class="badge bg-warning ms-2">{{ course.assignments.count }}</span>
+        </button>
+    </h2>
+    
+    <div id="assignmentCollapse" class="accordion-collapse collapse" 
+         aria-labelledby="assignmentHeading" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            {% if request.user.is_teacher and course.assignments.all %}
+                <div class="mb-3 text-end">
+                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                        <i class="fa-solid fa-plus-circle me-1"></i> Yeni İş Əlavə Et
+                    </button>
+                </div>
+            {% endif %}
+
+            {% if course.assignments.all %}
+                <div class="list-group list-group-flush">
+                    {% for assignment in course.assignments.all %}
+                    <div class="list-group-item border-0 border-bottom pb-3 mb-3" id="assignment-item-{{ assignment.id }}">
+                        
+                        <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fa-solid fa-file-lines text-warning"></i> {{ assignment.title }}
+                                </h6>
+                            </div>
+                            
+                            {% if request.user.is_teacher %}
+                                <div class="ms-2">
+                                    <span class="badge bg-info-subtle text-info">
+                                        <i class="fa-solid fa-comment-dots"></i> {{ assignment.get_submissions_count }} Cavab
+                                    </span>
+                                    {% if assignment.get_pending_submissions > 0 %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fa-solid fa-hourglass-half"></i> {{ assignment.get_pending_submissions }} Gözləyən
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if assignment.description %}
+                        <p class="text-muted small mb-2">{{ assignment.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        
+                        <div class="d-flex flex-wrap gap-3 mb-3">
+                            <small class="text-muted">
+                                <i class="fa-solid fa-calendar-days"></i> 
+                                <strong>Müddət:</strong> {{ assignment.deadline|date:"d.m.Y H:i" }}
+                                {% if assignment.is_deadline_passed %}
+                                    <span class="badge bg-danger ms-1">❌ Müddət Keçib</span>
+                                {% else %}
+                                    <span class="badge bg-success ms-1">✓ Aktiv</span>
+                                {% endif %}
+                            </small>
+                            
+                            {% if request.user.is_student %}
+                            <small class="text-muted">
+                                <i class="fa-solid fa-rotate-right"></i> 
+                                <strong>Cəhdlər:</strong> 
+                                {{ assignment.get_user_attempts|default:0 }} / {{ assignment.max_attempts }}
+                            </small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="btn-group btn-group-sm gap-2" role="group">
+                            {% if request.user.is_teacher %}
+                                <a href="{% url 'assignments:review_assignment_submissions' assignment.id %}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="fa-solid fa-eye"></i> Cavabları Gör
+                                </a>
+                                
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary js-edit-assignment"
+                                        data-url="{% url 'assignments:edit_assignment' assignment.id %}">
+                                    <i class="fa-solid fa-pen"></i> Redaktə
+                                </button>
+                                
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger js-delete-assignment"
+                                        data-url="{% url 'assignments:delete_assignment' assignment.id %}">
+                                    <i class="fa-solid fa-trash"></i> Sil
+                                </button>
+                            {% else %}
+                                <a href="{% url 'assignments:assignment_detail' assignment.id %}" 
+                                   class="btn btn-sm btn-warning">
+                                    <i class="fa-solid fa-circle-arrow-right"></i> Cavab Ver
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-light text-center py-4">
+                    <i class="fa-solid fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">Hələ ki sərbəst iş yoxdur</p>
+                    {% if request.user.is_teacher %}
+                        <button class="btn btn-warning btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                            <i class="fa-solid fa-plus-circle"></i> İlk Sərbəst İşi Əlavə Et
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

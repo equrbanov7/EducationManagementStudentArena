@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ assignment.title }} - Sərbəst İş{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-earmark-text"></i>
+                        {{ assignment.title }}
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    
+                    <!-- Assignment Info -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Təsvir:</h6>
+                        <p>{{ assignment.description|default:"Təsvir yoxdur" }}</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Deadline & Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <strong><i class="bi bi-calendar-event"></i> Son tarix:</strong>
+                            <p>{{ assignment.deadline|date:"d.m.Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong><i class="bi bi-arrow-repeat"></i> Qalan cəhd:</strong>
+                            <p>{{ attempts_left }} / {{ assignment.max_attempts }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if assignment.is_deadline_passed %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Diqqət!</strong> Bu tapşırığın müddəti keçib.
+                        </div>
+                    {% elif not can_submit %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i>
+                            Cavab göndərmək mümkün deyil (cəhd limiti dolub və ya status deaktivdir).
+                        </div>
+                    {% else %}
+                        <!-- Submit Form -->
+                        <form id="submitAssignmentForm" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Cavabınız:</label>
+                                <textarea name="content" class="form-control" rows="6" 
+                                          placeholder="Cavabınızı buraya yazın..." required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Fayl (opsional):</label>
+                                <input type="file" name="file" class="form-control">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-send"></i> Göndər
+                            </button>
+                        </form>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar: Previous Submissions -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Əvvəlki Cavablarım
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user_submissions %}
+                        <div class="list-group list-group-flush">
+                            {% for submission in user_submissions %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">
+                                        {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                    
+                                    {% if submission.status == 'pending' %}
+                                        <span class="badge bg-warning">Gözləyir</span>
+                                    {% elif submission.status == 'graded' %}
+                                        <span class="badge bg-success">Qiymət: {{ submission.grade }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Rədd</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <p class="small mt-2 mb-0">{{ submission.content|truncatewords:15 }}</p>
+                                
+                                {% if submission.feedback %}
+                                <div class="alert alert-info mt-2 mb-0 py-2 px-3">
+                                    <strong>Rəy:</strong> {{ submission.feedback }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Hələ cavab göndərməmisiniz</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+document.getElementById('submitAssignmentForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const assignmentId = {{ assignment.id }};
+    
+    fetch(`/assignments/${assignmentId}/submit/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('Cavabınız göndərildi!');
+            location.reload();
+        } else {
+            alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Server xətası');
+    });
+});
+</script>
+
+{% endblock %}

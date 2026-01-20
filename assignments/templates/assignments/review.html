@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sərbəst İşlər - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ course.title }} - Sərbəst İşlər</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+            <i class="bi bi-plus-circle"></i> Əlavə Et
+        </button>
+    </div>
+
+    <!-- Filter -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="group_search" class="form-control" 
+                   placeholder="Qrup ilə axtar..." value="{{ group_search }}">
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+
+    <!-- Assignments Table -->
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ad</th>
+                        <th>Status</th>
+                        <th>Son Tarix</th>
+                        <th>Cavablar</th>
+                        <th>Hədəf Qruplar</th>
+                        <th>Əməliyyatlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td>
+                            <strong>{{ assignment.title }}</strong>
+                            <br>
+                            <small class="text-muted">{{ assignment.description|truncatewords:10 }}</small>
+                        </td>
+                        <td>
+                            {% if assignment.status == 'active' %}
+                                <span class="badge bg-success">Aktiv</span>
+                            {% elif assignment.status == 'closed' %}
+                                <span class="badge bg-secondary">Bağlı</span>
+                            {% else %}
+                                <span class="badge bg-dark">Arxiv</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ assignment.deadline|date:"d.m.Y H:i" }}
+                            {% if assignment.is_deadline_passed %}
+                                <br><small class="text-danger">Keçib</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ assignment.get_submissions_count }}</span>
+                            {% if assignment.get_pending_submissions > 0 %}
+                                <span class="badge bg-warning">{{ assignment.get_pending_submissions }} gözləyir</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if assignment.target_groups %}
+                                {% for group in assignment.target_groups %}
+                                    <span class="badge bg-primary">{{ group }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Hamısı</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" 
+                                    onclick="editAssignment({{ assignment.id }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" 
+                                    onclick="deleteAssignment({{ assignment.id }})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <a href="{% url 'assignments:review' assignment.id %}" 
+                               class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i> Bax
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            Heç bir sərbəst iş tapılmadı
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include "assignments/partials/_assignment_modals.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/assignment_modal.js' %}"></script>
+<script>
+    const COURSE_ID = {{ course.id }};
+    const ALL_GROUPS = {{ all_groups|safe }};
+    const COURSE_STUDENTS = [
+        {% for m in course_students %}
+        {
+            id: {{ m.user.id }},
+            username: "{{ m.user.username }}",
+            full_name: "{{ m.user.get_full_name|default:m.user.username }}",
+            group: "{{ m.group_name|default:'' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+{% endblock %}

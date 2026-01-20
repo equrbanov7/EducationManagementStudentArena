@@ -1,0 +1,101 @@
+<div id="editFormData"
+     data-members-bulk-url="{% url 'assignments:course_group_members_bulk' course.id %}">
+
+  <form method="post">
+    {% csrf_token %}
+
+    <input type="hidden" name="target_groups" class="js-target-groups-edit" value="{{ assignment.target_groups|join:',' }}">
+    <input type="hidden" name="target_user_ids" class="js-target-user-ids-edit" value="{{ assignment.target_users|join:',' }}">
+
+    <div class="row g-4">
+
+      <div class="col-lg-8">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Tapşırıq adı</label>
+          {{ form.title }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Təsvir</label>
+          {{ form.description }}
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Başlama tarixi</label>
+            {{ form.start_date }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Son tarix</label>
+            {{ form.deadline }}
+          </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Maksimum cəhd</label>
+            {{ form.max_attempts }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Status</label>
+            {{ form.status }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+
+            <h6 class="fw-bold">Hədəf seçim</h6>
+
+            <div class="mb-2">
+              <input type="text" class="form-control js-group-search-edit" placeholder="Qrup axtar...">
+            </div>
+
+            <div class="js-group-list-edit" style="max-height: 160px; overflow:auto;">
+              {% for g in assignment_groups %}
+                <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">
+                  <input type="checkbox"
+                         class="form-check-input js-group-check-edit"
+                         value="{{ g }}"
+                         {% if g in assignment.target_groups %}checked{% endif %}>
+                  <span class="fw-semibold">{{ g }}</span>
+                </label>
+              {% endfor %}
+            </div>
+
+            <hr>
+
+            <div class="mb-2">
+              <input type="text" class="form-control js-student-search-edit" placeholder="Tələbə axtar...">
+            </div>
+
+            <div class="js-student-list-edit" style="max-height: 160px; overflow:auto;">
+              {% for m in course.memberships.all %}
+                {% if m.role == "student" %}
+                  <label class="d-flex align-items-center gap-2 border rounded p-2 mb-2">
+                    <input type="checkbox"
+                           class="form-check-input js-student-check-edit"
+                           value="{{ m.user.id }}"
+                           {% if m.user.id|stringformat:"s" in assignment.target_users %}checked{% endif %}>
+                    <span>{{ m.user.get_full_name|default:m.user.username }}</span>
+                  </label>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-light" data-bs-dismiss="modal">Bağla</button>
+      <button type="submit" class="btn btn-warning fw-bold">Yadda saxla</button>
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,574 @@
+{% if request.user.is_teacher %}
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- CREATE ASSIGNMENT MODAL                                         -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle"></i> Yeni Sərbəst İş
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form id="createAssignmentForm" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label class="form-label">Başlıq <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label class="form-label">Təsvir</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <!-- Start Date & Deadline -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Başlanğıc tarixi <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Son tarix <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="deadline" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Max Attempts -->
+                    <div class="mb-3">
+                        <label class="form-label">Maksimum cəhd</label>
+                        <input type="number" name="max_attempts" class="form-control" value="3" min="1">
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="active">Aktiv</option>
+                            <option value="inactive">Deaktiv</option>
+                            <option value="archived">Arxivləndi</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Tabs: Qruplar və Tələbələr -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="groups-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#groups-panel" type="button">
+                                <i class="bi bi-people"></i> Qruplar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="students-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#students-panel" type="button">
+                                <i class="bi bi-person"></i> Tələbələr
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- Groups Panel -->
+                        <div class="tab-pane fade show active" id="groups-panel">
+                            <div class="mb-3">
+                                <label class="form-label">Qruplar (kursda mövcud olanlar)</label>
+                                <div id="groupCheckboxList" class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                                    <!-- JavaScript ilə yüklənəcək -->
+                                    <p class="text-muted text-center">Yüklənir...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Students Panel -->
+                        <div class="tab-pane fade" id="students-panel">
+                            <div class="mb-3">
+                                <label class="form-label">Tələbə axtarın</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" id="studentSearchInput" class="form-control" 
+                                           placeholder="Tələbə adı yazın...">
+                                </div>
+                            </div>
+                            
+                            <div id="studentCheckboxList" class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                                <p class="text-muted text-center">Axtarış edin</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle"></i> Əlavə Et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- EDIT ASSIGNMENT MODAL                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil"></i> Redaktə Et
+          <span class="testItemVal">addd</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form id="editAssignmentForm" method="POST">
+        {% csrf_token %}
+        <input type="hidden" id="edit_assignment_id" name="assignment_id">
+
+        <div class="modal-body">
+
+          <!-- Title -->
+          <div class="mb-3">
+            <label class="form-label" for="edit_title">
+              Başlıq <span class="text-danger">*</span>
+            </label>
+            <input type="text" id="edit_title" name="title" class="form-control" required>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label class="form-label" for="edit_description">Təsvir</label>
+            <textarea id="edit_description" name="description" class="form-control" rows="3"></textarea>
+          </div>
+
+          <!-- Dates -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="edit_start_date">
+                Başlanğıc tarixi <span class="text-danger">*</span>
+              </label>
+              <input type="datetime-local" id="edit_start_date" name="start_date" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="edit_deadline">
+                Son tarix <span class="text-danger">*</span>
+              </label>
+              <input type="datetime-local" id="edit_deadline" name="deadline" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="edit_max_attempts">Maksimum cəhd</label>
+            <input type="number" id="edit_max_attempts" name="max_attempts" class="form-control" min="1">
+          </div>
+
+          <!-- Status -->
+          <div class="mb-3">
+            <label class="form-label" for="edit_status">Status</label>
+            <select id="edit_status" name="status" class="form-select">
+              <option value="active">Aktiv</option>
+              <option value="inactive">Deaktiv</option>
+              <option value="archived">Arxivləndi</option>
+            </select>
+          </div>
+
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#edit-groups-panel" type="button">
+                <i class="bi bi-people"></i> Qruplar
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#edit-students-panel" type="button">
+                <i class="bi bi-person"></i> Tələbələr
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- Groups Panel -->
+            <div class="tab-pane fade show active" id="edit-groups-panel">
+              <div id="editGroupCheckboxList" class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                <p class="text-muted text-center">Yüklənir...</p>
+              </div>
+            </div>
+
+            <!-- Students Panel -->
+            <div class="tab-pane fade" id="edit-students-panel">
+              <div class="mb-3">
+                <label class="visually-hidden" for="editStudentSearchInput">Tələbə axtarın</label>
+                <input type="text" id="editStudentSearchInput" class="form-control" placeholder="Tələbə axtarın...">
+              </div>
+              <div id="editStudentCheckboxList" class="border rounded p-3" style="max-height: 250px; overflow-y: auto;"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Yadda Saxla
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ASSIGNMENT MODAL SCRIPTS                                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const courseId = {{ course.id }};
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+
+   // ✅ datetime-local format helper (mütləq lazımdır)
+    function toDatetimeLocal(val) {
+      if (!val) return '';
+
+      // val "2026-01-21T12:30:00Z" və ya "2026-01-21T12:30:00" ola bilər
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return '';
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth() + 1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+
+    // ✅ courseId-ni ən stabil üsulla götür (body-də data-course-id olsun)
+    function getCourseIdSafe() {
+      // 1) window.courseId varsa
+      if (typeof courseId !== 'undefined' && courseId) return courseId;
+
+      // 2) <body data-course-id="...">
+      const fromBody = document.body?.dataset?.courseId;
+      if (fromBody) return fromBody;
+
+      // 3) hidden input varsa (istəsən əlavə edərsən)
+      const hidden = document.getElementById('course_id');
+      if (hidden?.value) return hidden.value;
+
+      return null;
+    }
+    
+
+    // ═══════════════════════════════════════════════════════════════
+    // LOAD GROUPS ON MODAL OPEN (CREATE)
+    // ═══════════════════════════════════════════════════════════════
+    
+    const addAssignmentModal = document.getElementById('addAssignmentModal');
+    if (addAssignmentModal) {
+        addAssignmentModal.addEventListener('shown.bs.modal', function() {
+            loadAvailableGroups();
+        });
+    }
+    
+    function loadAvailableGroups() {
+        fetch(`/assignments/search-groups/?course_id=${courseId}`)
+            .then(r => r.json())
+            .then(data => {
+                const container = document.getElementById('groupCheckboxList');
+                if (data.results && data.results.length > 0) {
+                    container.innerHTML = data.results.map(g => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="group_names[]" 
+                                   value="${g.text}" id="group_${g.id}">
+                            <label class="form-check-label" for="group_${g.id}">
+                                ${g.text}
+                            </label>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-muted text-center">Bu kursda qrup yoxdur</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Qruplar yüklənə bilmədi:', err);
+                document.getElementById('groupCheckboxList').innerHTML = 
+                    '<p class="text-danger text-center">Xəta baş verdi</p>';
+            });
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // STUDENT SEARCH (CREATE)
+    // ═══════════════════════════════════════════════════════════════
+    
+    let studentSearchTimeout;
+    document.getElementById('studentSearchInput')?.addEventListener('input', function(e) {
+        clearTimeout(studentSearchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) {
+            document.getElementById('studentCheckboxList').innerHTML = 
+                '<p class="text-muted text-center">Ən azı 2 hərf yazın</p>';
+            return;
+        }
+        
+        studentSearchTimeout = setTimeout(() => {
+            fetch(`/assignments/search-students/?q=${query}&course_id=${courseId}`)
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('studentCheckboxList');
+                    if (data.results && data.results.length > 0) {
+                        container.innerHTML = data.results.map(s => `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="students[]" 
+                                       value="${s.id}" id="student_${s.id}">
+                                <label class="form-check-label" for="student_${s.id}">
+                                    ${s.text}
+                                    ${s.group_name ? `<span class="badge bg-secondary ms-1">${s.group_name}</span>` : ''}
+                                </label>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-muted text-center">Tələbə tapılmadı</p>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Tələbə axtarışı xətası:', err);
+                    document.getElementById('studentCheckboxList').innerHTML = 
+                        '<p class="text-danger text-center">Xəta baş verdi</p>';
+                });
+        }, 300);
+    });
+    
+    // Submit CREATE form
+    document.getElementById('createAssignmentForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch(`/assignments/create/${courseId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Server xətası');
+        });
+    });
+    
+    
+    // ═══════════════════════════════════════════════════════════════
+    // EDIT ASSIGNMENT
+    // ═══════════════════════════════════════════════════════════════
+    
+   // Open edit modal
+    document.querySelectorAll('.js-edit-assignment').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const url = this.dataset.url;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('editAssignmentModal')).show();
+
+        fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+          .then(r => r.json())
+          .then(response => {
+            if (!response || !response.success) return;
+
+            const data = response.data || {};
+            console.log('Assignment data:', data);
+            const testItemVal = document.querySelector('.testItemVal');
+            if (testItemVal) {
+              testItemVal.textContent = data.title || 'N/A';
+            }
+
+            // ✅ Fill form (bu hissə mütləq işləməlidir)
+            document.getElementById('edit_assignment_id').value = data.id ?? '';
+            document.getElementById('edit_title').value = data.title || '';
+            document.getElementById('edit_description').value = data.description || '';
+
+            document.getElementById('edit_start_date').value = toDatetimeLocal(data.start_date || data.deadline);
+            document.getElementById('edit_deadline').value = toDatetimeLocal(data.deadline);
+
+            document.getElementById('edit_max_attempts').value = (data.max_attempts ?? 3);
+            document.getElementById('edit_status').value = data.status || 'active';
+
+            // ✅ Groups
+            const groupContainer = document.getElementById('editGroupCheckboxList');
+            groupContainer.innerHTML = '<p class="text-muted text-center">Yüklənir...</p>';
+
+            const cid = getCourseIdSafe();
+            if (!cid) {
+              console.warn('courseId tapılmadı. Body-ə data-course-id əlavə et: <body data-course-id="{{ course.id }}">');
+              groupContainer.innerHTML = '<p class="text-danger">courseId tapılmadı</p>';
+            } else {
+              fetch(`/assignments/search-groups/?course_id=${cid}`)
+                .then(r => r.json())
+                .then(groupData => {
+                  const results = groupData?.results || [];
+                  const selectedGroups = data.group_names || [];
+
+                  if (results.length > 0) {
+                    groupContainer.innerHTML = results.map(g => `
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="group_names[]"
+                          value="${g.text}" id="edit_group_${g.id}"
+                          ${selectedGroups.includes(g.text) ? 'checked' : ''}>
+                        <label class="form-check-label" for="edit_group_${g.id}">
+                          ${g.text}
+                        </label>
+                      </div>
+                    `).join('');
+                  } else {
+                    groupContainer.innerHTML = '<p class="text-muted">Qrup yoxdur</p>';
+                  }
+                })
+                .catch(err => {
+                  console.error('Group fetch error:', err);
+                  groupContainer.innerHTML = '<p class="text-danger">Qruplar yüklənmədi</p>';
+                });
+            }
+
+            // ✅ Students (data.students yoxdursa belə partlamasın)
+            const studentContainer = document.getElementById('editStudentCheckboxList');
+            const students = Array.isArray(data.students) ? data.students : [];
+
+            if (students.length > 0) {
+              studentContainer.innerHTML = students.map(s => `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="students[]"
+                    value="${s.id}" id="edit_student_${s.id}" checked>
+                  <label class="form-check-label" for="edit_student_${s.id}">
+                    ${(s.first_name || s.username || '')} ${(s.last_name || '')}
+                  </label>
+                </div>
+              `).join('');
+            } else {
+              studentContainer.innerHTML = '<p class="text-muted">Tələbə yoxdur. Axtarın və seçin.</p>';
+            }
+
+          })
+          .catch(err => console.error('Edit assignment fetch error:', err));
+      });
+    });
+    
+    
+    // Edit group search - SİLİNDİ (avtomatik yüklənir)
+    
+    // Edit student search
+    let editStudentSearchTimeout;
+    document.getElementById('editStudentSearchInput')?.addEventListener('input', function(e) {
+        clearTimeout(editStudentSearchTimeout);
+        const query = e.target.value.trim();
+        
+        if (query.length < 2) return;
+        
+        editStudentSearchTimeout = setTimeout(() => {
+            fetch(`/assignments/search-students/?q=${query}&course_id=${courseId}`)
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('editStudentCheckboxList');
+                    const existingChecked = Array.from(container.querySelectorAll('input:checked')).map(inp => inp.value);
+                    
+                    if (data.results && data.results.length > 0) {
+                        container.innerHTML = data.results.map(s => `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="students[]" value="${s.id}" 
+                                       id="edit_student_search_${s.id}" ${existingChecked.includes(String(s.id)) ? 'checked' : ''}>
+                                <label class="form-check-label" for="edit_student_search_${s.id}">
+                                    ${s.text}
+                                    ${s.group_name ? `<span class="badge bg-secondary ms-1">${s.group_name}</span>` : ''}
+                                </label>
+                            </div>
+                        `).join('');
+                    } else {
+                        container.innerHTML = '<p class="text-muted text-center">Tələbə tapılmadı</p>';
+                    }
+                });
+        }, 300);
+    });
+    
+    // Submit EDIT form
+    document.getElementById('editAssignmentForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const assignmentId = document.getElementById('edit_assignment_id').value;
+        const formData = new FormData(this);
+        
+        fetch(`/assignments/${assignmentId}/edit/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+            }
+        });
+    });
+    
+    
+    // ═══════════════════════════════════════════════════════════════
+    // DELETE ASSIGNMENT
+    // ═══════════════════════════════════════════════════════════════
+    
+    document.querySelectorAll('.js-delete-assignment').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Bu sərbəst işi silmək istədiyinizə əminsiniz?')) {
+                return;
+            }
+            
+            const url = this.dataset.url;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Xəta: ' + (data.error || 'Silinmədi'));
+                }
+            });
+        });
+    });
+});
+</script>
+
+{% endif %}
