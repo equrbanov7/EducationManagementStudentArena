@@ -1,0 +1,65 @@
+{# templates/partials/paint_answer.html #}
+{% load static %}
+
+{# Bu partial q və ans gözləyir #}
+<div class="paint-card"
+     data-qid="{{ q.id }}"
+     {% if ans and ans.paint_image %}
+     data-existing-url="{{ ans.paint_image.url }}"
+     {% endif %}>
+
+  <div class="paint-header">
+    <div class="paint-toggle">
+      {# Hidden input: backend-də paint_enabled_{qid} oxuyursan #}
+      <input type="hidden" name="paint_enabled_{{ q.id }}" value="{% if ans and ans.has_paint %}1{% else %}0{% endif %}" class="paint-enabled-hidden">
+
+      <label class="paint-switch">
+        <input type="checkbox"
+               class="paint-enabled-checkbox"
+               {% if ans and ans.has_paint %}checked{% endif %}>
+        <span class="paint-switch-ui"></span>
+        <span class="paint-switch-text">Paint cavabı</span>
+      </label>
+    </div>
+
+    <div class="paint-hint">
+      Qələm / silgi ilə çək, avtomatik yadda saxlanır.
+    </div>
+  </div>
+
+  <div class="paint-body" style="{% if ans and ans.has_paint %}display:block{% else %}display:none{% endif %}">
+    <div class="paint-toolbar">
+      <div class="paint-tools">
+        <button type="button" class="paint-btn paint-pen active" title="Qələm">✏️ Qələm</button>
+        <button type="button" class="paint-btn paint-eraser" title="Silgi">🧽 Silgi</button>
+      </div>
+
+      <div class="paint-controls">
+        <label class="paint-control">
+          Rəng
+          <input type="color" class="paint-color" value="#111111">
+        </label>
+
+        <label class="paint-control">
+          Qalınlıq
+          <input type="range" class="paint-width" min="1" max="30" value="4">
+          <span class="paint-width-val">4</span>
+        </label>
+
+        <button type="button" class="paint-btn paint-clear" title="Hamısını təmizlə">🗑️ Təmizlə</button>
+      </div>
+
+      <div class="paint-actions">
+        <button type="button" class="paint-btn paint-save" title="Şəkli saxla">💾 Saxla</button>
+      </div>
+    </div>
+
+    <div class="paint-canvas-wrap">
+      <canvas class="paint-canvas"></canvas>
+    </div>
+
+    {# Backend üçün hidden input-lar #}
+    <input type="hidden" name="paint_clear_{{ q.id }}" value="0" class="paint-clear-hidden">
+    <input type="hidden" name="paint_data_{{ q.id }}" class="paint-data-hidden" value="">
+  </div>
+</div>
