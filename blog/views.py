@@ -2460,7 +2460,7 @@ def teacher_pending_attempts(request):
         'pending_attempts': pending_attempts,
     }
     return render(request, 'blog/teacher_pending_attempts.html', context)
-
+ 
 # --- 1. SİYAHI VƏ MODAL ÜÇÜN FORM ---
 @login_required
 def teacher_group_list(request):
@@ -2480,7 +2480,7 @@ def teacher_group_list(request):
     }
     return render(request, "blog/teacher_group_list.html", context)
 
-
+ 
 # --- 2. YENİ QRUP YARATMAQ (POST) ---
 @login_required
 @require_POST

@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lab.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ lab.title }}</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-flask text-danger me-2"></i> {{ lab.title }}</h2>
+            {% if lab.description %}
+            <p class="text-muted">{{ lab.description }}</p>
+            {% endif %}
+        </div>
+        <div class="col-lg-4 text-end">
+            {% if lab.is_open %}
+            <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i> Açıq</span>
+            {% elif lab.is_upcoming %}
+            <span class="badge bg-info fs-6"><i class="fas fa-clock me-1"></i> Tezliklə açılacaq</span>
+            {% else %}
+            <span class="badge bg-danger fs-6"><i class="fas fa-times-circle me-1"></i> Bağlı</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Sol Panel - Məlumat -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-info-circle me-2"></i> Lab Məlumatı
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <strong><i class="fas fa-calendar-alt text-muted me-2"></i> Başlanğıc:</strong><br>
+                            <span class="ms-4">{{ lab.start_datetime|date:"d.m.Y H:i" }}</span>
+                        </li>
+                        <li class="mb-3">
+                            <strong><i class="fas fa-clock text-muted me-2"></i> Son Tarix:</strong><br>
+                            <span class="ms-4">{{ lab.end_datetime|date:"d.m.Y H:i" }}</span>
+                            {% if lab.is_closed %}
+                            <span class="badge bg-danger ms-2">Keçib</span>
+                            {% endif %}
+                        </li>
+                        <li class="mb-3">
+                            <strong><i class="fas fa-star text-muted me-2"></i> Maksimum Bal:</strong><br>
+                            <span class="ms-4">{{ lab.max_score }}</span>
+                        </li>
+                        <li class="mb-3">
+                            <strong><i class="fas fa-question-circle text-muted me-2"></i> Sual Sayı:</strong><br>
+                            <span class="ms-4">{{ assigned_questions|length }} ədəd</span>
+                        </li>
+                        {% if lab.allow_late_submission %}
+                        <li class="mb-0">
+                            <strong><i class="fas fa-exclamation-triangle text-warning me-2"></i> Gecikmə:</strong><br>
+                            <span class="ms-4">İcazəli ({{ lab.late_penalty_percent }}% cəza/gün)</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Müəllim Materialları -->
+            {% if lab.teacher_files or lab.teacher_instructions %}
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-file-alt me-2"></i> Materiallar & Təlimatlar
+                </div>
+                <div class="card-body">
+                    {% if lab.teacher_files %}
+                    <a href="{{ lab.teacher_files.url }}" class="btn btn-outline-primary w-100 mb-3" download>
+                        <i class="fas fa-download me-2"></i> Müəllim Faylını Yüklə
+                    </a>
+                    {% endif %}
+                    
+                    {% if lab.teacher_instructions %}
+                    <div class="border rounded p-3 bg-light" style="max-height: 350px; overflow-y: auto;">
+                        <small class="text-muted d-block mb-2"><strong>Təlimatlar:</strong></small>
+                        {{ lab.teacher_instructions|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Əvvəlki Göndərişlər -->
+            {% if submissions %}
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-history me-2"></i> Göndərişlərim</span>
+                    <span class="badge bg-light text-dark">{{ submissions|length }}</span>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for sub in submissions %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Cəhd {{ sub.attempt_number }}</strong>
+                                <small class="text-muted d-block">{{ sub.submitted_at|date:"d.m.Y H:i" }}</small>
+                                {% if sub.submission_file %}
+                                <a href="{{ sub.submission_file.url }}" target="_blank" class="small">
+                                    <i class="fas fa-file me-1"></i> Fayl
+                                </a>
+                                {% endif %}
+                                {% if sub.submission_link %}
+                                <a href="{{ sub.submission_link }}" target="_blank" class="small ms-2">
+                                    <i class="fas fa-link me-1"></i> Link
+                                </a>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                {% if sub.status == 'graded' %}
+                                <span class="badge bg-success fs-6">{{ sub.score }}/{{ lab.max_score }}</span>
+                                {% elif sub.status == 'late' %}
+                                <span class="badge bg-warning text-dark">Gecikmiş</span>
+                                {% else %}
+                                <span class="badge bg-info">{{ sub.get_status_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if sub.feedback %}
+                        <div class="mt-2 p-2 bg-light rounded small">
+                            <strong>Müəllim rəyi:</strong> {{ sub.feedback }}
+                        </div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sağ Panel - Suallar & Göndəriş -->
+        <div class="col-lg-8">
+            
+            <!-- Suallar -->
+            {% if assigned_questions %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-tasks me-2"></i> Sizə Düşən Suallar</span>
+                    <span class="badge bg-dark">{{ assigned_questions|length }} sual</span>
+                </div>
+                <div class="card-body">
+                    <div class="questions-list">
+                        {% for q in assigned_questions %}
+                        <div class="question-item mb-4 pb-4 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="d-flex align-items-start">
+                                <span class="badge bg-primary me-3 fs-6">{{ forloop.counter }}</span>
+                                <div class="flex-grow-1">
+                                    <div class="question-text mb-2" style="white-space: pre-wrap;">{{ q.question_text }}</div>
+                                    
+                                    <div class="question-meta">
+                                        {% if q.attachment %}
+                                        <a href="{{ q.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-secondary me-2">
+                                            <i class="fas fa-paperclip me-1"></i> Əlavə fayl
+                                        </a>
+                                        {% endif %}
+                                        {% if q.points > 0 %}
+                                        <span class="badge bg-info">{{ q.points }} bal</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Sizə təyin olunmuş sual yoxdur. Müəllimlə əlaqə saxlayın.
+            </div>
+            {% endif %}
+            
+            <!-- Göndəriş Formu -->
+            {% if lab.is_open or lab.allow_late_submission and lab.is_closed %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-paper-plane me-2"></i> Cavabınızı Göndərin
+                </div>
+                <div class="card-body">
+                    
+                    {% if lab.is_closed and lab.allow_late_submission %}
+                    <div class="alert alert-warning mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Diqqət:</strong> Deadline keçib! Gecikmə cəzası tətbiq olunacaq 
+                        (hər gün üçün {{ lab.late_penalty_percent }}% çıxılacaq).
+                    </div>
+                    {% endif %}
+                    
+                    <form id="submitLabForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if lab.allow_file_upload %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-upload me-1"></i> Fayl Yüklə
+                            </label>
+                            <input type="file" name="submission_file" class="form-control form-control-lg" 
+                                   id="submissionFile">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                İcazəli tiplər: <strong>{{ lab.allowed_extensions }}</strong> | 
+                                Maksimum ölçü: <strong>{{ lab.max_file_size_mb }}MB</strong>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if lab.allow_link_submission %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-link me-1"></i> Link Göndər
+                            </label>
+                            <input type="url" name="submission_link" class="form-control form-control-lg" 
+                                   placeholder="https://github.com/username/repo" id="submissionLink">
+                            <div class="form-text">
+                                GitHub, Google Drive, Figma, YouTube və s. linklər göndərə bilərsiniz.
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-comment me-1"></i> Əlavə Qeyd (isteğe bağlı)
+                            </label>
+                            <textarea name="submission_text" class="form-control" rows="4" 
+                                      placeholder="Layihəniz haqqında izahat, qeydlər, şərhlər..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i> Göndər
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Göndərdikdən sonra düzəliş etmək üçün yenidən göndərə bilərsiniz.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% elif lab.is_upcoming %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-clock fa-4x text-info mb-4"></i>
+                    <h4>Lab hələ açılmayıb</h4>
+                    <p class="text-muted mb-0">
+                        Açılma tarixi: <strong>{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong>
+                    </p>
+                    <p class="text-muted">
+                        <small>({{ lab.start_datetime|timeuntil }} qalıb)</small>
+                    </p>
+                </div>
+            </div>
+            
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-lock fa-4x text-danger mb-4"></i>
+                    <h4>Göndəriş bağlıdır</h4>
+                    <p class="text-muted mb-0">
+                        Son tarix: <strong>{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong>
+                    </p>
+                    <p class="text-muted">
+                        <small>({{ lab.end_datetime|timesince }} əvvəl bitib)</small>
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+    </div>
+    
+</div>
+
+<style>
+.question-item {
+    transition: background 0.2s;
+}
+.question-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-left: -10px;
+    margin-right: -10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.question-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+</style>
+
+<script>
+(function(){
+    const form = document.getElementById('submitLabForm');
+    if(!form) return;
+    
+    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const fileInput = document.getElementById('submissionFile');
+    const linkInput = document.getElementById('submissionLink');
+    
+    // Validation: ən azı fayl və ya link olmalıdır
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const hasFile = fileInput && fileInput.files.length > 0;
+        const hasLink = linkInput && linkInput.value.trim() !== '';
+        
+        if(!hasFile && !hasLink) {
+            alert('Xəta: Ən azı bir fayl və ya link göndərməlisiniz!');
+            return;
+        }
+        
+        // File size check
+        if(hasFile) {
+            const maxSize = {{ lab.max_file_size_mb }} * 1024 * 1024; // MB to bytes
+            if(fileInput.files[0].size > maxSize) {
+                alert('Xəta: Fayl çox böyükdür! Maksimum {{ lab.max_file_size_mb }}MB icazəlidir.');
+                return;
+            }
+            
+            // Extension check
+            const allowedExt = '{{ lab.allowed_extensions }}'.split(',').map(e => e.trim().toLowerCase());
+            const fileName = fileInput.files[0].name;
+            const fileExt = fileName.split('.').pop().toLowerCase();
+            
+            if(!allowedExt.includes(fileExt)) {
+                alert('Xəta: Bu fayl tipi icazəli deyil!\nİcazəli tiplər: {{ lab.allowed_extensions }}');
+                return;
+            }
+        }
+        
+        // Submit
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Göndərilir...';
+        
+        fetch('{% url "labs:submit_lab" lab.id %}', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-CSRFToken': CSRF,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if(data.success) {
+                // Success message
+                const successHtml = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+                        <h4 class="text-success">Cavabınız uğurla göndərildi!</h4>
+                        <p class="text-muted">Müəllim yoxladıqdan sonra qiyməti görəcəksiniz.</p>
+                        <button onclick="location.reload()" class="btn btn-primary mt-3">
+                            <i class="fas fa-sync me-2"></i> Səhifəni Yenilə
+                        </button>
+                    </div>
+                `;
+                form.closest('.card').querySelector('.card-body').innerHTML = successHtml;
+            } else {
+                alert('Xəta: ' + (data.error || 'Naməlum xəta baş verdi'));
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Göndər';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Server xətası baş verdi. Yenidən cəhd edin.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Göndər';
+        });
+    });
+    
+})();
+</script>
+{% endblock %}
