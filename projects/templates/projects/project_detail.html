@@ -1,156 +1,257 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ project.title }} - Kurs İşi{% endblock %}
+{% block title %}{{ project.title }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="row">
-        
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
-                        <i class="bi bi-folder-open"></i>
-                        {{ project.title }}
-                    </h4>
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' project.course.id %}">{{ project.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ project.title }}</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0">
+                <i class="fa-solid fa-folder-open text-info me-2"></i> {{ project.title }}
+            </h3>
+        </div>
+        <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Geri
+        </a>
+    </div>
+    
+    <!-- Project Info -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    {% if project.description %}
+                    <p class="mb-3">{{ project.description }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex flex-wrap gap-4">
+                        <div>
+                            <small class="text-muted">Son tarix:</small>
+                            <div class="fw-bold">{{ project.deadline|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Maksimum bal:</small>
+                            <div class="fw-bold">{{ project.max_score }}</div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Qalan cəhd:</small>
+                            <div class="fw-bold {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
+                                {{ attempts_left }} / {{ project.max_attempts }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    {% if project.is_deadline_passed %}
+                        <span class="badge bg-danger fs-5">Müddət Keçib</span>
+                    {% elif project.status != 'active' %}
+                        <span class="badge bg-warning fs-5">Deaktiv</span>
+                    {% else %}
+                        <span class="badge bg-success fs-5">Aktiv</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Previous Submissions -->
+    {% if user_submissions %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fa-solid fa-history me-2"></i> Əvvəlki Cavablarım
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Tarix</th>
+                            <th>Fayl</th>
+                            <th>Status</th>
+                            <th>Qiymət</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in user_submissions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if sub.file %}
+                                <a href="{{ sub.file.url }}" target="_blank" class="text-primary">
+                                    <i class="fa-solid fa-file"></i> {{ sub.file.name|cut:"projects/submissions/" }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.status == 'pending' %}
+                                    <span class="badge bg-warning">Gözləyir</span>
+                                {% elif sub.status == 'graded' %}
+                                    <span class="badge bg-success">Qiymətləndirildi</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ sub.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.grade %}
+                                    <span class="fw-bold text-success">{{ sub.grade }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Submit Form -->
+    {% if can_submit %}
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <i class="fa-solid fa-upload me-2"></i> Layihə Təqdim Et
+        </div>
+        <div class="card-body">
+            <form id="submitForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Mətn / İzahat</label>
+                    <textarea name="content" class="form-control" rows="4" 
+                              placeholder="Layihəniz haqqında qısa məlumat yazın..."></textarea>
                 </div>
                 
-                <div class="card-body">
-                    
-                    <!-- Project Info -->
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-3">Təsvir:</h6>
-                        <p>{{ project.description|default:"Təsvir yoxdur" }}</p>
+                <div class="mb-3">
+                    <label class="form-label">Fayl Yüklə</label>
+                    <input type="file" name="file" id="fileInput" class="form-control">
+                    {# ═══════════════════════════════════════════════════════ #}
+                    {# FAYL ADI GÖSTƏRİCİSİ                                    #}
+                    {# ═══════════════════════════════════════════════════════ #}
+                    <div id="fileNameDisplay" class="mt-2 text-muted small" style="display: none;">
+                        <i class="fa-solid fa-file me-1"></i>
+                        <span id="fileName"></span>
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2" id="clearFile">
+                            <i class="fa-solid fa-times"></i> Sil
+                        </button>
                     </div>
-                    
-                    <hr>
-                    
-                    <!-- Deadline & Score -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <strong><i class="bi bi-calendar-event"></i> Son tarix:</strong>
-                            <p>{{ project.deadline|date:"d.m.Y H:i" }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <strong><i class="bi bi-star"></i> Maksimum bal:</strong>
-                            <p>{{ project.max_score }}</p>
-                        </div>
-                    </div>
-                    
-                    {% if project.is_deadline_passed %}
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            <strong>Diqqət!</strong> Bu layihənin müddəti keçib.
-                        </div>
-                    {% elif not can_submit %}
-                        <div class="alert alert-warning">
-                            <i class="bi bi-info-circle"></i>
-                            Layihə təqdim etmək mümkün deyil (cəhd limiti dolub və ya status deaktivdir).
-                        </div>
-                    {% else %}
-                        <!-- Submit Form -->
-                        <form id="submitProjectForm" method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Layihə İzahatı:</label>
-                                <textarea name="content" class="form-control" rows="6" 
-                                          placeholder="Layihəniz haqqında izah, linkler və s." required></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Layihə Faylı (ZIP, PDF):</label>
-                                <input type="file" name="file" class="form-control" accept=".zip,.pdf,.rar">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-info">
-                                <i class="bi bi-send"></i> Layihə Təqdim Et
-                            </button>
-                        </form>
-                    {% endif %}
-                    
                 </div>
-            </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fa-solid fa-info-circle"></i> 
+                        Qalan cəhd: <strong>{{ attempts_left }}</strong>
+                    </small>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Göndər
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <!-- Sidebar: Previous Submissions -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="bi bi-clock-history"></i> Əvvəlki Təqdim Etmələrim
-                    </h6>
-                </div>
-                <div class="card-body">
-                    {% if user_submissions %}
-                        <div class="list-group list-group-flush">
-                            {% for submission in user_submissions %}
-                            <div class="list-group-item px-0">
-                                <div class="d-flex justify-content-between">
-                                    <small class="text-muted">
-                                        {{ submission.submitted_at|date:"d.m.Y H:i" }}
-                                    </small>
-                                    
-                                    {% if submission.status == 'pending' %}
-                                        <span class="badge bg-warning">Gözləyir</span>
-                                    {% elif submission.status == 'graded' %}
-                                        <span class="badge bg-success">Qiymət: {{ submission.grade }}/{{ project.max_score }}</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Rədd</span>
-                                    {% endif %}
-                                </div>
-                                
-                                <p class="small mt-2 mb-0">{{ submission.content|truncatewords:15 }}</p>
-                                
-                                {% if submission.feedback %}
-                                <div class="alert alert-info mt-2 mb-0 py-2 px-3">
-                                    <strong>Rəy:</strong> {{ submission.feedback }}
-                                </div>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">Hələ layihə təqdim etməmisiniz</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
     </div>
+    {% else %}
+    <div class="alert alert-warning text-center">
+        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+        {% if project.is_deadline_passed %}
+            Müddət keçib - layihə qəbul edilmir.
+        {% elif attempts_left == 0 %}
+            Bütün cəhdlərinizi istifadə etmisiniz.
+        {% elif project.status != 'active' %}
+            Bu layihə hal-hazırda deaktivdir.
+        {% endif %}
+    </div>
+    {% endif %}
+    
 </div>
 
 <script>
-document.getElementById('submitProjectForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileName = document.getElementById('fileName');
+    const clearFile = document.getElementById('clearFile');
     
-    const formData = new FormData(this);
-    const projectId = {{ project.id }};
+    // ═══════════════════════════════════════════════════════════════
+    // Fayl seçildikdə adını göstər
+    // ═══════════════════════════════════════════════════════════════
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                fileName.textContent = this.files[0].name;
+                fileNameDisplay.style.display = 'block';
+            } else {
+                fileNameDisplay.style.display = 'none';
+            }
+        });
+    }
     
-    fetch(`/projects/${projectId}/submit/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            alert('Layihəniz təqdim olundu!');
-            location.reload();
-        } else {
-            alert('Xəta: ' + (data.error || 'Naməlum xəta'));
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Server xətası');
-    });
+    // Faylı sil
+    if (clearFile) {
+        clearFile.addEventListener('click', function() {
+            fileInput.value = '';
+            fileNameDisplay.style.display = 'none';
+        });
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Form submit
+    // ═══════════════════════════════════════════════════════════════
+    const form = document.getElementById('submitForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = form.querySelector('[type=submit]');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Göndərilir...';
+            
+            const formData = new FormData(form);
+            
+            fetch('{% url "projects:submit_project" project.id %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Göndər';
+                }
+            })
+            .catch(() => {
+                alert('Server xətası');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Göndər';
+            });
+        });
+    }
 });
 </script>
-
 {% endblock %}

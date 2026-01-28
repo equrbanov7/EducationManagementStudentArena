@@ -606,22 +606,13 @@ def resend_code_view(request):
 def user_profile(request, username):
     """
     İstifadəçi profili.
-
-    + Müəllimlər üçün yoxlanmamış (pending) imtahan sayı hesablanır.
-      Məntiq: Statusu 'submitted' və ya 'expired' olan,
-              hələ 'checked_by_teacher=False' olan
-              və tipi 'test' OLMAYAN cəhdlər.
-
-    + İstifadəçi (öz profilində) üçün təyin olunmuş (assigned) imtahan sayı hesablanır:
-      - Exam.allowed_users içindədirsə
-      - və ya Exam.allowed_groups içində olub, həmin qrupun students-i içindədirsə
-      - is_active=True
     """
+    from courses.models import Course, CourseMembership
+    
     profile_user = get_object_or_404(User, username=username)
 
     # 1. Postların Filterlənməsi
     if request.user == profile_user:
-        # Öz profilinə baxanda – bütün postlar
         user_posts_list = (
             Post.objects
             .filter(author=profile_user)
@@ -629,7 +620,6 @@ def user_profile(request, username):
             .order_by("-created_at")
         )
     else:
-        # Başqasının profilinə baxanda – yalnız dərc olunmuşlar
         user_posts_list = (
             Post.objects
             .filter(author=profile_user, is_published=True)
@@ -649,8 +639,6 @@ def user_profile(request, username):
 
     # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
     pending_count = 0
-
-    # Şərt: Login olub + Öz profilidir + Müəllimdir
     if (
         request.user.is_authenticated
         and request.user == profile_user
@@ -659,15 +647,15 @@ def user_profile(request, username):
         pending_count = (
             ExamAttempt.objects
             .filter(
-                exam__author=request.user,            # Müəllimin öz imtahanları
-                status__in=['submitted', 'expired'],  # Tələbə bitirib (və ya vaxtı bitib)
-                checked_by_teacher=False              # Müəllim hələ "Təsdiq" etməyib
+                exam__author=request.user,
+                status__in=['submitted', 'expired'],
+                checked_by_teacher=False
             )
-            .exclude(exam__exam_type='test')          # Testləri çıxarırıq
+            .exclude(exam__exam_type='test')
             .count()
         )
 
-    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI (YENİ)
+    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI
     assigned_count = 0
     if request.user.is_authenticated and request.user == profile_user:
         assigned_count = (
@@ -681,7 +669,25 @@ def user_profile(request, username):
             .count()
         )
 
-    # 5. Kateqoriyalar
+    # ══════════════════════════════════════��════════════════════════
+    # 5. TƏLƏBƏNİN KURSLARI (YENİ)
+    # ═══════════════════════════════════════════════════════════════
+    student_courses = []
+    student_courses_count = 0
+    
+    if request.user.is_authenticated and request.user == profile_user:
+        # Tələbə öz profilinə baxır
+        if getattr(request.user, 'is_student', False):
+            # CourseMembership vasitəsilə tələbənin üzv olduğu kurslar
+            student_courses = Course.objects.filter(
+                memberships__user=request.user,
+                memberships__role='student',
+                status='published'  # Yalnız published kurslar
+            ).distinct().order_by('-created_at')
+            
+            student_courses_count = student_courses.count()
+
+    # 6. Kateqoriyalar
     categories = Category.objects.all().order_by('name')
 
     context = {
@@ -689,7 +695,9 @@ def user_profile(request, username):
         "posts": posts,
         "categories": categories,
         "pending_count": pending_count,
-        "assigned_count": assigned_count,   # YENİ
+        "assigned_count": assigned_count,
+        "student_courses": student_courses,           # YENİ
+        "student_courses_count": student_courses_count,  # YENİ
     }
     return render(request, "blog/user_profile.html", context)
 
@@ -1958,7 +1966,7 @@ def exam_code_check(request):
 
     return _start_or_resume_attempt(request, exam)
 
-
+ 
 
 
 
