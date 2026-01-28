@@ -45,6 +45,7 @@
                                     <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
                                 </td>
                                 <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                              
                                 <td>
                                     {% if submission.status == 'pending' %}
                                         <span class="badge bg-warning">Gözləyir</span>
@@ -69,6 +70,7 @@
                                             data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
                                             data-content="{{ submission.content }}"
                                             data-file="{% if submission.file %}{{ submission.file.url }}{% endif %}"
+                                            data-filename="{% if submission.file %}{{ submission.file.name|cut:'projects/submissions/' }}{% endif %}"
                                             data-grade="{{ submission.grade|default:'' }}"
                                             data-feedback="{{ submission.feedback }}">
                                         <i class="bi bi-eye"></i> Bax
@@ -108,21 +110,24 @@
                 
                 <div class="mb-3">
                     <strong>Tələbə:</strong>
-                    <p id="modal-student"></p>
+                    <p id="modal-student" class="mb-0"></p>
                 </div>
                 
                 <div class="mb-3">
                     <strong>Layihə İzahatı:</strong>
                     <div class="border rounded p-3 bg-light">
-                        <p id="modal-content" style="white-space: pre-wrap;"></p>
+                        <p id="modal-content" class="mb-0" style="white-space: pre-wrap;"></p>
                     </div>
                 </div>
                 
                 <div class="mb-3" id="modal-file-container" style="display: none;">
                     <strong>Layihə Faylı:</strong>
-                    <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-download"></i> Yüklə
-                    </a>
+                    <div class="mt-2">
+                        <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download me-1"></i> 
+                            <span id="modal-file-name">Yüklə</span>
+                        </a>
+                    </div>
                 </div>
                 
                 <hr>
@@ -163,19 +168,21 @@ document.querySelectorAll('.view-submission-btn').forEach(btn => {
         const student = this.dataset.student;
         const content = this.dataset.content;
         const file = this.dataset.file;
+        const filename = this.dataset.filename;  // Fayl adı
         const grade = this.dataset.grade;
         const feedback = this.dataset.feedback;
         
         document.getElementById('submission-id').value = submissionId;
         document.getElementById('modal-student').textContent = student;
-        document.getElementById('modal-content').textContent = content;
+        document.getElementById('modal-content').textContent = content || '(Mətn yoxdur)';
         document.getElementById('grade-input').value = grade;
         document.getElementById('feedback-input').value = feedback;
         
-        // Handle file
+        // Handle file - fayl adını göstər
         if (file) {
             document.getElementById('modal-file-container').style.display = 'block';
             document.getElementById('modal-file-link').href = file;
+            document.getElementById('modal-file-name').textContent = filename || 'Yüklə';
         } else {
             document.getElementById('modal-file-container').style.display = 'none';
         }
@@ -188,6 +195,10 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
     
     const submissionId = document.getElementById('submission-id').value;
     const formData = new FormData(this);
+    const btn = this.querySelector('[type=submit]');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Göndərilir...';
     
     fetch(`/projects/submission/${submissionId}/grade/`, {
         method: 'POST',
@@ -200,15 +211,18 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            alert('Qiymət verildi!');
             location.reload();
         } else {
             alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
         }
     })
     .catch(err => {
         console.error(err);
         alert('Server xətası');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
     });
 });
 </script>

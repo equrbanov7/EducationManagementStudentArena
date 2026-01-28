@@ -85,10 +85,21 @@ class CreateCourseView(IsTeacherMixin, CreateView):
 # VIEW 2: Kurs Dashboard (Accordion) - LABS ƏLAVƏSİ
 # ════════════════════════════════════════════════════════════════════════════
 
+
+
+
+
+
+
 class CourseDashboardView(LoginRequiredMixin, DetailView):
     """
-    Kurs dashboard view-u.
-    Labs app inteqrasiyası əlavə edilib.
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │ Kurs Dashboard View                                                     │
+    │ GET /courses/<course_id>/dashboard/                                     │
+    │                                                                         │
+    │ Tələbə yalnız özünə təyin olunmuş işləri görür.                         │
+    │ Müəllim bütün işləri görür və idarə edir.                               │
+    └───���─────────────────────────────────────────────────────────────────────┘
     """
     model = Course
     template_name = 'courses/course_dashboard.html'
@@ -100,66 +111,208 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         course = self.get_object()
         user = self.request.user
 
-        # ════════════════════════════════════════════════════════════════
-        # Accordion məlumatları
-        # ════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # 1. İSTİFADƏÇİ ROLUNU TƏYİN ET
+        # ═══════════════════════════════════════════════════════════════════
+        membership = CourseMembership.objects.filter(course=course, user=user).first()
+        user_role = membership.role if membership else None
+        
+        # ─────────────────────────────────────────────────────────────────────
+        # Context-ə rol məlumatlarını əlavə et
+        # ─────────────────────────────────────────────────────────────────────
+        context['is_owner'] = course.owner == user
+        context['is_teacher'] = getattr(user, 'is_teacher', False)
+        context['is_student'] = user_role == 'student'
+        context['is_assistant'] = user_role in ['assistant_teacher', 'moderator']
+        context['can_view_members'] = context['is_owner'] or context['is_assistant']
+        context['user_role'] = user_role
+        context['membership'] = membership  # Template-də lazım ola bilər
+
+        # ═══════════════════════════════════════════════════════════════════
+        # 2. MÖVZULAR & RESURSLAR (Hamı görür)
+        # ═══════════════════════════════════════════════════════════════════
         context['topics'] = course.topics.all().order_by('order')
         context['resources'] = course.resources.all().order_by('-created_at')
-        context['members'] = course.memberships.all().order_by('joined_at')
 
-        # ════════════════════════════════════════════════════════════════
-        # LABS - YENİ
-        # ════════════════════════════════════════════════════════════════
-        if user.is_teacher and course.owner == user:
-            # Müəllim bütün labları görür
-            context['labs'] = course.labs.all().order_by('-created_at')
-        elif hasattr(user, 'is_student') and user.is_student:
-            # Tələbə yalnız published labları görür
-            # + Qrup filtri varsa, yalnız öz qrupuna aid labları
-            membership = course.memberships.filter(user=user, role='student').first()
-            
-            labs_qs = course.labs.filter(status='published')
-            
-            if membership:
-                student_group = membership.group_name
-                # Qrup filtri olan labları yoxla
-                filtered_labs = []
-                for lab in labs_qs:
-                    allowed_groups = lab.get_allowed_groups_list()
-                    if not allowed_groups or student_group in allowed_groups:
-                        filtered_labs.append(lab)
-                context['labs'] = filtered_labs
-            else:
-                context['labs'] = labs_qs
+        # ═══════════════════════════════════════════════════════════════════
+        # 3. ÜZVLƏR (Yalnız owner və assistant görür)
+        # ═══════════════════════════════════════════════════════════════════
+        if context['can_view_members']:
+            context['members'] = course.memberships.select_related('user').order_by('group_name', 'joined_at')
         else:
-            context['labs'] = course.labs.filter(status='published')
+            context['members'] = []
 
-        # ════════════════════════════════════════════════════════════════
-        # Formalar (modal-lar üçün)
-        # ════════════════════════════════════════════════════════════════
-        context['topic_form'] = CourseTopicForm()
-        context['resource_form'] = CourseResourceForm()
+        # ═══════════════════════════════════════════════════════════════════
+        # 4. SƏRBƏST İŞLƏR (Assignments)
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün assignment-ları görür
+        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
+        # ═══════════════════════════════════════════════════════════════════
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün assignment-lar
+            context['assignments'] = course.assignments.all().order_by('-created_at')
+            context['assignments_with_user_data'] = []
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - arxivlənmişlər istisna (status != 'inactive' filter)
+            assignments_qs = course.assignments.filter(
+                assigned_students=user
+            ).exclude(
+                status='inactive'  # Deaktiv olanları göstərmə
+            ).order_by('-created_at')
+            
+            # Hər assignment üçün user-specific məlumat hazırla
+            assignments_with_user_data = []
+            for a in assignments_qs:
+                user_attempts = a.submissions.filter(student=user).count()
+                is_deadline_passed = a.is_deadline_passed if hasattr(a, 'is_deadline_passed') else False
+                is_active = a.status == 'active'
+                can_submit = (
+                    user_attempts < a.max_attempts 
+                    and not is_deadline_passed 
+                    and is_active
+                )
+                attempts_left = a.max_attempts - user_attempts
+                
+                assignments_with_user_data.append({
+                    'assignment': a,
+                    'user_attempts': user_attempts,
+                    'can_submit': can_submit,
+                    'attempts_left': attempts_left,
+                    'is_deadline_passed': is_deadline_passed,
+                })
+            
+            context['assignments'] = assignments_qs
+            context['assignments_with_user_data'] = assignments_with_user_data
+        else:
+            context['assignments'] = []
+            context['assignments_with_user_data'] = []
 
-        # Owner check
-        context['is_owner'] = course.owner == user
+        # ═══════════════════════════════════════════════════════════════════
+        # 5. KURS İŞLƏRİ (Projects)
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün project-ləri görür
+        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
+        # ═════════════════════════════════════════��═════════════════════════
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün project-lər
+            context['projects'] = course.projects.all().order_by('-created_at')
+            context['projects_with_user_data'] = []
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - arxivlənmişlər istisna
+            try:
+                projects_qs = course.projects.filter(
+                    assigned_students=user
+                ).exclude(
+                    status='archived'  # Arxivlənmişləri göstərmə
+                ).order_by('-created_at')
+                
+                # Hər project üçün user-specific məlumat hazırla
+                projects_with_user_data = []
+                for p in projects_qs:
+                    user_attempts = p.submissions.filter(student=user).count()
+                    is_deadline_passed = p.is_deadline_passed
+                    is_active = p.status == 'active'
+                    can_submit = (
+                        user_attempts < p.max_attempts 
+                        and not is_deadline_passed 
+                        and is_active
+                    )
+                    attempts_left = p.max_attempts - user_attempts
+                    
+                    projects_with_user_data.append({
+                        'project': p,
+                        'user_attempts': user_attempts,
+                        'can_submit': can_submit,
+                        'attempts_left': attempts_left,
+                        'is_deadline_passed': is_deadline_passed,
+                    })
+                
+                context['projects'] = projects_qs
+                context['projects_with_user_data'] = projects_with_user_data
+            except Exception:
+                context['projects'] = []
+                context['projects_with_user_data'] = []
+        else:
+            context['projects'] = []
+            context['projects_with_user_data'] = []
 
-        # ════════════════════════════════════════════════════════════════
-        # ASSIGNMENT MODAL üçün: Kursdakı real qruplar
-        # ════════════════════════════════════════════════════════════════
-        context['assignment_groups'] = list(
-            course.memberships
-            .filter(role='student')
-            .exclude(group_name__isnull=True)
-            .exclude(group_name__exact='')
-            .values_list('group_name', flat=True)
-            .distinct()
-            .order_by('group_name')
-        )
+        # ═══════════════════════════════════════════════════════════════════
+        # 6. LAB İŞLƏRİ (Labs)
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün lab-ları görür
+        # Tələbə: allowed_students və ya allowed_groups-a görə filter olunur
+        # ════════════════════════════════════���══════════════════════════════
+        if context['is_owner'] or context['is_teacher']:
+            context['labs'] = course.labs.all().order_by('-created_at')
+            
+        elif context['is_student']:
+            # Yalnız published lab-ları götür
+            labs_qs = course.labs.filter(status='published')
+            filtered_labs = []
+            
+            for lab in labs_qs:
+                # ─────────────────────────────────────────────────────────────
+                # Prioritet 1: allowed_students yoxla
+                # ─────────────────────────────────────────────────────────────
+                allowed_students_str = getattr(lab, 'allowed_students', '') or ''
+                if allowed_students_str:
+                    allowed_ids = [
+                        int(x) for x in allowed_students_str.split(',') 
+                        if x.strip().isdigit()
+                    ]
+                    if user.id in allowed_ids:
+                        filtered_labs.append(lab)
+                        continue
+                
+                # ─────────────────────────────────────────────────────────────
+                # Prioritet 2: allowed_groups yoxla
+                # ─────────────────────────────────────────────────────────────
+                allowed_groups = []
+                if hasattr(lab, 'get_allowed_groups_list'):
+                    allowed_groups = lab.get_allowed_groups_list()
+                
+                # Heç bir filter yoxdursa - hamı görür
+                if not allowed_groups and not allowed_students_str:
+                    filtered_labs.append(lab)
+                    continue
+                
+                # Tələbənin qrupu allowed_groups-dadırsa
+                if membership and membership.group_name:
+                    if membership.group_name in allowed_groups:
+                        filtered_labs.append(lab)
+            
+            context['labs'] = filtered_labs
+        else:
+            context['labs'] = []
 
-        # ════════════════════════════════════════════════════════════════
-        # Modal-lar üçün owner-ə məxsus şeylər
-        # ════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # 7. FORMALAR VƏ MODAL ÜÇÜN DATA (Yalnız owner üçün)
+        # ═══════════════════════════════════════════════════════════════════
         if context['is_owner']:
+            # ─────────────────────────────────────────────────────────────────
+            # Form instance-ları
+            # ─────────────────────────────────────────────────────────────────
+            context['topic_form'] = CourseTopicForm()
+            context['resource_form'] = CourseResourceForm()
+            
+            # ─────────────────────────────────────────────────────────────────
+            # Kursdakı qruplar (modal-da seçim üçün)
+            # ─────────────────────────────────────────────────────────────────
+            context['assignment_groups'] = list(
+                course.memberships
+                .filter(role='student')
+                .exclude(group_name__isnull=True)
+                .exclude(group_name__exact='')
+                .values_list('group_name', flat=True)
+                .distinct()
+                .order_by('group_name')
+            )
+            
+            # ─────────────────────────────────────────────────────────────────
+            # Kursa əlavə olunmamış istifadəçilər (üzv əlavə etmək üçün)
+            # ─────────────────────────────────────────────────────────────────
             course_user_ids = course.memberships.values_list('user_id', flat=True)
             context['all_users'] = (
                 User.objects
@@ -169,18 +322,21 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 .order_by('username')
             )
 
+            # ─────────────────────────────────────────────────────────────────
+            # Bütün qruplar (StudentGroup modelindən)
+            # ─────────────────────────────────────────────────────────────────
             try:
                 from blog.models import StudentGroup
                 context['all_groups'] = StudentGroup.objects.all().order_by('name')
             except ImportError:
                 context['all_groups'] = []
         else:
+            # Owner deyilsə boş saxla
             context['all_users'] = []
             context['all_groups'] = []
+            context['assignment_groups'] = []
 
         return context
-
-
 # ════════════════════════════════════════════════════════════════════════════
 # VIEW 3: Mövzu Əlavə Etmə (AJAX/Modal)
 # ════════════════════════════════════════════════════════════════════════════
@@ -630,3 +786,51 @@ class MyCoursesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Course.objects.filter(owner=self.request.user).order_by("-created_at")
+    
+    
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Tələbənin Kursları
+# ════════════════════════════════════════════════════════════════════════════
+
+class StudentCoursesView(LoginRequiredMixin, ListView):
+    """
+    Tələbəyə təyin olunmuş kursların siyahısı.
+    
+    Tələbə kursa iki yolla əlavə oluna bilər:
+    1. Birbaşa - CourseMembership.user = tələbə
+    2. Qrup vasitəsilə - CourseMembership qrupuna əlavə edilib
+    """
+    template_name = 'courses/student_courses.html'
+    context_object_name = 'courses'
+    paginate_by = 12
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Tələbənin üzv olduğu kurslar
+        return Course.objects.filter(
+            memberships__user=user,
+            memberships__role='student',
+            status='published'
+        ).distinct().select_related('owner').order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Hər kurs üçün əlavə məlumat
+        courses_with_info = []
+        for course in context['courses']:
+            membership = CourseMembership.objects.filter(
+                course=course,
+                user=self.request.user
+            ).first()
+            
+            courses_with_info.append({
+                'course': course,
+                'group_name': membership.group_name if membership else '',
+                'joined_at': membership.joined_at if membership else None,
+            })
+        
+        context['courses_with_info'] = courses_with_info
+        return context
+    

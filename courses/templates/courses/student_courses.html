@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kurslarım{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-graduation-cap text-success me-2"></i> Kurslarım
+            </h2>
+            <p class="text-muted mb-0">Sizə təyin olunmuş bütün kurslar</p>
+        </div>
+        <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Profilə Qayıt
+        </a>
+    </div>
+    
+    {% if courses_with_info %}
+    <div class="row">
+        {% for item in courses_with_info %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 shadow-sm course-card">
+                <!-- Cover Image -->
+                <div class="course-cover" style="height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    {% if item.course.cover_image %}
+                        <img src="{{ item.course.cover_image.url }}" alt="{{ item.course.title }}" 
+                             class="w-100 h-100" style="object-fit: cover;">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book fa-4x text-white opacity-50"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title mb-2">{{ item.course.title }}</h5>
+                    
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-user me-1"></i> 
+                        Müəllim: <strong>{{ item.course.owner.get_full_name|default:item.course.owner.username }}</strong>
+                    </p>
+                    
+                    {% if item.group_name %}
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-users me-1"></i> 
+                        Qrup: <span class="badge bg-secondary">{{ item.group_name }}</span>
+                    </p>
+                    {% endif %}
+                    
+                    {% if item.course.description %}
+                    <p class="card-text text-muted small">
+                        {{ item.course.description|truncatewords:20 }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {% if item.joined_at %}
+                                {{ item.joined_at|date:"d.m.Y" }}
+                            {% endif %}
+                        </small>
+                        <a href="{% url 'courses:course_dashboard' item.course.id %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i> Kursa Keç
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-graduation-cap fa-4x text-muted mb-4"></i>
+        <h4 class="text-muted">Hələ heç bir kursa təyin olunmamısınız</h4>
+        <p class="text-muted">Müəlliminiz sizi kursa əlavə etdikdə burada görəcəksiniz.</p>
+    </div>
+    {% endif %}
+    
+</div>
+
+<style>
+.course-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+.course-cover {
+    position: relative;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

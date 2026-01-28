@@ -61,6 +61,10 @@ class Assignment(models.Model):
     def is_deadline_passed(self):
         from django.utils import timezone
         return timezone.now() > self.deadline
+
+    def get_user_attempts(self, user):
+        """İstifadəçinin cəhd sayını qaytarır"""
+        return self.submissions.filter(student=user).count()
     
     def get_submissions_count(self):
         """Ümumi cavab sayı"""

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.title }} - Cavablarım{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' project.course.id %}">{{ project.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ project.title }}</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0">
+                <i class="fa-solid fa-list-check text-info me-2"></i> Mənim Cavablarım
+            </h3>
+        </div>
+        <div>
+            {% if can_submit %}
+            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-info">
+                <i class="fa-solid fa-plus me-1"></i> Yeni Layihə Təqdim Et
+            </a>
+            {% endif %}
+            <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Geri
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ user_attempts }} / {{ project.max_attempts }}</h4>
+                    <small class="text-muted">İstifadə olunmuş cəhd</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0 {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ attempts_left }}
+                    </h4>
+                    <small class="text-muted">Qalan cəhd</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0 text-info">{{ project.max_score }}</h4>
+                    <small class="text-muted">Maksimum bal</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    {% if project.is_deadline_passed %}
+                        <span class="badge bg-danger fs-6">Müddət Keçib</span>
+                    {% else %}
+                        <span class="badge bg-success fs-6">Aktiv</span>
+                    {% endif %}
+                    <br>
+                    <small class="text-muted">{{ project.deadline|date:"d.m.Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submissions List -->
+    {% if submissions %}
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <i class="fa-solid fa-history me-2"></i> Göndərdiyim Layihələr
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Göndərilmə Tarixi</th>
+                            <th>Status</th>
+                            <th>Qiymət</th>
+                            <th>Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if sub.status == 'pending' %}
+                                    <span class="badge bg-warning">Gözləyir</span>
+                                {% elif sub.status == 'graded' %}
+                                    <span class="badge bg-success">Qiymətləndirildi</span>
+                                {% elif sub.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rədd edildi</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ sub.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.grade %}
+                                    <span class="fw-bold text-success">{{ sub.grade }} / {{ project.max_score }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#viewSubmission{{ sub.id }}">
+                                    <i class="fa-solid fa-eye"></i> Bax
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals for each submission -->
+    {% for sub in submissions %}
+    <div class="modal fade" id="viewSubmission{{ sub.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Layihə #{{ forloop.counter }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Göndərilmə tarixi:</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                    </div>
+                    
+                    {% if sub.content %}
+                    <div class="mb-3">
+                        <strong>Mətn:</strong>
+                        <div class="bg-light p-3 rounded mt-2">{{ sub.content|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if sub.file %}
+                    <div class="mb-3">
+                        <strong>Fayl:</strong>
+                        <a href="{{ sub.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                            <i class="fa-solid fa-download"></i> {{ sub.file.name|cut:"projects/submissions/" }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if sub.status == 'graded' %}
+                    <hr>
+                    <div class="mb-3">
+                        <strong>Qiymət:</strong> 
+                        <span class="badge bg-success fs-5 ms-2">{{ sub.grade }} / {{ project.max_score }}</span>
+                    </div>
+                    
+                    {% if sub.feedback %}
+                    <div class="mb-3">
+                        <strong>Müəllim rəyi:</strong>
+                        <div class="bg-light p-3 rounded mt-2 border-start border-4 border-success">
+                            {{ sub.feedback|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% else %}
+    <div class="alert alert-light text-center py-5">
+        <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+        <h5>Hələ heç bir layihə təqdim etməmisiniz</h5>
+        {% if can_submit %}
+        <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-info mt-3">
+            <i class="fa-solid fa-plus me-1"></i> İlk Layihəni Təqdim Et
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+</div>
+{% endblock %}
