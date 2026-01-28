@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lab.title }} - Cavablar{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item">{{ lab.title }}</li>
+                    <li class="breadcrumb-item active">Cavablar</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0">
+                <i class="fas fa-clipboard-check text-success me-2"></i> Tələbə Cavabları
+            </h3>
+        </div>
+        <div>
+            <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-cubes me-1"></i> Bloklar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Hamısı</option>
+                        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Göndərilib</option>
+                        <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Gecikmiş</option>
+                        <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>Qiymətləndirilib</option>
+                        <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>Qaytarılıb</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Qrup</label>
+                    <select name="group" class="form-select">
+                        <option value="">Bütün qruplar</option>
+                        {% for g in groups %}
+                        <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter me-1"></i> Filtr
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-1"></i> Sıfırla
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ submissions|length }}</h3>
+                    <small>Ümumi Cavab</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ submissions|length }}</h3>
+                    <small>Gözləyən</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">0</h3>
+                    <small>Qiymətləndirilib</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">0</h3>
+                    <small>Gecikmiş</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Submissions Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if submissions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tələbə</th>
+                            <th>Göndəriş</th>
+                            <th>Tarix</th>
+                            <th>Status</th>
+                            <th>Qiymət</th>
+                            <th class="text-end">Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        <tr id="row-{{ sub.id }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-2">
+                                        {{ sub.assignment.student.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</strong>
+                                        <small class="text-muted d-block">{{ sub.assignment.student.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if sub.submission_file %}
+                                <a href="{{ sub.submission_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-download me-1"></i> Fayl
+                                </a>
+                                {% endif %}
+                                {% if sub.submission_link %}
+                                <a href="{{ sub.submission_link }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-external-link-alt me-1"></i> Link
+                                </a>
+                                {% endif %}
+                                {% if sub.submission_text %}
+                                <button class="btn btn-sm btn-outline-secondary" 
+                                        onclick="alert('{{ sub.submission_text|escapejs }}')">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                                <small class="text-muted d-block">Cəhd {{ sub.attempt_number }}</small>
+                            </td>
+                            <td>
+                                {% if sub.status == 'graded' %}
+                                <span class="badge bg-success">Qiymətləndirilib</span>
+                                {% elif sub.status == 'late' %}
+                                <span class="badge bg-warning text-dark">Gecikmiş</span>
+                                {% elif sub.status == 'returned' %}
+                                <span class="badge bg-info">Qaytarıl��b</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Gözləyir</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.score %}
+                                <span class="fw-bold text-success">{{ sub.score }}/{{ lab.max_score }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-primary js-grade-btn" 
+                                        data-id="{{ sub.id }}"
+                                        data-student="{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}"
+                                        data-score="{{ sub.score|default:'' }}"
+                                        data-feedback="{{ sub.feedback|default:'' }}">
+                                    <i class="fas fa-pen me-1"></i> Qiymətləndir
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
+                <h5>Heç bir cavab yoxdur</h5>
+                <p class="text-muted">Hələ heç bir tələbə cavab göndərməyib.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+</div>
+
+<!-- GRADE MODAL -->
+<div class="modal fade" id="gradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-star me-2"></i> Qiymətləndir</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="gradeForm">
+                {% csrf_token %}
+                <input type="hidden" id="gradeSubId" name="submission_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Tələbə:</strong></label>
+                        <p id="gradeStudentName" class="mb-0"></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Qiymət (0 - {{ lab.max_score }})</label>
+                        <input type="number" id="gradeScore" name="score" class="form-control form-control-lg" 
+                               min="0" max="{{ lab.max_score }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Rəy / Feedback</label>
+                        <textarea id="gradeFeedback" name="feedback" class="form-control" rows="4"
+                                  placeholder="Tələbəyə göstəriləcək rəy..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i> Yadda Saxla
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+</style>
+
+<script>
+(function(){
+    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const modal = new bootstrap.Modal(document.getElementById('gradeModal'));
+    
+    // Grade button click
+    document.querySelectorAll('.js-grade-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('gradeSubId').value = this.dataset.id;
+            document.getElementById('gradeStudentName').textContent = this.dataset.student;
+            document.getElementById('gradeScore').value = this.dataset.score;
+            document.getElementById('gradeFeedback').value = this.dataset.feedback;
+            modal.show();
+        });
+    });
+    
+    // Grade form submit
+    document.getElementById('gradeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const subId = document.getElementById('gradeSubId').value;
+        const btn = this.querySelector('[type=submit]');
+        btn.disabled = true;
+        
+        fetch(`/labs/submissions/${subId}/grade/`, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-CSRFToken': CSRF,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if(data.success) {
+                location.reload();
+            } else {
+                alert('Xəta: ' + (data.error || ''));
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('Server xətası');
+            btn.disabled = false;
+        });
+    });
+})();
+</script>
+{% endblock %}

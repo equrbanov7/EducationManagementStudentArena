@@ -1,0 +1,104 @@
+<div class="accordion-item">
+    <h2 class="accordion-header d-flex align-items-center" id="projectHeading">
+        <button class="accordion-button collapsed flex-grow-1" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#projectCollapse" aria-expanded="false" aria-controls="projectCollapse">
+            <i class="fa-solid fa-project-diagram me-2 fs-5" style="color: #17a2b8;"></i>
+            <span class="fw-bold">Kurs İşləri</span>
+            <span class="badge bg-info ms-2">{{ course.projects.count }}</span>
+        </button>
+    </h2>
+    
+    <div id="projectCollapse" class="accordion-collapse collapse" 
+         aria-labelledby="projectHeading" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            {% if request.user.is_teacher %}
+                <div class="mb-3 text-end">
+                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                        <i class="fa-solid fa-plus-circle me-1"></i> Yeni Kurs İşi Əlavə Et
+                    </button>
+                </div>
+            {% endif %}
+
+            {% if course.projects.all %}
+                <div class="list-group list-group-flush">
+                    {% for project in course.projects.all %}
+                    <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                        
+                        <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                            <h6 class="mb-1 fw-bold">
+                                <i class="fa-solid fa-folder-open text-info"></i> {{ project.title }}
+                            </h6>
+                            
+                            {% if request.user.is_teacher %}
+                                <div>
+                                    <span class="badge bg-info-subtle text-info">
+                                        {{ project.get_submissions_count }} Cavab
+                                    </span>
+                                    {% if project.get_pending_submissions > 0 %}
+                                    <span class="badge bg-warning text-dark">
+                                        {{ project.get_pending_submissions }} Gözləyən
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if project.description %}
+                        <p class="text-muted small mb-2">{{ project.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        
+                        <div class="d-flex flex-wrap gap-3 mb-3">
+                            <small class="text-muted">
+                                <i class="fa-solid fa-calendar-days"></i> 
+                                <strong>Son tarix:</strong> {{ project.deadline|date:"d.m.Y H:i" }}
+                                {% if project.is_deadline_passed %}
+                                    <span class="badge bg-danger ms-1">Müddət Keçib</span>
+                                {% else %}
+                                    <span class="badge bg-success ms-1">Aktiv</span>
+                                {% endif %}
+                            </small>
+                            <small class="text-muted">
+                                <strong>Bal:</strong> {{ project.max_score }}
+                            </small>
+                        </div>
+                        
+                        <div class="btn-group btn-group-sm gap-2">
+                            {% if request.user.is_teacher %}
+                                <a href="{% url 'projects:review_project_submissions' project.id %}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="fa-solid fa-eye"></i> Cavabları Gör
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary js-edit-project"
+                                        data-url="{% url 'projects:edit_project' project.id %}">
+                                    <i class="fa-solid fa-pen"></i> Redaktə
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger js-delete-project"
+                                        data-url="{% url 'projects:delete_project' project.id %}">
+                                    <i class="fa-solid fa-trash"></i> Sil
+                                </button>
+                            {% else %}
+                                <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-sm btn-info">
+                                    <i class="fa-solid fa-arrow-right"></i> Layihə Təqdim Et
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-light text-center py-4">
+                    <i class="fa-solid fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">Hələ ki kurs işi yoxdur</p>
+                    {% if request.user.is_teacher %}
+                        <button class="btn btn-info btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                            <i class="fa-solid fa-plus-circle"></i> İlk Kurs İşini Əlavə Et
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+

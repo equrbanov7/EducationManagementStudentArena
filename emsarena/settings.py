@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     "liveExam",
     "assignments",
    "accounts.apps.AccountsConfig",
+   "projects",
+   "labs",
     "daphne",
     "django.contrib.admin",
     "django.contrib.auth",

@@ -1,0 +1,653 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lab.title }} - Bloklar & Suallar{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a></li>
+                    <li class="breadcrumb-item active">{{ lab.title }}</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0"><i class="fas fa-cubes text-danger me-2"></i> Bloklar & Suallar</h3>
+        </div>
+        <div>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBlockModal">
+                <i class="fas fa-plus me-1"></i> Yeni Blok
+            </button>
+            <a href="{% url 'labs:preview_randomization' lab.id %}" class="btn btn-outline-info">
+                <i class="fas fa-eye me-1"></i> Random Preview
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ blocks|length }}</h4>
+                    <small class="text-muted">Blok</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{{ lab.total_questions }}</h4>
+                    <small class="text-muted">Ümumi Sual</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4 class="mb-0">{% if lab.questions_per_student > 0 %}{{ lab.questions_per_student }}{% else %}Hamısı{% endif %}</h4>
+                    <small class="text-muted">Tələbəyə düşən</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <span class="badge {% if lab.status == 'published' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+                        {{ lab.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Blocks Accordion -->
+    {% if blocks %}
+    <div class="accordion" id="blocksAccordion">
+        {% for block in blocks %}
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#blockCollapse{{ block.id }}">
+                    <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                        <span>
+                            <i class="fas fa-layer-group text-primary me-2"></i>
+                            <strong>{{ block.title }}</strong>
+                        </span>
+                        <div>
+                            <span class="badge bg-primary me-2">{{ block.question_count }} sual</span>
+                            {% if block.questions_to_pick > 0 %}
+                            <span class="badge bg-info">{{ block.questions_to_pick }} seçiləcək</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </button>
+            </h2>
+            <div id="blockCollapse{{ block.id }}" class="accordion-collapse collapse" 
+                 data-bs-parent="#blocksAccordion">
+                <div class="accordion-body">
+                    
+                    <!-- Block Actions -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary js-edit-block" 
+                                    data-id="{{ block.id }}"
+                                    data-title="{{ block.title }}"
+                                    data-description="{{ block.description|default:'' }}"
+                                    data-qtp="{{ block.questions_to_pick }}">
+                                <i class="fas fa-edit"></i> Redaktə
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger js-delete-block" data-id="{{ block.id }}">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-success js-add-question" data-block-id="{{ block.id }}">
+                                <i class="fas fa-plus"></i> Sual Əlavə Et
+                            </button>
+                            <button class="btn btn-sm btn-info js-import-questions" data-block-id="{{ block.id }}">
+                                <i class="fas fa-file-import"></i> Toplu Import
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Questions List -->
+                    {% if block.questions.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="60">#</th>
+                                    <th>Sual</th>
+                                    <th width="80">Bal</th>
+                                    <th width="120">Əməliyyat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for q in block.questions.all %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ q.question_number }}</span></td>
+                                    <td>
+                                        {{ q.question_text|truncatewords:30 }}
+                                        {% if q.attachment %}
+                                        <a href="{{ q.attachment.url }}" target="_blank" class="ms-2">
+                                            <i class="fas fa-paperclip text-muted"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>{% if q.points > 0 %}{{ q.points }}{% else %}-{% endif %}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary js-edit-question" 
+                                                data-id="{{ q.id }}"
+                                                data-text="{{ q.question_text|escapejs }}"
+                                                data-points="{{ q.points }}"
+                                                data-attachment="{% if q.attachment %}{{ q.attachment.url }}{% endif %}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger js-delete-question" data-id="{{ q.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light text-center mb-0">
+                        <i class="fas fa-inbox text-muted"></i>
+                        <p class="mb-0 text-muted">Bu blokda hələ sual yoxdur</p>
+                    </div>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light text-center py-5">
+        <i class="fas fa-cubes fa-3x text-muted mb-3"></i>
+        <h5>Hələ blok yaradılmayıb</h5>
+        <p class="text-muted">Sualları əlavə etmək üçün əvvəlcə blok yaradın</p>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBlockModal">
+            <i class="fas fa-plus me-1"></i> İlk Bloku Yarat
+        </button>
+    </div>
+    {% endif %}
+    
+</div>
+
+<!-- ADD BLOCK MODAL -->
+<div class="modal fade" id="addBlockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-layer-group me-2"></i> Yeni Blok</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addBlockForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Təsvir</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bu Blokdan Seçiləcək Sual Sayı</label>
+                        <input type="number" name="questions_to_pick" class="form-control" value="0" min="0">
+                        <small class="text-muted">0 = bütün suallar</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-success">Yarat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT BLOCK MODAL -->
+<div class="modal fade" id="editBlockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Blok Redaktə</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editBlockForm">
+                {% csrf_token %}
+                <input type="hidden" id="editBlockId" name="block_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                        <input type="text" id="editBlockTitle" name="title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Təsvir</label>
+                        <textarea id="editBlockDescription" name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bu Blokdan Seçiləcək Sual Sayı</label>
+                        <input type="number" id="editBlockQTP" name="questions_to_pick" class="form-control" min="0">
+                        <small class="text-muted">0 = bütün suallar</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-primary">Yadda Saxla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ADD QUESTION MODAL -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i> Yeni Sual</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addQuestionForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="addQuestionBlockId" name="block_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Sual Mətni <span class="text-danger">*</span></label>
+                        <textarea name="question_text" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Bal</label>
+                            <input type="number" name="points" class="form-control" value="0" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Əlavə Fayl</label>
+                            <input type="file" name="attachment" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-success">Əlavə Et</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT QUESTION MODAL -->
+<div class="modal fade" id="editQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Sual Redaktə</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editQuestionForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="editQuestionId" name="question_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Sual Mətni <span class="text-danger">*</span></label>
+                        <textarea id="editQuestionText" name="question_text" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Bal</label>
+                            <input type="number" id="editQuestionPoints" name="points" class="form-control" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Əlavə Fayl</label>
+                            <input type="file" name="attachment" class="form-control">
+                            <div id="editQuestionCurrentFile" class="mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-primary">Yadda Saxla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- IMPORT QUESTIONS MODAL -->
+<div class="modal fade" id="importQuestionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i> Toplu Sual Import</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="importQuestionsForm">
+                {% csrf_token %}
+                <input type="hidden" id="importBlockId" name="block_id">
+                <div class="modal-body">
+                    <div class="alert alert-light">
+                        <strong><i class="fas fa-info-circle me-1"></i> Format:</strong>
+                        Hər sətir bir sualdır.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sualları Yapışdırın</label>
+                        <textarea name="questions_text" class="form-control" rows="10" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-info"><i class="fas fa-upload me-1"></i> Import Et</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.accordion-item {
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+.accordion-button:not(.collapsed) {
+    background-color: #e7f1ff;
+    color: #0c63e4;
+}
+.accordion-button:focus {
+    box-shadow: none;
+}
+</style>
+
+<script>
+(function(){
+    const LAB_ID = {{ lab.id }};
+    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    const $ = id => document.getElementById(id);
+
+    // ═══════════════════════════════════════════════════════════
+    // PENDING DATA - Modal açılmadan əvvəl saxlanır
+    // ═══════════════════════════════════════════════════════════
+    
+    let pendingBlockData = null;
+    let pendingQuestionData = null;
+    let pendingImportBlockId = null;
+    let pendingAddQuestionBlockId = null;
+
+    // ═══════════════════════════════════════════════════════════
+    // EDIT BLOCK MODAL - shown.bs.modal event ilə
+    // ═══════════════════════════════════════════════════════════
+    
+    const editBlockModal = $('editBlockModal');
+    
+    editBlockModal?.addEventListener('shown.bs.modal', function() {
+        // Modal tam açılandan sonra dəyərləri yaz
+        if(pendingBlockData) {
+            $('editBlockId').value = pendingBlockData.id || '';
+            $('editBlockTitle').value = pendingBlockData.title || '';
+            $('editBlockDescription').value = pendingBlockData.description || '';
+            $('editBlockQTP').value = pendingBlockData.qtp || 0;
+            
+            console.log('Block data yazıldı:', pendingBlockData);
+            pendingBlockData = null;
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-edit-block');
+        if(!btn) return;
+        
+        // Data-nı saxla
+        pendingBlockData = {
+            id: btn.dataset.id,
+            title: btn.dataset.title,
+            description: btn.dataset.description,
+            qtp: btn.dataset.qtp
+        };
+        
+        console.log('Block data saxlanıldı:', pendingBlockData);
+        
+        // Modal aç
+        bootstrap.Modal.getOrCreateInstance(editBlockModal).show();
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // EDIT QUESTION MODAL - shown.bs.modal event ilə
+    // ═══════════════════════════════════════════════════════════
+    
+    const editQuestionModal = $('editQuestionModal');
+    
+    editQuestionModal?.addEventListener('shown.bs.modal', function() {
+        if(pendingQuestionData) {
+            $('editQuestionId').value = pendingQuestionData.id || '';
+            $('editQuestionText').value = pendingQuestionData.text || '';
+            $('editQuestionPoints').value = pendingQuestionData.points || 0;
+            
+            if(pendingQuestionData.attachment) {
+                $('editQuestionCurrentFile').innerHTML = `
+                    <a href="${pendingQuestionData.attachment}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-paperclip me-1"></i> Mövcud fayl
+                    </a>`;
+            } else {
+                $('editQuestionCurrentFile').innerHTML = '';
+            }
+            
+            console.log('Question data yazıldı:', pendingQuestionData);
+            pendingQuestionData = null;
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-edit-question');
+        if(!btn) return;
+        
+        pendingQuestionData = {
+            id: btn.dataset.id,
+            text: btn.dataset.text,
+            points: btn.dataset.points,
+            attachment: btn.dataset.attachment
+        };
+        
+        console.log('Question data saxlanıldı:', pendingQuestionData);
+        
+        bootstrap.Modal.getOrCreateInstance(editQuestionModal).show();
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // ADD QUESTION MODAL
+    // ═══════════════════════════════════════════════════════════
+    
+    const addQuestionModal = $('addQuestionModal');
+    
+    addQuestionModal?.addEventListener('shown.bs.modal', function() {
+        if(pendingAddQuestionBlockId) {
+            $('addQuestionBlockId').value = pendingAddQuestionBlockId;
+            pendingAddQuestionBlockId = null;
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-add-question');
+        if(!btn) return;
+        
+        pendingAddQuestionBlockId = btn.dataset.blockId;
+        $('addQuestionForm').reset();
+        
+        bootstrap.Modal.getOrCreateInstance(addQuestionModal).show();
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // IMPORT QUESTIONS MODAL
+    // ═══════════════════════════════════════════════════════════
+    
+    const importModal = $('importQuestionsModal');
+    
+    importModal?.addEventListener('shown.bs.modal', function() {
+        if(pendingImportBlockId) {
+            $('importBlockId').value = pendingImportBlockId;
+            pendingImportBlockId = null;
+        }
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-import-questions');
+        if(!btn) return;
+        
+        pendingImportBlockId = btn.dataset.blockId;
+        $('importQuestionsForm').reset();
+        
+        bootstrap.Modal.getOrCreateInstance(importModal).show();
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // FORM SUBMITS
+    // ═══════════════════════════════════════════════════════════
+    
+    // Add Block
+    $('addBlockForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+        
+        fetch(`/labs/${LAB_ID}/blocks/create/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => btn.disabled = false);
+    });
+
+    // Edit Block
+    $('editBlockForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const blockId = $('editBlockId').value;
+        if(!blockId) return;
+        
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+
+        fetch(`/labs/blocks/${blockId}/edit/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => btn.disabled = false);
+    });
+
+    // Add Question
+    $('addQuestionForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const blockId = $('addQuestionBlockId').value;
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+
+        fetch(`/labs/blocks/${blockId}/questions/create/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => btn.disabled = false);
+    });
+
+    // Edit Question
+    $('editQuestionForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const questionId = $('editQuestionId').value;
+        if(!questionId) return;
+        
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+
+        fetch(`/labs/questions/${questionId}/edit/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => btn.disabled = false);
+    });
+
+    // Import Questions
+    $('importQuestionsForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const blockId = $('importBlockId').value;
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+
+        fetch(`/labs/blocks/${blockId}/questions/import/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => {
+            if(d.success) {
+                alert(d.message || 'Suallar əlavə edildi');
+                location.reload();
+            } else {
+                alert('Xəta: ' + (d.error || ''));
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('Server xətası');
+            btn.disabled = false;
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // DELETE
+    // ═════════════════════════════════════════════���═════════════
+    
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-delete-block');
+        if(!btn) return;
+        if(!confirm('Bu bloku silmək istəyirsiniz?')) return;
+        
+        fetch(`/labs/blocks/${btn.dataset.id}/delete/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta'))
+        .catch(() => alert('Server xətası'));
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-delete-question');
+        if(!btn) return;
+        if(!confirm('Bu sualı silmək istəyirsiniz?')) return;
+        
+        fetch(`/labs/questions/${btn.dataset.id}/delete/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta'))
+        .catch(() => alert('Server xətası'));
+    });
+
+})();
+</script>
+{% endblock %}

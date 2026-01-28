@@ -18,4 +18,6 @@ urlpatterns = [
     # AJAX endpoints
     path('search-students/', views.search_students, name='search_students'),
     path('search-groups/', views.search_groups, name='search_groups'),
+    path('students-by-groups/', views.students_by_groups, name='students_by_groups'),
+    
 ]

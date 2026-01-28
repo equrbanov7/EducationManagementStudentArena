@@ -19,12 +19,10 @@ def create_assignment(request, course_id):
     """Sərbəst iş yaratma"""
     course = get_object_or_404(Course, id=course_id)
     
-    # Yalnız müəllim yarada bilər
     if not request.user.is_teacher or course.owner != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        # Assignment yaradılması
         assignment = Assignment.objects.create(
             course=course,
             title=request.POST.get('title'),
@@ -35,38 +33,28 @@ def create_assignment(request, course_id):
             status=request.POST.get('status', 'active')
         )
         
-        # Tələbələri assign etmək
-        student_ids = request.POST.getlist('students[]')
-        if student_ids:
-            # is_student property-dir, filter-də işləməz
-            # Əvəzinə groups__name='student' istifadə et
-            students = User.objects.filter(
-                id__in=student_ids,
-                groups__name='student'
-            )
-            assignment.assigned_students.set(students)
-        
-        # Qrup əsaslı assign (group_name-ə görə)
         group_names = request.POST.getlist('group_names[]')
-        if group_names:
-            # CourseMembership-dən həmin qrupda olan tələbələri tap
+        student_ids = request.POST.getlist('students[]')
+        
+        # ════════════════════════════════════════════════════════════
+        # ƏSAS MƏNTİQ:
+        # 1. Əgər student_ids varsa → YALNIZ seçilmiş tələbələr
+        # 2. Əgər student_ids yoxdur, amma group_names varsa → Bütün qrup
+        # ════════════════════════════════════════════════════════════
+        
+        if student_ids:
+            students = User.objects.filter(id__in=student_ids)
+            assignment.assigned_students.set(students)
+        elif group_names:
             group_students = User.objects.filter(
                 course_memberships__course=course,
                 course_memberships__group_name__in=group_names,
-                groups__name='student'  # is_student əvəzinə
+                course_memberships__role='student'
             ).distinct()
-            
-            # Mövcud tələbələrlə birləşdir
-            existing_students = list(assignment.assigned_students.all())
-            all_students = set(existing_students) | set(group_students)
-            assignment.assigned_students.set(all_students)
+            assignment.assigned_students.set(group_students)
         
         messages.success(request, 'Sərbəst iş uğurla yaradıldı!')
-        return JsonResponse({
-            'success': True,
-            'message': 'Sərbəst iş yaradıldı',
-            'assignment_id': assignment.id
-        })
+        return JsonResponse({'success': True, 'assignment_id': assignment.id})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -83,23 +71,36 @@ def edit_assignment(request, pk):
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     if request.method == 'GET':
-        # Modal üçün data qaytarmaq
+        # Assigned tələbələrin ID-lərini al
+        assigned_students = list(assignment.assigned_students.values('id', 'username', 'first_name', 'last_name'))
+        assigned_student_ids = [s['id'] for s in assigned_students]
+        
+        # Bu tələbələrin hansı qruplarda olduğunu tap
+        assigned_groups = list(
+            CourseMembership.objects.filter(
+                course=assignment.course,
+                user_id__in=assigned_student_ids,
+                role='student'
+            ).exclude(group_name='').values_list('group_name', flat=True).distinct()
+        )
+        
         data = {
             'id': assignment.id,
             'title': assignment.title,
             'description': assignment.description,
-            'start_date': assignment.start_date.strftime('%Y-%m-%dT%H:%M'),
-            'deadline': assignment.deadline.strftime('%Y-%m-%dT%H:%M'),
+            'start_date': assignment.start_date.strftime('%Y-%m-%dT%H:%M') if assignment.start_date else '',
+            'deadline': assignment.deadline.strftime('%Y-%m-%dT%H:%M') if assignment.deadline else '',
             'max_attempts': assignment.max_attempts,
             'status': assignment.status,
-            'students': list(assignment.assigned_students.values('id', 'username', 'first_name', 'last_name')),
-            # Qrup adları - tələbələrin group_name-lərini əldə et
-            'group_names': list(
-                CourseMembership.objects.filter(
-                    course=assignment.course,
-                    user__in=assignment.assigned_students.all()
-                ).values_list('group_name', flat=True).distinct()
-            ),
+            'group_names': assigned_groups,
+            'student_ids': assigned_student_ids,  # Frontend üçün - hansı tələbələr seçilidir
+            'students': [
+                {
+                    'id': s['id'],
+                    'name': f"{s['first_name']} {s['last_name']}".strip() or s['username']
+                }
+                for s in assigned_students
+            ],
         }
         return JsonResponse({'success': True, 'data': data})
     
@@ -113,35 +114,34 @@ def edit_assignment(request, pk):
         assignment.status = request.POST.get('status', 'active')
         assignment.save()
         
-        # Update students
-        student_ids = request.POST.getlist('students[]')
-        if student_ids:
-            students = User.objects.filter(
-                id__in=student_ids,
-                groups__name='student'
-            )
-            assignment.assigned_students.set(students)
-        else:
-            assignment.assigned_students.clear()
-        
-        # Update group-based students
         group_names = request.POST.getlist('group_names[]')
-        if group_names:
+        student_ids = request.POST.getlist('students[]')
+        
+        # ════════════════════════════════════════════════════════════
+        # ƏSAS MƏNTİQ:
+        # 1. Əgər student_ids varsa → YALNIZ seçilmiş tələbələr
+        # 2. Əgər student_ids yoxdur, amma group_names varsa → Bütün qrup
+        # 3. Heç biri yoxdursa → Boş
+        # ════════════════════════════════════════════════════════════
+        
+        if student_ids:
+            # Yalnız seçilmiş tələbələri əlavə et
+            students = User.objects.filter(id__in=student_ids)
+            assignment.assigned_students.set(students)
+        elif group_names:
+            # Heç bir tələbə seçilməyib, bütün qrupu əlavə et
             group_students = User.objects.filter(
                 course_memberships__course=assignment.course,
                 course_memberships__group_name__in=group_names,
-                groups__name='student'
+                course_memberships__role='student'
             ).distinct()
-            
-            existing = set(assignment.assigned_students.all())
-            all_students = existing | set(group_students)
-            assignment.assigned_students.set(all_students)
+            assignment.assigned_students.set(group_students)
+        else:
+            # Heç nə seçilməyib
+            assignment.assigned_students.clear()
         
         messages.success(request, 'Sərbəst iş yeniləndi!')
-        return JsonResponse({
-            'success': True,
-            'message': 'Sərbəst iş yeniləndi'
-        })
+        return JsonResponse({'success': True, 'message': 'Sərbəst iş yeniləndi'})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -326,3 +326,38 @@ def search_groups(request):
     } for name in group_names]
     
     return JsonResponse({'results': results})
+
+
+@login_required
+def students_by_groups(request):
+    """Qruplara görə tələbələri qaytarır"""
+    course_id = request.GET.get('course_id')
+    groups_param = request.GET.get('groups', '')
+    
+    if not course_id or not groups_param:
+        return JsonResponse({'students': []})
+    
+    course = get_object_or_404(Course, id=course_id)
+    group_names = [g.strip() for g in groups_param.split(',') if g.strip()]
+    
+    if not group_names:
+        return JsonResponse({'students': []})
+    
+    memberships = CourseMembership.objects.filter(
+        course=course,
+        group_name__in=group_names,
+        role='student'
+    ).select_related('user').order_by('group_name', 'user__first_name')
+    
+    students = []
+    seen = set()
+    for m in memberships:
+        if m.user.id not in seen:
+            seen.add(m.user.id)
+            students.append({
+                'id': m.user.id,
+                'name': m.user.get_full_name() or m.user.username,
+                'group_name': m.group_name
+            })
+    
+    return JsonResponse({'students': students})

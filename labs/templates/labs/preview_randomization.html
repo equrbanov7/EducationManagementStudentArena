@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Random Preview - {{ lab.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'labs:manage_blocks' lab.id %}">{{ lab.title }}</a></li>
+                    <li class="breadcrumb-item active">Random Preview</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0"><i class="fas fa-eye text-info me-2"></i> Random Preview</h3>
+        </div>
+        <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Geri
+        </a>
+    </div>
+    
+    {% if error %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i> {{ error }}
+    </div>
+    {% else %}
+    
+    <div class="row">
+        <!-- Tələbə Seçimi -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user me-2"></i> Tələbə Seçin
+                </div>
+                <div class="card-body">
+                    <form method="GET">
+                        <div class="mb-3">
+                            <select name="student_id" class="form-select" onchange="this.form.submit()">
+                                {% for m in students %}
+                                <option value="{{ m.user.id }}" {% if selected_student.id == m.user.id %}selected{% endif %}>
+                                    {{ m.user.get_full_name|default:m.user.username }}
+                                    {% if m.group_name %}({{ m.group_name }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                    
+                    <div class="border-top pt-3 mt-3">
+                        <p class="mb-2"><strong>Seçilmiş tələbə:</strong></p>
+                        <h5 class="text-primary">{{ selected_student.get_full_name|default:selected_student.username }}</h5>
+                        <p class="text-muted mb-0">{{ selected_student.email }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-chart-bar me-2"></i> Statistika
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <strong>Ümumi sual sayı:</strong> {{ lab.total_questions }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Bu tələbəyə düşən:</strong> {{ questions|length }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Blok sayı:</strong> {{ lab.blocks.count }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Suallar -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <i class="fas fa-question-circle me-2"></i> 
+                    Bu Tələbəyə Düşən Suallar 
+                    <span class="badge bg-dark ms-2">{{ questions|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if questions %}
+                    <ol class="mb-0">
+                        {% for q in questions %}
+                        <li class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="d-flex justify-content-between">
+                                <div>{{ q.question_text }}</div>
+                                <div>
+                                    <span class="badge bg-secondary">{{ q.block.title }}</span>
+                                    {% if q.points > 0 %}
+                                    <span class="badge bg-info ms-1">{{ q.points }} bal</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>Heç bir sual yoxdur</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+    
+</div>
+{% endblock %}

@@ -1,0 +1,610 @@
+{% if request.user.is_teacher %}
+
+<!-- ADD LAB MODAL -->
+<div class="modal fade" id="addLabModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-flask me-2"></i> Yeni Lab İşi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createLabForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    
+                    <!-- Nav Tabs -->
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#addLabTabInfo" type="button">
+                                <i class="fas fa-info-circle me-1"></i> Əsas Məlumat
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addLabTabSettings" type="button">
+                                <i class="fas fa-cog me-1"></i> Ayarlar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addLabTabMaterials" type="button">
+                                <i class="fas fa-file-alt me-1"></i> Materiallar
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- TAB 1: Əsas Məlumat -->
+                        <div class="tab-pane fade show active" id="addLabTabInfo">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Lab Adı <span class="text-danger">*</span></label>
+                                    <input type="text" name="title" class="form-control" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Maksimum Bal</label>
+                                    <input type="number" name="max_score" class="form-control" value="100" min="1">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Təsvir</label>
+                                <textarea name="description" class="form-control" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="start_datetime" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Son Tarix <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" name="end_datetime" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- QRUPLAR VƏ TƏLƏBƏLƏR -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">İcazəli Qruplar</label>
+                                    <input type="text" class="form-control mb-2" id="addLabGroupSearch" placeholder="Qrup axtar...">
+                                    <div id="addLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
+                                    <small class="text-muted">Seçilib: <span id="addLabGroupCount">0</span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">İcazəli Tələbələr</label>
+                                    <input type="text" class="form-control mb-2" id="addLabStudentSearch" placeholder="Tələbə axtar...">
+                                    <div id="addLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
+                                        <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                    </div>
+                                    <small class="text-muted">Seçilib: <span id="addLabStudentCount">0</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 2: Ayarlar -->
+                        <div class="tab-pane fade" id="addLabTabSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Hər Tələbəyə Düşən Sual Sayı</label>
+                                    <input type="number" name="questions_per_student" class="form-control" value="0" min="0">
+                                    <small class="text-muted">0 = bütün suallar</small>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <h6 class="mb-3"><i class="fas fa-clock me-2"></i> Gecikmə Ayarları</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="allow_late_submission" id="addAllowLate">
+                                        <label class="form-check-label" for="addAllowLate">Gecikmiş göndərişə icazə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Gecikmə Cəzası (%)</label>
+                                    <input type="number" name="late_penalty_percent" class="form-control" value="0" min="0" max="100">
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <h6 class="mb-3"><i class="fas fa-upload me-2"></i> Göndəriş Ayarları</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="allow_file_upload" checked>
+                                        <label class="form-check-label">Fayl yükləmə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="allow_link_submission" checked>
+                                        <label class="form-check-label">Link göndərmə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Maks Fayl (MB)</label>
+                                    <input type="number" name="max_file_size_mb" class="form-control" value="50" min="1">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">İcazəli Fayl Tipləri</label>
+                                <input type="text" name="allowed_extensions" class="form-control" value="zip,pdf,docx,png,jpg,txt,py,java,cpp">
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 3: Materiallar -->
+                        <div class="tab-pane fade" id="addLabTabMaterials">
+                            <div class="mb-3">
+                                <label class="form-label">Müəllim Faylı</label>
+                                <input type="file" name="teacher_files" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Müəllim Təlimatları</label>
+                                <textarea name="teacher_instructions" class="form-control" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-check me-1"></i> Yarat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT LAB MODAL -->
+<div class="modal fade" id="editLabModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Lab Redaktə Et</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editLabForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="editLabId" name="lab_id">
+                <div class="modal-body">
+                    
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#editLabTabInfo" type="button">
+                                <i class="fas fa-info-circle me-1"></i> Əsas Məlumat
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabSettings" type="button">
+                                <i class="fas fa-cog me-1"></i> Ayarlar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabMaterials" type="button">
+                                <i class="fas fa-file-alt me-1"></i> Materiallar
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <!-- TAB 1 -->
+                        <div class="tab-pane fade show active" id="editLabTabInfo">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label">Lab Adı <span class="text-danger">*</span></label>
+                                    <input type="text" id="editLabTitle" name="title" class="form-control" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Maksimum Bal</label>
+                                    <input type="number" id="editLabMaxScore" name="max_score" class="form-control" min="1">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Təsvir</label>
+                                <textarea id="editLabDescription" name="description" class="form-control" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" id="editLabStart" name="start_datetime" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Son Tarix <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" id="editLabEnd" name="end_datetime" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- QRUPLAR VƏ TƏLƏBƏLƏR -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">İcazəli Qruplar</label>
+                                    <input type="text" class="form-control mb-2" id="editLabGroupSearch" placeholder="Qrup axtar...">
+                                    <div id="editLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
+                                    <small class="text-muted">Seçilib: <span id="editLabGroupCount">0</span></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">İcazəli Tələbələr</label>
+                                    <input type="text" class="form-control mb-2" id="editLabStudentSearch" placeholder="Tələbə axtar...">
+                                    <div id="editLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
+                                        <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                    </div>
+                                    <small class="text-muted">Seçilib: <span id="editLabStudentCount">0</span></small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 2 -->
+                        <div class="tab-pane fade" id="editLabTabSettings">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Hər Tələbəyə Düşən Sual Sayı</label>
+                                    <input type="number" id="editLabQPS" name="questions_per_student" class="form-control" min="0">
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowLate" name="allow_late_submission">
+                                        <label class="form-check-label" for="editAllowLate">Gecikmiş göndərişə icazə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Gecikmə Cəzası (%)</label>
+                                    <input type="number" id="editLatePenalty" name="late_penalty_percent" class="form-control" min="0" max="100">
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowFile" name="allow_file_upload">
+                                        <label class="form-check-label" for="editAllowFile">Fayl yükləmə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="editAllowLink" name="allow_link_submission">
+                                        <label class="form-check-label" for="editAllowLink">Link göndərmə</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Maks Fayl (MB)</label>
+                                    <input type="number" id="editMaxFileSize" name="max_file_size_mb" class="form-control" min="1">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">İcazəli Fayl Tipləri</label>
+                                <input type="text" id="editAllowedExt" name="allowed_extensions" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <!-- TAB 3 -->
+                        <div class="tab-pane fade" id="editLabTabMaterials">
+                            <div class="mb-3">
+                                <label class="form-label">Müəllim Faylı</label>
+                                <input type="file" name="teacher_files" class="form-control">
+                                <div id="editCurrentFile" class="mt-2"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Müəllim Təlimatları</label>
+                                <textarea id="editLabInstructions" name="teacher_instructions" class="form-control" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Yadda Saxla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+<style>
+.lab-chk-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
+.lab-chk-row:hover{background:#f5f9ff}
+.lab-chk-row:last-child{border-bottom:none}
+.lab-chk-row input{width:18px;height:18px;margin-right:10px;flex-shrink:0}
+.lab-chk-row label{margin:0;flex:1;cursor:pointer;font-weight:500}
+.lab-chk-row .badge{margin-left:auto;flex-shrink:0}
+</style>
+
+<script>
+(function(){
+    if(window._LAB_MODAL_V3) return;
+    window._LAB_MODAL_V3 = true;
+
+    const COURSE_ID = {{ course.id }};
+    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    const $ = id => document.getElementById(id);
+
+    // STATE
+    let editSavedStudentIds = new Set();
+
+    // HELPERS
+    const esc = s => s ? String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]) : '';
+    
+    const toLocal = dt => {
+        if(!dt) return '';
+        const d = new Date(dt);
+        if(isNaN(d)) return '';
+        const p = n => String(n).padStart(2,'0');
+        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+    };
+
+    const updateCount = mode => {
+        const gc = document.querySelectorAll(`#${mode}LabGroupList input:checked`).length;
+        const sc = document.querySelectorAll(`#${mode}LabStudentList input:checked`).length;
+        if($(`${mode}LabGroupCount`)) $(`${mode}LabGroupCount`).textContent = gc;
+        if($(`${mode}LabStudentCount`)) $(`${mode}LabStudentCount`).textContent = sc;
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // LOAD GROUPS
+    // ═══════════════════════════════════════════════════════════
+    
+    function loadGroups(mode, checkedGroups = []) {
+        const container = $(`${mode}LabGroupList`);
+        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+
+        fetch(`/labs/api/groups/${COURSE_ID}/`)
+            .then(r => r.json())
+            .then(data => {
+                const groups = data.groups || [];
+                if(!groups.length) {
+                    container.innerHTML = '<p class="text-muted text-center py-3">Qrup yoxdur</p>';
+                    return;
+                }
+
+                container.innerHTML = groups.map(g => `
+                    <div class="lab-chk-row">
+                        <input type="checkbox" id="${mode}LabG_${esc(g.name)}" name="group_names[]" value="${esc(g.name)}" 
+                               data-group="${esc(g.name)}" ${checkedGroups.includes(g.name)?'checked':''}>
+                        <label for="${mode}LabG_${esc(g.name)}">${esc(g.name)}</label>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        updateCount(mode);
+                        loadStudents(mode);
+                    });
+                });
+
+                updateCount(mode);
+                if(checkedGroups.length) loadStudents(mode);
+            })
+            .catch(() => {
+                container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+            });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // LOAD STUDENTS
+    // ═══════════════════════════════════════════════════════════
+    
+    function loadStudents(mode) {
+        const container = $(`${mode}LabStudentList`);
+        
+        const groups = Array.from(document.querySelectorAll(`#${mode}LabGroupList input:checked`))
+                           .map(cb => cb.dataset.group);
+
+        if(!groups.length) {
+            container.innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+            updateCount(mode);
+            return;
+        }
+
+        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+
+        fetch(`/labs/api/students/${COURSE_ID}/?groups=${encodeURIComponent(groups.join(','))}`)
+            .then(r => r.json())
+            .then(data => {
+                const students = data.students || [];
+                if(!students.length) {
+                    container.innerHTML = '<p class="text-muted text-center py-3">Tələbə yoxdur</p>';
+                    updateCount(mode);
+                    return;
+                }
+
+                container.innerHTML = students.map(s => {
+                    let isChecked = '';
+                    if(mode === 'edit' && editSavedStudentIds.has(s.id)) {
+                        isChecked = 'checked';
+                    }
+                    
+                    return `
+                        <div class="lab-chk-row">
+                            <input type="checkbox" id="${mode}LabS${s.id}" name="student_ids[]" value="${s.id}" ${isChecked}>
+                            <label for="${mode}LabS${s.id}">${esc(s.name)}</label>
+                            <span class="badge bg-secondary">${esc(s.group_name)}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', () => updateCount(mode));
+                });
+
+                updateCount(mode);
+            })
+            .catch(() => {
+                container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+            });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SEARCH
+    // ═══════════════════════════════════════════════════════════
+    
+    ['add','edit'].forEach(mode => {
+        $(`${mode}LabGroupSearch`)?.addEventListener('input', e => {
+            const t = e.target.value.toLowerCase();
+            document.querySelectorAll(`#${mode}LabGroupList .lab-chk-row`).forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+            });
+        });
+        $(`${mode}LabStudentSearch`)?.addEventListener('input', e => {
+            const t = e.target.value.toLowerCase();
+            document.querySelectorAll(`#${mode}LabStudentList .lab-chk-row`).forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+            });
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // ADD MODAL
+    // ═══════════════════════════════════════════════════════════
+    
+    $('addLabModal')?.addEventListener('shown.bs.modal', () => {
+        $('addLabStudentList').innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+        loadGroups('add');
+    });
+
+    $('addLabModal')?.addEventListener('hidden.bs.modal', () => {
+        $('createLabForm').reset();
+    });
+
+    $('createLabForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        fetch(`/labs/create/${COURSE_ID}/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check me-1"></i> Yarat'; });
+    });
+
+    // ═══════════════════���═══════════════════════════════════════
+    // EDIT MODAL
+    // ═══════════════════════════════════════════════════════════
+    
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-edit-lab');
+        if(!btn) return;
+        e.preventDefault();
+
+        const url = btn.dataset.url;
+        
+        editSavedStudentIds.clear();
+        $('editLabGroupList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        $('editLabStudentList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+
+        bootstrap.Modal.getOrCreateInstance($('editLabModal')).show();
+
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(r => r.json())
+            .then(res => {
+                if(!res.success) return alert('Məlumat alınmadı');
+                
+                const d = res.data;
+                
+                $('editLabId').value = d.id;
+                $('editLabTitle').value = d.title || '';
+                $('editLabDescription').value = d.description || '';
+                $('editLabStart').value = d.start_datetime || '';
+                $('editLabEnd').value = d.end_datetime || '';
+                $('editLabMaxScore').value = d.max_score || 100;
+                $('editLabQPS').value = d.questions_per_student || 0;
+                $('editAllowLate').checked = d.allow_late_submission;
+                $('editLatePenalty').value = d.late_penalty_percent || 0;
+                $('editAllowFile').checked = d.allow_file_upload;
+                $('editAllowLink').checked = d.allow_link_submission;
+                $('editMaxFileSize').value = d.max_file_size_mb || 50;
+                $('editAllowedExt').value = d.allowed_extensions || '';
+                $('editLabInstructions').value = d.teacher_instructions || '';
+                
+                if(d.teacher_files_url) {
+                    $('editCurrentFile').innerHTML = `<a href="${d.teacher_files_url}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> Mövcud fayl</a>`;
+                } else {
+                    $('editCurrentFile').innerHTML = '';
+                }
+
+                // Saved student IDs
+                editSavedStudentIds = new Set(d.student_ids || []);
+                
+                // Load groups
+                loadGroups('edit', d.group_names || []);
+            })
+            .catch(() => alert('Xəta'));
+    });
+
+    $('editLabForm')?.addEventListener('submit', e => {
+        e.preventDefault();
+        const labId = $('editLabId').value;
+        if(!labId) return;
+
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+        fetch(`/labs/${labId}/edit/`, {
+            method: 'POST',
+            body: new FormData(e.target),
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'))
+        .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i> Yadda Saxla'; });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // DELETE & PUBLISH
+    // ═══════════════════════════════════════════════════════════
+    
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-delete-lab');
+        if(!btn) return;
+        e.preventDefault();
+        if(!confirm('Bu lab işini silmək istədiyinizə əminsiniz?')) return;
+
+        fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta'))
+        .catch(() => alert('Server xətası'));
+    });
+
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('.js-publish-lab');
+        if(!btn) return;
+        e.preventDefault();
+        if(!confirm('Lab işini yayımlamaq istəyirsiniz?')) return;
+
+        fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
+        .catch(() => alert('Server xətası'));
+    });
+
+})();
+</script>

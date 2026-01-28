@@ -28,6 +28,8 @@ urlpatterns = [
     path("", include("liveExam.urls")),
     path('courses/', include('courses.urls')),
     path('assignments/', include('assignments.urls')),
+    path('projects/', include('projects.urls')),
+    path('labs/', include('labs.urls')),
 ]
 
 # Serving media files during development
