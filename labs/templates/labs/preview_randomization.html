@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lab.title }} - Random Önizləmə{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'labs:manage_blocks' lab.id %}">{{ lab.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">Random Önizləmə</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0">
+                <i class="fas fa-random text-info me-2"></i> Randomizasiya Önizləməsi
+            </h3>
+        </div>
+        <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Geri
+        </a>
+    </div>
+    
+    <!-- Student Selector -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Tələbə Seçin</label>
+                    <select name="student" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Tələbə seçin --</option>
+                        {% for m in memberships %}
+                        <option value="{{ m.user.id }}" {% if selected_student and selected_student.id == m.user.id %}selected{% endif %}>
+                            {{ m.user.get_full_name|default:m.user.username }}
+                            {% if m.group_name %}({{ m.group_name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Tələbə seçdikdə həmin tələbəyə düşəcək sualları görəcəksiniz.
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Questions Preview -->
+    {% if selected_student %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-user me-2"></i>
+                    <strong>{{ selected_student.get_full_name|default:selected_student.username }}</strong> üçün suallar
+                </span>
+                <span class="badge bg-white text-info">{{ questions|length }} sual</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if questions %}
+                {% for question in questions %}
+                <div class="p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                              style="width: 35px; height: 35px;">
+                            {{ forloop.counter }}
+                        </span>
+                        <div>
+                            <span class="badge bg-secondary mb-1">{{ question.block.title }}</span>
+                            <p class="mb-0">{{ question.question_text }}</p>
+                            {% if question.points > 0 %}
+                            <small class="text-muted">{{ question.points }} bal</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-question-circle fa-3x mb-3"></i>
+                    <p>Bu lab üçün sual yoxdur</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="fas fa-hand-pointer fa-3x mb-3"></i>
+        <h5>Tələbə Seçin</h5>
+        <p class="mb-0">Randomizasiyanı görmək üçün yuxarıdan bir tələbə seçin.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Lab Info -->
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header">
+            <i class="fas fa-cog me-2"></i> Randomizasiya Ayarları
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <strong>Hər tələbəyə düşən sual:</strong>
+                    <p class="mb-0">
+                        {% if lab.questions_per_student > 0 %}
+                            {{ lab.questions_per_student }} sual
+                        {% else %}
+                            Bütün suallar
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <strong>Ümumi sual sayı:</strong>
+                    <p class="mb-0">{{ lab.total_questions }} sual</p>
+                </div>
+                <div class="col-md-4">
+                    <strong>Blok sayı:</strong>
+                    <p class="mb-0">{{ lab.blocks.count }} blok</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

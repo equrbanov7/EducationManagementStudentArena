@@ -1,85 +1,90 @@
 <div class="accordion-item">
     <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                data-bs-target="#assignmentCollapse" aria-expanded="false">
-            <i class="fa-solid fa-clipboard-list me-2 fs-5" style="color: #ff9800;"></i>
-            <span class="fw-bold">Sərbəst İşlər</span>
-            <span class="badge bg-warning ms-2">
+                data-bs-target="#projectCollapse" aria-expanded="false">
+            <i class="fa-solid fa-project-diagram me-2 fs-5" style="color: #17a2b8;"></i>
+            <span class="fw-bold">Kurs İşləri</span>
+            <span class="badge bg-info ms-2">
                 {% if is_student %}
-                    {{ assignments_with_user_data|length }}
+                    {{ projects_with_user_data|length }}
                 {% else %}
-                    {{ assignments|length }}
+                    {{ projects|length }}
                 {% endif %}
             </span>
         </button>
     </h2>
     
-    <div id="assignmentCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+    <div id="projectCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
         <div class="accordion-body">
             
             {% if is_owner %}
                 <div class="mb-3 text-end">
-                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
-                        <i class="fa-solid fa-plus-circle me-1"></i> Yeni İş Əlavə Et
+                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                        <i class="fa-solid fa-plus-circle me-1"></i> Yeni Kurs İşi Əlavə Et
                     </button>
                 </div>
             {% endif %}
 
             {# ═══════════════════════════════════════════════════════════ #}
             {# MÜƏLLİM GÖRÜNÜŞÜ                                            #}
-            {# ═══════════════════════════════════════════════════════════ #}
+            {# ═══════════════════════════════════════════════════���═══════ #}
             {% if is_owner or is_teacher %}
-                {% if assignments %}
+                {% if projects %}
                     <div class="list-group list-group-flush">
-                        {% for a in assignments %}
+                        {% for p in projects %}
                         <div class="list-group-item border-0 border-bottom pb-3 mb-3">
                             <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                                 <h6 class="mb-1 fw-bold">
-                                    <i class="fa-solid fa-file-lines text-warning"></i> {{ a.title }}
+                                    <i class="fa-solid fa-folder-open text-info"></i> {{ p.title }}
                                 </h6>
                                 <div class="ms-2">
-                                    <span class="badge bg-info">{{ a.get_submissions_count }} Cavab</span>
-                                    {% if a.get_pending_submissions > 0 %}
-                                    <span class="badge bg-warning text-dark">{{ a.get_pending_submissions }} Gözləyən</span>
+                                    <span class="badge bg-info">{{ p.get_submissions_count }} Cavab</span>
+                                    {% if p.get_pending_submissions > 0 %}
+                                    <span class="badge bg-warning text-dark">{{ p.get_pending_submissions }} Gözləyən</span>
                                     {% endif %}
                                 </div>
                             </div>
                             
-                            {% if a.description %}
-                            <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
+                            {% if p.description %}
+                            <p class="text-muted small mb-2">{{ p.description|truncatewords:20 }}</p>
                             {% endif %}
                             
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 <small class="text-muted">
                                     <i class="fa-solid fa-calendar-days"></i> 
-                                    {{ a.deadline|date:"d.m.Y H:i" }}
+                                    {{ p.deadline|date:"d.m.Y H:i" }}
                                     
-                                    {% if a.status == 'active' %}
-                                        {% if a.is_deadline_passed %}
+                                    {% if p.status == 'active' %}
+                                        {% if p.is_deadline_passed %}
                                             <span class="badge bg-danger ms-1">Müddət Keçib</span>
                                         {% else %}
                                             <span class="badge bg-success ms-1">Aktiv</span>
                                         {% endif %}
-                                    {% elif a.status == 'inactive' %}
+                                    {% elif p.status == 'inactive' %}
                                         <span class="badge bg-warning ms-1">Deaktiv</span>
+                                    {% elif p.status == 'archived' %}
+                                        <span class="badge bg-secondary ms-1">Arxivləndi</span>
                                     {% endif %}
                                 </small>
                                 <small class="text-muted">
-                                    <i class="fa-solid fa-rotate-right"></i> Maks cəhd: {{ a.max_attempts }}
+                                    <i class="fa-solid fa-star"></i> Maks bal: {{ p.max_score }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-rotate-right"></i> Maks cəhd: {{ p.max_attempts }}
                                 </small>
                             </div>
                             
                             <div class="btn-group btn-group-sm gap-2">
-                                <a href="{% url 'assignments:review_assignment_submissions' a.id %}" 
+                                <a href="{% url 'projects:review_project_submissions' p.id %}" 
                                    class="btn btn-sm btn-outline-info">
                                     <i class="fa-solid fa-eye"></i> Cavabları Gör
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-primary js-edit-assignment"
-                                        data-url="{% url 'assignments:edit_assignment' a.id %}">
+                                <button type="button" class="btn btn-sm btn-outline-primary js-edit-project"
+                                        data-url="{% url 'projects:edit_project' p.id %}">
                                     <i class="fa-solid fa-pen"></i> Redaktə
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger js-delete-assignment"
-                                        data-url="{% url 'assignments:delete_assignment' a.id %}">
+                                <button type="button" class="btn btn-sm btn-outline-danger js-delete-project"
+                                        data-url="{% url 'projects:delete_project' p.id %}">
                                     <i class="fa-solid fa-trash"></i> Sil
                                 </button>
                             </div>
@@ -88,10 +93,10 @@
                     </div>
                 {% else %}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2 mb-0">Hələ ki sərbəst iş yoxdur</p>
-                        <button class="btn btn-warning btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
-                            <i class="fa-solid fa-plus-circle"></i> İlk Sərbəst İşi Əlavə Et
+                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Hələ ki kurs işi yoxdur</p>
+                        <button class="btn btn-info btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                            <i class="fa-solid fa-plus-circle"></i> İlk Kurs İşini Əlavə Et
                         </button>
                     </div>
                 {% endif %}
@@ -100,44 +105,48 @@
             {# TƏLƏBƏ GÖRÜNÜŞÜ                                             #}
             {# ═══════════════════════════════════════════════════════════ #}
             {% elif is_student %}
-                {% if assignments_with_user_data %}
+                {% if projects_with_user_data %}
                     <div class="list-group list-group-flush">
-                        {% for item in assignments_with_user_data %}
-                        {% with a=item.assignment %}
+                        {% for item in projects_with_user_data %}
+                        {% with p=item.project %}
                         <div class="list-group-item border-0 border-bottom pb-3 mb-3">
                             <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                                 <h6 class="mb-1 fw-bold">
-                                    <i class="fa-solid fa-file-lines text-warning"></i> {{ a.title }}
+                                    <i class="fa-solid fa-folder-open text-info"></i> {{ p.title }}
                                 </h6>
                             </div>
                             
-                            {% if a.description %}
-                            <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
+                            {% if p.description %}
+                            <p class="text-muted small mb-2">{{ p.description|truncatewords:20 }}</p>
                             {% endif %}
                             
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 <small class="text-muted">
                                     <i class="fa-solid fa-calendar-days"></i> 
-                                    {{ a.deadline|date:"d.m.Y H:i" }}
+                                    {{ p.deadline|date:"d.m.Y H:i" }}
                                     
-                                    {% if a.status == 'active' %}
+                                    {% if p.status == 'active' %}
                                         {% if item.is_deadline_passed %}
                                             <span class="badge bg-danger ms-1">Müddət Keçib</span>
                                         {% else %}
                                             <span class="badge bg-success ms-1">Aktiv</span>
                                         {% endif %}
-                                    {% elif a.status == 'inactive' %}
+                                    {% elif p.status == 'inactive' %}
                                         <span class="badge bg-warning ms-1">Deaktiv</span>
                                     {% endif %}
+                                </small>
+                                
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-star"></i> Maks bal: {{ p.max_score }}
                                 </small>
                                 
                                 <small class="text-muted">
                                     <i class="fa-solid fa-rotate-right"></i>
                                     <strong>Cəhdlər:</strong> 
                                     <span class="{% if item.attempts_left == 0 %}text-danger fw-bold{% endif %}">
-                                        {{ item.user_attempts }} / {{ a.max_attempts }}
+                                        {{ item.user_attempts }} / {{ p.max_attempts }}
                                     </span>
-                                    {% if item.attempts_left > 0 and not item.is_deadline_passed and a.status == 'active' %}
+                                    {% if item.attempts_left > 0 and not item.is_deadline_passed and p.status == 'active' %}
                                         <span class="badge bg-info ms-1">{{ item.attempts_left }} qalıb</span>
                                     {% elif item.attempts_left == 0 %}
                                         <span class="badge bg-danger ms-1">Cəhd bitdi</span>
@@ -147,23 +156,23 @@
                             
                             <div class="btn-group btn-group-sm gap-2">
                                 {% if item.user_attempts > 0 %}
-                                    <a href="{% url 'assignments:my_submissions' a.id %}" 
-                                       class="btn btn-sm btn-outline-warning">
+                                    <a href="{% url 'projects:my_submissions' p.id %}" 
+                                       class="btn btn-sm btn-outline-info">
                                         <i class="fa-solid fa-list-check"></i> Cavablarım ({{ item.user_attempts }})
                                     </a>
                                 {% endif %}
                                 
                                 {% if item.can_submit %}
-                                    <a href="{% url 'assignments:assignment_detail' a.id %}" 
-                                       class="btn btn-sm btn-warning">
-                                        <i class="fa-solid fa-arrow-right"></i> Cavab Ver
+                                    <a href="{% url 'projects:project_detail' p.id %}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fa-solid fa-arrow-right"></i> Layihə Təqdim Et
                                     </a>
                                 {% else %}
                                     {% if item.is_deadline_passed %}
                                         <span class="btn btn-sm btn-secondary disabled">
                                             <i class="fa-solid fa-lock"></i> Müddət keçib
                                         </span>
-                                    {% elif a.status != 'active' %}
+                                    {% elif p.status != 'active' %}
                                         <span class="btn btn-sm btn-secondary disabled">
                                             <i class="fa-solid fa-pause"></i> Deaktiv
                                         </span>
@@ -176,11 +185,11 @@
                     </div>
                 {% else %}
                     {# ═══════════════════════════════════════════════════════ #}
-                    {# TƏLƏBƏYƏ TƏYİN OLUNMUŞ İŞ YOXDUR                        #}
+                    {# TƏLƏBƏYƏ TƏYİN OLUNMUŞ KURS İŞİ YOXDUR                  #}
                     {# ═══════════════════════════════════════════════════════ #}
                     <div class="alert alert-light text-center py-4">
-                        <i class="fa-solid fa-clipboard-list" style="font-size: 2rem; color: #ccc;"></i>
-                        <p class="text-muted mt-2 mb-0">Sizə təyin olunmuş sərbəst iş yoxdur</p>
+                        <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Sizə təyin olunmuş kurs işi yoxdur</p>
                     </div>
                 {% endif %}
             
@@ -189,8 +198,8 @@
             {# ═══════════════════════════════════════════════════════════ #}
             {% else %}
                 <div class="alert alert-light text-center py-4">
-                    <i class="fa-solid fa-clipboard-list" style="font-size: 2rem; color: #ccc;"></i>
-                    <p class="text-muted mt-2 mb-0">Sərbəst iş yoxdur</p>
+                    <i class="fa-solid fa-folder-open" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">Kurs işi yoxdur</p>
                 </div>
             {% endif %}
             

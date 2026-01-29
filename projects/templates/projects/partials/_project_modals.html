@@ -1,14 +1,14 @@
 {% if request.user.is_teacher %}
 
-<!-- ADD ASSIGNMENT MODAL -->
-<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-hidden="true">
+<!-- ADD MODAL -->
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Yeni Sərbəst İş</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Yeni Kurs İşi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="createAssignmentForm">
+            <form id="createProjectForm">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="row">
@@ -30,69 +30,70 @@
                         <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="start_date" class="form-control" required>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Son tarix <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="deadline" class="form-control" required>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Maks. cəhd</label>
-                            <input type="number" name="max_attempts" class="form-control" value="3" min="1">
+                            <input type="number" name="max_attempts" class="form-control" value="1" min="1">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Maks. bal</label>
+                            <input type="number" name="max_score" class="form-control" value="100" min="1">
                         </div>
                     </div>
-                    
                     <hr>
-                    
-                    <!-- QRUPLAR VƏ TƏLƏBƏLƏR - YAN YANA -->
                     <div class="row">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">İcazəli Qruplar</label>
-                            <input type="text" class="form-control mb-2" id="addAsnGroupSearch" placeholder="Qrup axtar...">
-                            <div id="addAsnGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
-                            <small class="text-muted">Seçilib: <span id="addAsnGroupCount">0</span></small>
+                            <input type="text" class="form-control mb-2" id="addGroupSearch" placeholder="Qrup axtar...">
+                            <div id="addGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <small class="text-muted">Seçilib: <span id="addGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                            <input type="text" class="form-control mb-2" id="addAsnStudentSearch" placeholder="Tələbə axtar...">
-                            <div id="addAsnStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <input type="text" class="form-control mb-2" id="addStudentSearch" placeholder="Tələbə axtar...">
+                            <div id="addStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
                                 <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
                             </div>
-                            <small class="text-muted">Seçilib: <span id="addAsnStudentCount">0</span></small>
+                            <small class="text-muted">Seçilib: <span id="addStudentCount">0</span></small>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-warning"><i class="bi bi-check"></i> Əlavə Et</button>
+                    <button type="submit" class="btn btn-info"><i class="bi bi-check"></i> Əlavə Et</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- EDIT ASSIGNMENT MODAL -->
-<div class="modal fade" id="editAssignmentModal" tabindex="-1" aria-hidden="true">
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editProjectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title"><i class="bi bi-pencil"></i> Redaktə Et</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="editAssignmentForm">
+            <form id="editProjectForm">
                 {% csrf_token %}
-                <input type="hidden" id="editAsnId" name="assignment_id">
+                <input type="hidden" id="editProjectId" name="project_id">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Başlıq <span class="text-danger">*</span></label>
-                            <input type="text" id="editAsnTitle" name="title" class="form-control" required>
+                            <input type="text" id="editTitle" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Status</label>
-                            <select id="editAsnStatus" name="status" class="form-select">
+                            <select id="editStatus" name="status" class="form-select">
                                 <option value="active">Aktiv</option>
                                 <option value="inactive">Deaktiv</option>
                                 <option value="archived">Arxivləndi</option>
@@ -101,40 +102,41 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Təsvir</label>
-                        <textarea id="editAsnDescription" name="description" class="form-control" rows="2"></textarea>
+                        <textarea id="editDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editAsnStartDate" name="start_date" class="form-control" required>
+                            <input type="datetime-local" id="editStartDate" name="start_date" class="form-control" required>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Son tarix <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editAsnDeadline" name="deadline" class="form-control" required>
+                            <input type="datetime-local" id="editDeadline" name="deadline" class="form-control" required>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Maks. cəhd</label>
-                            <input type="number" id="editAsnMaxAttempts" name="max_attempts" class="form-control" min="1">
+                            <input type="number" id="editMaxAttempts" name="max_attempts" class="form-control" min="1">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Maks. bal</label>
+                            <input type="number" id="editMaxScore" name="max_score" class="form-control" min="1">
                         </div>
                     </div>
-                    
                     <hr>
-                    
-                    <!-- QRUPLAR VƏ TƏLƏBƏLƏR - YAN YANA -->
                     <div class="row">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">İcazəli Qruplar</label>
-                            <input type="text" class="form-control mb-2" id="editAsnGroupSearch" placeholder="Qrup axtar...">
-                            <div id="editAsnGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
-                            <small class="text-muted">Seçilib: <span id="editAsnGroupCount">0</span></small>
+                            <input type="text" class="form-control mb-2" id="editGroupSearch" placeholder="Qrup axtar...">
+                            <div id="editGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
+                            <small class="text-muted">Seçilib: <span id="editGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                            <input type="text" class="form-control mb-2" id="editAsnStudentSearch" placeholder="Tələbə axtar...">
-                            <div id="editAsnStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
+                            <input type="text" class="form-control mb-2" id="editStudentSearch" placeholder="Tələbə axtar...">
+                            <div id="editStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
                                 <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
                             </div>
-                            <small class="text-muted">Seçilib: <span id="editAsnStudentCount">0</span></small>
+                            <small class="text-muted">Seçilib: <span id="editStudentCount">0</span></small>
                         </div>
                     </div>
                 </div>
@@ -150,27 +152,34 @@
 {% endif %}
 
 <style>
-.asn-chk-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
-.asn-chk-row:hover{background:#f5f9ff}
-.asn-chk-row:last-child{border-bottom:none}
-.asn-chk-row input{width:18px;height:18px;margin-right:10px;flex-shrink:0}
-.asn-chk-row label{margin:0;flex:1;cursor:pointer;font-weight:500}
-.asn-chk-row .badge{margin-left:auto;flex-shrink:0}
+.chk-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
+.chk-row:hover{background:#f5f9ff}
+.chk-row:last-child{border-bottom:none}
+.chk-row input{width:18px;height:18px;margin-right:10px}
+.chk-row label{margin:0;flex:1;cursor:pointer}
+.chk-row .badge{margin-left:auto}
 </style>
 
 <script>
 (function(){
-    if(window._ASN_MODAL_V2) return;
-    window._ASN_MODAL_V2 = true;
+    if(window._PROJ_MODAL_V4) return;
+    window._PROJ_MODAL_V4 = true;
 
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     const $ = id => document.getElementById(id);
 
+    // ═══════════════════════════════════════════════════════════
     // STATE
+    // ═══════════════════════════════════════════════════════════
+    
+    // Edit modal üçün - serverdən gələn orijinal tələbə ID-ləri
     let editSavedStudentIds = new Set();
 
+    // ═══════════════════════════════════════════════════════════
     // HELPERS
+    // ═══════════════════════════════════════════════════════════
+    
     const esc = s => s ? String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]) : '';
     
     const toLocal = dt => {
@@ -182,10 +191,10 @@
     };
 
     const updateCount = mode => {
-        const gc = document.querySelectorAll(`#${mode}AsnGroupList input:checked`).length;
-        const sc = document.querySelectorAll(`#${mode}AsnStudentList input:checked`).length;
-        if($(mode+'AsnGroupCount')) $(mode+'AsnGroupCount').textContent = gc;
-        if($(mode+'AsnStudentCount')) $(mode+'AsnStudentCount').textContent = sc;
+        const gc = document.querySelectorAll(`#${mode}GroupList input:checked`).length;
+        const sc = document.querySelectorAll(`#${mode}StudentList input:checked`).length;
+        if($(mode+'GroupCount')) $(mode+'GroupCount').textContent = gc;
+        if($(mode+'StudentCount')) $(mode+'StudentCount').textContent = sc;
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -193,23 +202,23 @@
     // ═══════════════════════════════════════════════════════════
     
     function loadGroups(mode, checkedGroups = []) {
-        const container = $(mode + 'AsnGroupList');
+        const container = $(mode + 'GroupList');
         container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
 
-        fetch(`/assignments/search-groups/?course_id=${COURSE_ID}`)
+        fetch(`/projects/api/groups/?course_id=${COURSE_ID}`)
             .then(r => r.json())
             .then(data => {
-                const groups = data.results || [];
+                const groups = data.groups || [];
                 if(!groups.length) {
                     container.innerHTML = '<p class="text-muted text-center py-3">Qrup yoxdur</p>';
                     return;
                 }
 
                 container.innerHTML = groups.map(g => `
-                    <div class="asn-chk-row">
-                        <input type="checkbox" id="${mode}AsnG${g.id}" name="group_names[]" value="${esc(g.text)}" 
-                               data-group="${esc(g.text)}" ${checkedGroups.includes(g.text)?'checked':''}>
-                        <label for="${mode}AsnG${g.id}">${esc(g.text)}</label>
+                    <div class="chk-row">
+                        <input type="checkbox" id="${mode}G${g.id}" name="group_names[]" value="${esc(g.name)}" 
+                               data-group="${esc(g.name)}" ${checkedGroups.includes(g.name)?'checked':''}>
+                        <label for="${mode}G${g.id}">${esc(g.name)}</label>
                     </div>
                 `).join('');
 
@@ -221,6 +230,8 @@
                 });
 
                 updateCount(mode);
+                
+                // Qruplar yükləndikdən sonra tələbələri yüklə
                 if(checkedGroups.length) loadStudents(mode);
             })
             .catch(() => {
@@ -233,9 +244,10 @@
     // ═══════════════════════════════════════════════════════════
     
     function loadStudents(mode) {
-        const container = $(mode + 'AsnStudentList');
+        const container = $(mode + 'StudentList');
         
-        const groups = Array.from(document.querySelectorAll(`#${mode}AsnGroupList input:checked`))
+        // Seçilmiş qrupları tap
+        const groups = Array.from(document.querySelectorAll(`#${mode}GroupList input:checked`))
                            .map(cb => cb.dataset.group);
 
         if(!groups.length) {
@@ -246,7 +258,7 @@
 
         container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
 
-        fetch(`/assignments/students-by-groups/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
+        fetch(`/projects/api/students/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
             .then(r => r.json())
             .then(data => {
                 const students = data.students || [];
@@ -257,15 +269,19 @@
                 }
 
                 container.innerHTML = students.map(s => {
+                    // ════════════════════════════════════════════════════════
+                    // ƏSAS: Edit modunda yalnız savedStudentIds-də olanları check et
+                    // Add modunda heç birini check etmə
+                    // ════════════════════════════════════════════════════════
                     let isChecked = '';
                     if(mode === 'edit' && editSavedStudentIds.has(s.id)) {
                         isChecked = 'checked';
                     }
                     
                     return `
-                        <div class="asn-chk-row">
-                            <input type="checkbox" id="${mode}AsnS${s.id}" name="students[]" value="${s.id}" ${isChecked}>
-                            <label for="${mode}AsnS${s.id}">${esc(s.name)}</label>
+                        <div class="chk-row">
+                            <input type="checkbox" id="${mode}S${s.id}" name="students[]" value="${s.id}" ${isChecked}>
+                            <label for="${mode}S${s.id}">${esc(s.name)}</label>
                             <span class="badge bg-secondary">${esc(s.group_name)}</span>
                         </div>
                     `;
@@ -287,40 +303,40 @@
     // ═══════════════════════════════════════════════════════════
     
     ['add','edit'].forEach(mode => {
-        $(mode+'AsnGroupSearch')?.addEventListener('input', e => {
+        $(mode+'GroupSearch')?.addEventListener('input', e => {
             const t = e.target.value.toLowerCase();
-            document.querySelectorAll(`#${mode}AsnGroupList .asn-chk-row`).forEach(row => {
+            document.querySelectorAll(`#${mode}GroupList .chk-row`).forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
             });
         });
-        $(mode+'AsnStudentSearch')?.addEventListener('input', e => {
+        $(mode+'StudentSearch')?.addEventListener('input', e => {
             const t = e.target.value.toLowerCase();
-            document.querySelectorAll(`#${mode}AsnStudentList .asn-chk-row`).forEach(row => {
+            document.querySelectorAll(`#${mode}StudentList .chk-row`).forEach(row => {
                 row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
             });
         });
     });
 
-    // ═══════════════════════════════════════════════════════════
+    // ═════════════════════════════════���═════════════════════════
     // ADD MODAL
     // ═══════════════════════════════════════════════════════════
     
-    $('addAssignmentModal')?.addEventListener('shown.bs.modal', () => {
-        $('addAsnStudentList').innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+    $('addProjectModal')?.addEventListener('shown.bs.modal', () => {
+        $('addStudentList').innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
         loadGroups('add');
     });
 
-    $('addAssignmentModal')?.addEventListener('hidden.bs.modal', () => {
-        $('createAssignmentForm').reset();
+    $('addProjectModal')?.addEventListener('hidden.bs.modal', () => {
+        $('createProjectForm').reset();
     });
 
-    $('createAssignmentForm')?.addEventListener('submit', e => {
+    $('createProjectForm')?.addEventListener('submit', e => {
         e.preventDefault();
         const btn = e.target.querySelector('[type=submit]');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        fetch(`/assignments/create/${COURSE_ID}/`, {
+        fetch(`/projects/create/${COURSE_ID}/`, {
             method: 'POST',
             body: new FormData(e.target),
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
@@ -336,17 +352,18 @@
     // ═══════════════════════════════════════════════════════════
     
     document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-edit-assignment');
+        const btn = e.target.closest('.js-edit-project');
         if(!btn) return;
         e.preventDefault();
 
         const url = btn.dataset.url;
         
+        // RESET
         editSavedStudentIds.clear();
-        $('editAsnGroupList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        $('editAsnStudentList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        $('editGroupList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        $('editStudentList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
 
-        bootstrap.Modal.getOrCreateInstance($('editAssignmentModal')).show();
+        bootstrap.Modal.getOrCreateInstance($('editProjectModal')).show();
 
         fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
             .then(r => r.json())
@@ -355,32 +372,40 @@
                 
                 const d = res.data;
                 
-                $('editAsnId').value = d.id;
-                $('editAsnTitle').value = d.title || '';
-                $('editAsnDescription').value = d.description || '';
-                $('editAsnStartDate').value = toLocal(d.start_date);
-                $('editAsnDeadline').value = toLocal(d.deadline);
-                $('editAsnMaxAttempts').value = d.max_attempts || 3;
-                $('editAsnStatus').value = d.status || 'active';
+                // Form doldur
+                $('editProjectId').value = d.id;
+                $('editTitle').value = d.title || '';
+                $('editDescription').value = d.description || '';
+                $('editStartDate').value = toLocal(d.start_date);
+                $('editDeadline').value = toLocal(d.deadline);
+                $('editMaxAttempts').value = d.max_attempts || 1;
+                $('editMaxScore').value = d.max_score || 100;
+                $('editStatus').value = d.status || 'active';
 
-                // Serverdən gələn tələbə ID-lərini saxla
+                // ════════════════════════════════════════════════════════
+                // ƏSAS: Serverdən gələn tələbə ID-lərini SAXLA
+                // Bu set loadStudents() funksiyasında istifadə olunacaq
+                // ════════════════════════════════════════════════════════
                 editSavedStudentIds = new Set(d.student_ids || []);
                 
+                console.log('Saved student IDs:', editSavedStudentIds);
+
+                // Qrupları yüklə
                 loadGroups('edit', d.group_names || []);
             })
             .catch(() => alert('Xəta'));
     });
 
-    $('editAssignmentForm')?.addEventListener('submit', e => {
+    $('editProjectForm')?.addEventListener('submit', e => {
         e.preventDefault();
-        const assignmentId = $('editAsnId').value;
-        if(!assignmentId) return;
+        const projectId = $('editProjectId').value;
+        if(!projectId) return;
 
         const btn = e.target.querySelector('[type=submit]');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-        fetch(`/assignments/${assignmentId}/edit/`, {
+        fetch(`/projects/${projectId}/edit/`, {
             method: 'POST',
             body: new FormData(e.target),
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
@@ -396,7 +421,7 @@
     // ═══════════════════════════════════════════════════════════
     
     document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-delete-assignment');
+        const btn = e.target.closest('.js-delete-project');
         if(!btn) return;
         e.preventDefault();
         if(!confirm('Silmək istədiyinizə əminsiniz?')) return;

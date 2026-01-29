@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ assignment.title }}{% endblock %}
+{% block title %}{{ project.title }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -12,38 +12,42 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' assignment.course.id %}">{{ assignment.course.title }}</a>
+                        <a href="{% url 'courses:course_dashboard' project.course.id %}">{{ project.course.title }}</a>
                     </li>
-                    <li class="breadcrumb-item active">{{ assignment.title }}</li>
+                    <li class="breadcrumb-item active">{{ project.title }}</li>
                 </ol>
             </nav>
             <h3 class="mb-0">
-                <i class="fa-solid fa-file-lines text-warning me-2"></i> {{ assignment.title }}
+                <i class="fa-solid fa-folder-open text-info me-2"></i> {{ project.title }}
             </h3>
         </div>
-        <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
+        <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left me-1"></i> Geri
         </a>
     </div>
     
-    <!-- Info Cards -->
+    <!-- Project Info -->
     <div class="row mb-4">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    {% if assignment.description %}
-                    <p class="mb-3">{{ assignment.description }}</p>
+                    {% if project.description %}
+                    <p class="mb-3">{{ project.description }}</p>
                     {% endif %}
                     
                     <div class="d-flex flex-wrap gap-4">
                         <div>
                             <small class="text-muted">Son tarix:</small>
-                            <div class="fw-bold">{{ assignment.deadline|date:"d.m.Y H:i" }}</div>
+                            <div class="fw-bold">{{ project.deadline|date:"d.m.Y H:i" }}</div>
+                        </div>
+                        <div>
+                            <small class="text-muted">Maksimum bal:</small>
+                            <div class="fw-bold">{{ project.max_score }}</div>
                         </div>
                         <div>
                             <small class="text-muted">Qalan cəhd:</small>
                             <div class="fw-bold {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
-                                {{ attempts_left }} / {{ assignment.max_attempts }}
+                                {{ attempts_left }} / {{ project.max_attempts }}
                             </div>
                         </div>
                     </div>
@@ -53,9 +57,9 @@
         <div class="col-md-4">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    {% if assignment.is_deadline_passed %}
+                    {% if project.is_deadline_passed %}
                         <span class="badge bg-danger fs-5">Müddət Keçib</span>
-                    {% elif assignment.status != 'active' %}
+                    {% elif project.status != 'active' %}
                         <span class="badge bg-warning fs-5">Deaktiv</span>
                     {% else %}
                         <span class="badge bg-success fs-5">Aktiv</span>
@@ -68,7 +72,7 @@
     <!-- Previous Submissions -->
     {% if user_submissions %}
     <div class="card mb-4">
-        <div class="card-header bg-warning text-dark">
+        <div class="card-header bg-info text-white">
             <i class="fa-solid fa-history me-2"></i> Əvvəlki Cavablarım
         </div>
         <div class="card-body p-0">
@@ -91,7 +95,7 @@
                             <td>
                                 {% if sub.file %}
                                 <a href="{{ sub.file.url }}" target="_blank" class="text-primary">
-                                    <i class="fa-solid fa-file"></i> {{ sub.file.name|cut:"assignments/submissions/" }}
+                                    <i class="fa-solid fa-file"></i> {{ sub.file.name|cut:"projects/submissions/" }}
                                 </a>
                                 {% else %}
                                 <span class="text-muted">-</span>
@@ -125,23 +129,25 @@
     <!-- Submit Form -->
     {% if can_submit %}
     <div class="card">
-        <div class="card-header bg-warning text-dark">
-            <i class="fa-solid fa-upload me-2"></i> Cavab Göndər
+        <div class="card-header bg-info text-white">
+            <i class="fa-solid fa-upload me-2"></i> Layihə Təqdim Et
         </div>
         <div class="card-body">
             <form id="submitForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 
                 <div class="mb-3">
-                    <label class="form-label">Mətn Cavabı</label>
+                    <label class="form-label">Mətn / İzahat</label>
                     <textarea name="content" class="form-control" rows="4" 
-                              placeholder="Cavabınızı yazın..."></textarea>
+                              placeholder="Layihəniz haqqında qısa məlumat yazın..."></textarea>
                 </div>
                 
                 <div class="mb-3">
                     <label class="form-label">Fayl Yüklə</label>
                     <input type="file" name="file" id="fileInput" class="form-control">
-                    {# FAYL ADI GÖSTƏRİCİSİ #}
+                    {# ═══════════════════════════════════════════════════════ #}
+                    {# FAYL ADI GÖSTƏRİCİSİ                                    #}
+                    {# ═══════════════════════════════════════════════════════ #}
                     <div id="fileNameDisplay" class="mt-2 text-muted small" style="display: none;">
                         <i class="fa-solid fa-file me-1"></i>
                         <span id="fileName"></span>
@@ -156,7 +162,7 @@
                         <i class="fa-solid fa-info-circle"></i> 
                         Qalan cəhd: <strong>{{ attempts_left }}</strong>
                     </small>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="submit" class="btn btn-info">
                         <i class="fa-solid fa-paper-plane me-1"></i> Göndər
                     </button>
                 </div>
@@ -166,12 +172,12 @@
     {% else %}
     <div class="alert alert-warning text-center">
         <i class="fa-solid fa-exclamation-triangle me-2"></i>
-        {% if assignment.is_deadline_passed %}
-            Müddət keçib - cavab qəbul edilmir.
+        {% if project.is_deadline_passed %}
+            Müddət keçib - layihə qəbul edilmir.
         {% elif attempts_left == 0 %}
             Bütün cəhdlərinizi istifadə etmisiniz.
-        {% elif assignment.status != 'active' %}
-            Bu tapşırıq hal-hazırda deaktivdir.
+        {% elif project.status != 'active' %}
+            Bu layihə hal-hazırda deaktivdir.
         {% endif %}
     </div>
     {% endif %}
@@ -185,7 +191,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileName = document.getElementById('fileName');
     const clearFile = document.getElementById('clearFile');
     
+    // ═══════════════════════════════════════════════════════════════
     // Fayl seçildikdə adını göstər
+    // ═══════════════════════════════════════════════════════════════
     if (fileInput) {
         fileInput.addEventListener('change', function() {
             if (this.files && this.files[0]) {
@@ -205,7 +213,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // ═══════════════════════════════════════════════════════════════
     // Form submit
+    // ═══════════════════════════════════════════════════════════════
     const form = document.getElementById('submitForm');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -217,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const formData = new FormData(form);
             
-            fetch('{% url "assignments:submit_assignment" assignment.id %}', {
+            fetch('{% url "projects:submit_project" project.id %}', {
                 method: 'POST',
                 body: formData,
                 headers: {
