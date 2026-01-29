@@ -79,6 +79,12 @@ class Lab(models.Model):
         verbose_name='Maksimum bal'
     )
     
+    max_attempts = models.PositiveIntegerField(
+        default=1,
+        verbose_name='Maksimum cəhd sayı',
+        help_text='Tələbə neçə dəfə göndərə bilər'
+    )
+    
     # Status
     status = models.CharField(
         max_length=20,
@@ -509,10 +515,65 @@ class LabSubmission(models.Model):
     @property
     def is_late(self):
         """Gecikmiş göndəriş?"""
+        if not self.submitted_at:
+            return False
+        if not self.assignment or not self.assignment.lab:
+            return False
+        if not self.assignment.lab.end_datetime:
+            return False
         return self.submitted_at > self.assignment.lab.end_datetime
     
     def save(self, *args, **kwargs):
-        # Gecikmiş göndərişi avtomatik işarələ
-        if not self.pk and self.is_late:
-            self.status = 'late'
+        # Gecikmiş göndərişi avtomatik işarələ - yalnız yeni submission üçün
+        if not self.pk:
+            try:
+                if self.is_late:
+                    self.status = 'late'
+            except:
+                pass
         super().save(*args, **kwargs)
+        
+    
+        
+# ════════════════════════════════════════════════════════════════════════════
+# 6. LAB ANSWER MODEL (Tələbənin hər suala verdiyi cavab)
+## ════════════════════════════════════════════════════════════════════════════
+
+class LabAnswer(models.Model):
+    """
+    Tələbənin hər suala verdiyi cavab - hər cəhd üçün ayrı
+    """
+    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey('LabQuestion', on_delete=models.CASCADE, related_name='answers')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lab_answers')
+    
+    # Hansı cəhdə aiddir
+    submission = models.ForeignKey(
+        'LabSubmission',
+        on_delete=models.CASCADE,
+        related_name='answers',
+        null=True,
+        blank=True
+    )
+    
+    # Cəhd nömrəsi (submission olmadan da işləsin)
+    attempt_number = models.PositiveIntegerField(default=1)
+    
+    answer = models.TextField(blank=True)
+    answer_file = models.FileField(
+        upload_to='labs/answers/%Y/%m/',
+        blank=True,
+        null=True
+    )
+    
+    is_draft = models.BooleanField(default=True)
+    is_correct = models.BooleanField(null=True, blank=True)
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        # Hər cəhd üçün ayrı cavab
+        unique_together = ['lab', 'question', 'student', 'attempt_number']
+    
+    def __str__(self):
+        return f"{self.student.username} - Q{self.question.id} - Cəhd {self.attempt_number}"

@@ -1,0 +1,202 @@
+<div class="accordion-item">
+    <h2 class="accordion-header" id="labHeading">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#labCollapse" aria-expanded="false">
+            <i class="fas fa-flask text-danger me-2 fs-5"></i>
+            <strong>Lab İşləri</strong>
+            <span class="badge bg-danger ms-2">
+                {% if is_student %}
+                    {{ labs_with_user_data|length }}
+                {% else %}
+                    {{ labs|length }}
+                {% endif %}
+            </span>
+        </button>
+    </h2>
+    
+    <div id="labCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            {% if is_owner %}
+                <div class="mb-3 text-end">
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                        <i class="fas fa-plus-circle me-1"></i> Yeni Lab Əlavə Et
+                    </button>
+                </div>
+            {% endif %}
+
+            {# ═══════════════════════════════════════════════════════════ #}
+            {# MÜƏLLİM GÖRÜNÜŞÜ                                            #}
+            {# ═══════════════════════════════════════════════════════════ #}
+            {% if is_owner or is_teacher %}
+                {% if labs %}
+                    <div class="list-group list-group-flush">
+                        {% for lab in labs %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-flask text-danger"></i> {{ lab.title }}
+                                </h6>
+                                <div>
+                                    {% if lab.status == 'draft' %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                    {% elif lab.is_upcoming %}
+                                        <span class="badge bg-info">Tezliklə</span>
+                                    {% elif lab.is_open %}
+                                        <span class="badge bg-success">Açıq</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Bağlı</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if lab.description %}
+                            <p class="text-muted small mb-2">{{ lab.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ lab.start_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-clock"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-star"></i> {{ lab.max_score }} bal</small>
+                                <small class="text-muted"><i class="fas fa-redo"></i> Cəhd: {{ lab.max_attempts|default:1 }}</small>
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm gap-2">
+                                <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-cubes"></i> Bloklar
+                                </a>
+                                <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i> Cavablar
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="openEditLabModal('{% url 'labs:edit_lab' lab.id %}')">
+                                    <i class="fas fa-pen"></i> Redaktə
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteLabConfirm('{% url 'labs:delete_lab' lab.id %}')">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Hələ ki lab işi yoxdur</p>
+                        <button class="btn btn-danger btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                            <i class="fas fa-plus-circle"></i> İlk Lab İşini Əlavə Et
+                        </button>
+                    </div>
+                {% endif %}
+            
+            {# ═══════════════════════════════════════════════════════════ #}
+            {# TƏLƏBƏ GÖRÜNÜŞÜ                                             #}
+            {# ═══════════════════════════════════════════════════════════ #}
+            {% elif is_student %}
+                {% if labs_with_user_data %}
+                    <div class="list-group list-group-flush">
+                        {% for item in labs_with_user_data %}
+                        {% with lab=item.lab %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-flask text-danger"></i> {{ lab.title }}
+                                </h6>
+                                <div>
+                                    {% if item.has_submitted %}
+                                        <span class="badge bg-success">Göndərilib</span>
+                                        {% if item.submission.status == 'graded' %}
+                                            <span class="badge bg-primary ms-1">{{ item.submission.score }}/{{ lab.max_score }}</span>
+                                        {% endif %}
+                                    {% elif lab.is_upcoming %}
+                                        <span class="badge bg-info">Tezliklə</span>
+                                    {% elif lab.is_open %}
+                                        <span class="badge bg-success">Açıq</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Bağlı</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if lab.description %}
+                            <p class="text-muted small mb-2">{{ lab.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ lab.start_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-clock"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-star"></i> {{ lab.max_score }} bal</small>
+                                <small class="text-muted">
+                                    <i class="fas fa-redo"></i> 
+                                    Cəhd: {{ item.attempt_count|default:0 }} / {{ item.max_attempts|default:1 }}
+                                    {% if item.attempts_left <= 0 %}
+                                        <span class="badge bg-danger ms-1">Cəhd bitdi</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            
+                            {# ═══════════════════════════════════════════════ #}
+                            {# BUTTONLAR                                       #}
+                            {# ═══════════════════════════════════════════════ #}
+                            <div class="btn-group btn-group-sm gap-2">
+                                
+                                {% if item.has_submitted %}
+                                    {# Cavablarına bax #}
+                                    <a href="{% url 'labs:my_lab_answers' lab.id %}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-list-check"></i> Cavablarım ({{ item.attempt_count }})
+                                    </a>
+                                    
+                                    {# Əgər hələ cəhd varsa və lab açıqdırsa #}
+                                    {% if item.attempts_left > 0 and lab.is_open %}
+                                        <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-redo"></i> Yenidən Göndər
+                                        </a>
+                                    {% else %}
+                                        <span class="btn btn-sm btn-secondary disabled">
+                                            <i class="fas fa-check-circle"></i> Tamamlandı
+                                        </span>
+                                    {% endif %}
+                                
+                                {% elif lab.is_open %}
+                                    {# Açıqdır - laba keç #}
+                                    <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-arrow-right"></i> Laba Keç
+                                    </a>
+                                
+                                {% elif lab.is_upcoming %}
+                                    {# Hələ açılmayıb #}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Hələ açılmayıb
+                                    </button>
+                                
+                                {% else %}
+                                    {# Bağlıdır #}
+                                    <span class="btn btn-sm btn-secondary disabled">
+                                        <i class="fas fa-lock"></i> Müddət keçib
+                                    </span>
+                                {% endif %}
+                                
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Sizə təyin olunmuş lab işi yoxdur</p>
+                    </div>
+                {% endif %}
+            
+            {% else %}
+                <div class="alert alert-light text-center py-4">
+                    <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">Lab işi yoxdur</p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
