@@ -239,53 +239,125 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context['projects_with_user_data'] = []
 
         # ═══════════════════════════════════════════════════════════════════
-        # 6. LAB İŞLƏRİ (Labs)
+        # 6. LAB İŞLƏRİ
         # ───────────────────────────────────────────────────────────────────
         # Müəllim: Bütün lab-ları görür
-        # Tələbə: allowed_students və ya allowed_groups-a görə filter olunur
-        # ════════════════════════════════════���══════════════════════════════
+        # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
+        # ═══════════════════════════════════════════════════════════════════
+
+        from labs.models import Lab, LabAssignment, LabSubmission
+
         if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün lab-lar
             context['labs'] = course.labs.all().order_by('-created_at')
+            context['labs_with_user_data'] = []
             
         elif context['is_student']:
-            # Yalnız published lab-ları götür
-            labs_qs = course.labs.filter(status='published')
-            filtered_labs = []
+            # TƏLƏBƏ - yalnız özünə təyin olunmuş lab-ları görür
             
-            for lab in labs_qs:
-                # ─────────────────────────────────────────────────────────────
-                # Prioritet 1: allowed_students yoxla
-                # ─────────────────────────────────────────────────────────────
-                allowed_students_str = getattr(lab, 'allowed_students', '') or ''
-                if allowed_students_str:
-                    allowed_ids = [
-                        int(x) for x in allowed_students_str.split(',') 
-                        if x.strip().isdigit()
-                    ]
-                    if user.id in allowed_ids:
-                        filtered_labs.append(lab)
-                        continue
+            # Tələbənin qrup adını al
+            student_group = ''
+            if membership and hasattr(membership, 'group_name'):
+                student_group = membership.group_name or ''
+            
+            print(f"DEBUG: Student ID: {user.id}, Group: '{student_group}'")  # DEBUG
+            
+            labs_with_user_data = []
+            
+            # Published olan lab-ları yoxla
+            for lab in course.labs.filter(status='published').order_by('-created_at'):
                 
-                # ─────────────────────────────────────────────────────────────
-                # Prioritet 2: allowed_groups yoxla
-                # ─────────────────────────────────────────────────────────────
-                allowed_groups = []
-                if hasattr(lab, 'get_allowed_groups_list'):
-                    allowed_groups = lab.get_allowed_groups_list()
+                print(f"DEBUG: Checking Lab '{lab.title}' (ID: {lab.id})")  # DEBUG
+                print(f"DEBUG:   allowed_students: '{lab.allowed_students}'")  # DEBUG
+                print(f"DEBUG:   allowed_groups: '{lab.allowed_groups}'")  # DEBUG
                 
-                # Heç bir filter yoxdursa - hamı görür
-                if not allowed_groups and not allowed_students_str:
-                    filtered_labs.append(lab)
+                # Bu lab tələbəyə təyin olunubmu?
+                is_assigned = False
+                
+                # Allowed students - vergüllə ayrılmış ID-lər
+                allowed_student_ids = []
+                if lab.allowed_students and lab.allowed_students.strip():
+                    for x in lab.allowed_students.split(','):
+                        x = x.strip()
+                        if x.isdigit():
+                            allowed_student_ids.append(int(x))
+                
+                # Allowed groups - vergüllə ayrılmış qrup adları
+                allowed_group_names = []
+                if lab.allowed_groups and lab.allowed_groups.strip():
+                    for g in lab.allowed_groups.split(','):
+                        g = g.strip()
+                        if g:
+                            allowed_group_names.append(g)
+                
+                print(f"DEBUG:   Parsed student IDs: {allowed_student_ids}")  # DEBUG
+                print(f"DEBUG:   Parsed group names: {allowed_group_names}")  # DEBUG
+                
+                # ƏSAS MƏNTİQ:
+                # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
+                # 2. Əgər student ID siyahısında varsa → görür
+                # 3. Əgər qrup siyahısında varsa → görür
+                
+                has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
+                
+                if not has_any_filter:
+                    # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
+                    # Əgər heç bir tələbə/qrup seçilməyibsə, heç kim görməsin:
+                    is_assigned = False
+                    print(f"DEBUG:   No filter set - NOT assigned")  # DEBUG
+                else:
+                    # Filtr var - yoxla
+                    # Student ID ilə yoxla
+                    if user.id in allowed_student_ids:
+                        is_assigned = True
+                        print(f"DEBUG:   Assigned by student ID")  # DEBUG
+                    
+                    # Qrup adı ilə yoxla
+                    if not is_assigned and student_group and student_group in allowed_group_names:
+                        is_assigned = True
+                        print(f"DEBUG:   Assigned by group name")  # DEBUG
+                
+                print(f"DEBUG:   Final is_assigned: {is_assigned}")  # DEBUG
+                
+                # Əgər təyin olunmayıbsa, skip et
+                if not is_assigned:
                     continue
                 
-                # Tələbənin qrupu allowed_groups-dadırsa
-                if membership and membership.group_name:
-                    if membership.group_name in allowed_groups:
-                        filtered_labs.append(lab)
+                # Assignment və submission məlumatlarını al
+                assignment = LabAssignment.objects.filter(lab=lab, student=user).first()
+                
+                submissions_qs = LabSubmission.objects.none()
+                attempt_count = 0
+                has_submitted = False
+                latest_submission = None
+                
+                if assignment:
+                    submissions_qs = LabSubmission.objects.filter(assignment=assignment).order_by('-submitted_at')
+                    attempt_count = submissions_qs.count()
+                    has_submitted = attempt_count > 0
+                    latest_submission = submissions_qs.first() if has_submitted else None
+                
+                max_attempts = lab.max_attempts or 1
+                can_submit = (attempt_count < max_attempts) and lab.is_open
+                
+                labs_with_user_data.append({
+                    'lab': lab,
+                    'has_submitted': has_submitted,
+                    'submission': latest_submission,
+                    'submissions': submissions_qs,
+                    'attempt_count': attempt_count,
+                    'max_attempts': max_attempts,
+                    'attempts_left': max_attempts - attempt_count,
+                    'can_submit': can_submit,
+                })
             
-            context['labs'] = filtered_labs
+            context['labs'] = []
+            context['labs_with_user_data'] = labs_with_user_data
+            print(f"DEBUG: Total labs for student: {len(labs_with_user_data)}")  # DEBUG
+            
         else:
             context['labs'] = []
+            context['labs_with_user_data'] = []
 
         # ═══════════════════════════════════════════════════════════════════
         # 7. FORMALAR VƏ MODAL ÜÇÜN DATA (Yalnız owner üçün)

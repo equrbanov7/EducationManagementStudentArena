@@ -1,218 +1,226 @@
 """
-labs/views.py - YENİLƏNMİŞ
+Labs Views - Bütün view-lar pk istifadə edir
 """
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
 from django.contrib import messages
+from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods
-
-from .models import Lab, LabBlock, LabQuestion, LabAssignment, LabSubmission
-from courses.models import Course, CourseMembership
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+import json
+import os
+from .models import Lab, LabBlock, LabQuestion, LabAssignment, LabSubmission, LabAnswer
 
 
-def is_course_teacher(user, course):
-    return user.is_teacher and course.owner == user
-
-
-# ════════════════════════════════════════════════════════════════════════════
+# ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def create_lab(request, course_id):
-    """Lab yaratmaq"""
+    """Lab yarat"""
+    from courses.models import Course, CourseMembership
+    
     course = get_object_or_404(Course, id=course_id)
     
-    if not is_course_teacher(request.user, course):
+    if course.owner != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
+        # Seçilmiş qruplar və tələbələr
+        group_names = request.POST.getlist('group_names[]')
+        student_ids = request.POST.getlist('student_ids[]')
+        
         lab = Lab.objects.create(
             course=course,
-            created_by=request.user,
             title=request.POST.get('title'),
             description=request.POST.get('description', ''),
             start_datetime=request.POST.get('start_datetime'),
             end_datetime=request.POST.get('end_datetime'),
             max_score=request.POST.get('max_score', 100),
+            max_attempts=request.POST.get('max_attempts', 1),  # Cəhd sayı
             status='draft',
+            questions_per_student=request.POST.get('questions_per_student', 0),
             allow_late_submission=request.POST.get('allow_late_submission') == 'on',
-            late_penalty_percent=request.POST.get('late_penalty_percent', 0) or 0,
+            late_penalty_percent=request.POST.get('late_penalty_percent', 0),
             allow_file_upload=request.POST.get('allow_file_upload') == 'on',
             allow_link_submission=request.POST.get('allow_link_submission') == 'on',
-            allowed_extensions=request.POST.get('allowed_extensions', 'zip,pdf,docx'),
-            max_file_size_mb=request.POST.get('max_file_size_mb', 50) or 50,
-            questions_per_student=request.POST.get('questions_per_student', 0) or 0,
+            max_file_size_mb=request.POST.get('max_file_size_mb', 50),
+            allowed_extensions=request.POST.get('allowed_extensions', ''),
             teacher_instructions=request.POST.get('teacher_instructions', ''),
+            allowed_groups=','.join(group_names) if group_names else '',
+            allowed_students=','.join(student_ids) if student_ids else '',
+            created_by=request.user,
         )
         
-        # Müəllim faylı
         if 'teacher_files' in request.FILES:
             lab.teacher_files = request.FILES['teacher_files']
-        
-        # Qrup və Tələbə məntiqi
-        group_names = request.POST.getlist('group_names[]')
-        student_ids = request.POST.getlist('student_ids[]')
-        
-        if student_ids:
-            # Yalnız seçilmiş tələbələr
-            lab.allowed_groups = ''  # Qrupları sıfırla
-            lab.allowed_students = ','.join(student_ids)
-        elif group_names:
-            # Bütün qrup
-            lab.allowed_groups = ','.join(group_names)
-            lab.allowed_students = ''
-        
-        lab.save()
+            lab.save()
         
         return JsonResponse({'success': True, 'lab_id': lab.id})
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_lab(request, pk):
-    """Lab redaktə etmək"""
+    """Lab redaktə et"""
     lab = get_object_or_404(Lab, id=pk)
     
-    if not is_course_teacher(request.user, lab.course):
+    if lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     if request.method == 'GET':
-        # Allowed students parse
+        # Mövcud qrupları al
+        group_names = []
+        if lab.allowed_groups:
+            group_names = [g.strip() for g in lab.allowed_groups.split(',') if g.strip()]
+        
+        # Mövcud tələbə ID-lərini al
         student_ids = []
-        if hasattr(lab, 'allowed_students') and lab.allowed_students:
+        if lab.allowed_students:
             student_ids = [int(x) for x in lab.allowed_students.split(',') if x.strip().isdigit()]
         
         data = {
             'id': lab.id,
-            'title': lab.title,
-            'description': lab.description,
+            'title': lab.title or '',
+            'description': lab.description or '',
             'start_datetime': lab.start_datetime.strftime('%Y-%m-%dT%H:%M') if lab.start_datetime else '',
             'end_datetime': lab.end_datetime.strftime('%Y-%m-%dT%H:%M') if lab.end_datetime else '',
-            'max_score': lab.max_score,
-            'status': lab.status,
+            'max_score': lab.max_score or 100,
+            'max_attempts': getattr(lab, 'max_attempts', 1) or 1,
+            'status': lab.status or 'draft',
+            'questions_per_student': lab.questions_per_student or 0,
             'allow_late_submission': lab.allow_late_submission,
-            'late_penalty_percent': lab.late_penalty_percent,
+            'late_penalty_percent': lab.late_penalty_percent or 0,
             'allow_file_upload': lab.allow_file_upload,
             'allow_link_submission': lab.allow_link_submission,
-            'allowed_extensions': lab.allowed_extensions,
-            'max_file_size_mb': lab.max_file_size_mb,
-            'questions_per_student': lab.questions_per_student,
-            'teacher_instructions': lab.teacher_instructions,
+            'max_file_size_mb': lab.max_file_size_mb or 50,
+            'allowed_extensions': lab.allowed_extensions or 'zip,pdf,docx,png,jpg,txt,py,java,cpp',
+            'teacher_instructions': lab.teacher_instructions or '',
             'teacher_files_url': lab.teacher_files.url if lab.teacher_files else None,
-            'group_names': lab.get_allowed_groups_list(),
+            'group_names': group_names,
             'student_ids': student_ids,
         }
         return JsonResponse({'success': True, 'data': data})
     
-    # POST
+    # POST - yenilə
     try:
+        group_names = request.POST.getlist('group_names[]')
+        student_ids = request.POST.getlist('student_ids[]')
+        
         lab.title = request.POST.get('title')
         lab.description = request.POST.get('description', '')
-        lab.start_datetime = request.POST.get('start_datetime')
-        lab.end_datetime = request.POST.get('end_datetime')
-        lab.max_score = request.POST.get('max_score', 100) or 100
+        lab.start_datetime = request.POST.get('start_datetime') or None
+        lab.end_datetime = request.POST.get('end_datetime') or None
+        lab.max_score = int(request.POST.get('max_score', 100) or 100)
+        lab.status = request.POST.get('status', 'draft')
+        
+        # max_attempts field varsa
+        if hasattr(lab, 'max_attempts'):
+            lab.max_attempts = int(request.POST.get('max_attempts', 1) or 1)
+        
+        lab.questions_per_student = int(request.POST.get('questions_per_student', 0) or 0)
         lab.allow_late_submission = request.POST.get('allow_late_submission') == 'on'
-        lab.late_penalty_percent = request.POST.get('late_penalty_percent', 0) or 0
+        lab.late_penalty_percent = int(request.POST.get('late_penalty_percent', 0) or 0)
         lab.allow_file_upload = request.POST.get('allow_file_upload') == 'on'
         lab.allow_link_submission = request.POST.get('allow_link_submission') == 'on'
-        lab.allowed_extensions = request.POST.get('allowed_extensions', 'zip,pdf,docx')
-        lab.max_file_size_mb = request.POST.get('max_file_size_mb', 50) or 50
-        lab.questions_per_student = request.POST.get('questions_per_student', 0) or 0
+        lab.max_file_size_mb = int(request.POST.get('max_file_size_mb', 50) or 50)
+        lab.allowed_extensions = request.POST.get('allowed_extensions', '')
         lab.teacher_instructions = request.POST.get('teacher_instructions', '')
+        lab.allowed_groups = ','.join(group_names) if group_names else ''
+        lab.allowed_students = ','.join(student_ids) if student_ids else ''
         
         if 'teacher_files' in request.FILES:
             lab.teacher_files = request.FILES['teacher_files']
         
-        # Qrup və Tələbə məntiqi
-        group_names = request.POST.getlist('group_names[]')
-        student_ids = request.POST.getlist('student_ids[]')
-        
-        if student_ids:
-            lab.allowed_groups = ''
-            lab.allowed_students = ','.join(student_ids)
-        elif group_names:
-            lab.allowed_groups = ','.join(group_names)
-            lab.allowed_students = ''
-        else:
-            lab.allowed_groups = ''
-            lab.allowed_students = ''
-        
         lab.save()
-        
         return JsonResponse({'success': True})
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def delete_lab(request, pk):
+    """Lab sil"""
     lab = get_object_or_404(Lab, id=pk)
-    if not is_course_teacher(request.user, lab.course):
+    
+    if lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
+    course_id = lab.course.id
     lab.delete()
-    return JsonResponse({'success': True})
+    messages.success(request, 'Lab silindi!')
+    return JsonResponse({'success': True, 'redirect_url': reverse('courses:course_dashboard', args=[course_id])})
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def publish_lab(request, pk):
+    """Lab yayımla"""
     lab = get_object_or_404(Lab, id=pk)
-    if not is_course_teacher(request.user, lab.course):
+    
+    if lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
-    if lab.total_questions == 0:
-        return JsonResponse({'success': False, 'error': 'Ən azı 1 sual əlavə edin'}, status=400)
+    
     lab.status = 'published'
     lab.save()
+    messages.success(request, 'Lab yayımlandı!')
     return JsonResponse({'success': True})
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 # BLOCK CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
-def manage_blocks(request, lab_id):
-    lab = get_object_or_404(Lab, id=lab_id)
-    if not is_course_teacher(request.user, lab.course):
+def manage_blocks(request, pk):
+    """Blokları idarə et"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    if lab.created_by != request.user:
         messages.error(request, 'İcazəniz yoxdur')
         return redirect('courses:course_dashboard', pk=lab.course.id)
     
-    return render(request, 'labs/manage_blocks.html', {
+    blocks = lab.blocks.all().order_by('order')
+    
+    context = {
         'lab': lab,
-        'blocks': lab.blocks.prefetch_related('questions').all(),
-    })
+        'blocks': blocks,
+    }
+    
+    return render(request, 'labs/manage_blocks.html', context)
 
 
 @login_required
-@require_http_methods(["POST"])
-def create_block(request, lab_id):
-    lab = get_object_or_404(Lab, id=lab_id)
-    if not is_course_teacher(request.user, lab.course):
+@require_POST
+def create_block(request, pk):
+    """Blok yarat"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    if lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        max_order = lab.blocks.count() + 1
         block = LabBlock.objects.create(
             lab=lab,
-            title=request.POST.get('title', f'Blok {max_order}'),
+            title=request.POST.get('title'),
             description=request.POST.get('description', ''),
-            order=max_order,
-            questions_to_pick=request.POST.get('questions_to_pick', 0) or 0,
+            order=lab.blocks.count() + 1,
         )
-        return JsonResponse({'success': True, 'block': {'id': block.id, 'title': block.title}})
+        messages.success(request, 'Blok yaradıldı!')
+        return JsonResponse({'success': True, 'block_id': block.id})
+        
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
@@ -220,66 +228,71 @@ def create_block(request, lab_id):
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_block(request, pk):
+    """Blok redaktə et"""
     block = get_object_or_404(LabBlock, id=pk)
-    if not is_course_teacher(request.user, block.lab.course):
+    
+    if block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     if request.method == 'GET':
-        return JsonResponse({
-            'success': True,
-            'data': {
-                'id': block.id,
-                'title': block.title,
-                'description': block.description,
-                'order': block.order,
-                'questions_to_pick': block.questions_to_pick,
-                'question_count': block.question_count,
-            }
-        })
+        data = {
+            'id': block.id,
+            'title': block.title,
+            'description': block.description,
+            'order': block.order,
+        }
+        return JsonResponse({'success': True, 'data': data})
     
     try:
         block.title = request.POST.get('title')
         block.description = request.POST.get('description', '')
-        block.questions_to_pick = request.POST.get('questions_to_pick', 0) or 0
         block.save()
         return JsonResponse({'success': True})
+        
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def delete_block(request, pk):
+    """Blok sil"""
     block = get_object_or_404(LabBlock, id=pk)
-    if not is_course_teacher(request.user, block.lab.course):
+    
+    if block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
     block.delete()
     return JsonResponse({'success': True})
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 # QUESTION CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def create_question(request, block_id):
+    """Sual yarat"""
     block = get_object_or_404(LabBlock, id=block_id)
-    if not is_course_teacher(request.user, block.lab.course):
+    
+    if block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        max_num = block.questions.count() + 1
         question = LabQuestion.objects.create(
             block=block,
-            question_number=max_num,
+            question_number=block.questions.count() + 1,
             question_text=request.POST.get('question_text'),
-            points=request.POST.get('points', 0) or 0,
+            points=request.POST.get('points', 0),
         )
+        
         if 'attachment' in request.FILES:
             question.attachment = request.FILES['attachment']
             question.save()
-        return JsonResponse({'success': True, 'question': {'id': question.id}})
+        
+        return JsonResponse({'success': True, 'question_id': question.id})
+        
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
@@ -287,145 +300,99 @@ def create_question(request, block_id):
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_question(request, pk):
+    """Sual redaktə et"""
     question = get_object_or_404(LabQuestion, id=pk)
-    if not is_course_teacher(request.user, question.block.lab.course):
+    
+    if question.block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     if request.method == 'GET':
-        return JsonResponse({
-            'success': True,
-            'data': {
-                'id': question.id,
-                'question_number': question.question_number,
-                'question_text': question.question_text,
-                'points': question.points,
-                'attachment_url': question.attachment.url if question.attachment else None,
-            }
-        })
+        data = {
+            'id': question.id,
+            'question_text': question.question_text,
+            'points': question.points,
+            'question_number': question.question_number,
+        }
+        return JsonResponse({'success': True, 'data': data})
     
     try:
         question.question_text = request.POST.get('question_text')
-        question.points = request.POST.get('points', 0) or 0
-        if 'attachment' in request.FILES:
-            question.attachment = request.FILES['attachment']
+        question.points = request.POST.get('points', 0)
         question.save()
         return JsonResponse({'success': True})
+        
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def delete_question(request, pk):
+    """Sual sil"""
     question = get_object_or_404(LabQuestion, id=pk)
-    if not is_course_teacher(request.user, question.block.lab.course):
+    
+    if question.block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
     question.delete()
     return JsonResponse({'success': True})
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_POST
 def import_questions(request, block_id):
+    """Sualları toplu import et"""
     block = get_object_or_404(LabBlock, id=block_id)
-    if not is_course_teacher(request.user, block.lab.course):
+    
+    if block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        questions_text = request.POST.get('questions_text', '')
-        lines = [line.strip() for line in questions_text.strip().split('\n') if line.strip()]
+        questions_text = request.POST.get('questions', '')
+        lines = [line.strip() for line in questions_text.split('\n') if line.strip()]
         
-        if not lines:
-            return JsonResponse({'success': False, 'error': 'Heç bir sual tapılmadı'}, status=400)
-        
-        created_count = 0
-        start_num = block.questions.count() + 1
-        
-        for i, line in enumerate(lines):
+        count = block.questions.count()
+        for i, text in enumerate(lines, start=1):
             LabQuestion.objects.create(
                 block=block,
-                question_number=start_num + i,
-                question_text=line,
+                question_number=count + i,
+                question_text=text,
             )
-            created_count += 1
         
-        return JsonResponse({'success': True, 'created_count': created_count, 'message': f'{created_count} sual əlavə edildi'})
+        return JsonResponse({'success': True, 'count': len(lines)})
+        
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
-# ════════════════════════════════════════════════════════════════════════════
-# STUDENT
-# ════════════════════════════════════════════════════════════════════════════
-
-@login_required
-def lab_detail(request, pk):
-    lab = get_object_or_404(Lab, id=pk)
-    
-    if request.user.is_student:
-        membership = CourseMembership.objects.filter(course=lab.course, user=request.user, role='student').first()
-        if not membership:
-            messages.error(request, 'Bu laba giriş icazəniz yoxdur')
-            return redirect('courses:course_dashboard', pk=lab.course.id)
-        
-        allowed_groups = lab.get_allowed_groups_list()
-        if allowed_groups and membership.group_name not in allowed_groups:
-            messages.error(request, 'Bu lab sizin qrupunuz üçün deyil')
-            return redirect('courses:course_dashboard', pk=lab.course.id)
-    
-    assignment = None
-    submissions = []
-    
-    if request.user.is_student and lab.is_open:
-        assignment = LabAssignment.get_or_create_for_student(lab, request.user)
-        submissions = assignment.submissions.all()
-    
-    return render(request, 'labs/lab_detail.html', {
-        'lab': lab,
-        'assignment': assignment,
-        'submissions': submissions,
-        'assigned_questions': assignment.assigned_questions.all() if assignment else [],
-    })
-
-
-@login_required
-@require_http_methods(["POST"])
-def submit_lab(request, pk):
-    lab = get_object_or_404(Lab, id=pk)
-    assignment = get_object_or_404(LabAssignment, lab=lab, student=request.user)
-    
-    if lab.is_closed and not lab.allow_late_submission:
-        return JsonResponse({'success': False, 'error': 'Deadline keçib'}, status=400)
-    
-    try:
-        attempt_num = assignment.submissions.count() + 1
-        submission = LabSubmission.objects.create(
-            assignment=assignment,
-            submission_text=request.POST.get('submission_text', ''),
-            submission_link=request.POST.get('submission_link', ''),
-            attempt_number=attempt_num,
-        )
-        if 'submission_file' in request.FILES:
-            submission.submission_file = request.FILES['submission_file']
-            submission.save()
-        return JsonResponse({'success': True, 'submission_id': submission.id})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# TEACHER: Submissions & Grading
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUBMISSIONS & GRADING
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
 def lab_submissions(request, pk):
+    """Lab cavablarını göstər - müəllim üçün"""
     lab = get_object_or_404(Lab, id=pk)
-    if not is_course_teacher(request.user, lab.course):
+    
+    if lab.created_by != request.user:
         messages.error(request, 'İcazəniz yoxdur')
         return redirect('courses:course_dashboard', pk=lab.course.id)
     
-    submissions = LabSubmission.objects.filter(assignment__lab=lab).select_related('assignment__student').order_by('-submitted_at')
+    # Bütün submission-lar
+    submissions = LabSubmission.objects.filter(
+        assignment__lab=lab
+    ).select_related('assignment__student').order_by('-submitted_at')
     
+    # Qrupları al - CourseMembership-dən
+    from courses.models import CourseMembership
+    memberships = CourseMembership.objects.filter(
+        course=lab.course,
+        role='student'
+    ).exclude(group_name__isnull=True).exclude(group_name='')
+    
+    groups = list(memberships.values_list('group_name', flat=True).distinct())
+    
+    # Filters
     status_filter = request.GET.get('status', '')
     group_filter = request.GET.get('group', '')
     
@@ -433,135 +400,455 @@ def lab_submissions(request, pk):
         submissions = submissions.filter(status=status_filter)
     
     if group_filter:
-        student_ids = CourseMembership.objects.filter(course=lab.course, group_name=group_filter, role='student').values_list('user_id', flat=True)
+        # Qrup filter - membership üzərindən
+        student_ids = memberships.filter(group_name=group_filter).values_list('user_id', flat=True)
         submissions = submissions.filter(assignment__student_id__in=student_ids)
     
-    groups = CourseMembership.objects.filter(course=lab.course, role='student').exclude(group_name='').values_list('group_name', flat=True).distinct()
+    # Statistika
+    all_submissions = LabSubmission.objects.filter(assignment__lab=lab)
+    stats = {
+        'total': all_submissions.count(),
+        'pending': all_submissions.filter(status='submitted').count(),
+        'graded': all_submissions.filter(status='graded').count(),
+        'late': all_submissions.filter(status='late').count(),
+    }
     
-    return render(request, 'labs/lab_submissions.html', {
+    # Hər submission üçün student-in qrup adını əlavə et
+    student_groups = {}
+    for m in memberships:
+        student_groups[m.user_id] = m.group_name
+    
+    context = {
         'lab': lab,
         'submissions': submissions,
         'groups': groups,
         'status_filter': status_filter,
         'group_filter': group_filter,
-    })
+        'stats': stats,
+        'student_groups': student_groups,
+    }
+    
+    return render(request, 'labs/lab_submissions.html', context)
 
 
 @login_required
-@require_http_methods(["POST"])
-def grade_submission(request, pk):
+def grade_submission_page(request, pk):
+    """Qiymətləndirmə səhifəsi"""
     submission = get_object_or_404(LabSubmission, id=pk)
-    if not is_course_teacher(request.user, submission.assignment.lab.course):
-        return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    lab = submission.assignment.lab
     
+    if lab.created_by != request.user:
+        messages.error(request, 'İcazəniz yoxdur')
+        return redirect('labs:lab_submissions', pk=lab.id)
+    
+    if request.method == 'POST':
+        try:
+            submission.score = request.POST.get('score')
+            submission.feedback = request.POST.get('feedback', '')
+            submission.status = 'graded'
+            submission.graded_by = request.user
+            submission.graded_at = timezone.now()
+            submission.save()
+            
+            messages.success(request, 'Qiymət uğurla saxlanıldı!')
+            return redirect('labs:lab_submissions', pk=lab.id)
+        except Exception as e:
+            messages.error(request, f'Xəta: {str(e)}')
+    
+    # Bu cəhdin cavablarını al
     try:
-        submission.score = request.POST.get('score')
-        submission.feedback = request.POST.get('feedback', '')
-        submission.status = 'graded'
-        submission.graded_by = request.user
-        submission.graded_at = timezone.now()
-        submission.save()
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        # attempt_number field varsa
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=submission.assignment.student,
+            attempt_number=submission.attempt_number,
+            is_draft=False
+        ).select_related('question').order_by('question__block__order', 'question__question_number')
+        
+        # Əgər boşdursa, submission-a bağlı cavabları yoxla
+        if not answers.exists():
+            answers = LabAnswer.objects.filter(
+                lab=lab,
+                student=submission.assignment.student,
+                submission=submission,
+                is_draft=False
+            ).select_related('question').order_by('question__block__order', 'question__question_number')
+            
+    except Exception:
+        # Field yoxdursa, bütün cavabları göstər
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=submission.assignment.student,
+            is_draft=False
+        ).select_related('question').order_by('question__block__order', 'question__question_number')
+    
+    context = {
+        'submission': submission,
+        'lab': lab,
+        'answers': answers,
+    }
+    
+    return render(request, 'labs/grade_submission.html', context)
 
-
-# ════════════════════════════════════════════════════════════════════════════
-# PREVIEW RANDOMIZATION - FIX
-# ════════════════════════════════════════════════════════════════════════════
 
 @login_required
 def preview_randomization(request, pk):
-    """Müəllim üçün random preview - HTML səhifə"""
+    """Randomizasiyanı önizlə"""
     lab = get_object_or_404(Lab, id=pk)
     
-    if not is_course_teacher(request.user, lab.course):
+    if lab.created_by != request.user:
         messages.error(request, 'İcazəniz yoxdur')
-        return redirect('labs:manage_blocks', lab_id=lab.id)
+        return redirect('courses:course_dashboard', pk=lab.course.id)
     
-    import hashlib
-    import random as rnd
+    # Kurs tələbələrini al
+    from courses.models import CourseMembership
+    memberships = CourseMembership.objects.filter(
+        course=lab.course,
+        role='student'
+    ).select_related('user')
     
-    # Test üçün student seç
-    student_id = request.GET.get('student_id')
+    # Seçilmiş tələbə
+    selected_student_id = request.GET.get('student')
+    selected_student = None
+    questions = []
     
-    if student_id:
-        student = get_object_or_404(User, id=student_id)
-    else:
-        membership = CourseMembership.objects.filter(course=lab.course, role='student').first()
-        student = membership.user if membership else None
+    if selected_student_id:
+        try:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            selected_student = User.objects.get(id=selected_student_id)
+            
+            # Bu tələbə üçün assignment yarat/al
+            assignment = LabAssignment.get_or_create_for_student(lab, selected_student)
+            questions = assignment.assigned_questions.all().order_by('block__order', 'question_number')
+        except:
+            pass
     
-    if not student:
-        return render(request, 'labs/preview_randomization.html', {
-            'lab': lab,
-            'error': 'Heç bir tələbə yoxdur',
-            'students': [],
-            'questions': [],
-        })
-    
-    # Random sualları hesabla
-    all_questions = []
-    
-    for block in lab.blocks.all():
-        block_questions = list(block.questions.all())
-        
-        if block.questions_to_pick > 0 and block.questions_to_pick < len(block_questions):
-            seed = int(hashlib.md5(f"{lab.id}-{student.id}-{block.id}".encode()).hexdigest(), 16)
-            rng = rnd.Random(seed)
-            selected = rng.sample(block_questions, block.questions_to_pick)
-            all_questions.extend(selected)
-        else:
-            all_questions.extend(block_questions)
-    
-    # Lab səviyyəsində limit
-    if lab.questions_per_student > 0 and lab.questions_per_student < len(all_questions):
-        seed = int(hashlib.md5(f"{lab.id}-{student.id}-total".encode()).hexdigest(), 16)
-        rng = rnd.Random(seed)
-        all_questions = rng.sample(all_questions, lab.questions_per_student)
-    
-    # Bütün tələbələr
-    students = CourseMembership.objects.filter(course=lab.course, role='student').select_related('user')
-    
-    return render(request, 'labs/preview_randomization.html', {
+    context = {
         'lab': lab,
-        'selected_student': student,
-        'questions': all_questions,
-        'students': students,
-    })
+        'memberships': memberships,
+        'selected_student': selected_student,
+        'questions': questions,
+    }
+    
+    return render(request, 'labs/preview_randomization.html', context)
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
+# STUDENT VIEWS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@login_required
+def lab_detail(request, pk):
+    """Lab detalları - Tələbə görünüşü"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    assignment = None
+    questions = []
+    has_submitted = False
+    submission = None
+    attempt_count = 0
+    can_retry = True
+    
+    if request.user.is_authenticated:
+        if not getattr(request.user, 'is_teacher', False):
+            assignment = LabAssignment.get_or_create_for_student(lab, request.user)
+            questions = assignment.assigned_questions.all().order_by('block__order', 'question_number')
+            
+            submissions = LabSubmission.objects.filter(assignment=assignment).order_by('-submitted_at')
+            attempt_count = submissions.count()
+            has_submitted = attempt_count > 0
+            submission = submissions.first() if has_submitted else None
+            
+            # Cəhd sayı yoxlaması
+            max_attempts = lab.max_attempts or 1
+            can_retry = attempt_count < max_attempts
+        else:
+            questions = LabQuestion.objects.filter(block__lab=lab).order_by('block__order', 'question_number')
+    
+    saved_answers = {}
+    if request.user.is_authenticated:
+        answers = LabAnswer.objects.filter(lab=lab, student=request.user)
+        for ans in answers:
+            saved_answers[ans.question_id] = ans.answer
+    
+    context = {
+        'lab': lab,
+        'questions': questions,
+        'assignment': assignment,
+        'saved_answers': saved_answers,
+        'has_submitted': has_submitted,
+        'submission': submission,
+        'attempt_count': attempt_count,
+        'can_retry': can_retry,
+    }
+    
+    return render(request, 'labs/lab_detail.html', context)
+
+
+@login_required
+@require_POST
+def auto_save_answer(request, pk):
+    """Cavabı avtomatik saxla - cari cəhd üçün"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    now = timezone.now()
+    if lab.start_datetime and lab.end_datetime:
+        is_open = lab.status == 'published' and lab.start_datetime <= now <= lab.end_datetime
+    else:
+        is_open = lab.status == 'published'
+    
+    if not is_open:
+        return JsonResponse({'success': False, 'error': 'Lab bağlıdır'})
+    
+    try:
+        # Cari cəhd nömrəsini tap
+        assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
+        current_attempt = 1
+        if assignment:
+            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
+            current_attempt = submitted_count + 1
+        
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            question_id = data.get('question_id')
+            answer = data.get('answer', '')
+            answer_file = None
+        else:
+            question_id = request.POST.get('question_id')
+            answer = request.POST.get('answer', '')
+            answer_file = request.FILES.get('answer_file')
+        
+        question = get_object_or_404(LabQuestion, id=question_id)
+        
+        # Bu cəhd üçün cavab yarat/yenilə
+        lab_answer, created = LabAnswer.objects.get_or_create(
+            lab=lab,
+            question=question,
+            student=request.user,
+            attempt_number=current_attempt,
+            defaults={'answer': answer, 'is_draft': True}
+        )
+        
+        if not created:
+            lab_answer.answer = answer
+            lab_answer.is_draft = True
+        
+        if answer_file:
+            lab_answer.answer_file = answer_file
+        
+        lab_answer.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_POST
+def submit_lab(request, pk):
+    """Labı göndər"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    now = timezone.now()
+    if lab.start_datetime and lab.end_datetime:
+        is_open = lab.status == 'published' and lab.start_datetime <= now <= lab.end_datetime
+    else:
+        is_open = lab.status == 'published'
+    
+    if not is_open and not lab.allow_late_submission:
+        return JsonResponse({'success': False, 'error': 'Lab bağlıdır'})
+    
+    try:
+        assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
+        if not assignment:
+            return JsonResponse({'success': False, 'error': 'Təyinat tapılmadı'})
+        
+        current_attempts = LabSubmission.objects.filter(assignment=assignment).count()
+        max_attempts = lab.max_attempts or 1
+        
+        if current_attempts >= max_attempts:
+            return JsonResponse({'success': False, 'error': 'Cəhd sayınız bitib'})
+        
+        new_attempt_number = current_attempts + 1
+        
+        # Yeni submission yarat
+        submission = LabSubmission.objects.create(
+            assignment=assignment,
+            status='submitted',
+            attempt_number=new_attempt_number
+        )
+        
+        # Bu cəhdin cavablarını submission-a bağla və final et
+        LabAnswer.objects.filter(
+            lab=lab,
+            student=request.user,
+            attempt_number=new_attempt_number,
+            is_draft=True
+        ).update(is_draft=False, submission=submission)
+        
+        return JsonResponse({
+            'success': True,
+            'redirect_url': reverse('courses:course_dashboard', args=[lab.course.id])
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # API
-# ════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
 def api_get_groups(request, course_id):
+    """Kurs qruplarını qaytarır"""
+    from courses.models import Course, CourseMembership
+    
     course = get_object_or_404(Course, id=course_id)
-    groups = CourseMembership.objects.filter(course=course, role='student').exclude(group_name='').exclude(group_name__isnull=True).values_list('group_name', flat=True).distinct()
-    return JsonResponse({'groups': [{'name': g} for g in groups]})
+    
+    groups = CourseMembership.objects.filter(
+        course=course,
+        role='student'
+    ).exclude(group_name='').exclude(group_name__isnull=True).values_list('group_name', flat=True).distinct()
+    
+    return JsonResponse({
+        'groups': [{'id': i, 'name': name} for i, name in enumerate(groups, 1)]
+    })
 
 
 @login_required
 def api_get_students(request, course_id):
+    """Kurs tələbələrini qaytarır"""
+    from courses.models import Course, CourseMembership
+    
     course = get_object_or_404(Course, id=course_id)
-    groups_param = request.GET.get('groups', '')
+    groups = request.GET.get('groups', '').split(',')
+    groups = [g.strip() for g in groups if g.strip()]
     
-    if not groups_param:
-        return JsonResponse({'students': []})
+    memberships = CourseMembership.objects.filter(
+        course=course,
+        role='student'
+    ).select_related('user')
     
-    group_names = [g.strip() for g in groups_param.split(',') if g.strip()]
-    
-    memberships = CourseMembership.objects.filter(course=course, group_name__in=group_names, role='student').select_related('user').order_by('group_name', 'user__first_name')
+    if groups:
+        memberships = memberships.filter(group_name__in=groups)
     
     students = []
-    seen = set()
     for m in memberships:
-        if m.user.id not in seen:
-            seen.add(m.user.id)
-            students.append({
-                'id': m.user.id,
-                'name': m.user.get_full_name() or m.user.username,
-                'group_name': m.group_name
-            })
+        students.append({
+            'id': m.user.id,
+            'name': m.user.get_full_name() or m.user.username,
+            'group_name': m.group_name or '',
+        })
     
     return JsonResponse({'students': students})
+
+
+@login_required
+def submission_answers(request, pk):
+    """Submission-un cavablarını JSON olaraq qaytar"""
+    submission = get_object_or_404(LabSubmission, id=pk)
+    
+    if submission.assignment.lab.created_by != request.user:
+        return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
+    # Bu submission-a aid cavabları al
+    answers = LabAnswer.objects.filter(
+        lab=submission.assignment.lab,
+        student=submission.assignment.student,
+        is_draft=False
+    ).select_related('question').order_by('question__block__order', 'question__question_number')
+    
+    answers_data = []
+    for ans in answers:
+        answers_data.append({
+            'question': ans.question.question_text,
+            'answer': ans.answer or '',
+            'file_url': ans.answer_file.url if ans.answer_file else None,
+            'file_name': os.path.basename(ans.answer_file.name) if ans.answer_file else None,
+            'score': float(ans.score) if ans.score else None,
+        })
+    
+    return JsonResponse({'success': True, 'answers': answers_data})
+
+
+
+@login_required
+def my_lab_answers(request, pk):
+    """Tələbənin öz cavablarını görmək"""
+    lab = get_object_or_404(Lab, id=pk)
+    
+    assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
+    if not assignment:
+        messages.error(request, 'Təyinat tapılmadı')
+        return redirect('courses:course_dashboard', pk=lab.course.id)
+    
+    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by('attempt_number')
+    
+    if not all_submissions.exists():
+        messages.error(request, 'Göndəriş tapılmadı')
+        return redirect('courses:course_dashboard', pk=lab.course.id)
+    
+    total_attempts = all_submissions.count()
+    
+    # Hansı cəhdə baxılır?
+    attempt = request.GET.get('attempt')
+    if attempt and attempt.isdigit():
+        attempt_number = int(attempt)
+        submission = all_submissions.filter(attempt_number=attempt_number).first()
+        if not submission:
+            submission = all_submissions.last()
+            attempt_number = submission.attempt_number
+    else:
+        submission = all_submissions.last()
+        attempt_number = submission.attempt_number if submission else 1
+    
+    # Müddət
+    duration = None
+    if submission and submission.submitted_at:
+        start_time = assignment.assigned_at if assignment.assigned_at else lab.start_datetime
+        if start_time:
+            delta = submission.submitted_at - start_time
+            total_seconds = int(delta.total_seconds())
+            if total_seconds > 0:
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                if hours > 0:
+                    duration = f"{hours} saat {minutes} dəqiqə"
+                else:
+                    duration = f"{minutes} dəqiqə"
+    
+    # Bu cəhdin cavablarını al - attempt_number ilə
+    # Əgər attempt_number field yoxdursa, bütün cavabları göstər
+    try:
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=request.user,
+            attempt_number=attempt_number,
+            is_draft=False
+        ).select_related('question').order_by('question__block__order', 'question__question_number')
+    except:
+        # Əgər attempt_number field yoxdursa
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=request.user,
+            is_draft=False
+        ).select_related('question').order_by('question__block__order', 'question__question_number')
+    
+    context = {
+        'lab': lab,
+        'submission': submission,
+        'all_submissions': all_submissions,
+        'answers': answers,
+        'duration': duration,
+        'attempt_number': attempt_number,
+        'total_attempts': total_attempts,
+    }
+    
+    return render(request, 'labs/my_lab_answers.html', context)
