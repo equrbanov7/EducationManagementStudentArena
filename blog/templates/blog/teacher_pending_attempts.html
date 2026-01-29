@@ -5,9 +5,8 @@
 
 {% block extraCss %}
 <style>
-    /* Sadə və təmiz cədvəl dizaynı */
     .pending-container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 40px auto;
         padding: 0 20px;
     }
@@ -40,12 +39,12 @@
         color: #555;
         font-weight: 600;
         text-transform: uppercase;
-        font-size: 0.85rem;
-        padding: 15px 20px;
+        font-size: 0.8rem;
+        padding: 15px 18px;
         text-align: left;
     }
     .custom-table td {
-        padding: 15px 20px;
+        padding: 15px 18px;
         border-bottom: 1px solid #f1f1f1;
         color: #333;
         vertical-align: middle;
@@ -57,16 +56,14 @@
         background-color: #fcfcfc;
     }
     
-    /* User Avatar/Initials */
     .user-cell {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-weight: 600;
     }
     .user-icon {
-        width: 35px;
-        height: 35px;
+        width: 38px;
+        height: 38px;
         background: #e0e7ff;
         color: #4f46e5;
         border-radius: 50%;
@@ -74,36 +71,113 @@
         align-items: center;
         justify-content: center;
         font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    .user-info {
+        font-weight: 600;
+    }
+    .user-email {
+        font-size: 0.75rem;
+        color: #888;
+        font-weight: normal;
     }
 
-    /* Action Button */
-    .btn-check {
+    .exam-title {
+        font-weight: 600;
+        color: #333;
+    }
+    .exam-type {
+        display: inline-block;
+        margin-top: 4px;
+    }
+    
+    /* Tip badge-ləri */
+    .badge-test {
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .badge-essay {
+        background: #fef3c7;
+        color: #b45309;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .btn-check-action {
         background-color: #3b82f6;
         color: white;
         padding: 8px 16px;
         border-radius: 6px;
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         font-weight: 500;
         transition: all 0.2s;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
-    .btn-check:hover {
+    .btn-check-action:hover {
         background-color: #2563eb;
         transform: translateY(-2px);
         color: white;
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .empty-state {
         text-align: center;
-        padding: 50px;
+        padding: 60px 20px;
         color: #666;
     }
     .empty-icon {
-        font-size: 3rem;
+        font-size: 3.5rem;
         color: #d1d5db;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    .empty-state h4 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    /* Filter tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .filter-tab {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #666;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .filter-tab:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+    .filter-tab.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+    .filter-tab .count {
+        background: rgba(0,0,0,0.1);
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 6px;
+        font-size: 0.8rem;
+    }
+    .filter-tab.active .count {
+        background: rgba(255,255,255,0.2);
     }
 </style>
 {% endblock %}
@@ -116,53 +190,86 @@
         <span class="badge bg-secondary fs-6">{{ pending_attempts|length }} Tapşırıq</span>
     </div>
 
+    {% if pending_attempts %}
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            Hamısı <span class="count">{{ pending_attempts|length }}</span>
+        </button>
+        <button class="filter-tab" data-filter="essay">
+            <i class="fas fa-pen-fancy me-1"></i> Yazılı
+            <span class="count">{{ essay_count|default:0 }}</span>
+        </button>
+        <button class="filter-tab" data-filter="test">
+            <i class="fas fa-list-check me-1"></i> Test
+            <span class="count">{{ test_count|default:0 }}</span>
+        </button>
+    </div>
+    {% endif %}
+
     <div class="table-card">
         {% if pending_attempts %}
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Tələbə (İstifadəçi)</th>
-                        <th>İmtahan / Mövzu</th>
+                        <th>Tələbə</th>
+                        <th>İmtahan / Tip</th>
                         <th>Göndərilmə Tarixi</th>
                         <th>Status</th>
                         <th class="text-end">Əməliyyat</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="attemptsTableBody">
                     {% for attempt in pending_attempts %}
-                    <tr>
+                    <tr data-type="{{ attempt.exam.exam_type|default:'test' }}">
                         <td>
                             <div class="user-cell">
                                 <div class="user-icon">
                                     <i class="fas fa-user"></i>
                                 </div>
-                                <div>
+                                <div class="user-info">
                                     {{ attempt.user.get_full_name|default:attempt.user.username }}
-                                    <small class="d-block text-muted fw-normal" style="font-size:0.75rem;">
-                                        {{ attempt.user.email }}
-                                    </small>
+                                    <div class="user-email">{{ attempt.user.email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <strong>{{ attempt.exam.title }}</strong>
+                            <div class="exam-title">{{ attempt.exam.title }}</div>
+                            <div class="exam-type">
+                                {% if attempt.exam.exam_type == 'essay' %}
+                                    <span class="badge-essay">
+                                        <i class="fas fa-pen-fancy me-1"></i> Yazılı
+                                    </span>
+                                {% else %}
+                                    <span class="badge-test">
+                                        <i class="fas fa-list-check me-1"></i> Test
+                                    </span>
+                                {% endif %}
+                            </div>
                         </td>
                         <td>
-                            {{ attempt.finished_at|date:"d.m.Y H:i" }}
-                            <small class="text-muted d-block">
-                                ({{ attempt.finished_at|timesince }} əvvəl)
-                            </small>
+                            <div>{{ attempt.finished_at|date:"d.m.Y H:i" }}</div>
+                            <small class="text-muted">({{ attempt.finished_at|timesince }} əvvəl)</small>
                         </td>
                         <td>
                             {% if attempt.status == 'expired' %}
-                                <span class="badge bg-danger">Vaxt bitib</span>
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-clock me-1"></i> Vaxt bitib
+                                </span>
+                            {% elif attempt.status == 'pending_review' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-hourglass-half me-1"></i> Yoxlanılır
+                                </span>
                             {% else %}
-                                <span class="badge bg-success">Təslim edilib</span>
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i> Təslim edilib
+                                </span>
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'teacher_check_attempt' attempt.exam.slug attempt.id %}" class="btn-check">
-                                <i class="fas fa-marker me-1"></i> Yoxla
+                            <a href="{% url 'teacher_check_attempt' attempt.exam.slug attempt.id %}" 
+                               class="btn-check-action">
+                                <i class="fas fa-marker"></i> Yoxla
                             </a>
                         </td>
                     </tr>
@@ -174,11 +281,40 @@
                 <div class="empty-icon">
                     <i class="fas fa-check-double"></i>
                 </div>
-                <h4>Hər şey əla!</h4>
-                <p>Hazırda yoxlanılacaq heç bir tapşırıq yoxdur.</p>
-                <a href="{% url 'profile' request.user.username %}" class="btn btn-outline-primary mt-3">Profilə qayıt</a>
+                <h4>Hər şey yolundadır!</h4>
+                <p class="text-muted">Hazırda yoxlanılacaq heç bir tapşırıq yoxdur.</p>
+                <a href="{% url 'profile' request.user.username %}" class="btn btn-outline-primary mt-3">
+                    <i class="fas fa-arrow-left me-2"></i> Profilə qayıt
+                </a>
             </div>
         {% endif %}
     </div>
 </div>
+
+{% if pending_attempts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    const rows = document.querySelectorAll('#attemptsTableBody tr');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Active class
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.dataset.type === filter ? '' : 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

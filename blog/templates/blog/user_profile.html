@@ -16,55 +16,71 @@
         <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
 
         {% if request.user.is_authenticated and request.user == profile_user %}
-             <a href="{% url 'create_post' %}" class="profile-create-post-btn">
-               <i class="fas fa-plus-circle"></i> Yeni post yarat
-             </a>
-
-             {% if assigned_count > 0 %}
-                <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
-                    <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlarım
-                    <span class="pending-badge">{{ assigned_count }}</span>
+            <div class="profile-buttons-container">
+                
+                <a href="{% url 'create_post' %}" class="profile-create-post-btn">
+                    <i class="fas fa-plus-circle"></i> Yeni post yarat
                 </a>
-             {% endif %}
 
-             <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
-                <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
-             </a>
-
-             {% if request.user.is_teacher %}
-                 <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
-                      <i class="fas fa-file-alt"></i> İmtahanlarım
-                 </a>
-                 {% if pending_count > 0 %}
-                    <a href="{% url 'teacher_pending_attempts' %}" class="profile-create-post-btn btn-warning-pulse">
-                        <i class="fas fa-bell"></i> Yoxlanılacaq
-                        <span class="pending-badge">{{ pending_count }}</span>
+                {% if assigned_count > 0 %}
+                    <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
+                        <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlarım
+                        <span class="pending-badge">{{ assigned_count }}</span>
                     </a>
-                 {% endif %}
-                 <a href="{% url 'create_exam' %}" class="profile-create-post-btn">
-                      <i class="fas fa-plus-square"></i> Yeni imtahan yarat
-                 </a>
-                
-                            {# --- YENİ: Qruplar düymələri --- #}
-                <a href="{% url 'teacher_group_list' %}" class="profile-create-post-btn">
-                    <i class="fas fa-users"></i> Qruplarım
-                </a>
-                
-                <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9;">
-                    <i class="fas fa-graduation-cap"></i> Kurslarım
-                  </a>
-                  
-                  <!-- ← YENİ SƏTIR: Kurs Yarat Düyməsi -->
-                <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #28a745;">
-                    <i class="fas fa-graduation-cap"></i> Yeni Kurs Yarat
+                {% endif %}
+
+                <a href="{% url 'student_exam_history' %}" class="profile-create-post-btn">
+                    <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
                 </a>
 
-                {% comment %} <a href="{% url 'create_student_group' %}" class="profile-create-post-btn">
-                    <i class="fas fa-user-plus"></i> Qrup yarat
-                </a> {% endcomment %}
-            {% endif %}
+                {# ═══════════════════════════════════════════════════════ #}
+                {# TƏLƏBƏ KURSLARI - YENİ                                  #}
+                {# ═══════════════════════════════════════════════════════ #}
+                {% if request.user.is_student %}
+                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981;">
+                        <i class="fas fa-graduation-cap"></i> Kurslarım
+                        {% if student_courses_count > 0 %}
+                            <span class="pending-badge">{{ student_courses_count }}</span>
+                        {% endif %}
+                    </a>
+                {% endif %}
+
+                {# ═══════════════════════════════════════════════════════ #}
+                {# MÜƏLLİM BUTTONLARI                                      #}
+                {# ═══════════════════════════════════════════════════════ #}
+                {% if request.user.is_teacher %}
+                    <a href="{% url 'teacher_exam_list' %}" class="profile-create-post-btn">
+                        <i class="fas fa-file-alt"></i> İmtahanlarım
+                    </a>
+                    
+                    {% if pending_count > 0 %}
+                        <a href="{% url 'teacher_pending_attempts' %}" class="profile-create-post-btn btn-warning-pulse">
+                            <i class="fas fa-bell"></i> Yoxlanılacaq
+                            <span class="pending-badge">{{ pending_count }}</span>
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'create_exam' %}" class="profile-create-post-btn">
+                        <i class="fas fa-plus-square"></i> Yeni imtahan yarat
+                    </a>
+                    
+                    <a href="{% url 'teacher_group_list' %}" class="profile-create-post-btn">
+                        <i class="fas fa-users"></i> Qruplarım
+                    </a>
+                    
+                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9;">
+                        <i class="fas fa-graduation-cap"></i> Kurslarım
+                    </a>
+                    
+                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #28a745;">
+                        <i class="fas fa-graduation-cap"></i> Yeni Kurs Yarat
+                    </a>
+                {% endif %}
+                
+            </div>
         {% endif %}
     </header>
+
 
     <section class="profile-posts-section">
         {% if posts %}

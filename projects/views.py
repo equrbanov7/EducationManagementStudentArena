@@ -1,12 +1,12 @@
 """
 ═══════════════════════════════════════════════════════════════════════════════
-ASSIGNMENTS VIEWS
+PROJECTS VIEWS
 ═══════════════════════════════════════════════════════════════════════════════
-Sərbəst işlər üçün bütün view-lar:
+Kurs işləri üçün bütün view-lar:
 - CRUD əməliyyatları (create, edit, delete)
 - Tələbə görünüşü (detail, submit, my_submissions)
 - Müəllim görünüşü (review, grade)
-- API helper view-lar (search students, groups)
+- API helper view-lar (get groups, get students)
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
@@ -15,10 +15,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q
 from django.views.decorators.http import require_http_methods
 
-from .models import Assignment, AssignmentSubmission
+from .models import Project, ProjectSubmission
 from courses.models import Course, CourseMembership
 from django.contrib.auth import get_user_model
 
@@ -31,14 +30,14 @@ User = get_user_model()
 
 @login_required
 @require_http_methods(["POST"])
-def create_assignment(request, course_id):
+def create_project(request, course_id):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Sərbəst iş yaratma                                                      │
-    │ POST /assignments/create/<course_id>/                                   │
+    │ Kurs işi yaratma                                                        │
+    │ POST /projects/create/<course_id>/                                      │
     │                                                                         │
-    │ Tələb olunan fieldlər: title, deadline                                  │
-    │ Opsional: description, start_date, max_attempts, status                 │
+    │ Tələb olunan fieldlər: title, start_date, deadline                      │
+    │ Opsional: description, max_attempts, max_score, status                  │
     │ Təyin etmə: group_names[] və ya students[]                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
@@ -49,14 +48,15 @@ def create_assignment(request, course_id):
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        # Assignment yarat
-        assignment = Assignment.objects.create(
+        # Project yarat
+        project = Project.objects.create(
             course=course,
             title=request.POST.get('title'),
             description=request.POST.get('description', ''),
             start_date=request.POST.get('start_date'),
             deadline=request.POST.get('deadline'),
-            max_attempts=request.POST.get('max_attempts', 3),
+            max_attempts=request.POST.get('max_attempts', 1),
+            max_score=request.POST.get('max_score', 100),
             status=request.POST.get('status', 'active')
         )
         
@@ -71,7 +71,7 @@ def create_assignment(request, course_id):
         if student_ids:
             # Konkret tələbələr seçilib
             students = User.objects.filter(id__in=student_ids)
-            assignment.assigned_students.set(students)
+            project.assigned_students.set(students)
         elif group_names:
             # Qrup seçilib - qrupdakı bütün tələbələri əlavə et
             group_students = User.objects.filter(
@@ -79,10 +79,10 @@ def create_assignment(request, course_id):
                 course_memberships__group_name__in=group_names,
                 course_memberships__role='student'
             ).distinct()
-            assignment.assigned_students.set(group_students)
+            project.assigned_students.set(group_students)
         
-        messages.success(request, 'Sərbəst iş uğurla yaradıldı!')
-        return JsonResponse({'success': True, 'assignment_id': assignment.id})
+        messages.success(request, 'Kurs işi uğurla yaradıldı!')
+        return JsonResponse({'success': True, 'project_id': project.id})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -90,25 +90,25 @@ def create_assignment(request, course_id):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def edit_assignment(request, pk):
+def edit_project(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Sərbəst işi redaktə etmək                                               │
-    │ GET  /assignments/<pk>/edit/ → JSON data qaytarır                       │
-    │ POST /assignments/<pk>/edit/ → Yeniləyir                                │
+    │ Kurs işini redaktə etmək                                                │
+    │ GET  /projects/<pk>/edit/ → JSON data qaytarır                          │
+    │ POST /projects/<pk>/edit/ → Yeniləyir                                   │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher or project.course.owner != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     # ─────────────────────────────────────────────────────────────────────────
     # GET - Mövcud məlumatları JSON olaraq qaytar
     # ─────────────────────────────────────────────────────────────────────────
     if request.method == 'GET':
-        assigned_students = list(assignment.assigned_students.values(
+        assigned_students = list(project.assigned_students.values(
             'id', 'username', 'first_name', 'last_name'
         ))
         assigned_student_ids = [s['id'] for s in assigned_students]
@@ -116,20 +116,21 @@ def edit_assignment(request, pk):
         # Tələbələrin qruplarını tap
         assigned_groups = list(
             CourseMembership.objects.filter(
-                course=assignment.course,
+                course=project.course,
                 user_id__in=assigned_student_ids,
                 role='student'
             ).exclude(group_name='').values_list('group_name', flat=True).distinct()
         )
         
         data = {
-            'id': assignment.id,
-            'title': assignment.title,
-            'description': assignment.description,
-            'start_date': assignment.start_date.strftime('%Y-%m-%dT%H:%M') if assignment.start_date else '',
-            'deadline': assignment.deadline.strftime('%Y-%m-%dT%H:%M') if assignment.deadline else '',
-            'max_attempts': assignment.max_attempts,
-            'status': assignment.status,
+            'id': project.id,
+            'title': project.title,
+            'description': project.description,
+            'start_date': project.start_date.strftime('%Y-%m-%dT%H:%M') if project.start_date else '',
+            'deadline': project.deadline.strftime('%Y-%m-%dT%H:%M') if project.deadline else '',
+            'max_attempts': project.max_attempts,
+            'max_score': project.max_score,
+            'status': project.status,
             'group_names': assigned_groups,
             'student_ids': assigned_student_ids,
             'students': [
@@ -142,17 +143,18 @@ def edit_assignment(request, pk):
         }
         return JsonResponse({'success': True, 'data': data})
     
-    # ───────────────��─────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # POST - Yenilə
     # ─────────────────────────────────────────────────────────────────────────
     try:
-        assignment.title = request.POST.get('title')
-        assignment.description = request.POST.get('description', '')
-        assignment.start_date = request.POST.get('start_date')
-        assignment.deadline = request.POST.get('deadline')
-        assignment.max_attempts = request.POST.get('max_attempts', 3)
-        assignment.status = request.POST.get('status', 'active')
-        assignment.save()
+        project.title = request.POST.get('title')
+        project.description = request.POST.get('description', '')
+        project.start_date = request.POST.get('start_date')
+        project.deadline = request.POST.get('deadline')
+        project.max_attempts = request.POST.get('max_attempts', 1)
+        project.max_score = request.POST.get('max_score', 100)
+        project.status = request.POST.get('status', 'active')
+        project.save()
         
         # ════════════════════════════════════════════════════════════
         # TƏLƏBƏLƏRİ TƏYİN ETMƏ MƏNTİQİ:
@@ -165,19 +167,19 @@ def edit_assignment(request, pk):
         
         if student_ids:
             students = User.objects.filter(id__in=student_ids)
-            assignment.assigned_students.set(students)
+            project.assigned_students.set(students)
         elif group_names:
             group_students = User.objects.filter(
-                course_memberships__course=assignment.course,
+                course_memberships__course=project.course,
                 course_memberships__group_name__in=group_names,
                 course_memberships__role='student'
             ).distinct()
-            assignment.assigned_students.set(group_students)
+            project.assigned_students.set(group_students)
         else:
-            assignment.assigned_students.clear()
+            project.assigned_students.clear()
         
-        messages.success(request, 'Sərbəst iş yeniləndi!')
-        return JsonResponse({'success': True, 'message': 'Sərbəst iş yeniləndi'})
+        messages.success(request, 'Kurs işi yeniləndi!')
+        return JsonResponse({'success': True, 'message': 'Kurs işi yeniləndi'})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -185,92 +187,92 @@ def edit_assignment(request, pk):
 
 @login_required
 @require_http_methods(["POST"])
-def delete_assignment(request, pk):
+def delete_project(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Sərbəst işi silmək                                                      │
-    │ POST /assignments/<pk>/delete/                                          │
-    └─────────────────────────────────────────────────────────────────────────┘
+    │ Kurs işini silmək                                                       │
+    │ POST /projects/<pk>/delete/                                             │
+    └─────────────────────────────��───────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher or project.course.owner != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        assignment.delete()
-        messages.success(request, 'Sərbəst iş silindi!')
+        project.delete()
+        messages.success(request, 'Kurs işi silindi!')
         return JsonResponse({'success': True, 'message': 'Silindi'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
-# ���══════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
 # TƏLƏBƏ GÖRÜNÜŞÜ
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
-def assignment_detail(request, pk):
+def project_detail(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Sərbəst işin detalları (tələbə üçün)                                    │
-    │ GET /assignments/<pk>/                                                  │
+    │ Kurs işinin detalları (tələbə üçün)                                     │
+    │ GET /projects/<pk>/                                                     │
     │                                                                         │
     │ Tələbə burada:                                                          │
-    │ - Assignment məlumatlarını görür                                        │
+    │ - Project məlumatlarını görür                                           │
     │ - Əvvəlki cavablarını görür                                             │
     │ - Yeni cavab göndərə bilir (cəhd varsa)                                 │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
     # ─────────────────────────────────────────────────────────────────────────
     # İcazə yoxlaması - tələbə yalnız özünə təyin olunmuşlara baxa bilər
     # ─────────────────────────────────────────────────────────────────────────
     if getattr(request.user, 'is_student', False):
-        has_access = assignment.assigned_students.filter(id=request.user.id).exists()
+        has_access = project.assigned_students.filter(id=request.user.id).exists()
         if not has_access:
-            messages.error(request, 'Bu tapşırığa giriş icazəniz yoxdur')
-            return redirect('courses:course_dashboard', course_id=assignment.course.id)
+            messages.error(request, 'Bu kurs işinə giriş icazəniz yoxdur')
+            return redirect('courses:course_dashboard', course_id=project.course.id)
     
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = assignment.submissions.filter(student=request.user).order_by('-submitted_at')
+    user_submissions = project.submissions.filter(student=request.user).order_by('-submitted_at')
     user_attempts = user_submissions.count()
     
     context = {
-        'assignment': assignment,
+        'project': project,
         'user_submissions': user_submissions,
         'user_attempts': user_attempts,
-        'can_submit': assignment.can_user_submit(request.user),
-        'attempts_left': assignment.max_attempts - user_attempts,
+        'can_submit': project.can_user_submit(request.user),
+        'attempts_left': project.max_attempts - user_attempts,
     }
     
-    return render(request, 'assignments/assignment_detail.html', context)
+    return render(request, 'projects/project_detail.html', context)
 
 
 @login_required
 @require_http_methods(["POST"])
-def submit_assignment(request, pk):
+def submit_project(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Sərbəst işə cavab göndərmək                                             │
-    │ POST /assignments/<pk>/submit/                                          │
+    │ Kurs işinə cavab göndərmək                                              │
+    │ POST /projects/<pk>/submit/                                             │
     │                                                                         │
     │ Form data: content (text), file (optional)                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
     # Cavab göndərə bilərmi yoxla
-    if not assignment.can_user_submit(request.user):
+    if not project.can_user_submit(request.user):
         return JsonResponse({
             'success': False,
-            'error': 'Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib.'
+            'error': 'Təqdim etmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib.'
         }, status=400)
     
     try:
-        submission = AssignmentSubmission.objects.create(
-            assignment=assignment,
+        submission = ProjectSubmission.objects.create(
+            project=project,
             student=request.user,
             content=request.POST.get('content', ''),
         )
@@ -280,10 +282,10 @@ def submit_assignment(request, pk):
             submission.file = request.FILES['file']
             submission.save()
         
-        messages.success(request, 'Cavabınız göndərildi!')
+        messages.success(request, 'Layihəniz təqdim edildi!')
         return JsonResponse({
             'success': True,
-            'message': 'Cavab göndərildi',
+            'message': 'Layihə təqdim edildi',
             'submission_id': submission.id
         })
         
@@ -296,7 +298,7 @@ def my_submissions(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
     │ Tələbənin öz cavablarını görmək                                         │
-    │ GET /assignments/<pk>/my-submissions/                                   │
+    │ GET /projects/<pk>/my-submissions/                                      │
     │                                                                         │
     │ Tələbə burada:                                                          │
     │ - Bütün göndərdiyi cavabları görür                                      │
@@ -305,28 +307,28 @@ def my_submissions(request, pk):
     │ - Qalan cəhd sayını görür                                               │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
     # ─────────────────────────────────────────────────────────────────────────
-    # İcazə yoxlaması - yalnız özünə təyin olunmuş assignment-lara baxa bilər
-    # ──────────────────��──────────────────────────────────────────────────────
-    if not assignment.assigned_students.filter(id=request.user.id).exists():
-        messages.error(request, 'Bu tapşırığa giriş icazəniz yoxdur')
-        return redirect('courses:course_dashboard', course_id=assignment.course.id)
+    # İcazə yoxlaması - yalnız özünə təyin olunmuş project-lərə baxa bilər
+    # ─────────────────────────────────────────────────────────────────────────
+    if not project.assigned_students.filter(id=request.user.id).exists():
+        messages.error(request, 'Bu kurs işinə giriş icazəniz yoxdur')
+        return redirect('courses:course_dashboard', course_id=project.course.id)
     
     # İstifadəçinin cavablarını al
-    submissions = assignment.submissions.filter(student=request.user).order_by('-submitted_at')
+    submissions = project.submissions.filter(student=request.user).order_by('-submitted_at')
     user_attempts = submissions.count()
     
     context = {
-        'assignment': assignment,
+        'project': project,
         'submissions': submissions,
         'user_attempts': user_attempts,
-        'can_submit': assignment.can_user_submit(request.user),
-        'attempts_left': assignment.max_attempts - user_attempts,
+        'can_submit': project.can_user_submit(request.user),
+        'attempts_left': project.max_attempts - user_attempts,
     }
     
-    return render(request, 'assignments/my_submissions.html', context)
+    return render(request, 'projects/my_submissions.html', context)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -338,7 +340,7 @@ def review_submissions(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
     │ Cavabları yoxlamaq (müəllim üçün)                                       │
-    │ GET /assignments/<pk>/submissions/                                      │
+    │ GET /projects/<pk>/submissions/                                         │
     │                                                                         │
     │ Müəllim burada:                                                         │
     │ - Bütün tələbə cavablarını görür                                        │
@@ -346,21 +348,21 @@ def review_submissions(request, pk):
     │ - Rəy yaza bilir                                                        │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    assignment = get_object_or_404(Assignment, id=pk)
+    project = get_object_or_404(Project, id=pk)
     
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher or project.course.owner != request.user:
         messages.error(request, 'İcazəniz yoxdur')
-        return redirect('courses:course_dashboard', course_id=assignment.course.id)
+        return redirect('courses:course_dashboard', course_id=project.course.id)
     
-    submissions = assignment.submissions.select_related('student').order_by('-submitted_at')
+    submissions = project.submissions.select_related('student').order_by('-submitted_at')
     
     context = {
-        'assignment': assignment,
+        'project': project,
         'submissions': submissions,
     }
     
-    return render(request, 'assignments/review_submissions.html', context)
+    return render(request, 'projects/review_submissions.html', context)
 
 
 @login_required
@@ -369,15 +371,15 @@ def grade_submission(request, pk):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
     │ Cavabı qiymətləndirmək                                                  │
-    │ POST /assignments/submission/<pk>/grade/                                │
+    │ POST /projects/submission/<pk>/grade/                                   │
     │                                                                         │
     │ Form data: grade, feedback (optional)                                   │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    submission = get_object_or_404(AssignmentSubmission, id=pk)
+    submission = get_object_or_404(ProjectSubmission, id=pk)
     
     # İcazə yoxlaması
-    if not request.user.is_teacher or submission.assignment.course.owner != request.user:
+    if not request.user.is_teacher or submission.project.course.owner != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
@@ -403,83 +405,41 @@ def grade_submission(request, pk):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @login_required
-def search_students(request):
-    """
-    ┌────────────────���────────────────────────────────────────────────────────┐
-    │ Tələbə axtarışı (AJAX)                                                  │
-    │ GET /assignments/api/students/?q=<query>&course_id=<id>                 │
-    │                                                                         │
-    │ Select2 dropdown üçün istifadə olunur                                   │
-    └─────────────────────────────────────────────────────────────────────────┘
-    """
-    query = request.GET.get('q', '')
-    course_id = request.GET.get('course_id')
-    
-    if not course_id:
-        return JsonResponse({'results': []})
-    
-    course = get_object_or_404(Course, id=course_id)
-    
-    # Kursda olan tələbələri axtar
-    student_memberships = course.memberships.filter(
-        role='student'
-    ).filter(
-        Q(user__username__icontains=query) |
-        Q(user__first_name__icontains=query) |
-        Q(user__last_name__icontains=query)
-    ).select_related('user')[:10]
-    
-    results = [{
-        'id': m.user.id,
-        'text': f"{m.user.get_full_name()} ({m.user.username})" if m.user.first_name else m.user.username,
-        'group_name': m.group_name or ''
-    } for m in student_memberships]
-    
-    return JsonResponse({'results': results})
-
-
-@login_required
-def search_groups(request):
+def api_get_groups(request):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Qrup axtarışı (AJAX)                                                    │
-    │ GET /assignments/api/groups/?q=<query>&course_id=<id>                   │
-    │                                                                         │
-    │ Kursdakı unique group_name-ləri qaytarır                                │
+    │ Kursdakı qrupları qaytarır (AJAX)                                       │
+    │ GET /projects/api/groups/?course_id=<id>                                │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    query = request.GET.get('q', '')
     course_id = request.GET.get('course_id')
     
     if not course_id:
-        return JsonResponse({'results': []})
+        return JsonResponse({'groups': []})
     
     course = get_object_or_404(Course, id=course_id)
     
     # Unique qrup adlarını tap
-    group_names = CourseMembership.objects.filter(
+    groups = CourseMembership.objects.filter(
         course=course,
-        group_name__icontains=query
+        role='student'
     ).exclude(
         group_name=''
-    ).values_list('group_name', flat=True).distinct()[:10]
+    ).exclude(
+        group_name__isnull=True
+    ).values_list('group_name', flat=True).distinct().order_by('group_name')
     
-    results = [{
-        'id': name,
-        'text': name
-    } for name in group_names]
-    
-    return JsonResponse({'results': results})
+    return JsonResponse({
+        'groups': [{'id': i, 'name': name} for i, name in enumerate(groups, 1)]
+    })
 
 
 @login_required
-def students_by_groups(request):
+def api_get_students(request):
     """
     ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Qruplara görə tələbələri qaytarır (AJAX)                                │
-    │ GET /assignments/api/students-by-groups/?course_id=<id>&groups=<g1,g2>  │
-    │                                                                         │
-    │ Modal-da qrup seçildikdə tələbə listini yeniləmək üçün                  │
+    │ Qruplardakı tələbələri qaytarır (AJAX)                                  │
+    │ GET /projects/api/students/?course_id=<id>&groups=<g1,g2>               │
     └─────────────────────────────────────────────────────────────────────────┘
     """
     course_id = request.GET.get('course_id')

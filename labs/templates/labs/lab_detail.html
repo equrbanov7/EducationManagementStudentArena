@@ -1,0 +1,470 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load lab_filters %}
+
+{% block title %}{{ lab.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="text-decoration-none">
+                            {{ lab.course.title }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ lab.title }}</li>
+                </ol>
+            </nav>
+            <h2 class="mb-1">
+                <i class="fas fa-flask text-danger me-2"></i> {{ lab.title }}
+            </h2>
+            {% if lab.description %}
+            <p class="text-muted mb-0">{{ lab.description }}</p>
+            {% endif %}
+        </div>
+        <div>
+            {% if lab.is_open %}
+                <span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check-circle me-1"></i> Açıq</span>
+            {% elif lab.is_upcoming %}
+                <span class="badge bg-info fs-6 px-3 py-2"><i class="fas fa-clock me-1"></i> Tezliklə</span>
+            {% else %}
+                <span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-lock me-1"></i> Bağlı</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- ARTIQ GÖNDƏRİLİB VƏ CƏHD BİTİB -->
+    {% if has_submitted and not can_retry %}
+    <div class="card border-success mb-4">
+        <div class="card-body bg-success bg-opacity-10">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-check-circle text-success fs-3"></i>
+                    <div>
+                        <strong class="text-success">Bu labı artıq göndərmisiniz!</strong>
+                        <div class="text-muted small">
+                            {{ submission.submitted_at|date:"d.m.Y H:i" }} · 
+                            Cəhd: {{ attempt_count }} / {{ lab.max_attempts }}
+                        </div>
+                    </div>
+                    {% if submission.status == 'graded' %}
+                        <span class="badge bg-primary fs-6">{{ submission.score }}/{{ lab.max_score }}</span>
+                    {% else %}
+                        <span class="badge bg-warning">Qiymətləndirilməyib</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-success">
+                    <i class="fas fa-eye me-1"></i> Cavablarıma Bax
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- PROGRESS BAR - Yalnız açıq və göndərə bilərsə -->
+    {% if lab.is_open and questions and can_retry %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-list-check text-primary fs-5"></i>
+                        <span>Cavablandırılan:</span>
+                        <strong class="text-primary fs-5" id="answeredCount">0</strong>
+                        <span>/ {{ questions|length }}</span>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="d-flex justify-content-center gap-4">
+                        <div class="text-center">
+                            <small class="text-muted d-block">Keçən vaxt</small>
+                            <div class="fs-5 fw-bold text-primary font-monospace" id="elapsedTimer">00:00:00</div>
+                        </div>
+                        <div class="text-center">
+                            <small class="text-muted d-block">Qalan vaxt</small>
+                            <div class="fs-5 fw-bold text-danger font-monospace" id="remainingTimer">--:--:--</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar bg-success" id="progressBar" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        
+        <!-- SOL PANEL -->
+        <div class="col-lg-4 mb-4">
+            
+            <!-- Lab Info -->
+            <div class="card mb-3 border-0 shadow-sm">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-info-circle me-2"></i> <strong>Lab Məlumatı</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-calendar-alt text-muted me-3" style="width: 20px;"></i>
+                        <div>
+                            <small class="text-muted d-block">Başlanğıc</small>
+                            <strong>{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-clock text-muted me-3" style="width: 20px;"></i>
+                        <div>
+                            <small class="text-muted d-block">Son Tarix</small>
+                            <strong>{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-star text-warning me-3" style="width: 20px;"></i>
+                        <div>
+                            <small class="text-muted d-block">Maksimum Bal</small>
+                            <strong>{{ lab.max_score }}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-redo text-info me-3" style="width: 20px;"></i>
+                        <div>
+                            <small class="text-muted d-block">Cəhd</small>
+                            <strong>{{ attempt_count|default:0 }} / {{ lab.max_attempts }}</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-question-circle text-primary me-3" style="width: 20px;"></i>
+                        <div>
+                            <small class="text-muted d-block">Sual Sayı</small>
+                            <strong>{{ questions|length }} ədəd</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Materials -->
+            {% if lab.teacher_files or lab.teacher_instructions %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <i class="fas fa-file-alt me-2"></i> <strong>Materiallar</strong>
+                </div>
+                <div class="card-body">
+                    {% if lab.teacher_files %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Müəllim Faylı:</small>
+                        <a href="{{ lab.teacher_files.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-download me-1"></i> Yüklə
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if lab.teacher_instructions %}
+                    <div>
+                        <small class="text-muted d-block mb-2">Təlimatlar:</small>
+                        <div class="bg-light p-3 rounded small">
+                            {{ lab.teacher_instructions|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+        
+        <!-- SAĞ PANEL - SUALLAR -->
+        <div class="col-lg-8">
+            
+            {% if lab.is_open and can_retry %}
+                {% if questions %}
+                <form id="labForm" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% for question in questions %}
+                    <div class="card mb-3 border-0 shadow-sm question-card" 
+                         id="question-{{ question.id }}" 
+                         data-question-id="{{ question.id }}">
+                        
+                        <div class="card-header d-flex align-items-center gap-3 text-white" 
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <span class="badge bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                  style="width: 32px; height: 32px; font-weight: bold;">
+                                {{ forloop.counter }}
+                            </span>
+                            <span class="flex-grow-1">{{ question.question_text }}</span>
+                            {% if question.points > 0 %}
+                            <span class="badge bg-warning text-dark">{{ question.points }} bal</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body">
+                            {% if question.attachment %}
+                            <div class="mb-3">
+                                <a href="{{ question.attachment.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-paperclip me-1"></i> Əlavə fayl
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% with saved_answer=saved_answers|get_item:question.id %}
+                            <textarea class="form-control answer-textarea mb-3" 
+                                      name="answer_{{ question.id }}" 
+                                      rows="4" 
+                                      placeholder="Cavabınızı buraya yazın...">{{ saved_answer }}</textarea>
+                            {% endwith %}
+                            
+                            <!-- Fayl Yükləmə -->
+                            <div class="file-upload-area p-3 border rounded text-center mb-2" 
+                                 style="border-style: dashed !important; cursor: pointer; background: #fafafa;"
+                                 onclick="document.getElementById('file-{{ question.id }}').click()">
+                                <input type="file" name="file_{{ question.id }}" id="file-{{ question.id }}" 
+                                       class="d-none file-input" accept="image/*,.pdf,.doc,.docx,.zip,.py,.java,.cpp,.txt">
+                                <i class="fas fa-cloud-upload-alt text-muted me-2"></i>
+                                <span class="text-muted file-label">Fayl əlavə et (şəkil, PDF, DOC...)</span>
+                            </div>
+                            <div class="file-preview d-none mb-2" id="preview-{{ question.id }}">
+                                <span class="badge bg-primary p-2">
+                                    <i class="fas fa-file me-1"></i>
+                                    <span class="file-name"></span>
+                                    <button type="button" class="btn-close btn-close-white ms-2" 
+                                            style="font-size: 0.5rem;" 
+                                            onclick="event.stopPropagation(); removeFile({{ question.id }})"></button>
+                                </span>
+                            </div>
+                            
+                            <div class="save-status small" id="status-{{ question.id }}">
+                                {% if saved_answers|get_item:question.id %}
+                                <i class="fas fa-check-circle text-success"></i> Saxlanıldı
+                                {% else %}
+                                <i class="fas fa-circle text-muted"></i> Cavab gözləyir
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- Submit -->
+                    <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <div class="card-body text-white">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Diqqət:</strong> Göndərdikdən sonra dəyişiklik edə bilməzsiniz!
+                                </div>
+                                <button type="submit" class="btn btn-light btn-lg px-4 fw-bold" id="submitBtn">
+                                    <i class="fas fa-paper-plane me-2"></i> Labı Bitir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </form>
+                {% else %}
+                <div class="alert alert-warning text-center py-5">
+                    <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                    <h5>Bu lab üçün sual yoxdur</h5>
+                </div>
+                {% endif %}
+                
+            {% elif has_submitted and not can_retry %}
+                <!-- Artıq göndərilib, cəhd bitib - yuxarıda göstərilir -->
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                    <h5>Bu labı uğurla göndərmisiniz!</h5>
+                    <p class="mb-3">Cəhd sayınız bitib ({{ attempt_count }} / {{ lab.max_attempts }})</p>
+                    <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-success">
+                        <i class="fas fa-eye me-1"></i> Cavablarıma Bax
+                    </a>
+                </div>
+                
+            {% elif lab.is_upcoming %}
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-clock fa-3x mb-3"></i>
+                    <h5>Lab hələ başlamayıb</h5>
+                    <p class="mb-0">Başlanğıc: <strong>{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong></p>
+                </div>
+            {% else %}
+                <div class="alert alert-danger text-center py-5">
+                    <i class="fas fa-lock fa-3x mb-3"></i>
+                    <h5>Lab bağlıdır</h5>
+                    <p class="mb-0">Son tarix: <strong>{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong></p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+
+{% if lab.is_open and questions and can_retry %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const LAB_ID = {{ lab.id }};
+    const CSRF = '{{ csrf_token }}';
+    const END_TIME = new Date('{{ lab.end_datetime|date:"c" }}');
+    const TOTAL_QUESTIONS = {{ questions|length }};
+    
+    let labStartTime = localStorage.getItem('lab_' + LAB_ID + '_start');
+    if (!labStartTime) {
+        labStartTime = new Date().toISOString();
+        localStorage.setItem('lab_' + LAB_ID + '_start', labStartTime);
+    }
+    labStartTime = new Date(labStartTime);
+    
+    // File Upload
+  // lab_detail.html JS hissəsinə əlavə et
+
+    document.querySelectorAll('.file-input').forEach(function(input) {
+        input.addEventListener('change', function() {
+            var questionId = this.id.replace('file-', '');
+            var preview = document.getElementById('preview-' + questionId);
+            
+            if (this.files && this.files[0]) {
+                preview.classList.remove('d-none');
+                preview.querySelector('.file-name').textContent = this.files[0].name;
+                
+                // Faylı dərhal yüklə
+                var formData = new FormData();
+                formData.append('question_id', questionId);
+                formData.append('answer', '');
+                formData.append('answer_file', this.files[0]);
+                
+                fetch('/labs/' + LAB_ID + '/auto-save/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {'X-CSRFToken': CSRF}
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var statusEl = document.getElementById('status-' + questionId);
+                    statusEl.innerHTML = data.success 
+                        ? '<i class="fas fa-check-circle text-success"></i> Saxlanıldı'
+                        : '<i class="fas fa-exclamation-circle text-danger"></i> Xəta';
+                });
+            }
+        });
+    });
+    
+    window.removeFile = function(questionId) {
+        document.getElementById('file-' + questionId).value = '';
+        document.getElementById('preview-' + questionId).classList.add('d-none');
+    };
+    
+    // Timer
+    function updateTimers() {
+        var now = new Date();
+        var elapsed = Math.floor((now - labStartTime) / 1000);
+        document.getElementById('elapsedTimer').textContent = formatTime(elapsed);
+        
+        var remaining = Math.max(0, Math.floor((END_TIME - now) / 1000));
+        document.getElementById('remainingTimer').textContent = formatTime(remaining);
+        
+        if (remaining <= 0) {
+            document.getElementById('labForm').submit();
+        }
+    }
+    
+    function formatTime(seconds) {
+        var h = Math.floor(seconds / 3600);
+        var m = Math.floor((seconds % 3600) / 60);
+        var s = seconds % 60;
+        return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+    
+    setInterval(updateTimers, 1000);
+    updateTimers();
+    
+    // Progress
+    function updateProgress() {
+        var answered = 0;
+        document.querySelectorAll('.answer-textarea').forEach(function(ta) {
+            if (ta.value.trim()) answered++;
+        });
+        document.getElementById('answeredCount').textContent = answered;
+        document.getElementById('progressBar').style.width = (answered / TOTAL_QUESTIONS * 100) + '%';
+    }
+    
+    // Auto-save
+    var saveTimeouts = {};
+    document.querySelectorAll('.answer-textarea').forEach(function(ta) {
+        ta.addEventListener('input', function() {
+            var card = this.closest('.question-card');
+            var qId = card.dataset.questionId;
+            clearTimeout(saveTimeouts[qId]);
+            saveTimeouts[qId] = setTimeout(function() { autoSave(qId, ta.value); }, 800);
+        });
+    });
+    
+    function autoSave(questionId, answer) {
+        var statusEl = document.getElementById('status-' + questionId);
+        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin text-primary"></i> Saxlanılır...';
+        
+        fetch('/labs/' + LAB_ID + '/auto-save/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF},
+            body: JSON.stringify({question_id: questionId, answer: answer})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            statusEl.innerHTML = data.success 
+                ? '<i class="fas fa-check-circle text-success"></i> Saxlanıld��'
+                : '<i class="fas fa-exclamation-circle text-danger"></i> Xəta';
+        })
+        .catch(function() {
+            statusEl.innerHTML = '<i class="fas fa-exclamation-circle text-danger"></i> Xəta';
+        });
+        
+        updateProgress();
+    }
+    
+    updateProgress();
+    
+    // Submit
+    document.getElementById('labForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var answered = parseInt(document.getElementById('answeredCount').textContent);
+        if (answered < TOTAL_QUESTIONS && !confirm((TOTAL_QUESTIONS - answered) + ' sual cavabsızdır. Göndərmək istəyirsiniz?')) {
+            return;
+        }
+        
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Göndərilir...';
+        
+        fetch('/labs/' + LAB_ID + '/submit/', {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {'X-CSRFToken': CSRF}
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                localStorage.removeItem('lab_' + LAB_ID + '_start');
+                window.location.href = data.redirect_url || '/';
+            } else {
+                alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Labı Bitir';
+            }
+        })
+        .catch(function() {
+            alert('Server xətası');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Labı Bitir';
+        });
+    });
+
+
+});
+</script>
+{% endif %}
+
+{% endblock %}

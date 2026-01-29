@@ -1,72 +1,95 @@
-<div class="list-group-item border-0 border-bottom pb-3 mb-3"
-     id="assignment-item-{{ a.id }}">
+{% load assignment_tags %}
 
-  <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-    <div class="flex-grow-1">
-      <h6 class="mb-1 fw-bold">
-        <i class="bi bi-file-text"></i> {{ a.title }}
-      </h6>
+<div class="list-group-item border-0 border-bottom pb-3 mb-3" id="assignment-item-{{ a.id }}">
 
-      {% if a.description %}
-        <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
-      {% endif %}
+    <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+        <div class="flex-grow-1">
+            <h6 class="mb-1 fw-bold">
+                <i class="bi bi-file-text text-warning"></i> {{ a.title }}
+            </h6>
 
-      <div class="d-flex flex-wrap gap-3 mb-3">
-        <small class="text-muted">
-          <i class="bi bi-calendar-event"></i>
-          <strong>Müddət:</strong> {{ a.deadline|date:"d.m.Y H:i" }}
-          {% if a.is_deadline_passed %}
-            <span class="badge bg-danger ms-1">❌ Müddət Keçib</span>
-          {% else %}
-            <span class="badge bg-success ms-1">✓ Aktiv</span>
-          {% endif %}
-        </small>
+            {% if a.description %}
+                <p class="text-muted small mb-2">{{ a.description|truncatewords:20 }}</p>
+            {% endif %}
 
-        <small class="text-muted">
-          <i class="bi bi-arrow-repeat"></i>
-          <strong>Maks. Cəhd:</strong> {{ a.max_attempts }}
-        </small>
-      </div>
+            <div class="d-flex flex-wrap gap-3 mb-3">
+                <small class="text-muted">
+                    <i class="bi bi-calendar-event"></i>
+                    <strong>Müddət:</strong> {{ a.deadline|date:"d.m.Y H:i" }}
+                    {% if a.is_deadline_passed %}
+                        <span class="badge bg-danger ms-1">❌ Müddət Keçib</span>
+                    {% else %}
+                        <span class="badge bg-success ms-1">✓ Aktiv</span>
+                    {% endif %}
+                </small>
+
+                {# Tələbə üçün cəhd sayı #}
+                {% if not request.user.is_teacher %}
+                    {% user_attempts a request.user as attempts %}
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <strong>Cəhdlər:</strong> {{ attempts }} / {{ a.max_attempts }}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Müəllim üçün statistika #}
+        {% if request.user.is_teacher %}
+        <div class="ms-2 text-end">
+            <span class="badge bg-info-subtle text-info">
+                <i class="bi bi-chat-left-text"></i> {{ a.get_submissions_count }} Cavab
+            </span>
+            {% if a.get_pending_submissions > 0 %}
+                <br>
+                <span class="badge bg-warning text-dark mt-1">
+                    <i class="bi bi-hourglass-split"></i> {{ a.get_pending_submissions }} Gözləyən
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
-    <div class="ms-2 text-end">
-      <span class="badge bg-info-subtle text-info">
-        <i class="bi bi-chat-left-text"></i> {{ a.get_submissions_count }} Cavab
-      </span>
-      {% if a.get_pending_submissions > 0 %}
-        <br>
-        <span class="badge bg-warning text-dark mt-1">
-          <i class="bi bi-hourglass-split"></i> {{ a.get_pending_submissions }} Gözləyən
-        </span>
-      {% endif %}
+    <div class="btn-group btn-group-sm gap-1" role="group">
+        {% if request.user.is_teacher %}
+            <a href="{% url 'assignments:review_assignment_submissions' a.id %}"
+               class="btn btn-sm btn-info">
+                <i class="bi bi-eye"></i> Cavabları Gör
+            </a>
+            <button type="button"
+                    class="btn btn-sm btn-warning js-edit-assignment"
+                    data-url="{% url 'assignments:edit_assignment' a.id %}">
+                <i class="bi bi-pencil"></i> Redaktə
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-danger js-delete-assignment"
+                    data-url="{% url 'assignments:delete_assignment' a.id %}">
+                <i class="bi bi-trash"></i> Sil
+            </button>
+        {% else %}
+            {# Tələbə üçün #}
+            {% user_attempts a request.user as attempts %}
+            {% can_submit a request.user as can_submit_now %}
+            
+            {# Əgər ən azı 1 cavab varsa - Cavablarım linki #}
+            {% if attempts > 0 %}
+                <a href="{% url 'assignments:my_submissions' a.id %}"
+                   class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-list-check"></i> Cavablarım ({{ attempts }})
+                </a>
+            {% endif %}
+            
+            {# Cavab verə bilərsə #}
+            {% if can_submit_now %}
+                <a href="{% url 'assignments:assignment_detail' a.id %}"
+                   class="btn btn-sm btn-primary">
+                    <i class="bi bi-arrow-right"></i> Cavab Ver
+                </a>
+            {% elif attempts >= a.max_attempts %}
+                <span class="btn btn-sm btn-secondary disabled">
+                    <i class="bi bi-x-circle"></i> Cəhd Bitdi
+                </span>
+            {% endif %}
+        {% endif %}
     </div>
-  </div>
-
-  <div class="btn-group btn-group-sm gap-1" role="group">
-    {% if request.user.is_teacher %}
-      <a href="{% url 'assignments:review_assignment_submissions' a.id %}"
-         class="btn btn-sm btn-info">
-        <i class="bi bi-eye"></i> Cavabları Gör
-      </a>
-
-      <button type="button"
-              class="btn btn-sm btn-warning js-edit-assignment"
-              data-url="{% url 'assignments:edit_assignment' a.id %}">
-        <i class="bi bi-pencil"></i> Redaktə
-      </button>
-
-      <button type="button"
-              class="btn btn-sm btn-danger js-delete-assignment"
-              data-url="{% url 'assignments:delete_assignment' a.id %}">
-        <i class="bi bi-trash"></i> Sil
-      </button>
-    {% else %}
-      <a href="{% url 'assignments:assignment_detail' a.id %}"
-         class="btn btn-sm btn-primary">
-        <i class="bi bi-arrow-right"></i> Cavab Ver
-      </a>
-    {% endif %}
-  </div>
 </div>
-
-

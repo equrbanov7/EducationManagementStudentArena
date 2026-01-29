@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ assignment.title }} - Cavablar{% endblock %}
+{% block title %}{{ project.title }} - Layihələr{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -10,15 +10,15 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3>
-                <i class="fa-solid fa-clipboard-check"></i>
-                {{ assignment.title }} - Təqdim Olunan Cavablar
+                <i class="bi bi-folder-check"></i>
+                {{ project.title }} - Təqdim Olunan Layihələr
             </h3>
             <p class="text-muted mb-0">
-                Kurs: <strong>{{ assignment.course.title }}</strong>
+                Kurs: <strong>{{ project.course.title }}</strong>
             </p>
         </div>
-        <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Geriyə
+        <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Geriyə
         </a>
     </div>
     
@@ -45,19 +45,19 @@
                                     <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
                                 </td>
                                 <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
-                             
+                              
                                 <td>
                                     {% if submission.status == 'pending' %}
                                         <span class="badge bg-warning">Gözləyir</span>
                                     {% elif submission.status == 'graded' %}
                                         <span class="badge bg-success">Qiymətləndirilib</span>
                                     {% else %}
-                                        <span class="badge bg-secondary">{{ submission.status }}</span>
+                                        <span class="badge bg-danger">Rədd</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if submission.grade %}
-                                        <strong class="text-success">{{ submission.grade }}</strong>
+                                        <strong class="text-success">{{ submission.grade }}/{{ project.max_score }}</strong>
                                     {% else %}
                                         <span class="text-muted">—</span>
                                     {% endif %}
@@ -70,10 +70,10 @@
                                             data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
                                             data-content="{{ submission.content }}"
                                             data-file="{% if submission.file %}{{ submission.file.url }}{% endif %}"
-                                            data-filename="{% if submission.file %}{{ submission.file.name|cut:'assignments/submissions/' }}{% endif %}"
+                                            data-filename="{% if submission.file %}{{ submission.file.name|cut:'projects/submissions/' }}{% endif %}"
                                             data-grade="{{ submission.grade|default:'' }}"
                                             data-feedback="{{ submission.feedback }}">
-                                        <i class="fa-solid fa-eye"></i> Bax
+                                        <i class="bi bi-eye"></i> Bax
                                     </button>
                                 </td>
                             </tr>
@@ -83,8 +83,8 @@
                 </div>
             {% else %}
                 <div class="alert alert-light text-center py-5">
-                    <i class="fa-solid fa-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                    <p class="text-muted mt-3 mb-0">Hələ ki cavab təqdim olunmayıb</p>
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3 mb-0">Hələ ki layihə təqdim olunmayıb</p>
                 </div>
             {% endif %}
             
@@ -98,11 +98,12 @@
 <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
+            <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
-                    <i class="fa-solid fa-file-lines"></i> Cavaba Bax
+                    <i class="bi bi-file-text"></i>
+                    Layihəyə Bax
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
             <div class="modal-body">
@@ -113,17 +114,17 @@
                 </div>
                 
                 <div class="mb-3">
-                    <strong>Cavab Mətni:</strong>
+                    <strong>Layihə İzahatı:</strong>
                     <div class="border rounded p-3 bg-light">
                         <p id="modal-content" class="mb-0" style="white-space: pre-wrap;"></p>
                     </div>
                 </div>
                 
                 <div class="mb-3" id="modal-file-container" style="display: none;">
-                    <strong>Fayl:</strong>
+                    <strong>Layihə Faylı:</strong>
                     <div class="mt-2">
                         <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="fa-solid fa-download me-1"></i> 
+                            <i class="bi bi-download me-1"></i> 
                             <span id="modal-file-name">Yüklə</span>
                         </a>
                     </div>
@@ -137,9 +138,9 @@
                     <input type="hidden" id="submission-id" name="submission_id">
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Qiymət:</label>
+                        <label class="form-label fw-bold">Qiymət (0-{{ project.max_score }}):</label>
                         <input type="number" id="grade-input" name="grade" class="form-control" 
-                               step="0.01" min="0" placeholder="Qiymət daxil edin">
+                               step="0.01" min="0" max="{{ project.max_score }}" placeholder="0-{{ project.max_score }}">
                     </div>
                     
                     <div class="mb-3">
@@ -149,7 +150,7 @@
                     </div>
                     
                     <button type="submit" class="btn btn-success">
-                        <i class="fa-solid fa-check-circle"></i> Qiymət Ver
+                        <i class="bi bi-check-circle"></i> Qiymət Ver
                     </button>
                 </form>
                 
@@ -167,7 +168,7 @@ document.querySelectorAll('.view-submission-btn').forEach(btn => {
         const student = this.dataset.student;
         const content = this.dataset.content;
         const file = this.dataset.file;
-        const filename = this.dataset.filename;
+        const filename = this.dataset.filename;  // Fayl adı
         const grade = this.dataset.grade;
         const feedback = this.dataset.feedback;
         
@@ -199,7 +200,7 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Göndərilir...';
     
-    fetch(`/assignments/submission/${submissionId}/grade/`, {
+    fetch(`/projects/submission/${submissionId}/grade/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -214,14 +215,14 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
         } else {
             alert('Xəta: ' + (data.error || 'Naməlum xəta'));
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Qiymət Ver';
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
         }
     })
     .catch(err => {
         console.error(err);
         alert('Server xətası');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Qiymət Ver';
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
     });
 });
 </script>

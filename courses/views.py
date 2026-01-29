@@ -3,24 +3,7 @@ courses/views.py
 ────────────────
 Kurs modulu üçün view-lər.
 
-Nə üçün:
-- Kurs yaratma (CreateCourseView)
-- Kurs dashboard (accordion göstərmə)
-- Mövzu əlavə/sil
-- Resurs əlavə/sil
-- Üzv əlavə/sil
-
-View Tipləri:
-- Class-based views (CBV) - Django best practice
-- Mixins (LoginRequiredMixin) - Authentikasiya
-- get_object_or_404() - Səhv handling
-- redirect(), render() - Response
-
-CRUD Əməliyyatlar:
-- CREATE: POST, form validation, save(), redirect
-- READ: GET, template render
-- UPDATE: GET + POST, instance update
-- DELETE: POST, delete(), redirect
+Labs app inteqrasiyası əlavə edilib.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -30,7 +13,7 @@ from django.views.generic import CreateView, DetailView, UpdateView, View, ListV
 from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.db.models import Q
+from django.db.models import Q, Max
 
 from .models import (
     Course,
@@ -43,56 +26,35 @@ from .forms import (
     CourseTopicForm,
     CourseResourceForm,
 )
-from django.db import models
-from django.db.models import Max
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # Mixin: Müəllim İcazə Yoxlaması
 # ════════════════════════════════════════════════════════════════════════════
 
 class IsTeacherMixin(UserPassesTestMixin):
-    """
-    Yalnız müəllim (is_teacher) bu view-a girə bilər.
-    
-    Nə edər:
-    - request.user.is_teacher yoxlayır
-    - Yoxdursa: 403 Forbidden
-    
-    Istifadə:
-    class CreateCourseView(IsTeacherMixin, CreateView):
-        ...
-    """
+    """Yalnız müəllim (is_teacher) bu view-a girə bilər."""
     
     def test_func(self):
-        """Müəllim mı?"""
         return getattr(self.request.user, 'is_teacher', False)
     
     def handle_no_permission(self):
-        """İcazə yoxdursa nə eləsin."""
         messages.error(self.request, 'Bu əməliyyat yalnız müəllimlər üçün mümkündür.')
         return redirect('home')
 
 
 class IsCourseOwnerMixin(UserPassesTestMixin):
-    """
-    Yalnız kursun sahibi (owner) redaktə edə bilər.
-    
-    Nə edər:
-    - course.owner == request.user yoxlayır
-    - Yoxdursa: 403 Forbidden
-    """
+    """Yalnız kursun sahibi (owner) redaktə edə bilər."""
     
     def test_func(self):
-        """Kurs sahibimi?"""
         course_id = self.kwargs.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         return course.owner == self.request.user
     
     def handle_no_permission(self):
-        """Səhifə sahibi deyilsə."""
         messages.error(self.request, 'Bu kursu redaktə etməyə icazəniz yoxdur.')
         return redirect('home')
 
@@ -102,54 +64,43 @@ class IsCourseOwnerMixin(UserPassesTestMixin):
 # ════════════════════════════════════════════════════════════════════════════
 
 class CreateCourseView(IsTeacherMixin, CreateView):
-    """
-    Kurs yaratma view-u.
-    
-    Flow:
-    1. GET /courses/create/ → Form göstər
-    2. POST /courses/create/ → Form submit
-    3. Django model.save() çalışır
-    4. Redirect → course_dashboard
-    
-    Misal:
-    - Teacher "Yeni Kurs Yarat" düyməsinə klik edir
-    - Form açılır (title, description, cover_image, status)
-    - Submit edir
-    - Kurs yaradılır, dashboard-a atılır
-    """
+    """Kurs yaratma view-u."""
     
     model = Course
     form_class = CourseForm
     template_name = 'courses/create_course.html'
     
     def form_valid(self, form):
-        """Form validdi, kurs yaradıl."""
-        # owner otomatik request.user olur
         form.instance.owner = self.request.user
-        # status draft olur (default)
         form.instance.status = 'draft'
-        
-        # Save-dən əvvəl save etmə (commit=False)
-        # Tələsmədən əvvəl əlavə məlumat əlavə edə bilərik
         response = super().form_valid(form)
-        
-        messages.success(
-            self.request,
-            f'✅ "{form.instance.title}" kursu uğurla yaradıldı!'
-        )
-        
+        messages.success(self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!')
         return response
     
     def get_success_url(self):
-        """Uğur halında hara redirect et?"""
-        # Yeni yaradılan kursun dashboard-ına
         return reverse_lazy('courses:course_dashboard', args=[self.object.id])
 
 
+# ═══���════════════════════════════════════════════════════════════════════════
+# VIEW 2: Kurs Dashboard (Accordion) - LABS ƏLAVƏSİ
 # ════════════════════════════════════════════════════════════════════════════
-# VIEW 2: Kurs Dashboard (Accordion)
-# ════════════════════════════════════════════════════════════════════════════
+
+
+
+
+
+
+
 class CourseDashboardView(LoginRequiredMixin, DetailView):
+    """
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │ Kurs Dashboard View                                                     │
+    │ GET /courses/<course_id>/dashboard/                                     │
+    │                                                                         │
+    │ Tələbə yalnız özünə təyin olunmuş işləri görür.                         │
+    │ Müəllim bütün işləri görür və idarə edir.                               │
+    └───���─────────────────────────────────────────────────────────────────────┘
+    """
     model = Course
     template_name = 'courses/course_dashboard.html'
     context_object_name = 'course'
@@ -158,33 +109,282 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
+        user = self.request.user
 
-        # Accordion məlumatları
+        # ═══════════════════════════════════════════════════════════════════
+        # 1. İSTİFADƏÇİ ROLUNU TƏYİN ET
+        # ═══════════════════════════════════════════════════════════════════
+        membership = CourseMembership.objects.filter(course=course, user=user).first()
+        user_role = membership.role if membership else None
+        
+        # ─────────────────────────────────────────────────────────────────────
+        # Context-ə rol məlumatlarını əlavə et
+        # ─────────────────────────────────────────────────────────────────────
+        context['is_owner'] = course.owner == user
+        context['is_teacher'] = getattr(user, 'is_teacher', False)
+        context['is_student'] = user_role == 'student'
+        context['is_assistant'] = user_role in ['assistant_teacher', 'moderator']
+        context['can_view_members'] = context['is_owner'] or context['is_assistant']
+        context['user_role'] = user_role
+        context['membership'] = membership  # Template-də lazım ola bilər
+
+        # ═══════════════════════════════════════════════════════════════════
+        # 2. MÖVZULAR & RESURSLAR (Hamı görür)
+        # ═══════════════════════════════════════════════════════════════════
         context['topics'] = course.topics.all().order_by('order')
         context['resources'] = course.resources.all().order_by('-created_at')
-        context['members'] = course.memberships.all().order_by('joined_at')
 
-        # Formalar (modal-lar üçün)
-        context['topic_form'] = CourseTopicForm()
-        context['resource_form'] = CourseResourceForm()
+        # ═══════════════════════════════════════════════════════════════════
+        # 3. ÜZVLƏR (Yalnız owner və assistant görür)
+        # ═══════════════════════════════════════════════════════════════════
+        if context['can_view_members']:
+            context['members'] = course.memberships.select_related('user').order_by('group_name', 'joined_at')
+        else:
+            context['members'] = []
 
-        # Owner check
-        context['is_owner'] = course.owner == self.request.user
+        # ═══════════════════════════════════════════════════════════════════
+        # 4. SƏRBƏST İŞLƏR (Assignments)
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün assignment-ları görür
+        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
+        # ═══════════════════════════════════════════════════════════════════
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün assignment-lar
+            context['assignments'] = course.assignments.all().order_by('-created_at')
+            context['assignments_with_user_data'] = []
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - arxivlənmişlər istisna (status != 'inactive' filter)
+            assignments_qs = course.assignments.filter(
+                assigned_students=user
+            ).exclude(
+                status='inactive'  # Deaktiv olanları göstərmə
+            ).order_by('-created_at')
+            
+            # Hər assignment üçün user-specific məlumat hazırla
+            assignments_with_user_data = []
+            for a in assignments_qs:
+                user_attempts = a.submissions.filter(student=user).count()
+                is_deadline_passed = a.is_deadline_passed if hasattr(a, 'is_deadline_passed') else False
+                is_active = a.status == 'active'
+                can_submit = (
+                    user_attempts < a.max_attempts 
+                    and not is_deadline_passed 
+                    and is_active
+                )
+                attempts_left = a.max_attempts - user_attempts
+                
+                assignments_with_user_data.append({
+                    'assignment': a,
+                    'user_attempts': user_attempts,
+                    'can_submit': can_submit,
+                    'attempts_left': attempts_left,
+                    'is_deadline_passed': is_deadline_passed,
+                })
+            
+            context['assignments'] = assignments_qs
+            context['assignments_with_user_data'] = assignments_with_user_data
+        else:
+            context['assignments'] = []
+            context['assignments_with_user_data'] = []
 
-        # ✅ ASSIGNMENT MODAL üçün: Kursdakı real qruplar (CourseMembership.group_name)
-        context['assignment_groups'] = list(
-            course.memberships
-            .filter(role='student')
-            .exclude(group_name__isnull=True)
-            .exclude(group_name__exact='')
-            .values_list('group_name', flat=True)
-            .distinct()
-            .order_by('group_name')
-        )
+        # ═══════════════════════════════════════════════════════════════════
+        # 5. KURS İŞLƏRİ (Projects)
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün project-ləri görür
+        # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
+        # ═════════════════════════════════════════��═════════════════════════
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün project-lər
+            context['projects'] = course.projects.all().order_by('-created_at')
+            context['projects_with_user_data'] = []
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - arxivlənmişlər istisna
+            try:
+                projects_qs = course.projects.filter(
+                    assigned_students=user
+                ).exclude(
+                    status='archived'  # Arxivlənmişləri göstərmə
+                ).order_by('-created_at')
+                
+                # Hər project üçün user-specific məlumat hazırla
+                projects_with_user_data = []
+                for p in projects_qs:
+                    user_attempts = p.submissions.filter(student=user).count()
+                    is_deadline_passed = p.is_deadline_passed
+                    is_active = p.status == 'active'
+                    can_submit = (
+                        user_attempts < p.max_attempts 
+                        and not is_deadline_passed 
+                        and is_active
+                    )
+                    attempts_left = p.max_attempts - user_attempts
+                    
+                    projects_with_user_data.append({
+                        'project': p,
+                        'user_attempts': user_attempts,
+                        'can_submit': can_submit,
+                        'attempts_left': attempts_left,
+                        'is_deadline_passed': is_deadline_passed,
+                    })
+                
+                context['projects'] = projects_qs
+                context['projects_with_user_data'] = projects_with_user_data
+            except Exception:
+                context['projects'] = []
+                context['projects_with_user_data'] = []
+        else:
+            context['projects'] = []
+            context['projects_with_user_data'] = []
 
-        # Modal-lar üçün owner-ə məxsus şeylər
+        # ═══════════════════════════════════════════════════════════════════
+        # 6. LAB İŞLƏRİ
+        # ───────────────────────────────────────────────────────────────────
+        # Müəllim: Bütün lab-ları görür
+        # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
+        # ═══════════════════════════════════════════════════════════════════
+
+        from labs.models import Lab, LabAssignment, LabSubmission
+
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bütün lab-lar
+            context['labs'] = course.labs.all().order_by('-created_at')
+            context['labs_with_user_data'] = []
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - yalnız özünə təyin olunmuş lab-ları görür
+            
+            # Tələbənin qrup adını al
+            student_group = ''
+            if membership and hasattr(membership, 'group_name'):
+                student_group = membership.group_name or ''
+            
+            print(f"DEBUG: Student ID: {user.id}, Group: '{student_group}'")  # DEBUG
+            
+            labs_with_user_data = []
+            
+            # Published olan lab-ları yoxla
+            for lab in course.labs.filter(status='published').order_by('-created_at'):
+                
+                print(f"DEBUG: Checking Lab '{lab.title}' (ID: {lab.id})")  # DEBUG
+                print(f"DEBUG:   allowed_students: '{lab.allowed_students}'")  # DEBUG
+                print(f"DEBUG:   allowed_groups: '{lab.allowed_groups}'")  # DEBUG
+                
+                # Bu lab tələbəyə təyin olunubmu?
+                is_assigned = False
+                
+                # Allowed students - vergüllə ayrılmış ID-lər
+                allowed_student_ids = []
+                if lab.allowed_students and lab.allowed_students.strip():
+                    for x in lab.allowed_students.split(','):
+                        x = x.strip()
+                        if x.isdigit():
+                            allowed_student_ids.append(int(x))
+                
+                # Allowed groups - vergüllə ayrılmış qrup adları
+                allowed_group_names = []
+                if lab.allowed_groups and lab.allowed_groups.strip():
+                    for g in lab.allowed_groups.split(','):
+                        g = g.strip()
+                        if g:
+                            allowed_group_names.append(g)
+                
+                print(f"DEBUG:   Parsed student IDs: {allowed_student_ids}")  # DEBUG
+                print(f"DEBUG:   Parsed group names: {allowed_group_names}")  # DEBUG
+                
+                # ƏSAS MƏNTİQ:
+                # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
+                # 2. Əgər student ID siyahısında varsa → görür
+                # 3. Əgər qrup siyahısında varsa → görür
+                
+                has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
+                
+                if not has_any_filter:
+                    # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
+                    # Əgər heç bir tələbə/qrup seçilməyibsə, heç kim görməsin:
+                    is_assigned = False
+                    print(f"DEBUG:   No filter set - NOT assigned")  # DEBUG
+                else:
+                    # Filtr var - yoxla
+                    # Student ID ilə yoxla
+                    if user.id in allowed_student_ids:
+                        is_assigned = True
+                        print(f"DEBUG:   Assigned by student ID")  # DEBUG
+                    
+                    # Qrup adı ilə yoxla
+                    if not is_assigned and student_group and student_group in allowed_group_names:
+                        is_assigned = True
+                        print(f"DEBUG:   Assigned by group name")  # DEBUG
+                
+                print(f"DEBUG:   Final is_assigned: {is_assigned}")  # DEBUG
+                
+                # Əgər təyin olunmayıbsa, skip et
+                if not is_assigned:
+                    continue
+                
+                # Assignment və submission məlumatlarını al
+                assignment = LabAssignment.objects.filter(lab=lab, student=user).first()
+                
+                submissions_qs = LabSubmission.objects.none()
+                attempt_count = 0
+                has_submitted = False
+                latest_submission = None
+                
+                if assignment:
+                    submissions_qs = LabSubmission.objects.filter(assignment=assignment).order_by('-submitted_at')
+                    attempt_count = submissions_qs.count()
+                    has_submitted = attempt_count > 0
+                    latest_submission = submissions_qs.first() if has_submitted else None
+                
+                max_attempts = lab.max_attempts or 1
+                can_submit = (attempt_count < max_attempts) and lab.is_open
+                
+                labs_with_user_data.append({
+                    'lab': lab,
+                    'has_submitted': has_submitted,
+                    'submission': latest_submission,
+                    'submissions': submissions_qs,
+                    'attempt_count': attempt_count,
+                    'max_attempts': max_attempts,
+                    'attempts_left': max_attempts - attempt_count,
+                    'can_submit': can_submit,
+                })
+            
+            context['labs'] = []
+            context['labs_with_user_data'] = labs_with_user_data
+            print(f"DEBUG: Total labs for student: {len(labs_with_user_data)}")  # DEBUG
+            
+        else:
+            context['labs'] = []
+            context['labs_with_user_data'] = []
+
+        # ═══════════════════════════════════════════════════════════════════
+        # 7. FORMALAR VƏ MODAL ÜÇÜN DATA (Yalnız owner üçün)
+        # ═══════════════════════════════════════════════════════════════════
         if context['is_owner']:
-            # Kursa hələ əlavə olmamış tələbələr
+            # ─────────────────────────────────────────────────────────────────
+            # Form instance-ları
+            # ─────────────────────────────────────────────────────────────────
+            context['topic_form'] = CourseTopicForm()
+            context['resource_form'] = CourseResourceForm()
+            
+            # ─────────────────────────────────────────────────────────────────
+            # Kursdakı qruplar (modal-da seçim üçün)
+            # ─────────────────────────────────────────────────────────────────
+            context['assignment_groups'] = list(
+                course.memberships
+                .filter(role='student')
+                .exclude(group_name__isnull=True)
+                .exclude(group_name__exact='')
+                .values_list('group_name', flat=True)
+                .distinct()
+                .order_by('group_name')
+            )
+            
+            # ─────────────────────────────────────────────────────────────────
+            # Kursa əlavə olunmamış istifadəçilər (üzv əlavə etmək üçün)
+            # ─────────────────────────────────────────────────────────────────
             course_user_ids = course.memberships.values_list('user_id', flat=True)
             context['all_users'] = (
                 User.objects
@@ -194,79 +394,46 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 .order_by('username')
             )
 
-            # Bütün tələbə qrupları (StudentGroup) — səndə ayrıca model kimi qalır
+            # ─────────────────────────────────────────────────────────────────
+            # Bütün qruplar (StudentGroup modelindən)
+            # ─────────────────────────────────────────────────────────────────
             try:
                 from blog.models import StudentGroup
                 context['all_groups'] = StudentGroup.objects.all().order_by('name')
             except ImportError:
                 context['all_groups'] = []
         else:
-            # owner deyilsə də template error verməsin
+            # Owner deyilsə boş saxla
             context['all_users'] = []
             context['all_groups'] = []
+            context['assignment_groups'] = []
 
         return context
-
-
-
 # ════════════════════════════════════════════════════════════════════════════
 # VIEW 3: Mövzu Əlavə Etmə (AJAX/Modal)
 # ════════════════════════════════════════════════════════════════════════════
 
 class AddTopicView(IsCourseOwnerMixin, CreateView):
-    """
-    Mövzu əlavə etmə (AJAX POST).
-    
-    Flow:
-    1. POST /courses/<id>/topic/add/ (AJAX)
-    2. Form validasiyası
-    3. Mövzu yaradılır
-    4. JSON response (success/error)
-    5. JavaScript modal bağlayır, siyahıyı refresh edir
-    
-    Misal JSON Response:
-    {
-        "success": true,
-        "message": "Mövzu əlavə olundu",
-        "topic": {
-            "id": 1,
-            "title": "Həftə 1",
-            "order": 1
-        }
-    }
-    """
+    """Mövzu əlavə etmə (AJAX POST)."""
     
     model = CourseTopic
     form_class = CourseTopicForm
     
     def dispatch(self, request, *args, **kwargs):
-        """View-a gelmədən əvvəl yoxla."""
         self.course = get_object_or_404(Course, id=kwargs['course_id'])
-        
-        # Kursun sahibi mü?
         if self.course.owner != request.user:
             return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
-        
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
-        """Mövzu yaradıl."""
         form.instance.course = self.course
-        
-        # Order avtomatik hesablanır
-        # max_order = CourseTopic.objects.filter(
-        #     course=self.course
-        # ).aggregate(models.Max('order'))['order__max'] or 0
-        
         max_order = CourseTopic.objects.filter(
-            course=self.course).aggregate(Max('order'))['order__max'] or 0
-
-        
+            course=self.course
+        ).aggregate(Max('order'))['order__max'] or 0
         form.instance.order = max_order + 1
         
         response = super().form_valid(form)
         
-        # Əgər AJAX idi, JSON return et
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({
                 'success': True,
@@ -278,28 +445,16 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
                 },
             })
         
-        # Normal POST (form)
-        messages.success(
-            self.request,
-            f'"{form.instance.title}" mövzusu əlavə olundu'
-        )
+        messages.success(self.request, f'"{form.instance.title}" mövzusu əlavə olundu')
         return response
     
     def form_invalid(self, form):
-        """Form validasiyası uğursuzdu."""
-        # AJAX error
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': False,
-                'errors': form.errors,
-            }, status=400)
-        
-        # Normal error
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
         messages.error(self.request, 'Mövzu əlavə olunarkən xəta baş verdi.')
         return redirect('courses:course_dashboard', course_id=self.course.id)
     
     def get_success_url(self):
-        """Uğur halında hara atıl?"""
         return reverse_lazy('courses:course_dashboard', args=[self.course.id])
 
 
@@ -308,31 +463,15 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
 # ════════════════════════════════════════════════════════════════════════════
 
 class DeleteTopicView(IsCourseOwnerMixin, View):
-    """
-    Mövzu silmə (POST).
-    
-    Flow:
-    1. POST /courses/<id>/topic/<topic_id>/delete/
-    2. Mövzu silinir
-    3. Redirect dashboard-a
-    
-    Misal:
-    - User accordion-dan mövzünün [Sil] düyməsinə klik edir
-    - POST request
-    - Mövzu silinir
-    - Toast message: "Mövzu silindi"
-    - Sayfa refresh olur
-    """
+    """Mövzu silmə (POST)."""
     
     def post(self, request, *args, **kwargs):
-        """POST: Mövzu sil."""
         course_id = kwargs.get('course_id')
         topic_id = kwargs.get('topic_id')
         
         course = get_object_or_404(Course, id=course_id)
         topic = get_object_or_404(CourseTopic, id=topic_id, course=course)
         
-        # Owner mi?
         if course.owner != request.user:
             messages.error(request, 'Bu əməliyyata icazəniz yoxdur.')
             return redirect('courses:course_dashboard', course_id=course_id)
@@ -342,7 +481,6 @@ class DeleteTopicView(IsCourseOwnerMixin, View):
         
         messages.success(request, f'✅ "{topic_title}" mövzusu silindi.')
         
-        # AJAX idi?
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
         
@@ -354,21 +492,15 @@ class DeleteTopicView(IsCourseOwnerMixin, View):
 # ════════════════════════════════════════════════════════════════════════════
 
 class AddResourceView(IsCourseOwnerMixin, CreateView):
-    """
-    Resurs əlavə etmə (AJAX/Modal).
-    
-    AddTopicView-ə bənzərdir.
-    """
+    """Resurs əlavə etmə (AJAX/Modal)."""
     
     model = CourseResource
     form_class = CourseResourceForm
     
     def dispatch(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course, id=kwargs['course_id'])
-        
         if self.course.owner != request.user:
             return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
-        
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
@@ -426,28 +558,10 @@ class DeleteResourceView(IsCourseOwnerMixin, View):
 # VIEW 7: Kurs Üzvləri (Members)
 # ════════════════════════════════════════════════════════════════════════════
 
-"""
-courses/views.py – AddMemberView FIX
-
-MƏSƏLƏ: Modal açıldıqda bütün users listini göstərmir.
-
-HƏLL: Context-ə bütün mövcud users əlavə et (Form-dan gelen users, 
-      group memberships-lər dəhil)
-"""
-
-# ════════════════════════════════════════════════════════════════════════════
-# VIEW 7: Kurs Üzvləri (Members) - DÜZƏLDİLDİ
-# ════════════════════════════════════════════════════════════════════════════
-
 class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Kurs üzvlüyü səhifəsi.
-    FIX: UnboundLocalError həll edildi.
-    FIX: StudentGroup modeli düzgün import edildi.
-    """
+    """Kurs üzvlüyü səhifəsi."""
     
     def test_func(self):
-        """Yalnız kurs sahibi girə bilər."""
         course_id = self.kwargs.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         return course.owner == self.request.user
@@ -460,53 +574,34 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         course_id = kwargs.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         
-        # 1. Mövcud üzvləri alırıq
         members = course.memberships.all().order_by('joined_at')
-        
-        # Rollara görə bölürük
         teacher = members.filter(role='teacher').first()
         assistants = members.filter(role='assistant')
         students = members.filter(role='student').order_by('group_name', 'user__username')
         
-        # 2. Modal üçün: Kursda OLMAYAN tələbələri tapırıq
         course_user_ids = course.memberships.values_list('user_id', flat=True)
         
-        # Burada 'student' qrupuna aid userləri tapırıq (Sənin sisteminə uyğun)
-        # Əgər səndə User modelinde is_student fieldi varsa, filter(is_student=True) yaz.
-        # İndiki halda qrup adı 'student' olanları axtarır:
-        all_users_qs = User.objects.exclude(id__in=course_user_ids)
-        
-        # Əgər userlərin 'student' qrupu varsa:
         if hasattr(User, 'groups'): 
-             all_users = all_users_qs.filter(groups__name='student').distinct().order_by('username')
+            all_users = User.objects.exclude(id__in=course_user_ids).filter(
+                groups__name='student'
+            ).distinct().order_by('username')
         else:
-             # Sadəcə bütün userləri gətir (ehtiyat variant)
-             all_users = all_users_qs.order_by('username')
-
+            all_users = User.objects.exclude(id__in=course_user_ids).order_by('username')
         
-        # 3. Modal üçün: Bütün QRUPLARI tapırıq (StudentGroup)
-        # QEYD: 'accounts' və ya qruplar hansı app-dadırsa, oradan import etməlisən.
-        # Mən ehtimal edirəm ki, 'accounts' app-ındadır.
         try:
-            # Sənin göndərdiyin koda əsasən model adı 'StudentGroup'-dur
             from blog.models import StudentGroup 
             all_groups = StudentGroup.objects.all().order_by('name')
-            #all_groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related("students")
-
         except ImportError:
-            # Əgər model tapılmasa boş list qaytar ki, error verməsin
-            print("XƏTA: StudentGroup modeli tapılmadı. Zəhmət olmasa importu yoxlayın.")
             all_groups = []
         
-        # 4. Context-i İNDİ yaradırıq (Dəyişənlər hazır olandan sonra)
         context = {
             'course': course,
             'members': members,
             'teacher': teacher,
             'assistants': assistants,
             'students': students,
-            'all_users': all_users,   # Modal üçün
-            'all_groups': all_groups, # Modal üçün
+            'all_users': all_users,
+            'all_groups': all_groups,
             'is_owner': course.owner == request.user,
         }
         
@@ -514,9 +609,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Kursda olmayan tələbələri JSON kimi qaytarır (modal açılarkən refresh üçün).
-    """
+    """Kursda olmayan tələbələri JSON kimi qaytarır."""
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
@@ -537,25 +630,20 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
             .order_by("username")
         )
 
-        data = []
-        for u in qs:
-            data.append({
-                "id": u.id,
-                "username": u.username,
-                "full_name": (u.get_full_name() or u.username),
-            })
+        data = [
+            {"id": u.id, "username": u.username, "full_name": u.get_full_name() or u.username}
+            for u in qs
+        ]
 
         return JsonResponse({"success": True, "users": data})
 
+
 # ════════════════════════════════════════════════════════════════════════════
-# VIEW: Tələbə Əlavə Et (AJAX) - DÜZƏLDİLDİ
+# VIEW: Tələbə Əlavə Et (AJAX)
 # ════════════════════════════════════════════════════════════════════════════
 
 class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Tələbə əlavə etmə (Modal-dan AJAX).
-    FIX: 'user_ids' listini qəbul edir (HTML-də name="user_ids" olduğu üçün).
-    """
+    """Tələbə əlavə etmə (Modal-dan AJAX)."""
     
     def test_func(self):
         course_id = self.kwargs.get('course_id')
@@ -563,68 +651,44 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return course.owner == self.request.user
     
     def handle_no_permission(self):
-        return JsonResponse({
-            'success': False, 
-            'error': 'Bu əməliyyata icazəniz yoxdur.'
-        }, status=403)
+        return JsonResponse({'success': False, 'error': 'Bu əməliyyata icazəniz yoxdur.'}, status=403)
     
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         
-        # FIX: get() əvəzinə getlist() istifadə edirik
-        # HTML-də input name="user_ids" olduğu üçün
         user_ids = request.POST.getlist('user_ids')
         group_name = request.POST.get('group_name', '').strip()
         
         if not user_ids:
-            return JsonResponse({
-                'success': False,
-                'error': 'Heç bir tələbə seçilməyib.'
-            }, status=400)
+            return JsonResponse({'success': False, 'error': 'Heç bir tələbə seçilməyib.'}, status=400)
         
         added_count = 0
         
-        # Seçilən hər bir user üçün dövr edirik
         for uid in user_ids:
             try:
                 user = User.objects.get(id=uid)
-                
-                # Membership yarat və ya update et
                 membership, created = CourseMembership.objects.get_or_create(
                     course=course,
                     user=user,
-                    defaults={
-                        'role': 'student',
-                        'group_name': group_name,
-                    }
+                    defaults={'role': 'student', 'group_name': group_name}
                 )
-                
-                # Əgər artıq üzvdürsə, qrupunu yenilə
                 if not created:
                     membership.group_name = group_name
                     membership.save()
-                    
                 added_count += 1
-                
             except User.DoesNotExist:
                 continue
         
-        # AJAX Response
-        return JsonResponse({
-            'success': True,
-            'message': f'{added_count} tələbə kursa əlavə olundu.'
-        })
+        return JsonResponse({'success': True, 'message': f'{added_count} tələbə kursa əlavə olundu.'})
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# VIEW: Qrup Əlavə Et (Bulk) - DÜZƏLDİLDİ
+# VIEW: Qrup Əlavə Et (Bulk)
 # ════════════════════════════════════════════════════════════════════════════
 
 class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Qrupları toplu şəkildə kursa əlavə et.
-    """
+    """Qrupları toplu şəkildə kursa əlavə et."""
     
     def test_func(self):
         course_id = self.kwargs.get('course_id')
@@ -644,32 +708,23 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({'success': False, 'error': 'Qrup seçilməyib.'}, status=400)
         
         try:
-            # Model adını dəqiqləşdirin (StudentGroup)
             from blog.models import StudentGroup
-            
             groups = StudentGroup.objects.filter(id__in=group_ids)
             
             added_count = 0
             
             for group in groups:
-                # StudentGroup modelində tələbələr necə adlanır? 
-                # Adətən: group.students.all()
                 students = group.students.all() 
                 
                 for student in students:
                     membership, created = CourseMembership.objects.get_or_create(
                         course=course,
                         user=student,
-                        defaults={
-                            'role': 'student',
-                            'group_name': group.name, 
-                        }
+                        defaults={'role': 'student', 'group_name': group.name}
                     )
-                    
                     if created:
                         added_count += 1
                     else:
-                        # Artıq üzvdürsə, qrup adını yeniləyək
                         if not (membership.group_name or "").strip():
                             membership.group_name = group.name
                             membership.save(update_fields=["group_name"])
@@ -699,10 +754,7 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return course.owner == self.request.user
     
     def handle_no_permission(self):
-        return JsonResponse({
-            'success': False,
-            'error': 'Bu əməliyyata icazəniz yoxdur.'
-        }, status=403)
+        return JsonResponse({'success': False, 'error': 'Bu əməliyyata icazəniz yoxdur.'}, status=403)
     
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get('course_id')
@@ -714,26 +766,19 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         username = membership.user.username
         membership.delete()
         
-        # AJAX Response
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({
-                'success': True,
-                'message': f'{username} silindi.'
-            })
+            return JsonResponse({'success': True, 'message': f'{username} silindi.'})
         
         messages.success(request, f'✅ {username} silindi.')
         return redirect('courses:course_members', course_id=course_id)
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# VIEW: Qrup Silmə (Toplu) - YENİ
+# VIEW: Qrup Silmə (Toplu)
 # ════════════════════════════════════════════════════════════════════════════
 
 class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """
-    Kursdan müəyyən bir qrup adını daşıyan bütün tələbələri silir.
-    Məsələn: '940' qrupunu siləndə, o qrupdakı hər kəs kursdan çıxır.
-    """
+    """Kursdan müəyyən bir qrup adını daşıyan bütün tələbələri silir."""
     
     def test_func(self):
         course_id = self.kwargs.get('course_id')
@@ -742,33 +787,29 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
         
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get('course_id')
-        # Formdan və ya URL-dən qrup adını alırıq
         group_name = request.POST.get('group_name') 
         
         if not group_name:
-             messages.error(request, "Qrup adı tapılmadı.")
-             return redirect('courses:course_members', course_id=course_id)
+            messages.error(request, "Qrup adı tapılmadı.")
+            return redirect('courses:course_members', course_id=course_id)
 
         course = get_object_or_404(Course, id=course_id)
         
-        # Həmin qrup adı olan üzvləri tapıb silirik
         deleted_count, _ = CourseMembership.objects.filter(
             course=course, 
             group_name=group_name
         ).delete()
         
         messages.success(request, f'✅ "{group_name}" qrupundan {deleted_count} tələbə kursdan çıxarıldı.')
-        
         return redirect('courses:course_members', course_id=course_id)
 
+
 # ════════════════════════════════════════════════════════════════════════════
-# VIEW 10: Kurs Redaksiya Etmə
+# VIEW: Kurs Redaksiya Etmə
 # ════════════════════════════════════════════════════════════════════════════
 
 class EditCourseView(IsCourseOwnerMixin, UpdateView):
-    """
-    Kurs məlumatını redaktə etmə (title, description, cover_image, status).
-    """
+    """Kurs məlumatını redaktə etmə."""
     
     model = Course
     form_class = CourseForm
@@ -782,63 +823,86 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('courses:course_dashboard', args=[self.object.id])
-    
-    
-"""
-courses/views.py içinə əlavə et:
 
-Delete Course View - Kursun tam silinməsi
-"""
+
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Kurs Silmə
+# ════════════════════════════════════════════════════════════════════════════
 
 class DeleteCourseView(IsCourseOwnerMixin, View):
-    """
-    Kursun tam silinməsi.
-    
-    Flow:
-    1. POST /courses/<id>/delete/
-    2. Kurs silinir (cascade: mövzular, resurslar, üzvlər də silinir)
-    3. Müəllimin profil səhifəsinə redirect
-    
-    Misal:
-    - Müəllim accordion-dan [Sil] düyməsinə klik edir
-    - Confirmation dialogi açılır
-    - Confirm edərsə, kurs + bütün məlumatlar silinir
-    """
+    """Kursun tam silinməsi."""
     
     def post(self, request, *args, **kwargs):
-        """POST: Kurs sil"""
         course_id = kwargs.get('course_id')
         course = get_object_or_404(Course, id=course_id)
         
-        # Owner mı?
         if course.owner != request.user:
             messages.error(request, 'Bu kursu silməyə icazəniz yoxdur.')
             return redirect('home')
         
-        # Cascade delete:
-        # - CourseTopic (mövzular)
-        # - CourseResource (resurslar)
-        # - CourseMembership (üzvlər)
-        # Hamısı otomatik silinir (on_delete=CASCADE)
-        
         course_title = course.title
         course.delete()
         
-        messages.success(
-            request,
-            f'✅ "{course_title}" kursu və bütün məlumatları silindi.'
-        )
-        
-        # Müəllimin profil səhifəsinə
+        messages.success(request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.')
         return redirect('profile', username=request.user.username)
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Mənim Kurslarım
+# ════════════════════════════════════════════════════════════════════════════
 
 class MyCoursesListView(LoginRequiredMixin, ListView):
     template_name = "courses/my_courses.html"
     context_object_name = "courses"
-    paginate_by = 12  # istəsən silə bilərsən
+    paginate_by = 12
 
     def get_queryset(self):
-        # müəllimin yaratdığı kurslar
         return Course.objects.filter(owner=self.request.user).order_by("-created_at")
+    
+    
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Tələbənin Kursları
+# ════════════════════════════════════════════════════════════════════════════
+
+class StudentCoursesView(LoginRequiredMixin, ListView):
+    """
+    Tələbəyə təyin olunmuş kursların siyahısı.
+    
+    Tələbə kursa iki yolla əlavə oluna bilər:
+    1. Birbaşa - CourseMembership.user = tələbə
+    2. Qrup vasitəsilə - CourseMembership qrupuna əlavə edilib
+    """
+    template_name = 'courses/student_courses.html'
+    context_object_name = 'courses'
+    paginate_by = 12
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        # Tələbənin üzv olduğu kurslar
+        return Course.objects.filter(
+            memberships__user=user,
+            memberships__role='student',
+            status='published'
+        ).distinct().select_related('owner').order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Hər kurs üçün əlavə məlumat
+        courses_with_info = []
+        for course in context['courses']:
+            membership = CourseMembership.objects.filter(
+                course=course,
+                user=self.request.user
+            ).first()
+            
+            courses_with_info.append({
+                'course': course,
+                'group_name': membership.group_name if membership else '',
+                'joined_at': membership.joined_at if membership else None,
+            })
+        
+        context['courses_with_info'] = courses_with_info
+        return context
+    

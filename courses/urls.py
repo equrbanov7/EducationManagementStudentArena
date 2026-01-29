@@ -125,4 +125,8 @@ urlpatterns = [
     path('<int:course_id>/members/delete-group/', 
          views.DeleteGroupFromCourseView.as_view(), 
          name='delete_group_from_course'),
+    
+    # Tələbə kursları
+    path('my-enrolled/', views.StudentCoursesView.as_view(), name='student_courses'),
+
 ]
