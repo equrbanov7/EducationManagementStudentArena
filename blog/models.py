@@ -347,7 +347,17 @@ class Exam(models.Model):
         help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir."
     )
     
+    
     default_question_points = models.PositiveIntegerField(default=1)
+    
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='exams',
+        verbose_name='Kurs'
+    )
 
     # --- Giriş məhdudiyyətləri ---
 

@@ -4,43 +4,78 @@
 {% block title %}Oyuna Qoşul | {{ session.pin }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/join.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/join.css' %}">
 {% endblock %}
 
 {% block content %}
+<!-- Floating Background Shapes -->
+<div class="floating-shapes">
+    <div class="shape">🎮</div>
+    <div class="shape">🎯</div>
+    <div class="shape">🏆</div>
+    <div class="shape">⭐</div>
+    <div class="shape">🚀</div>
+    <div class="shape">💡</div>
+</div>
+
+<div class="join-container">
     <div class="join-card">
         
-        <h2 style="margin:0; color:#546e7a; font-size:1rem; text-transform:uppercase;">Game PIN</h2>
-        <div class="pin-badge">{{ session.pin }}</div>
-
-        <div class="input-group">
-            <label class="input-label">Adın nədir?</label>
-            <input id="nickname" class="custom-input" maxlength="15" placeholder="Adını bura yaz..." autocomplete="off">
+        <!-- Game Icon -->
+        <div class="game-icon">🎮</div>
+        
+        <!-- PIN Section -->
+        <div class="pin-section">
+            <div class="pin-label">Game PIN</div>
+            <div class="pin-badge">{{ session.pin }}</div>
         </div>
 
+        <!-- Nickname Input -->
         <div class="input-group">
-            <label class="input-label">Avatarını Seç</label>
+            <label class="input-label">
+                <i class="fas fa-user"></i> Adın nədir?
+            </label>
+            <input id="nickname" 
+                   class="custom-input" 
+                   maxlength="15" 
+                   placeholder="Məsələn: SuperPlayer" 
+                   autocomplete="off"
+                   autofocus>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="input-group">
+            <label class="input-label">
+                <i class="fas fa-smile"></i> Avatarını Seç
+            </label>
             <div id="avatarGrid" class="avatar-grid">
-                {% for a in avatars %}
-                    <button type="button" class="avatar-btn" data-key="{{ a }}"></button>
-                {% endfor %}
+                <!-- Emoji-lər JS ilə doldurulacaq -->
             </div>
         </div>
 
-        <button id="joinBtn" class="join-btn">Hadi Başlayaq! 🚀</button>
+        <!-- Join Button -->
+        <button id="joinBtn" class="join-btn">
+            <i class="fas fa-play me-2"></i> Oyuna Qoşul!
+        </button>
+
+        <!-- Fun Text -->
+        <p class="fun-text">
+            🎉 Hazır ol, <span>əylənmək</span> zamanıdır!
+        </p>
 
     </div>
-
+</div>
 {% endblock %}
 
 {% block extraJs %}
-    <script>
-        // Backend dəyərlərini JS-ə ötürürük
-        const CONFIG = {
-            joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
-            csrf: "{{ csrf_token }}"
-        };
-    </script>
-    <script src="{% static 'js/join.js' %}"></script>
+<!-- ÖNCƏ CONFIG-i Django ilə render et -->
+<script>
+    const CONFIG = {
+        joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
+        csrf: "{{ csrf_token }}"
+    };
+</script>
+<!-- SONRA static JS-i yüklə -->
+<script src="{% static 'js/join.js' %}"></script>
 {% endblock %}
