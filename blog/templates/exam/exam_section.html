@@ -1,0 +1,231 @@
+<div class="accordion-item">
+    <h2 class="accordion-header" id="examHeading">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#examCollapse" aria-expanded="false">
+            <i class="fas fa-file-alt text-info me-2 fs-5"></i>
+            <strong>İmtahanlar</strong>
+            <span class="badge bg-info ms-2">
+                {% if is_student %}
+                    {{ exams_with_data|length }}
+                {% else %}
+                    {{ course_exams|length }}
+                {% endif %}
+            </span>
+        </button>
+    </h2>
+    
+    <div id="examCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            {% if is_owner or is_teacher %}
+                <div class="mb-3 d-flex gap-2 justify-content-end flex-wrap">
+                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#linkExamModal">
+                        <i class="fas fa-link me-1"></i> Mövcud İmtahanı Əlaqələndir
+                    </button>
+                    <a href="{% url 'create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i> Yeni İmtahan Yarat
+                    </a>
+                </div>
+            {% endif %}
+
+            {# ═══════════════════════════════════════════════════════════ #}
+            {# MÜƏLLİM GÖRÜNÜŞÜ                                            #}
+            {# ═══════════════════════════════════════════════════════════ #}
+            {% if is_owner or is_teacher %}
+                {% if course_exams %}
+                    <div class="list-group list-group-flush">
+                        {% for exam in course_exams %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-file-alt text-info"></i> {{ exam.title }}
+                                </h6>
+                                <div>
+                                    {% if exam.is_active %}
+                                        {% if exam.is_before_start %}
+                                            <span class="badge bg-warning">Başlamayıb</span>
+                                        {% elif exam.is_after_end %}
+                                            <span class="badge bg-secondary">Bitib</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Aktiv</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">Deaktiv</span>
+                                    {% endif %}
+                                    
+                                    <span class="badge bg-info ms-1">{{ exam.get_exam_type_display }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if exam.description %}
+                            <p class="text-muted small mb-2">{{ exam.description|truncatewords:15 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-question-circle"></i> {{ exam.questions.count }} sual
+                                </small>
+                                {% if exam.total_duration_minutes %}
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ exam.total_duration_minutes }} dəq
+                                </small>
+                                {% endif %}
+                                {% if exam.max_attempts_per_user %}
+                                <small class="text-muted">
+                                    <i class="fas fa-redo"></i> {{ exam.max_attempts_per_user }} cəhd
+                                </small>
+                                {% endif %}
+                                {% if exam.start_datetime %}
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm gap-2">
+                                <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i> Bax
+                                </a>
+                                <a href="{% url 'teacher_exam_results' exam.slug %}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-chart-bar"></i> Nəticələr
+                                </a>
+                                <a href="{% url 'edit_exam' exam.slug %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-pen"></i> Redaktə
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger js-unlink-exam" 
+                                        data-exam-id="{{ exam.id }}">
+                                    <i class="fas fa-unlink"></i> Ayır
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Bu kursda hələ imtahan yoxdur</p>
+                        <div class="mt-3">
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#linkExamModal">
+                                <i class="fas fa-link"></i> Mövcud İmtahanı Əlaqələndir
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+            
+            {# ═══════════════════════════════════════════════════════════ #}
+            {# TƏLƏBƏ GÖRÜNÜŞÜ                                             #}
+            {# ═══════════════════════════════════════════════════════════ #}
+            {% elif is_student %}
+                {% if exams_with_data %}
+                    <div class="list-group list-group-flush">
+                        {% for item in exams_with_data %}
+                        {% with exam=item.exam %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-file-alt text-info"></i> {{ exam.title }}
+                                </h6>
+                                <div>
+                                    {% if item.last_attempt %}
+                                        {% if item.last_attempt.status == 'submitted' %}
+                                            <span class="badge bg-success">Tamamlandı</span>
+                                            {% if item.last_attempt.score_percent %}
+                                            <span class="badge bg-primary ms-1">{{ item.last_attempt.score_percent }}%</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% elif exam.is_before_start %}
+                                        <span class="badge bg-warning">Başlamayıb</span>
+                                    {% elif exam.is_after_end %}
+                                        <span class="badge bg-secondary">Bitib</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Açıq</span>
+                                    {% endif %}
+                                    
+                                    <span class="badge bg-info ms-1">{{ exam.get_exam_type_display }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if exam.description %}
+                            <p class="text-muted small mb-2">{{ exam.description|truncatewords:15 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-question-circle"></i> 
+                                    {% if exam.random_question_count > 0 %}
+                                        {{ exam.random_question_count }} sual
+                                    {% else %}
+                                        {{ exam.questions.count }} sual
+                                    {% endif %}
+                                </small>
+                                {% if exam.total_duration_minutes %}
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ exam.total_duration_minutes }} dəqiqə
+                                </small>
+                                {% endif %}
+                                <small class="text-muted">
+                                    <i class="fas fa-redo"></i> 
+                                    Cəhd: {{ item.attempt_count }} / {{ exam.max_attempts_per_user|default:"∞" }}
+                                </small>
+                                {% if exam.start_datetime %}
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt"></i> {{ exam.start_datetime|date:"d.m.Y H:i" }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm gap-2">
+                                {% if item.last_attempt %}
+                                    <a href="{% url 'exam_result' exam.slug item.last_attempt.id %}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-chart-bar"></i> Nəticələrimə Bax
+                                    </a>
+                                    
+                                    {% if item.can_start and item.attempts_left != 0 %}
+                                        <a href="{% url 'start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-redo"></i> Yenidən Başla
+                                        </a>
+                                    {% endif %}
+                                    
+                                {% elif item.can_start %}
+                                    <a href="{% url 'start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-play"></i> İmtahana Başla
+                                    </a>
+                                    
+                                {% elif exam.is_before_start %}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Hələ başlamayıb
+                                    </button>
+                                    
+                                {% elif exam.is_after_end %}
+                                    <span class="btn btn-sm btn-secondary disabled">
+                                        <i class="fas fa-lock"></i> Müddət bitib
+                                    </span>
+                                    
+                                {% else %}
+                                    <span class="btn btn-sm btn-secondary disabled">
+                                        <i class="fas fa-ban"></i> Cəhd qalmayıb
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">Bu kursda sizə təyin olunmuş imtahan yoxdur</p>
+                    </div>
+                {% endif %}
+            
+            {% else %}
+                <div class="alert alert-light text-center py-4">
+                    <i class="fas fa-file-alt" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">İmtahan yoxdur</p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>

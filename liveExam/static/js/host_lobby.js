@@ -1,373 +1,391 @@
-/* host_lobby.js  (UPDATED) */
+/* ═══════════════════════════════════════════════════════════════
+   HOST LOBBY - Full Rewrite
+   ═══════════════════════════════════════════════════════════════ */
 
-/** Emojilər */
-const AVATARS = {
-    'avatar_1': '🦊',   // Fox
-    'avatar_2': '🐼',   // Panda
-    'avatar_3': '🦁',   // Lion
-    'avatar_4': '🐯',   // Tiger
-    'avatar_5': '🐨',   // Koala
-    'avatar_6': '🐷',   // Pig
-    'avatar_7': '🐸',   // Frog
-    'avatar_8': '🐙',   // Octopus
-    'avatar_9': '🐵',   // Monkey
-    'avatar_10': '🦄',  // Unicorn
-    'avatar_11': '🐰',  // Rabbit
-    'avatar_12': '🐹'   // Hamster
+   const AVATARS = {
+    'avatar_1':'🦊','avatar_2':'🐼','avatar_3':'🦁','avatar_4':'🐯',
+    'avatar_5':'🐨','avatar_6':'🐷','avatar_7':'🐸','avatar_8':'🐙',
+    'avatar_9':'🐵','avatar_10':'🦄','avatar_11':'🐰','avatar_12':'🐹'
 };
-  
-  /** DOM */
-  const els = {
-    startBtn: document.getElementById("startBtn"),
-    revealBtn: document.getElementById("revealBtn"),
-    nextBtn: document.getElementById("nextBtn"),
-    finishBtn: document.getElementById("finishBtn"),
-    qCountInput: document.getElementById("questionCount"),
-    autoMode: document.getElementById("autoMode"),
-    gameState: document.getElementById("gameState"),
-  
-    lobbyHeader: document.getElementById("lobbyHeader"),
-  
-    questionWrap: document.getElementById("questionWrap"),
-    leaderWrap: document.getElementById("leaderWrap"),
-    playersCount: document.getElementById("playersCount"),
-    playersList: document.getElementById("playersList"),
-    hostLog: document.getElementById("hostLog"),
-  
-    qMeta: document.getElementById("qMeta"),
-    qText: document.getElementById("qText"),
-    qTimer: document.getElementById("qTimer"),
-    qOptions: document.getElementById("qOptions"),
-  
-    leaderList: document.getElementById("leaderList"),
-  
-    // ✅ yeni: debug toggle düyməsi (HTML-də əlavə et)
-    debugBtn: document.getElementById("debugBtn"),
-  };
-  
-  let state = "lobby";
-  let qTimerInterval = null;
-  let autoRevealTimer = null;
-  let autoNextTimer = null;
-  
 
-/* =========================
-   DEBUG LOG SYSTEM 
-   - yeni log yuxarıda
-   - 1-ci klik aç, 2-ci klik bağla
-   - alt-alta səliqəli
-   ========================= */
+// DOM Elements
+const $ = id => document.getElementById(id);
 
-   let debugEnabled = false;
-   const LOG_MAX_LINES = 250;
-   const logBuffer = []; // ✅ yeni yuxarıda saxlanacaq
-   
-   function setDebugUI(open) {
-     debugEnabled = !!open;
-   
-     if (els.debugBtn) {
-       els.debugBtn.textContent = debugEnabled ? "Debug Logs ▾" : "Debug Logs ▸";
-       els.debugBtn.style.opacity = debugEnabled ? "1" : "0.75";
-     }
-     if (els.hostLog) {
-       els.hostLog.style.display = debugEnabled ? "block" : "none";
-     }
-   }
-   
-   function toggleDebug() {
-     setDebugUI(!debugEnabled);
-     log(`Debug ${debugEnabled ? "açıldı" : "bağlandı"}`, "info", { force: true });
-   }
-   
-   // level="debug" yalnız debugEnabled=true olanda UI-a yaz
-   function log(msg, level = "debug", opts = {}) {
-     const force = !!opts.force;
-   
-     // Console-a həmişə
-     if (level === "error") console.error("[HOST]", msg);
-     else console.log("[HOST]", msg);
-   
-     // UI log-a yalnız debug açıq olanda (və ya force)
-     if (!els.hostLog) return;
-     if (!debugEnabled && !force) return;
-   
-     const line = `> ${new Date().toLocaleTimeString()} [${level.toUpperCase()}] ${msg}`;
-   
-     // ✅ yeni log yuxarıda görünsün
-     logBuffer.unshift(line);
-   
-     // limit
-     if (logBuffer.length > LOG_MAX_LINES) logBuffer.length = LOG_MAX_LINES;
-   
-     // yazdır
-     els.hostLog.textContent = logBuffer.join("\n");
-   
-     // ✅ yeni yuxarıda olduğu üçün scroll-u yuxarı saxla
-     els.hostLog.scrollTop = 0;
-   }
-   
-   // default bağlı
-   setDebugUI(false);
-   
-   // 1-ci klik aç, 2-ci klik bağla
-   if (els.debugBtn) {
-     els.debugBtn.addEventListener("click", toggleDebug);
-   } else if (els.hostLog) {
-     // düymə yoxdursa, log panelinə kliklə toggle
-     els.hostLog.addEventListener("click", toggleDebug);
-   }
-   
-  
-  /* =========================
-     HELPERS
-     ========================= */
-  function getWsUrl(path) {
-    const proto = location.protocol === "https:" ? "wss" : "ws";
-    return `${proto}://${location.host}${path}`;
-  }
-  
-  async function sendAction(url, bodyData = null) {
-    try {
-      const headers = {
-        "X-CSRFToken": GAME_CONFIG.csrf,
-        "X-Requested-With": "XMLHttpRequest"
-      };
-  
-      const options = { method: "POST", headers };
-      if (bodyData) options.body = bodyData;
-  
-      log(`POST -> ${url}`, "debug");
-      const res = await fetch(url, options);
-  
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || json.ok === false) {
-        const msg = json.message || "Server Request Failed";
-        log(`Action error: ${msg}`, "error", { force: true });
-        return json;
-      }
-  
-      log(`Action OK: ${url}`, "debug");
-      return json;
-    } catch (e) {
-      log("Fetch error: " + e.message, "error", { force: true });
-      return { ok: false, message: e.message };
-    }
-  }
-  
-  /* =========================
-     UI STATE
-     ========================= */
-  function updateUIState(newState) {
-    state = newState;
-    if (els.gameState) els.gameState.textContent = state.toUpperCase();
-  
-    // Buttons
-    if (els.startBtn) els.startBtn.disabled = (state !== "lobby");
-    if (els.revealBtn) els.revealBtn.disabled = (state !== "question");
-    if (els.nextBtn) els.nextBtn.disabled = (state !== "reveal");
-    if (els.finishBtn) els.finishBtn.disabled = false;
-  
-    // Panels
-    if (els.questionWrap) els.questionWrap.style.display = (state === "question") ? "block" : "none";
-    if (els.leaderWrap) els.leaderWrap.style.display = (state === "reveal" || state === "finished") ? "block" : "none";
-  
-    // Header hide (oyun başlayanda gizlət)
-    if (els.lobbyHeader) {
-      els.lobbyHeader.style.display = (state !== "lobby") ? "none" : "block";
-    }
-  
-    if (state !== "question") {
-      clearInterval(qTimerInterval);
-      qTimerInterval = null;
-      if (els.qTimer) els.qTimer.textContent = "--";
-    }
-  
-    log(`STATE -> ${state}`, "debug");
-  }
-  
-  /* =========================
-     WEBSOCKETS
-     ========================= */
-  
-  // Lobby WS
-  const lobbyWs = new WebSocket(getWsUrl(`/ws/live/${GAME_CONFIG.pin}/lobby/`));
-  
-  lobbyWs.onopen = () => log("Lobby WS connected", "debug");
-  lobbyWs.onclose = () => log("Lobby WS closed", "debug");
-  lobbyWs.onerror = () => log("Lobby WS error", "error", { force: true });
-  
-  lobbyWs.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    log(`Lobby msg: ${data.type}`, "debug");
-  
-    if (data.type === "lobby_state") {
-        if (els.playersCount) els.playersCount.textContent = data.count || 0;
-      
-        if (els.playersList) {
-          els.playersList.innerHTML = "";
-          (data.players || []).forEach(p => {
-            const div = document.createElement("div");
-            div.className = "player-chip";
-      
-            const emoji = AVATARS[p.avatar_key] || "👤";
-      
-            div.innerHTML = `
-              <span class="player-avatar">${emoji}</span>
-              <div class="player-name">${p.nickname}</div>
-            `;
-            els.playersList.appendChild(div);
-          });
-        }
-      }
-      
-  
-    // istəsən: game_started redirect kimi mesajları da burada log edə bilərsən
-  };
-  
-  
-  // Play WS
-  const playWs = new WebSocket(getWsUrl(`/ws/live/${GAME_CONFIG.pin}/play/`));
-  
-  playWs.onopen = () => log("Play WS connected", "debug");
-  playWs.onclose = () => log("Play WS closed", "debug");
-  playWs.onerror = () => log("Play WS error", "error", { force: true });
-  
-  playWs.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    log(`Play msg: ${msg.type}`, "debug");
-  
-    if (msg.type === "question_published") {
-      updateUIState("question");
-      renderQuestion(msg.question);
-      log(`Sual yayımlandı: ${msg.question.index}/${msg.question.total}`, "info", { force: true });
-  
-      // Auto Reveal (vaxt bitəndə)
-      if (els.autoMode?.checked && msg.question.ends_at) {
-        const ends = new Date(msg.question.ends_at).getTime();
-        const ms = Math.max(0, ends - Date.now());
-  
-        if (autoRevealTimer) clearTimeout(autoRevealTimer);
-        autoRevealTimer = setTimeout(() => {
-          if (state === "question") els.revealBtn?.click();
-        }, ms + 500);
-      }
-    }
-  
-    else if (msg.type === "reveal") {
-      updateUIState("reveal");
-      renderLeaderboard(msg.top || []);
-      log("Nəticələr göstərildi", "info", { force: true });
-  
-      // Auto Next (5 saniyə sonra)
-      if (els.autoMode?.checked) {
-        if (autoNextTimer) clearTimeout(autoNextTimer);
-        autoNextTimer = setTimeout(() => {
-          if (state === "reveal") els.nextBtn?.click();
-        }, 5000);
-      }
-    }
-  
-    else if (msg.type === "finished") {
-      updateUIState("finished");
-      renderLeaderboard(msg.top || []);
-      log("Oyun bitdi", "info", { force: true });
-    }
-  
-    // əlavə debug event: answer_progress (istəsən burada izləyərsən)
-    else if (msg.type === "answer_progress") {
-      log(`Progress: ${msg.answered_count}/${msg.total_players}`, "debug");
-    }
-  };
-  
-  /* =========================
-     RENDER
-     ========================= */
-  function renderQuestion(q) {
-    if (!els.qMeta || !els.qText || !els.qOptions) return;
-  
-    els.qMeta.textContent = `Sual ${q.index} / ${q.total}`;
-    els.qText.textContent = q.text;
-    els.qOptions.innerHTML = "";
-  
-    (q.options || []).forEach((opt, idx) => {
-      const div = document.createElement("div");
-      div.className = `opt-card opt-bg-${idx % 4}`;
-  
-      // UI üçün A,B,C,D sadəcə labeldır (backend artıq qarışdırır)
-      const letter = String.fromCharCode(65 + idx);
-      div.innerHTML = `
-        <span style="background:rgba(0,0,0,0.2); width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:50%; margin-right:10px;">
-          ${letter}
-        </span>
-        ${opt.text}
-      `;
-      els.qOptions.appendChild(div);
-    });
-  
-    // Timer
-    if (els.qTimer) {
-      if (q.ends_at) {
-        const ends = new Date(q.ends_at).getTime();
-  
-        clearInterval(qTimerInterval);
-        qTimerInterval = setInterval(() => {
-          const diff = Math.max(0, Math.ceil((ends - Date.now()) / 1000));
-          els.qTimer.textContent = diff;
-          if (diff <= 0) {
-            clearInterval(qTimerInterval);
-            qTimerInterval = null;
-          }
-        }, 250);
-      } else {
-        els.qTimer.textContent = "∞";
-      }
-    }
-  }
-  
-  function renderLeaderboard(topPlayers) {
-    if (!els.leaderList) return;
-  
-    els.leaderList.innerHTML = "";
-    topPlayers.forEach((p, i) => {
-      const div = document.createElement("div");
-      div.className = "leader-row";
-      div.innerHTML = `
-        <div style="display:flex; align-items:center;">
-          <span class="badge-rank">${i + 1}</span>
-          <span>${p.nickname}</span>
-        </div>
-        <span style="color:var(--primary); font-weight:900;">${p.score} xal</span>
-      `;
-      els.leaderList.appendChild(div);
-    });
-  }
-  
-  /* =========================
-     BUTTON ACTIONS
-     ========================= */
-  els.startBtn && (els.startBtn.onclick = () => {
-    const fd = new FormData();
-    if (els.qCountInput?.value) fd.append("question_count", els.qCountInput.value);
-    sendAction(GAME_CONFIG.urls.start, fd);
-  });
-  
-  els.revealBtn && (els.revealBtn.onclick = () => sendAction(GAME_CONFIG.urls.endQuestion));
-  els.nextBtn && (els.nextBtn.onclick = () => sendAction(GAME_CONFIG.urls.nextQuestion));
-  els.finishBtn && (els.finishBtn.onclick = () => sendAction(GAME_CONFIG.urls.finish));
+const UI = {
+    startBtn: $('startBtn'),
+    revealBtn: $('revealBtn'),
+    nextBtn: $('nextBtn'),
+    finishBtn: $('finishBtn'),
+    questionCount: $('questionCount'),
+    autoMode: $('autoMode'),
+    gameState: $('gameState'),
+    lobbyHeader: $('lobbyHeader'),
+    gameArea: $('gameArea'),
+    questionPanel: $('questionPanel'),
+    resultsPanel: $('resultsPanel'),
+    resultsList: $('resultsList'),
+    playersSection: $('playersSection'),
+    playersCount: $('playersCount'),
+    playersList: $('playersList'),
+    leaderList: $('leaderList'),
+    finalPodium: $('finalPodium'),
+    podiumStage: $('podiumStage'),
+    othersList: $('othersList'),
+    confetti: $('confetti'),
+    progressBox: $('progressBox'),
+    answeredText: $('answeredText'),
+    debugBtn: $('debugBtn'),
+    debugLog: $('debugLog'),
+    qMeta: $('qMeta'),
+    qText: $('qText'),
+    qTimer: $('qTimer'),
+    qOptions: $('qOptions')
+};
 
-const qc = document.getElementById("questionCount");
-const maxQ = parseInt(qc.getAttribute("max") || "1", 10);
+let state = 'lobby';
+let timerInterval = null;
+let autoRevealTimeout = null;
+let autoNextTimeout = null;
+let totalPlayers = 0;
 
-qc.addEventListener("input", () => {
-  let v = parseInt(qc.value || "1", 10);
-  if (isNaN(v)) v = 1;
-  if (v < 1) v = 1;
-  if (v > maxQ) v = maxQ;
-  qc.value = v;
+/* ═══════════════════════════════════════════════════════════════
+   DEBUG
+   ═══════════════════════════════════════════════════════════════ */
+
+let debugOn = false;
+const logs = [];
+
+UI.debugBtn?.addEventListener('click', () => {
+    debugOn = !debugOn;
+    UI.debugBtn.innerHTML = `<i class="fas fa-terminal"></i> Debug ${debugOn ? '▾' : '▸'}`;
+    UI.debugLog.style.display = debugOn ? 'block' : 'none';
 });
 
-  
-  /* Init */
-  updateUIState("lobby");
-  log("Host lobby script loaded", "debug");
-  
+function log(msg) {
+    console.log('[HOST]', msg);
+    if (!UI.debugLog) return;
+    logs.unshift(`> ${new Date().toLocaleTimeString()} ${msg}`);
+    if (logs.length > 100) logs.length = 100;
+    UI.debugLog.textContent = logs.join('\n');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+const wsUrl = path => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${path}`;
+const esc = t => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
+
+async function post(url, data = null) {
+    try {
+        const opts = { method: 'POST', headers: { 'X-CSRFToken': CONFIG.csrf } };
+        if (data) opts.body = data;
+        const res = await fetch(url, opts);
+        return await res.json();
+    } catch (e) {
+        log('POST error: ' + e.message);
+        return { ok: false };
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UI STATE
+   ═══════════════════════════════════════════════════════════════ */
+
+function setState(newState) {
+    state = newState;
+    UI.gameState.textContent = state.toUpperCase();
+    
+    UI.startBtn.disabled = state !== 'lobby';
+    UI.revealBtn.disabled = state !== 'question';
+    UI.nextBtn.disabled = state !== 'reveal';
+    
+    const isLobby = state === 'lobby';
+    const isQuestion = state === 'question';
+    const isReveal = state === 'reveal';
+    const isFinished = state === 'finished';
+    
+    UI.lobbyHeader.style.display = isLobby ? 'block' : 'none';
+    UI.playersSection.style.display = isLobby ? 'block' : 'none';
+    UI.gameArea.style.display = (isQuestion || isReveal) ? 'grid' : 'none';
+    UI.questionPanel.style.display = isQuestion ? 'block' : 'none';
+    UI.resultsPanel.style.display = isReveal ? 'block' : 'none';
+    UI.finalPodium.style.display = isFinished ? 'block' : 'none';
+    UI.progressBox.style.display = isQuestion ? 'flex' : 'none';
+    
+    if (!isQuestion) {
+        clearInterval(timerInterval);
+        UI.qTimer.textContent = '--';
+        UI.qTimer.className = 'timer';
+    }
+    
+    log(`State: ${state}`);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WEBSOCKETS
+   ═══════════════════════════════════════════════════════════════ */
+
+// Lobby WS
+const lobbyWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/lobby/`));
+lobbyWS.onopen = () => log('Lobby WS open');
+lobbyWS.onclose = () => log('Lobby WS closed');
+
+lobbyWS.onmessage = e => {
+    try {
+        const msg = JSON.parse(e.data);
+        const d = msg.data || msg;
+        
+        if (d.type === 'lobby_state') {
+            totalPlayers = d.count || 0;
+            UI.playersCount.textContent = totalPlayers;
+            
+            UI.playersList.innerHTML = '';
+            (d.players || []).forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'player-chip';
+                div.innerHTML = `<div class="avatar">${AVATARS[p.avatar_key] || '👤'}</div><div class="name">${esc(p.nickname)}</div>`;
+                UI.playersList.appendChild(div);
+            });
+        }
+    } catch (err) { log('Lobby msg error'); }
+};
+
+// Play WS
+const playWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
+playWS.onopen = () => log('Play WS open');
+playWS.onclose = () => log('Play WS closed');
+
+playWS.onmessage = e => {
+    try {
+        const msg = JSON.parse(e.data);
+        const d = msg.data || msg;
+        
+        if (d.type === 'question_published') {
+            setState('question');
+            renderQuestion(d.question);
+            UI.answeredText.textContent = `0 / ${totalPlayers}`;
+            
+            // Auto reveal at end
+            if (UI.autoMode.checked && d.question.ends_at) {
+                const ms = Math.max(0, new Date(d.question.ends_at) - Date.now());
+                clearTimeout(autoRevealTimeout);
+                autoRevealTimeout = setTimeout(() => {
+                    if (state === 'question') UI.revealBtn.click();
+                }, ms + 200);
+            }
+        }
+        
+        else if (d.type === 'answer_progress') {
+            const answered = d.answered_count || 0;
+            const total = d.total_players || totalPlayers;
+            UI.answeredText.textContent = `${answered} / ${total}`;
+            
+            // All answered -> auto reveal
+            if (answered >= total && total > 0 && state === 'question') {
+                log('All answered, auto reveal!');
+                clearTimeout(autoRevealTimeout);
+                setTimeout(() => {
+                    if (state === 'question') UI.revealBtn.click();
+                }, 400);
+            }
+        }
+        
+        else if (d.type === 'reveal') {
+            setState('reveal');
+            renderResults(d.results || []);
+            renderLeaderboard(d.top || []);
+            
+            // Auto next
+            if (UI.autoMode.checked) {
+                clearTimeout(autoNextTimeout);
+                autoNextTimeout = setTimeout(() => {
+                    if (state === 'reveal') UI.nextBtn.click();
+                }, 4000);
+            }
+        }
+        
+        else if (d.type === 'finished') {
+            setState('finished');
+            renderPodium(d.top || []);
+        }
+        
+    } catch (err) { log('Play msg error: ' + err.message); }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderQuestion(q) {
+    UI.qMeta.textContent = `Sual ${q.index} / ${q.total}`;
+    UI.qText.textContent = q.text;
+    
+    UI.qOptions.innerHTML = '';
+    (q.options || []).forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = `opt-card opt-${i % 4}`;
+        div.innerHTML = `<span class="letter">${String.fromCharCode(65 + i)}</span><span>${esc(opt.text)}</span>`;
+        UI.qOptions.appendChild(div);
+    });
+    
+    // Timer
+    if (q.ends_at) {
+        const end = new Date(q.ends_at).getTime();
+        clearInterval(timerInterval);
+        
+        timerInterval = setInterval(() => {
+            const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+            UI.qTimer.textContent = left;
+            
+            UI.qTimer.className = 'timer' + (left <= 5 ? ' danger' : left <= 10 ? ' warning' : '');
+            
+            if (left <= 0) clearInterval(timerInterval);
+        }, 200);
+    }
+}
+
+function renderResults(results) {
+    UI.resultsList.innerHTML = '';
+    
+    if (!results || results.length === 0) {
+        UI.resultsList.innerHTML = '<div style="text-align:center;opacity:0.6;padding:20px;">Heç kim cavab vermədi</div>';
+        return;
+    }
+    
+    results.slice(0, 10).forEach(r => {
+        const div = document.createElement('div');
+        div.className = `result-row ${r.is_correct ? 'correct' : 'wrong'}`;
+        div.innerHTML = `
+            <div class="result-info">
+                <span class="result-avatar">${AVATARS[r.avatar_key] || '👤'}</span>
+                <span class="result-name">${esc(r.nickname)}</span>
+            </div>
+            <span class="result-points">${r.is_correct ? '+' + (r.awarded_points || 0) : '0'}</span>
+        `;
+        UI.resultsList.appendChild(div);
+    });
+}
+
+function renderLeaderboard(top) {
+    UI.leaderList.innerHTML = '';
+    
+    top.slice(0, 10).forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'leader-row';
+        div.innerHTML = `
+            <div class="leader-info">
+                <span class="leader-rank">${i + 1}</span>
+                <span class="leader-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                <span class="leader-name">${esc(p.nickname)}</span>
+            </div>
+            <span class="leader-score">${p.score || 0}</span>
+        `;
+        UI.leaderList.appendChild(div);
+    });
+}
+
+function renderPodium(top) {
+    // Confetti
+    UI.confetti.innerHTML = '';
+    const colors = ['#fbbf24','#ef4444','#3b82f6','#10b981','#a855f7','#ec4899'];
+    for (let i = 0; i < 50; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.cssText = `
+            left: ${Math.random() * 100}%;
+            animation-delay: ${Math.random() * 3}s;
+            animation-duration: ${3 + Math.random() * 2}s;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            width: ${6 + Math.random() * 8}px;
+            height: ${6 + Math.random() * 8}px;
+            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        `;
+        UI.confetti.appendChild(c);
+    }
+    
+    // Podium
+    UI.podiumStage.innerHTML = '';
+    const t3 = top.slice(0, 3);
+    const order = [];
+    if (t3[1]) order.push({ ...t3[1], place: 2, cls: 'p2' });
+    if (t3[0]) order.push({ ...t3[0], place: 1, cls: 'p1' });
+    if (t3[2]) order.push({ ...t3[2], place: 3, cls: 'p3' });
+    
+    order.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = `podium-block ${p.cls}`;
+        div.style.animationDelay = `${0.2 + i * 0.25}s`;
+        div.innerHTML = `
+            <div class="podium-card">
+                ${p.place === 1 ? '<div class="crown">👑</div>' : ''}
+                <div class="podium-avatar">${AVATARS[p.avatar_key] || '👤'}</div>
+                <div class="podium-name">${esc(p.nickname)}</div>
+                <div class="podium-score">${p.score || 0} xal</div>
+            </div>
+            <div class="podium-stand">${p.place}</div>
+        `;
+        UI.podiumStage.appendChild(div);
+    });
+    
+    // Others
+    UI.othersList.innerHTML = '';
+    top.slice(3, 10).forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'other-row';
+        div.style.animationDelay = `${0.8 + i * 0.1}s`;
+        div.innerHTML = `
+            <div class="other-info">
+                <span class="other-rank">${i + 4}</span>
+                <span class="other-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                <span class="other-name">${esc(p.nickname)}</span>
+            </div>
+            <span class="other-score">${p.score || 0}</span>
+        `;
+        UI.othersList.appendChild(div);
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTON HANDLERS
+   ═══════════════════════════════════════════════════════════════ */
+
+UI.startBtn.onclick = () => {
+    const fd = new FormData();
+    const count = parseInt(UI.questionCount.value) || 1;
+    fd.append('question_count', count);
+    post(CONFIG.urls.start, fd);
+};
+
+UI.revealBtn.onclick = () => post(CONFIG.urls.reveal);
+UI.nextBtn.onclick = () => post(CONFIG.urls.next);
+UI.finishBtn.onclick = () => post(CONFIG.urls.finish);
+
+// Question count input - proper handling
+UI.questionCount.addEventListener('focus', function() {
+    this.select();
+});
+
+UI.questionCount.addEventListener('blur', function() {
+    let v = parseInt(this.value) || 1;
+    if (v < 1) v = 1;
+    if (v > CONFIG.maxQuestions) v = CONFIG.maxQuestions;
+    this.value = v;
+});
+
+UI.questionCount.addEventListener('keydown', function(e) {
+    // Allow: backspace, delete, tab, escape, enter, arrows
+    if ([8, 46, 9, 27, 13, 37, 38, 39, 40].includes(e.keyCode)) return;
+    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+    if ((e.ctrlKey || e.metaKey) && [65, 67, 86, 88].includes(e.keyCode)) return;
+    // Allow: numbers
+    if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) return;
+    e.preventDefault();
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+
+setState('lobby');
+log('Host ready');

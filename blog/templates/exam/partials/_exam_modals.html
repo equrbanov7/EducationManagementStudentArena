@@ -1,0 +1,130 @@
+{% if is_owner or is_teacher %}
+
+<!-- LINK EXAM MODAL -->
+<div class="modal fade" id="linkExamModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-link me-2"></i> İmtahanı Kursa Əlaqələndir</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="examSearchInput" 
+                           placeholder="İmtahan adı ilə axtar...">
+                </div>
+                
+                <div id="examSearchResults" style="max-height: 400px; overflow-y: auto;">
+                    {% if teacher_exams %}
+                        {% for exam in teacher_exams %}
+                        <div class="exam-search-item d-flex justify-content-between align-items-center p-3 border-bottom">
+                            <div>
+                                <strong>{{ exam.title }}</strong>
+                                <small class="text-muted d-block">
+                                    {{ exam.get_exam_type_display }} · {{ exam.questions.count }} sual
+                                    {% if exam.course %}
+                                        · <span class="text-warning">{{ exam.course.title }} kursuna bağlı</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-info js-link-exam" 
+                                    data-exam-id="{{ exam.id }}"
+                                    {% if exam.course %}disabled{% endif %}>
+                                {% if exam.course %}
+                                    <i class="fas fa-check"></i> Bağlı
+                                {% else %}
+                                    <i class="fas fa-link"></i> Əlaqələndir
+                                {% endif %}
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-info-circle fa-2x mb-2"></i>
+                            <p>Əlaqələndirilə biləcək imtahan yoxdur.</p>
+                            <a href="{% url 'create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Yeni İmtahan Yarat
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const COURSE_ID = {{ course.id }};
+    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    
+    // Link exam
+    document.querySelectorAll('.js-link-exam').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const examId = this.dataset.examId;
+            
+            fetch('/courses/' + COURSE_ID + '/link-exam/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({exam_id: examId})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Xəta: ' + (data.error || ''));
+                }
+            });
+        });
+    });
+    
+    // Unlink exam
+    document.querySelectorAll('.js-unlink-exam').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('İmtahanı kursdan ayırmaq istəyirsiniz?')) return;
+            
+            const examId = this.dataset.examId;
+            
+            fetch('/courses/' + COURSE_ID + '/unlink-exam/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({exam_id: examId})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Xəta: ' + (data.error || ''));
+                }
+            });
+        });
+    });
+    
+    // Search
+    const searchInput = document.getElementById('examSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.exam-search-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(q) ? '' : 'none';
+            });
+        });
+    }
+})();
+</script>
+
+{% endif %}

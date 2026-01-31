@@ -4,149 +4,156 @@
 {% block title %}Game Host | {{ session.pin }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="host-container">
+<div class="host-container">
+    
+    <!-- LOBBY HEADER -->
+    <header id="lobbyHeader" class="lobby-header">
+        <div class="lobby-title">🚀 Live İmtahan</div>
+        <div class="pin-display">{{ session.pin }}</div>
+        <div class="join-info">
+            <div class="qr-box" onclick="toggleQR(true)">
+                <img src="{{ qr_url }}" alt="QR" width="140">
+            </div>
+            <div class="link-box">
+                <small>Qoşulmaq üçün:</small>
+                <a href="{{ join_url }}" target="_blank">LearnHub.it / {{ session.pin }}</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTROL BAR -->
+    <div class="control-bar">
+        <button id="startBtn" class="btn btn-start"><i class="fas fa-play"></i> Başla</button>
         
-        <header id="lobbyHeader" class="lobby-header">
-            <div class="lobby-title">🚀 Live İmtahan Lobby</div>
-            <div class="pin-display" id="displayPin">{{ session.pin }}</div>
-            
-            <div class="join-info">
-                <div class="qr-box">
-                    <img src="{{ qr_url }}" alt="QR Code" width="160" onclick="toggleQR(true)" title="Böyütmək üçün kliklə">
-                </div>
-                <div class="link-box">
-                    <div style="font-size: 0.9rem; color:#888; margin-bottom:5px;">Brauzerdə yaz:</div>
-                    <a href="{{ join_url }}" target="_blank" style="color:#00bcd4; font-weight:bold; font-size:1.5rem; text-decoration:none;">
-                       LearnHub.it / {{ session.pin }}
-                    </a>
-                </div>
-            </div> 
-        </header>
-
-        <div class="control-bar">
-            <button id="startBtn" class="btn-3d btn-start">
-                <i class="fas fa-play"></i> Start
-            </button>
-
-            <div class="settings-group">
-                <i class="fas fa-list-ol"></i>
-                <span style="font-size:0.9rem; font-weight:700; color:#455a64;">Sual sayı:</span>
-            
-                <input
-                    id="questionCount"
-                    type="number"
-                    min="1"
-                    max="{{ exam_total_questions }}"
-                    value="5"
-                    style="width:55px; border:none; background:transparent; font-weight:900; color:#455a64; text-align:center;"
-                />
-            
-                <small style="opacity:0.7; font-weight:700; color:#455a64;">
-                    / {{ exam_total_questions }}
-                </small>
-            </div>
-            
-
-            <button id="revealBtn" class="btn-3d btn-reveal" disabled>
-                <i class="fas fa-eye"></i> Reveal
-            </button>
-            
-            <button id="nextBtn" class="btn-3d btn-next" disabled>
-                <i class="fas fa-forward"></i> Next
-            </button>
-            
-            <button id="finishBtn" class="btn-3d btn-finish">
-                <i class="fas fa-stop"></i> Finish
-            </button>
-
-            <div class="settings-group" style="cursor:pointer;" onclick="document.getElementById('autoMode').click()">
-                <input type="checkbox" id="autoMode" checked>
-                <span style="font-size:0.9rem;">Auto</span>
-            </div>
-
-            <span id="gameState" style="background:#263238; color:#00e676; padding:5px 10px; border-radius:5px; font-size:0.8rem; font-family:monospace;">LOBBY</span>
+        <div class="question-count-box">
+            <i class="fas fa-list-ol"></i>
+            <label>Sual:</label>
+            <input type="text" id="questionCount" value="{{ selected_total_questions }}" maxlength="3">
+            <span>/ {{ exam_total_questions }}</span>
         </div>
-
-        <div id="questionWrap" style="display:none;">
-            <div class="q-header">
-                <span id="qMeta" style="font-weight:700; color:#888; font-size:1.1rem;">Sual 1/10</span>
-                <div class="timer-circle" id="qTimer">--</div>
-            </div>
-            <div id="qText" class="q-text">Sual mətni...</div>
-            <div id="qOptions" class="options-grid"></div>
+        
+        <button id="revealBtn" class="btn btn-reveal" disabled><i class="fas fa-eye"></i> Cavabı Göstər</button>
+        <button id="nextBtn" class="btn btn-next" disabled><i class="fas fa-forward"></i> Növbəti</button>
+        <button id="finishBtn" class="btn btn-finish"><i class="fas fa-stop"></i> Bitir</button>
+        
+        <label class="auto-toggle">
+            <input type="checkbox" id="autoMode" checked>
+            <span>Auto</span>
+        </label>
+        
+        <div class="state-badge" id="gameState">LOBBY</div>
+        
+        <div class="progress-box" id="progressBox">
+            <i class="fas fa-users"></i>
+            <span id="answeredText">0 / 0</span>
         </div>
-
-        <div id="leaderWrap" style="display:none;">
-            <h2 style="text-align:center; color:var(--primary); font-weight:900; margin-bottom:20px;">
-                <i class="fas fa-trophy" style="color:gold;"></i> Leaderboard
-            </h2>
-            <div id="leaderList"></div>
-        </div>
-
-        <div class="players-section">
-            <div class="players-header">
-                <h3 style="margin:0; font-weight:800;">
-                    <i class="fas fa-users"></i> Qoşulanlar: 
-                    <span id="playersCount" style="background:white; color:var(--primary); padding:2px 10px; border-radius:10px;">0</span>
-                </h3>
-                <small style="opacity:0.8;">Total: {{ exam_total_questions }} sual</small>
-            </div>
-            <div id="playersList" class="players-grid"></div>
-        </div>
-
-        <div style="margin-top:20px; opacity:0.75; text-align:center;">
-            <button id="debugBtn" type="button"
-                    style="background:none;border:none;cursor:pointer;color:white;font-weight:700;">
-              Debug Logs ▸
-            </button>
-          
-            <div id="hostLog"
-                 style="display:none;text-align:left;background:#000;color:#0f0;
-                        padding:12px;max-height:160px;overflow:auto;margin-top:10px;
-                        border-radius:10px;white-space:pre-wrap;
-                        font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-                        line-height:1.35;">
-              Ready.
-            </div>
-          </div>
-          
-
     </div>
 
-    <div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
-        <img src="{{ qr_url }}" alt="QR Big">
-        <p style="position:absolute; bottom:5%; color:white; font-weight:bold; font-size:1.5rem;">Qoşulmaq üçün skan et!</p>
+    <!-- GAME AREA -->
+    <div id="gameArea" class="game-area">
+        
+        <!-- LEFT: Question / Results -->
+        <div class="left-panel">
+            
+            <!-- Question Display -->
+            <div id="questionPanel" class="panel question-panel">
+                <div class="q-header">
+                    <span id="qMeta">Sual 1 / 10</span>
+                    <div id="qTimer" class="timer">--</div>
+                </div>
+                <div id="qText" class="q-text">Sual mətni...</div>
+                <div id="qOptions" class="options-grid"></div>
+            </div>
+            
+            <!-- Results Display -->
+            <div id="resultsPanel" class="panel results-panel">
+                <div class="panel-title"><i class="fas fa-chart-bar"></i> Bu sualın nəticələri</div>
+                <div id="resultsList" class="results-list"></div>
+            </div>
+            
+        </div>
+        
+        <!-- RIGHT: Leaderboard -->
+        <div class="right-panel">
+            <div class="panel leaderboard-panel">
+                <div class="panel-title"><i class="fas fa-trophy"></i> Liderlik Cədvəli</div>
+                <div id="leaderList" class="leader-list"></div>
+            </div>
+        </div>
+        
     </div>
 
-    {% block extraJs %}
-        <script>
-            const GAME_CONFIG = {
-                pin: "{{ session.pin }}",
-                csrf: "{{ csrf_token }}",
-                urls: {
-                    start: "{% url 'liveExam:start_game' session.pin %}",
-                    endQuestion: "{% url 'liveExam:end_question' session.pin %}",
-                    nextQuestion: "{% url 'liveExam:next_question' session.pin %}",
-                    finish: "{% url 'liveExam:finish_game' session.pin %}"
-                }
-            };
+    <!-- PLAYERS (Lobby only) -->
+    <div id="playersSection" class="players-section">
+        <div class="players-header">
+            <h3><i class="fas fa-users"></i> Qoşulanlar: <span id="playersCount">0</span></h3>
+            <small>{{ exam_total_questions }} sual mövcuddur</small>
+        </div>
+        <div id="playersList" class="players-grid"></div>
+    </div>
 
-            // QR Modal Funksiyası
-            function toggleQR(show) {
-                const modal = document.getElementById('qrModal');
-                // Əgər oyun başlayıbsa (lobbyHeader gizlidirsə) modalı açmağa icazə vermə
-                const header = document.getElementById('lobbyHeader');
-                if (show && header.style.display === 'none') return;
-                
-                modal.style.display = show ? 'flex' : 'none';
-            }
-        </script>
-        <script src="{% static 'js/host_lobby.js' %}"></script>
-    {% endblock %}
+    <!-- DEBUG -->
+    <div class="debug-section">
+        <button id="debugBtn" class="debug-btn"><i class="fas fa-terminal"></i> Debug ▸</button>
+        <pre id="debugLog" class="debug-log"></pre>
+    </div>
 
+</div>
+
+<!-- FINAL PODIUM -->
+<div id="finalPodium" class="final-podium">
+    <div id="confetti" class="confetti-wrap"></div>
+    <div class="spotlight s1"></div>
+    <div class="spotlight s2"></div>
+    <div class="spotlight s3"></div>
+    
+    <button class="close-btn" onclick="closePodium()"><i class="fas fa-times"></i></button>
+    
+    <div class="podium-header">
+        <h1>🏆 Final Nəticələr</h1>
+        <p>Təbriklər qaliblərə!</p>
+    </div>
+    
+    <div id="podiumStage" class="podium-stage"></div>
+    <div class="others-section">
+        <div class="others-title">Digər oyunçular</div>
+        <div id="othersList" class="others-list"></div>
+    </div>
+</div>
+
+<!-- QR MODAL -->
+<div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
+    <img src="{{ qr_url }}" alt="QR">
+    <p>Skan edin!</p>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+const CONFIG = {
+    pin: "{{ session.pin }}",
+    csrf: "{{ csrf_token }}",
+    maxQuestions: {{ exam_total_questions }},
+    urls: {
+        start: "{% url 'liveExam:start_game' session.pin %}",
+        reveal: "{% url 'liveExam:host_reveal' session.pin %}",
+        next: "{% url 'liveExam:next_question' session.pin %}",
+        finish: "{% url 'liveExam:finish_game' session.pin %}"
+    }
+};
+
+function toggleQR(show) {
+    document.getElementById('qrModal').style.display = show ? 'flex' : 'none';
+}
+
+function closePodium() {
+    document.getElementById('finalPodium').style.display = 'none';
+}
+</script>
+<script src="{% static 'js/host_lobby.js' %}"></script>
 {% endblock %}

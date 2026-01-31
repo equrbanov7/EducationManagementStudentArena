@@ -1,102 +1,174 @@
-/* wait_room.js */
+/* ═══════════════════════════════════════════════════════════════
+   WAIT ROOM - WebSocket & UI Logic
+   ═══════════════════════════════════════════════════════════════ */
 
-// Emojilər (Digər fayllarla eyni olmalıdır)
-const AVATARS = {
-    'avatar_1': '🦊', 'avatar_2': '🐼', 'avatar_3': '🦁', 'avatar_4': '🐯',
-    'avatar_5': '🐨', 'avatar_6': '🐷', 'avatar_7': '🐸', 'avatar_8': '🐙',
-    'avatar_9': '🐵', 'avatar_10': '🦄', 'avatar_11': '🐰', 'avatar_12': '🐹'
-};
-
-const els = {
-    myAvatar: document.getElementById("myAvatar"),
-    myNickname: document.getElementById("myNickname"),
-    list: document.getElementById("playersList"),
-    count: document.getElementById("count"),
-    wsStatus: document.getElementById("wsStatus")
-};
-
-// 1. Mənim Avatarımı Render Et
-// HTML-dən gələn açarı (məs: 'avatar_2') emojiyə çevirir
-const myKey = CONFIG.myAvatarKey; 
-const myEmoji = AVATARS[myKey] || '👤';
-if(els.myAvatar) els.myAvatar.textContent = myEmoji;
-
-// 2. Oyunçuları Render Et
-function renderPlayers(players) {
-    const arr = Array.isArray(players) ? players : [];
-    if(els.count) els.count.textContent = arr.length;
-
-    if(els.list) {
-        els.list.innerHTML = "";
-        arr.forEach(p => {
-            // Özümüzü siyahıda göstərmirik (artıq yuxarıda böyük şəkildə var)
-            if (p.nickname === CONFIG.myNickname) return; 
-
-            const div = document.createElement("div");
-            div.className = "mini-player";
-            const emoji = AVATARS[p.avatar_key] || '👤';
-            div.innerHTML = `<div style="font-size:1.5rem">${emoji}</div><div>${p.nickname}</div>`;
-            els.list.appendChild(div);
-        });
-    }
-}
-
-// İlkin yükləmə
-try {
-    const initial = JSON.parse(document.getElementById("initialPlayers").textContent || "[]");
-    renderPlayers(initial);
-} catch (e) {
-    console.error("Initial parsing error", e);
-}
-
-// 3. WebSocket Logic
-function wsUrl() {
-    const proto = location.protocol === "https:" ? "wss" : "ws";
-    return `${proto}://${location.host}${CONFIG.wsPath}`;
-}
-
-let socket = null;
-let reconnectTimer = null;
-
-function connectWs() {
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-
-    if(els.wsStatus) els.wsStatus.textContent = "Bağlantı qurulur...";
+   document.addEventListener('DOMContentLoaded', () => {
     
-    socket = new WebSocket(wsUrl());
-
-    socket.onopen = () => {
-        if(els.wsStatus) {
-            els.wsStatus.textContent = "Onlayn ✅";
-            els.wsStatus.style.color = "#00c853";
-        }
+    // Avatar Emojis
+    const AVATARS = {
+        'avatar_1': '🦊', 'avatar_2': '🐼', 'avatar_3': '🦁', 'avatar_4': '🐯',
+        'avatar_5': '🐨', 'avatar_6': '🐷', 'avatar_7': '🐸', 'avatar_8': '🐙',
+        'avatar_9': '🐵', 'avatar_10': '🦄', 'avatar_11': '🐰', 'avatar_12': '🐹'
     };
 
-    socket.onmessage = (e) => {
+    // DOM Elements
+    const els = {
+        myAvatar: document.getElementById('myAvatar'),
+        myNickname: document.getElementById('myNickname'),
+        playersList: document.getElementById('playersList'),
+        playerCount: document.getElementById('playerCount'),
+        wsStatus: document.getElementById('wsStatus')
+    };
+
+    // Set my avatar
+    if (els.myAvatar && CONFIG.myAvatarKey) {
+        els.myAvatar.textContent = AVATARS[CONFIG.myAvatarKey] || '👤';
+    }
+
+    // Render players
+    function renderPlayers(players) {
+        const arr = Array.isArray(players) ? players : [];
+        
+        // Update count (excluding self)
+        const othersCount = arr.filter(p => p.nickname !== CONFIG.myNickname).length;
+        if (els.playerCount) {
+            els.playerCount.textContent = othersCount;
+        }
+
+        // Render player cards
+        if (els.playersList) {
+            els.playersList.innerHTML = '';
+            
+            arr.forEach((player, index) => {
+                // Skip self
+                if (player.nickname === CONFIG.myNickname) return;
+
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                const emoji = AVATARS[player.avatar_key] || '👤';
+                
+                card.innerHTML = `
+                    <div class="player-avatar">${emoji}</div>
+                    <div class="player-name">${escapeHtml(player.nickname)}</div>
+                `;
+                
+                els.playersList.appendChild(card);
+            });
+        }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Update WebSocket status
+    function updateWsStatus(status, text) {
+        if (!els.wsStatus) return;
+        
+        els.wsStatus.className = 'ws-status ' + status;
+        const statusText = els.wsStatus.querySelector('.status-text');
+        if (statusText) {
+            statusText.textContent = text;
+        }
+    }
+
+    // Load initial players
+    try {
+        const initialData = document.getElementById('initialPlayers');
+        if (initialData) {
+            const players = JSON.parse(initialData.textContent || '[]');
+            renderPlayers(players);
+        }
+    } catch (e) {
+        console.error('Initial players parse error:', e);
+    }
+
+    // WebSocket Connection
+    function getWsUrl() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${protocol}//${window.location.host}${CONFIG.wsPath}`;
+    }
+
+    let socket = null;
+    let reconnectTimer = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+
+    function connectWebSocket() {
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+
+        updateWsStatus('', 'Bağlanır...');
+
         try {
-            const msg = JSON.parse(e.data);
-            const payload = msg.data ? msg.data : msg;
+            socket = new WebSocket(getWsUrl());
 
-            // OYUN BAŞLADI -> Redirect
-            if (payload.type === "game_started" && payload.redirect) {
-                window.location.href = payload.redirect;
-                return;
-            }
+            socket.onopen = () => {
+                console.log('WebSocket connected');
+                updateWsStatus('online', 'Onlayn');
+                reconnectAttempts = 0;
+            };
 
-            // LOBBY UPDATE -> Siyahını yenilə
-            if (payload.type === "lobby_state" && Array.isArray(payload.players)) {
-                renderPlayers(payload.players);
-            }
-        } catch (_) {}
-    };
+            socket.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    const payload = msg.data || msg;
 
-    socket.onclose = () => {
-        if(els.wsStatus) {
-            els.wsStatus.textContent = "Bağlantı kəsildi ❌";
-            els.wsStatus.style.color = "#ff4081";
+                    // Game started - redirect to player screen
+                    if (payload.type === 'game_started' && payload.redirect) {
+                        updateWsStatus('online', 'Oyun başlayır...');
+                        window.location.href = payload.redirect;
+                        return;
+                    }
+
+                    // Lobby state update
+                    if (payload.type === 'lobby_state' && Array.isArray(payload.players)) {
+                        renderPlayers(payload.players);
+                    }
+
+                } catch (e) {
+                    console.error('Message parse error:', e);
+                }
+            };
+
+            socket.onclose = (event) => {
+                console.log('WebSocket closed:', event.code);
+                updateWsStatus('offline', 'Bağlantı kəsildi');
+
+                // Reconnect logic
+                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * reconnectAttempts, 5000);
+                    reconnectTimer = setTimeout(connectWebSocket, delay);
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                updateWsStatus('offline', 'Xəta');
+            };
+
+        } catch (e) {
+            console.error('WebSocket connection error:', e);
+            updateWsStatus('offline', 'Bağlantı xətası');
         }
-        reconnectTimer = setTimeout(connectWs, 2000);
-    };
-}
+    }
 
-connectWs();
+    // Start connection
+    connectWebSocket();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (socket) {
+            socket.close();
+        }
+    });
+
+});
