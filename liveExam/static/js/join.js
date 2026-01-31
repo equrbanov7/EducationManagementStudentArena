@@ -1,124 +1,113 @@
-/* join.js */
+document.addEventListener('DOMContentLoaded', () => {
+    // CONFIG artıq template-dən gəlir (global dəyişən)
 
-// Backend-dəki stringləri vizual Emojilərə çevirən xəritə
-// Əgər backend 'avatar_13' göndərsə və burda yoxdursa, random seçəcək.
-const AVATARS = {
-    'avatar_1': '🦊',   // Fox
-    'avatar_2': '🐼',   // Panda
-    'avatar_3': '🦁',   // Lion
-    'avatar_4': '🐯',   // Tiger
-    'avatar_5': '🐨',   // Koala
-    'avatar_6': '🐷',   // Pig
-    'avatar_7': '🐸',   // Frog
-    'avatar_8': '🐙',   // Octopus
-    'avatar_9': '🐵',   // Monkey
-    'avatar_10': '🦄',  // Unicorn
-    'avatar_11': '🐰',  // Rabbit
-    'avatar_12': '🐹'   // Hamster
-};
-const avatarContainer = document.getElementById("avatarGrid");
-const joinBtn = document.getElementById("joinBtn");
-const nicknameInput = document.getElementById("nickname");
-let selectedAvatar = "avatar_1"; // Default
+    // Avatar emoji-ləri
+    const AVATAR_EMOJIS = {
+        "avatar_1": "🦊",
+        "avatar_2": "🐼",
+        "avatar_3": "🦁",
+        "avatar_4": "🐯",
+        "avatar_5": "🐨",
+        "avatar_6": "🐷",
+        "avatar_7": "🐙",
+        "avatar_8": "🦄",
+        "avatar_9": "🐸",
+        "avatar_10": "🐰",
+        "avatar_11": "🐻",
+        "avatar_12": "🐶"
+    };
 
-// 1. Avatarları Hazırla (Buttonlara Emoji və Click Event əlavə et)
-document.querySelectorAll(".avatar-btn").forEach(btn => {
-    const key = btn.dataset.key;
+    // Avatar grid-i doldur
+    const avatarGrid = document.getElementById('avatarGrid');
+    if (!avatarGrid) return;
     
-    // Mətni Emojiyə çevir
-    const emoji = AVATARS[key] || '👤';
-    btn.textContent = emoji;
+    let selectedAvatar = null;
 
-    // Click Event
-    btn.addEventListener("click", () => {
-        // Hamısından selected klasını sil
-        document.querySelectorAll(".avatar-btn").forEach(b => b.classList.remove("selected"));
-        // Buna əlavə et
-        btn.classList.add("selected");
-        selectedAvatar = key;
+    Object.entries(AVATAR_EMOJIS).forEach(([key, emoji]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'avatar-btn';
+        btn.dataset.key = key;
+        btn.textContent = emoji;
         
-        // Kiçik vibrasiya (telefonda hissiyyat üçün)
-        if(navigator.vibrate) navigator.vibrate(10);
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAvatar = key;
+        });
+        
+        avatarGrid.appendChild(btn);
     });
-});
 
-// Default olaraq birincini seçili et
-const firstBtn = document.querySelector(`.avatar-btn[data-key="${selectedAvatar}"]`) || document.querySelector(".avatar-btn");
-if(firstBtn) {
-    firstBtn.classList.add("selected");
-    selectedAvatar = firstBtn.dataset.key;
-}
-
-// 2. Input Enter Event
-nicknameInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") joinBtn.click();
-});
-
-// 3. Qoşulma Məntiqi (Sənin orijinal kodun saxlanılıb)
-joinBtn.addEventListener("click", async () => {
-    const nickname = nicknameInput.value.trim();
-    if (!nickname) {
-        // Inputu silkələ (animasiya)
-        nicknameInput.style.borderColor = "#ff4081";
-        nicknameInput.classList.add("shake");
-        setTimeout(() => nicknameInput.classList.remove("shake"), 500);
-        nicknameInput.focus();
-        return;
+    // Auto-select first avatar
+    const firstBtn = avatarGrid.querySelector('.avatar-btn');
+    if (firstBtn) {
+        firstBtn.click();
     }
-    nicknameInput.style.borderColor = "#eceff1";
 
-    // Düyməni loading rejiminə sal
-    joinBtn.disabled = true;
-    joinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gözləyin...';
+    // Join button
+    const joinBtn = document.getElementById('joinBtn');
+    if (!joinBtn) return;
 
-    const form = new FormData();
-    form.append("nickname", nickname);
-    form.append("avatar_key", selectedAvatar);
+    joinBtn.addEventListener('click', async () => {
+        const nickname = document.getElementById('nickname').value.trim();
+        
+        if (!nickname) {
+            document.getElementById('nickname').focus();
+            document.getElementById('nickname').style.borderColor = '#ef4444';
+            return;
+        }
 
-    try {
-        const res = await fetch(CONFIG.joinUrl, {
-            method: "POST",
-            body: form,
-            credentials: "same-origin",
-            headers: {
-                "X-CSRFToken": CONFIG.csrf,
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json"
+        if (!selectedAvatar) {
+            alert('Avatar seç!');
+            return;
+        }
+
+        joinBtn.disabled = true;
+        joinBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Qoşulur...';
+
+        try {
+            const formData = new FormData();
+            formData.append('nickname', nickname);
+            formData.append('avatar_key', selectedAvatar);
+
+            const res = await fetch(CONFIG.joinUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CONFIG.csrf
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (data.ok) {
+                window.location.href = data.redirect;
+            } else {
+                alert(data.message || 'Xəta baş verdi');
+                joinBtn.disabled = false;
+                joinBtn.innerHTML = '<i class="fas fa-play me-2"></i> Oyuna Qoşul!';
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Bağlantı xətası');
+            joinBtn.disabled = false;
+            joinBtn.innerHTML = '<i class="fas fa-play me-2"></i> Oyuna Qoşul!';
+        }
+    });
+
+    // Enter key to submit
+    const nicknameInput = document.getElementById('nickname');
+    if (nicknameInput) {
+        nicknameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinBtn.click();
             }
         });
 
-        let data;
-        try {
-            data = await res.json();
-        } catch (_) {
-            data = null;
-        }
-
-        if (!res.ok || !data || !data.ok) {
-            const msg = (data && data.message) ? data.message : "Xəta baş verdi";
-            alert(msg);
-            resetBtn();
-            return;
-        }
-
-        // Redirect
-        if (data.redirect) {
-            window.location.href = data.redirect;
-            return;
-        }
-
-        // Fallback
-        joinBtn.textContent = "Qoşuldu ✅";
-        joinBtn.style.background = "var(--success)";
-
-    } catch (err) {
-        alert("İnternet xətası. Yenidən cəhd edin.");
-        console.error(err);
-        resetBtn();
+        // Reset border color on input
+        nicknameInput.addEventListener('input', function() {
+            this.style.borderColor = '#e5e7eb';
+        });
     }
 });
-
-function resetBtn() {
-    joinBtn.disabled = false;
-    joinBtn.innerHTML = 'Hadi Başlayaq! 🚀';
-}

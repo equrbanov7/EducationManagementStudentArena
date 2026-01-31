@@ -95,6 +95,11 @@
                 <!-- LAB İŞLƏRİ - Həmişə göstər                                  -->
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 {% include 'labs/lab_section.html' %}
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- İMTAHANLAR                                                  -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                {% include 'exams/exam_section.html' %}
                 
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 <!-- KURS İŞLƏRİ - Həmişə göstər                                 -->
@@ -125,7 +130,8 @@
     {% include 'courses/partials/_member_form_modal.html' %}
     {% include "assignments/partials/_assignment_modals.html" %}
     {% include "projects/partials/_project_modals.html" %}
-    {% include "labs/partials/_lab_modals.html" %}
+    {% include "labs/partials/_lab_modals.html" %}  
+    {% include "exams/partials/_exam_modals.html" %}
 {% endif %}
 
 <script>
