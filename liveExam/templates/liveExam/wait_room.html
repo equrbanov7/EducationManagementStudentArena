@@ -4,50 +4,83 @@
 {% block title %}Gözləmə Otağı | {{ session.pin }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/wait_room.css' %}">
+<link rel="stylesheet" href="{% static 'css/wait_room.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="wait-page-wrapper">
+    
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle">🎮</div>
+        <div class="particle">⭐</div>
+        <div class="particle">🎯</div>
+        <div class="particle">🏆</div>
+        <div class="particle">🚀</div>
+        <div class="particle">💡</div>
+        <div class="particle">🎲</div>
+        <div class="particle">✨</div>
+    </div>
 
-    <div class="wait-card">
-        <div class="success-msg">Sən Artıq İçəridəsən!</div>
-        
-        <div class="my-profile">
-            <div id="myAvatar" class="my-avatar"></div> 
-            <div id="myNickname" class="my-nickname">{{ my_nickname }}</div>
+    <!-- Main Profile Card -->
+    <div class="profile-card">
+        <div class="success-badge">
+            <i class="fas fa-check-circle"></i>
+            Sən Artıq İçəridəsən!
         </div>
-
+        
+        <div id="myAvatar" class="my-avatar">👤</div>
+        <div id="myNickname" class="my-nickname">{{ my_nickname|default:"Oyunçu" }}</div>
+        
         <div class="status-bar">
+            <i class="fas fa-spinner"></i>
             Müəllim oyunu başladır<span class="loading-dots"></span>
         </div>
     </div>
 
-    <div class="others-container">
-        <div class="others-title">
-            <span>Digər oyunçular:</span>
-            <span id="count" style="background:white; color:#006064; padding:2px 8px; border-radius:10px;">0</span>
-        </div>
-        <div id="playersList" class="players-grid">
+    <!-- Other Players Section -->
+    <div class="players-section">
+        <div class="players-header">
+            <div class="players-title">
+                <i class="fas fa-users"></i>
+                Digər oyunçular
             </div>
+            <div class="player-count" id="playerCount">0</div>
+        </div>
+        
+        <div id="playersList" class="players-grid">
+            <!-- Players will be rendered here by JS -->
+        </div>
     </div>
 
-    <div class="lobby-info">
-        <p>PIN: {{ session.pin }}</p>
-        <small id="wsStatus" style="opacity:0.8;">Bağlantı...</small>
+</div>
+
+<!-- Footer Info -->
+<div class="lobby-footer">
+    <div class="footer-item">
+        <i class="fas fa-gamepad"></i>
+        <span>PIN:</span>
+        <span class="pin">{{ session.pin }}</span>
     </div>
+    <div class="footer-item">
+        <div id="wsStatus" class="ws-status">
+            <span class="dot"></span>
+            <span class="status-text">Bağlanır...</span>
+        </div>
+    </div>
+</div>
 
-    {{ players|json_script:"initialPlayers" }}
-
+{{ players|json_script:"initialPlayers" }}
 {% endblock %}
 
 {% block extraJs %}
-    <script>
-        // Backend-dən gələn məlumatlar JS-ə ötürülür
-        const CONFIG = {
-            wsPath: `/ws/live/{{ session.pin }}/lobby/`,
-            myNickname: "{{ my_nickname }}",     // View-da context-ə 'my_nickname' əlavə et
-            myAvatarKey: "{{ my_avatar_key }}"   // View-da context-ə 'my_avatar_key' əlavə et
-        };
-    </script>
-    <script src="{% static 'js/wait_room.js' %}"></script>
+<script>
+    const CONFIG = {
+        wsPath: `/ws/live/{{ session.pin }}/lobby/`,
+        playerScreenUrl: "{{ player_screen_url }}",
+        myNickname: "{{ my_nickname|escapejs }}",
+        myAvatarKey: "{{ my_avatar_key|default:'avatar_1' }}"
+    };
+</script>
+<script src="{% static 'js/wait_room.js' %}"></script>
 {% endblock %}

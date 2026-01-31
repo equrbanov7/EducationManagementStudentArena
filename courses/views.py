@@ -6,6 +6,7 @@ Kurs modulu üçün view-lər.
 Labs app inteqrasiyası əlavə edilib.
 """
 
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -14,6 +15,9 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q, Max
+from blog.models import Exam
+
+
 
 from .models import (
     Course,
@@ -27,6 +31,7 @@ from .forms import (
     CourseResourceForm,
 )
 from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
@@ -238,6 +243,53 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             context['projects'] = []
             context['projects_with_user_data'] = []
 
+        # ═══════════════════════════════════════════════════════════════════
+        # 7. İMTAHANLAR
+        # ───────────────────────────────────────────────────────────────────
+        from blog.models import Exam, ExamAttempt
+
+        if context['is_owner'] or context['is_teacher']:
+            # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
+            context['course_exams'] = Exam.objects.filter(
+                course=course
+            ).order_by('-created_at')
+            
+            # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
+            context['teacher_exams'] = Exam.objects.filter(
+                author=user
+            ).exclude(course=course).order_by('-created_at')[:10]
+            
+        elif context['is_student']:
+            # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
+            all_course_exams = Exam.objects.filter(course=course, is_active=True)
+            
+            exams_with_data = []
+            for exam in all_course_exams:
+                if exam.can_user_see(user):
+                    # Bu tələbənin attempt-ları
+                    attempts = ExamAttempt.objects.filter(
+                        exam=exam,
+                        user=user
+                    ).exclude(status='draft').order_by('-started_at')
+                    
+                    last_attempt = attempts.first()
+                    attempt_count = attempts.count()
+                    attempts_left = exam.attempts_left_for(user)
+                    
+                    exams_with_data.append({
+                        'exam': exam,
+                        'last_attempt': last_attempt,
+                        'attempt_count': attempt_count,
+                        'attempts_left': attempts_left,
+                        'can_start': exam.can_user_start(user)[0],
+                    })
+            
+            context['course_exams'] = []
+            context['exams_with_data'] = exams_with_data
+        else:
+            context['course_exams'] = []
+            context['exams_with_data'] = []
+        
         # ═══════════════════════════════════════════════════════════════════
         # 6. LAB İŞLƏRİ
         # ───────────────────────────────────────────────────────────────────
@@ -906,3 +958,49 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         context['courses_with_info'] = courses_with_info
         return context
     
+    
+
+
+
+@login_required
+@require_POST
+def link_exam_to_course(request, pk):
+    """İmtahanı kursa əlaqələndir"""
+    course = get_object_or_404(Course, id=pk)
+    
+    if course.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        exam_id = data.get('exam_id')
+        
+        exam = get_object_or_404(Exam, id=exam_id, author=request.user)
+        exam.course = course
+        exam.save()
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@require_POST
+def unlink_exam_from_course(request, pk):
+    """İmtahanı kursdan ayır"""
+    course = get_object_or_404(Course, id=pk)
+    
+    if course.owner != request.user:
+        return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        exam_id = data.get('exam_id')
+        
+        exam = get_object_or_404(Exam, id=exam_id, course=course)
+        exam.course = None
+        exam.save()
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

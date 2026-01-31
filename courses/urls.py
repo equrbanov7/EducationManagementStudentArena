@@ -128,5 +128,12 @@ urlpatterns = [
     
     # Tələbə kursları
     path('my-enrolled/', views.StudentCoursesView.as_view(), name='student_courses'),
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # İmtahanlar ilə əlaqələndirmə
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    path('<int:pk>/link-exam/', views.link_exam_to_course, name='link_exam'),
+    path('<int:pk>/unlink-exam/', views.unlink_exam_from_course, name='unlink_exam'),
 
 ]

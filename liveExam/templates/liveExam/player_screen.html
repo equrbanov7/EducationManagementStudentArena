@@ -4,55 +4,97 @@
 {% block title %}Live Player | {{ session.pin }}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/player.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/player.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="player-wrapper">
     
-    <div class="topbar">
-        <div>📌 {{ session.pin }}</div>
-        <div id="connPill" class="pill">Qoşulur...</div>
-        <div id="timerBox" class="timer">--:--</div>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="pin-badge">
+            <i class="fas fa-gamepad"></i>
+            <span>{{ session.pin }}</span>
+        </div>
+        <div class="connection-status" id="connStatus">
+            <span class="dot"></span>
+            <span class="text">Qoşulur...</span>
+        </div>
+        <div class="timer-box" id="timerBox">
+            <i class="fas fa-clock"></i>
+            <span id="timerText">--:--</span>
+        </div>
     </div>
 
-    <div class="card" id="mainCard">
+    <!-- Main Card -->
+    <div class="main-card" id="mainCard">
         
-        <div id="metaLine" style="text-align:center; font-size:0.9rem; opacity:0.7; margin-bottom:10px;"></div>
-
-        <div class="qtext" id="qText">
-            Hazır ol! Oyun başlayır... 🚀
-        </div>
-
-        <div class="grid" id="optionsGrid" style="display:none;"></div>
-
-        <div class="actions" id="actionBar" style="display:none;">
-            <div id="multiHint" style="font-size:0.9rem; font-weight:bold;"></div>
-            <button class="btn-submit" id="submitBtn" type="button" disabled>Təsdiqlə</button>
-        </div>
-
-        <div class="status" id="statusLine"></div>
-
-        <div class="lb" id="lbWrap" style="display:none;">
-            <h3>🏆 Liderlər</h3>
-            <ol id="lbList"></ol>
-
-            <div style="margin-top:15px;">
-                <div class="pill">Nəticələr</div>
-                <ol id="resultList" style="margin-top:8px; font-size:0.9rem; padding-left:20px;"></ol>
+        <!-- Question Meta -->
+        <div class="question-meta" id="questionMeta"></div>
+        
+        <!-- Question Text -->
+        <div class="question-text" id="questionText">
+            <div class="waiting-screen">
+                <div class="waiting-icon">🎮</div>
+                <div class="waiting-title">Hazır ol!</div>
+                <div class="waiting-subtitle">Oyun tezliklə başlayır...</div>
             </div>
         </div>
+        
+        <!-- Options Grid -->
+        <div class="options-container" id="optionsContainer"></div>
+        
+        <!-- Multi Select Actions -->
+        <div class="multi-actions" id="multiActions">
+            <div class="select-counter" id="selectCounter">Seçilib: 0 / 2</div>
+            <button class="submit-btn" id="submitBtn" disabled>
+                <i class="fas fa-paper-plane"></i> Təsdiqlə
+            </button>
+        </div>
+        
+        <!-- Status Message -->
+        <div class="status-message" id="statusMessage"></div>
+        
     </div>
 
+    <!-- Leaderboard Section -->
+    <div class="leaderboard-section" id="leaderboardSection">
+        <div class="lb-header">
+            <i class="fas fa-trophy"></i>
+            <span>Liderlik Cədvəli</span>
+        </div>
+        <div class="lb-list" id="leaderboardList"></div>
+        
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <i class="fas fa-chart-bar"></i>
+                <span>Bu sualın nəticələri</span>
+            </div>
+            <div class="results-list" id="resultsList"></div>
+        </div>
+    </div>
+
+    <!-- Final Screen -->
+    <div class="final-screen" id="finalScreen">
+        <div class="confetti-layer" id="confettiLayer"></div>
+        <div class="final-content">
+            <div class="final-trophy">🏆</div>
+            <h1 class="final-title">Oyun Bitdi!</h1>
+            <p class="final-subtitle">Təbriklər bütün iştirakçılara!</p>
+            <div class="final-leaderboard" id="finalLeaderboard"></div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
 
 {% block extraJs %}
-    <script>
-        // Backend dəyərlərini JS-ə ötürürük
-        const GAME_CONFIG = {
-            pin: "{{ session.pin }}",
-            csrf: "{{ csrf_token }}"
-            // DİQQƏT: answerUrl sətirini sildik, çünki WebSocket işlədirik!
-        };
-    </script>
-    <script src="{% static 'js/player.js' %}"></script>
+<script>
+const GAME_CONFIG = {
+    pin: "{{ session.pin }}",
+    csrf: "{{ csrf_token }}"
+};
+</script>
+<script src="{% static 'js/player.js' %}"></script>
 {% endblock %}
