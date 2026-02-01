@@ -1,9 +1,21 @@
 # =========================
+# Environment Variables (ÇOX VACİB!)
+# =========================
+.env
+.env.*
+*.env
+.env.local
+.env.production
+.env.development
+
+# =========================
 # Python bytecode & cache
 # =========================
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
 
 # =========================
 # Virtual environments
@@ -11,68 +23,101 @@ __pycache__/
 venv/
 .venv/
 env/
-.env/
+ENV/
 env.bak/
-.env.bak/
+.python-version
 
 # =========================
 # Django specific
 # =========================
 db.sqlite3
+*.sqlite3
 /staticfiles/
+/static_root/
 /media/
 /media_root/
-/static_root/
-
-# Lokal settings faylı istifadə edirsənsə
 local_settings.py
+*.log
+
+# =========================
+# Docker
+# =========================
+# Docker volume data (əgər local saxlayırsansa)
+postgres_data/
+redis_data/
 
 # =========================
 # Logs & temp files
 # =========================
 *.log
 *.pot
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
 *.tmp
 *.swp
 *.swo
+*~
 
 # =========================
-# Test / coverage
+# Test / Coverage
 # =========================
 htmlcov/
 .coverage
 .coverage.*
-.cache
+.cache/
+.pytest_cache/
 nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
-.pytest_cache/
+.tox/
+.nox/
 
 # =========================
-# IDE / Editor faylları
+# IDE / Editor
 # =========================
 .vscode/
 .idea/
 *.iml
+*.sublime-project
+*.sublime-workspace
 
-# MacOS system files
+# =========================
+# MacOS
+# =========================
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Thumbnails
 ._*
+.Spotlight-V100
+.Trashes
 
 # =========================
-# Node.js varsa (frontend)
+# Windows
+# =========================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Node.js (frontend varsa)
 # =========================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+package-lock.json
+yarn.lock
+
+# =========================
+# Jupyter Notebooks
+# =========================
+.ipynb_checkpoints/
+*.ipynb
+
+# =========================
+# Secrets & Keys
+# =========================
+*.pem
+*.key
+secrets/
+credentials/
