@@ -1,185 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
+{% load exam_filters %}
 
 {% block title %}Yoxlanılacaq İşlər{% endblock %}
 
 {% block extraCss %}
-<style>
-    .pending-container {
-        max-width: 1100px;
-        margin: 40px auto;
-        padding: 0 20px;
-    }
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 20px;
-    }
-    .page-header h2 {
-        font-weight: 700;
-        color: #333;
-        margin: 0;
-    }
-    .table-card {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        overflow: hidden;
-        border: 1px solid #eee;
-    }
-    .custom-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .custom-table th {
-        background: #f8f9fa;
-        color: #555;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        padding: 15px 18px;
-        text-align: left;
-    }
-    .custom-table td {
-        padding: 15px 18px;
-        border-bottom: 1px solid #f1f1f1;
-        color: #333;
-        vertical-align: middle;
-    }
-    .custom-table tr:last-child td {
-        border-bottom: none;
-    }
-    .custom-table tr:hover {
-        background-color: #fcfcfc;
-    }
-    
-    .user-cell {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .user-icon {
-        width: 38px;
-        height: 38px;
-        background: #e0e7ff;
-        color: #4f46e5;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-    }
-    .user-info {
-        font-weight: 600;
-    }
-    .user-email {
-        font-size: 0.75rem;
-        color: #888;
-        font-weight: normal;
-    }
-
-    .exam-title {
-        font-weight: 600;
-        color: #333;
-    }
-    .exam-type {
-        display: inline-block;
-        margin-top: 4px;
-    }
-    
-    /* Tip badge-ləri */
-    .badge-test {
-        background: #dbeafe;
-        color: #1d4ed8;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-    .badge-essay {
-        background: #fef3c7;
-        color: #b45309;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
-    .btn-check-action {
-        background-color: #3b82f6;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .btn-check-action:hover {
-        background-color: #2563eb;
-        transform: translateY(-2px);
-        color: white;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-    }
-    .empty-icon {
-        font-size: 3.5rem;
-        color: #d1d5db;
-        margin-bottom: 20px;
-    }
-    .empty-state h4 {
-        color: #333;
-        margin-bottom: 10px;
-    }
-
-    /* Filter tabs */
-    .filter-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .filter-tab {
-        padding: 8px 16px;
-        border-radius: 20px;
-        border: 1px solid #e5e7eb;
-        background: #fff;
-        color: #666;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-    .filter-tab:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
-    }
-    .filter-tab.active {
-        background: #3b82f6;
-        color: white;
-        border-color: #3b82f6;
-    }
-    .filter-tab .count {
-        background: rgba(0,0,0,0.1);
-        padding: 2px 8px;
-        border-radius: 10px;
-        margin-left: 6px;
-        font-size: 0.8rem;
-    }
-    .filter-tab.active .count {
-        background: rgba(255,255,255,0.2);
-    }
-</style>
+    <link rel="stylesheet" href="{% static 'css/teacher_pending_attempts.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -196,13 +22,13 @@
         <button class="filter-tab active" data-filter="all">
             Hamısı <span class="count">{{ pending_attempts|length }}</span>
         </button>
-        <button class="filter-tab" data-filter="essay">
+        <button class="filter-tab" data-filter="written">
             <i class="fas fa-pen-fancy me-1"></i> Yazılı
-            <span class="count">{{ essay_count|default:0 }}</span>
+            <span class="count">{{ essay_count }}</span>
         </button>
         <button class="filter-tab" data-filter="test">
             <i class="fas fa-list-check me-1"></i> Test
-            <span class="count">{{ test_count|default:0 }}</span>
+            <span class="count">{{ test_count }}</span>
         </button>
     </div>
     {% endif %}
@@ -220,23 +46,38 @@
                     </tr>
                 </thead>
                 <tbody id="attemptsTableBody">
-                    {% for attempt in pending_attempts %}
-                    <tr data-type="{{ attempt.exam.exam_type|default:'test' }}">
+                    {% for data in attempts_data %}
+                    <tr data-type="{{ data.attempt.exam.exam_type }}"
+                        {% if data.seconds_remaining %}
+                        data-seconds-remaining="{{ data.seconds_remaining }}"
+                        data-real-name="{{ data.real_name }}"
+                        data-anonymous-name="{{ data.anonymous_name }}"
+                        {% endif %}>
                         <td>
                             <div class="user-cell">
                                 <div class="user-icon">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div class="user-info">
-                                    {{ attempt.user.get_full_name|default:attempt.user.username }}
-                                    <div class="user-email">{{ attempt.user.email }}</div>
+                                    {# ✅ Anonim ad məntiq #}
+                                    {% if data.can_view_name %}
+                                        {{ data.real_name }}
+                                    {% else %}
+                                        <span class="anonymous-name">{{ data.anonymous_name }}</span>
+                                        {% if data.seconds_remaining %}
+                                            <div class="countdown-timer">
+                                                <i class="fas fa-hourglass-half"></i>
+                                                <span class="timer-display">{{ data.seconds_remaining|floatformat:0 }}s</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="exam-title">{{ attempt.exam.title }}</div>
+                            <div class="exam-title">{{ data.attempt.exam.title }}</div>
                             <div class="exam-type">
-                                {% if attempt.exam.exam_type == 'essay' %}
+                                {% if data.attempt.exam.exam_type == 'written' %}
                                     <span class="badge-essay">
                                         <i class="fas fa-pen-fancy me-1"></i> Yazılı
                                     </span>
@@ -248,15 +89,15 @@
                             </div>
                         </td>
                         <td>
-                            <div>{{ attempt.finished_at|date:"d.m.Y H:i" }}</div>
-                            <small class="text-muted">({{ attempt.finished_at|timesince }} əvvəl)</small>
+                            <div>{{ data.attempt.finished_at|date:"d.m.Y H:i" }}</div>
+                            <small class="text-muted">({{ data.attempt.finished_at|timesince }} əvvəl)</small>
                         </td>
                         <td>
-                            {% if attempt.status == 'expired' %}
+                            {% if data.attempt.status == 'expired' %}
                                 <span class="badge bg-danger">
                                     <i class="fas fa-clock me-1"></i> Vaxt bitib
                                 </span>
-                            {% elif attempt.status == 'pending_review' %}
+                            {% elif data.attempt.status == 'pending_review' %}
                                 <span class="badge bg-warning text-dark">
                                     <i class="fas fa-hourglass-half me-1"></i> Yoxlanılır
                                 </span>
@@ -267,13 +108,13 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'teacher_check_attempt' attempt.exam.slug attempt.id %}" 
+                            <a href="{% url 'teacher_check_attempt' data.attempt.exam.slug data.attempt.id %}" 
                                class="btn-check-action">
                                 <i class="fas fa-marker"></i> Yoxla
                             </a>
                         </td>
                     </tr>
-                    {% endfor %}
+                    {% endfor %} 
                 </tbody>
             </table>
         {% else %}
@@ -283,7 +124,7 @@
                 </div>
                 <h4>Hər şey yolundadır!</h4>
                 <p class="text-muted">Hazırda yoxlanılacaq heç bir tapşırıq yoxdur.</p>
-                <a href="{% url 'profile' request.user.username %}" class="btn btn-outline-primary mt-3">
+                <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-primary mt-3">
                     <i class="fas fa-arrow-left me-2"></i> Profilə qayıt
                 </a>
             </div>
@@ -297,9 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.filter-tab');
     const rows = document.querySelectorAll('#attemptsTableBody tr');
     
+    // Tab filtering
     tabs.forEach(tab => {
         tab.addEventListener('click', function() {
-            // Active class
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
             
@@ -313,6 +154,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+    });
+    
+    // ✅ Real-time countdown timer
+    rows.forEach(row => {
+        let secondsLeft = parseInt(row.dataset.secondsRemaining) || 0;
+        if (secondsLeft <= 0) return;
+        
+        const timerDisplay = row.querySelector('.timer-display');
+        
+        const updateTimer = () => {
+            if (secondsLeft <= 0) {
+                window.location.reload();  // Auto-refresh
+                return;
+            }
+            
+            const minutes = Math.floor(secondsLeft / 60);
+            const seconds = secondsLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            secondsLeft--;
+        };
+        
+        updateTimer();
+        setInterval(updateTimer, 1000);
     });
 });
 </script>
