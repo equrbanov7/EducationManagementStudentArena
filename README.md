@@ -248,3 +248,5 @@ University Lecturer • Full-Stack Developer • Researcher
 
 Əgər istəyirsənsə, növbəti addımda bunun **Azerbaycanca versiyasını** da yaza bilərəm (məsələn, tələbələr üçün PDF kimi).
 ```
+
+python manage.py runserver 0.0.0.0:8000  

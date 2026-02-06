@@ -740,6 +740,11 @@ class ExamAttempt(models.Model):
         "Müəllim tərəfindən yoxlanılıb?",
         default=False
     )
+    teacher_checked_at = models.DateTimeField(
+        "Yoxlanma tarixi",
+        null=True,
+        blank=True
+    )
 
     user = models.ForeignKey(
         User,

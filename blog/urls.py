@@ -74,7 +74,15 @@ urlpatterns = [
     path('teacher/groups/delete/<int:group_id>/', views.teacher_delete_group, name='teacher_delete_group'),
 
     # 3. Slug ilə olan URL-lər (Spesifikdən ümumiyə doğru)
+      # Müəllim cəhdləri görür (yalnız baxmaq üçün)
+    path("exams/<slug:slug>/attempt/<int:attempt_id>/view/", 
+         views.teacher_view_attempt, 
+         name="teacher_view_attempt"),
     
+    # Müəllim yazılı imtahanı yoxlayır (bal verir)
+    path("exams/<slug:slug>/attempt/<int:attempt_id>/check/", 
+         views.teacher_check_attempt, 
+         name="teacher_check_attempt"),
     # Sual Bankı (Müəllim üçün)
     path(
         "teacher/exams/<slug:slug>/test-bank/",
