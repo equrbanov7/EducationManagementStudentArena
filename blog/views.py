@@ -48,7 +48,7 @@ except Exception:
 
 from .utils import generate_otp, send_verify_email, _save_paint_png_to_answer, _clear_paint_from_answer
 from django.db import transaction
-
+import hashlib
 User = get_user_model()
 signer = TimestampSigner()
 
@@ -993,7 +993,6 @@ def process_question_bank(request, slug):
     
     if request.method == "POST":
         # 1. Silinməli olan blokları silirik
-        # Frontend-dən vergüllə ayrılmış ID-lər gələcək (məs: "5,8,12")
         deleted_ids = request.POST.get('deleted_block_ids', '').split(',')
         for d_id in deleted_ids:
             if d_id.strip():
@@ -1007,6 +1006,9 @@ def process_question_bank(request, slug):
 
         # Adların təkrar olub-olmadığını yoxlamaq üçün set
         used_names = set()
+        
+        # ✅ Order hesablamaq üçün counter
+        current_order = 1
 
         # 3. Blokları emal edirik
         for key, value in request.POST.items():
@@ -1045,6 +1047,7 @@ def process_question_bank(request, slug):
                             block = block_qs.first()
                             block.name = block_name
                             block.time_limit_minutes = int(time_val) if time_val else None
+                            block.order = current_order  # ✅ Düzgün order
                             block.save()
                             # Sualları yeniləyirik
                             block.questions.all().delete()
@@ -1055,8 +1058,11 @@ def process_question_bank(request, slug):
                             exam=exam,
                             name=block_name,
                             time_limit_minutes=int(time_val) if time_val else None,
-                            order=ui_id
+                            order=current_order  # ✅ Düzgün order (ui_id deyil)
                         )
+                    
+                    # ✅ Növbəti blok üçün order artır
+                    current_order += 1
 
                     # Sualların Parse edilməsi
                     if content_text.strip():
@@ -2351,7 +2357,46 @@ def teacher_exam_results(request, slug):
             .order_by("question__order", "question__id")
         )
 
-    # Statistikalar (sənin əvvəlki kodun kimi qalsın)
+    # ═══════════════════════════════════════════════════════════════════
+    # ✅ YENİ: Anonim adlar və timer məlumatları
+    # ═══════════════════════════════════════════════════════════════════
+    from django.utils import timezone
+    import hashlib
+    
+    now = timezone.now()
+    attempts_data = []
+    
+    for att in attempts:
+        # Anonim ad (deterministic)
+        hash_input = f"{att.id}-{att.user.id}-{exam.id}"
+        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
+        anonymous_name = f"Tələbə #{hash_digest[:6].upper()}"
+        
+        # Vaxt hesablamaları
+        seconds_remaining = None
+        can_view_name = False
+        
+        if att.checked_by_teacher and att.teacher_checked_at:
+            diff = now - att.teacher_checked_at
+            total_seconds_passed = int(diff.total_seconds())
+            
+            if total_seconds_passed < 300:  # 5 dəqiqə = 300 saniyə
+                seconds_remaining = 300 - total_seconds_passed
+                can_view_name = False  # Ad gizli
+            else:
+                can_view_name = True  # 5+ dəqiqə - ad görünür
+        
+        attempts_data.append({
+            'attempt': att,
+            'anonymous_name': anonymous_name,
+            'real_name': att.user.username,
+            'can_view_name': can_view_name,
+            'seconds_remaining': seconds_remaining,
+        })
+
+    # ═══════════════════════════════════════════════════════════════════
+    # Statistikalar (əvvəlki kimi)
+    # ═══════════════════════════════════════════════════════════════════
     fastest_attempts = sorted(
         [a for a in attempts if a.duration_seconds],
         key=lambda a: a.duration_seconds
@@ -2366,6 +2411,7 @@ def teacher_exam_results(request, slug):
     return render(request, "blog/teacher_exam_results.html", {
         "exam": exam,
         "attempts": attempts,
+        "attempts_data": attempts_data,  # ✅ YENİ
         "fastest_attempts": fastest_attempts,
         "hardest_questions": hardest_questions,
         "selected_attempt": selected_attempt,
@@ -2374,17 +2420,17 @@ def teacher_exam_results(request, slug):
 
 
 @login_required
-def teacher_check_attempt(request, slug, attempt_id):
+def teacher_view_attempt(request, slug, attempt_id):
     """
-    Müəllim yazılı/praktiki imtahandakı BİR cəhdi sual-sual yoxlayır.
-    Yalnız həmin attempt-ə düşən sualları göstərir.
+    ✅ Müəllim cavabları YALNIZ GÖRMƏK üçün (bal verə bilməz)
+    Test və Yazılı hər ikisi üçün işləyir
     """
     _ensure_teacher(request.user)
 
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
-    # ✅ YALNIZ attempt-də yaranmış cavablar (yəni düşən suallar)
+    # Cavabları al
     answers_qs = (
         attempt.answers
         .select_related("question")
@@ -2392,7 +2438,6 @@ def teacher_check_attempt(request, slug, attempt_id):
         .order_by("id")
     )
 
-    # attempt-də cavablar yoxdursa (köhnə attemptlər üçün safety)
     if not answers_qs.exists():
         generate_random_questions_for_attempt(attempt)
         answers_qs = (
@@ -2402,10 +2447,67 @@ def teacher_check_attempt(request, slug, attempt_id):
             .order_by("id")
         )
 
-    # Template üçün sual+cavab listi (artıq hamısı attempt-ə aid)
+    qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
+
+    context = {
+        "exam": exam,
+        "attempt": attempt,
+        "qa_list": qa_list,
+        "read_only": True,  # ✅ Yalnız oxumaq rejimi
+    }
+    
+    return render(request, "blog/teacher_view_attempt.html", context)
+
+
+@login_required
+def teacher_check_attempt(request, slug, attempt_id):
+    """
+    Müəllim yazılı/praktiki imtahandakı BİR cəhdi sual-sual yoxlayır.
+    
+    ✅ MÜDAFİƏ: 5 dəqiqə keçibsə, yalnız oxumaq üçün yönləndir
+    """
+    _ensure_teacher(request.user)
+
+    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+
+    # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
+    if attempt.checked_by_teacher and attempt.teacher_checked_at:
+       
+        minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
+        
+        if minutes_passed >= 5:
+            messages.warning(request, '5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.')
+            return redirect('teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
+
+    # YALNIZ bu attempt-ə düşən suallar
+    answers_qs = (
+        attempt.answers
+        .select_related("question")
+        .prefetch_related("files", "selected_options", "question__options")
+        .order_by("id")
+    )
+
+    if not answers_qs.exists():
+        generate_random_questions_for_attempt(attempt)
+        answers_qs = (
+            attempt.answers
+            .select_related("question")
+            .prefetch_related("files", "selected_options", "question__options")
+            .order_by("id")
+        )
+
     qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
 
     if request.method == "POST":
+        # ✅ DOUBLE-CHECK: POST zamanı da yoxla
+        if attempt.checked_by_teacher and attempt.teacher_checked_at:
+            minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
+            
+            if minutes_passed >= 5:
+                messages.error(request, '5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.')
+                return redirect('teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
+
         total_score = 0
         any_score = False
 
@@ -2429,9 +2531,11 @@ def teacher_check_attempt(request, slug, attempt_id):
             a.teacher_feedback = feedback
             a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
 
+        # ✅ Tarix yenilənir (hər dəyişiklikdə)
         attempt.teacher_score = total_score if any_score else None
         attempt.checked_by_teacher = True
-        attempt.save(update_fields=["teacher_score", "checked_by_teacher"])
+        attempt.teacher_checked_at = timezone.now()  # ✅ Hər dəyişiklikdə yenilənir
+        attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
         messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
         return redirect("teacher_exam_results", slug=exam.slug)
@@ -2453,7 +2557,7 @@ def teacher_pending_attempts(request):
     """
     # Yalnız müəllimlər görə bilsin
     if not getattr(request.user, 'is_teacher', False):
-        return render(request, '403_forbidden.html') # Və ya redirect
+        return render(request, '403_forbidden.html')
 
     # Yoxlanılacaq işləri tapırıq
     pending_attempts = ExamAttempt.objects.filter(
@@ -2462,10 +2566,56 @@ def teacher_pending_attempts(request):
         checked_by_teacher=False             # Hələ yoxlanmayıb
     ).exclude(
         exam__exam_type='test'               # Testləri çıxarırıq
-    ).select_related('user', 'exam').order_by('finished_at') # Ən köhnədən yeniyə
+    ).select_related('user', 'exam').order_by('finished_at')
+
+    # ═══════════════════════════════════════════════════════════════════
+    # ✅ YENİ: Anonim adlar və timer məlumatları
+    # ═══════════════════════════════════════════════════════════════════
+    from django.utils import timezone
+    import hashlib
+    
+    now = timezone.now()
+    attempts_data = []
+    
+    for att in pending_attempts:
+        # Anonim ad (deterministic)
+        hash_input = f"{att.id}-{att.user.id}-{att.exam.id}"
+        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
+        anonymous_name = f"Tələbə #{hash_digest[:6].upper()}"
+        
+        # Vaxt hesablamaları
+        seconds_remaining = None
+        can_view_name = False
+        
+        if att.checked_by_teacher and att.teacher_checked_at:
+            diff = now - att.teacher_checked_at
+            total_seconds_passed = int(diff.total_seconds())
+            
+            if total_seconds_passed < 300:  # 5 dəqiqə = 300 saniyə
+                seconds_remaining = 300 - total_seconds_passed
+                can_view_name = False  # Ad gizli
+            else:
+                can_view_name = True  # 5+ dəqiqə - ad görünür
+        
+        attempts_data.append({
+            'attempt': att,
+            'anonymous_name': anonymous_name,
+            'real_name': att.user.username,
+            'can_view_name': can_view_name,
+            'seconds_remaining': seconds_remaining,
+        })
+    
+    # ═══════════════════════════════════════════════════════════════════
+    # ✅ YENİ: Tip üzrə saylar (Yazılı və Test)
+    # ═══════════════════════════════════════════════════════════════════
+    essay_count = sum(1 for att in pending_attempts if att.exam.exam_type == 'written')
+    test_count = sum(1 for att in pending_attempts if att.exam.exam_type == 'test')
 
     context = {
         'pending_attempts': pending_attempts,
+        'attempts_data': attempts_data,  # ✅ YENİ - anonim adlar
+        'essay_count': essay_count,      # ✅ YENİ - yazılı say
+        'test_count': test_count,        # ✅ YENİ - test say
     }
     return render(request, 'blog/teacher_pending_attempts.html', context)
  
