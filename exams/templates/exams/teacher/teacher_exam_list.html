@@ -3,14 +3,14 @@
 {% block title %}İmtahanlarım{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/teacher_exam_list.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_list.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="exams-page-container">
     <div class="header-section">
         <h1>İmtahanlarım</h1>
-        <a href="{% url 'create_exam' %}" class="create-exam-btn">
+        <a href="{% url 'exams:create_exam' %}" class="create-exam-btn">
             <i class="fas fa-plus-circle"></i> Yeni imtahan yarat
         </a>
     </div>
@@ -22,7 +22,7 @@
                 {# Kartın özü #}
                 <article class="exam-card">
                     {# Bütün kartı əhatə edən link #}
-                    <a href="{% url 'teacher_exam_detail' exam.slug %}" class="exam-card-link">
+                    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="exam-card-link">
                         
                         {# Kartın yuxarı hissəsi: Məlumatlar #}
                         <div class="exam-card-body">

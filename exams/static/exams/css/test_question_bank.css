@@ -447,6 +447,55 @@ body {
     background: #fff;
 }
 
+.compact-guide {
+    background: #f1f3f5; /* Açıq boz fon */
+    border: 1px solid #dee2e6;
+    border-bottom: none; /* Textarea ilə birləşsin */
+    padding: 8px 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 12px; /* Xırda şrift */
+    color: #495057;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.guide-label {
+    font-weight: 700;
+    color: #228be6; /* Göy rəng */
+    margin-right: 5px;
+}
+
+.rule-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rule-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: help; /* Üzərinə gələndə sual işarəsi çıxır (title oxunur) */
+}
+
+.rule-item .code {
+    background: #fff;
+    border: 1px solid #ced4da;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #d63384; /* Kod rəngi */
+    font-weight: 600;
+}
+
+.separator {
+    color: #adb5bd;
+    font-weight: bold;
+}
+
 @media (max-width: 992px) {
     .split-layout { flex-direction: column; }
     .upload-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }

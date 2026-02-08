@@ -4,7 +4,7 @@
 {% block title %}{{ exam.title }} - Nəticə{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_result.css' %}">
+    <link rel="stylesheet" href="{% static 'css/exam_result.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -262,11 +262,11 @@
     </div>
 
     <div class="action-footer">
-        <a href="{% url 'exams:student_exam_list' %}" class="btn custom-blue-btn">
+        <a href="{% url 'student_exam_list' %}" class="btn custom-blue-btn">
             <i class="fas fa-arrow-left me-2"></i> İmtahanlara qayıt
         </a>
 
-        <a href="{% url 'exams:student_exam_history' %}" class="btn custom-blue-btn">
+        <a href="{% url 'student_exam_history' %}" class="btn custom-blue-btn">
              Tarixçəyə Qayıt  <i class="fas fa-history ms-2"></i>
         </a>
     </div>

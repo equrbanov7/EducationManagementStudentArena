@@ -229,7 +229,7 @@
         <h2>{{ exam.title }} <span style="color:#6c5ce7">Sual Bankı</span></h2>
     </div>
 
-    <form method="post" action="{% url 'exams:process_question_bank' exam.slug %}" id="bankForm">
+    <form method="post" action="{% url 'process_question_bank' exam.slug %}" id="bankForm">
         {% csrf_token %}
 
         <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
@@ -321,7 +321,7 @@
         </button>
 
         <div class="action-bar">
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel-main">
+            <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel-main">
                 <i class="fas fa-times"></i> Ləğv et
             </a>
 

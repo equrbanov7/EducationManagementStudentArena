@@ -1,5 +1,5 @@
 
-from datetime import timezone
+from django.utils import timezone
 from pyexpat.errors import messages
 from exams.models import Exam
 
@@ -25,7 +25,7 @@ def start_exam(request, slug):
     can_start, reason = exam.can_user_start(request.user, code=None)
     if not can_start:
         messages.error(request, reason or "Bu imtahana başlaya bilmirsiniz.")
-        return redirect("student_exam_list")
+        return redirect("exams:student_exam_list")
 
     return _start_or_resume_attempt(request, exam)
 
@@ -41,7 +41,7 @@ def take_exam(request, slug, attempt_id):
     exam = attempt.exam
 
     if attempt.is_finished:
-        return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
+        return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)
 
     # Sualları Attempt-ə bağlanmış cavablardan götürürük
     answers_qs = (
@@ -171,9 +171,9 @@ def take_exam(request, slug, attempt_id):
                 return JsonResponse({
                     "success": True,
                     "finished": True,
-                    "redirect_url": reverse("exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
+                    "redirect_url": reverse("exams:exam_result", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
                 })
-            return redirect("exam_result", slug=exam.slug, attempt_id=attempt.id)
+            return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)
 
         # ✅ Draft olaraq saxla (autosave və ya manual save_draft)
         if action in ("autosave", "save_draft"):
@@ -184,7 +184,7 @@ def take_exam(request, slug, attempt_id):
             return JsonResponse({"success": True, "finished": False})
         
         # ✅ Normal POST (AJAX deyilsə) - səhifəni yenilə
-        return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+        return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
 
     # GET sorğusu
     context = {
@@ -195,5 +195,5 @@ def take_exam(request, slug, attempt_id):
         "answers_by_qid": answers_by_qid,
         "remaining_seconds": remaining_seconds,
     }
-    return render(request, "blog/take_exam.html", context)
+    return render(request, "exams/student/take_exam.html", context)
 

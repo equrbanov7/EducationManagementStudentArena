@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/createAndEditExam.css' %}">
+    <link rel="stylesheet" href="{% static 'css/createAndEditExam.css' %}">
     <link rel="stylesheet" href="{% static 'css/_searchable_multi_select.css' %}">
 {% endblock %}
  
@@ -255,7 +255,7 @@
 
                 <div class="form-actions">
                     {% if is_editing %}
-                        <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel">
+                        <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel">
                             <i class="fas fa-times"></i> Ləğv et
                         </a>
                         <button type="submit" class="btn-submit">

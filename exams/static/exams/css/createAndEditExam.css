@@ -1,49 +1,70 @@
 /* static/css/createAndEditExam.css */
-/* Partial-a aid hissələr çıxarılmışdır */
+
+:root {
+    --primary-color: #4f46e5; /* Modern İndigo */
+    --primary-hover: #4338ca;
+    --text-dark: #111827;
+    --text-medium: #374151;
+    --text-light: #6b7280;
+    --bg-page: #f3f4f6;
+    --bg-card: #ffffff;
+    --border-color: #e5e7eb;
+    --error-color: #ef4444;
+    --success-color: #10b981;
+    --focus-ring: rgba(79, 70, 229, 0.25);
+}
 
 /* =========================================
-   1. LAYOUT & CARD STYLES
+   1. LAYOUT & CARD
    ========================================= */
-   .create-exam-page-wrapper {
+.create-exam-page-wrapper {
     padding: 40px 20px;
-    background-color: var(--bg-light, #f9fafb);
-    min-height: calc(100vh - 200px);
+    background-color: var(--bg-page);
+    min-height: calc(100vh - 70px);
     display: flex;
     justify-content: center;
+    align-items: flex-start;
 }
 
 .create-exam-card {
-    background: #ffffff;
-    max-width: 800px;
+    background: var(--bg-card);
+    max-width: 900px;
     width: 100%;
     border-radius: 16px;
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
     overflow: hidden;
 }
 
+/* Header Dizaynı */
 .card-header {
     padding: 30px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f8fafc;
+    background: linear-gradient(to right, #ffffff, #f9fafb);
+    border-bottom: 1px solid var(--border-color);
     text-align: center;
 }
 
 .card-header h1 {
-    font-size: 1.8rem;
-    color: var(--text-dark, #111827);
-    margin-bottom: 10px;
+    font-size: 1.75rem;
     font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    letter-spacing: -0.025em;
+}
+
+.card-header h1 i {
+    color: var(--primary-color);
+    margin-right: 8px;
 }
 
 .card-header p {
-    color: var(--text-light, #6b7280);
+    color: var(--text-light);
     font-size: 1rem;
     margin: 0;
 }
 
 /* =========================================
-   2. FORM GRID & GENERAL STRUCTURE
+   2. FORM GRID SYSTEM
    ========================================= */
 .exam-form {
     padding: 30px;
@@ -52,101 +73,122 @@
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 25px;
+    gap: 24px;
 }
 
 .span-full {
     grid-column: 1 / -1;
 }
 
+/* =========================================
+   3. INPUTS & LABELS
+   ========================================= */
 .form-group {
     display: flex;
     flex-direction: column;
-    position: relative;
+    margin-bottom: 4px;
 }
 
 .form-group label {
+    font-size: 0.925rem;
     font-weight: 600;
-    color: var(--text-dark, #374151);
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    display: block;
+    color: var(--text-medium);
+    margin-bottom: 6px;
 }
 
-/* =========================================
-   3. STANDARD INPUTS
-   ========================================= */
+/* Input Styles */
 .form-group input[type="text"],
 .form-group input[type="number"],
 .form-group select,
-.form-group textarea { 
+.form-group textarea {
     width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #d1d5db;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-dark);
+    background-color: #fff;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background-color: #f9fafb;
-    outline: none;
-    font-family: inherit;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    appearance: none; /* Standart stili ləğv et */
 }
 
-/* Textarea */
+/* Textarea Specific */
 .form-group textarea {
     min-height: 100px;
     resize: vertical;
 }
 
-/* Focus states */
+/* Focus States */
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    background-color: #ffffff;
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
-/* Icons inside inputs */
+/* Select Arrow Fix (Custom Arrow) */
+.form-group select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+}
+
+/* Helper Text */
+.form-text.text-muted {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* =========================================
+   4. ICONS INSIDE INPUTS
+   ========================================= */
 .input-with-icon {
     position: relative;
 }
 
 .input-with-icon input {
-    padding-right: 40px; 
+    padding-right: 40px;
 }
 
 .input-with-icon .icon {
     position: absolute;
-    right: 15px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #9ca3af;
     pointer-events: none;
-}
-
-/* Helper texts */
-.form-text.text-muted {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-top: 6px;
+    font-size: 1rem;
 }
 
 /* =========================================
-   4. CUSTOM CHECKBOX STYLES
+   5. CHECKBOXES (Custom Design)
    ========================================= */
 .checkbox-group {
-    justify-content: center;
+    margin-top: 5px;
 }
 
 .checkbox-label-wrapper {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start; /* Mətni yuxarıdan hizala */
     cursor: pointer;
-    position: relative;
-    font-weight: 600;
-    color: var(--text-dark, #374151);
+    user-select: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    width: 100%;
 }
 
+.checkbox-label-wrapper:hover {
+    background-color: #f9fafb;
+}
+
+/* Hide native checkbox */
 .checkbox-label-wrapper input[type="checkbox"] {
     position: absolute;
     opacity: 0;
@@ -155,35 +197,36 @@
     width: 0;
 }
 
+/* Custom Box */
 .custom-checkbox-box {
-    display: inline-flex;
-    height: 25px;
-    width: 25px;
-    background-color: #f9fafb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
     border: 2px solid #d1d5db;
-    border-radius: 6px;
-    margin-right: 10px;
+    border-radius: 5px;
+    margin-right: 12px;
+    margin-top: 2px; /* Mətnlə hizalanması üçün */
     transition: all 0.2s ease;
-    position: relative;
-    top: 5px;
+    flex-shrink: 0;
 }
 
+/* Checked State */
 .checkbox-label-wrapper input:checked ~ .custom-checkbox-box {
-    background-color: var(--primary-color, #3b82f6);
-    border-color: var(--primary-color, #3b82f6);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
+/* Font Awesome 6 Check Icon */
 .custom-checkbox-box::after {
-    content: "";
-    position: absolute;
+    content: '\f00c';
+    font-family: "Font Awesome 6 Free"; /* FA 6 ÜÇÜN VACİB */
+    font-weight: 900;
+    color: white;
+    font-size: 12px;
     display: none;
-    left: 7px;
-    top: 3px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
 }
 
 .checkbox-label-wrapper input:checked ~ .custom-checkbox-box::after {
@@ -192,112 +235,54 @@
 
 .checkbox-help {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 400;
-    color: #6b7280;
-    margin-top: 4px;
+    color: var(--text-light);
+    margin-top: 2px;
 }
 
-/* =========================================
-   5. ACCESS SECTION (Grid layout)
-   ========================================= */
-.access-section-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-.access-help {
-    font-size: 0.9rem;
-    color: #6b7280;
-    margin-top: 15px;
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border-left: 3px solid var(--primary-color, #3b82f6);
-}
-
-/* =========================================
-   6. ERROR MESSAGES
-   ========================================= */
-.form-global-errors {
-    background-color: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-}
-
-.field-error {
-    color: #dc2626;
-    font-size: 0.85rem;
-    margin-top: 5px;
-    font-weight: 500;
-}
-
-.form-group:has(.field-error) input,
-.form-group:has(.field-error) select,
-.form-group:has(.field-error) textarea {
-    border-color: #dc2626;
-    background-color: #fef2f2;
-}
-
-/* =========================================
-   7. FORM SECTION TITLES
-   ========================================= */
-.form-section-title {
-    margin-top: 10px;
-    margin-bottom: 5px;
-}
-
-.form-section-title h2 {
-    font-size: 1.3rem;
-    color: var(--text-dark, #1f2937);
-    font-weight: 700;
-    margin-bottom: 5px;
+/* Paint Checkbox specific */
+.form-check {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #fff;
 }
-
-.form-section-title p {
-    font-size: 0.9rem;
-    color: #6b7280;
+.form-check-input {
+    width: 18px; 
+    height: 18px; 
     margin: 0;
 }
 
 /* =========================================
-   8. DATE RANGE DESIGN
+   6. DATE RANGE SECTION
    ========================================= */
 .date-range-wrapper {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 20px;
     background: #f8fafc;
     padding: 20px;
     border-radius: 12px;
     border: 1px dashed #cbd5e1;
-    margin-bottom: 20px;
+    align-items: flex-start;
 }
 
 .date-card {
     flex: 1;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: #fff;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 15px;
-    transition: all 0.3s ease;
     position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s;
 }
 
-.date-card:hover, 
 .date-card:focus-within {
-    border-color: var(--primary-color, #3b82f6);
-    box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.15);
-    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
 }
 
 .date-card-header {
@@ -307,195 +292,222 @@
     margin-bottom: 10px;
 }
 
-.badge-start, 
-.badge-end {
-    font-size: 0.75rem;
+.badge-start, .badge-end {
+    font-size: 0.7rem;
+    font-weight: 700;
     text-transform: uppercase;
-    font-weight: 800;
-    letter-spacing: 0.5px;
     padding: 4px 8px;
     border-radius: 4px;
+    letter-spacing: 0.5px;
 }
 
-.badge-start {
-    background-color: #dcfce7;
-    color: #166534;
-}
-
-.badge-end {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.icon-faded {
-    color: #94a3b8;
-    font-size: 1.1rem;
-}
+.badge-start { background: #dcfce7; color: #166534; }
+.badge-end { background: #fee2e2; color: #991b1b; }
 
 .date-input-container input {
-    width: 100%;
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
     border: none;
     background: transparent;
-    font-size: 1.1rem;
-    font-family: monospace;
-    color: #334155;
-    padding: 5px 0;
-    outline: none;
-    font-weight: 600;
+    width: 100%;
+    padding: 0;
 }
 
-.date-input-container input::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    opacity: 0.6;
-    transition: 0.2s;
-}
-
-.date-input-container input::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-    transform: scale(1.1);
+.date-input-container input:focus {
+    box-shadow: none;
 }
 
 .date-footer {
-    margin-top: 8px;
-    border-top: 1px solid #f1f5f9;
+    margin-top: 10px;
     padding-top: 8px;
+    border-top: 1px solid #f3f4f6;
 }
 
 .date-footer small {
-    color: #64748b;
-    font-size: 0.8rem;
     display: block;
-    margin-top: 2px;
+    font-size: 0.75rem;
+    color: #9ca3af;
 }
 
 .date-separator {
-    color: #cbd5e1;
-    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.field-error-floating {
-    position: absolute;
-    bottom: -22px;
-    left: 0;
-    font-size: 0.75rem;
-    color: #dc2626;
-    font-weight: 600;
+    padding-top: 40px;
+    color: #cbd5e1;
+    font-size: 1.2rem;
 }
 
 /* =========================================
-   9. FORM ACTIONS (Buttons)
+   7. SECTION TITLES
    ========================================= */
-.form-actions {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
+.form-section-title {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.form-section-title h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-dark);
     display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-}
-
-.btn-submit, 
-.btn-cancel {
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
+    gap: 10px;
+    margin-bottom: 4px;
 }
 
-.btn-submit {
-    background-color: var(--primary-color, #3b82f6);
-    color: white;
-    border: none;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
-}
-
-.btn-submit:hover {
-    background-color: var(--primary-dark, #1e3a8a);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.6);
-}
-
-.btn-cancel {
-    background-color: transparent;
-    color: #6b7280;
-    border: 1px solid #d1d5db;
-}
-
-.btn-cancel:hover {
-    background-color: #f3f4f6;
-    color: #374151;
+.form-section-title p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin: 0;
 }
 
 /* =========================================
-   10. ACCESS RESTRICTIONS TOGGLE ANIMATION
+   8. ACCESS CONTROL & PARTIALS
    ========================================= */
 #access-restrictions {
-    max-height: 2000px;
-    opacity: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: top;
+    max-height: 2000px; /* Expandable height */
+    opacity: 1;
 }
 
 #access-restrictions.closed {
     max-height: 0;
     opacity: 0;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border: none;
+    margin: 0;
+    padding: 0;
     pointer-events: none;
 }
 
+.access-section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.access-help {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #1e40af;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 /* =========================================
-   11. RESPONSIVE
+   9. ERROR HANDLING
+   ========================================= */
+.field-error {
+    color: var(--error-color);
+    font-size: 0.8rem;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.form-global-errors {
+    background-color: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #991b1b;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-group:has(.field-error) input {
+    border-color: var(--error-color);
+    background-color: #fffafa;
+}
+
+/* =========================================
+   10. ACTIONS (BUTTONS)
+   ========================================= */
+.form-actions {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+.btn-submit, .btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    gap: 8px;
+}
+
+.btn-submit {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+}
+
+.btn-submit:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background-color: white;
+    color: var(--text-medium);
+    border: 1px solid var(--border-color);
+}
+
+.btn-cancel:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+/* =========================================
+   11. RESPONSIVE DESIGN
    ========================================= */
 @media (max-width: 768px) {
     .create-exam-page-wrapper {
-        padding: 20px 15px;
+        padding: 15px;
     }
-
-    .card-header, 
-    .exam-form {
+    
+    .card-header, .exam-form {
         padding: 20px;
     }
 
-    .form-grid,
-    .access-section-grid {
+    .form-grid, .access-section-grid {
         grid-template-columns: 1fr;
     }
-
-    .form-actions {
-        flex-direction: column-reverse;
-    }
-
-    .btn-submit, 
-    .btn-cancel {
-        width: 100%;
-        justify-content: center;
-    }
-
+    
     .date-range-wrapper {
         flex-direction: column;
         gap: 15px;
-        border-style: solid;
     }
 
     .date-separator {
+        padding: 5px 0;
         transform: rotate(90deg);
     }
     
-    .date-card {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .btn-submit, .btn-cancel {
         width: 100%;
     }
 }

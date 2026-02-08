@@ -4,7 +4,7 @@
 {% block title %}İmtahanlar{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_exam_list.css' %}">
     {# Paginasiya CSS-ni buraya əlavə etdik #}
      <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
@@ -39,10 +39,9 @@
         <button type="submit" class="btn btn-primary search-btn">Axtar</button>
     
         {% if request.GET.q or request.GET.type %}
-            <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-secondary">
+            <a href="{% url current_url_name|default:'student_exam_list' %}" class="btn btn-outline-secondary">
                 Sıfırla
             </a>
-        
         
         
         {% endif %}
@@ -104,7 +103,7 @@
                             </button>
                         {% else %}
                             {# Əks halda birbaşa start_exam #}
-                            <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary customBtn">
+                            <a href="{% url 'start_exam' exam.slug %}" class="btn btn-primary customBtn">
                                 İmtahana başla
                             </a>
                         {% endif %}
@@ -125,11 +124,10 @@
             <i class="far fa-folder-open empty-icon"></i>
             <p>Axtarışınıza uyğun heç bir imtahan tapılmadı.</p>
             {% if request.GET.q or request.GET.type %}
-                <a href="{% url 'exams:student_exam_list' %}"
+                <a href="{% url current_url_name|default:'student_exam_list' %}"
                 class="btn btn-sm btn-outline-primary mt-2">
                     Bütün imtahanları göstər
                 </a>
-            
         {% endif %}
         
         </div>
@@ -147,7 +145,7 @@
         <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
         <p id="exam-code-text" class="exam-code-text">Kod daxil edin.</p>
 
-        <form id="exam-code-form" method="post" action="{% url 'exams:exam_code_check' %}">
+        <form id="exam-code-form" method="post" action="{% url 'exam_code_check' %}">
             {% csrf_token %}
             <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
             <div class="exam-input-wrapper">

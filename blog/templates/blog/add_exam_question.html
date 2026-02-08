@@ -3,7 +3,7 @@
 {% block title %}{{ exam.title }} - Yeni sual{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/add_exam_question.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_exam_question.css' %}">
     <style>
         .media-preview {
             margin-top: 15px;
@@ -262,7 +262,7 @@
             <button type="submit" name="save_and_continue" class="btn-save-add">
                 Yadda saxla və yeni sual
             </button>
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel">
+            <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn-cancel">
                 Ləğv et
             </a>
         </div>

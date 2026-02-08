@@ -22,7 +22,7 @@
                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#linkExamModal">
                         <i class="fas fa-link me-1"></i> Mövcud İmtahanı Əlaqələndir
                     </button>
-                    <a href="{% url 'create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                    <a href="{% url 'exams:create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
                         <i class="fas fa-plus-circle me-1"></i> Yeni İmtahan Yarat
                     </a>
                 </div>
@@ -83,13 +83,13 @@
                             </div>
                             
                             <div class="btn-group btn-group-sm gap-2">
-                                <a href="{% url 'teacher_exam_detail' exam.slug %}" class="btn btn-sm btn-outline-info">
+                                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-eye"></i> Bax
                                 </a>
-                                <a href="{% url 'teacher_exam_results' exam.slug %}" class="btn btn-sm btn-outline-success">
+                                <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="btn btn-sm btn-outline-success">
                                     <i class="fas fa-chart-bar"></i> Nəticələr
                                 </a>
-                                <a href="{% url 'edit_exam' exam.slug %}" class="btn btn-sm btn-outline-primary">
+                                <a href="{% url 'exams:edit_exam' exam.slug %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-pen"></i> Redaktə
                                 </a>
                                 <button type="button" class="btn btn-sm btn-outline-danger js-unlink-exam" 
@@ -176,19 +176,19 @@
                             
                             <div class="btn-group btn-group-sm gap-2">
                                 {% if item.last_attempt %}
-                                    <a href="{% url 'exam_result' exam.slug item.last_attempt.id %}" 
+                                    <a href="{% url 'exams:exam_result' exam.slug item.last_attempt.id %}" 
                                        class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-chart-bar"></i> Nəticələrimə Bax
                                     </a>
                                     
                                     {% if item.can_start and item.attempts_left != 0 %}
-                                        <a href="{% url 'start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                        <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-info">
                                             <i class="fas fa-redo"></i> Yenidən Başla
                                         </a>
                                     {% endif %}
                                     
                                 {% elif item.can_start %}
-                                    <a href="{% url 'start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                    <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-info">
                                         <i class="fas fa-play"></i> İmtahana Başla
                                     </a>
                                     

@@ -49,14 +49,14 @@ def add_exam_question(request, slug):
             # hansı düyməyə basıldığını yoxlayaq
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
-                return redirect("add_exam_question", slug=exam.slug)
+                return redirect("exams:add_exam_question", slug=exam.slug)
             else: 
                 # Sadəcə imtahan detalına qayıt
-                return redirect("teacher_exam_detail", slug=exam.slug)
+                return redirect("exams:teacher_exam_detail", slug=exam.slug)
     else:
         form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks)
 
-    return render(request, "blog/add_exam_question.html", {
+    return render(request, "exams/teacher/add_exam_question.html", {
         "exam": exam,
         "form": form,
     })
@@ -97,9 +97,9 @@ def edit_exam_question(request, slug, question_id):
                 form.save_options(q)
 
             if "save_and_continue" in request.POST:
-                return redirect("add_exam_question", slug=exam.slug)
+                return redirect("exams::add_exam_question", slug=exam.slug)
             
-            return redirect("teacher_exam_detail", slug=exam.slug)
+            return redirect("exams:teacher_exam_detail", slug=exam.slug)
     else:
         form = ExamQuestionCreateForm(
             instance=question,
@@ -107,7 +107,7 @@ def edit_exam_question(request, slug, question_id):
             subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
         )
 
-    return render(request, "blog/add_exam_question.html", {
+    return render(request, "exams/teacher/add_exam_question.html", {
         "exam": exam,
         "form": form,
         "editing": True,
@@ -126,9 +126,9 @@ def delete_exam_question(request, slug, question_id):
 
     if request.method == "POST":
         question.delete()
-        return redirect("teacher_exam_detail", slug=exam.slug)
+        return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
-    return render(request, "blog/confirm_delete_question.html", {
+    return render(request, "exams/teacher/confirm_delete_question.html", {
         "exam": exam,
         "question": question,
     })
