@@ -15,7 +15,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q, Max
-from blog.models import Exam
+from exams.models import Exam
 
 
 
