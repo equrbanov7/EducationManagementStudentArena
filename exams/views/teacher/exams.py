@@ -1,5 +1,5 @@
 
-from pyexpat.errors import messages
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.exceptions import PermissionDenied
@@ -15,7 +15,7 @@ def teacher_exam_list(request):
     """
     _ensure_teacher(request.user)
     exams = Exam.objects.filter(author=request.user).order_by("-created_at")
-    return render(request, "blog/teacher_exam_list.html", {
+    return render(request, "exams/teacher/teacher_exam_list.html", {
         "exams": exams,
     })
     
@@ -62,7 +62,7 @@ def createAndEditExamView(request, slug=None):
                 request, 
                 "İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"
             )
-            return redirect("teacher_exam_detail", slug=exam_instance.slug)
+            return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
     else:
         # GET request
         if is_editing:
@@ -70,7 +70,7 @@ def createAndEditExamView(request, slug=None):
         else:
             form = ExamForm(user=request.user)
 
-    return render(request, "blog/createAndEditExam.html", {
+    return render(request, "exams/teacher/createAndEditExam.html", {
         "form": form,
         "exam": exam,
         "is_editing": is_editing,
@@ -89,7 +89,7 @@ def teacher_exam_detail(request, slug):
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
     questions = exam.questions.all().order_by("order")
 
-    return render(request, "blog/teacher_exam_detail.html", {
+    return render(request, "exams/teacher/teacher_exam_detail.html", {
         "exam": exam,
         "questions": questions,
     })
@@ -106,7 +106,7 @@ def toggle_exam_active(request, slug):
     if request.method == "POST":
         exam.is_active = not exam.is_active
         exam.save()
-    return redirect("teacher_exam_detail", slug=exam.slug)
+    return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
 
 @login_required
@@ -125,6 +125,6 @@ def delete_exam(request, slug):
 
     if request.method == "POST":
         exam.delete()
-        return redirect("teacher_exam_list")
+        return redirect("exams:teacher_exam_list")
 
-    return render(request, "blog/confirm_delete_exam.html", {"exam": exam})
+    return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})

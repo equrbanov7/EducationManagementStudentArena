@@ -15,7 +15,8 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q, Max
-from exams.models import Exam
+from exams.models import Exam, ExamAttempt
+
 
 
 
@@ -246,7 +247,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ═══════════════════════════════════════════════════════════════════
         # 7. İMTAHANLAR
         # ───────────────────────────────────────────────────────────────────
-        from blog.models import Exam, ExamAttempt
+  
 
         if context['is_owner'] or context['is_teacher']:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
@@ -450,7 +451,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-                from blog.models import StudentGroup
+                from exams.models import StudentGroup
                 context['all_groups'] = StudentGroup.objects.all().order_by('name')
             except ImportError:
                 context['all_groups'] = []
@@ -641,7 +642,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
             all_users = User.objects.exclude(id__in=course_user_ids).order_by('username')
         
         try:
-            from blog.models import StudentGroup 
+            from exams.models import StudentGroup 
             all_groups = StudentGroup.objects.all().order_by('name')
         except ImportError:
             all_groups = []
@@ -760,7 +761,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({'success': False, 'error': 'Qrup seçilməyib.'}, status=400)
         
         try:
-            from blog.models import StudentGroup
+            from exams.models import StudentGroup
             groups = StudentGroup.objects.filter(id__in=group_ids)
             
             added_count = 0
@@ -896,7 +897,7 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
         course.delete()
         
         messages.success(request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.')
-        return redirect('profile', username=request.user.username)
+        return redirect('user_profile', username=request.user.username)
 
 
 # ════════════════════════════════════════════════════════════════════════════

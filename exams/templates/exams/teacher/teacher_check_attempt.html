@@ -4,7 +4,7 @@
 {% block title %}{{ exam.title }} - Yoxlama{% endblock %}
 
 {% block extraCss %} 
-    <link rel="stylesheet" href="{% static 'css/teacher_check_attempt.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -144,7 +144,7 @@
         </ul>
 
         <div class="main-actions sticky-bottom">
-            <a href="{% url 'teacher_exam_results' exam.slug %}" class="btn btn-secondary" id="backBtn">
+            <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="btn btn-secondary" id="backBtn">
                 <i class="fas fa-arrow-left"></i> Geri
             </a>
             <button type="submit" class="btn btn-success" id="mainSaveBtn" disabled>
@@ -196,5 +196,5 @@
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'js/teacher_check_attempt.js' %}"></script>
+    <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>
 {% endblock %}

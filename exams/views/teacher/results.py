@@ -1,7 +1,7 @@
 
 
 
-from pyexpat.errors import messages
+from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from exams.models import Exam, ExamAnswer, ExamAttempt
 from exams.services.attempts import _ensure_teacher
@@ -130,7 +130,7 @@ def teacher_exam_results(request, slug):
         key=lambda q: q.correct_ratio
     )[:5]
 
-    return render(request, "blog/teacher_exam_results.html", {
+    return render(request, "exams/teacher/teacher_exam_results.html", {
         "exam": exam,
         "attempts": attempts,
         "attempts_data": attempts_data,  # ✅ YENİ
@@ -179,7 +179,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
     }
     
-    return render(request, "blog/teacher_view_attempt.html", context)
+    return render(request, "exams/teacher/teacher_view_attempt.html", context)
 
 
 @login_required
@@ -201,7 +201,7 @@ def teacher_check_attempt(request, slug, attempt_id):
         
         if minutes_passed >= 5:
             messages.warning(request, '5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.')
-            return redirect('teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
+            return redirect('exams:teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
 
     # YALNIZ bu attempt-ə düşən suallar
     answers_qs = (
@@ -229,7 +229,7 @@ def teacher_check_attempt(request, slug, attempt_id):
             
             if minutes_passed >= 5:
                 messages.error(request, '5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.')
-                return redirect('teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
+                return redirect('exams:teacher_view_attempt', slug=exam.slug, attempt_id=attempt.id)
 
         total_score = 0
         any_score = False
@@ -261,14 +261,14 @@ def teacher_check_attempt(request, slug, attempt_id):
         attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
         messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
-        return redirect("teacher_exam_results", slug=exam.slug)
+        return redirect("exams:teacher_exam_results", slug=exam.slug)
 
     context = {
         "exam": exam,
         "attempt": attempt,
         "qa_list": qa_list,
     }
-    return render(request, "blog/teacher_check_attempt.html", context)
+    return render(request, "exams/teacher/teacher_check_attempt.html", context)
 
  
  
@@ -336,5 +336,5 @@ def teacher_pending_attempts(request):
         'essay_count': essay_count,      # ✅ YENİ - yazılı say
         'test_count': test_count,        # ✅ YENİ - test say
     }
-    return render(request, 'blog/teacher_pending_attempts.html', context)
+    return render(request, 'exams/teacher/teacher_pending_attempts.html', context)
  

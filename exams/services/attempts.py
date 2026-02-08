@@ -40,7 +40,7 @@ def _start_or_resume_attempt(request, exam: Exam):
         if current_count != desired and not _attempt_has_any_answer(current):
             generate_random_questions_for_attempt(current, force_rebuild=True)
         
-        return redirect("take_exam", slug=exam.slug, attempt_id=current.id)
+        return redirect("exams:take_exam", slug=exam.slug, attempt_id=current.id)
 
     # ✅ Bitmiş cəhdləri yoxla
     finished_qs = exam.attempts.filter(
@@ -58,8 +58,8 @@ def _start_or_resume_attempt(request, exam: Exam):
         last = finished_qs.first()
         if last:
             messages.info(request, f"Siz bu imtahana maksimum {max_attempts} dəfə cəhd edə bilərsiniz.")
-            return redirect("exam_result", slug=exam.slug, attempt_id=last.id)
-        return redirect("student_exam_list")
+            return redirect("exams:exam_result", slug=exam.slug, attempt_id=last.id)
+        return redirect("exams:student_exam_list")
 
     # ✅ DƏYİŞİKLİK: Attempt number-i düzgün hesabla
     # Bütün attemptlərdən (bitmiş və bitməmiş) ən böyük nömrəni tap
@@ -82,7 +82,8 @@ def _start_or_resume_attempt(request, exam: Exam):
     generate_random_questions_for_attempt(attempt)
     
     messages.success(request, f"İmtahan başladı! (Cəhd #{next_attempt_number})")
-    return redirect("take_exam", slug=exam.slug, attempt_id=attempt.id)
+    return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
+
 
 
 

@@ -4,7 +4,7 @@
 {% block title %}Tələbə qruplarım{% endblock %}
 
 {% block extraCss %}
-  <link rel="stylesheet" href="{% static 'css/teacher_group_list.css' %}">
+  <link rel="stylesheet" href="{% static 'exams/css/teacher_group_list.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -29,7 +29,7 @@
         type="button"
         class="btn-create-new"
         id="btnOpenCreateGroup"
-        data-create-url="{% url 'teacher_create_group' %}"
+        data-create-url="{% url 'exams:teacher_create_group' %}"
       >
         <i class="fas fa-plus"></i>
         <span>Yeni qrup yarat</span>
@@ -99,7 +99,7 @@
         type="button"
         class="btn-create-new mt-3"
         id="btnOpenCreateGroupEmpty"
-        data-create-url="{% url 'teacher_create_group' %}"
+        data-create-url="{% url 'exams:teacher_create_group' %}"
       >
         İlk qrupunu yarat
       </button>
@@ -388,7 +388,7 @@
 
   // ===== Wire buttons =====
   function getCreateUrl(btn) {
-    return (btn && btn.dataset && btn.dataset.createUrl) ? btn.dataset.createUrl : "{% url 'teacher_create_group' %}";
+    return (btn && btn.dataset && btn.dataset.createUrl) ? btn.dataset.createUrl : "{% url 'exams:teacher_create_group' %}";
   }
 
   if (btnOpenCreate) {

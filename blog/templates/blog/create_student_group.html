@@ -4,7 +4,7 @@
 {% block title %}Yeni tələbə qrupu yarat{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/create_student_group.css' %}">
+    <link rel="stylesheet" href="{% static 'css/create_student_group.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="form-footer d-flex justify-content-between align-items-center">
-                            <a href="{% url 'exams:teacher_group_list' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'teacher_group_list' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Qruplara qayıt
                             </a>
                             <button type="submit" class="btn btn-primary">

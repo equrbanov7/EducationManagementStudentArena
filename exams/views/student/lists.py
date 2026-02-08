@@ -1,6 +1,6 @@
 
 
-from datetime import timezone
+from django.utils import timezone
 from exams.models import Exam
 from django.db.models import Q  
 from django.shortcuts import  render
@@ -97,7 +97,7 @@ def assigned_student_exam_list(request):
     }
 
     
-    return render(request, "blog/student_exam_list.html", context)
+    return render(request, "exams/student/student_exam_list.html", context)
 
 
 
@@ -176,7 +176,7 @@ def student_exam_list(request):
         "exam_items": page_obj,
         "current_url_name": "student_exam_list",
     }
-    # return render(request, "blog/student_exam_list.html", context)
+    
     return render(request, "exams/student/student_exam_list.html", context)
 
 

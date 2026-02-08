@@ -5,7 +5,7 @@
 {% block title %}Yoxlanılacaq İşlər{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/teacher_pending_attempts.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_pending_attempts.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -108,7 +108,7 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'teacher_check_attempt' data.attempt.exam.slug data.attempt.id %}" 
+                            <a href="{% url 'exams:teacher_check_attempt' data.attempt.exam.slug data.attempt.id %}" 
                                class="btn-check-action">
                                 <i class="fas fa-marker"></i> Yoxla
                             </a>

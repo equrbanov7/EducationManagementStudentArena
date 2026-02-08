@@ -36,7 +36,7 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers_qs]
     answers_by_qid = {a.question_id: a for a in answers_qs}
 
-    return render(request, "blog/exam_result.html", {
+    return render(request, "exams/student/exam_result.html", {
         "exam": exam,
         "attempt": attempt,
         "questions": questions,
@@ -56,5 +56,5 @@ def student_exam_history(request):
     context = {
         'attempts': attempts
     }
-    return render(request, 'blog/student_exam_history.html', context)
+    return render(request, 'exams/student/student_exam_history.html', context)
 

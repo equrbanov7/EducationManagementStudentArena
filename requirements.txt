@@ -53,6 +53,7 @@ service-identity==24.2.0
 Twisted==25.5.0
 txaio==25.12.2
 zope.interface==8.1.1
+channels-redis==4.0.0
 
 # =========================
 # Phone numbers (əgər istifadə edirsinizsə)

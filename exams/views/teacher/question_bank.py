@@ -1,6 +1,6 @@
 
 
-from pyexpat.errors import messages
+from django.contrib import messages
 import re
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -29,7 +29,7 @@ def create_question_bank(request, slug):
             'text_content': text_content
         })
 
-    return render(request, 'blog/create_question_bank.html', {
+    return render(request, 'exams/teacher/create_question_bank.html', {
         'exam': exam,
         'blocks_data': blocks_data
     })
@@ -67,7 +67,7 @@ def process_question_bank(request, slug):
                 # Validation: Eyni sorğuda dublikat ad varmı?
                 if block_name.lower() in used_names:
                     messages.error(request, f"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin.")
-                    return redirect('create_question_bank', slug=exam.slug)
+                    return redirect('exams:create_question_bank', slug=exam.slug)
                 used_names.add(block_name.lower())
 
                 content_key = f'block_content_{ui_id}'
@@ -84,7 +84,7 @@ def process_question_bank(request, slug):
                 
                 if existing_check.exists():
                     messages.error(request, f"'{block_name}' adlı blok artıq bazada mövcuddur.")
-                    return redirect('create_question_bank', slug=exam.slug)
+                    return redirect('exams:create_question_bank', slug=exam.slug)
 
                 if block_name:
                     # Blok Yaradılması/Yenilənməsi
@@ -128,9 +128,9 @@ def process_question_bank(request, slug):
                             )
         
         messages.success(request, "Sual bankı uğurla yadda saxlanıldı!")
-        return redirect('teacher_exam_detail', slug=exam.slug)
+        return redirect('exams:teacher_exam_detail', slug=exam.slug)
     
-    return redirect('create_question_bank', slug=exam.slug)
+    return redirect('exams:create_question_bank', slug=exam.slug)
 
  
 
@@ -178,7 +178,7 @@ def test_question_bank(request, slug):
 
     # GET
     if request.method != "POST":
-        return render(request, "blog/test_question_bank.html", {
+        return render(request, "exams/teacher/test_question_bank.html", {
             "exam": exam,
             "blocks": blocks,
             "raw_text": raw_text,
@@ -348,10 +348,10 @@ def test_question_bank(request, slug):
             created_count += 1
 
         messages.success(request, f"{created_count} sual əlavə olundu. ({skipped_count} sual keçildi)")
-        return redirect("test_question_bank", slug=exam.slug)
+        return redirect("exams:test_question_bank", slug=exam.slug)
 
     # PREVIEW və ya parse sonrası eyni səhifəni göstər
-    return render(request, "blog/test_question_bank.html", {
+    return render(request, "exams/teacher/test_question_bank.html", {
         "exam": exam,
         "blocks": blocks,
         "raw_text": raw_text,

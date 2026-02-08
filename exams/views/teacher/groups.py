@@ -1,5 +1,5 @@
 
-from pyexpat.errors import messages
+from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 
@@ -25,7 +25,7 @@ def teacher_group_list(request):
         "groups": groups,
         "form": form
     }
-    return render(request, "blog/teacher_group_list.html", context)
+    return render(request, "exams/teacher/teacher_group_list.html", context)
 
  
 # --- 2. YENİ QRUP YARATMAQ (POST) ---
@@ -43,7 +43,7 @@ def teacher_create_group(request):
         group.save()
         form.save_m2m()  # ManyToMany (tələbələr) üçün vacibdir
         
-    return redirect('teacher_group_list')
+    return redirect('exams:teacher_group_list')
 
 
 # --- 3. QRUPU YENİLƏMƏK (UPDATE - POST) ---
@@ -61,7 +61,7 @@ def teacher_update_group(request, group_id):
     if form.is_valid():
         form.save()
         
-    return redirect('teacher_group_list')
+    return redirect('exams:teacher_group_list')
 
  
 # --- 4. QRUPU SİLMƏK (DELETE) ---
@@ -72,7 +72,7 @@ def teacher_delete_group(request, group_id):
     group = get_object_or_404(StudentGroup, id=group_id, teacher=request.user)
     group.delete()
     
-    return redirect('teacher_group_list')
+    return redirect('exams:teacher_group_list')
 
 @login_required
 def create_student_group(request):
@@ -86,10 +86,10 @@ def create_student_group(request):
             group.save()
             form.save_m2m()
             messages.success(request, "Qrup uğurla yaradıldı.")
-            return redirect("teacher_group_list")
+            return redirect("exams:teacher_group_list")
     else:
         form = StudentGroupForm(teacher=request.user)
 
-    return render(request, "blog/create_student_group.html", {"form": form})
+    return render(request, "exams/teacher/create_student_group.html", {"form": form})
 
  

@@ -1,5 +1,5 @@
 import base64
-from datetime import timezone
+from django.utils import timezone
 import re
 
 from blog.utils import DATA_URL_PNG_RE
