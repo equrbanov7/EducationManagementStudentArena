@@ -67,6 +67,13 @@ urlpatterns = [
         name='add_topic'
     ),
     
+    # Mövzu redaktə etmə
+    path(
+        'topic/<int:topic_id>/edit/',
+        views.EditTopicView.as_view(),
+        name='edit_topic'
+    ),
+    
     # POST /courses/<id>/topic/<topic_id>/delete/ (AJAX)
     # Mövzu silmə
     path(

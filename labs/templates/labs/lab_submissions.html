@@ -4,168 +4,190 @@
 
 {% block title %}{{ lab.title }} - Cavablar{% endblock %}
 
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'labs/css/lab_submissions.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 submissions-page-wrapper">
     
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1">
+                <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a>
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">
+                            <i class="fas fa-layer-group"></i> {{ lab.course.title }}
+                        </a>
                     </li>
                     <li class="breadcrumb-item">{{ lab.title }}</li>
-                    <li class="breadcrumb-item active">Cavablar</li>
+                    <li class="breadcrumb-item active">Nəticələr</li>
                 </ol>
             </nav>
-            <h3 class="mb-0">
-                <i class="fas fa-clipboard-check text-success me-2"></i> Tələbə Cavabları
-            </h3>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                Tələbə Cavabları
+            </h1>
         </div>
-        <div>
-            <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-secondary">
-                <i class="fas fa-cubes me-1"></i> Bloklar
+        <div class="header-actions">
+            <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-primary action-btn">
+                <i class="fas fa-cubes me-2"></i> Blokları İdarə Et
             </a>
         </div>
     </div>
     
-    <!-- Filters - Auto submit on change -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" id="filterForm" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">Hamısı</option>
-                        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Gözləyir</option>
-                        <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Gecikmiş</option>
-                        <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>Qiymətləndirilib</option>
-                    </select>
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Qrup</label>
-                    <select name="group" class="form-select" onchange="this.form.submit()">
-                        <option value="">Bütün qruplar</option>
-                        {% for g in groups %}
-                        <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="stat-content">
+                    <h3>{{ stats.total }}</h3>
+                    <p>Ümumi Cavab</p>
                 </div>
-                <div class="col-md-4">
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.pending }}</h3>
+                    <p>Gözləyən</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.graded }}</h3>
+                    <p>Qiymətləndirilib</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card danger">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.late }}</h3>
+                    <p>Gecikmiş</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-card shadow-sm">
+        <div class="filters-toolbar border-bottom p-3">
+            <form method="GET" id="filterForm" class="row g-3 align-items-center">
+                <div class="col-md-4 col-sm-6">
+                    <label class="filter-label">Statusa görə</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-filter"></i>
+                        <select name="status" class="form-select custom-select" onchange="this.form.submit()">
+                            <option value="">Bütün Statuslar</option>
+                            <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Gözləyir</option>
+                            <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Gecikmiş</option>
+                            <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>Qiymətləndirilib</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <label class="filter-label">Qrupa görə</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-users-cog"></i>
+                        <select name="group" class="form-select custom-select" onchange="this.form.submit()">
+                            <option value="">Bütün Qruplar</option>
+                            {% for g in groups %}
+                            <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12 text-md-end mt-4 mt-md-3">
                     {% if status_filter or group_filter %}
-                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Filtri Sıfırla
+                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-light text-danger border">
+                        <i class="fas fa-times me-1"></i> Filtri Təmizlə
                     </a>
                     {% endif %}
                 </div>
             </form>
         </div>
-    </div>
     
-    <!-- Stats -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-6 mb-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ stats.total }}</h3>
-                    <small>Ümumi</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="card bg-warning h-100">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ stats.pending }}</h3>
-                    <small>Gözləyən</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ stats.graded }}</h3>
-                    <small>Qiymətləndirilib</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-3">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body text-center py-3">
-                    <h3 class="mb-0">{{ stats.late }}</h3>
-                    <small>Gecikmiş</small>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Submissions Table -->
-    <div class="card shadow-sm">
         <div class="card-body p-0">
             {% if submissions %}
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
+                <table class="table custom-table mb-0 align-middle">
+                    <thead>
                         <tr>
-                            <th>Tələbə</th>
+                            <th class="ps-4">Tələbə</th>
                             <th>Qrup</th>
                             <th>Tarix</th>
                             <th>Cəhd</th>
                             <th>Status</th>
                             <th>Qiymət</th>
-                            <th class="text-end">Əməliyyat</th>
+                            <th class="text-end pe-4">Əməliyyat</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sub in submissions %}
                         <tr>
-                            <td>
+                            <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-circle me-2">
+                                    <div class="avatar-circle me-3">
                                         {{ sub.assignment.student.username|slice:":1"|upper }}
                                     </div>
-                                    <div>
-                                        <strong>{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</strong>
-                                        <small class="text-muted d-block">{{ sub.assignment.student.email }}</small>
+                                    <div class="student-info">
+                                        <h6 class="mb-0 fw-bold text-dark">{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</h6>
+                                        <small class="text-muted">{{ sub.assignment.student.email }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 {% with group=student_groups|get_item:sub.assignment.student.id %}
                                     {% if group %}
-                                    <span class="badge bg-secondary">{{ group }}</span>
+                                    <span class="badge-soft group-badge">{{ group }}</span>
                                     {% else %}
                                     <span class="text-muted">-</span>
                                     {% endif %}
                                 {% endwith %}
                             </td>
                             <td>
-                                <span>{{ sub.submitted_at|date:"d.m.Y" }}</span>
-                                <small class="text-muted d-block">{{ sub.submitted_at|date:"H:i" }}</small>
+                                <div class="date-info">
+                                    <span class="d-block fw-medium">{{ sub.submitted_at|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ sub.submitted_at|date:"H:i" }}</small>
+                                </div>
                             </td>
                             <td>
-                                <span class="badge bg-info">{{ sub.attempt_number }}</span>
+                                <span class="badge-circle">{{ sub.attempt_number }}</span>
                             </td>
                             <td>
                                 {% if sub.status == 'graded' %}
-                                <span class="badge bg-success">Qiymətləndirilib</span>
+                                    <span class="status-badge success"><i class="fas fa-check me-1"></i> Qiymətləndirilib</span>
                                 {% elif sub.status == 'late' %}
-                                <span class="badge bg-warning text-dark">Gecikmiş</span>
+                                    <span class="status-badge danger"><i class="fas fa-clock me-1"></i> Gecikmiş</span>
                                 {% else %}
-                                <span class="badge bg-secondary">Gözləyir</span>
+                                    <span class="status-badge warning"><i class="fas fa-hourglass-half me-1"></i> Gözləyir</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if sub.score is not None %}
-                                <span class="fw-bold text-success fs-5">{{ sub.score }}</span>
-                                <small class="text-muted">/{{ lab.max_score }}</small>
+                                    <div class="score-display">
+                                        <span class="score-value">{{ sub.score }}</span>
+                                        <span class="score-max">/ {{ lab.max_score }}</span>
+                                    </div>
                                 {% else %}
-                                <span class="text-muted">-</span>
+                                    <span class="text-muted fs-5">-</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
-                                <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-pen me-1"></i> Qiymətləndir
+                            <td class="text-end pe-4">
+                                <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-action">
+                                    Qiymətləndir <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </td>
                         </tr>
@@ -174,36 +196,26 @@
                 </table>
             </div>
             {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-inbox fa-4x text-muted mb-4"></i>
-                <h5>Heç bir cavab yoxdur</h5>
+            <div class="empty-state text-center">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h5>Heç bir cavab tapılmadı</h5>
                 <p class="text-muted">
                     {% if status_filter or group_filter %}
-                    Bu filtrlərə uyğun cavab tapılmadı.
-                    <a href="{% url 'labs:lab_submissions' lab.id %}">Filtri sıfırla</a>
+                        Seçilmiş filtrlərə uyğun nəticə yoxdur.
                     {% else %}
-                    Hələ heç bir tələbə cavab göndərməyib.
+                        Hələ ki, heç bir tələbə tapşırıq göndərməyib.
                     {% endif %}
                 </p>
+                {% if status_filter or group_filter %}
+                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-primary mt-2">
+                        Bütün nəticələri göstər
+                    </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>
     </div>
-    
 </div>
-
-<style>
-.avatar-circle {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-</style>
 {% endblock %}

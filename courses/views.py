@@ -509,6 +509,53 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
     
     def get_success_url(self):
         return reverse_lazy('courses:course_dashboard', args=[self.course.id])
+    
+    
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Mövzu Redaktə Etmə (AJAX)
+# ════════════════════════════════════════════════════════════════════════════
+
+class EditTopicView(IsCourseOwnerMixin, UpdateView):
+    """Mövzu redaktə etmə (AJAX POST)."""
+    
+    model = CourseTopic
+    form_class = CourseTopicForm
+    pk_url_kwarg = 'topic_id'
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.topic = self.get_object()
+        self.course = self.topic.course
+        if self.course.owner != request.user:
+            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'"{form.instance.title}" mövzusu yeniləndi',
+                'topic': {
+                    'id': form.instance.id,
+                    'title': form.instance.title,
+                    'description': form.instance.description,
+                    'order': form.instance.order,
+                },
+            })
+        
+        messages.success(self.request, f'"{form.instance.title}" mövzusu yeniləndi')
+        return response
+    
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        
+        messages.error(self.request, 'Mövzu yenilənərkən xəta baş verdi.')
+        return redirect('courses:course_dashboard', course_id=self.course.id)
+    
+    def get_success_url(self):
+        return reverse_lazy('courses:course_dashboard', args=[self.course.id])
 
 
 # ════════════════════════════════════════════════════════════════════════════
