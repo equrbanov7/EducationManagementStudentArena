@@ -71,10 +71,6 @@ class Assignment(models.Model):
         """Yoxlanılmayan cavablar"""
         return self.submissions.filter(status="pending").count()
 
-    def get_user_attempts(self, user):
-        """İstifadəçinin cəhd sayı"""
-        return self.submissions.filter(student=user).count()
-
     def can_user_submit(self, user):
         """İstifadəçi cavab verə bilərmi?"""
         if self.is_deadline_passed:

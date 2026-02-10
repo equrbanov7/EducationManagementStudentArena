@@ -7,20 +7,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from exams.models import (
-    Exam,
-    ExamAnswer,
-    ExamAnswerFile,
-    ExamAttempt,
-    ExamQuestionOption,
-)
-from exams.services.attempts import (
-    _clear_paint_from_answer,
-    _save_paint_png_to_answer,
-    _start_or_resume_attempt,
-    build_shuffled_options,
-    generate_random_questions_for_attempt,
-)
+from exams.models import (Exam, ExamAnswer, ExamAnswerFile, ExamAttempt,
+                          ExamQuestionOption)
+from exams.services.attempts import (_clear_paint_from_answer,
+                                     _save_paint_png_to_answer,
+                                     _start_or_resume_attempt,
+                                     build_shuffled_options,
+                                     generate_random_questions_for_attempt)
 
 
 @login_required

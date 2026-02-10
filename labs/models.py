@@ -15,11 +15,8 @@ import hashlib
 import random
 
 from django.contrib.auth import get_user_model
-from django.core.validators import (
-    FileExtensionValidator,
-    MaxValueValidator,
-    MinValueValidator,
-)
+from django.core.validators import (FileExtensionValidator, MaxValueValidator,
+                                    MinValueValidator)
 from django.db import models
 from django.utils import timezone
 
@@ -362,7 +359,6 @@ class LabAssignment(models.Model):
         """
         Bu tələbəyə random suallar təyin et
         """
-        import random
 
         all_questions = []
 
