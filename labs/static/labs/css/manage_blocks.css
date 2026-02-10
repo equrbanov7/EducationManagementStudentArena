@@ -1,0 +1,88 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANAGE BLOCKS & QUESTIONS - Custom Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+   .accordion-item {
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    border-radius: 8px !important;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.accordion-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #e7f1ff;
+    color: #0c63e4;
+    font-weight: 600;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(13, 110, 253, 0.25);
+}
+
+.accordion-button .badge {
+    font-size: 0.85rem;
+}
+
+/* Questions Table */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Modal Enhancements */
+.modal-header.bg-success,
+.modal-header.bg-primary,
+.modal-header.bg-info {
+    border-bottom: none;
+}
+
+.modal-header .btn-close-white {
+    opacity: 0.9;
+}
+
+.modal-header .btn-close-white:hover {
+    opacity: 1;
+}
+
+/* Import textarea */
+textarea.font-monospace {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Stats cards animation */
+.card.bg-light {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card.bg-light:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Button hover effects */
+.btn-sm {
+    transition: all 0.2s ease;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+}
+
+/* Alert formatting in import modal */
+.alert code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.alert ul {
+    padding-left: 1.5rem;
+}
