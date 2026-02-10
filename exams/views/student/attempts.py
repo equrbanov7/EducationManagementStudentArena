@@ -15,12 +15,11 @@ from exams.models import (
     ExamQuestionOption,
 )
 from exams.services.attempts import (
-    _clear_paint_from_answer,
-    _save_paint_png_to_answer,
     _start_or_resume_attempt,
-    build_shuffled_options,
     generate_random_questions_for_attempt,
 )
+from exams.services.randomizer import build_shuffled_options
+from exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 
 
 @login_required
