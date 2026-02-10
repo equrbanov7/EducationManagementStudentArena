@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from pyexpat.errors import messages
-
 from exams.models import Exam
 from exams.services.attempts import _start_or_resume_attempt
 
