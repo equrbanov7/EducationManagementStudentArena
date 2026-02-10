@@ -9,16 +9,17 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import ssl
-import os
-from dotenv import load_dotenv
-import dj_database_url
 
-if hasattr(ssl, '_create_unverified_context'):
+import os
+import ssl
+
+import dj_database_url
+from dotenv import load_dotenv
+
+if hasattr(ssl, "_create_unverified_context"):
     ssl._create_default_https_context = ssl._create_unverified_context
 
 from pathlib import Path
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,31 +30,33 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&)+@mug5+!j8%58dv2nt-#8xs')
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&)+@mug5+!j8%58dv2nt-#8xs"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-#ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # deploy zamani silin!!
 # ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.1.73","0.0.0.0"]
 # ALLOWED_HOSTS = ["172.20.10.11", "localhost", "127.0.0.1","0.0.0.0","192.168.1.73","172.20.10.11","192.168.1.77","192.168.1.115", "192.168.1.80" ]
 
 # ALLOWED_HOSTS - .env-dən oxu
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # Application definition
 
 INSTALLED_APPS = [
-   "courses.apps.CoursesConfig",
+    "courses.apps.CoursesConfig",
     "blog",
     "channels",
     "liveExam",
     "assignments",
-   "accounts.apps.AccountsConfig",
-   "projects",
-   "labs",
+    "accounts.apps.AccountsConfig",
+    "projects",
+    "labs",
     "daphne",
     "exams",
     "django.contrib.admin",
@@ -80,7 +83,7 @@ ROOT_URLCONF = "emsarena.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "emsarena"  / "templates"],
+        "DIRS": [BASE_DIR / "emsarena" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -93,7 +96,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "emsarena.wsgi.application"
-
 
 
 ASGI_APPLICATION = "emsarena.asgi.application"  # core = sənin project adı
@@ -118,8 +120,8 @@ CHANNEL_LAYERS = {
 #     )
 # }
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
         conn_max_age=600,
         conn_health_checks=True,  # Bağlantıları yoxlayır
     )
@@ -130,9 +132,9 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 # Login / logout ayarları
-LOGIN_URL = '/blog/login/'
-LOGIN_REDIRECT_URL = '/blog/'        # uğurlu login-dən sonra hara getsin
-LOGOUT_REDIRECT_URL = '/blog/'       # logout-dan sonra hara qayıtsın (istəsən)
+LOGIN_URL = "/blog/login/"
+LOGIN_REDIRECT_URL = "/blog/"  # uğurlu login-dən sonra hara getsin
+LOGOUT_REDIRECT_URL = "/blog/"  # logout-dan sonra hara qayıtsın (istəsən)
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -165,13 +167,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "emsarena" / "static",
     BASE_DIR / "liveExam" / "static",
-    ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -181,23 +183,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email ayarları (Gmail SMTP istifadə olunur)
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 
 EMAIL_PORT = 465
 EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True      # Bunu yandırırıq (SSL daha etibarlıdır)
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  
-#use .env
+EMAIL_USE_SSL = True  # Bunu yandırırıq (SSL daha etibarlıdır)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+# use .env
 
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL') 
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
 
 # Media files (Uploaded by users)
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # settings.py
@@ -213,14 +215,13 @@ CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 SITE_URL = "http://127.0.0.1:8000"
 
 
-
 # 6. MESSAGE_TAGS (Toast message styling)
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
-    messages.DEBUG: 'debug',
-    messages.INFO: 'info',
-    messages.SUCCESS: 'success',
-    messages.WARNING: 'warning',
-    messages.ERROR: 'danger',
+    messages.DEBUG: "debug",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
 }

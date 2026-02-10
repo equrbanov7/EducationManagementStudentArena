@@ -1,10 +1,10 @@
-
 import os
 import re
 from collections import defaultdict
 from importlib.readers import ZipReader
 
 from docx import Document
+
 try:
     from pypdf import PdfReader
 except Exception:
@@ -13,8 +13,8 @@ except Exception:
 from exams.constants import ANSWERLINE_RE, OPTION_RE, QUESTION_RE
 from exams.services.utils import _norm
 
-
 # PDF-dən çıxan mətni parser üçün uyğun formaya salır:
+
 
 def normalize_pdf_extracted_text(text: str) -> str:
     """
@@ -53,6 +53,7 @@ def normalize_pdf_extracted_text(text: str) -> str:
 
 # Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .docx, .pdf
 
+
 def extract_text_from_upload(uploaded_file) -> str:
     name = uploaded_file.name.lower()
     ext = os.path.splitext(name)[1]
@@ -76,7 +77,9 @@ def extract_text_from_upload(uploaded_file) -> str:
 
     if ext == ".pdf":
         if ZipReader is None:
-            raise ValueError("PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin.")
+            raise ValueError(
+                "PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin."
+            )
 
         reader = PdfReader(uploaded_file)
         parts = []
@@ -91,11 +94,11 @@ def extract_text_from_upload(uploaded_file) -> str:
         # ✅ əsas fix burada
         return normalize_pdf_extracted_text(raw)
 
-
     raise ValueError("Yalnız .docx, .pdf, .txt qəbul olunur.")
 
 
 # PDF-dən çıxan və ya digər mənbədən alınan raw mətni parser üçün strukturlaşdırılmış sual formatına çevirir
+
 
 def parse_bulk_mcq(raw_text: str):
     """
@@ -250,37 +253,40 @@ def parse_bulk_mcq(raw_text: str):
         # missing A-D
         for must in ["A", "B", "C", "D"]:
             if must not in q["options"]:
-                q["warnings"].append({
-                    "type": "missing_option",
-                    "msg": f"{must} variantı tapılmadı."
-                })
+                q["warnings"].append(
+                    {"type": "missing_option", "msg": f"{must} variantı tapılmadı."}
+                )
 
         # E optional warning
         if "E" not in q["options"]:
-            q["warnings"].append({
-                "type": "missing_option_e",
-                "msg": "E variantı yoxdur (opsional)."
-            })
+            q["warnings"].append(
+                {"type": "missing_option_e", "msg": "E variantı yoxdur (opsional)."}
+            )
 
         # duplicate options text warning
         norm_map = defaultdict(list)
         for lab, txt in q["options"].items():
             norm_map[_norm(txt)].append(lab)
 
-        dup_groups = [labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1]
+        dup_groups = [
+            labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1
+        ]
         for labs in dup_groups:
-            q["warnings"].append({
-                "type": "duplicate_option_text",
-                "msg": f"Təkrar variant mətni: {', '.join(labs)} eynidir."
-            })
+            q["warnings"].append(
+                {
+                    "type": "duplicate_option_text",
+                    "msg": f"Təkrar variant mətni: {', '.join(labs)} eynidir.",
+                }
+            )
 
         # correct label exists?
         for c in q["correct"]:
             if c not in q["options"]:
-                q["warnings"].append({
-                    "type": "correct_missing",
-                    "msg": f"Düz cavab kimi işarələnən {c} variantı yoxdur."
-                })
+                q["warnings"].append(
+                    {
+                        "type": "correct_missing",
+                        "msg": f"Düz cavab kimi işarələnən {c} variantı yoxdur.",
+                    }
+                )
 
     return questions
-

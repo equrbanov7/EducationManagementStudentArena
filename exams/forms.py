@@ -1,8 +1,10 @@
-
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from exams.models import Exam, ExamQuestion, ExamQuestionOption, StudentGroup, QuestionBlock
+
+from exams.models import (Exam, ExamQuestion, ExamQuestionOption,
+                          QuestionBlock, StudentGroup)
+
 
 class ExamForm(forms.ModelForm):
     class Meta:
@@ -12,8 +14,8 @@ class ExamForm(forms.ModelForm):
             "description",
             "exam_type",
             "is_active",
-            "start_datetime",     
-            "end_datetime",       
+            "start_datetime",
+            "end_datetime",
             "is_public",
             "allowed_users",
             "allowed_groups",
@@ -24,61 +26,86 @@ class ExamForm(forms.ModelForm):
             "enable_paint",
         ]
         widgets = {
-            "title": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: Şərt operatorları – Test 1",
-            }),
-            "description": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 3,
-                "placeholder": "İmtahan haqqında qısa izah...",
-            }),
-            "exam_type": forms.Select(attrs={
-                "class": "form-control",
-            }),
-            "is_active": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
-            }),
-            
+            "title": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: Şərt operatorları – Test 1",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "İmtahan haqqında qısa izah...",
+                }
+            ),
+            "exam_type": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
             # ✅ YENİ: DateTime widget-ləri
-            "start_datetime": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-                "placeholder": "Başlama tarixi və vaxtı",
-            }, format='%Y-%m-%dT%H:%M'),
-            
-            "end_datetime": forms.DateTimeInput(attrs={
-                "class": "form-control",
-                "type": "datetime-local",
-                "placeholder": "Bitmə tarixi və vaxtı",
-            }, format='%Y-%m-%dT%H:%M'),
-            
-            "is_public": forms.CheckboxInput(attrs={
-                "class": "form-check-input",
-            }),
-            "allowed_users": forms.SelectMultiple(attrs={
-                "class": "form-control",
-            }),
-            "allowed_groups": forms.SelectMultiple(attrs={
-                "class": "form-control",
-            }),
-            "access_code": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 123456 (6 rəqəm)",
-                "maxlength": "6",
-            }),
-            "total_duration_minutes": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 30 (dəqiqə)",
-            }),
-            "default_question_time_seconds": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 60 (saniyə)",
-            }),
-            "max_attempts_per_user": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 1, 2, 3...",
-            }),
+            "start_datetime": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                    "placeholder": "Başlama tarixi və vaxtı",
+                },
+                format="%Y-%m-%dT%H:%M",
+            ),
+            "end_datetime": forms.DateTimeInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "datetime-local",
+                    "placeholder": "Bitmə tarixi və vaxtı",
+                },
+                format="%Y-%m-%dT%H:%M",
+            ),
+            "is_public": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
+            "allowed_users": forms.SelectMultiple(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "allowed_groups": forms.SelectMultiple(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "access_code": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 123456 (6 rəqəm)",
+                    "maxlength": "6",
+                }
+            ),
+            "total_duration_minutes": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 30 (dəqiqə)",
+                }
+            ),
+            "default_question_time_seconds": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 60 (saniyə)",
+                }
+            ),
+            "max_attempts_per_user": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 1, 2, 3...",
+                }
+            ),
         }
         labels = {
             "title": "İmtahan adı",
@@ -86,7 +113,7 @@ class ExamForm(forms.ModelForm):
             "exam_type": "İmtahan tipi",
             "is_active": "Aktiv olsun?",
             "start_datetime": "Başlama tarixi və vaxtı",  # ✅ YENİ
-            "end_datetime": "Bitmə tarixi və vaxtı",      # ✅ YENİ
+            "end_datetime": "Bitmə tarixi və vaxtı",  # ✅ YENİ
             "is_public": "Hamı üçün açıqdır?",
             "allowed_users": "Fərdi icazəli istifadəçilər",
             "allowed_groups": "İcazəli qruplar",
@@ -105,12 +132,14 @@ class ExamForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # ✅ YENİ: DateTime field-lərini input_formats ilə düzəlt
-        self.fields['start_datetime'].input_formats = ['%Y-%m-%dT%H:%M']
-        self.fields['end_datetime'].input_formats = ['%Y-%m-%dT%H:%M']
+        self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
 
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.all().order_by("username")
-        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by("name")
+        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by(
+            "name"
+        )
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
@@ -128,22 +157,26 @@ class ExamForm(forms.ModelForm):
             return ""  # boş buraxmaq olar
 
         if not code.isdigit() or len(code) != 6:
-            raise forms.ValidationError("Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456).")
+            raise forms.ValidationError(
+                "Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456)."
+            )
 
         return code
-    
+
     def clean(self):
         """
         ✅ YENİ: Tarix validasiyası
         """
         cleaned_data = super().clean()
-        start_dt = cleaned_data.get('start_datetime')
-        end_dt = cleaned_data.get('end_datetime')
+        start_dt = cleaned_data.get("start_datetime")
+        end_dt = cleaned_data.get("end_datetime")
         enable_paint = cleaned_data.get("enable_paint")
         exam_type = cleaned_data.get("exam_type")
 
         if exam_type == "test" and enable_paint:
-            raise ValidationError("Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər.")
+            raise ValidationError(
+                "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər."
+            )
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:
@@ -164,80 +197,96 @@ class ExamQuestionCreateForm(forms.ModelForm):
     option1_text = forms.CharField(
         label="1-ci variant",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"})
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option1_is_correct = forms.BooleanField(
         label="Düzgün?",
         required=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option2_text = forms.CharField(
         label="2-ci variant",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"})
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option2_is_correct = forms.BooleanField(
         label="Düzgün?",
         required=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option3_text = forms.CharField(
         label="3-cü variant",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"})
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option3_is_correct = forms.BooleanField(
         label="Düzgün?",
         required=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option4_text = forms.CharField(
         label="4-cü variant",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control"})
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option4_is_correct = forms.BooleanField(
         label="Düzgün?",
         required=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"})
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     class Meta:
         model = ExamQuestion
-        fields = ["text", "block", "answer_mode", "time_limit_seconds", "correct_answer", "image", "video", "enable_paint"]
+        fields = [
+            "text",
+            "block",
+            "answer_mode",
+            "time_limit_seconds",
+            "correct_answer",
+            "image",
+            "video",
+            "enable_paint",
+        ]
         widgets = {
-            "text": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 3,
-                "placeholder": "Sual mətni..."
-            }),
-            "block": forms.Select(attrs={
-                "class": "form-control"
-            }),
-            "answer_mode": forms.Select(attrs={
-                "class": "form-control",
-            }),
-            "time_limit_seconds": forms.NumberInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
-            }),
-            "correct_answer": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 3,
-                "placeholder": "Yazılı/praktiki üçün ideal cavab (istəyə görə)...",
-            }),
+            "text": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Sual mətni...",
+                }
+            ),
+            "block": forms.Select(attrs={"class": "form-control"}),
+            "answer_mode": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+            "time_limit_seconds": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 60 (saniyə). Boş qalsa default istifadə olunur.",
+                }
+            ),
+            "correct_answer": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "Yazılı/praktiki üçün ideal cavab (istəyə görə)...",
+                }
+            ),
             # ✅ DƏYİŞİKLİK: ClearableFileInput ilə clear funksionallığı
-            "image": forms.ClearableFileInput(attrs={
-                "class": "form-control",
-                "accept": "image/*"
-            }),
-            "video": forms.ClearableFileInput(attrs={
-                "class": "form-control",
-                "accept": "video/mp4,video/webm,video/quicktime"
-            }),
+            "image": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            ),
+            "video": forms.ClearableFileInput(
+                attrs={
+                    "class": "form-control",
+                    "accept": "video/mp4,video/webm,video/quicktime",
+                }
+            ),
         }
         labels = {
             "text": "Sual",
@@ -259,14 +308,14 @@ class ExamQuestionCreateForm(forms.ModelForm):
         # Yazılı imtahanlarda enable_paint field-ini silmə
         if self.exam_type != "written":
             self.fields.pop("enable_paint", None)
-            
+
         # Blokları dropdown-a doldururuq
         if subject_blocks is not None:
-            self.fields['block'].queryset = subject_blocks
-            self.fields['block'].empty_label = "Ümumi (Heç bir bloka aid deyil)"
-        else: 
-            self.fields['block'].queryset = QuestionBlock.objects.none()
-            
+            self.fields["block"].queryset = subject_blocks
+            self.fields["block"].empty_label = "Ümumi (Heç bir bloka aid deyil)"
+        else:
+            self.fields["block"].queryset = QuestionBlock.objects.none()
+
         # Yazılı imtahanlarda answer_mode-u məcburi etməyək
         if self.exam_type == "written":
             self.fields["answer_mode"].required = False
@@ -338,13 +387,17 @@ class StudentGroupForm(forms.ModelForm):
         model = StudentGroup
         fields = ["name", "students"]
         widgets = {
-            "name": forms.TextInput(attrs={
-                "class": "form-control",
-                "placeholder": "Məs: 875i, 842A1 və s.",
-            }),
-            "students": forms.SelectMultiple(attrs={
-                "class": "form-select",
-            }),
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Məs: 875i, 842A1 və s.",
+                }
+            ),
+            "students": forms.SelectMultiple(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
         labels = {
             "name": "Qrup adı / nömrəsi",

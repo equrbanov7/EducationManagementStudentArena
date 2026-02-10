@@ -2,4 +2,4 @@
 
 from .access import exam_code_check
 
-__all__ = ['exam_code_check']
+__all__ = ["exam_code_check"]

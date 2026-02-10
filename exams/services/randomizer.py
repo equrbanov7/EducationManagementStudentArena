@@ -1,9 +1,9 @@
-
 import random
 
-from exams.models import ExamAnswer
 from exams.constants import LABELS
-from exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+from exams.models import ExamAnswer
+from exams.services.utils import (_attempt_has_any_answer,
+                                  _effective_needed_count)
 
 
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
@@ -13,11 +13,13 @@ def build_shuffled_options(attempt_id, question):
     rnd.shuffle(opts)
     packed = []
     for i, opt in enumerate(opts):
-        packed.append({
-            "id": opt.id,
-            "label": LABELS[i] if i < len(LABELS) else "",
-            "text": opt.text
-        })
+        packed.append(
+            {
+                "id": opt.id,
+                "label": LABELS[i] if i < len(LABELS) else "",
+                "text": opt.text,
+            }
+        )
     return packed
 
 
@@ -80,7 +82,10 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                         continue
                     selected_qs.append(q)
                     picked_ids.add(q.id)
-                    if len(selected_qs) >= total_needed or len(selected_qs) - len(picked_ids) >= take:
+                    if (
+                        len(selected_qs) >= total_needed
+                        or len(selected_qs) - len(picked_ids) >= take
+                    ):
                         # yuxarıdakı “take” limitini yumşaq saxlayırıq,
                         # əsas məqsəd total_needed-ə çatmaqdır
                         pass
@@ -104,6 +109,5 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
     # ExamAnswer-ları bulk yarat
     ExamAnswer.objects.bulk_create(
         [ExamAnswer(attempt=attempt, question=q) for q in selected_qs],
-        ignore_conflicts=True
+        ignore_conflicts=True,
     )
-

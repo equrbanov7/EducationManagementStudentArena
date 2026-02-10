@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, Post, Comment, Question
+
+from .models import Category, Comment, Post, Question
 
 
 @admin.register(Category)
@@ -22,11 +23,9 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ("post", "user", "rating", "created_at")
     list_filter = ("rating", "created_at")
 
+
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ("question_text", "author", "visible_to_all", "created_at")
     list_filter = ("visible_to_all", "created_at", "author")
     search_fields = ("question_text", "answer_text", "author__username")
-
-
-
