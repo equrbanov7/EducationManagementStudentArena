@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from exams.models import Exam, ExamQuestion, ExamQuestionOption
-from liveExam.constants import AVATAR_EMOJI
 from liveExam.models import LiveAnswer, LivePlayer, LiveSession
 
 AVATAR_KEYS = [
