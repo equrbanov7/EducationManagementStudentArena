@@ -120,4 +120,4 @@ yarn.lock
 *.pem
 *.key
 secrets/
-credentials/
+credentials/.env
