@@ -6,10 +6,8 @@
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#topicCollapse">
             <i class="fas fa-list text-primary me-2"></i>
-            <strong>Mövzular ({{ topics|length }})</strong>
-            {% if is_owner %}
-                <span class="badge bg-primary ms-2">{{ topics|length }}</span>
-            {% endif %}
+            <strong>Mövzular</strong>
+            <span class="badge bg-primary ms-2">{{ topics|length }}</span>
         </button>
     </h2>
     <div id="topicCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
@@ -24,45 +22,128 @@
             
             <!-- Topics List -->
             {% if topics %}
-                <div class="list-group">
+                <div class="topics-container">
                     {% for topic in topics %}
-                        <div class="list-group-item border-start border-primary border-5">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">
-                                        <i class="fas fa-bookmark text-primary"></i>
-                                        {{ topic.order }}. {{ topic.title }}
-                                    </h6>
+                        <div class="topic-card mb-3" id="topic-{{ topic.id }}">
+                            <!-- Topic Header (Clickable) -->
+                            <div class="topic-header" data-bs-toggle="collapse" 
+                                 data-bs-target="#topicResources{{ topic.id }}" 
+                                 aria-expanded="false">
+                                <div class="topic-info">
+                                    <div class="topic-title-row">
+                                        <span class="topic-order">{{ topic.order }}</span>
+                                        <h6 class="topic-title mb-1">
+                                            <i class="fas fa-bookmark text-primary me-2"></i>
+                                            {{ topic.title }}
+                                        </h6>
+                                        <i class="fas fa-chevron-down collapse-icon ms-auto"></i>
+                                    </div>
                                     
                                     {% if topic.description %}
-                                        <p class="mb-2 text-muted small">{{ topic.description }}</p>
+                                        <p class="topic-description mb-2">{{ topic.description|truncatechars:120 }}</p>
                                     {% endif %}
                                     
-                                    <!-- Topic Resources Count -->
-                                    <small class="text-muted">
-                                        <i class="fas fa-file-alt"></i>
-                                        {{ topic.resources.count }} resurs
-                                    </small>
+                                    <!-- Topic Meta -->
+                                    <div class="topic-meta">
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-file-alt"></i>
+                                            {{ topic.resources.count }} resurs
+                                        </span>
+                                        <span class="text-muted small">
+                                            <i class="fas fa-clock"></i>
+                                            {{ topic.created_at|date:"d.m.Y" }}
+                                        </span>
+                                    </div>
                                 </div>
                                 
-                                <!-- Action Buttons (Owner only) -->
+                                <!-- Action Buttons (Owner only) - Stop propagation -->
                                 {% if is_owner %}
-                                    <div class="btn-group btn-group-sm ms-2" role="group">
-                                        <!-- Edit Button (TODO) -->
-                                        <button type="button" class="btn btn-outline-warning"
-                                                onclick="editTopic({{ topic.id }})"
+                                    <div class="topic-actions" onclick="event.stopPropagation();">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                onclick="editTopic({{ topic.id }}, '{{ topic.title|escapejs }}', '{{ topic.description|escapejs }}')"
                                                 title="Redaktə et">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         
-                                        <!-- Delete Button -->
-                                        <button type="button" class="btn btn-outline-danger"
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
                                                 onclick="deleteTopic({{ course.id }}, {{ topic.id }})"
                                                 title="Sil">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 {% endif %}
+                            </div>
+                            
+                            <!-- Topic Resources (Collapsible) -->
+                            <div class="collapse topic-resources" id="topicResources{{ topic.id }}">
+                                <div class="resources-container">
+                                    {% if topic.resources.all %}
+                                        <div class="resources-list">
+                                            {% for resource in topic.resources.all %}
+                                                <div class="resource-item">
+                                                    <div class="resource-icon">
+                                                        {% if resource.resource_type == 'file' %}
+                                                            <i class="fas fa-file-pdf text-danger"></i>
+                                                        {% elif resource.resource_type == 'link' %}
+                                                            <i class="fas fa-link text-primary"></i>
+                                                        {% elif resource.resource_type == 'video' %}
+                                                            <i class="fas fa-video text-success"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-file text-secondary"></i>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="resource-details">
+                                                        <h6 class="resource-title">{{ resource.title }}</h6>
+                                                        {% if resource.description %}
+                                                            <p class="resource-desc">{{ resource.description|truncatechars:80 }}</p>
+                                                        {% endif %}
+                                                        <small class="text-muted">
+                                                            {{ resource.get_resource_type_display }}
+                                                        </small>
+                                                    </div>
+                                                    
+                                                    <div class="resource-actions">
+                                                        {% if resource.is_file %}
+                                                            <a href="{{ resource.file.url }}" class="btn btn-sm btn-outline-primary" 
+                                                               download title="Yüklə">
+                                                                <i class="fas fa-download"></i>
+                                                            </a>
+                                                        {% elif resource.is_link %}
+                                                            <a href="{{ resource.url }}" class="btn btn-sm btn-outline-primary" 
+                                                               target="_blank" title="Aç">
+                                                                <i class="fas fa-external-link-alt"></i>
+                                                            </a>
+                                                        {% endif %}
+                                                        
+                                                        {% if is_owner %}
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                    onclick="deleteResource({{ course.id }}, {{ resource.id }})"
+                                                                    title="Sil">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-3 text-muted">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p class="mb-0">Hələ resurs əlavə olunmayıb</p>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Add Resource Button -->
+                                    {% if is_owner %}
+                                        <div class="add-resource-btn-container">
+                                            <button type="button" class="btn btn-sm btn-outline-primary w-100"
+                                                    onclick="openResourceModal({{ topic.id }}, '{{ topic.title|escapejs }}')">
+                                                <i class="fas fa-plus-circle"></i> Resurs Əlavə Et
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
@@ -82,26 +163,237 @@
     </div>
 </div>
 
-<!-- Delete Topic Script -->
-<script>
-function deleteTopic(courseId, topicId) {
-    if (confirm('Bu mövzunu silmək istədiniz?\n\nMövzuya aid bütün məlumatlar silinəcək.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/courses/${courseId}/topic/${topicId}/delete/`;
-        
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfToken) {
-            form.appendChild(csrfToken.cloneNode(true));
-        }
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
+<style>
+/* Topic Card Styles */
+.topic-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    transition: all 0.3s ease;
 }
 
-function editTopic(topicId) {
-    alert('Mövzu redaksiyası hələ hazırlanmır');
-    // TODO: Edit modal açılacaq
+.topic-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
+
+.topic-header {
+    padding: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    transition: background 0.2s;
+}
+
+.topic-header:hover {
+    background: #f8fafc;
+}
+
+.topic-info {
+    flex: 1;
+}
+
+.topic-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.topic-order {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.topic-title {
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.topic-header[aria-expanded="true"] .collapse-icon {
+    transform: rotate(180deg);
+}
+
+.topic-description {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0 0 8px 44px;
+    line-height: 1.5;
+}
+
+.topic-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-left: 44px;
+}
+
+.topic-meta .badge {
+    font-weight: 500;
+    padding: 4px 10px;
+}
+
+.topic-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Resources Section */
+.topic-resources {
+    border-top: 1px solid #e2e8f0;
+}
+
+.resources-container {
+    padding: 16px;
+    background: #f8fafc;
+}
+
+.resources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.resource-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+
+.resource-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.resource-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.resource-details {
+    flex: 1;
+}
+
+.resource-title {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.resource-desc {
+    margin: 0 0 4px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.resource-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.add-resource-btn-container {
+    margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .topic-header {
+        flex-direction: column;
+    }
+    
+    .topic-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .topic-meta {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+
+
+<script>
+    // Delete Topic
+    function deleteTopic(courseId, topicId) {
+        if (confirm('Bu mövzunu silmək istədiniz?\n\nMövzuya aid bütün resurslar da silinəcək!')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/courses/${courseId}/topic/${topicId}/delete/`;
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                form.appendChild(csrfToken.cloneNode(true));
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+   
+    
+    // Delete Resource
+    function deleteResource(courseId, resourceId) {
+        if (confirm('Bu resursu silmək istədiniz?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/courses/${courseId}/resource/${resourceId}/delete/`;
+            
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                form.appendChild(csrfToken.cloneNode(true));
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    // Open Resource Modal with Topic Context
+    function openResourceModal(topicId, topicTitle) {
+        const modalEl = document.getElementById('resourceFormModal');
+        if (!modalEl) {
+            console.error('resourceFormModal tapılmadı!');
+            return;
+        }
+    
+        const topicSelect = document.getElementById('resourceTopic');
+        if (topicSelect) topicSelect.value = topicId;
+    
+        const topicName = document.getElementById('resourceModalTopicName');
+        if (topicName) topicName.textContent = ` - ${topicTitle}`;
+    
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
 </script>

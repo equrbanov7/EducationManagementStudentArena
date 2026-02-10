@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+{% load static get_item %}
+
+{% block title %}{{ exam.title }} - Nəticə{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/exam_result.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="result-container container">
+    
+    <div class="text-center mb-5">
+        <h1 class="page-title">{{ exam.title }} - Nəticəniz</h1>
+    </div>
+
+    <div class="summary-card">
+        
+        <div class="summary-header">
+            <span class="text-uppercase tracking-wider text-muted small fw-bold">İmtahan Statusu</span>
+            <div class="mt-2">
+                {% if attempt.status == "submitted" %}
+                    <span class="status-badge badge-success">Təslim edilib</span>
+                {% elif attempt.status == "expired" %}
+                    <span class="status-badge badge-danger">Vaxt bitib</span>
+                {% else %}
+                    <span class="status-badge badge-secondary">{{ attempt.get_status_display }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="summary-body">
+            {% if exam.exam_type == 'test' %}
+                
+                <div class="stat-item main-score w-100 mb-4">
+                    <span class="stat-label">Bal</span>
+                    <span class="stat-value text-primary">{{ attempt.score_percent }}%</span>
+                </div>
+
+                <div class="test-stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Düzgün</span>
+                        <span class="stat-value text-success">{{ attempt.correct_count }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Səhv</span>
+                        <span class="stat-value text-danger">{{ attempt.wrong_count }}</span>
+                    </div>
+                </div>
+
+            {% else %}
+                <div class="final-score-area w-100">
+                    {% if attempt.checked_by_teacher %}
+                        <span class="stat-label">Yekun Bal</span>
+                        <span class="stat-value text-primary">{{ attempt.teacher_score }}</span>
+                        <small class="text-muted d-block mt-1">Müəllim tərəfindən qiymətləndirilib</small>
+                    {% else %}
+                        <span class="stat-value">
+                            <span class="badge bg-warning text-dark px-3 py-2">Müəllim yoxlaması gözlənilir...</span>
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if attempt.duration_seconds %}
+                <span class="duration-info"><i class="far fa-clock"></i> Müddət: {{ attempt.duration_seconds }} saniyə</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="section-title">Sual - Nəticə Təhlili</h3>
+    
+    <div class="questions-list">
+        {% for q in questions %}
+            {% with ans=answers_by_qid|get_item:q.id %}
+            <div class="question-card">
+                <div class="q-header">
+                    <span class="q-number">{{ forloop.counter }}</span>
+
+                    <div class="questionAndMedia">
+                        <div class="q-text">
+                            {{ q.text|linebreaks }}
+                        </div>
+                        {% if q.image %}
+                            <div class="question-media">
+                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            </div>
+                        {% endif %}
+                      
+                        {% if q.video %}
+                            <div class="question-media">
+                            <video controls preload="metadata" playsinline>
+                                <source src="{{ q.video.url }}">
+                                Brauzeriniz video göstərə bilmir.
+                            </video>
+                            </div>
+                        {% endif %}
+                    </div>
+                
+                  
+                </div>
+
+                <div class="q-body">
+                    {% if exam.exam_type == "test" %}
+                        <ul class="option-list">
+                            {% for opt in q.options.all %}
+                                <li class="option-item
+                                    {% if opt.is_correct %}correct-option{% endif %}
+                                    {% if ans and opt in ans.selected_options.all and not opt.is_correct %}wrong-selected{% endif %}
+                                    {% if ans and opt in ans.selected_options.all and opt.is_correct %}correct-selected{% endif %}
+                                ">
+                                    <div class="d-flex align-items-center">
+                                        {% if opt.is_correct %}
+                                            <i class="fas fa-check-circle correct-icon"></i>
+                                        {% elif ans and opt in ans.selected_options.all and not opt.is_correct %}
+                                            <i class="fas fa-times-circle wrong-icon"></i>
+                                        {% else %}
+                                            <i class="far fa-circle option-icon"></i>
+                                        {% endif %}
+                                        <span class="option-text">{{ opt.text }}</span>
+                                    </div>
+                                    
+                                    {% if ans and opt in ans.selected_options.all %}
+                                        <span class="badge bg-light text-dark border">Sizin seçim</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <div class="feedback-status mt-3 text-end">
+                            {% if ans %}
+                                {% if ans.is_correct %}
+                                    <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> Düzgün</span>
+                                {% else %}
+                                    <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> Səhv</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-warning text-dark feedback-badge">Cavab verməmisən</span>
+                            {% endif %}
+                        </div>
+
+                    {% else %} 
+                        <div class="written-response-area">
+                            <div class="mb-3">
+                                <label class="response-label text-primary mb-2">
+                                    <i class="fas fa-pen-alt"></i> Sənin cavabın:
+                                </label>
+                          
+                                {% if ans and ans.text_answer %}
+                                     <pre class="code-block user-answer">{{ ans.text_answer }}</pre>
+                             
+                                {% elif ans and ans.paint_image %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-paint-brush"></i> Paint ilə cavab verilib
+                                    </div>
+                            
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Cavab verməmisən
+                                    </div>
+                                {% endif %}
+                            
+
+                            </div>
+
+                            {# ==== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ==== #}
+                            {% if ans and ans.files.all %}
+                                <div class="answer-files mb-3">
+                                    <label class="response-label text-secondary mb-2">
+                                        <i class="fas fa-paperclip"></i> Yüklənmiş fayllar:
+                                    </label>
+                                    <ul class="file-list">
+                                        {% for f in ans.files.all %}
+                                            {% with name=f.filename|lower %}
+                                                <li class="file-item">
+                                                    <div class="file-main">
+                                                        <span class="file-icon">
+                                                            {% if ".pdf" in name %}
+                                                                <i class="fas fa-file-pdf"></i>
+                                                            {% elif ".zip" in name %}
+                                                                <i class="fas fa-file-archive"></i>
+                                                            {% elif ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                                <i class="fas fa-image"></i>
+                                                            {% else %}
+                                                                <i class="fas fa-file"></i>
+                                                            {% endif %}
+                                                        </span>
+                                                        <a href="{{ f.file.url }}" 
+                                                           target="_blank" 
+                                                           class="file-link">
+                                                            {{ f.filename }}
+                                                        </a>
+                                                    </div>
+
+                                                    {# şəkillər üçün kiçik preview #}
+                                                    {% if ".png" in name or ".jpg" in name or ".jpeg" in name or ".gif" in name %}
+                                                        <div class="file-thumb">
+                                                            <img src="{{ f.file.url }}" alt="{{ f.filename }}">
+                                                        </div>
+                                                    {% endif %}
+                                                </li>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            {# ==== PAINT CAVABI (tələbə üçün) ==== #}
+                            {% if ans and ans.paint_image %}
+                                <div class="paint-answer-box mb-3">
+                                    <label class="response-label text-secondary mb-2">
+                                        <i class="fas fa-paint-brush"></i> Paint cavabı:
+                                        {% if ans.paint_updated_at %}
+                                            <small class="text-muted">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
+                                        {% endif %}
+                                    </label>
+
+                                    <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
+                                        <img src="{{ ans.paint_image.url }}" alt="Paint cavabı" class="paint-answer-img">
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {# ==== /PAINT CAVABI ==== #}
+
+                            {# ==== /YENİ BLOK ==== #}
+
+                            {% if attempt.checked_by_teacher %}
+                                <div class="teacher-feedback-box">
+                                    <div class="tf-header">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="tf-avatar">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                            </div>
+                                            <span class="tf-title">Müəllim Rəyi</span>
+                                        </div>
+                                        <div class="tf-score">
+                                            Bal: <strong>{{ ans.teacher_score|default:"0" }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="tf-body">
+                                        {{ ans.teacher_feedback|default:"Rəy qeyd olunmayıb."|linebreaks }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                {% if q.correct_answer %}
+                                    <div class="mt-4">
+                                        <label class="response-label text-success mb-2">
+                                            <i class="fas fa-check-double"></i> İdeal cavab nümunəsi:
+                                        </label>
+                                        <pre class="code-block correct-answer">{{ q.correct_answer }}</pre>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div class="action-footer">
+        <a href="{% url 'exams:student_exam_list' %}" class="btn custom-blue-btn">
+            <i class="fas fa-arrow-left me-2"></i> İmtahanlara qayıt
+        </a>
+
+        <a href="{% url 'exams:student_exam_history' %}" class="btn custom-blue-btn">
+             Tarixçəyə Qayıt  <i class="fas fa-history ms-2"></i>
+        </a>
+    </div>
+
+</div> 
+{% endblock %}

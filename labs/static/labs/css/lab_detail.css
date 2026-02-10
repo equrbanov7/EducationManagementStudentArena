@@ -1,0 +1,111 @@
+/* ════════════════════════════════════════════════════════���══════
+   LAB DETAIL - Custom Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Lab Info Card */
+.lab-info-card .card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.lab-info-card .icon-fixed {
+    width: 20px;
+}
+
+/* Materials Card */
+.materials-card .card-header {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+/* Question Card */
+.question-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.question-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.question-number {
+    width: 32px;
+    height: 32px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Answer Textarea */
+.answer-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.answer-textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* File Upload */
+.file-upload-area {
+    border-style: dashed !important;
+    cursor: pointer;
+    background: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.file-upload-area:hover {
+    background: #f0f0f0;
+    border-color: #667eea !important;
+}
+
+.file-preview .badge {
+    font-size: 0.9rem;
+}
+
+.file-remove {
+    font-size: 0.5rem;
+}
+
+/* Submit Card */
+.submit-card .card-body {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+/* Save Status */
+.save-status {
+    font-size: 0.875rem;
+}
+
+/* Progress Bar */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.5s ease;
+}
+
+/* Timer */
+.font-monospace {
+    font-family: 'Courier New', monospace;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .question-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .question-header {
+        font-size: 0.95rem;
+    }
+}

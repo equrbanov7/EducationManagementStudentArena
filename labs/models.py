@@ -327,10 +327,8 @@ class LabQuestion(models.Model):
 
 class LabAssignment(models.Model):
     """
-    Tələbə ↔ Lab bağlantısı.
-    
-    Hər tələbəyə random suallar təyin olunur və burada saxlanılır.
-    Bu, eyni tələbənin hər dəfə eyni sualları görməsini təmin edir.
+    Tələbəyə verilmiş lab tapşırığı.
+    Hər tələbəyə unikal sual dəsti təyin olunur.
     """
     
     lab = models.ForeignKey(
@@ -347,20 +345,18 @@ class LabAssignment(models.Model):
         verbose_name='Tələbə'
     )
     
-    # Təyin olunan suallar (ManyToMany)
     assigned_questions = models.ManyToManyField(
-        LabQuestion,
+        'LabQuestion',
         related_name='assignments',
-        verbose_name='Təyin olunan suallar'
+        verbose_name='Təyin edilmiş suallar'
     )
     
-    # Nə vaxt təyin olundu
     assigned_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('lab', 'student')
-        verbose_name = 'Lab Təyinatı'
-        verbose_name_plural = 'Lab Təyinatları'
+        unique_together = ['lab', 'student']
+        verbose_name = 'Lab Tapşırığı'
+        verbose_name_plural = 'Lab Tapşırıqları'
     
     def __str__(self):
         return f"{self.student.username} - {self.lab.title}"
@@ -368,50 +364,48 @@ class LabAssignment(models.Model):
     @classmethod
     def get_or_create_for_student(cls, lab, student):
         """
-        Tələbə üçün assignment yarat və ya mövcud olanı qaytar.
-        Random sualları deterministic şəkildə seç (həmişə eyni).
+        Tələbə üçün assignment yarat və sualları təyin et
         """
         assignment, created = cls.objects.get_or_create(
             lab=lab,
             student=student
         )
         
-        if created:
-            # Sualları seç
-            assignment._assign_questions()
+        # ƏGƏR YENİ YARANIBSA VƏ YA SUALLARI YOXDURSA
+        if created or assignment.assigned_questions.count() == 0:
+            assignment.assign_questions()
         
         return assignment
     
-    def _assign_questions(self):
-        """Random sualları seç və təyin et"""
+    def assign_questions(self):
+        """
+        Bu tələbəyə random suallar təyin et
+        """
+        import random
+        
         all_questions = []
         
-        for block in self.lab.blocks.all():
+        # Hər blokdan sualları topla
+        for block in self.lab.blocks.all().order_by('order'):
             block_questions = list(block.questions.all())
             
             if block.questions_to_pick > 0 and block.questions_to_pick < len(block_questions):
-                # Deterministic random: həmişə eyni seed
-                seed = int(hashlib.md5(
-                    f"{self.lab.id}-{self.student.id}-{block.id}".encode()
-                ).hexdigest(), 16)
-                rng = random.Random(seed)
-                selected = rng.sample(block_questions, block.questions_to_pick)
-                all_questions.extend(selected)
+                # Bu blokdan məhdud sayda seç
+                selected = random.sample(block_questions, block.questions_to_pick)
             else:
-                # Bütün sualları əlavə et
-                all_questions.extend(block_questions)
+                # Bütün sualları götür
+                selected = block_questions
+            
+            all_questions.extend(selected)
         
-        # Lab səviyyəsində limit varsa
+        # Əgər lab səviyyəsində limit varsa
         if self.lab.questions_per_student > 0 and self.lab.questions_per_student < len(all_questions):
-            seed = int(hashlib.md5(
-                f"{self.lab.id}-{self.student.id}-total".encode()
-            ).hexdigest(), 16)
-            rng = random.Random(seed)
-            all_questions = rng.sample(all_questions, self.lab.questions_per_student)
+            all_questions = random.sample(all_questions, self.lab.questions_per_student)
         
+        # Sualları təyin et
         self.assigned_questions.set(all_questions)
-
-
+        
+        print(f"✓ {self.student.username} üçün {len(all_questions)} sual təyin edildi")
 # ════════════════════════════════════════════════════════════════════════════
 # 5. LAB SUBMISSION MODEL
 # ════════════════════════════════════════════════════════════════════════════

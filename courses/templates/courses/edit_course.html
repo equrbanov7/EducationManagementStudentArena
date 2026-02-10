@@ -3,155 +3,438 @@
 
 {% block title %}{{ course.title }} - Redaktə - EMSArena{% endblock %}
 
+{% block extraCss%}
+<style>
+    :root {
+        --edit-primary: #d97706; /* Amber 600 - İsti kəhrəba rəngi */
+        --edit-primary-hover: #b45309; /* Amber 700 */
+        --edit-soft-bg: #fffbeb; /* Amber 50 */
+        --text-dark: #1f2937;
+        --text-medium: #4b5563;
+        --border-color: #e5e7eb;
+    }
+
+    body {
+        background-color: #f9fafb;
+    }
+
+    /* Main Card Styling */
+    .edit-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    /* Modern Header */
+    .card-header-clean {
+        padding: 30px;
+        background: #fff;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header-icon-box {
+        width: 50px;
+        height: 50px;
+        background: var(--edit-soft-bg);
+        color: var(--edit-primary);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .card-body-custom {
+        padding: 40px;
+    }
+
+    /* Form Labels & Inputs */
+    .modern-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+
+    .modern-label i {
+        color: var(--edit-primary);
+    }
+
+    .form-control, .form-select {
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 2px solid var(--border-color);
+        font-size: 1rem;
+        transition: all 0.2s;
+        color: var(--text-dark);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--edit-primary);
+        box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+        outline: none;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* --- Enhanced Image Upload Section --- */
+    .image-upload-container {
+        background: #fcfcfc;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .image-upload-container:hover {
+        border-color: var(--edit-primary);
+        background: var(--edit-soft-bg);
+    }
+
+    .current-image-wrapper, .preview-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 3px solid #fff;
+    }
+
+    .current-image-wrapper img, .preview-wrapper img {
+        max-height: 250px;
+        object-fit: cover;
+        width: auto;
+        display: block;
+    }
+
+    .image-label-tag {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.7);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(2px);
+    }
+
+    /* Custom File Input Styling */
+    .custom-file-upload-zone {
+        position: relative;
+        margin-top: 10px;
+    }
+
+    .custom-file-upload-zone input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .upload-trigger-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 24px;
+        background: white;
+        border: 2px solid var(--edit-primary);
+        color: var(--edit-primary);
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .custom-file-upload-zone:hover .upload-trigger-btn {
+        background: var(--edit-primary);
+        color: white;
+    }
+    /* ------------------------------------- */
+
+    /* Helper Texts & Alerts */
+    .text-muted-modern {
+        color: var(--text-medium);
+        font-size: 0.85rem;
+        margin-top: 8px;
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .alert-danger-modern {
+        background-color: #fef2f2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        margin-top: 40px;
+        padding-top: 25px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-lg-modern {
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--edit-primary), var(--edit-primary-hover));
+        color: white;
+        border: none;
+        box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(217, 119, 6, 0.4);
+        color: white;
+    }
+
+    .btn-back {
+        background: white;
+        color: var(--text-medium);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-back:hover {
+        background: #f3f4f6;
+        color: var(--text-dark);
+        border-color: #d1d5db;
+    }
+
+    /* Info Tip Box */
+    .info-tip-box {
+        background: #f0f9ff; /* Light blue tint */
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        padding: 25px;
+    }
+
+    .info-tip-title {
+        color: #0369a1;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+    }
+
+    .info-tip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-tip-list li {
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 10px;
+        color: #334155;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .info-tip-list li::before {
+        content: '\f05a'; /* Font Awesome Info Circle */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 3px;
+        color: #38bdf8;
+    }
+
+    @media (max-width: 768px) {
+        .card-body-custom { padding: 25px; }
+        .form-actions { flex-direction: column-reverse; gap: 15px; }
+        .btn-lg-modern { width: 100%; }
+        .current-image-wrapper img, .preview-wrapper img { max-height: 200px; width: 100%; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- HEADER CARD -->
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
-                    <h2 class="mb-0 text-white">
-                        <i class="fas fa-edit"></i> Kurs Redaksiyası
+        <div class="col-lg-9">
+            <div class="card edit-card">
+                <div class="card-header-clean">
+                    <div class="header-icon-box">
+                        <i class="fas fa-pen-to-square"></i>
+                    </div>
+                    <h2 class="header-title">
+                        Kursu Redaktə Et: <span style="color: var(--edit-primary);">{{ course.title }}</span>
                     </h2>
                 </div>
                 
-                <!-- FORM CARD -->
-                <div class="card-body p-5">
+                <div class="card-body card-body-custom">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <!-- Title Field -->
                         <div class="mb-4">
-                            <label for="{{ form.title.id_for_label }}" class="form-label">
-                                <strong><i class="fas fa-book"></i> Kurs Adı</strong>
-                                <span class="text-danger">*</span>
+                            <label for="{{ form.title.id_for_label }}" class="modern-label">
+                                <i class="fas fa-heading"></i> Kurs Adı <span class="text-danger">*</span>
                             </label>
                             {{ form.title }}
                             {% if form.title.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.title.errors }}
+                                <div class="alert alert-danger-modern mt-2">
+                                    <i class="fas fa-exclamation-circle me-2"></i> {{ form.title.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
                         
-                        <!-- Description Field -->
                         <div class="mb-4">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">
-                                <strong><i class="fas fa-pen-fancy"></i> Kurs Təsviri</strong>
+                            <label for="{{ form.description.id_for_label }}" class="modern-label">
+                                <i class="fas fa-paragraph"></i> Kurs Təsviri
                             </label>
                             {{ form.description }}
                             {% if form.description.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.description.errors }}
+                                <div class="alert alert-danger-modern mt-2">
+                                    <i class="fas fa-exclamation-circle me-2"></i> {{ form.description.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
                         
-                        <!-- Cover Image Field -->
                         <div class="mb-4">
-                            <label for="{{ form.cover_image.id_for_label }}" class="form-label">
-                                <strong><i class="fas fa-image"></i> Kurs Şəkli</strong>
+                            <label class="modern-label mb-3">
+                                <i class="fas fa-image"></i> Kurs Şəkli (Cover Image)
                             </label>
                             
-                            <!-- Current Image -->
-                            {% if course.cover_image %}
-                                <div class="mb-3">
-                                    <p class="small text-muted mb-2">Mövcud şəkil:</p>
-                                    <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" 
-                                         style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover;">
+                            <div class="image-upload-container">
+                                <div id="imageDisplayArea">
+                                    {% if course.cover_image %}
+                                        <div id="currentImageBlock" class="current-image-wrapper">
+                                            <img src="{{ course.cover_image.url }}" alt="Current Cover">
+                                            <span class="image-label-tag">Mövcud Şəkil</span>
+                                        </div>
+                                    {% endif %}
+
+                                    <div id="imagePreviewBlock" class="preview-wrapper" style="display: none;">
+                                        <img id="previewImg" src="#" alt="New Preview">
+                                        <span class="image-label-tag" style="background: var(--edit-primary);">Yeni Seçim</span>
+                                    </div>
                                 </div>
-                            {% endif %}
-                            
-                            <!-- Image Preview -->
-                            <div id="imagePreview" class="mb-3" style="display: none;">
-                                <p class="small text-muted mb-2">Yeni şəkil:</p>
-                                <img id="previewImg" src="#" alt="Preview" 
-                                     style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: cover;">
-                            </div>
-                            
-                            <!-- File Input -->
-                            <div class="input-group">
-                                {{ form.cover_image }}
-                                <label class="input-group-text" for="{{ form.cover_image.id_for_label }}">
-                                    <i class="fas fa-upload"></i> Şəkil Dəyiş
-                                </label>
+
+                                <div class="custom-file-upload-zone">
+                                    {{ form.cover_image }} <div class="upload-trigger-btn">
+                                        <i class="fas fa-cloud-arrow-up"></i>
+                                        <span>Şəkli dəyişdirmək üçün klikləyin</span>
+                                    </div>
+                                </div>
                             </div>
                             
                             {% if form.cover_image.errors %}
-                                <div class="alert alert-danger mt-2 small">
-                                    {{ form.cover_image.errors }}
+                                <div class="alert alert-danger-modern mt-3">
+                                    <i class="fas fa-exclamation-circle me-2"></i> {{ form.cover_image.errors.0 }}
                                 </div>
                             {% endif %}
                         </div>
                         
-                        <!-- Status Field -->
                         <div class="mb-4">
-                            <label for="{{ form.status.id_for_label }}" class="form-label">
-                                <strong><i class="fas fa-toggle-on"></i> Status</strong>
+                            <label for="{{ form.status.id_for_label }}" class="modern-label">
+                                <i class="fas fa-toggle-on"></i> Kurs Statusu
                             </label>
                             {{ form.status }}
-                            <small class="text-muted d-block mt-2">
+                            <small class="text-muted-modern">
                                 <i class="fas fa-info-circle"></i>
-                                <strong>Draft:</strong> Tələbələr görmə |
-                                <strong>Published:</strong> Tələbələr görə |
-                                <strong>Archived:</strong> Silinib ama data qalır
+                                <span>Status kursun tələbələrə görünüb-görünməməsini təyin edir.</span>
                             </small>
                         </div>
                         
-                        <!-- SUBMIT BUTTONS -->
-                        <div class="d-flex gap-3 mt-5">
+                        <div class="form-actions d-flex gap-3">
                             <a href="{% url 'courses:course_dashboard' course.id %}" 
-                               class="btn btn-secondary btn-lg flex-grow-1">
-                                <i class="fas fa-arrow-left"></i> Geri
+                               class="btn btn-lg-modern btn-back flex-grow-1">
+                                <i class="fas fa-arrow-left"></i> Ləğv et və Geri Dön
                             </a>
-                            <button type="submit" class="btn btn-warning btn-lg flex-grow-1">
-                                <i class="fas fa-save"></i> Dəyişiklikləri Saxla
+                            <button type="submit" class="btn btn-lg-modern btn-save flex-grow-1">
+                                <i class="fas fa-floppy-disk"></i> Dəyişiklikləri Yadda Saxla
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <!-- INFO CARD -->
-            <div class="alert alert-info border-0 shadow-sm">
-                <h5 class="mb-2">
-                    <i class="fas fa-info-circle"></i> Dəyişiklikləri Nə Vaxt Saxlamalı?
+            <div class="info-tip-box shadow-sm">
+                <h5 class="info-tip-title">
+                    <i class="fas fa-lightbulb"></i> Faydalı Məlumatlar
                 </h5>
-                <ul class="mb-0 small">
-                    <li><strong>Kurs adı</strong> dəyişdiyində tələbələr yeni adı dərhal görür</li>
-                    <li><strong>Status</strong> dəyişdiyində kursun görünürlüyü dəyişir</li>
-                    <li><strong>Şəkil</strong> dəyişdiyində dashboard-da yeni şəkil görünür</li>
+                <ul class="info-tip-list">
+                    <li><strong>Anında Yenilənmə:</strong> Kurs adı və təsvirində etdiyiniz dəyişikliklər yadda saxlanılan kimi tələbələr üçün yenilənəcək.</li>
+                    <li><strong>Statusun Önəmi:</strong> Kursu "Draft" rejimində saxlayaraq üzərində rahatca işləyə bilərsiniz. Hazır olduqda "Published" etməyi unutmayın.</li>
+                    <li><strong>Şəkil Ölçüsü:</strong> Ən yaxşı görünüş üçün yüksək keyfiyyətli, üfüqi (landscape) şəkillərdən istifadə etməyiniz tövsiyə olunur.</li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Image Preview Script -->
 <script>
-document.getElementById('{{ form.cover_image.id_for_label }}').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            document.getElementById('previewImg').src = event.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.cover_image.id_for_label }}');
+    const currentImageBlock = document.getElementById('currentImageBlock');
+    const imagePreviewBlock = document.getElementById('imagePreviewBlock');
+    const previewImg = document.getElementById('previewImg');
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Yeni şəkli göstər
+                    previewImg.src = event.target.result;
+                    imagePreviewBlock.style.display = 'inline-block';
+                    
+                    // Mövcud şəkli gizlət (əgər varsa)
+                    if (currentImageBlock) {
+                        currentImageBlock.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
 });
 </script>
-
-<style>
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 0.75rem 1rem;
-    }
-    
-    .form-control:focus, .form-select:focus {
-        border-color: #ffc107;
-        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
-    }
-</style>
 {% endblock %}
