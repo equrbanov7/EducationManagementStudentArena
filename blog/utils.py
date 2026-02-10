@@ -1,16 +1,16 @@
-
 import random
 import re
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.signing import TimestampSigner
 
-
-
 signer = TimestampSigner()
+
 
 def generate_otp():
     return f"{random.randint(0, 999999):06d}"
+
 
 def send_verify_email(user, code: str):
     token = signer.sign(str(user.pk))
@@ -27,6 +27,4 @@ def send_verify_email(user, code: str):
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
 
-
 DATA_URL_PNG_RE = re.compile(r"^data:image\/png;base64,(.+)$")
-

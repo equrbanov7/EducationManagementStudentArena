@@ -1,13 +1,10 @@
-
-
-
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from django.contrib.auth.decorators import login_required
+from exams.forms import ExamQuestionCreateForm
 from exams.models import Exam, ExamQuestion, QuestionBlock
 from exams.services.attempts import _ensure_teacher
-from exams.forms import ExamQuestionCreateForm
- 
+
 
 @login_required
 def add_exam_question(request, slug):
@@ -18,15 +15,12 @@ def add_exam_question(request, slug):
     """
     _ensure_teacher(request.user)
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
-    blocks = QuestionBlock.objects.filter(exam=exam).order_by('order')
+    blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
-            request.POST,
-            request.FILES,
-            exam_type=exam.exam_type,
-            subject_blocks=blocks
-            )
+            request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks
+        )
         if form.is_valid():
             # Sualı yaradıq
             last_q = exam.questions.order_by("-order").first()
@@ -50,17 +44,20 @@ def add_exam_question(request, slug):
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
                 return redirect("exams:add_exam_question", slug=exam.slug)
-            else: 
+            else:
                 # Sadəcə imtahan detalına qayıt
                 return redirect("exams:teacher_exam_detail", slug=exam.slug)
     else:
         form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks)
 
-    return render(request, "exams/teacher/add_exam_question.html", {
-        "exam": exam,
-        "form": form,
-    })
-
+    return render(
+        request,
+        "exams/teacher/add_exam_question.html",
+        {
+            "exam": exam,
+            "form": form,
+        },
+    )
 
 
 @login_required
@@ -73,7 +70,7 @@ def edit_exam_question(request, slug, question_id):
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
 
     # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
-    blocks = QuestionBlock.objects.filter(exam=exam).order_by('order')
+    blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
     # ------------------------------------------------------------
 
     if request.method == "POST":
@@ -82,7 +79,7 @@ def edit_exam_question(request, slug, question_id):
             request.FILES,
             instance=question,
             exam_type=exam.exam_type,
-            subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
+            subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
         )
         if form.is_valid():
             q = form.save(commit=False)
@@ -98,21 +95,25 @@ def edit_exam_question(request, slug, question_id):
 
             if "save_and_continue" in request.POST:
                 return redirect("exams::add_exam_question", slug=exam.slug)
-            
+
             return redirect("exams:teacher_exam_detail", slug=exam.slug)
     else:
         form = ExamQuestionCreateForm(
             instance=question,
             exam_type=exam.exam_type,
-            subject_blocks=blocks  # <--- Vacib: Blokları formaya ötürürük
+            subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
         )
 
-    return render(request, "exams/teacher/add_exam_question.html", {
-        "exam": exam,
-        "form": form,
-        "editing": True,
-        "question": question,
-    })
+    return render(
+        request,
+        "exams/teacher/add_exam_question.html",
+        {
+            "exam": exam,
+            "form": form,
+            "editing": True,
+            "question": question,
+        },
+    )
 
 
 @login_required
@@ -128,7 +129,11 @@ def delete_exam_question(request, slug, question_id):
         question.delete()
         return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
-    return render(request, "exams/teacher/confirm_delete_question.html", {
-        "exam": exam,
-        "question": question,
-    })
+    return render(
+        request,
+        "exams/teacher/confirm_delete_question.html",
+        {
+            "exam": exam,
+            "question": question,
+        },
+    )

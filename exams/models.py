@@ -1,14 +1,14 @@
 # exams/models.py
-from django.db import models
 from django.contrib.auth.models import User
-from django.utils.text import slugify
-from django.utils.crypto import get_random_string
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from django.db import models
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+from django.utils.text import slugify
 
-from exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
-
+from exams.validators import (validate_file_extension, validate_file_size,
+                              validate_zip_contents)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
@@ -24,7 +24,7 @@ def validate_video_size(f):
     max_mb = 30
     if f.size > max_mb * 1024 * 1024:
         raise ValidationError(f"Video faylı {max_mb}MB-dan böyük ola bilməz.")
-    
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: StudentGroup
@@ -36,11 +36,12 @@ class StudentGroup(models.Model):
     Müəllimin yaratdığı tələbə qrupu.
     Məs: 875i, 842A1 və s.
     """
+
     teacher = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="student_groups",
-        verbose_name="Müəllim"
+        verbose_name="Müəllim",
     )
     name = models.CharField("Qrup adı / nömrəsi", max_length=50)
 
@@ -48,7 +49,7 @@ class StudentGroup(models.Model):
         User,
         related_name="student_groups_as_student",
         blank=True,
-        verbose_name="Tələbələr"
+        verbose_name="Tələbələr",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -56,7 +57,10 @@ class StudentGroup(models.Model):
     class Meta:
         verbose_name = "Tələbə qrupu"
         verbose_name_plural = "Tələbə qrupları"
-        unique_together = ("teacher", "name")  # eyni müəllimdə eyni adda iki qrup olmasın
+        unique_together = (
+            "teacher",
+            "name",
+        )  # eyni müəllimdə eyni adda iki qrup olmasın
         ordering = ["name"]
 
     def __str__(self):
@@ -67,24 +71,22 @@ class StudentGroup(models.Model):
         Verilən user bu qrupun üzvüdürmü?
         """
         return self.students.filter(id=user.id).exists()
-    
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: Exam
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class Exam(models.Model):
-    
+
     EXAM_TYPE_CHOICES = (
         ("test", "Test imtahanı"),
         ("written", "Yazılı / praktiki"),
     )
 
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="exams",
-        verbose_name="Müəllif"
+        User, on_delete=models.CASCADE, related_name="exams", verbose_name="Müəllif"
     )
     title = models.CharField("Blok adı", max_length=200)
     description = models.TextField("Qısa izah", blank=True)
@@ -101,21 +103,21 @@ class Exam(models.Model):
         "Başlama tarixi və vaxtı",
         blank=True,
         null=True,
-        help_text="İmtahan bu tarixdən əvvəl başlamaq olmaz. Boş saxlasanız, hər zaman başlamaq olar."
+        help_text="İmtahan bu tarixdən əvvəl başlamaq olmaz. Boş saxlasanız, hər zaman başlamaq olar.",
     )
-    
+
     end_datetime = models.DateTimeField(
         "Bitmə tarixi və vaxtı",
         blank=True,
         null=True,
-        help_text="İmtahan bu tarixdən sonra başlamaq olmaz. Boş saxlasanız, son tarix olmaz."
+        help_text="İmtahan bu tarixdən sonra başlamaq olmaz. Boş saxlasanız, son tarix olmaz.",
     )
 
     # Exam aktivdir?
     is_active = models.BooleanField(
         "Aktivdir?",
         default=False,
-        help_text="Əgər söndürsəniz, tələbələr bu imtahanı görə bilməyəcək."
+        help_text="Əgər söndürsəniz, tələbələr bu imtahanı görə bilməyəcək.",
     )
 
     # Ümumi imtahan vaxtı (dəqiqə) – OPTIONAL
@@ -123,7 +125,7 @@ class Exam(models.Model):
         "Ümumi imtahan müddəti (dəqiqə)",
         blank=True,
         null=True,
-        help_text="Məs: 30. Boş saxlasanız, ümumi vaxt limiti olmayacaq."
+        help_text="Məs: 30. Boş saxlasanız, ümumi vaxt limiti olmayacaq.",
     )
 
     # Hər sual üçün default vaxt (saniyə) – OPTIONAL
@@ -131,7 +133,7 @@ class Exam(models.Model):
         "Hər sual üçün default vaxt (saniyə)",
         blank=True,
         null=True,
-        help_text="Məs: 60. Boş saxlasanız, sual basisində vaxt limiti olmayacaq."
+        help_text="Məs: 60. Boş saxlasanız, sual basisində vaxt limiti olmayacaq.",
     )
 
     # Bir user üçün maksimum cəhd sayı – OPTIONAL
@@ -139,25 +141,24 @@ class Exam(models.Model):
         "Bir istifadəçi üçün maksimum cəhd sayı",
         blank=True,
         null=True,
-        help_text="Məs: 1, 2, 3... Boş saxlasanız, attempts limitsiz olacaq."
+        help_text="Məs: 1, 2, 3... Boş saxlasanız, attempts limitsiz olacaq.",
     )
-    
+
     random_question_count = models.PositiveIntegerField(
         "Tələbəyə göstəriləcək sual sayı",
         default=10,
-        help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir."
+        help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir.",
     )
-    
-    
+
     default_question_points = models.PositiveIntegerField(default=1)
-    
+
     course = models.ForeignKey(
-        'courses.Course',
+        "courses.Course",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='exams',
-        verbose_name='Kurs'
+        related_name="exams",
+        verbose_name="Kurs",
     )
 
     # --- Giriş məhdudiyyətləri ---
@@ -165,7 +166,7 @@ class Exam(models.Model):
     is_public = models.BooleanField(
         "Hamı üçün açıqdır?",
         default=True,
-        help_text="Aktivdirsə, imtahan tələbə siyahısı məhdudiyyəti olmadan görünə bilər."
+        help_text="Aktivdirsə, imtahan tələbə siyahısı məhdudiyyəti olmadan görünə bilər.",
     )
 
     allowed_users = models.ManyToManyField(
@@ -173,7 +174,7 @@ class Exam(models.Model):
         related_name="allowed_exams",
         blank=True,
         verbose_name="İcazəli tələbələr (fərdi)",
-        help_text="Yalnız bu istifadəçilər imtahanı görə / başlaya bilsin (qrupdan əlavə olaraq)."
+        help_text="Yalnız bu istifadəçilər imtahanı görə / başlaya bilsin (qrupdan əlavə olaraq).",
     )
 
     allowed_groups = models.ManyToManyField(
@@ -181,14 +182,14 @@ class Exam(models.Model):
         related_name="exams",
         blank=True,
         verbose_name="İcazəli qruplar",
-        help_text="Bu qruplardakı bütün tələbələr imtahana giriş icazəsi alır."
+        help_text="Bu qruplardakı bütün tələbələr imtahana giriş icazəsi alır.",
     )
 
     access_code = models.CharField(
         "İmtahan kodu (6 rəqəm)",
         max_length=6,
         blank=True,
-        help_text="İstəyə görə əlavə təhlükəsizlik üçün 6 rəqəmli kod."
+        help_text="İstəyə görə əlavə təhlükəsizlik üçün 6 rəqəmli kod.",
     )
 
     slug = models.SlugField(max_length=220, unique=True, blank=True)
@@ -197,11 +198,9 @@ class Exam(models.Model):
     enable_paint = models.BooleanField(
         "Paint cavabı aktiv olsun",
         default=False,
-        help_text="Aktiv edilsə, tələbə cavabı paint ilə çəkib göndərə bilər."
+        help_text="Aktiv edilsə, tələbə cavabı paint ilə çəkib göndərə bilər.",
     )
-    
-    
-    
+
     class Meta:
         verbose_name = "İmtahan bloku"
         verbose_name_plural = "İmtahan blokları"
@@ -222,15 +221,17 @@ class Exam(models.Model):
         if not self.start_datetime:
             return False
         from django.utils import timezone
+
         return timezone.now() < self.start_datetime
-    
+
     def is_after_end(self) -> bool:
         """İmtahan bitib?"""
         if not self.end_datetime:
             return False
         from django.utils import timezone
+
         return timezone.now() > self.end_datetime
-    
+
     def is_currently_active(self) -> bool:
         """İmtahan indi aktiv vaxt aralığındadır?"""
         return not self.is_before_start() and not self.is_after_end()
@@ -245,12 +246,7 @@ class Exam(models.Model):
         if not self.max_attempts_per_user:
             return None
 
-        used = (
-            self.attempts
-            .filter(user=user)
-            .exclude(status="draft")
-            .count()
-        )
+        used = self.attempts.filter(user=user).exclude(status="draft").count()
         left = self.max_attempts_per_user - used
         return max(left, 0)
 
@@ -287,7 +283,9 @@ class Exam(models.Model):
 
         return False
 
-    def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
+    def can_user_start(
+        self, user: User, code: str | None = None
+    ) -> tuple[bool, str | None]:
         """
         Student yeni attempt başlaya bilərmi?
         """
@@ -298,9 +296,10 @@ class Exam(models.Model):
         # ✅ YENİ: Tarix yoxlaması
         if self.is_before_start():
             from django.utils import timezone
+
             start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
             return False, f"İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"
-        
+
         if self.is_after_end():
             return False, "İmtahan müddəti bitib."
 
@@ -313,10 +312,9 @@ class Exam(models.Model):
         if user == self.author:
             return True, None
 
-        in_allowed_any = (
-            self.allowed_users.filter(id=user.id).exists()
-            or self._user_in_allowed_groups(user)
-        )
+        in_allowed_any = self.allowed_users.filter(
+            id=user.id
+        ).exists() or self._user_in_allowed_groups(user)
 
         # 4) Kod yoxdursa
         if not self.access_code:
@@ -355,29 +353,35 @@ class Exam(models.Model):
             return False
 
         return True
-    
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: QuestionBlock
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
 class QuestionBlock(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='question_blocks', verbose_name="İmtahan")
+    exam = models.ForeignKey(
+        Exam,
+        on_delete=models.CASCADE,
+        related_name="question_blocks",
+        verbose_name="İmtahan",
+    )
     name = models.CharField("Blok adı", max_length=100)
     order = models.PositiveIntegerField("Sıra", default=1)
-    
+
     # --- YENİ SAHƏ: Blok üçün vaxt limiti (dəqiqə ilə) ---
     time_limit_minutes = models.PositiveIntegerField(
-        "Blok vaxtı (dəqiqə)", 
-        null=True, 
+        "Blok vaxtı (dəqiqə)",
+        null=True,
         blank=True,
-        help_text="Bu blokdakı sualları həll etmək üçün ayrılan vaxt. Boş olsa, limit yoxdur."
+        help_text="Bu blokdakı sualları həll etmək üçün ayrılan vaxt. Boş olsa, limit yoxdur.",
     )
 
     class Meta:
         verbose_name = "Sual Bloku"
         verbose_name_plural = "Sual Blokları"
-        ordering = ['order', 'id']
+        ordering = ["order", "id"]
 
     def __str__(self):
         return f"{self.exam.title} - {self.name}"
@@ -400,27 +404,25 @@ class ExamQuestion(models.Model):
         Exam,
         on_delete=models.CASCADE,
         related_name="questions",
-        verbose_name="İmtahan bloku"
+        verbose_name="İmtahan bloku",
     )
-    
+
     # --- BURANI ƏLAVƏ EDİN (START) ---
     block = models.ForeignKey(
-        QuestionBlock, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='questions', 
-        verbose_name="Sual Bloku"
+        QuestionBlock,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="questions",
+        verbose_name="Sual Bloku",
     )
     # --- BURANI ƏLAVƏ EDİN (END) ---
 
-  
     text = models.TextField("Sual mətni")
 
     # Test üçün "ideal" cavab mətni lazım olsa, yazılı üçün də istifadə etmək olar
     correct_answer = models.TextField(
-        "Düzgün cavab / ideal cavab (yazılı üçün)",
-        blank=True
+        "Düzgün cavab / ideal cavab (yazılı üçün)", blank=True
     )
 
     order = models.PositiveIntegerField("Sıra", default=1)
@@ -431,7 +433,7 @@ class ExamQuestion(models.Model):
         max_length=20,
         choices=ANSWER_MODE_CHOICES,
         default="single",
-        help_text="Yalnız test imtahanları üçün mənalıdır."
+        help_text="Yalnız test imtahanları üçün mənalıdır.",
     )
 
     # Bu sual üçün xüsusi vaxt limiti (saniyə) – OPTIONAL
@@ -439,14 +441,11 @@ class ExamQuestion(models.Model):
         "Bu sual üçün vaxt limiti (saniyə)",
         blank=True,
         null=True,
-        help_text="Boş saxlasanız, Exam.default_question_time_seconds istifadə olunacaq."
+        help_text="Boş saxlasanız, Exam.default_question_time_seconds istifadə olunacaq.",
     )
-    
+
     image = models.ImageField(
-        "Sual şəkli (optional)",
-        upload_to=question_media_path,
-        blank=True,
-        null=True
+        "Sual şəkli (optional)", upload_to=question_media_path, blank=True, null=True
     )
 
     video = models.FileField(
@@ -456,13 +455,13 @@ class ExamQuestion(models.Model):
         null=True,
         validators=[
             FileExtensionValidator(allowed_extensions=["mp4", "webm", "mov"]),
-            validate_video_size
-        ]
+            validate_video_size,
+        ],
     )
-    
+
     enable_paint = models.BooleanField(
         default=False,
-        help_text="Yalnız yazılı imtahanda tələbə cavab üçün çəkim (paint) edə bilsin."
+        help_text="Yalnız yazılı imtahanda tələbə cavab üçün çəkim (paint) edə bilsin.",
     )
 
     class Meta:
@@ -519,14 +518,18 @@ class ExamQuestion(models.Model):
 
 class ExamQuestionOption(models.Model):
     LABEL_CHOICES = (
-        ("A","A"), ("B","B"), ("C","C"), ("D","D"), ("E","E"),
+        ("A", "A"),
+        ("B", "B"),
+        ("C", "C"),
+        ("D", "D"),
+        ("E", "E"),
     )
     label = models.CharField(max_length=1, choices=LABEL_CHOICES, null=True, blank=True)
     question = models.ForeignKey(
         ExamQuestion,
         on_delete=models.CASCADE,
         related_name="options",
-        verbose_name="Sual"
+        verbose_name="Sual",
     )
     text = models.CharField("Variant mətni", max_length=255)
     is_correct = models.BooleanField("Düzgün variantdır?", default=False)
@@ -538,11 +541,12 @@ class ExamQuestionOption(models.Model):
     def __str__(self):
         prefix = "✓" if self.is_correct else "•"
         return f"{prefix} {self.text[:50]}"
- 
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: ExamAttempt
 # ═══════════════════════════════════════════════════════════════════════════════
+
 
 class ExamAttempt(models.Model):
     STATUS_CHOICES = (
@@ -551,59 +555,38 @@ class ExamAttempt(models.Model):
         ("submitted", "Təslim edilib"),
         ("expired", "Vaxt bitib"),
     )
-    
+
     checked_by_teacher = models.BooleanField(
-        "Müəllim tərəfindən yoxlanılıb?",
-        default=False
+        "Müəllim tərəfindən yoxlanılıb?", default=False
     )
-    teacher_checked_at = models.DateTimeField(
-        "Yoxlanma tarixi",
-        null=True,
-        blank=True
-    )
+    teacher_checked_at = models.DateTimeField("Yoxlanma tarixi", null=True, blank=True)
 
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="exam_attempts"
+        User, on_delete=models.CASCADE, related_name="exam_attempts"
     )
-    exam = models.ForeignKey(
-        Exam,
-        on_delete=models.CASCADE,
-        related_name="attempts"
-    )
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="attempts")
 
     attempt_number = models.PositiveIntegerField(
-        "Cəhd nömrəsi",
-        default=1,
-        help_text="Eyni user üçün 1, 2, 3 və s."
+        "Cəhd nömrəsi", default=1, help_text="Eyni user üçün 1, 2, 3 və s."
     )
 
     status = models.CharField(
-        "Status",
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="in_progress"
+        "Status", max_length=20, choices=STATUS_CHOICES, default="in_progress"
     )
 
     started_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(blank=True, null=True)
 
     duration_seconds = models.PositiveIntegerField(
-        "Faktiki davametmə müddəti (saniyə)",
-        blank=True,
-        null=True
+        "Faktiki davametmə müddəti (saniyə)", blank=True, null=True
     )
 
     # Test üçün ümumi nəticə:
     correct_count = models.PositiveIntegerField(default=0)
     wrong_count = models.PositiveIntegerField(default=0)
-    
+
     teacher_score = models.PositiveIntegerField(
-        "Müəllimin verdiyi bal (%)",
-        blank=True,
-        null=True,
-        help_text="0–100 arası bal."
+        "Müəllimin verdiyi bal (%)", blank=True, null=True, help_text="0–100 arası bal."
     )
 
     teacher_feedback = models.TextField(
@@ -617,11 +600,11 @@ class ExamAttempt(models.Model):
         ordering = ["-started_at"]
         # ✅ DƏYİŞİKLİK: unique_together silindi
         # unique_together = ("user", "exam", "attempt_number")  # SİLİNDİ
-        
+
         # ✅ ƏLAVƏ: Performans üçün index-lər
         indexes = [
-            models.Index(fields=['user', 'exam', 'status']),
-            models.Index(fields=['user', 'exam', '-started_at']),
+            models.Index(fields=["user", "exam", "status"]),
+            models.Index(fields=["user", "exam", "-started_at"]),
         ]
 
     def __str__(self):
@@ -648,7 +631,7 @@ class ExamAttempt(models.Model):
             delta = self.finished_at - self.started_at
             self.duration_seconds = int(delta.total_seconds())
         self.save(update_fields=["status", "finished_at", "duration_seconds"])
-        
+
     def recalculate_score(self):
         """
         Bu attempt üçün düzgün/səhv cavab sayını yenidən hesablayır.
@@ -657,7 +640,7 @@ class ExamAttempt(models.Model):
         self.correct_count = qs.filter(is_correct=True).count()
         self.wrong_count = qs.filter(is_correct=False).count()
         self.save(update_fields=["correct_count", "wrong_count"])
-    
+
     def mark_checked(self):
         self.checked_by_teacher = True
         self.save(update_fields=["checked_by_teacher"])
@@ -673,45 +656,34 @@ class ExamAnswer(models.Model):
     Bir attempt daxilində konkret bir suala verilən cavab.
     Test + yazılı üçün birləşmiş model.
     """
+
     attempt = models.ForeignKey(
-        ExamAttempt,
-        on_delete=models.CASCADE,
-        related_name="answers"
+        ExamAttempt, on_delete=models.CASCADE, related_name="answers"
     )
     question = models.ForeignKey(
-        ExamQuestion,
-        on_delete=models.CASCADE,
-        related_name="answers"
+        ExamQuestion, on_delete=models.CASCADE, related_name="answers"
     )
-    
 
     # Test üçün: seçilən variantlar (single/multiple)
     selected_options = models.ManyToManyField(
         ExamQuestionOption,
         blank=True,
         related_name="selected_in_answers",
-        verbose_name="Seçilmiş variantlar"
+        verbose_name="Seçilmiş variantlar",
     )
 
     # Yazılı / praktiki üçün: mətndə cavab
-    text_answer = models.TextField(
-        "Yazılı cavab",
-        blank=True
-    )
+    text_answer = models.TextField("Yazılı cavab", blank=True)
 
     # Avtomatik hesablanmış nəticə (testdə istifadə olunacaq)
-    is_correct = models.BooleanField(
-        "Düzgündür?",
-        default=False
-    )
-    
-    
+    is_correct = models.BooleanField("Düzgündür?", default=False)
+
     # --- MÜƏLLİM YOXLAMASI (SUAL SƏVİYYƏSİNDƏ) ---
     teacher_score = models.PositiveIntegerField(
         "Müəllim balı (sual üzrə)",
         blank=True,
         null=True,
-        help_text="Bu suala verilən bal. (məs: 0–10 və ya 0–20 və s.)"
+        help_text="Bu suala verilən bal. (məs: 0–10 və ya 0–20 və s.)",
     )
 
     teacher_feedback = models.TextField(
@@ -721,9 +693,11 @@ class ExamAnswer(models.Model):
 
     # Autosave və draft üçün vacib:
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     has_paint = models.BooleanField(default=False)  # bu sualda paint aktivdir?
-    paint_image = models.ImageField(upload_to="exam_paints/%Y/%m/", null=True, blank=True)
+    paint_image = models.ImageField(
+        upload_to="exam_paints/%Y/%m/", null=True, blank=True
+    )
     paint_updated_at = models.DateTimeField(null=True, blank=True)
 
     # istəsən raw data (debug üçün) saxlaya bilərsən, amma vacib deyil
@@ -752,18 +726,17 @@ class ExamAnswer(models.Model):
         correct_options = set(
             self.question.options.filter(is_correct=True).values_list("id", flat=True)
         )
-        selected = set(
-            self.selected_options.values_list("id", flat=True)
-        )
+        selected = set(self.selected_options.values_list("id", flat=True))
 
         if not correct_options:
             # Düzgün variant təyin olunmayıbsa, heç nə etmirik
             self.is_correct = False
         else:
             # Seçilən variant set-i düzgün set-lə eyni olmalıdır
-            self.is_correct = (selected == correct_options)
+            self.is_correct = selected == correct_options
 
         self.save()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: ExamAnswerFile
@@ -775,18 +748,17 @@ class ExamAnswerFile(models.Model):
         "ExamAnswer",
         on_delete=models.CASCADE,
         related_name="files",
-        verbose_name="Cavab"
+        verbose_name="Cavab",
     )
     file = models.FileField(
         "Fayl",
         upload_to="exam_uploads/",
-        validators=[validate_file_extension, validate_file_size, validate_zip_contents]
+        validators=[validate_file_extension, validate_file_size, validate_zip_contents],
     )
     uploaded_at = models.DateTimeField("Yüklənmə tarixi", auto_now_add=True)
-    
+
     def filename(self):
         return self.file.name.split("/")[-1]
 
     def __str__(self):
         return f"{self.filename()} ({self.answer_id})"
-

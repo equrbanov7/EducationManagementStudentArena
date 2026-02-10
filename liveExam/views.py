@@ -1,35 +1,41 @@
 from __future__ import annotations
+
+import hashlib
 import io
+import random
 import re
 import uuid
+from typing import Any, Dict, List, Optional, Tuple
+
 import qrcode
-import random
-import hashlib
-
-
-
-
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core import signing
-from django.conf import settings
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from typing import Any, Dict, List, Optional, Tuple
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
-from liveExam.models import LiveSession, LivePlayer, LiveAnswer
-from liveExam.constants import AVATAR_EMOJI
 from exams.models import Exam, ExamQuestion, ExamQuestionOption
-
+from liveExam.constants import AVATAR_EMOJI
+from liveExam.models import LiveAnswer, LivePlayer, LiveSession
 
 AVATAR_KEYS = [
-    "avatar_1","avatar_2","avatar_3","avatar_4","avatar_5","avatar_6",
-    "avatar_7","avatar_8","avatar_9","avatar_10","avatar_11","avatar_12",
+    "avatar_1",
+    "avatar_2",
+    "avatar_3",
+    "avatar_4",
+    "avatar_5",
+    "avatar_6",
+    "avatar_7",
+    "avatar_8",
+    "avatar_9",
+    "avatar_10",
+    "avatar_11",
+    "avatar_12",
 ]
 
 PLAYER_COOKIE_NAME = "live_player_token"
@@ -44,6 +50,7 @@ PLAYER_TOKEN_SALT = "liveExam.player"
 # ------------------------
 # Small utils
 # ------------------------
+
 
 def _safe_int(v: Any, default: int = 0) -> int:
     try:
@@ -70,6 +77,7 @@ def _get_client_id(request) -> str:
 # Broadcast (Channels group_send)
 # ------------------------
 
+
 def _broadcast(pin: str, payload: dict, group_suffix: str) -> None:
     """
     group_suffix: 'lobby' | 'play'
@@ -90,46 +98,53 @@ def _broadcast(pin: str, payload: dict, group_suffix: str) -> None:
 # Serializers
 # ------------------------
 
+
 def _serialize_players(session: LiveSession, limit: int = 50) -> List[Dict[str, Any]]:
     return list(
-        session.players.order_by("-created_at")
-        .values("id", "nickname", "avatar_key")[:limit]
+        session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[
+            :limit
+        ]
     )
 
 
 def _serialize_top(session: LiveSession, limit: int = 10) -> List[Dict[str, Any]]:
     return list(
-        session.players.order_by("-score", "created_at")
-        .values("nickname", "avatar_key", "score")[:limit]
+        session.players.order_by("-score", "created_at").values(
+            "nickname", "avatar_key", "score"
+        )[:limit]
     )
 
 
-def _serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> List[Dict[str, Any]]:
+def _serialize_question_results(
+    session: LiveSession, question_id: int, limit: int = 50
+) -> List[Dict[str, Any]]:
     """
     Reveal zamanı: bu sual üzrə kim nə qədər bal aldı, total score nədir.
     """
     answers = (
-        LiveAnswer.objects
-        .filter(session=session, question_id=question_id)
+        LiveAnswer.objects.filter(session=session, question_id=question_id)
         .select_related("player")
         .order_by("-awarded_points", "-created_at")
     )[:limit]
 
     out: List[Dict[str, Any]] = []
     for a in answers:
-        out.append({
-            "nickname": a.player.nickname,
-            "avatar_key": a.player.avatar_key,
-            "is_correct": bool(a.is_correct),
-            "awarded_points": _safe_int(a.awarded_points, 0),
-            "total_score": _safe_int(a.player.score, 0),
-        })
+        out.append(
+            {
+                "nickname": a.player.nickname,
+                "avatar_key": a.player.avatar_key,
+                "is_correct": bool(a.is_correct),
+                "awarded_points": _safe_int(a.awarded_points, 0),
+                "total_score": _safe_int(a.player.score, 0),
+            }
+        )
     return out
 
 
 # ------------------------
 # Question picking helpers
 # ------------------------
+
 
 def _get_selected_question_ids(session: LiveSession) -> List[int]:
     """
@@ -151,8 +166,7 @@ def _get_exam_question_ids(session: LiveSession) -> List[int]:
     Səndə order field var deyə: order, id.
     """
     return list(
-        ExamQuestion.objects
-        .filter(exam=session.exam)
+        ExamQuestion.objects.filter(exam=session.exam)
         .order_by("order", "id")
         .values_list("id", flat=True)
     )
@@ -196,6 +210,7 @@ def _get_current_exam_question(session: LiveSession) -> Optional[ExamQuestion]:
 # ------------------------
 # Timing & points
 # ------------------------
+
 
 def _question_time_limit(session: LiveSession, eq: ExamQuestion) -> int:
     """
@@ -253,6 +268,7 @@ def _get_question_text(eq: ExamQuestion) -> str:
 # Options (NULL fix) + Multi detect
 # ------------------------
 
+
 def _get_option_text(opt) -> str:
     """
     “null” problemini öldürmək üçün:
@@ -277,6 +293,7 @@ def _options_seed(pin: str, question_id: int, started_at) -> int:
     h = hashlib.sha256(seed_str.encode("utf-8")).hexdigest()
     return int(h[:8], 16)  # 32-bit seed
 
+
 def _build_options(eq, *, seed: int | None = None):
     """
     ✅ Variantları qarışdırır.
@@ -284,11 +301,9 @@ def _build_options(eq, *, seed: int | None = None):
     """
     letters = ["A", "B", "C", "D", "E", "F"]
 
-    qs = (
-        ExamQuestionOption.objects
-        .filter(question=eq)
-        .order_by("id")  # baza stabil olsun
-    )
+    qs = ExamQuestionOption.objects.filter(question=eq).order_by(
+        "id"
+    )  # baza stabil olsun
 
     opts = list(qs)
 
@@ -297,7 +312,9 @@ def _build_options(eq, *, seed: int | None = None):
 
     out = []
     for i, opt in enumerate(opts):
-        label = _get_option_label(opt) or (letters[i] if i < len(letters) else str(i + 1))
+        label = _get_option_label(opt) or (
+            letters[i] if i < len(letters) else str(i + 1)
+        )
         text = _get_option_text(opt) or f"Variant {label}"
         out.append({"id": opt.id, "label": label, "text": text})
     return out
@@ -314,9 +331,9 @@ def _detect_multi(eq: ExamQuestion) -> Tuple[bool, int, List[int]]:
     - yoxdursa correct_count
     """
     correct_ids = list(
-        ExamQuestionOption.objects
-        .filter(question=eq, is_correct=True)
-        .values_list("id", flat=True)
+        ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list(
+            "id", flat=True
+        )
     )
     correct_count = len(correct_ids)
 
@@ -341,7 +358,10 @@ def _detect_multi(eq: ExamQuestion) -> Tuple[bool, int, List[int]]:
 # Payload builders
 # ------------------------
 
-def _build_question_payload(session: LiveSession, eq: ExamQuestion, idx: int, total: int):
+
+def _build_question_payload(
+    session: LiveSession, eq: ExamQuestion, idx: int, total: int
+):
     time_limit = _question_time_limit(session, eq)
     now = timezone.now()
     ends = now + timezone.timedelta(seconds=time_limit)
@@ -360,15 +380,13 @@ def _build_question_payload(session: LiveSession, eq: ExamQuestion, idx: int, to
             "points": _question_points(session, eq),
             "multi": multi,
             "max_select": max_select,
-
             # ✅ qarışdırılmış options
             "options": _build_options(eq, seed=seed),
-
             "started_at": now.isoformat(),
             "ends_at": ends.isoformat(),
             "index": _safe_int(idx, 0) + 1,
             "total": _safe_int(total, 0),
-        }
+        },
     }
     return payload, now, ends
 
@@ -395,6 +413,7 @@ def _build_reveal_payload(session: LiveSession, question_id: int) -> Dict[str, A
 # ------------------------
 # Multi scoring helper (consumer üçün)
 # ------------------------
+
 
 def _score_multi_fraction(
     chosen_ids: List[int],
@@ -430,6 +449,8 @@ def _score_multi_fraction(
 
     # partial default
     return max(0.0, (T - W) / float(C))
+
+
 # ------------------------
 # Host / Session
 # ------------------------
@@ -455,7 +476,9 @@ def live_host_lobby(request, pin):
         raise Http404("Not allowed.")
 
     host = getattr(settings, "LAN_HOST", None) or request.get_host()
-    join_url = f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
+    join_url = (
+        f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
+    )
 
     exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
 
@@ -475,7 +498,6 @@ def live_host_lobby(request, pin):
         "selected_total_questions": selected,
     }
     return render(request, "liveExam/host_lobby.html", context)
-
 
 
 # ------------------------
@@ -500,7 +522,9 @@ def live_join_enter(request, pin):
         avatar_key = "avatar_1"
 
     if not nickname:
-        return JsonResponse({"ok": False, "message": "Nickname boş ola bilməz."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": "Nickname boş ola bilməz."}, status=400
+        )
 
     client_id = _get_client_id(request)
     now = timezone.now()
@@ -511,7 +535,9 @@ def live_join_enter(request, pin):
         player.avatar_key = avatar_key
         player.is_connected = True
         player.last_seen = now
-        player.save(update_fields=["nickname", "avatar_key", "is_connected", "last_seen"])
+        player.save(
+            update_fields=["nickname", "avatar_key", "is_connected", "last_seen"]
+        )
     else:
         player = LivePlayer.objects.create(
             session=session,
@@ -528,17 +554,25 @@ def live_join_enter(request, pin):
     )
 
     # lobby-yə realtime update
-    _broadcast(session.pin, {
-        "type": "lobby_state",
-        "count": session.players.count(),
-        "players": _serialize_players(session),
-    }, "lobby")
+    _broadcast(
+        session.pin,
+        {
+            "type": "lobby_state",
+            "count": session.players.count(),
+            "players": _serialize_players(session),
+        },
+        "lobby",
+    )
 
     wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
-    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax")
-    resp.set_cookie(PLAYER_COOKIE_NAME, token, max_age=60 * 60 * 6, samesite="Lax", httponly=True)
+    resp.set_cookie(
+        "live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax"
+    )
+    resp.set_cookie(
+        PLAYER_COOKIE_NAME, token, max_age=60 * 60 * 6, samesite="Lax", httponly=True
+    )
 
     return resp
 
@@ -554,6 +588,7 @@ def live_join_enter(request, pin):
 #     img.save(buf, format="PNG")
 #     return HttpResponse(buf.getvalue(), content_type="image/png")
 
+
 def live_qr_png(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
@@ -567,6 +602,7 @@ def live_qr_png(request, pin):
 
     return HttpResponse(buf.getvalue(), content_type="image/png")
 
+
 def live_wait_room(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
@@ -577,7 +613,9 @@ def live_wait_room(request, pin):
         {
             "session": session,
             "players": players,
-            "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
+            "player_screen_url": reverse(
+                "liveExam:player_screen", kwargs={"pin": session.pin}
+            ),
         },
     )
 
@@ -603,8 +641,14 @@ def live_state_json(request, pin):
         "state": session.state,
         "current_index": int(session.current_index or 0),
         "total_questions": total,
-        "question_started_at": session.question_started_at.isoformat() if session.question_started_at else None,
-        "question_ends_at": session.question_ends_at.isoformat() if session.question_ends_at else None,
+        "question_started_at": (
+            session.question_started_at.isoformat()
+            if session.question_started_at
+            else None
+        ),
+        "question_ends_at": (
+            session.question_ends_at.isoformat() if session.question_ends_at else None
+        ),
     }
 
     idx = int(session.current_index or 0)
@@ -643,7 +687,9 @@ def live_state_json(request, pin):
     data["question"] = question
 
     # reveal-də correct ids lazımdır
-    data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
+    data["correct_option_ids"] = (
+        correct_ids if session.state == LiveSession.STATE_REVEAL else []
+    )
 
     return JsonResponse(data)
 
@@ -651,6 +697,7 @@ def live_state_json(request, pin):
 # ------------------------
 # Host game controls (Kahoot flow)
 # ------------------------
+
 
 @require_POST
 @login_required
@@ -666,22 +713,31 @@ def host_start_game(request, pin):
     total_in_exam = len(all_ids)
 
     if total_in_exam <= 0:
-        return JsonResponse({"ok": False, "message": "Bu imtahanda sual yoxdur."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": "Bu imtahanda sual yoxdur."}, status=400
+        )
 
     desired = None
     if raw:
         try:
             desired = int(raw)
         except Exception:
-            return JsonResponse({"ok": False, "message": "Sual sayı düzgün deyil."}, status=400)
+            return JsonResponse(
+                {"ok": False, "message": "Sual sayı düzgün deyil."}, status=400
+            )
 
         if desired <= 0:
-            return JsonResponse({"ok": False, "message": "Sual sayı 1-dən böyük olmalıdır."}, status=400)
+            return JsonResponse(
+                {"ok": False, "message": "Sual sayı 1-dən böyük olmalıdır."}, status=400
+            )
 
         if desired > total_in_exam:
             return JsonResponse(
-                {"ok": False, "message": f"Bu imtahanda cəmi {total_in_exam} sual var. {desired} seçilə bilməz."},
-                status=400
+                {
+                    "ok": False,
+                    "message": f"Bu imtahanda cəmi {total_in_exam} sual var. {desired} seçilə bilməz.",
+                },
+                status=400,
             )
 
     # 2) Random seçimi session-a yaz (desired boşdursa hamısı)
@@ -692,24 +748,33 @@ def host_start_game(request, pin):
     else:
         session.selected_question_ids = random.sample(all_ids, k=desired)
         session.question_limit = desired
- 
+
     # 3) Oyun reset
     session.current_index = 0
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = None
     session.question_ends_at = None
 
-    session.save(update_fields=[
-        "selected_question_ids", "question_limit",
-        "current_index", "state",
-        "question_started_at", "question_ends_at",
-    ])
+    session.save(
+        update_fields=[
+            "selected_question_ids",
+            "question_limit",
+            "current_index",
+            "state",
+            "question_started_at",
+            "question_ends_at",
+        ]
+    )
 
     # 4) Wait room-da olan player-ları player_screen-ə yönləndir
-    _broadcast(pin, {
-        "type": "game_started",
-        "redirect": reverse("liveExam:player_screen", kwargs={"pin": pin}),
-    }, "lobby")
+    _broadcast(
+        pin,
+        {
+            "type": "game_started",
+            "redirect": reverse("liveExam:player_screen", kwargs={"pin": pin}),
+        },
+        "lobby",
+    )
 
     # 5) Start basan kimi 1-ci sualı publish et
     eq = _get_question_by_index(session, 0)
@@ -717,7 +782,9 @@ def host_start_game(request, pin):
         return JsonResponse({"ok": False, "message": "Sual tapılmadı."}, status=400)
 
     total = _get_total_questions(session)
-    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=0, total=total)
+    payload, now, ends = _build_question_payload(
+        session=session, eq=eq, idx=0, total=total
+    )
 
     session.question_started_at = now
     session.question_ends_at = ends
@@ -725,12 +792,14 @@ def host_start_game(request, pin):
 
     _broadcast(pin, payload, "play")
 
-    return JsonResponse({
-        "ok": True,
-        "published": True,
-        "question_count": (desired or total_in_exam),
-        "total_in_exam": total_in_exam,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "published": True,
+            "question_count": (desired or total_in_exam),
+            "total_in_exam": total_in_exam,
+        }
+    )
 
 
 @require_POST
@@ -754,16 +823,27 @@ def host_next_question(request, pin):
         session.state = LiveSession.STATE_FINISHED
         session.save(update_fields=["state"])
 
-        _broadcast(pin, {"type": "finished", "top": _serialize_top(session, limit=50)}, "play")
+        _broadcast(
+            pin, {"type": "finished", "top": _serialize_top(session, limit=50)}, "play"
+        )
         return JsonResponse({"ok": True, "finished": True})
 
-    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=idx, total=total)
+    payload, now, ends = _build_question_payload(
+        session=session, eq=eq, idx=idx, total=total
+    )
 
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = now
     session.question_ends_at = ends
 
-    session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+    session.save(
+        update_fields=[
+            "state",
+            "current_index",
+            "question_started_at",
+            "question_ends_at",
+        ]
+    )
 
     _broadcast(pin, payload, "play")
     return JsonResponse({"ok": True, "index": idx + 1, "total": total})
@@ -779,13 +859,15 @@ def host_reveal(request, pin):
     idx = int(session.current_index or 0)
     eq = _get_question_by_index(session, idx)
     if not eq:
-        return JsonResponse({"ok": False, "message": "Aktiv sual tapılmadı."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": "Aktiv sual tapılmadı."}, status=400
+        )
 
     # ✅ multi-choice üçün: bir neçə correct ola bilər
     correct_ids = list(
-        ExamQuestionOption.objects
-        .filter(question=eq, is_correct=True)
-        .values_list("id", flat=True)
+        ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list(
+            "id", flat=True
+        )
     )
 
     session.state = LiveSession.STATE_REVEAL

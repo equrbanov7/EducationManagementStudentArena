@@ -3,12 +3,13 @@ from django.utils import timezone
 
 register = template.Library()
 
+
 @register.filter
 def minutes_since(value):
     """Verilən tarixdən bu ana qədər neçə dəqiqə keçib?"""
     if not value:
         return None
-    
+
     now = timezone.now()
     diff = now - value
     return int(diff.total_seconds() / 60)

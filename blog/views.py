@@ -1,76 +1,65 @@
 # blog/views.py
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, Http404, JsonResponse
-from django.views.decorators.http import require_POST
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login, logout, get_user_model
+from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
-from django.core.mail import send_mail 
+from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
-from django.template.loader import render_to_string 
-from django.conf import settings
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.decorators.http import require_POST
 
 from exams.models import Exam, ExamAttempt
 
-from .models import Post, Category, Comment, Subscriber, Question, EmailOTP
-from .forms import (
-    SubscriptionForm,
-    RegisterForm,
-    PostForm,
-    CommentForm,
-    QuestionForm,
-)
+from .forms import (CommentForm, PostForm, QuestionForm, RegisterForm,
+                    SubscriptionForm)
+from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
 from .utils import generate_otp, send_verify_email
-
 
 User = get_user_model()
 signer = TimestampSigner()
 
 
-
-
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
+
 def home(request):
-    
+
     query = request.GET.get("q", "").strip()
     post_list = (
-        Post.objects
-        .filter(is_published=True) 
+        Post.objects.filter(is_published=True)
         .select_related("category", "author")
         .order_by("-created_at")
     )
 
     if query:
         post_list = post_list.filter(
-            Q(title__icontains=query) |
-            Q(excerpt__icontains=query) |
-            Q(content__icontains=query)
+            Q(title__icontains=query)
+            | Q(excerpt__icontains=query)
+            | Q(content__icontains=query)
         ).distinct()
-        
- 
-    paginator = Paginator(post_list, 6) 
-    page_number = request.GET.get('page')
+
+    paginator = Paginator(post_list, 6)
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     categories = (
-        Category.objects
-        .annotate(
-            post_count=Count('posts', filter=Q(posts__is_published=True))
+        Category.objects.annotate(
+            post_count=Count("posts", filter=Q(posts__is_published=True))
         )
         .filter(post_count__gt=0)
-        .order_by('name')
+        .order_by("name")
     )
 
- 
     context = {
-        "page_obj": page_obj,  
+        "page_obj": page_obj,
         "categories": categories,
         "search_query": query,
     }
@@ -81,30 +70,27 @@ def home(request):
 def about(request):
     return render(request, "blog/about.html")
 
+
 def technology(request):
-   
+
     TECH_CATEGORIES = [
-        "proqramlasdirma", 
-        "suni-intellekt", 
-        "python", 
-        "django", 
-        "texnologiya", 
-        "backend"
+        "proqramlasdirma",
+        "suni-intellekt",
+        "python",
+        "django",
+        "texnologiya",
+        "backend",
     ]
-    
-    
+
     post_list = (
-        Post.objects
-        .filter(category__slug__in=TECH_CATEGORIES)
+        Post.objects.filter(category__slug__in=TECH_CATEGORIES)
         .select_related("category", "author")
         .order_by("-created_at")
     )
 
-  
-    paginator = Paginator(post_list, 6) 
-    page_number = request.GET.get('page')
+    paginator = Paginator(post_list, 6)
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    
 
     return render(request, "blog/technology.html", {"page_obj": page_obj})
 
@@ -114,6 +100,7 @@ def contact(request):
 
 
 # ------------------- POST DETAY + COMMENT ------------------- #
+
 
 def post_detail(request, slug):
     """
@@ -127,18 +114,15 @@ def post_detail(request, slug):
     if not post.is_published and request.user != post.author:
         raise Http404("No Post matches the given query.")
 
-    comments = (
-        post.comments
-        .select_related("user")
-        .order_by("-created_at")
-    )
+    comments = post.comments.select_related("user").order_by("-created_at")
 
     user_first_comment = None
     if request.user.is_authenticated:
-        user_first_comment = Comment.objects.filter(
-            post=post,
-            user=request.user
-        ).order_by("created_at").first()
+        user_first_comment = (
+            Comment.objects.filter(post=post, user=request.user)
+            .order_by("created_at")
+            .first()
+        )
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -154,7 +138,9 @@ def post_detail(request, slug):
                 comment.post = post
                 comment.user = request.user
                 comment.save()
-                messages.success(request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐")
+                messages.success(
+                    request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐"
+                )
             else:
                 # Artıq bu posta şərhi var → yeni şərh, eyni rating
                 comment = Comment(
@@ -164,7 +150,9 @@ def post_detail(request, slug):
                     rating=user_first_comment.rating,
                 )
                 comment.save()
-                messages.success(request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂")
+                messages.success(
+                    request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂"
+                )
 
             return redirect("post_detail", slug=post.slug)
     else:
@@ -181,6 +169,7 @@ def post_detail(request, slug):
 
 # ------------------- SUBSCRIBE ------------------- #
 
+
 def subscribe_page(request):
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
@@ -190,37 +179,43 @@ def subscribe_page(request):
             try:
                 # 1. Abunəçini bazaya yaz
                 subscriber, created = Subscriber.objects.get_or_create(email=email)
-                
+
                 if created or not subscriber.is_active:
-                    
+
                     # 2. Email şablonunu yarat
                     html_message = render_to_string(
-                        'email_templates/welcome_email.html',
-                        {'email': email}
+                        "email_templates/welcome_email.html", {"email": email}
                     )
-                    
+
                     # 3. Email göndər
                     send_mail(
-                        'Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]',
+                        "Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]",
                         # Text versiyası (html-i dəstəkləməyən proqramlar üçün)
-                        f'Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.',
+                        f"Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.",
                         settings.DEFAULT_FROM_EMAIL,
                         [email],
                         html_message=html_message,
                         fail_silently=False,
                     )
-                    
-                    messages.success(request, f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.")
-                    
-                else:
-                    messages.warning(request, f"'{email}' ünvanı artıq abunəçilərimizdədir.")
 
+                    messages.success(
+                        request,
+                        f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.",
+                    )
+
+                else:
+                    messages.warning(
+                        request, f"'{email}' ünvanı artıq abunəçilərimizdədir."
+                    )
 
             except Exception as e:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
-                messages.error(request, f"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.")
-                print(f"EMAIL ERROR: {e}") # Xətanı konsolda göstər
-                
+                messages.error(
+                    request,
+                    f"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
+                )
+                print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
+
             return redirect("subscribe")
         else:
             messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
@@ -233,7 +228,6 @@ def subscribe_page(request):
 # ------------------- POST CRUD ------------------- #
 
 
-
 @login_required
 def create_post(request):
     if request.method == "POST":
@@ -242,28 +236,30 @@ def create_post(request):
             post = form.save(commit=False)
             post.author = request.user
 
-            new_cat_name = form.cleaned_data.get('new_category')
-            selected_cat = form.cleaned_data.get('category')
+            new_cat_name = form.cleaned_data.get("new_category")
+            selected_cat = form.cleaned_data.get("category")
 
             if new_cat_name:
-              
+
                 category, created = Category.objects.get_or_create(name=new_cat_name)
                 post.category = category
-                
+
                 if created:
-                    messages.info(request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı.")
+                    messages.info(
+                        request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı."
+                    )
 
             elif selected_cat:
                 # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
                 post.category = selected_cat
-            
+
             else:
                 # 3. Heç nə seçməyibsə (istəyə bağlı):
                 # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
                 pass
 
             # --- SLUG MƏNTİQİ SİLİNDİ ---
-            # Sənin Post modelinin save() metodu slug-ı və unikallığı 
+            # Sənin Post modelinin save() metodu slug-ı və unikallığı
             # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
 
             post.save()
@@ -273,8 +269,6 @@ def create_post(request):
         form = PostForm()
 
     return render(request, "post_form.html", {"form": form})
-
-
 
 
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
@@ -336,25 +330,21 @@ def post_edit_ajax(request, pk):
 def delete_post(request, post_id):
     post = get_object_or_404(Post, pk=post_id, author=request.user)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         # Yalnız POST gələndə silməni icra et (silmə düyməsi POST göndərməlidir)
         post.delete()
         # Və ya sadəcə redirect edirik (çünki JS modalı bağlayıb səhifəni yeniləyir)
-        return redirect('user_profile', username=request.user.username)
-    
+        return redirect("user_profile", username=request.user.username)
+
     # Əgər GET gələrsə, xəta veririk və ya sadəcə silməni icra etmədən geri göndəririk
-    return redirect('user_profile', username=request.user.username)
+    return redirect("user_profile", username=request.user.username)
 
 
 def list_posts(request):
     """
     Bütün postların siyahısı (əgər ayrıca page istəyirsənsə).
     """
-    posts = (
-        Post.objects
-        .select_related("category", "author")
-        .order_by("-created_at")
-    )
+    posts = Post.objects.select_related("category", "author").order_by("-created_at")
     return render(request, "blog/post_list.html", {"posts": posts})
 
 
@@ -366,21 +356,24 @@ def search_posts(request):
     posts = Post.objects.all()
 
     if query:
-        posts = posts.filter(
-            title__icontains=query
-        ) | posts.filter(
+        posts = posts.filter(title__icontains=query) | posts.filter(
             excerpt__icontains=query
         )
 
     posts = posts.order_by("-created_at")
 
-    return render(request, "blog/search_results.html", {
-        "posts": posts,
-        "query": query,
-    })
+    return render(
+        request,
+        "blog/search_results.html",
+        {
+            "posts": posts,
+            "query": query,
+        },
+    )
 
 
 # ------------------- USER REGISTER / PROFILE / LOGOUT ------------------- #
+
 
 def register_view(request):
     if request.method == "POST":
@@ -397,7 +390,11 @@ def register_view(request):
             user.save()
 
             code = generate_otp()
-            EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
+            EmailOTP.objects.create(
+                user=user,
+                code=code,
+                expires_at=timezone.now() + timezone.timedelta(minutes=10),
+            )
             send_verify_email(user, code)
 
             request.session["pending_verify_email"] = user.email
@@ -408,10 +405,13 @@ def register_view(request):
 
     return render(request, "blog/register.html", {"form": form})
 
+
 def verify_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
+        messages.error(
+            request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç."
+        )
         return redirect("register")
 
     if request.method == "POST":
@@ -422,7 +422,11 @@ def verify_code_view(request):
             messages.error(request, "User tapılmadı.")
             return redirect("register")
 
-        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
+        otp = (
+            EmailOTP.objects.filter(user=user, code=code, is_used=False)
+            .order_by("-created_at")
+            .first()
+        )
         if not otp or otp.is_expired():
             messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
             return render(request, "blog/verify_code.html", {"email": email})
@@ -438,6 +442,7 @@ def verify_code_view(request):
 
     return render(request, "blog/verify_code.html", {"email": email})
 
+
 def verify_email_link_view(request):
     token = request.GET.get("token", "")
     try:
@@ -451,6 +456,7 @@ def verify_email_link_view(request):
         messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
         return redirect("register")
 
+
 def resend_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
@@ -463,7 +469,9 @@ def resend_code_view(request):
         return redirect("register")
 
     code = generate_otp()
-    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
+    EmailOTP.objects.create(
+        user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10)
+    )
     send_verify_email(user, code)
 
     messages.success(request, "Yeni kod göndərildi.")
@@ -475,28 +483,26 @@ def user_profile(request, username):
     İstifadəçi profili.
     """
     from courses.models import Course, CourseMembership
-    
+
     profile_user = get_object_or_404(User, username=username)
 
     # 1. Postların Filterlənməsi
     if request.user == profile_user:
         user_posts_list = (
-            Post.objects
-            .filter(author=profile_user)
+            Post.objects.filter(author=profile_user)
             .select_related("category")
             .order_by("-created_at")
         )
     else:
         user_posts_list = (
-            Post.objects
-            .filter(author=profile_user, is_published=True)
+            Post.objects.filter(author=profile_user, is_published=True)
             .select_related("category")
             .order_by("-created_at")
         )
 
     # 2. Pagination
     paginator = Paginator(user_posts_list, 6)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     try:
         posts = paginator.page(page_number)
     except PageNotAnInteger:
@@ -509,16 +515,15 @@ def user_profile(request, username):
     if (
         request.user.is_authenticated
         and request.user == profile_user
-        and getattr(request.user, 'is_teacher', False)
+        and getattr(request.user, "is_teacher", False)
     ):
         pending_count = (
-            ExamAttempt.objects
-            .filter(
+            ExamAttempt.objects.filter(
                 exam__author=request.user,
-                status__in=['submitted', 'expired'],
-                checked_by_teacher=False
+                status__in=["submitted", "expired"],
+                checked_by_teacher=False,
             )
-            .exclude(exam__exam_type='test')
+            .exclude(exam__exam_type="test")
             .count()
         )
 
@@ -526,11 +531,9 @@ def user_profile(request, username):
     assigned_count = 0
     if request.user.is_authenticated and request.user == profile_user:
         assigned_count = (
-            Exam.objects
-            .filter(is_active=True)
+            Exam.objects.filter(is_active=True)
             .filter(
-                Q(allowed_users=request.user) |
-                Q(allowed_groups__students=request.user)
+                Q(allowed_users=request.user) | Q(allowed_groups__students=request.user)
             )
             .distinct()
             .count()
@@ -541,21 +544,25 @@ def user_profile(request, username):
     # ═══════════════════════════════════════════════════════════════
     student_courses = []
     student_courses_count = 0
-    
+
     if request.user.is_authenticated and request.user == profile_user:
         # Tələbə öz profilinə baxır
-        if getattr(request.user, 'is_student', False):
+        if getattr(request.user, "is_student", False):
             # CourseMembership vasitəsilə tələbənin üzv olduğu kurslar
-            student_courses = Course.objects.filter(
-                memberships__user=request.user,
-                memberships__role='student',
-                status='published'  # Yalnız published kurslar
-            ).distinct().order_by('-created_at')
-            
+            student_courses = (
+                Course.objects.filter(
+                    memberships__user=request.user,
+                    memberships__role="student",
+                    status="published",  # Yalnız published kurslar
+                )
+                .distinct()
+                .order_by("-created_at")
+            )
+
             student_courses_count = student_courses.count()
 
     # 6. Kateqoriyalar
-    categories = Category.objects.all().order_by('name')
+    categories = Category.objects.all().order_by("name")
 
     context = {
         "profile_user": profile_user,
@@ -563,11 +570,10 @@ def user_profile(request, username):
         "categories": categories,
         "pending_count": pending_count,
         "assigned_count": assigned_count,
-        "student_courses": student_courses,           # YENİ
+        "student_courses": student_courses,  # YENİ
         "student_courses_count": student_courses_count,  # YENİ
     }
     return render(request, "blog/user_profile.html", context)
-
 
 
 def logout_view(request):
@@ -580,31 +586,36 @@ def logout_view(request):
 
 # ------------------- CATEGORY DETAIL ------------------- #
 
+
 def category_detail(request, slug):
     # 1. Hazırkı seçilmiş kateqoriyanı tapırıq (yoxdursa 404 qaytarır)
     category = get_object_or_404(Category, slug=slug)
 
     # 2. YALNIZ bu kateqoriyaya aid olan və yayımlanmış postları tapırıq
-    posts = Post.objects.filter(category=category, is_published=True).order_by("-created_at")
+    posts = Post.objects.filter(category=category, is_published=True).order_by(
+        "-created_at"
+    )
 
     # 3. Sidebar üçün bütün kateqoriyaları və post saylarını hesablayırıq (Home view-dakı kimi)
     categories = (
-        Category.objects
-        .annotate(post_count=Count('posts', filter=Q(posts__is_published=True)))
+        Category.objects.annotate(
+            post_count=Count("posts", filter=Q(posts__is_published=True))
+        )
         .filter(post_count__gt=0)
-        .order_by('name')
+        .order_by("name")
     )
 
     context = {
-        'category': category,   # Başlıqda adını yazmaq üçün
-        'posts': posts,         # Süzülmüş postlar
-        'categories': categories # Sidebar üçün siyahı
+        "category": category,  # Başlıqda adını yazmaq üçün
+        "posts": posts,  # Süzülmüş postlar
+        "categories": categories,  # Sidebar üçün siyahı
     }
 
-    return render(request, 'blog/category_detail.html', context)
+    return render(request, "blog/category_detail.html", context)
 
 
 # ------------------- QUESTION SUBMISSION ------------------- #
+
 
 @login_required
 def create_question(request):
@@ -623,9 +634,7 @@ def create_question(request):
     else:
         form = QuestionForm()
 
-    return render(request, "blog/create_question.html", {
-        "form": form
-    })
+    return render(request, "blog/create_question.html", {"form": form})
 
 
 @login_required
@@ -634,9 +643,7 @@ def my_questions(request):
     Bu view müəllimin öz yaratdığı sualları göstərir.
     """
     questions = Question.objects.filter(author=request.user).order_by("-created_at")
-    return render(request, "blog/my_questions.html", {
-        "questions": questions
-    })
+    return render(request, "blog/my_questions.html", {"questions": questions})
 
 
 @login_required
@@ -647,21 +654,15 @@ def questions_i_can_see(request):
     + author = user olanlar,
     + visible_users siyahısında user olanlar.
     """
-    
 
     questions = (
-        Question.objects
-        .filter(
-            Q(visible_to_all=True) |
-            Q(author=request.user) |
-            Q(visible_users=request.user)
+        Question.objects.filter(
+            Q(visible_to_all=True)
+            | Q(author=request.user)
+            | Q(visible_users=request.user)
         )
         .distinct()
         .select_related("author")
     )
 
-    return render(request, "blog/questions_i_can_see.html", {
-        "questions": questions
-    })
-
-
+    return render(request, "blog/questions_i_can_see.html", {"questions": questions})
