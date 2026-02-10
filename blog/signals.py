@@ -5,8 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
-from .models import (Post,  # Post və Subscriber modellərini import et
-                     Subscriber)
+from .models import Post  # Post və Subscriber modellərini import et
+from .models import Subscriber
 
 
 # Yeni post üçün email göndərmək
