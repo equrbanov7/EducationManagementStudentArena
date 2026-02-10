@@ -2,8 +2,7 @@ import random
 
 from exams.constants import LABELS
 from exams.models import ExamAnswer
-from exams.services.utils import (_attempt_has_any_answer,
-                                  _effective_needed_count)
+from exams.services.utils import _attempt_has_any_answer, _effective_needed_count
 
 
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
