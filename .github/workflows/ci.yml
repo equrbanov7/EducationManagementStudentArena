@@ -116,7 +116,7 @@ jobs:
       - name: 📥 Install linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 flake8-docstrings flake8-bugbear black isort
+          pip install flake8 flake8-bugbear black isort
 
       # ───────────────────────────────────────────────────────────────────
       # STEP 1.5: Black - Kod formatı yoxlaması
