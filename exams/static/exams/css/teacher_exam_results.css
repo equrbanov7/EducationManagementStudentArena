@@ -1,0 +1,254 @@
+/* exams/css/teacher_exam_results.css - Final UX/UI Göy Dizayn */
+
+:root {
+    --primary-blue: #2563eb;      /* Əsas mavi (düymələr, vurğular) */
+    --dark-blue: #1e3a8a;         /* Tünd mavi (başlıq mətnləri) */
+    --light-blue-bg: #f1f5f9;     /* Çox açıq mavi (header fonu) */
+    --row-hover-bg: #e2e8f0;      /* Hover effekti */
+    --zebra-bg: #f8fafc;          /* Cüt sətir fonu */
+    --border-color: #cbd5e1;      /* İncə boz-mavi çərçivə */
+    --text-dark: #1e293b;         /* Əsas mətn rəngi */
+    --text-muted: #64748b;        /* İkinci dərəcəli mətn */
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+}
+
+/* --- Səhifə Konteyneri --- */
+.container.my-4 {
+    max-width: 1140px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+}
+
+/* --- Başlıqlar --- */
+.container.my-4 h1.h3 {
+    font-size: 2rem;
+    color: var(--dark-blue);
+    margin-bottom: 20px;
+    font-weight: 800;
+    text-align: center;
+    border-bottom: 2px solid var(--light-blue-bg);
+    padding-bottom: 15px;
+}
+
+.container.my-4 h3 {
+    font-size: 1.5rem;
+    color: var(--dark-blue);
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.container.my-4 h3::before {
+    content: '\f0c0'; /* FontAwesome Users Icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--primary-blue);
+}
+
+/* --- Ümumi Məlumat Paneli (P) --- */
+.container.my-4 p {
+    font-size: 1rem;
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-blue);
+    color: var(--text-dark);
+}
+
+/* --- CƏDVƏL DİZAYNI (ƏSAS HİSSƏ) --- */
+.table-responsive {
+    margin-top: 25px;
+    border-radius: 12px;
+    overflow: hidden; /* Köşələri yuvarlaq saxlamaq üçün */
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+table.table {
+    width: 100%;
+    border-collapse: separate; /* Hüceyrələri ayırır */
+    border-spacing: 0;
+    margin-bottom: 0;
+    color: var(--text-dark);
+}
+
+/* Cədvəl Başlığı (Thead) */
+table.table thead th {
+    background-color: var(--light-blue-bg);
+    color: var(--dark-blue);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    padding: 16px 20px; /* Geniş başlıq paddingi */
+    text-align: left;
+    border-bottom: 2px solid var(--border-color);
+    white-space: nowrap; /* Başlıqların qırılmaması üçün */
+}
+
+/* Cədvəl Gövdəsi (Tbody) */
+table.table tbody td {
+    padding: 16px 20px; /* Geniş hüceyrə paddingi */
+    vertical-align: middle; /* Şaquli mərkəzləşdirmə */
+    border-bottom: 1px solid var(--light-blue-bg);
+    font-size: 0.95rem;
+    background-color: #fff; /* Defolt fon */
+    transition: background-color 0.2s ease;
+}
+
+/* Zebra Striping (Cüt sətirlər üçün fərqli fon) */
+table.table tbody tr:nth-of-type(even) td {
+    background-color: var(--zebra-bg);
+}
+
+/* Hover Effekti */
+table.table tbody tr:hover td {
+    background-color: var(--row-hover-bg) !important;
+    cursor: default;
+}
+
+/* --- Cədvəl Daxili Elementlər --- */
+
+/* Adlar */
+.student-name-cell strong {
+    font-weight: 700;
+    color: var(--dark-blue);
+}
+.anonymous-name {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Rəqəmlər və Vurğular */
+td strong {
+    font-weight: 600;
+}
+
+/* Status Etiketləri (Badges) */
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.badge.bg-secondary {
+    background-color: var(--text-muted) !important;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.badge.bg-info.text-dark {
+    background-color: #dbeafe !important; /* Açıq göy */
+    color: var(--dark-blue) !important;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+/* Düymələr (Cədvəl daxili) */
+.action-cell .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border-width: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+.btn-outline-primary {
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+/* Digər düymə rəngləri (warning/success) bootstrap defaultlarıdır və bu stilə uyğundur */
+
+/* Countdown Timer */
+.countdown-timer {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--danger-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    background: #fee2e2;
+    padding: 4px 8px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+/* --- Boş Vəziyyət (Empty State) --- */
+p.text-muted.text-center {
+    text-align: center;
+    padding: 40px;
+    background: var(--zebra-bg);
+    border-radius: 12px;
+    border: 2px dashed var(--border-color);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-top: 25px;
+}
+p.text-muted.text-center i {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #cbd5e1;
+}
+
+/* --- Geri Düyməsi --- */
+.btn.btn-secondary.mt-3 {
+    background: #fff;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-top: 30px !important;
+}
+.btn.btn-secondary.mt-3:hover {
+    background: var(--light-blue-bg);
+    color: var(--text-dark);
+    border-color: #a0aec0;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container.my-4 {
+        padding: 20px;
+    }
+    /* Mobildə paddingləri bir az azaldırıq */
+    table.table thead th,
+    table.table tbody td {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    /* Mobildə düymələr tam en */
+    .action-cell .btn-sm {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+}

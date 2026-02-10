@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models.signals import m2m_changed, pre_save, post_save
 from django.dispatch import receiver
 
-from blog.models import StudentGroup
+from exams.models import StudentGroup
 from courses.models import CourseMembership
 
 

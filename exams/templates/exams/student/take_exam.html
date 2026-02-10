@@ -1,0 +1,763 @@
+{% extends "base.html" %}
+{% load get_item %}
+{% load static %}
+
+{% block title %}{{ exam.title }} - İmtahan{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/take_exam.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/paint_answer.css' %}">
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-container">
+    
+    <div class="exam-header">
+        <div class="header-top">
+            <div>
+                <h2 class="exam-title">{{ exam.title }}</h2>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                {# Sual timeri #}
+                <div class="question-timer-badge" id="question-timer-container" style="display: none;">
+                    <i class="fas fa-hourglass-half"></i> 
+                    Sual vaxtı: <span id="question-timer-value">--:--</span>
+                </div>
+
+                {# Ümumi imtahan timeri #}
+                <div class="timer-badge" id="exam-timer-container">
+                    <i class="fas fa-clock"></i> 
+                    Ümumi: <span id="timer-value">--:--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-area">
+            <div class="progress-info">
+                <span>Sual: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
+                <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post"
+          id="exam-form"
+          enctype="multipart/form-data"
+          data-exam-id="{{ exam.id }}"
+          data-attempt-id="{{ attempt.id }}"
+          data-exam-type="{{ exam.exam_type }}">
+        {% csrf_token %}
+ 
+        <div class="slides-wrapper">
+            {% for item in q_payload %}
+                {% with q=item.q %}
+                {% with ans_data=answers_by_qid|get_item:q.id %}
+                <div class="question-slide" 
+                     data-index="{{ forloop.counter0 }}" 
+                     id="slide-{{ forloop.counter0 }}"
+                     data-time-limit="{{ q.effective_time_limit|default:0 }}">
+                    
+                    <div class="question-content">
+                        <span class="q-number">Sual {{ forloop.counter }}</span>
+                        <p class="q-text">{{ q.text|linebreaks }}</p>
+
+                        {% if q.image %}
+                            <div class="question-media">
+                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            </div>
+                        {% endif %}
+                      
+                        {% if q.video %}
+                            <div class="question-media">
+                            <video controls preload="metadata" playsinline>
+                                <source src="{{ q.video.url }}">
+                                Brauzeriniz video göstərmir.
+                            </video>
+                            </div>
+                        {% endif %}
+                      
+
+                        {# --- TEST SUALLARI --- #}
+                        {% if exam.exam_type == "test" %}
+                            
+                            {% if q.answer_mode == "single" %}
+                            <div class="options-group">
+                                {% for opt in item.opts %}
+                                    <label class="option-card">
+                                        <input type="radio"
+                                               name="q_{{ q.id }}"
+                                               value="{{ opt.id }}"
+                                               data-question-id="{{ q.id }}"
+                                               {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
+                                        <span class="circle-mark"></span>
+                                        <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+
+                            {% elif q.answer_mode == "multiple" %}
+                                <div class="options-group">
+                                    {% for opt in item.opts %}
+                                        <label class="option-card">
+                                            <input type="checkbox"
+                                                name="q_{{ q.id }}"
+                                                value="{{ opt.id }}"
+                                                data-question-id="{{ q.id }}"
+                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
+                                            <span class="box-mark"></span>
+                                            <span class="opt-text">{{ opt.label }}) {{ opt.text }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                        {# --- YAZILI SUALLAR --- #}
+                        {% else %}
+                            <textarea name="q_{{ q.id }}" 
+                                      class="written-answer" 
+                                      placeholder="Cavabınızı bura yazın...">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
+                            <br>
+                                
+                            {# --- PAINT CAVABI --- #}
+                            {% if exam.enable_paint or q.enable_paint %}
+                                {% include "partials/_paint_answer.html" with q=q ans=ans_data.answer %}
+                            {% endif %}
+                        
+                        
+                        
+
+                            <div class="file-dropzone" 
+                                 data-qid="{{ q.id }}" 
+                                 ondrop="handleDrop(event, {{ q.id }})"
+                                 ondragover="event.preventDefault(); this.classList.add('hover');"
+                                 ondragleave="this.classList.remove('hover');">
+
+                                <p>Faylları buraya atın və ya klikləyin</p>
+
+                                <input type="file" 
+                                       name="file_{{ q.id }}[]" 
+                                       class="file-input" 
+                                       accept=".pdf,.png,.jpg,.jpeg,.zip"
+                                       multiple 
+                                       onchange="handleFiles(event, {{ q.id }})">
+                            </div>
+
+                            <button type="button"
+                                    class="add-file-btn"
+                                    onclick="triggerFileInput({{ q.id }})">
+                                + Əlavə fayl əlavə et
+                            </button>
+
+                            <div id="file-preview-{{ q.id }}" class="file-preview-area">
+                                {% if ans_data and ans_data.answer %}
+                                    {% for f in ans_data.answer.files.all %}
+                                        <div class="file-preview-item">
+                                            <div class="file-preview-left">
+                                                <span class="file-icon">{{ f.filename|slice:"-3:"|upper }}</span>
+                                                <a href="{{ f.file.url }}" target="_blank">{{ f.filename }}</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endwith %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+
+        <div class="exam-footer">
+            <button type="button" id="prev-btn" class="nav-btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Əvvəlki
+            </button>
+        
+            <button type="button" id="next-btn" class="nav-btn btn-primary">
+                Növbəti <i class="fas fa-arrow-right"></i>
+            </button>
+        
+            {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
+            <button style = "display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
+                <i class="fas fa-save"></i> Draft kimi saxla
+            </button>
+            
+            <button type="button" name="submit_action" value="finish" 
+                    id="finish-btn" class="nav-btn btn-success" style="display: none;">
+                İmtahanı Bitir <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+{# ---- Bitirmə təsdiq modali ---- #}
+<div class="confirm-modal-backdrop" id="finishConfirmBackdrop">
+    <div class="confirm-modal-box">
+        <h3>İmtahanı bitirmək istəyirsiniz?</h3>
+        <p>İmtahanı bitirdikdən sonra cavablarınızı dəyişə bilməyəcəksiniz.</p>
+        <div class="confirm-actions">
+            <button type="button" class="nav-btn btn-outline-secondary" id="cancelFinishBtn">
+                Xeyr, geri qayıt
+            </button>
+            <button type="button" class="nav-btn btn-danger" id="confirmFinishBtn">
+                Bəli, imtahanı bitir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.question-slide');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const currentQNum = document.getElementById('current-question-num');
+    const answeredCountEl = document.getElementById('answered-count');
+    const progressFill = document.getElementById('progress-fill');
+    const examForm = document.getElementById('exam-form');
+    const saveDraftBtn = document.getElementById('save-draft-btn');
+
+    const qTimerContainer = document.getElementById('question-timer-container');
+    const qTimerValue = document.getElementById('question-timer-value');
+
+    let questionTimerInterval = null;
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let hasUnsavedChanges = false;
+
+    // Exam type
+    const examType = examForm.dataset.examType;
+    console.log('Exam Type:', examType);
+    console.log('Save Draft Button:', saveDraftBtn);
+    
+    // Debug: Yüklənmiş cavabları yoxla
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    console.log('Checked radios on load:', checkedRadios.length);
+    console.log('Checked checkboxes on load:', checkedCheckboxes.length);
+    
+    // Seçilmiş cavabları göstər
+    checkedRadios.forEach(radio => {
+        console.log('Radio checked:', radio.name, '=', radio.value);
+    });
+    checkedCheckboxes.forEach(checkbox => {
+        console.log('Checkbox checked:', checkbox.name, '=', checkbox.value);
+    });
+
+    // localStorage üçün key
+    const examId = examForm.dataset.examId;
+    const attemptId = examForm.dataset.attemptId;
+    const storageKey = `exam_${examId}_attempt_${attemptId}_currentIndex`;
+
+    // Fayl state
+    const fileState = {};
+
+    // ✅ ƏLAVƏ: Bildiriş funksiyaları
+    function showNotification(message, type = "info", duration = 0) {
+        const notification = document.createElement('div');
+        notification.className = `auto-save-notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            transition: opacity 0.3s ease;
+        `;
+        
+        if (type === "success") {
+            notification.style.backgroundColor = "#10b981";
+            notification.style.color = "white";
+        } else if (type === "error") {
+            notification.style.backgroundColor = "#ef4444";
+            notification.style.color = "white";
+        } else {
+            notification.style.backgroundColor = "#3b82f6";
+            notification.style.color = "white";
+        }
+        
+        document.body.appendChild(notification);
+        
+        if (duration > 0) {
+            setTimeout(() => hideNotification(notification), duration);
+        }
+        
+        return notification;
+    }
+
+    function hideNotification(notification) {
+        if (notification && notification.parentNode) {
+            notification.style.opacity = "0";
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
+
+    function formatTime(totalSeconds) {
+        if (totalSeconds < 0) totalSeconds = 0;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function disableSlideInputs(slideElement) {
+        const inputs = slideElement.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+        slideElement.style.opacity = '0.7';
+        slideElement.style.pointerEvents = 'none';
+    }
+
+    function startQuestionTimer(slideElement) {
+        if (questionTimerInterval) {
+            clearInterval(questionTimerInterval);
+            qTimerContainer.classList.remove('danger');
+        }
+
+        if (slideElement.getAttribute('data-time-expired') === 'true') {
+            qTimerContainer.style.display = 'flex';
+            qTimerValue.textContent = "00:00";
+            qTimerContainer.classList.add('danger');
+            disableSlideInputs(slideElement);
+            return;
+        }
+
+        let timeLimit = parseInt(slideElement.getAttribute('data-time-limit')) || 0;
+
+        if (timeLimit > 0) {
+            qTimerContainer.style.display = 'flex';
+            qTimerValue.textContent = formatTime(timeLimit);
+
+            questionTimerInterval = setInterval(() => {
+                timeLimit--;
+                slideElement.setAttribute('data-time-limit', timeLimit);
+                
+                qTimerValue.textContent = formatTime(timeLimit);
+
+                if (timeLimit <= 10 && timeLimit > 0) {
+                    qTimerContainer.classList.add('danger');
+                }
+
+                if (timeLimit <= 0) {
+                    clearInterval(questionTimerInterval);
+                    slideElement.setAttribute('data-time-expired', 'true');
+                    disableSlideInputs(slideElement);
+
+                    if (currentIndex < totalSlides - 1) {
+                        showSlide(currentIndex + 1);
+                    } else {
+                        localStorage.removeItem(storageKey);
+                        examForm.submit();
+                    }
+                    updateProgress();
+                }
+            }, 1000);
+        } else {
+            qTimerContainer.style.display = 'none';
+        }
+    }
+
+    function showSlide(index) {
+        slides.forEach(slide => slide.classList.remove('active'));
+
+        const currentSlide = slides[index];
+        currentSlide.classList.add('active');
+        
+        currentQNum.textContent = index + 1;
+
+        prevBtn.style.visibility = (index === 0) ? 'hidden' : 'visible';
+        if (index === totalSlides - 1) {
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'flex';
+        } else {
+            nextBtn.style.display = 'flex';
+            finishBtn.style.display = 'none';
+        }
+
+        currentIndex = index;
+        localStorage.setItem(storageKey, index);
+        startQuestionTimer(currentSlide);
+        updateProgress();
+    }
+
+    function updateProgress() {
+        let answeredCount = 0;
+        slides.forEach(slide => {
+            const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
+            const textareas = slide.querySelectorAll('textarea:not(:disabled)');
+            let hasText = false;
+            if (textareas.length > 0) {
+                if (textareas[0].value.trim().length > 0) hasText = true;
+            }
+            if (inputs.length > 0 || hasText) {
+                answeredCount++;
+            }
+        });
+        answeredCountEl.textContent = answeredCount;
+        const percent = (answeredCount / totalSlides) * 100;
+        progressFill.style.width = percent + '%';
+    }
+
+    // Test suallarında radio/checkbox dəyişikliyini izlə
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', function() {
+            console.log('Input changed:', this.name, this.value);
+            hasUnsavedChanges = true;
+            updateProgress();
+            
+            // ✅ ƏLAVƏ: Test suallarında avtomatik draft saxla
+            if (examType === 'test') {
+                // Debounce ilə - 1 saniyə gözlə, sonra saxla
+                clearTimeout(window.autoSaveTimer);
+                window.autoSaveTimer = setTimeout(() => {
+                    console.log('Auto-saving test answer...');
+                    sendDraft("autosave");
+                }, 1000);
+            }
+        });
+    });
+
+    // Yazılı cavablarda textarea dəyişikliyini izlə
+    document.querySelectorAll('textarea.written-answer').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            hasUnsavedChanges = true;
+            updateProgress();
+            
+            // ✅ ƏLAVƏ: Yazılı suallarda da avtomatik draft saxla (3 saniyə debounce)
+            clearTimeout(window.autoSaveTimer);
+            window.autoSaveTimer = setTimeout(() => {
+                console.log('Auto-saving written answer...');
+                sendDraft("autosave");
+            }, 3000); // Yazılı cavablar üçün 3 saniyə gözlə
+        });
+    });
+
+    // Ümumi imtahan timeri
+    {% if remaining_seconds is not None %}
+    let remainingSeconds = parseInt("{{ remaining_seconds }}");
+    
+    if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
+        const timerValueElement = document.getElementById('timer-value');
+        const timerContainer = document.getElementById('exam-timer-container');
+        
+        timerValueElement.textContent = formatTime(remainingSeconds);
+
+        const timerInterval = setInterval(() => {
+            remainingSeconds--;
+            
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                if (questionTimerInterval) clearInterval(questionTimerInterval);
+                timerValueElement.textContent = "00:00";
+
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "submit_action";
+                hiddenInput.value = "finish";
+                examForm.appendChild(hiddenInput);
+
+                localStorage.removeItem(storageKey);
+                examForm.submit();
+                return;
+            }
+            
+            timerValueElement.textContent = formatTime(remainingSeconds);
+            
+            if (remainingSeconds < 60) {
+                timerContainer.style.backgroundColor = '#fee2e2';
+                timerContainer.style.color = '#dc2626';
+            }
+        }, 1000);
+    } else {
+        document.getElementById('timer-value').textContent = "00:00";
+    }
+    {% endif %}
+
+    // ---- Fayl helper-ləri ----
+    function syncInputFiles(qid) {
+        const input = document.querySelector(`input[name="file_${qid}[]"]`);
+        if (!input) return;
+
+        const dt = new DataTransfer();
+        (fileState[qid] || []).forEach(f => dt.items.add(f));
+        input.files = dt.files;
+    }
+
+    function renderPreview(qid) {
+        const container = document.getElementById(`file-preview-${qid}`);
+        if (!container) return;
+
+        const files = fileState[qid] || [];
+        container.innerHTML = "";
+
+        files.forEach((f, idx) => {
+            let icon = "📄";
+            const nameLower = f.name.toLowerCase();
+            if (nameLower.endsWith(".pdf")) icon = "📕";
+            if (nameLower.endsWith(".zip")) icon = "🗂️";
+            if (f.type.startsWith("image/")) icon = "🖼️";
+
+            container.innerHTML += `
+                <div class="file-preview-item" data-index="${idx}">
+                    <div class="file-preview-left">
+                        <span class="file-icon">${icon}</span>
+                        <span class="file-name">${f.name}</span>
+                    </div>
+                    <button type="button" class="file-remove-btn" onclick="removeFile(${qid}, ${idx})">
+                        &times;
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    window.handleFiles = function(event, qid) {
+        const selected = Array.from(event.target.files);
+        if (!fileState[qid]) fileState[qid] = [];
+        fileState[qid] = fileState[qid].concat(selected);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    window.handleDrop = function(event, qid) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('hover');
+
+        const selected = Array.from(event.dataTransfer.files);
+        if (!fileState[qid]) fileState[qid] = [];
+        fileState[qid] = fileState[qid].concat(selected);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    window.triggerFileInput = function(qid) {
+        const input = document.querySelector(`input[name="file_${qid}[]"]`);
+        if (input) {
+            input.click();
+        }
+    };
+
+    window.removeFile = function(qid, index) {
+        if (!fileState[qid]) return;
+        fileState[qid].splice(index, 1);
+        hasUnsavedChanges = true;
+        syncInputFiles(qid);
+        renderPreview(qid);
+    };
+
+    // Draft / autosave – AJAX
+    function sendDraft(action = "autosave") {
+        if (action === "autosave" && !hasUnsavedChanges) {
+            console.log('No unsaved changes, skipping autosave');
+            return;
+        }
+
+        console.log('Sending draft, action:', action, 'hasUnsavedChanges:', hasUnsavedChanges);
+
+        const formData = new FormData(examForm);
+        formData.append("submit_action", action);
+
+        // ✅ ƏLAVƏ: Vizual feedback - kiçik bildiriş göstər
+        let notification = null;
+        if (action === "autosave") {
+            notification = showNotification("Saxlanılır...", "info");
+        }
+
+        fetch(window.location.href, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Draft response:', data);
+            hasUnsavedChanges = false;
+
+            // ✅ ƏLAVƏ: Uğurlu bildiriş
+            if (notification) {
+                hideNotification(notification);
+            }
+            if (action === "autosave") {
+                showNotification("✓ Saxlanıldı", "success", 2000);
+            }
+
+            if (data.finished && data.redirect_url) {
+                localStorage.removeItem(storageKey);
+                window.location.href = data.redirect_url;
+                return;
+            }
+
+            if (action === "save_draft") {
+                const originalText = saveDraftBtn.innerHTML;
+                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Draft saxlanıldı';
+                saveDraftBtn.disabled = true;
+                setTimeout(() => {
+                    saveDraftBtn.innerHTML = originalText;
+                    saveDraftBtn.disabled = false;
+                }, 2000);
+            }
+        })
+        .catch(err => {
+            console.error("Draft saxlanarkən xəta:", err);
+            if (notification) {
+                hideNotification(notification);
+            }
+            showNotification("Xəta baş verdi", "error", 3000);
+            
+            if (action === "save_draft") {
+                alert("Draft saxlanarkən xəta baş verdi. Yenidən cəhd edin.");
+            }
+        });
+    }
+
+    // Draft düyməsi click
+    if (saveDraftBtn) {
+        saveDraftBtn.addEventListener("click", function () {
+            console.log('Draft button clicked');
+            
+            // Düyməni disable et
+            const originalText = saveDraftBtn.innerHTML;
+            saveDraftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saxlanılır...';
+            saveDraftBtn.disabled = true;
+            
+            // Draft saxla
+            const formData = new FormData(examForm);
+            formData.append("submit_action", "save_draft");
+
+            fetch(window.location.href, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Manual draft response:', data);
+                hasUnsavedChanges = false;
+
+                if (data.finished && data.redirect_url) {
+                    localStorage.removeItem(storageKey);
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+
+                // Uğur mesajı
+                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Saxlanıldı!';
+                showNotification("✓ Draft saxlanıldı", "success", 2000);
+                
+                setTimeout(() => {
+                    saveDraftBtn.innerHTML = originalText;
+                    saveDraftBtn.disabled = false;
+                }, 2000);
+            })
+            .catch(err => {
+                console.error("Draft saxlanarkən xəta:", err);
+                saveDraftBtn.innerHTML = originalText;
+                saveDraftBtn.disabled = false;
+                showNotification("Xəta baş verdi", "error", 3000);
+            });
+        });
+    }
+
+    // ✅ DƏYİŞİKLİK: 5 dəqiqəlik interval-ı silmək olar, çünki artıq avtomatik saxlama var
+    // Amma təhlükəsizlik üçün saxlaya bilərik (backup kimi)
+    setInterval(() => {
+        if (hasUnsavedChanges) {
+            console.log('Periodic auto-save (backup)...');
+            sendDraft("autosave");
+        }
+    }, 5 * 60 * 1000);
+
+    // Səhifədən çıxanda xəbərdarlıq
+    window.addEventListener("beforeunload", function (e) {
+        if (!hasUnsavedChanges) return;
+        e.preventDefault();
+        e.returnValue = "";
+    });
+
+    // Finish confirm modal
+    const finishConfirmBackdrop = document.getElementById('finishConfirmBackdrop');
+    const cancelFinishBtn = document.getElementById('cancelFinishBtn');
+    const confirmFinishBtn = document.getElementById('confirmFinishBtn');
+
+    finishBtn.addEventListener('click', () => {
+        finishConfirmBackdrop.style.display = 'flex';
+    });
+
+    cancelFinishBtn.addEventListener('click', () => {
+        finishConfirmBackdrop.style.display = 'none';
+    });
+
+    finishConfirmBackdrop.addEventListener('click', (e) => {
+        if (e.target === finishConfirmBackdrop) {
+            finishConfirmBackdrop.style.display = 'none';
+        }
+    });
+
+    confirmFinishBtn.addEventListener('click', () => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'submit_action';
+        hiddenInput.value = 'finish';
+        examForm.appendChild(hiddenInput);
+
+        localStorage.removeItem(storageKey);
+        examForm.submit();
+    });
+
+    // Navigasiya düymələri
+    nextBtn.addEventListener('click', () => {
+        if (currentIndex < totalSlides - 1) showSlide(currentIndex + 1);
+    });
+    prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) showSlide(currentIndex - 1);
+    });
+
+    // Başlanğıc slayd
+    const savedIndex = parseInt(localStorage.getItem(storageKey));
+    if (!isNaN(savedIndex) && savedIndex >= 0 && savedIndex < totalSlides) {
+        currentIndex = savedIndex;
+    } else {
+        currentIndex = 0;
+    }
+    showSlide(currentIndex);
+});
+</script>
+ 
+{% block extraJs %}
+    <script src="{% static 'js/paint_answer.js' %}"></script>
+{% endblock %}
+
+{% endblock %}

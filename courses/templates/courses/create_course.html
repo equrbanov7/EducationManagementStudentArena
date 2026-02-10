@@ -75,7 +75,7 @@
                             <div class="input-group">
                                 {{ form.cover_image }}
                                 <label class="input-group-text" for="{{ form.cover_image.id_for_label }}">
-                                    <i class="fas fa-upload"></i> Şəkil Seç
+                                    <i class="fas fa-upload" style="padding:6px"></i> Şəkil Seç
                                 </label>
                             </div>
                             
@@ -153,38 +153,288 @@
 </script>
 
 <style>
-    .card-header {
-        border-radius: 8px 8px 0 0;
-        padding: 2rem;
+    /*=============================================
+    =            Modern Form Styling              =
+    =============================================*/
+    position: relative;
+    right: 4px;
+    
+    /* --- Ümumi Konteyner və Arxa Plan --- */
+    body {
+        background-color: #f8f9fc; /* Çox açıq boz arxa plan */
     }
     
+    .container {
+        max-width: 1200px; /* Böyük ekranlarda məzmun çox yayılmasın */
+    }
+    
+    /* --- Əsas Kart Dizaynı --- */
+    .card.shadow-lg {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important; /* Daha yumşaq kölgə */
+        overflow: hidden; /* Header border-radius üçün */
+        background: #fff;
+    }
+    
+    /* --- Kart Başlığı (Header) --- */
+    .card-header.bg-gradient {
+        background: linear-gradient(120deg, #4e73df, #224abe) !important; /* Daha peşəkar mavi qradient */
+        padding: 2.5rem 2rem; /* Daha geniş daxili boşluq */
+        border-bottom: none;
+    }
+    
+    .card-header h2 {
+        font-weight: 700;
+        font-size: 1.8rem;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* --- Kart Gövdəsi (Body) və Form --- */
+    .card-body.p-5 {
+        padding: 3rem !important; /* Bootstrap p-5-i override edir */
+    }
+    
+    /* --- Etiketlər (Labels) --- */
     .form-label {
+        font-size: 0.95rem;
         font-weight: 600;
-        color: #333;
+        color: #4a5568; /* Daha tünd boz */
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
     }
     
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
+    .form-label i {
+        color: #4e73df; /* İkon rəngi */
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
     }
     
-    .form-control:focus, .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    .text-danger {
+        color: #e3342f !important; /* Daha canlı qırmızı */
+        margin-left: 4px;
     }
     
-    .btn-lg {
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        border-radius: 8px;
+    /* --- İnput Sahələri --- */
+    .form-control, 
+    .form-select,
+    .input-group-text {
+        border: 2px solid #e2e8f0; /* Daha qalın, açıq boz çərçivə */
+        border-radius: 12px !important; /* Daha yumru künclər */
+        padding: 0.875rem 1.2rem; /* Daha rahat daxili boşluq */
+        font-size: 1rem;
+        color: #2d3748;
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+    }
+    
+    /* İnput Fokus Halı */
+    .form-control:focus, 
+    .form-select:focus {
+        border-color: #4e73df; /* Fokus rəngi */
+        box-shadow: 0 0 0 4px rgba(78, 115, 223, 0.15) !important; /* Yumşaq fokus kölgəsi */
+        background-color: #fff;
+    }
+    
+    /* Textarea Xüsusi Stili */
+    textarea.form-control {
+        resize: vertical; /* Yalnız şaquli ölçülən */
+        min-height: 120px;
+    }
+    
+    /* --- Fayl Yükləmə Sahəsi --- */
+    .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    
+    .input-group .form-control {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none;
     }
     
     .input-group-text {
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        background-color: #f1f5f9;
+        color: #4a5568;
+        font-weight: 600;
+        border-left: 1px solid #e2e8f0;
         cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .input-group-text:hover {
+        background-color: #e2e8f0;
+        color: #2d3748;
+    }
+    
+    /* Şəkil Preview */
+    #previewImg {
+        border-radius: 12px !important;
+        border: 3px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+    
+    /* --- Köməkçi Mətnlər (Small Text) --- */
+    .text-muted {
+        color: #718096 !important; /* Daha oxunaqlı boz */
+        font-size: 0.85rem;
+        margin-top: 0.6rem !important;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .text-muted i {
+        color: #a0aec0;
+        margin-right: 0.4rem;
+        margin-top: 0.2rem;
+    }
+    
+    /* --- Xəta Mesajları --- */
+    .alert-danger {
+        background-color: #fff5f5;
+        border-left: 4px solid #e3342f;
+        color: #c53030;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .alert-danger i {
+        font-size: 1.1rem;
+        margin-right: 0.5rem;
+    }
+    
+    /* --- Düymələr --- */
+    .btn-lg {
+        padding: 0.875rem 2rem;
+        font-weight: 700;
+        font-size: 1rem;
+        border-radius: 12px;
+        text-transform: uppercase; /* Düymə mətnlərini böyük hərflə yazmaq */
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(to right, #4e73df, #224abe);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(to right, #224abe, #1a365d);
+        transform: translateY(-2px); /* Yüngül qalxma effekti */
+        box-shadow: 0 6px 12px rgba(78, 115, 223, 0.25);
+    }
+    
+    .btn-secondary {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        border: none;
+        box-shadow: none;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #cbd5e0;
+        color: #2d3748;
+        transform: translateY(-2px);
+    }
+    
+    /* --- Məlumat Kartı (Info Card) --- */
+    .alert-info.border-0 {
+        background-color: #ebf8ff; /* Çox açıq mavi */
+        border-left: 5px solid #4299e1; /* Sol tərəfdə qalın xətt */
+        color: #2c5282;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    .alert-info h5 {
+        color: #2b6cb0;
+        font-weight: 700;
+        margin-bottom: 1.2rem !important;
+    }
+    
+    .alert-info ul li {
+        margin-bottom: 0.8rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    
+    /* Siyahı elementləri üçün xüsusi ikon (font awesome əvəzinə CSS ilə) */
+    .alert-info ul li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #4299e1;
+        font-weight: bold;
+    }
+    
+    /*=============================================
+    =            Responsive Düzəlişlər           =
+    =============================================*/
+    
+    /* Mobil Cihazlar (768px-dən kiçik) */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .card.shadow-lg {
+            border-radius: 15px;
+        }
+    
+        /* Header padding-i azaldırıq */
+        .card-header.bg-gradient {
+            padding: 1.5rem;
+        }
+    
+        .card-header h2 {
+            font-size: 1.4rem;
+            text-align: center; /* Başlığı mərkəzləşdir */
+        }
+    
+        /* Body padding-i azaldırıq */
+        .card-body.p-5 {
+            padding: 1.5rem !important;
+        }
+    
+        /* İnputlar daha yığcam olsun */
+        .form-control, 
+        .form-select,
+        .input-group-text,
+        .btn-lg {
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border-radius: 10px !important;
+        }
+        
+        /* Düymələr alt-alta düşsün (əgər yan-yana sığmırsa) */
+        .d-flex.gap-3.mt-5 {
+            flex-direction: column-reverse; /* Geri düyməsi aşağı düşsün */
+            gap: 1rem !important;
+            margin-top: 2rem !important;
+        }
+    
+        .btn-lg {
+            width: 100%; /* Düymələr tam genişlikdə olsun */
+        }
+    
+        /* Məlumat kartı daha yığcam olsun */
+        .alert-info.border-0 {
+            padding: 1.5rem;
+            margin-top: 2rem !important; /* Yuxarıdan boşluq */
+        }
     }
 </style>
 {% endblock %}
