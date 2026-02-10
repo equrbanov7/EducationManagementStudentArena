@@ -2,8 +2,13 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from exams.models import (Exam, ExamQuestion, ExamQuestionOption,
-                          QuestionBlock, StudentGroup)
+from exams.models import (
+    Exam,
+    ExamQuestion,
+    ExamQuestionOption,
+    QuestionBlock,
+    StudentGroup,
+)
 
 
 class ExamForm(forms.ModelForm):
