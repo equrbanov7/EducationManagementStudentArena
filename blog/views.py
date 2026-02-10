@@ -18,7 +18,8 @@ from django.views.decorators.http import require_POST
 
 from exams.models import Exam, ExamAttempt
 
-from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
+from .forms import (CommentForm, PostForm, QuestionForm, RegisterForm,
+                    SubscriptionForm)
 from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
 from .utils import generate_otp, send_verify_email
 
