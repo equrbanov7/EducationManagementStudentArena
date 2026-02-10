@@ -3,7 +3,7 @@
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from courses.models import Course
 from exams.models import Exam, ExamAttempt
 
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
@@ -481,7 +482,6 @@ def user_profile(request, username):
     """
     İstifadəçi profili.
     """
-    from courses.models import Course, CourseMembership
 
     profile_user = get_object_or_404(User, username=username)
 

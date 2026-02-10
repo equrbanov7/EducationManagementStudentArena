@@ -12,14 +12,15 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Max, Q
+from django.db.models import Max
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
-from exams.models import Exam, ExamAttempt
+from exams.models import Exam, ExamAttempt, StudentGroup
+from labs.models import LabAssignment, LabSubmission
 
 from .forms import CourseForm, CourseResourceForm, CourseTopicForm
 from .models import Course, CourseMembership, CourseResource, CourseTopic
@@ -300,8 +301,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
         # ═══════════════════════════════════════════════════════════════════
 
-        from labs.models import Lab, LabAssignment, LabSubmission
-
         if context["is_owner"] or context["is_teacher"]:
             # MÜƏLLİM - bütün lab-lar
             context["labs"] = course.labs.all().order_by("-created_at")
@@ -361,13 +360,13 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
                     # Əgər heç bir tələbə/qrup seçilməyibsə, heç kim görməsin:
                     is_assigned = False
-                    print(f"DEBUG:   No filter set - NOT assigned")  # DEBUG
+                    print("DEBUG:   No filter set - NOT assigned")  # DEBUG
                 else:
                     # Filtr var - yoxla
                     # Student ID ilə yoxla
                     if user.id in allowed_student_ids:
                         is_assigned = True
-                        print(f"DEBUG:   Assigned by student ID")  # DEBUG
+                        print("DEBUG:   Assigned by student ID")  # DEBUG
 
                     # Qrup adı ilə yoxla
                     if (
@@ -376,7 +375,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         and student_group in allowed_group_names
                     ):
                         is_assigned = True
-                        print(f"DEBUG:   Assigned by group name")  # DEBUG
+                        print("DEBUG:   Assigned by group name")  # DEBUG
 
                 print(f"DEBUG:   Final is_assigned: {is_assigned}")  # DEBUG
 
@@ -463,7 +462,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-                from exams.models import StudentGroup
 
                 context["all_groups"] = StudentGroup.objects.all().order_by("name")
             except ImportError:
@@ -726,7 +724,6 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
             )
 
         try:
-            from exams.models import StudentGroup
 
             all_groups = StudentGroup.objects.all().order_by("name")
         except ImportError:
@@ -859,7 +856,6 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             )
 
         try:
-            from exams.models import StudentGroup
 
             groups = StudentGroup.objects.filter(id__in=group_ids)
 

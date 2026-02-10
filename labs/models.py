@@ -11,15 +11,10 @@ Modellər:
 5. LabSubmission - Tələbənin cavabı
 """
 
-import hashlib
 import random
 
 from django.contrib.auth import get_user_model
-from django.core.validators import (
-    FileExtensionValidator,
-    MaxValueValidator,
-    MinValueValidator,
-)
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -491,7 +486,7 @@ class LabSubmission(models.Model):
             try:
                 if self.is_late:
                     self.status = "late"
-            except:
+            except Exception:
                 pass
         super().save(*args, **kwargs)
 

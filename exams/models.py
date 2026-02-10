@@ -223,7 +223,6 @@ class Exam(models.Model):
         """İmtahan hələ başlamayıb?"""
         if not self.start_datetime:
             return False
-        from django.utils import timezone
 
         return timezone.now() < self.start_datetime
 
@@ -231,7 +230,6 @@ class Exam(models.Model):
         """İmtahan bitib?"""
         if not self.end_datetime:
             return False
-        from django.utils import timezone
 
         return timezone.now() > self.end_datetime
 
@@ -298,7 +296,6 @@ class Exam(models.Model):
 
         # ✅ YENİ: Tarix yoxlaması
         if self.is_before_start():
-            from django.utils import timezone
 
             start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
             return False, f"İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"

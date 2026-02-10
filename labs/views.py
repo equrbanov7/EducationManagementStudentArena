@@ -4,6 +4,7 @@ Labs Views - Bütün view-lar pk istifadə edir
 
 import json
 import os
+import traceback
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,6 +13,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
+
+from courses.models import Course, CourseMembership
 
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
@@ -24,7 +27,6 @@ from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSub
 @require_POST
 def create_lab(request, course_id):
     """Lab yarat"""
-    from courses.models import Course, CourseMembership
 
     course = get_object_or_404(Course, id=course_id)
 
@@ -475,7 +477,6 @@ def lab_submissions(request, pk):
     )
 
     # Qrupları al - CourseMembership-dən
-    from courses.models import CourseMembership
 
     memberships = (
         CourseMembership.objects.filter(course=lab.course, role="student")
@@ -606,7 +607,6 @@ def preview_randomization(request, pk):
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     # Kurs tələbələrini al
-    from courses.models import CourseMembership
 
     memberships = CourseMembership.objects.filter(
         course=lab.course, role="student"
@@ -629,7 +629,7 @@ def preview_randomization(request, pk):
             questions = assignment.assigned_questions.all().order_by(
                 "block__order", "question_number"
             )
-        except:
+        except Exception:
             pass
 
     context = {
@@ -686,7 +686,7 @@ def lab_detail(request, pk):
 
             # Əgər hələ də sual yoxdursa, yenidən təyin et
             if questions.count() == 0:
-                print(f"[WARNING] Sual tapılmadı, yenidən assign edilir...")
+                print("[WARNING] Sual tapılmadı, yenidən assign edilir...")
                 assignment.assign_questions()
                 questions = assignment.assigned_questions.select_related(
                     "block"
@@ -786,7 +786,6 @@ def auto_save_answer(request, pk):
         return JsonResponse({"success": True})
 
     except Exception as e:
-        import traceback
 
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(e)})
@@ -845,7 +844,6 @@ def submit_lab(request, pk):
         )
 
     except Exception as e:
-        import traceback
 
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(e)})
@@ -859,7 +857,6 @@ def submit_lab(request, pk):
 @login_required
 def api_get_groups(request, course_id):
     """Kurs qruplarını qaytarır"""
-    from courses.models import Course, CourseMembership
 
     course = get_object_or_404(Course, id=course_id)
 
@@ -879,7 +876,6 @@ def api_get_groups(request, course_id):
 @login_required
 def api_get_students(request, course_id):
     """Kurs tələbələrini qaytarır"""
-    from courses.models import Course, CourseMembership
 
     course = get_object_or_404(Course, id=course_id)
     groups = request.GET.get("groups", "").split(",")
@@ -1003,7 +999,7 @@ def my_lab_answers(request, pk):
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
-    except:
+    except Exception:
         # Əgər attempt_number field yoxdursa
         answers = (
             LabAnswer.objects.filter(lab=lab, student=request.user, is_draft=False)
