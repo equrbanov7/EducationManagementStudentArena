@@ -3,7 +3,7 @@ import string
 from django.db import models
 from django.utils import timezone
 
-from blog.models import Exam, ExamQuestion  
+from exams.models import Exam, ExamQuestion  
 
 
 def generate_pin():

@@ -24,7 +24,7 @@ from channels.layers import get_channel_layer
 
 from liveExam.models import LiveSession, LivePlayer, LiveAnswer
 from liveExam.constants import AVATAR_EMOJI
-from blog.models import Exam, ExamQuestion, ExamQuestionOption
+from exams.models import Exam, ExamQuestion, ExamQuestionOption
 
 
 AVATAR_KEYS = [

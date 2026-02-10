@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Mənim görə bildiyim suallar{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Mənim görə bildiyim suallar</h1>
+
+    {% if questions %}
+        <ul class="list-group">
+            {% for q in questions %}
+                <li class="list-group-item">
+                    <strong>{{ q.question_text }}</strong><br>
+                    {% if q.answer_text %}
+                        <small>Cavab:</small> {{ q.answer_text }}<br>
+                    {% endif %}
+                    <small class="text-muted">
+                        Müəllif: {{ q.author.username }} —
+                        {{ q.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Görə bildiyiniz sual yoxdur.</p>
+    {% endif %}
+</div>
+{% endblock %}

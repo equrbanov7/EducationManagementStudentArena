@@ -1,0 +1,218 @@
+<!-- MODAL: Mövzu Redaktə Etmə -->
+<div class="modal fade" id="topicEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="topicEditModalLabel">
+                    <i class="fas fa-edit"></i> Mövzunu Redaktə Et
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Body -->
+            <div class="modal-body">
+                <form id="topicEditForm" method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Hidden Topic ID -->
+                    <input type="hidden" id="editTopicId" name="topic_id">
+                    
+                    <!-- Title Field -->
+                    <div class="mb-3">
+                        <label for="editTopicTitle" class="form-label">
+                            <strong>Mövzu Adı</strong>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="editTopicTitle" 
+                               name="title" required>
+                    </div>
+                    
+                    <!-- Description Field -->
+                    <div class="mb-3">
+                        <label for="editTopicDescription" class="form-label">
+                            <strong>Mövzu Təsviri</strong>
+                        </label>
+                        <textarea class="form-control" id="editTopicDescription" 
+                                  name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <!-- Error Messages Container -->
+                    <div id="topicEditErrors" class="alert alert-danger d-none" role="alert"></div>
+                    
+                    <!-- Submit Button -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning flex-grow-1">
+                            <i class="fas fa-save"></i> Yadda Saxla
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Ləğv Et
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // Pending data storage
+    let pendingTopicData = null;
+
+    // Modal element
+    const modalEl = document.getElementById('topicEditModal');
+    const form = document.getElementById('topicEditForm');
+
+    if (!modalEl || !form) {
+        console.error('⚠️ topicEditModal və ya topicEditForm tapılmadı!');
+        return;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MODAL SHOWN EVENT - Data yazılır
+    // ═══════════════════════════════════════════════════════════
+    
+    modalEl.addEventListener('shown.bs.modal', function() {
+        if (pendingTopicData) {
+            console.log('✓ Modal açıldı, data yazılır:', pendingTopicData);
+            
+            document.getElementById('editTopicId').value = pendingTopicData.id || '';
+            document.getElementById('editTopicTitle').value = pendingTopicData.title || '';
+            document.getElementById('editTopicDescription').value = pendingTopicData.description || '';
+            
+            // Error container-i təmizlə
+            const errContainer = document.getElementById('topicEditErrors');
+            if (errContainer) {
+                errContainer.classList.add('d-none');
+                errContainer.innerHTML = '';
+            }
+            
+            // Focus title input
+            setTimeout(() => {
+                document.getElementById('editTopicTitle').focus();
+            }, 100);
+            
+            pendingTopicData = null;
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // GLOBAL FUNCTION - editTopic()
+    // ═══════════════════════════════════════════════════════════
+    
+    window.editTopic = function(topicId, title, description) {
+        console.log('→ editTopic çağırıldı:', {topicId, title, description});
+        
+        // Data-nı pending storage-ə saxla
+        pendingTopicData = {
+            id: topicId,
+            title: title,
+            description: description
+        };
+        
+        // Modalı aç
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // FORM SUBMIT
+    // ═══════════════════════════════════════════════════════════
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const topicId = document.getElementById('editTopicId').value;
+        
+        if (!topicId) {
+            alert('Xəta: Mövzu ID tapılmadı!');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        const actionUrl = `/courses/topic/${topicId}/edit/`;
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yenilənir...';
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Modalı bağla
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                // Notification
+                if (typeof notify === 'function') {
+                    notify(data.message || 'Mövzu yeniləndi!', 'success');
+                }
+
+                // Reload
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                // Xətaları göstər
+                showFormErrors('topicEditErrors', data.errors || {});
+            }
+        })
+        .catch(err => {
+            console.error('Xəta:', err);
+            if (typeof notify === 'function') {
+                notify('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+            } else {
+                alert('Xəta baş verdi!');
+            }
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // HELPER: Show Form Errors
+    // ═══════════════════════════════════════════════════════════
+    
+    function showFormErrors(containerId, errors) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        let errorHtml = '<strong>Xətalar:</strong><ul class="mb-0">';
+        for (const [field, messages] of Object.entries(errors)) {
+            const msg = (Array.isArray(messages) && messages[0]) ? messages[0] : 'Xəta';
+            errorHtml += `<li>${msg}</li>`;
+        }
+        errorHtml += '</ul>';
+
+        container.innerHTML = errorHtml;
+        container.classList.remove('d-none');
+    }
+
+    console.log('✓ Topic Edit Modal initialized');
+})();
+</script>
+
+<style>
+    #topicEditForm .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    #topicEditForm .form-control {
+        border-radius: 6px;
+    }
+    
+    #topicEditForm .form-control:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+    }
+</style>

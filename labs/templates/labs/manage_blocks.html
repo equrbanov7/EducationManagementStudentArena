@@ -3,6 +3,10 @@
 
 {% block title %}{{ lab.title }} - Bloklar & Suallar{% endblock %}
 
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'labs/css/manage_blocks.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     
@@ -337,11 +341,19 @@
                 <div class="modal-body">
                     <div class="alert alert-light">
                         <strong><i class="fas fa-info-circle me-1"></i> Format:</strong>
-                        Hər sətir bir sualdır.
+                        <ul class="mb-0 mt-2">
+                            <li><code>1. Sual mətni</code> və ya <code>1) Sual mətni</code></li>
+                            <li><code>2. Başqa sual</code> və ya <code>2) Başqa sual</code></li>
+                            <li>Nömrəsiz sətir = əvvəlki sualın davamı</li>
+                        </ul>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Sualları Yapışdırın</label>
-                        <textarea name="questions_text" class="form-control" rows="10" required></textarea>
+                        <textarea name="questions_text" class="form-control font-monospace" rows="12" required 
+                                  placeholder="1. İlk sual mətni burda
+Bu sətr də ilk sualın davamıdır
+2) İkinci sual başqa formatda
+3. Üçüncü sual..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -353,301 +365,13 @@
     </div>
 </div>
 
-<style>
-.accordion-item {
-    border: 1px solid #dee2e6;
-    margin-bottom: 0.5rem;
-    border-radius: 8px !important;
-    overflow: hidden;
-}
-.accordion-button:not(.collapsed) {
-    background-color: #e7f1ff;
-    color: #0c63e4;
-}
-.accordion-button:focus {
-    box-shadow: none;
-}
-</style>
-
+<!-- CSRF Token for JS -->
 <script>
-(function(){
-    const LAB_ID = {{ lab.id }};
-    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-    const $ = id => document.getElementById(id);
-
-    // ═══════════════════════════════════════════════════════════
-    // PENDING DATA - Modal açılmadan əvvəl saxlanır
-    // ═══════════════════════════════════════════════════════════
-    
-    let pendingBlockData = null;
-    let pendingQuestionData = null;
-    let pendingImportBlockId = null;
-    let pendingAddQuestionBlockId = null;
-
-    // ═══════════════════════════════════════════════════════════
-    // EDIT BLOCK MODAL - shown.bs.modal event ilə
-    // ═══════════════════════════════════════════════════════════
-    
-    const editBlockModal = $('editBlockModal');
-    
-    editBlockModal?.addEventListener('shown.bs.modal', function() {
-        // Modal tam açılandan sonra dəyərləri yaz
-        if(pendingBlockData) {
-            $('editBlockId').value = pendingBlockData.id || '';
-            $('editBlockTitle').value = pendingBlockData.title || '';
-            $('editBlockDescription').value = pendingBlockData.description || '';
-            $('editBlockQTP').value = pendingBlockData.qtp || 0;
-            
-            console.log('Block data yazıldı:', pendingBlockData);
-            pendingBlockData = null;
-        }
-    });
-
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-edit-block');
-        if(!btn) return;
-        
-        // Data-nı saxla
-        pendingBlockData = {
-            id: btn.dataset.id,
-            title: btn.dataset.title,
-            description: btn.dataset.description,
-            qtp: btn.dataset.qtp
-        };
-        
-        console.log('Block data saxlanıldı:', pendingBlockData);
-        
-        // Modal aç
-        bootstrap.Modal.getOrCreateInstance(editBlockModal).show();
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // EDIT QUESTION MODAL - shown.bs.modal event ilə
-    // ═══════════════════════════════════════════════════════════
-    
-    const editQuestionModal = $('editQuestionModal');
-    
-    editQuestionModal?.addEventListener('shown.bs.modal', function() {
-        if(pendingQuestionData) {
-            $('editQuestionId').value = pendingQuestionData.id || '';
-            $('editQuestionText').value = pendingQuestionData.text || '';
-            $('editQuestionPoints').value = pendingQuestionData.points || 0;
-            
-            if(pendingQuestionData.attachment) {
-                $('editQuestionCurrentFile').innerHTML = `
-                    <a href="${pendingQuestionData.attachment}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-paperclip me-1"></i> Mövcud fayl
-                    </a>`;
-            } else {
-                $('editQuestionCurrentFile').innerHTML = '';
-            }
-            
-            console.log('Question data yazıldı:', pendingQuestionData);
-            pendingQuestionData = null;
-        }
-    });
-
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-edit-question');
-        if(!btn) return;
-        
-        pendingQuestionData = {
-            id: btn.dataset.id,
-            text: btn.dataset.text,
-            points: btn.dataset.points,
-            attachment: btn.dataset.attachment
-        };
-        
-        console.log('Question data saxlanıldı:', pendingQuestionData);
-        
-        bootstrap.Modal.getOrCreateInstance(editQuestionModal).show();
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // ADD QUESTION MODAL
-    // ═══════════════════════════════════════════════════════════
-    
-    const addQuestionModal = $('addQuestionModal');
-    
-    addQuestionModal?.addEventListener('shown.bs.modal', function() {
-        if(pendingAddQuestionBlockId) {
-            $('addQuestionBlockId').value = pendingAddQuestionBlockId;
-            pendingAddQuestionBlockId = null;
-        }
-    });
-
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-add-question');
-        if(!btn) return;
-        
-        pendingAddQuestionBlockId = btn.dataset.blockId;
-        $('addQuestionForm').reset();
-        
-        bootstrap.Modal.getOrCreateInstance(addQuestionModal).show();
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // IMPORT QUESTIONS MODAL
-    // ═══════════════════════════════════════════════════════════
-    
-    const importModal = $('importQuestionsModal');
-    
-    importModal?.addEventListener('shown.bs.modal', function() {
-        if(pendingImportBlockId) {
-            $('importBlockId').value = pendingImportBlockId;
-            pendingImportBlockId = null;
-        }
-    });
-
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-import-questions');
-        if(!btn) return;
-        
-        pendingImportBlockId = btn.dataset.blockId;
-        $('importQuestionsForm').reset();
-        
-        bootstrap.Modal.getOrCreateInstance(importModal).show();
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // FORM SUBMITS
-    // ═══════════════════════════════════════════════════════════
-    
-    // Add Block
-    $('addBlockForm')?.addEventListener('submit', e => {
-        e.preventDefault();
-        const btn = e.target.querySelector('[type=submit]');
-        btn.disabled = true;
-        
-        fetch(`/labs/${LAB_ID}/blocks/create/`, {
-            method: 'POST',
-            body: new FormData(e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => btn.disabled = false);
-    });
-
-    // Edit Block
-    $('editBlockForm')?.addEventListener('submit', e => {
-        e.preventDefault();
-        const blockId = $('editBlockId').value;
-        if(!blockId) return;
-        
-        const btn = e.target.querySelector('[type=submit]');
-        btn.disabled = true;
-
-        fetch(`/labs/blocks/${blockId}/edit/`, {
-            method: 'POST',
-            body: new FormData(e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => btn.disabled = false);
-    });
-
-    // Add Question
-    $('addQuestionForm')?.addEventListener('submit', e => {
-        e.preventDefault();
-        const blockId = $('addQuestionBlockId').value;
-        const btn = e.target.querySelector('[type=submit]');
-        btn.disabled = true;
-
-        fetch(`/labs/blocks/${blockId}/questions/create/`, {
-            method: 'POST',
-            body: new FormData(e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => btn.disabled = false);
-    });
-
-    // Edit Question
-    $('editQuestionForm')?.addEventListener('submit', e => {
-        e.preventDefault();
-        const questionId = $('editQuestionId').value;
-        if(!questionId) return;
-        
-        const btn = e.target.querySelector('[type=submit]');
-        btn.disabled = true;
-
-        fetch(`/labs/questions/${questionId}/edit/`, {
-            method: 'POST',
-            body: new FormData(e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error || '')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => btn.disabled = false);
-    });
-
-    // Import Questions
-    $('importQuestionsForm')?.addEventListener('submit', e => {
-        e.preventDefault();
-        const blockId = $('importBlockId').value;
-        const btn = e.target.querySelector('[type=submit]');
-        btn.disabled = true;
-
-        fetch(`/labs/blocks/${blockId}/questions/import/`, {
-            method: 'POST',
-            body: new FormData(e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => {
-            if(d.success) {
-                alert(d.message || 'Suallar əlavə edildi');
-                location.reload();
-            } else {
-                alert('Xəta: ' + (d.error || ''));
-                btn.disabled = false;
-            }
-        })
-        .catch(() => {
-            alert('Server xətası');
-            btn.disabled = false;
-        });
-    });
-
-    // ═══════════════════════════════════════════════════════════
-    // DELETE
-    // ═════════════════════════════════════════════���═════════════
-    
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-delete-block');
-        if(!btn) return;
-        if(!confirm('Bu bloku silmək istəyirsiniz?')) return;
-        
-        fetch(`/labs/blocks/${btn.dataset.id}/delete/`, {
-            method: 'POST',
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta'))
-        .catch(() => alert('Server xətası'));
-    });
-
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.js-delete-question');
-        if(!btn) return;
-        if(!confirm('Bu sualı silmək istəyirsiniz?')) return;
-        
-        fetch(`/labs/questions/${btn.dataset.id}/delete/`, {
-            method: 'POST',
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta'))
-        .catch(() => alert('Server xətası'));
-    });
-
-})();
+    window.LAB_CONFIG = {
+        labId: {{ lab.id }},
+        csrf: '{{ csrf_token }}'
+    };
 </script>
+
+<script src="{% static 'labs/js/manage_blocks.js' %}"></script>
 {% endblock %}

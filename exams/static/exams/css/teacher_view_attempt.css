@@ -1,0 +1,303 @@
+/* static/exams/css/teacher_view_attempt.css */
+
+:root {
+    --primary-blue: #2563eb;
+    --dark-blue: #1e3a8a;
+    --light-blue-bg: #f0f9ff;
+    --border-color: #cbd5e1;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --success-green: #10b981;
+    --danger-red: #ef4444;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* --- ƏSAS KONTEYNER --- */
+.view-attempt-container {
+    max-width: 900px;
+}
+
+/* --- SƏHİFƏ BAŞLIĞI --- */
+.page-header h1 {
+    color: var(--dark-blue);
+    font-weight: 700;
+    border-bottom: 2px solid var(--light-blue-bg);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.page-header h1 i {
+    color: var(--primary-blue);
+    opacity: 0.8;
+}
+
+.student-name {
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin-left: 8px;
+}
+
+/* --- İMTAHAN MƏLUMAT KARTI --- */
+.exam-summary-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.summary-item {
+    flex: 1 1 200px; /* Responsive genişlik */
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.summary-item i {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    background: var(--light-blue-bg);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-content .label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-content .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-top: 4px;
+}
+
+
+
+.result-item .value .score {
+    font-size: 1.2rem;
+    padding: 6px 12px;
+}
+
+.result-item .details {
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin-left: 5px;
+}
+
+/* --- AYIRICI XƏTT --- */
+.section-divider {
+    border-top: 1px solid var(--border-color);
+    margin: 30px 0;
+    opacity: 0.7;
+}
+
+/* --- SUAL KARTLARI --- */
+.question-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.question-card:hover {
+    box-shadow: var(--card-shadow) !important;
+}
+
+/* Kart Başlığı */
+.question-header {
+    background: linear-gradient(to right, var(--primary-blue), var(--dark-blue));
+    color: white;
+    padding: 15px 20px;
+}
+
+.question-header h5 {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.q-number {
+    font-weight: 800;
+    color: #a5b4fc; /* Açıq mavi */
+    white-space: nowrap;
+}
+
+.q-text {
+    font-weight: 600;
+}
+
+.q-points {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--primary-blue) !important;
+    border-radius: 20px;
+}
+
+/* Kart Gövdəsi */
+.question-body {
+    padding: 25px;
+    background: #fff;
+}
+
+/* --- TEST SUALLARI ÜÇÜN STİLLƏR --- */
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+/* Seçilmiş cavabın stili */
+.option-item.selected {
+    background-color: var(--light-blue-bg);
+    border-color: var(--primary-blue);
+}
+
+/* Düzgün cavabın stili (həmişə yaşıl olmalıdır) */
+.option-item.correct-option {
+    background-color: #ecfdf5; /* Açıq yaşıl */
+    border-color: var(--success-green);
+}
+
+.option-item.correct-option label {
+    color: #065f46; /* Tünd yaşıl mətn */
+    font-weight: 700;
+}
+
+/* Səhv seçilmiş cavabın stili */
+.option-item.wrong-option {
+    background-color: #fef2f2; /* Açıq qırmızı */
+    border-color: var(--danger-red);
+}
+
+.option-item.wrong-option label {
+    color: #991b1b; /* Tünd qırmızı mətn */
+    font-weight: 600;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.status-icon i {
+    font-size: 1.2rem;
+}
+
+/* --- YAZILI SUALLAR ÜÇÜN STİLLƏR --- */
+.block-title {
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.block-title i {
+    color: var(--text-muted);
+}
+
+.block-title.text-primary i {
+    color: var(--primary-blue);
+}
+
+.answer-content {
+    font-size: 1rem;
+    color: var(--text-dark);
+    line-height: 1.6;
+    background-color: #f8fafc !important; /* Çox açıq boz fon */
+}
+
+/* Fayl Siyahısı */
+.attached-files-block .list-group-item {
+    padding: 10px 15px;
+}
+
+.attached-files-block a.text-decoration-none {
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.attached-files-block a.text-decoration-none:hover {
+    text-decoration: underline !important;
+}
+
+/* Müəllim Rəyi Bloku */
+.teacher-feedback-block {
+    background: var(--light-blue-bg);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #bfdbfe; /* Bir az daha tünd mavi çərçivə */
+}
+
+.feedback-box.alert-primary {
+    background-color: #dbeafe;
+    border-color: #bfdbfe;
+    color: #1e40af;
+}
+
+.score-box {
+    font-weight: 600;
+}
+
+.score-box .badge {
+    font-size: 1rem !important;
+    padding: 8px 12px;
+}
+
+/* --- GERİ DÜYMƏSİ --- */
+.btn-outline-secondary {
+    border: 2px solid var(--border-color);
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 10px 24px;
+    transition: all 0.2s;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+/* --- RESPONSİV DÜZƏLİŞLƏR --- */
+@media (max-width: 768px) {
+    .summary-item {
+        flex: 1 1 100%; /* Mobildə tam genişlik */
+    }
+    .question-header {
+        flex-direction: column;
+    }
+    .q-points {
+        margin-top: 10px;
+        align-self: flex-start;
+    }
+}

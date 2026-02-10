@@ -1,13 +1,14 @@
-<!-- MODAL: Resurs Əlavə Etmə -->
+<!-- MODAL: Resurs Əlavə Etmə (Updated with Topic Context) -->
 <!-- courses/templates/courses/partials/_resource_form_modal.html -->
 
 <div class="modal fade" id="resourceFormModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <!-- Header -->
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus-circle"></i> Yeni Resurs Əlavə Et
+                    <i class="fas fa-file-upload"></i> Yeni Resurs Əlavə Et
+                    <span id="resourceModalTopicName" class="text-white-50"></span>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -17,15 +18,64 @@
                 <form id="resourceForm" method="post" action="{% url 'courses:add_resource' course.id %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     
+                    <!-- Resource Type Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <strong>Resurs Tipi</strong>
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="resource_type" 
+                                   id="typeFile" value="file" checked>
+                            <label class="btn btn-outline-primary" for="typeFile">
+                                <i class="fas fa-file-pdf"></i> Fayl
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="resource_type" 
+                                   id="typeLink" value="link">
+                            <label class="btn btn-outline-primary" for="typeLink">
+                                <i class="fas fa-link"></i> Link
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="resource_type" 
+                                   id="typeVideo" value="video">
+                            <label class="btn btn-outline-primary" for="typeVideo">
+                                <i class="fas fa-video"></i> Video
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="resource_type" 
+                                   id="typeDocument" value="document">
+                            <label class="btn btn-outline-primary" for="typeDocument">
+                                <i class="fas fa-file-alt"></i> Sənəd
+                            </label>
+                        </div>
+                    </div>
+                    
                     <!-- Title Field -->
                     <div class="mb-3">
                         <label for="resourceTitle" class="form-label">
-                            <strong>Resurs Adı</strong>
+                            <strong>Resurs Başlığı</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text" class="form-control" id="resourceTitle" 
-                               name="title" placeholder="Məs: Python Dokumentasiyası"
+                               name="title" placeholder="Məs: Mühazirə 1 - Giriş"
                                required>
+                    </div>
+                    
+                    <!-- Topic Selection -->
+                    <div class="mb-3">
+                        <label for="resourceTopic" class="form-label">
+                            <strong>Mövzu</strong>
+                        </label>
+                        <select class="form-select" id="resourceTopic" name="topic">
+                            <option value="">Mövzu seçilməyib (kurs səviyyəsi)</option>
+                            {% for topic in topics %}
+                                <option value="{{ topic.id }}">{{ topic.order }}. {{ topic.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">
+                            Opsional: Resursu konkret mövzuya bağlayın
+                        </small>
                     </div>
                     
                     <!-- Description Field -->
@@ -35,58 +85,31 @@
                         </label>
                         <textarea class="form-control" id="resourceDescription" 
                                   name="description" rows="2" 
-                                  placeholder="Bu resurs nə haqqındadır?"></textarea>
+                                  placeholder="Bu resurs haqqında qısa məlumat"></textarea>
                     </div>
                     
-                    <!-- Resource Type Field -->
-                    <div class="mb-3">
-                        <label for="resourceType" class="form-label">
-                            <strong>Resurs Tipi</strong>
+                    <!-- File Upload (conditional) -->
+                    <div class="mb-3" id="fileUploadSection">
+                        <label for="resourceFile" class="form-label">
+                            <strong>Fayl</strong>
                             <span class="text-danger">*</span>
                         </label>
-                        <select class="form-select" id="resourceType" name="resource_type" required onchange="toggleResourceInput()">
-                            <option value="">-- Seç --</option>
-                            <option value="file">Fayl (PDF, ZIP, IMG)</option>
-                            <option value="link">Xarici Link</option>
-                            <option value="document">Sənəd</option>
-                            <option value="video">Video</option>
-                        </select>
-                    </div>
-                    
-                    <!-- File Input (shown when type is 'file') -->
-                    <div class="mb-3" id="fileInputDiv" style="display: none;">
-                        <label for="resourceFile" class="form-label">
-                            <strong>Fayl Yüklə</strong>
-                        </label>
-                        <input type="file" class="form-control" id="resourceFile" 
-                               name="file" accept=".pdf,.zip,.jpg,.png,.mp4,.mov">
+                        <input type="file" class="form-control" id="resourceFile" name="file">
                         <small class="text-muted">
-                            Dəstəklənən formatlar: PDF, ZIP, JPG, PNG, MP4, MOV (max 50MB)
+                            Dəstəklənən formatlar: PDF, ZIP, DOC, DOCX, PPT, PPTX, XLS, XLSX
                         </small>
                     </div>
                     
-                    <!-- URL Input (shown when type is not 'file') -->
-                    <div class="mb-3" id="urlInputDiv" style="display: none;">
+                    <!-- URL Input (conditional) -->
+                    <div class="mb-3 d-none" id="urlInputSection">
                         <label for="resourceUrl" class="form-label">
-                            <strong>Linki</strong>
+                            <strong>URL Linki</strong>
+                            <span class="text-danger">*</span>
                         </label>
                         <input type="url" class="form-control" id="resourceUrl" 
-                               name="url" placeholder="https://example.com/...">
-                    </div>
-                    
-                    <!-- Topic Assignment (Optional) -->
-                    <div class="mb-3">
-                        <label for="resourceTopic" class="form-label">
-                            <strong>Mövzu (Isteğe Bağlı)</strong>
-                        </label>
-                        <select class="form-select" id="resourceTopic" name="topic">
-                            <option value="">-- Seçmə --</option>
-                            {% for topic in topics %}
-                                <option value="{{ topic.id }}">{{ topic.title }}</option>
-                            {% endfor %}
-                        </select>
+                               name="url" placeholder="https://example.com">
                         <small class="text-muted">
-                            Bu resurs hansı mövzuya aiddir?
+                            Xarici resurs linki (YouTube, Google Drive və s.)
                         </small>
                     </div>
                     
@@ -108,35 +131,30 @@
     </div>
 </div>
 
-<!-- Resource Form AJAX Handler -->
 <script>
-// Toggle file/URL inputs based on resource type
-function toggleResourceInput() {
-    const resourceType = document.getElementById('resourceType').value;
-    const fileInputDiv = document.getElementById('fileInputDiv');
-    const urlInputDiv = document.getElementById('urlInputDiv');
-    const fileInput = document.getElementById('resourceFile');
-    const urlInput = document.getElementById('resourceUrl');
-    
-    if (resourceType === 'file') {
-        fileInputDiv.style.display = 'block';
-        urlInputDiv.style.display = 'none';
-        fileInput.required = true;
-        urlInput.required = false;
-    } else if (resourceType) {
-        fileInputDiv.style.display = 'none';
-        urlInputDiv.style.display = 'block';
-        fileInput.required = false;
-        urlInput.required = true;
-    } else {
-        fileInputDiv.style.display = 'none';
-        urlInputDiv.style.display = 'none';
-        fileInput.required = false;
-        urlInput.required = false;
-    }
-}
+// Toggle file/url sections based on resource type
+document.querySelectorAll('input[name="resource_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const fileSection = document.getElementById('fileUploadSection');
+        const urlSection = document.getElementById('urlInputSection');
+        const fileInput = document.getElementById('resourceFile');
+        const urlInput = document.getElementById('resourceUrl');
+        
+        if (this.value === 'file' || this.value === 'document' || this.value === 'video') {
+            fileSection.classList.remove('d-none');
+            urlSection.classList.add('d-none');
+            fileInput.required = true;
+            urlInput.required = false;
+        } else {
+            fileSection.classList.add('d-none');
+            urlSection.classList.remove('d-none');
+            fileInput.required = false;
+            urlInput.required = true;
+        }
+    });
+});
 
-// Form submission
+// Resource Form Submit
 document.getElementById('resourceForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -147,7 +165,7 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Əlavə olunur...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yüklənir...';
     
     fetch(actionUrl, {
         method: 'POST',
@@ -159,10 +177,17 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Close modal
             bootstrap.Modal.getInstance(document.getElementById('resourceFormModal')).hide();
-            document.getElementById('resourceForm').reset();
-            showNotification(data.message, 'success');
             
+            // Clear form
+            document.getElementById('resourceForm').reset();
+            document.getElementById('resourceModalTopicName').textContent = '';
+            
+            // Show success message
+            notify(data.message, 'success');
+            
+            // Reload page
             setTimeout(() => {
                 location.reload();
             }, 1000);
@@ -172,29 +197,18 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+        notify('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
     })
     .finally(() => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     });
 });
-</script>
 
-<style>
-    #resourceForm .form-label {
-        font-weight: 600;
-        color: #333;
-    }
-    
-    #resourceForm .form-control,
-    #resourceForm .form-select {
-        border-radius: 6px;
-    }
-    
-    #resourceForm .form-control:focus,
-    #resourceForm .form-select:focus {
-        border-color: #28a745;
-        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-    }
-</style>
+// Clear modal on close
+document.getElementById('resourceFormModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('resourceForm').reset();
+    document.getElementById('resourceModalTopicName').textContent = '';
+    document.getElementById('resourceErrors').classList.add('d-none');
+});
+</script>

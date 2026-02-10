@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni sual{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Yeni sual yarat</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+            {{ form.question_text.label_tag }}
+            {{ form.question_text }}
+            {{ form.question_text.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.answer_text.label_tag }}
+            {{ form.answer_text }}
+            {{ form.answer_text.errors }}
+        </div>
+
+        <div class="form-check mb-3">
+            {{ form.visible_to_all }}
+            {{ form.visible_to_all.label_tag }}
+            {{ form.visible_to_all.errors }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.visible_users.label_tag }}
+            {{ form.visible_users }}
+            {{ form.visible_users.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Yadda saxla</button>
+    </form>
+</div>
+{% endblock %}

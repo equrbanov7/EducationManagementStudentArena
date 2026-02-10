@@ -10,7 +10,7 @@ from django.core import signing
 from django.utils import timezone
 
 from liveExam.models import LiveSession, LivePlayer, LiveAnswer
-from blog.models import ExamQuestion, ExamQuestionOption  # import yolunu öz proyektinə uyğun saxla
+from exams.models import ExamQuestion, ExamQuestionOption  
 
 # ⚠️ consumers içindən views import eləmə (circular risk).
 PLAYER_COOKIE_NAME = "live_player_token"

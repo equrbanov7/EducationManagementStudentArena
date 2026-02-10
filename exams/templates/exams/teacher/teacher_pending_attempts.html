@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+{% load exam_filters %}
+
+{% block title %}Yoxlanılacaq İşlər{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_pending_attempts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="pending-container">
+    
+    <div class="page-header">
+        <h2><i class="fas fa-tasks text-warning me-2"></i> Yoxlanılacaq İşlər</h2>
+        <span class="badge bg-secondary fs-6">{{ pending_attempts|length }} Tapşırıq</span>
+    </div>
+
+    {% if pending_attempts %}
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            Hamısı <span class="count">{{ pending_attempts|length }}</span>
+        </button>
+        <button class="filter-tab" data-filter="written">
+            <i class="fas fa-pen-fancy me-1"></i> Yazılı
+            <span class="count">{{ essay_count }}</span>
+        </button>
+        <button class="filter-tab" data-filter="test">
+            <i class="fas fa-list-check me-1"></i> Test
+            <span class="count">{{ test_count }}</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="table-card">
+        {% if pending_attempts %}
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Tələbə</th>
+                        <th>İmtahan / Tip</th>
+                        <th>Göndərilmə Tarixi</th>
+                        <th>Status</th>
+                        <th class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody id="attemptsTableBody">
+                    {% for data in attempts_data %}
+                    <tr data-type="{{ data.attempt.exam.exam_type }}"
+                        {% if data.seconds_remaining %}
+                        data-seconds-remaining="{{ data.seconds_remaining }}"
+                        data-real-name="{{ data.real_name }}"
+                        data-anonymous-name="{{ data.anonymous_name }}"
+                        {% endif %}>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="user-info">
+                                    {# ✅ Anonim ad məntiq #}
+                                    {% if data.can_view_name %}
+                                        {{ data.real_name }}
+                                    {% else %}
+                                        <span class="anonymous-name">{{ data.anonymous_name }}</span>
+                                        {% if data.seconds_remaining %}
+                                            <div class="countdown-timer">
+                                                <i class="fas fa-hourglass-half"></i>
+                                                <span class="timer-display">{{ data.seconds_remaining|floatformat:0 }}s</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="exam-title">{{ data.attempt.exam.title }}</div>
+                            <div class="exam-type">
+                                {% if data.attempt.exam.exam_type == 'written' %}
+                                    <span class="badge-essay">
+                                        <i class="fas fa-pen-fancy me-1"></i> Yazılı
+                                    </span>
+                                {% else %}
+                                    <span class="badge-test">
+                                        <i class="fas fa-list-check me-1"></i> Test
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div>{{ data.attempt.finished_at|date:"d.m.Y H:i" }}</div>
+                            <small class="text-muted">({{ data.attempt.finished_at|timesince }} əvvəl)</small>
+                        </td>
+                        <td>
+                            {% if data.attempt.status == 'expired' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-clock me-1"></i> Vaxt bitib
+                                </span>
+                            {% elif data.attempt.status == 'pending_review' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-hourglass-half me-1"></i> Yoxlanılır
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i> Təslim edilib
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'exams:teacher_check_attempt' data.attempt.exam.slug data.attempt.id %}" 
+                               class="btn-check-action">
+                                <i class="fas fa-marker"></i> Yoxla
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %} 
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <h4>Hər şey yolundadır!</h4>
+                <p class="text-muted">Hazırda yoxlanılacaq heç bir tapşırıq yoxdur.</p>
+                <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-primary mt-3">
+                    <i class="fas fa-arrow-left me-2"></i> Profilə qayıt
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if pending_attempts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    const rows = document.querySelectorAll('#attemptsTableBody tr');
+    
+    // Tab filtering
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.dataset.filter;
+            
+            rows.forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.dataset.type === filter ? '' : 'none';
+                }
+            });
+        });
+    });
+    
+    // ✅ Real-time countdown timer
+    rows.forEach(row => {
+        let secondsLeft = parseInt(row.dataset.secondsRemaining) || 0;
+        if (secondsLeft <= 0) return;
+        
+        const timerDisplay = row.querySelector('.timer-display');
+        
+        const updateTimer = () => {
+            if (secondsLeft <= 0) {
+                window.location.reload();  // Auto-refresh
+                return;
+            }
+            
+            const minutes = Math.floor(secondsLeft / 60);
+            const seconds = secondsLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            secondsLeft--;
+        };
+        
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

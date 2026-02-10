@@ -341,25 +341,81 @@ def delete_question(request, pk):
 @login_required
 @require_POST
 def import_questions(request, block_id):
-    """Sualları toplu import et"""
+    """
+    Sualları toplu import et.
+    
+    Format dəstəyi:
+    - 1. Sual metni
+    - 1) Sual metni
+    - 2. Başqa sual
+    - Nömrəsiz sətir = əvvəlki sualın davamı
+    """
+    import re
+    
     block = get_object_or_404(LabBlock, id=block_id)
     
     if block.lab.created_by != request.user:
         return JsonResponse({'success': False, 'error': 'İcazəniz yoxdur'}, status=403)
     
     try:
-        questions_text = request.POST.get('questions', '')
-        lines = [line.strip() for line in questions_text.split('\n') if line.strip()]
+        questions_text = request.POST.get('questions_text', '')
         
+        if not questions_text.strip():
+            return JsonResponse({'success': False, 'error': 'Boş mətn göndərildi'}, status=400)
+        
+        # Regex pattern: başda rəqəm + nöqtə və ya mötərizə
+        # Məs: "1. " və ya "2) " və ya "10. "
+        pattern = re.compile(r'^\s*(\d+)[\.\)]\s+(.+)', re.MULTILINE)
+        
+        lines = questions_text.split('\n')
+        questions = []
+        current_question = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            match = pattern.match(line)
+            if match:
+                # Yeni sual başlayır
+                if current_question:
+                    questions.append(current_question)
+                
+                num, text = match.groups()
+                current_question = text.strip()
+            else:
+                # Əvvəlki sualın davamı
+                if current_question:
+                    current_question += ' ' + line
+        
+        # Sonuncu sualı əlavə et
+        if current_question:
+            questions.append(current_question)
+        
+        if not questions:
+            return JsonResponse({
+                'success': False, 
+                'error': 'Heç bir sual tapılmadı. Format: "1. Sual metni" və ya "1) Sual metni"'
+            }, status=400)
+        
+        # Sualları DB-yə əlavə et
         count = block.questions.count()
-        for i, text in enumerate(lines, start=1):
+        created_count = 0
+        
+        for i, text in enumerate(questions, start=1):
             LabQuestion.objects.create(
                 block=block,
                 question_number=count + i,
                 question_text=text,
             )
+            created_count += 1
         
-        return JsonResponse({'success': True, 'count': len(lines)})
+        return JsonResponse({
+            'success': True, 
+            'count': created_count,
+            'message': f'{created_count} sual uğurla əlavə edildi'
+        })
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -551,21 +607,48 @@ def lab_detail(request, pk):
     can_retry = True
     
     if request.user.is_authenticated:
-        if not getattr(request.user, 'is_teacher', False):
-            assignment = LabAssignment.get_or_create_for_student(lab, request.user)
-            questions = assignment.assigned_questions.all().order_by('block__order', 'question_number')
+        # Müəllim üçün bütün sualları göstər
+        if getattr(request.user, 'is_teacher', False):
+            questions = LabQuestion.objects.filter(
+                block__lab=lab
+            ).select_related('block').order_by('block__order', 'question_number')
             
-            submissions = LabSubmission.objects.filter(assignment=assignment).order_by('-submitted_at')
+            print(f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir")
+        
+        # Tələbə üçün assignment yarat və sualları təyin et
+        else:
+            assignment = LabAssignment.get_or_create_for_student(lab, request.user)
+            
+            # ƏSAS FİX: select_related və prefetch_related istifadə et
+            questions = assignment.assigned_questions.select_related('block').order_by(
+                'block__order', 'question_number'
+            )
+            
+            print(f"[STUDENT] {request.user.username} - Assignment ID: {assignment.id}")
+            print(f"[STUDENT] Assigned questions count: {questions.count()}")
+            
+            # Əgər hələ də sual yoxdursa, yenidən təyin et
+            if questions.count() == 0:
+                print(f"[WARNING] Sual tapılmadı, yenidən assign edilir...")
+                assignment.assign_questions()
+                questions = assignment.assigned_questions.select_related('block').order_by(
+                    'block__order', 'question_number'
+                )
+                print(f"[STUDENT] Yenidən assign: {questions.count()} sual")
+            
+            # Submission yoxlaması
+            submissions = LabSubmission.objects.filter(
+                assignment=assignment
+            ).order_by('-submitted_at')
+            
             attempt_count = submissions.count()
             has_submitted = attempt_count > 0
             submission = submissions.first() if has_submitted else None
             
-            # Cəhd sayı yoxlaması
             max_attempts = lab.max_attempts or 1
             can_retry = attempt_count < max_attempts
-        else:
-            questions = LabQuestion.objects.filter(block__lab=lab).order_by('block__order', 'question_number')
     
+    # Saved answers
     saved_answers = {}
     if request.user.is_authenticated:
         answers = LabAnswer.objects.filter(lab=lab, student=request.user)

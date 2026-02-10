@@ -15,7 +15,8 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db.models import Q, Max
-from blog.models import Exam
+from exams.models import Exam, ExamAttempt
+
 
 
 
@@ -246,7 +247,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ═══════════════════════════════════════════════════════════════════
         # 7. İMTAHANLAR
         # ───────────────────────────────────────────────────────────────────
-        from blog.models import Exam, ExamAttempt
+  
 
         if context['is_owner'] or context['is_teacher']:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
@@ -450,7 +451,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-                from blog.models import StudentGroup
+                from exams.models import StudentGroup
                 context['all_groups'] = StudentGroup.objects.all().order_by('name')
             except ImportError:
                 context['all_groups'] = []
@@ -504,6 +505,53 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
         messages.error(self.request, 'Mövzu əlavə olunarkən xəta baş verdi.')
+        return redirect('courses:course_dashboard', course_id=self.course.id)
+    
+    def get_success_url(self):
+        return reverse_lazy('courses:course_dashboard', args=[self.course.id])
+    
+    
+# ════════════════════════════════════════════════════════════════════════════
+# VIEW: Mövzu Redaktə Etmə (AJAX)
+# ════════════════════════════════════════════════════════════════════════════
+
+class EditTopicView(IsCourseOwnerMixin, UpdateView):
+    """Mövzu redaktə etmə (AJAX POST)."""
+    
+    model = CourseTopic
+    form_class = CourseTopicForm
+    pk_url_kwarg = 'topic_id'
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.topic = self.get_object()
+        self.course = self.topic.course
+        if self.course.owner != request.user:
+            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f'"{form.instance.title}" mövzusu yeniləndi',
+                'topic': {
+                    'id': form.instance.id,
+                    'title': form.instance.title,
+                    'description': form.instance.description,
+                    'order': form.instance.order,
+                },
+            })
+        
+        messages.success(self.request, f'"{form.instance.title}" mövzusu yeniləndi')
+        return response
+    
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        
+        messages.error(self.request, 'Mövzu yenilənərkən xəta baş verdi.')
         return redirect('courses:course_dashboard', course_id=self.course.id)
     
     def get_success_url(self):
@@ -641,7 +689,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
             all_users = User.objects.exclude(id__in=course_user_ids).order_by('username')
         
         try:
-            from blog.models import StudentGroup 
+            from exams.models import StudentGroup 
             all_groups = StudentGroup.objects.all().order_by('name')
         except ImportError:
             all_groups = []
@@ -760,7 +808,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({'success': False, 'error': 'Qrup seçilməyib.'}, status=400)
         
         try:
-            from blog.models import StudentGroup
+            from exams.models import StudentGroup
             groups = StudentGroup.objects.filter(id__in=group_ids)
             
             added_count = 0
@@ -896,7 +944,7 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
         course.delete()
         
         messages.success(request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.')
-        return redirect('profile', username=request.user.username)
+        return redirect('user_profile', username=request.user.username)
 
 
 # ════════════════════════════════════════════════════════════════════════════
