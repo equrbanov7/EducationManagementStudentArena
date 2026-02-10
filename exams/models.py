@@ -7,11 +7,8 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 
-from exams.validators import (
-    validate_file_extension,
-    validate_file_size,
-    validate_zip_contents,
-)
+from exams.validators import (validate_file_extension, validate_file_size,
+                              validate_zip_contents)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS

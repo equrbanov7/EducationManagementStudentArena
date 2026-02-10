@@ -3,16 +3,12 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
 from exams.models import Exam, ExamAttempt
-from exams.services.randomizer import (
-    build_shuffled_options,
-    generate_random_questions_for_attempt,
-)
-from exams.services.utils import (
-    _attempt_has_any_answer,
-    _clear_paint_from_answer,
-    _effective_needed_count,
-    _save_paint_png_to_answer,
-)
+from exams.services.randomizer import (build_shuffled_options,
+                                       generate_random_questions_for_attempt)
+from exams.services.utils import (_attempt_has_any_answer,
+                                  _clear_paint_from_answer,
+                                  _effective_needed_count,
+                                  _save_paint_png_to_answer)
 
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.

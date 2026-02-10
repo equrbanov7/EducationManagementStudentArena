@@ -18,7 +18,8 @@ from django.views.decorators.http import require_POST
 
 from exams.models import Exam, ExamAttempt
 
-from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
+from .forms import (CommentForm, PostForm, QuestionForm, RegisterForm,
+                    SubscriptionForm)
 from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
 from .utils import generate_otp, send_verify_email
 
@@ -211,7 +212,7 @@ def subscribe_page(request):
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
                 messages.error(
                     request,
-                    f"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
+                    "Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
                 )
                 print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
 
