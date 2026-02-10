@@ -1,13 +1,7 @@
 from django.contrib import admin
 
-from .models import (
-    Exam,
-    ExamAnswer,
-    ExamAttempt,
-    ExamQuestion,
-    ExamQuestionOption,
-    StudentGroup,
-)
+from .models import (Exam, ExamAnswer, ExamAttempt, ExamQuestion,
+                     ExamQuestionOption, StudentGroup)
 
 # Register your models here.
 
