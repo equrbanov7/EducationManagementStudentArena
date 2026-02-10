@@ -14,6 +14,7 @@ import os
 import ssl
 
 import dj_database_url
+from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 
 if hasattr(ssl, "_create_unverified_context"):
@@ -216,7 +217,7 @@ SITE_URL = "http://127.0.0.1:8000"
 
 
 # 6. MESSAGE_TAGS (Toast message styling)
-from django.contrib.messages import constants as messages
+
 
 MESSAGE_TAGS = {
     messages.DEBUG: "debug",

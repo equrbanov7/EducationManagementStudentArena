@@ -42,13 +42,13 @@ def send_new_post_notification(sender, instance, created, **kwargs):
 
 # signals.py faylını app konfiqurasiyasında aktivləşdir:
 
-# your_app/apps.py
-from django.apps import AppConfig
+# # your_app/apps.py
+# from django.apps import AppConfig
 
 
-class YourAppConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "your_app"
+# class YourAppConfig(AppConfig):
+#     default_auto_field = "django.db.models.BigAutoField"
+#     name = "your_app"
 
-    def ready(self):
-        import your_app.signals  # Sinyalları burada import edirik
+#     def ready(self):
+#         import your_app.signals  # Sinyalları burada import edirik

@@ -193,7 +193,7 @@ class CourseResourceAdmin(admin.ModelAdmin):
         if obj.file:
             return f"📄 Fayl ({obj.file.name.split('/')[-1]})"
         elif obj.url:
-            return f"🔗 Link"
+            return "🔗 Link"
         return "⚠️ Boş"
 
     is_file_or_link.short_description = "Tür"
