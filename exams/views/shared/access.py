@@ -1,14 +1,14 @@
-
-from pyexpat.errors import messages
-from django.shortcuts import get_object_or_404, redirect
-from django.views.decorators.http import require_POST
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from exams.models import Exam
 from exams.services.attempts import _start_or_resume_attempt
 
-@csrf_exempt   # DEV üçün CSRF-dən azad edirik (sonra istəsən götürərsən)
+
+@csrf_exempt  # DEV üçün CSRF-dən azad edirik (sonra istəsən götürərsən)
 @login_required
 @require_POST
 def exam_code_check(request):

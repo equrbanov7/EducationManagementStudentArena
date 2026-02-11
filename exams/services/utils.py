@@ -1,9 +1,10 @@
 import base64
-from django.utils import timezone
 import re
 
-from blog.utils import DATA_URL_PNG_RE
 from django.core.files.base import ContentFile
+from django.utils import timezone
+
+from blog.utils import DATA_URL_PNG_RE
 
 
 # Bu, sual mətnini normallaşdırır: boşluqları təmizləyir, kiçik hərflərə çevirir və çoxlu boşluqları tək boşluğa çevirir.
@@ -16,6 +17,7 @@ def _norm(text: str) -> str:
 
 
 # 0, 1, 10, boş/None kimi dəyərlər üçün lazım olan sual sayını qaytarır.
+
 
 def _effective_needed_count(exam) -> int:
     """
@@ -40,7 +42,9 @@ def _effective_needed_count(exam) -> int:
 
     return min(val, total)
 
+
 # Tələbənin həqiqətən nəsə yazıb/seçib-seçmədiyini yoxlamaq üçün istifadə olunur.
+
 
 def _attempt_has_any_answer(attempt) -> bool:
     """
@@ -48,19 +52,30 @@ def _attempt_has_any_answer(attempt) -> bool:
     False-positive verməsin deyə count-based yoxlayırıq.
     """
     # text
-    if attempt.answers.exclude(text_answer__isnull=True).exclude(text_answer="").exists():
+    if (
+        attempt.answers.exclude(text_answer__isnull=True)
+        .exclude(text_answer="")
+        .exists()
+    ):
         return True
 
     # selected options
     if attempt.answers.filter(selected_options__isnull=False).distinct().exists():
         # bu da bəzən false-positive ola bilər, ona görə bir addım da:
-        return attempt.answers.filter(selected_options__isnull=False).values("id").distinct().count() > 0
+        return (
+            attempt.answers.filter(selected_options__isnull=False)
+            .values("id")
+            .distinct()
+            .count()
+            > 0
+        )
 
     # files
     if attempt.answers.filter(files__isnull=False).distinct().exists():
         return True
 
     return False
+
 
 def _save_paint_png_to_answer(ans, data_url: str):
     """
@@ -89,6 +104,7 @@ def _save_paint_png_to_answer(ans, data_url: str):
     ans.paint_updated_at = timezone.now()
     ans.has_paint = True
     return True
+
 
 def _clear_paint_from_answer(ans):
     """

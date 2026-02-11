@@ -4,6 +4,7 @@ from django.dispatch import receiver
 
 DEFAULT_GROUPS = ["student", "teacher", "assistant_teacher", "moderator"]
 
+
 @receiver(post_migrate)
 def create_default_groups(sender, **kwargs):
     # yalnız "accounts" migrate olanda işlə (boşuna hər migrate-da qaçmasın)
