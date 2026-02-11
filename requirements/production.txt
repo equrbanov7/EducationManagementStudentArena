@@ -1,12 +1,12 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# EMS ARENA - PYTHON DEPENDENCIES
+# EMS ARENA - PRODUCTION DEPENDENCIES
 # ═══════════════════════════════════════════════════════════════════════════
-# For backwards compatibility and local development
-# Install specific environment requirements using:
-#   - pip install -r requirements/local.txt (development)
-#   - pip install -r requirements/production.txt (production)
-#   - pip install -r requirements/test.txt (testing)
+# Dependencies for production deployment
 # ═══════════════════════════════════════════════════════════════════════════
 
-# Default to local requirements for backwards compatibility
--r requirements/local.txt
+-r base.txt
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PRODUCTION SERVER
+# ═══════════════════════════════════════════════════════════════════════════
+gunicorn==21.2.0
