@@ -111,7 +111,6 @@ class LivePlayer(models.Model):
                 fields=["session", "client_id"], name="uniq_player_per_session_client"
             )
         ]
-        unique_together = [("session", "client_id")]
 
     def __str__(self):
         return f"{self.nickname} ({self.session.pin})"
