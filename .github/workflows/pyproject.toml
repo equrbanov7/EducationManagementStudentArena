@@ -16,5 +16,17 @@ profile = "black"
 line_length = 120
 skip = ["migrations", "venv", ".venv", "__pycache__"]
 known_django = ["django"]
-known_first_party = ["accounts", "courses", "assignments", "exams", "labs", "blog", "projects", "liveExam", "emsarena"]
+known_first_party = ["apps", "core", "config"]
 sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["tests.py", "test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["tests", "apps"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
