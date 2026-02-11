@@ -98,7 +98,7 @@ LOGIN_REDIRECT_URL = "/blog/"
 LOGOUT_REDIRECT_URL = "/blog/"
 
 # Internationalization
-LANGUAGE_CODE = "az"
+LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Baku"
 USE_I18N = True
 USE_TZ = True
