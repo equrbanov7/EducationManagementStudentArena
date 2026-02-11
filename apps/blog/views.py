@@ -16,8 +16,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from courses.models import Course
-from exams.models import Exam, ExamAttempt
+from apps.courses.models import Course
+from apps.exams.models import Exam, ExamAttempt
 
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
 from .models import Category, Comment, EmailOTP, Post, Question, Subscriber

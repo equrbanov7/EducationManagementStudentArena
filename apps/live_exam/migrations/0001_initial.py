@@ -5,7 +5,7 @@ import django.utils.timezone
 from django.conf import settings
 from django.db import migrations, models
 
-import liveExam.models
+import apps.live_exam.models
 
 
 class Migration(migrations.Migration):
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                     "pin",
                     models.CharField(
                         db_index=True,
-                        default=liveExam.models.generate_pin,
+                        default=apps.live_exam.models.generate_pin,
                         max_length=6,
                         unique=True,
                     ),

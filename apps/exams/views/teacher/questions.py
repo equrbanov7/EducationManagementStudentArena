@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from exams.forms import ExamQuestionCreateForm
-from exams.models import Exam, ExamQuestion, QuestionBlock
-from exams.services.attempts import _ensure_teacher
+from apps.exams.forms import ExamQuestionCreateForm
+from apps.exams.models import Exam, ExamQuestion, QuestionBlock
+from apps.exams.services.attempts import _ensure_teacher
 
 
 @login_required

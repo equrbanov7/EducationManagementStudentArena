@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
 
-from exams.models import Exam
+from apps.exams.models import Exam
 
 
 @login_required

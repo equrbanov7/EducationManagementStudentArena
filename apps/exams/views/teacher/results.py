@@ -5,9 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from exams.models import Exam, ExamAnswer, ExamAttempt
-from exams.services.attempts import _ensure_teacher
-from exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt
+from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.randomizer import generate_random_questions_for_attempt
 
 
 @login_required

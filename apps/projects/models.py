@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from courses.models import Course
+from apps.courses.models import Course
 
 User = get_user_model()
 

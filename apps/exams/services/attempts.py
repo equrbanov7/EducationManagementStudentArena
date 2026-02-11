@@ -2,9 +2,9 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
-from exams.models import Exam, ExamAttempt
-from exams.services.randomizer import generate_random_questions_for_attempt
-from exams.services.utils import _attempt_has_any_answer, _effective_needed_count
+from apps.exams.models import Exam, ExamAttempt
+from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
 
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.

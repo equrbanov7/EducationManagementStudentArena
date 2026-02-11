@@ -5,8 +5,8 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import exams.models
-import exams.validators
+import apps.exams.models
+import apps.exams.validators
 
 
 class Migration(migrations.Migration):
@@ -239,9 +239,9 @@ class Migration(migrations.Migration):
                     models.FileField(
                         upload_to="exam_uploads/",
                         validators=[
-                            exams.validators.validate_file_extension,
-                            exams.validators.validate_file_size,
-                            exams.validators.validate_zip_contents,
+                            apps.exams.validators.validate_file_extension,
+                            apps.exams.validators.validate_file_size,
+                            apps.exams.validators.validate_zip_contents,
                         ],
                         verbose_name="Fayl",
                     ),
@@ -419,7 +419,7 @@ class Migration(migrations.Migration):
                     models.ImageField(
                         blank=True,
                         null=True,
-                        upload_to=exams.models.question_media_path,
+                        upload_to=apps.exams.models.question_media_path,
                         verbose_name="Sual şəkli (optional)",
                     ),
                 ),
@@ -428,12 +428,12 @@ class Migration(migrations.Migration):
                     models.FileField(
                         blank=True,
                         null=True,
-                        upload_to=exams.models.question_media_path,
+                        upload_to=apps.exams.models.question_media_path,
                         validators=[
                             django.core.validators.FileExtensionValidator(
                                 allowed_extensions=["mp4", "webm", "mov"]
                             ),
-                            exams.models.validate_video_size,
+                            apps.exams.models.validate_video_size,
                         ],
                         verbose_name="Sual videosu (optional)",
                     ),

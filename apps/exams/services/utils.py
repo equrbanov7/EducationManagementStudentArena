@@ -4,7 +4,7 @@ import re
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
-from blog.utils import DATA_URL_PNG_RE
+from apps.blog.utils import DATA_URL_PNG_RE
 
 
 # Bu, sual mətnini normallaşdırır: boşluqları təmizləyir, kiçik hərflərə çevirir və çoxlu boşluqları tək boşluğa çevirir.

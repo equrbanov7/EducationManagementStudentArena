@@ -10,8 +10,8 @@ try:
 except Exception:
     PdfReader = None
 
-from exams.constants import ANSWERLINE_RE, OPTION_RE, QUESTION_RE
-from exams.services.utils import _norm
+from apps.exams.constants import ANSWERLINE_RE, OPTION_RE, QUESTION_RE
+from apps.exams.services.utils import _norm
 
 # PDF-dən çıxan mətni parser üçün uyğun formaya salır:
 

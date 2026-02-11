@@ -4,8 +4,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from exams.models import Exam
-from exams.services.attempts import _start_or_resume_attempt
+from apps.exams.models import Exam
+from apps.exams.services.attempts import _start_or_resume_attempt
 
 
 @csrf_exempt  # DEV üçün CSRF-dən azad edirik (sonra istəsən götürərsən)
