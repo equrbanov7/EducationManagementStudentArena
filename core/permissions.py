@@ -4,8 +4,9 @@ Helper functions and decorators for permission checks.
 """
 
 from functools import wraps
-from django.shortcuts import redirect
+
 from django.contrib import messages
+from django.shortcuts import redirect
 
 
 def is_teacher(user):

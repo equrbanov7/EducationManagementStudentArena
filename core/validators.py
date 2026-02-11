@@ -17,7 +17,7 @@ def validate_positive(value):
 def validate_file_size(value, max_size_mb=10):
     """
     Validate file size.
-    
+
     Args:
         value: File object
         max_size_mb: Maximum file size in megabytes
