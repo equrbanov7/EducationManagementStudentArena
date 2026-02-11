@@ -4,7 +4,7 @@ import string
 from django.db import models
 from django.utils import timezone
 
-from exams.models import Exam, ExamQuestion
+from apps.exams.models import Exam, ExamQuestion
 
 
 def generate_pin():

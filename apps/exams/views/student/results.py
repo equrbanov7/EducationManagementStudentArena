@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
-from exams.models import Exam, ExamAttempt
+from apps.exams.models import Exam, ExamAttempt
 
 
 @login_required

@@ -3,9 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from exams.forms import StudentGroupForm
-from exams.models import StudentGroup
-from exams.services.attempts import _ensure_teacher
+from apps.exams.forms import StudentGroupForm
+from apps.exams.models import StudentGroup
+from apps.exams.services.attempts import _ensure_teacher
 
 
 # --- 1. SİYAHI VƏ MODAL ÜÇÜN FORM ---

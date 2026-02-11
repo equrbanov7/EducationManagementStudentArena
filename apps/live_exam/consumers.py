@@ -9,8 +9,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core import signing
 from django.utils import timezone
 
-from exams.models import ExamQuestion, ExamQuestionOption
-from liveExam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 
 # ⚠️ consumers içindən views import eləmə (circular risk).
 PLAYER_COOKIE_NAME = "live_player_token"

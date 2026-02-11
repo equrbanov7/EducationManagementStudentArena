@@ -2,8 +2,8 @@ from django.db import transaction
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
-from courses.models import CourseMembership
-from exams.models import StudentGroup
+from apps.courses.models import CourseMembership
+from apps.exams.models import StudentGroup
 
 
 # Qrup adının əvvəlki dəyərini yadda saxla

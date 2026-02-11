@@ -19,8 +19,8 @@ from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
-from exams.models import Exam, ExamAttempt, StudentGroup
-from labs.models import LabAssignment, LabSubmission
+from apps.exams.models import Exam, ExamAttempt, StudentGroup
+from apps.labs.models import LabAssignment, LabSubmission
 
 from .forms import CourseForm, CourseResourceForm, CourseTopicForm
 from .models import Course, CourseMembership, CourseResource, CourseTopic

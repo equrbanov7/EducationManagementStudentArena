@@ -19,7 +19,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
-from courses.models import Course, CourseMembership
+from apps.courses.models import Course, CourseMembership
 
 from .models import Assignment, AssignmentSubmission
 

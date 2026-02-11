@@ -19,8 +19,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from exams.models import Exam, ExamQuestion, ExamQuestionOption
-from liveExam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 
 AVATAR_KEYS = [
     "avatar_1",

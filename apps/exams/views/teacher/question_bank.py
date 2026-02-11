@@ -4,9 +4,9 @@ from django.contrib import messages
 from django.db.models import Max
 from django.shortcuts import get_object_or_404, redirect, render
 
-from exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock
-from exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
-from exams.services.utils import _norm
+from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock
+from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
+from apps.exams.services.utils import _norm
 
 
 def create_question_bank(request, slug):
