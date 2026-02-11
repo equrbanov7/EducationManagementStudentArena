@@ -1,90 +1,93 @@
-
+import re
 
 from django.contrib import messages
-import re
+from django.db.models import Max
 from django.shortcuts import get_object_or_404, redirect, render
 
 from exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock
 from exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from exams.services.utils import _norm
-from django.db.models import  Max
 
 
 def create_question_bank(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
-    
+
     # Mövcud blokları gətiririk ki, ekranda görsənsin
-    blocks = exam.question_blocks.all().order_by('order')
-    
+    blocks = exam.question_blocks.all().order_by("order")
+
     # Hər blok üçün sualları mətn formatına çeviririk (Textarea üçün)
     # Məsələn: [ {block_obj: block, text_content: "1. Salam\n2. Necəsən"}, ... ]
     blocks_data = []
     for block in blocks:
-        questions = block.questions.all().order_by('order')
+        questions = block.questions.all().order_by("order")
         # Sualları "1. Sual mətni" formatında birləşdiririk
         text_content = "\n".join([f"{q.order}. {q.text}" for q in questions])
-        
-        blocks_data.append({
-            'obj': block,
-            'text_content': text_content
-        })
 
-    return render(request, 'exams/teacher/create_question_bank.html', {
-        'exam': exam,
-        'blocks_data': blocks_data
-    })
+        blocks_data.append({"obj": block, "text_content": text_content})
 
+    return render(
+        request,
+        "exams/teacher/create_question_bank.html",
+        {"exam": exam, "blocks_data": blocks_data},
+    )
 
 
 def process_question_bank(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
-    
+
     if request.method == "POST":
         # 1. Silinməli olan blokları silirik
-        deleted_ids = request.POST.get('deleted_block_ids', '').split(',')
+        deleted_ids = request.POST.get("deleted_block_ids", "").split(",")
         for d_id in deleted_ids:
             if d_id.strip():
                 QuestionBlock.objects.filter(id=d_id, exam=exam).delete()
 
         # 2. Ümumi sual sayını yenilə
-        random_count = request.POST.get('random_question_count')
+        random_count = request.POST.get("random_question_count")
         if random_count:
             exam.random_question_count = int(random_count)
             exam.save()
 
         # Adların təkrar olub-olmadığını yoxlamaq üçün set
         used_names = set()
-        
+
         # ✅ Order hesablamaq üçün counter
         current_order = 1
 
         # 3. Blokları emal edirik
         for key, value in request.POST.items():
-            if key.startswith('block_name_'):
-                ui_id = key.split('_')[-1]
+            if key.startswith("block_name_"):
+                ui_id = key.split("_")[-1]
                 block_name = value.strip()
-                
+
                 # Validation: Eyni sorğuda dublikat ad varmı?
                 if block_name.lower() in used_names:
-                    messages.error(request, f"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin.")
-                    return redirect('exams:create_question_bank', slug=exam.slug)
+                    messages.error(
+                        request,
+                        f"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin.",
+                    )
+                    return redirect("exams:create_question_bank", slug=exam.slug)
                 used_names.add(block_name.lower())
 
-                content_key = f'block_content_{ui_id}'
-                content_text = request.POST.get(content_key, '')
-                time_key = f'block_time_{ui_id}'
+                content_key = f"block_content_{ui_id}"
+                content_text = request.POST.get(content_key, "")
+                time_key = f"block_time_{ui_id}"
                 time_val = request.POST.get(time_key)
-                db_id_key = f'block_db_id_{ui_id}'
+                db_id_key = f"block_db_id_{ui_id}"
                 db_id = request.POST.get(db_id_key)
 
                 # Validation: Bazada başqa blok eyni adda varmı? (özü xaric)
-                existing_check = QuestionBlock.objects.filter(exam=exam, name__iexact=block_name)
+                existing_check = QuestionBlock.objects.filter(
+                    exam=exam, name__iexact=block_name
+                )
                 if db_id:
                     existing_check = existing_check.exclude(id=db_id)
-                
+
                 if existing_check.exists():
-                    messages.error(request, f"'{block_name}' adlı blok artıq bazada mövcuddur.")
-                    return redirect('exams:create_question_bank', slug=exam.slug)
+                    messages.error(
+                        request, f"'{block_name}' adlı blok artıq bazada mövcuddur."
+                    )
+                    return redirect("exams:create_question_bank", slug=exam.slug)
 
                 if block_name:
                     # Blok Yaradılması/Yenilənməsi
@@ -94,45 +97,45 @@ def process_question_bank(request, slug):
                         if block_qs.exists():
                             block = block_qs.first()
                             block.name = block_name
-                            block.time_limit_minutes = int(time_val) if time_val else None
+                            block.time_limit_minutes = (
+                                int(time_val) if time_val else None
+                            )
                             block.order = current_order  # ✅ Düzgün order
                             block.save()
                             # Sualları yeniləyirik
                             block.questions.all().delete()
                         else:
-                            continue # Blok tapılmadısa keçirik
+                            continue  # Blok tapılmadısa keçirik
                     else:
                         block = QuestionBlock.objects.create(
                             exam=exam,
                             name=block_name,
                             time_limit_minutes=int(time_val) if time_val else None,
-                            order=current_order  # ✅ Düzgün order (ui_id deyil)
+                            order=current_order,  # ✅ Düzgün order (ui_id deyil)
                         )
-                    
+
                     # ✅ Növbəti blok üçün order artır
                     current_order += 1
 
                     # Sualların Parse edilməsi
                     if content_text.strip():
-                        pattern = r'(?:\n|^)\s*\d+[\.\)]\s+'
+                        pattern = r"(?:\n|^)\s*\d+[\.\)]\s+"
                         questions = re.split(pattern, content_text)
                         questions = [q.strip() for q in questions if q.strip()]
-                        
+
                         for index, q_text in enumerate(questions, start=1):
                             ExamQuestion.objects.create(
                                 exam=exam,
                                 block=block,
                                 text=q_text,
                                 order=index,
-                                answer_mode='single'
+                                answer_mode="single",
                             )
-        
-        messages.success(request, "Sual bankı uğurla yadda saxlanıldı!")
-        return redirect('exams:teacher_exam_detail', slug=exam.slug)
-    
-    return redirect('exams:create_question_bank', slug=exam.slug)
 
- 
+        messages.success(request, "Sual bankı uğurla yadda saxlanıldı!")
+        return redirect("exams:teacher_exam_detail", slug=exam.slug)
+
+    return redirect("exams:create_question_bank", slug=exam.slug)
 
 
 def test_question_bank(request, slug):
@@ -165,7 +168,11 @@ def test_question_bank(request, slug):
     dp_value = str(dp_default)
 
     def build_fp_from_parsed(q):
-        return _norm(q["text"]) + "||" + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
+        return (
+            _norm(q["text"])
+            + "||"
+            + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
+        )
 
     def build_fp_from_db(eq):
         # DB-də option-lar label saxlamadığı üçün sıra ilə götürürük (A..E)
@@ -174,23 +181,30 @@ def test_question_bank(request, slug):
         labels = list("ABCDE")
         for i, opt in enumerate(opts[:5]):
             opt_map[labels[i]] = opt.text
-        return _norm(eq.text) + "||" + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
+        return (
+            _norm(eq.text)
+            + "||"
+            + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
+        )
 
     # GET
     if request.method != "POST":
-        return render(request, "exams/teacher/test_question_bank.html", {
-            "exam": exam,
-            "blocks": blocks,
-            "raw_text": raw_text,
-            "parsed": parsed,
-            "selected": selected,
-            "warning_count": warning_count,
-            "duplicate_count": duplicate_count,
-
-            # >>> YENİ: input-ların value-ları
-            "rq_value": rq_value,
-            "dp_value": dp_value,
-        })
+        return render(
+            request,
+            "exams/teacher/test_question_bank.html",
+            {
+                "exam": exam,
+                "blocks": blocks,
+                "raw_text": raw_text,
+                "parsed": parsed,
+                "selected": selected,
+                "warning_count": warning_count,
+                "duplicate_count": duplicate_count,
+                # >>> YENİ: input-ların value-ları
+                "rq_value": rq_value,
+                "dp_value": dp_value,
+            },
+        )
 
     # POST
     action = request.POST.get("action", "preview")
@@ -229,11 +243,13 @@ def test_question_bank(request, slug):
         for idx, q in enumerate(parsed, start=1):
             fp = build_fp_from_parsed(q)
             if fp in fp_first:
-                q["warnings"].append({
-                    "type": "duplicate_in_import",
-                    "msg": f"Təkrar sual: #{idx} sualı əvvəlki #{fp_first[fp]} ilə eynidir.",
-                    "ref": fp_first[fp]
-                })
+                q["warnings"].append(
+                    {
+                        "type": "duplicate_in_import",
+                        "msg": f"Təkrar sual: #{idx} sualı əvvəlki #{fp_first[fp]} ilə eynidir.",
+                        "ref": fp_first[fp],
+                    }
+                )
             else:
                 fp_first[fp] = idx
 
@@ -244,10 +260,12 @@ def test_question_bank(request, slug):
         for idx, q in enumerate(parsed, start=1):
             fp = build_fp_from_parsed(q)
             if fp in existing_fp:
-                q["warnings"].append({
-                    "type": "already_in_exam",
-                    "msg": f"Bu sual artıq imtahanda mövcuddur (import # {idx})."
-                })
+                q["warnings"].append(
+                    {
+                        "type": "already_in_exam",
+                        "msg": f"Bu sual artıq imtahanda mövcuddur (import # {idx}).",
+                    }
+                )
 
         # ---- Seçilən suallar ----
         selected_list = request.POST.getlist("selected")
@@ -300,15 +318,16 @@ def test_question_bank(request, slug):
         if new_block_name:
             max_order = blocks.aggregate(m=Max("order")).get("m") or 0
             block_obj = QuestionBlock.objects.create(
-                exam=exam,
-                name=new_block_name,
-                order=max_order + 1
+                exam=exam, name=new_block_name, order=max_order + 1
             )
         elif block_id:
             block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
 
         # ---- order başlanğıcı ----
-        start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
+        start_order = (
+            ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m")
+            or 0
+        ) + 1
 
         created_count = 0
         skipped_count = 0
@@ -321,10 +340,12 @@ def test_question_bank(request, slug):
             if any(x not in q["options"] for x in ["A", "B", "C", "D"]):
                 skipped_count += 1
                 continue
- 
+
             # per-question points (opsional input: points_1, points_2, ...)
             p_raw = (request.POST.get(f"points_{idx}") or "").strip()
-            points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
+            points = (
+                int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
+            )
 
             eq = ExamQuestion.objects.create(
                 exam=exam,
@@ -342,27 +363,31 @@ def test_question_bank(request, slug):
                     ExamQuestionOption.objects.create(
                         question=eq,
                         text=q["options"][lab],
-                        is_correct=(lab in q["correct"])
+                        is_correct=(lab in q["correct"]),
                     )
 
             created_count += 1
 
-        messages.success(request, f"{created_count} sual əlavə olundu. ({skipped_count} sual keçildi)")
+        messages.success(
+            request,
+            f"{created_count} sual əlavə olundu. ({skipped_count} sual keçildi)",
+        )
         return redirect("exams:test_question_bank", slug=exam.slug)
 
     # PREVIEW və ya parse sonrası eyni səhifəni göstər
-    return render(request, "exams/teacher/test_question_bank.html", {
-        "exam": exam,
-        "blocks": blocks,
-        "raw_text": raw_text,
-        "parsed": parsed,
-        "selected": selected,
-        "warning_count": warning_count,
-        "duplicate_count": duplicate_count,
-
-        # >>> YENİ: Preview refresh olsa da input-lar dolu qalsın
-        "rq_value": rq_value,
-        "dp_value": dp_value,
-    })
-
-
+    return render(
+        request,
+        "exams/teacher/test_question_bank.html",
+        {
+            "exam": exam,
+            "blocks": blocks,
+            "raw_text": raw_text,
+            "parsed": parsed,
+            "selected": selected,
+            "warning_count": warning_count,
+            "duplicate_count": duplicate_count,
+            # >>> YENİ: Preview refresh olsa da input-lar dolu qalsın
+            "rq_value": rq_value,
+            "dp_value": dp_value,
+        },
+    )

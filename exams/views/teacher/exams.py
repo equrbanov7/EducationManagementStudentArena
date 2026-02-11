@@ -1,8 +1,8 @@
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect, render
+
 from exams.forms import ExamForm
 from exams.models import Exam
 from exams.services.attempts import _ensure_teacher
@@ -15,13 +15,17 @@ def teacher_exam_list(request):
     """
     _ensure_teacher(request.user)
     exams = Exam.objects.filter(author=request.user).order_by("-created_at")
-    return render(request, "exams/teacher/teacher_exam_list.html", {
-        "exams": exams,
-    })
-    
-    
-    
-# ((sonra adını teacher_exam_create / teacher_exam_edit edərsən)) 
+    return render(
+        request,
+        "exams/teacher/teacher_exam_list.html",
+        {
+            "exams": exams,
+        },
+    )
+
+
+# ((sonra adını teacher_exam_create / teacher_exam_edit edərsən))
+
 
 @login_required
 def createAndEditExamView(request, slug=None):
@@ -31,7 +35,7 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
-    
+
     # Əgər slug varsa -> Edit mode
     if slug:
         exam = get_object_or_404(Exam, slug=slug, author=request.user)
@@ -47,20 +51,24 @@ def createAndEditExamView(request, slug=None):
         else:
             # Create mode
             form = ExamForm(request.POST, user=request.user)
-        
+
         if form.is_valid():
             exam_instance = form.save(commit=False)
-            
+
             # Yeni imtahanda author-u set et
             if not is_editing:
                 exam_instance.author = request.user
-            
+
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
-            
+
             messages.success(
-                request, 
-                "İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"
+                request,
+                (
+                    "İmtahan uğurla yeniləndi!"
+                    if is_editing
+                    else "İmtahan uğurla yaradıldı!"
+                ),
             )
             return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
     else:
@@ -70,12 +78,17 @@ def createAndEditExamView(request, slug=None):
         else:
             form = ExamForm(user=request.user)
 
-    return render(request, "exams/teacher/createAndEditExam.html", {
-        "form": form,
-        "exam": exam,
-        "is_editing": is_editing,
-    })
- 
+    return render(
+        request,
+        "exams/teacher/createAndEditExam.html",
+        {
+            "form": form,
+            "exam": exam,
+            "is_editing": is_editing,
+        },
+    )
+
+
 @login_required
 def teacher_exam_detail(request, slug):
     """
@@ -89,11 +102,15 @@ def teacher_exam_detail(request, slug):
     exam = get_object_or_404(Exam, slug=slug, author=request.user)
     questions = exam.questions.all().order_by("order")
 
-    return render(request, "exams/teacher/teacher_exam_detail.html", {
-        "exam": exam,
-        "questions": questions,
-    })
-    
+    return render(
+        request,
+        "exams/teacher/teacher_exam_detail.html",
+        {
+            "exam": exam,
+            "questions": questions,
+        },
+    )
+
 
 @login_required
 def toggle_exam_active(request, slug):

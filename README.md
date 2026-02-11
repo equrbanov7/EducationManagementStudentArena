@@ -673,3 +673,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **⭐ If you find this project useful, please consider giving it a star on GitHub!**
+
+
+# CI
+# 1. Əvvəl isort (Black profili ilə)
+isort --profile black .
+
+# 2. Sonra Black
+black .
+
+# 3. Yoxla - heç bir dəyişiklik olmamalı
+isort --check --profile black .
+black --check .
