@@ -156,10 +156,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterUniqueTogether(
-            name="liveplayer",
-            unique_together={("session", "client_id")},
-        ),
-        migrations.AlterUniqueTogether(
             name="liveanswer",
             unique_together={("session", "player", "question_id")},
         ),
