@@ -3,9 +3,9 @@ Core view mixins for EMS Arena project.
 Reusable mixins for views that require specific permissions.
 """
 
+from django.contrib import messages
 from django.contrib.auth.mixins import AccessMixin
 from django.shortcuts import redirect
-from django.contrib import messages
 
 
 class TeacherRequiredMixin(AccessMixin):

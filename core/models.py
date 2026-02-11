@@ -4,6 +4,7 @@ Base models that can be inherited by app models.
 """
 
 import uuid
+
 from django.db import models
 from django.utils.text import slugify
 

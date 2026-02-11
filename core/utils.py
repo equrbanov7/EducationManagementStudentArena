@@ -5,6 +5,7 @@ Reusable helper functions used across the application.
 
 import random
 import string
+
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -31,10 +32,12 @@ def generate_code(length=8):
     return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 
-def send_template_email(subject, template_name, context, recipient_list, from_email=None):
+def send_template_email(
+    subject, template_name, context, recipient_list, from_email=None
+):
     """
     Send an email using a template.
-    
+
     Args:
         subject: Email subject
         template_name: Path to email template
@@ -44,7 +47,7 @@ def send_template_email(subject, template_name, context, recipient_list, from_em
     """
     html_message = render_to_string(template_name, context)
     plain_message = strip_tags(html_message)
-    
+
     send_mail(
         subject=subject,
         message=plain_message,
