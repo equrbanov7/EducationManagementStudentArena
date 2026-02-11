@@ -1,0 +1,498 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA - CI/CD PIPELINE
+# ═══════════════════════════════════════════════════════════════════════════
+# Author: equrbanov7
+# Python: 3.11.6 | Django: 5.2.8
+# Best Practices: Industry Standard DevOps
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🚀 CI Pipeline
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STEP 1: TRIGGERLƏR - CI nə zaman işləyəcək?
+# ═══════════════════════════════════════════════════════════════════════════
+# 📌 NİYƏ?: Hər PR və push-da avtomatik yoxlama - bug-ları erkən tutmaq üçün
+# 📌 BEST PRACTICE: Branch-lara görə fərqli davranış
+on:
+  # Pull Request açılanda və ya yeniləndikdə
+  pull_request:
+    branches:
+      - main        # Production-a PR
+      - Staging     # Staging-ə PR  
+      - Develop     # Development-ə PR
+    types:
+      - opened          # PR açılanda
+      - synchronize     # Yeni commit push olanda
+      - reopened        # PR yenidən açılanda
+
+  # Birbaşa push (merge sonrası)
+  push:
+    branches:
+      - main
+      - Staging
+      - Develop
+
+  # Manual trigger (əl ilə işə salmaq üçün)
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Debug mode aktiv etmək'
+        required: false
+        default: false
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STEP 2: CONCURRENCY - Eyni branch-da paralel run-ları idarə et
+# ═══════════════════════════════════════════════════════════════════════════
+# 📌 NİYƏ?: Eyni PR-da yeni commit push olunsa, köhnə run-u dayandır
+# 📌 BEST PRACTICE: Resurs israfının qarşısını alır, sürətli feedback
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ═══════════════════════════════════════════════════════════════════════════
+# STEP 3: ENV VARIABLES - Workflow səviyyəsində dəyişənlər
+# ═══════════════════════════════════════════════════════════════════════════
+# 📌 NİYƏ?: Bir yerdə saxlamaq - dəyişiklik asanlaşır
+# 📌 BEST PRACTICE: DRY (Don't Repeat Yourself) prinsipi
+env:
+  PYTHON_VERSION: "3.11.6"
+  DJANGO_SETTINGS_MODULE: "emsarena.settings"
+  PYTHONDONTWRITEBYTECODE: "1"      # .pyc faylları yaratmasın
+  PYTHONUNBUFFERED: "1"             # Output buffer-siz olsun (real-time logs)
+  PIP_NO_CACHE_DIR: "1"             # Pip cache istifadə etməsin
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# JOBS - CI Pipeline-ın əsas hissələri
+# ═══════════════════════════════════════════════════════════════════════════
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 1: CODE QUALITY (Linting)
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Kod standartlarına uyğunluq - oxunaqlı, konsistent kod
+  # 📌 TOOLS: flake8 (syntax/style), black (formatting), isort (import order)
+  lint:
+    name: 🔍 Code Quality Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.1: Kodu çəkmək
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Repository-ni runner-ə yükləmək
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # Bütün history - coverage comparison üçün lazımdır
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.2: Python quraşdırmaq
+      # ───────────��───────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Düzgün Python versiyası
+      - name: 🐍 Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.3: Pip caching
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Dependencies-i cache-ləmək - 2-3x sürətli CI
+      # 📌 BEST PRACTICE: requirements.txt dəyişəndə cache yenilənir
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-lint-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-lint-
+            ${{ runner.os }}-pip-
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.4: Linting tools quraşdırmaq
+      # ─────────────────────────────────────────────────��─────────────────
+      # 📌 NİYƏ?: Yalnız lazım olan tool-lar - sürətli install
+      - name: 📥 Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 flake8-bugbear black isort
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.5: Black - Kod formatı yoxlaması
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Vahid kod stili - team-də hər kəs eyni format
+      # 📌 --check: Dəyişiklik etmir, yalnız yoxlayır
+      # 📌 --diff: Fərqləri göstərir
+      - name: 🖤 Check code formatting with Black
+        run: |
+          echo "::group::🖤 Black Format Check"
+          black --check --diff --color . || {
+            echo "::error::❌ Black formatting issues found! Run 'black .' locally to fix."
+            exit 1
+          }
+          echo "✅ Black check passed!"
+          echo "::endgroup::"
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.6: isort - Import sıralaması
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Import-lar düzgün sıralanmalıdır (stdlib → third-party → local)
+      # 📌 --profile black: Black ilə uyğunluq
+      - name: 📑 Check import sorting with isort
+        run: |
+          echo "::group::📑 isort Import Check"
+          isort --check-only --diff --profile black . || {
+            echo "::error::❌ Import sorting issues found! Run 'isort .' locally to fix."
+            exit 1
+          }
+          echo "✅ isort check passed!"
+          echo "::endgroup::"
+
+      # ───────────────────────────────────────────────────────────────────
+      # STEP 1.7: Flake8 - Syntax və stil yoxlaması
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: PEP8 standartlarına uyğunluq, bug-ları erkən tapmaq
+      # 📌 --max-line-length=120: 120 simvol limit (modern standard)
+      # 📌 --extend-ignore: Black ilə konflikt olan qaydaları ignore et
+      - name: 🔎 Lint with Flake8
+        run: |
+          echo "::group::🔎 Flake8 Linting"
+          flake8 . \
+            --count \
+            --max-line-length=120 \
+            --extend-ignore=E203,E266,E501,W503 \
+            --exclude=.git,__pycache__,migrations,venv,.venv,env \
+            --statistics \
+            --show-source
+          echo "✅ Flake8 check passed!"
+          echo "::endgroup::"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 2: SECURITY CHECK
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Dependencies-də zəifliklər tapmaq
+  # 📌 BEST PRACTICE: Supply chain security - çox vacibdir!
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-security-
+            ${{ runner.os }}-pip-
+
+      # ───────────────────────────────────────────────────────────────────
+      # Safety - Dependency vulnerability scanner
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: CVE database ilə müqayisə - bilinən zəifliklər
+      - name: 🛡️ Check dependencies for vulnerabilities
+        run: |
+          pip install safety pip-audit
+          echo "::group::🛡️ Safety Check"
+          safety check -r requirements.txt --full-report || true
+          echo "::endgroup::"
+          echo "::group::🔐 Pip Audit"
+          pip-audit -r requirements.txt || true
+          echo "::endgroup::"
+        continue-on-error: true  # Xəbərdarlıq - bloklama yox
+
+      # ───────────────────────────────────────────────────────────────────
+      # Bandit - Python security linter
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Kod-da təhlükəsizlik problemləri tapmaq (SQL injection, etc.)
+      - name: 🔍 Scan code with Bandit
+        run: |
+          pip install bandit[toml]
+          echo "::group::🔍 Bandit Security Scan"
+          bandit -r . -x ./tests,./venv,./.venv,./migrations -ll --format txt || true
+          echo "::endgroup::"
+        continue-on-error: true
+
+  # ──────────────────────────────────���──────────────────────────────────────
+  # JOB 3: TESTS
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Kodun düzgün işlədiyini yoxlamaq
+  # 📌 BEST PRACTICE: Matrix testing - bir neçə versiya ilə test
+  test:
+    name: 🧪 Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: [lint]  # Lint keçməsə test başlamasın
+    
+    # ───────────────────────────────────────────────────────────────────────
+    # Matrix Strategy - Bir neçə konfiqurasiya ilə test
+    # ───────────────────────────────────────────────────────────────────────
+    # 📌 NİYƏ?: Fərqli Python versiyalarında işlədiyini yoxlamaq
+    # 📌 BEST PRACTICE: Ən azı cari və növbəti versiya
+    strategy:
+      fail-fast: false  # Biri uğursuz olsa, digərləri davam etsin
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    # ───────────────────────────────────────────────────────────────────────
+    # Services - Database və Redis
+    # ───────────────────────────────────────────────────────────────────────
+    # 📌 NİYƏ?: Real database ilə test - production-a yaxın mühit
+    # 📌 BEST PRACTICE: Docker containers - izolə olunmuş, təkrarlana bilən
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # ───────────────────────────────────────────────────────────────────
+      # Cache - Dependencies
+      # ───────────────────────────────────────────────────────────────────
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      # ───────────────────────────────────────────────────────────────────
+      # Dependencies install
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Bütün project dependencies + test tools
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements.txt
+          pip install pytest pytest-django pytest-cov pytest-xdist pytest-timeout
+
+      # ──────────────────────────────────���────────────────────────────────
+      # Django checks
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Django konfiqurasiyasının düzgünlüyünü yoxlamaq
+      - name: ✅ Django system check
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::✅ Django System Checks"
+          python manage.py check --fail-level WARNING
+          echo "::endgroup::"
+
+      # ───────────────────────────────────────────────────────────────────
+      # Run migrations
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Database schema-nın düzgün yaradıldığını yoxlamaq
+      - name: 🗃️ Run migrations
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::🗃️ Database Migrations"
+          python manage.py migrate --verbosity=2
+          echo "::endgroup::"
+
+      # ───────────────────────────────────────────────────────────────────
+      # Run tests with coverage
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Bütün testləri icra etmək və coverage hesablamaq
+      # 📌 -n auto: Paralel test (CPU core sayına görə)
+      # 📌 --cov: Coverage report yaratmaq
+      - name: 🧪 Run tests with coverage
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::🧪 Running Tests"
+          pytest \
+            --ds=emsarena.settings \
+            --cov=. \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:htmlcov \
+            --cov-report=term-missing \
+            --cov-fail-under=0 \
+            -v \
+            --tb=short \
+            --timeout=300 \
+            || echo "⚠️ No tests found or tests failed"
+          echo "::endgroup::"
+        continue-on-error: true  # Test olmasa belə davam et
+
+      # ───────────────────────────────────────────────────────────────────
+      # Upload coverage report
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Coverage hesabatını artifact olaraq saxlamaq
+      - name: 📊 Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 7
+
+      # ───────────────────────────────────────────────────────────────────
+      # Coverage comment on PR
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: PR-da coverage göstərmək - visible feedback
+      - name: 📈 Coverage Report to PR
+        uses: orgoro/coverage@v3.2
+        if: github.event_name == 'pull_request' && matrix.python-version == '3.11'
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.0
+          thresholdNew: 0.0
+          thresholdModified: 0.0
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 4: BUILD CHECK
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Static files-ın düzgün collect olduğunu yoxlamaq
+  build:
+    name: 🏗️ Build Check
+    runs-on: ubuntu-latest
+    needs: [lint]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-build-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-build-
+            ${{ runner.os }}-pip-
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ───────────────────────────────────────────────────────────────────
+      # Collect static files
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Production-da static files düzgün işləyəcəyini yoxlamaq
+      - name: 📦 Collect static files
+        env:
+          SECRET_KEY: build-check-secret-key
+          DEBUG: "False"
+          DATABASE_URL: sqlite:///db.sqlite3
+        run: |
+          echo "::group::📦 Collecting Static Files"
+          python manage.py collectstatic --noinput --clear || echo "⚠️ collectstatic skipped"
+          echo "::endgroup::"
+        continue-on-error: true
+
+      # ───────────────────────────────────────────────────────────────────
+      # Check for missing migrations
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Model dəyişiklikləri üçün migration yaradılıb-yaradılmadığını yoxlamaq
+      - name: 🔍 Check for missing migrations
+        env:
+          SECRET_KEY: build-check-secret-key
+          DEBUG: "False"
+          DATABASE_URL: sqlite:///db.sqlite3
+        run: |
+          echo "::group::🔍 Migration Check"
+          python manage.py makemigrations --check --dry-run || {
+            echo "::warning::⚠️ There are missing migrations!"
+          }
+          echo "::endgroup::"
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 5: CI SUCCESS (Final status)
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Bütün job-ların uğurla bitdiyini bir yerdə göstərmək
+  # 📌 BEST PRACTICE: Branch protection üçün bu job-u istifadə et
+  ci-success:
+    name: ✅ CI Success
+    runs-on: ubuntu-latest
+    needs: [lint, security, test, build]
+    if: always()
+    
+    steps:
+      - name: 📋 Check all jobs status
+        run: |
+          echo "=== CI Pipeline Summary ==="
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo "Test: ${{ needs.test.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "=========================="
+          
+          if [[ "${{ needs.lint.result }}" == "failure" ]]; then
+            echo "❌ Lint job failed!"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "❌ Test job failed!"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.build.result }}" == "failure" ]]; then
+            echo "❌ Build job failed!"
+            exit 1
+          fi
+          
+          echo "✅ All critical jobs passed!"

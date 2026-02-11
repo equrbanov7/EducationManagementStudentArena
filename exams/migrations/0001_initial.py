@@ -2,10 +2,11 @@
 
 import django.core.validators
 import django.db.models.deletion
-import exams.models
-import exams.validators
 from django.conf import settings
 from django.db import migrations, models
+
+import exams.models
+import exams.validators
 
 
 class Migration(migrations.Migration):

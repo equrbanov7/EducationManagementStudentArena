@@ -1,20 +1,21 @@
 # blog/models.py
 import itertools
-from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.utils.text import slugify
-from django.utils import timezone
 from datetime import timedelta
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
 from django.templatetags.static import static
-
-
-
+from django.utils import timezone
+from django.utils.text import slugify
 
 # Email OTP modeli
 
+
 class EmailOTP(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps"
+    )
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -30,6 +31,7 @@ class EmailOTP(models.Model):
 
 
 # ---- Models for Category functionality ----
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -47,18 +49,19 @@ class Category(models.Model):
         # Slug boşdursa və ya dəyişdirilibsə yenilə
         if not self.slug:
             self.slug = slugify(self.name)
-            
+
             # Əgər bu slug artıq varsa, sonuna rəqəm artır (nadir halda)
             original_slug = self.slug
             for x in itertools.count(1):
                 if not Category.objects.filter(slug=self.slug).exists():
                     break
-                self.slug = '%s-%d' % (original_slug, x)
-                
+                self.slug = "%s-%d" % (original_slug, x)
+
         super().save(*args, **kwargs)
 
 
 # ---- Post Model ----
+
 
 class Post(models.Model):
     author = models.ForeignKey(
@@ -69,21 +72,23 @@ class Post(models.Model):
     # Burada related_name="posts" qalsa yaxşıdır, kateqoriyadan postları çağırmaq üçün
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET_NULL, # Kateqoriya silinsə, məqalə silinməsin, kategoriyasız qalsın
+        on_delete=models.SET_NULL,  # Kateqoriya silinsə, məqalə silinməsin, kategoriyasız qalsın
         null=True,
         blank=True,
-        related_name="posts", 
+        related_name="posts",
     )
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=220, unique=True, blank=True) # Blank=True qoyduq ki, admin paneldə məcburi istəməsin
+    slug = models.SlugField(
+        max_length=220, unique=True, blank=True
+    )  # Blank=True qoyduq ki, admin paneldə məcburi istəməsin
     excerpt = models.TextField(blank=True)
     content = models.TextField()
-    
+
     image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=True)
-    image = models.ImageField(upload_to='post_images/', blank=True, null=True)
+    image = models.ImageField(upload_to="post_images/", blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -102,7 +107,7 @@ class Post(models.Model):
         for x in itertools.count(1):
             if not Post.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 break
-            self.slug = '%s-%d' % (original_slug, x)
+            self.slug = "%s-%d" % (original_slug, x)
 
         super().save(*args, **kwargs)
 
@@ -111,7 +116,7 @@ class Post(models.Model):
         # Comments modelin varsa bu işləyəcək
         agg = self.comments.aggregate(models.Avg("rating"))
         return agg["rating__avg"] or 0
-    
+
     @property
     def get_image(self):
         """
@@ -125,9 +130,11 @@ class Post(models.Model):
         elif self.image_url:
             return self.image_url
         else:
-            return static('img/default-post.jpg') # Default şəklin yeri
+            return static("img/default-post.jpg")  # Default şəklin yeri
+
 
 # ---- Models for Comment functionality ----
+
 
 class Comment(models.Model):
     post = models.ForeignKey(
@@ -155,12 +162,16 @@ class Comment(models.Model):
     def __str__(self):
         return f"{self.user.username} → {self.post.title} ({self.rating})"
 
+
 # ---- Models for Subscription functionality ----
+
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
-    conf_token = models.CharField(max_length=64, blank=True, null=True) # Təsdiq linki üçün token
-    is_active = models.BooleanField(default=False) # Təsdiq olunmayıbsa passivdir
+    conf_token = models.CharField(
+        max_length=64, blank=True, null=True
+    )  # Təsdiq linki üçün token
+    is_active = models.BooleanField(default=False)  # Təsdiq olunmayıbsa passivdir
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -169,28 +180,23 @@ class Subscriber(models.Model):
 
 # ---- Models for Question functionality ----
 
+
 class Question(models.Model):
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="questions",
-        verbose_name="Müəllif"
+        User, on_delete=models.CASCADE, related_name="questions", verbose_name="Müəllif"
     )
     question_text = models.TextField("Sual")
     answer_text = models.TextField("Cavab", blank=True, null=True)
 
     # Hamı görə bilsin?
-    visible_to_all = models.BooleanField(
-        "Hamı görə bilər",
-        default=False
-    )
+    visible_to_all = models.BooleanField("Hamı görə bilər", default=False)
 
     # Yalnız seçilmiş user-lər görə bilsin deyirsə:
     visible_users = models.ManyToManyField(
         User,
         related_name="questions_can_see",
         blank=True,
-        verbose_name="Görə bilən istifadəçilər"
+        verbose_name="Görə bilən istifadəçilər",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -215,11 +221,10 @@ class Question(models.Model):
         if user == self.author:
             return True
         return self.visible_users.filter(id=user.id).exists()
-    
-
 
 
 def _user_is_teacher(self):
-    return self.groups.filter(name='teacher').exists()
+    return self.groups.filter(name="teacher").exists()
 
-User.add_to_class('is_teacher', property(_user_is_teacher))
+
+User.add_to_class("is_teacher", property(_user_is_teacher))
