@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="players",
-                        to="liveExam.livesession",
+                        to="live_exam.livesession",
                     ),
                 ),
             ],
@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="answers",
-                        to="liveExam.liveplayer",
+                        to="live_exam.liveplayer",
                     ),
                 ),
                 (
@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="answers",
-                        to="liveExam.livesession",
+                        to="live_exam.livesession",
                     ),
                 ),
             ],
