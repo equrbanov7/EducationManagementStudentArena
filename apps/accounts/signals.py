@@ -8,7 +8,7 @@ DEFAULT_GROUPS = ["student", "teacher", "assistant_teacher", "moderator"]
 @receiver(post_migrate)
 def create_default_groups(sender, **kwargs):
     # yalnız "accounts" migrate olanda işlə (boşuna hər migrate-da qaçmasın)
-    if sender.name != "accounts":
+    if sender.name != "apps.accounts":
         return
 
     Group = apps.get_model("auth", "Group")
