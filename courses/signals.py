@@ -1,9 +1,9 @@
 from django.db import transaction
-from django.db.models.signals import m2m_changed, pre_save, post_save
+from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
-from exams.models import StudentGroup
 from courses.models import CourseMembership
+from exams.models import StudentGroup
 
 
 # Qrup adının əvvəlki dəyərini yadda saxla
@@ -35,7 +35,9 @@ def sync_group_rename_to_course_memberships(sender, instance, created, **kwargs)
 
 # Qrupun tələbələri dəyişəndə -> kurs membership qrupunu sync elə
 @receiver(m2m_changed, sender=StudentGroup.students.through)
-def sync_group_students_to_course_memberships(sender, instance: StudentGroup, action, pk_set, **kwargs):
+def sync_group_students_to_course_memberships(
+    sender, instance: StudentGroup, action, pk_set, **kwargs
+):
 
     def do_sync():
         teacher = getattr(instance, "teacher", None)
@@ -47,7 +49,9 @@ def sync_group_students_to_course_memberships(sender, instance: StudentGroup, ac
             qs.update(group_name=instance.name)
 
         elif action == "post_remove":
-            qs = CourseMembership.objects.filter(user_id__in=pk_set, group_name=instance.name)
+            qs = CourseMembership.objects.filter(
+                user_id__in=pk_set, group_name=instance.name
+            )
             if teacher is not None:
                 qs = qs.filter(course__owner=teacher)
             qs.update(group_name="")

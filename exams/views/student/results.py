@@ -1,10 +1,8 @@
-
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
 
 from exams.models import Exam, ExamAttempt
 
-from django.shortcuts import  get_object_or_404,  render
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def exam_result(request, slug, attempt_id):
@@ -14,16 +12,12 @@ def exam_result(request, slug, attempt_id):
     """
     exam = get_object_or_404(Exam, slug=slug)
     attempt = get_object_or_404(
-        ExamAttempt,
-        id=attempt_id,
-        exam=exam,
-        user=request.user
+        ExamAttempt, id=attempt_id, exam=exam, user=request.user
     )
 
     # YALNIZ bu attempt-ə düşən suallar:
     answers_qs = (
-        attempt.answers
-        .select_related("question")
+        attempt.answers.select_related("question")
         .prefetch_related(
             "selected_options",
             "files",
@@ -36,25 +30,24 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers_qs]
     answers_by_qid = {a.question_id: a for a in answers_qs}
 
-    return render(request, "exams/student/exam_result.html", {
-        "exam": exam,
-        "attempt": attempt,
-        "questions": questions,
-        "answers_by_qid": answers_by_qid,
-    })
+    return render(
+        request,
+        "exams/student/exam_result.html",
+        {
+            "exam": exam,
+            "attempt": attempt,
+            "questions": questions,
+            "answers_by_qid": answers_by_qid,
+        },
+    )
 
- 
 
 @login_required
 def student_exam_history(request):
     # Tələbənin bitirdiyi və ya vaxtı bitmiş bütün cəhdləri gətiririk
     attempts = ExamAttempt.objects.filter(
-        user=request.user, 
-        status__in=['submitted', 'graded', 'expired']
-    ).order_by('-started_at')
+        user=request.user, status__in=["submitted", "graded", "expired"]
+    ).order_by("-started_at")
 
-    context = {
-        'attempts': attempts
-    }
-    return render(request, 'exams/student/student_exam_history.html', context)
-
+    context = {"attempts": attempts}
+    return render(request, "exams/student/student_exam_history.html", context)

@@ -1,9 +1,10 @@
 import random
 import string
+
 from django.db import models
 from django.utils import timezone
 
-from exams.models import Exam, ExamQuestion  
+from exams.models import Exam, ExamQuestion
 
 
 def generate_pin():
@@ -23,10 +24,16 @@ class LiveSession(models.Model):
         (STATE_FINISHED, "Finished"),
     ]
 
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="live_sessions")
-    host_user = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="hosted_live_sessions")
+    exam = models.ForeignKey(
+        Exam, on_delete=models.CASCADE, related_name="live_sessions"
+    )
+    host_user = models.ForeignKey(
+        "auth.User", on_delete=models.CASCADE, related_name="hosted_live_sessions"
+    )
 
-    pin = models.CharField(max_length=6, unique=True, default=generate_pin, db_index=True)
+    pin = models.CharField(
+        max_length=6, unique=True, default=generate_pin, db_index=True
+    )
     state = models.CharField(max_length=12, choices=STATE_CHOICES, default=STATE_LOBBY)
 
     is_locked = models.BooleanField(default=False)
@@ -36,7 +43,7 @@ class LiveSession(models.Model):
     question_ends_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     current_index = models.PositiveIntegerField(default=0)
 
     # ✅ NEW: aktiv sualın id-si (optional, amma çox rahatdır)
@@ -47,7 +54,7 @@ class LiveSession(models.Model):
 
     question_started_at = models.DateTimeField(null=True, blank=True)
     question_ends_at = models.DateTimeField(null=True, blank=True)
-        # ✅ Host neçə sual oynanacağını seçəcək
+    # ✅ Host neçə sual oynanacağını seçəcək
     question_limit = models.PositiveIntegerField(default=10)
 
     # ✅ Random seçilən sualların ID-ləri (order burada saxlanır)
@@ -74,15 +81,16 @@ class LiveSession(models.Model):
         # ExamQuestion ara modelində sıra field-in adı fərqlidirsə (məs: position),
         # bunu dəyişəcəksən:
         return (
-            ExamQuestion.objects
-            .filter(exam=self.exam)
+            ExamQuestion.objects.filter(exam=self.exam)
             .select_related("question")
             .order_by("order")
         )
 
 
 class LivePlayer(models.Model):
-    session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="players")
+    session = models.ForeignKey(
+        LiveSession, on_delete=models.CASCADE, related_name="players"
+    )
 
     nickname = models.CharField(max_length=32)
     avatar_key = models.CharField(max_length=32, default="avatar_1")
@@ -99,7 +107,9 @@ class LivePlayer(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["session", "client_id"], name="uniq_player_per_session_client")
+            models.UniqueConstraint(
+                fields=["session", "client_id"], name="uniq_player_per_session_client"
+            )
         ]
         unique_together = [("session", "client_id")]
 
@@ -108,8 +118,12 @@ class LivePlayer(models.Model):
 
 
 class LiveAnswer(models.Model):
-    session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="answers")
-    player = models.ForeignKey(LivePlayer, on_delete=models.CASCADE, related_name="answers")
+    session = models.ForeignKey(
+        LiveSession, on_delete=models.CASCADE, related_name="answers"
+    )
+    player = models.ForeignKey(
+        LivePlayer, on_delete=models.CASCADE, related_name="answers"
+    )
 
     question_id = models.IntegerField()
 

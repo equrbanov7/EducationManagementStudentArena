@@ -1,0 +1,20 @@
+[tool.black]
+line-length = 120
+target-version = ['py311']
+extend-exclude = '''
+/(
+    \.git
+    | \.venv
+    | venv
+    | migrations
+    | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = ["migrations", "venv", ".venv", "__pycache__"]
+known_django = ["django"]
+known_first_party = ["accounts", "courses", "assignments", "exams", "labs", "blog", "projects", "liveExam", "emsarena"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]

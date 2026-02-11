@@ -1,11 +1,10 @@
-
-
-from django.utils import timezone
-from exams.models import Exam
-from django.db.models import Q  
-from django.shortcuts import  render
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
+from django.shortcuts import render
+from django.utils import timezone
+
+from exams.models import Exam
 
 
 @login_required
@@ -15,26 +14,22 @@ def assigned_student_exam_list(request):
     # 1) BAZA SORĞUSU (İlkin Filter)
     # Fərq burdadır: yalnız user-ə təyin olunmuş aktiv imtahanlar
     exams_qs = (
-        Exam.objects
-        .filter(is_active=True)
-        .filter(
-            Q(allowed_users=user) |
-            Q(allowed_groups__students=user)
-        )
+        Exam.objects.filter(is_active=True)
+        .filter(Q(allowed_users=user) | Q(allowed_groups__students=user))
         .distinct()
-        .select_related('author')
+        .select_related("author")
     )
 
     # --- SEARCH (Axtarış) ---
-    search_query = request.GET.get('q')
+    search_query = request.GET.get("q")
     if search_query:
         exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query) |
-            Q(author__username__icontains=search_query)
+            Q(title__icontains=search_query)
+            | Q(author__username__icontains=search_query)
         )
 
     # --- FILTER (Tipə görə) ---
-    filter_type = request.GET.get('type')
+    filter_type = request.GET.get("type")
     if filter_type:
         exams_qs = exams_qs.filter(exam_type=filter_type)
 
@@ -69,16 +64,18 @@ def assigned_student_exam_list(request):
         else:
             access_label = "Yalnız icazəli istifadəçilər"
 
-        exam_items.append({
-            "exam": exam,
-            "left": left,
-            "requires_code": requires_code,
-            "access_label": access_label,
-        }) 
+        exam_items.append(
+            {
+                "exam": exam,
+                "left": left,
+                "requires_code": requires_code,
+                "access_label": access_label,
+            }
+        )
 
     # 3) PAGINATION (Səhifələmə) — eyni saxla
     paginator = Paginator(exam_items, 2)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
 
     try:
         page_obj = paginator.page(page_number)
@@ -90,16 +87,11 @@ def assigned_student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
-
-        
-         "page_title": "Təyin olunmuş imtahanlarım",
-         "current_url_name": "assigned_exam_list",
+        "page_title": "Təyin olunmuş imtahanlarım",
+        "current_url_name": "assigned_exam_list",
     }
 
-    
     return render(request, "exams/student/student_exam_list.html", context)
-
-
 
 
 @login_required
@@ -109,22 +101,23 @@ def student_exam_list(request):
 
     # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
     exams_qs = (
-        Exam.objects
-        .filter(is_active=True)
-        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
-        .select_related('author')
+        Exam.objects.filter(is_active=True)
+        .filter(
+            Q(end_datetime__isnull=True) | Q(end_datetime__gte=now)
+        )  # ✅ keçmişləri gizlədir
+        .select_related("author")
     )
 
     # --- SEARCH ---
-    search_query = request.GET.get('q')
+    search_query = request.GET.get("q")
     if search_query:
         exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query) |
-            Q(author__username__icontains=search_query)
+            Q(title__icontains=search_query)
+            | Q(author__username__icontains=search_query)
         )
 
     # --- FILTER (Tipə görə) ---
-    filter_type = request.GET.get('type')
+    filter_type = request.GET.get("type")
     if filter_type:
         exams_qs = exams_qs.filter(exam_type=filter_type)
 
@@ -154,15 +147,17 @@ def student_exam_list(request):
         else:
             access_label = "Yalnız icazəli istifadəçilər"
 
-        exam_items.append({
-            "exam": exam,
-            "left": left,
-            "requires_code": requires_code,
-            "access_label": access_label,
-        })
+        exam_items.append(
+            {
+                "exam": exam,
+                "left": left,
+                "requires_code": requires_code,
+                "access_label": access_label,
+            }
+        )
 
     paginator = Paginator(exam_items, 2)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
 
     try:
         page_obj = paginator.page(page_number)
@@ -176,8 +171,5 @@ def student_exam_list(request):
         "exam_items": page_obj,
         "current_url_name": "student_exam_list",
     }
-    
+
     return render(request, "exams/student/student_exam_list.html", context)
-
-
- 
