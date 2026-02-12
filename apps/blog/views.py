@@ -1,0 +1,667 @@
+# blog/views.py
+
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model, logout
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from apps.courses.models import Course
+from apps.exams.models import Exam, ExamAttempt
+
+from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
+from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
+from .utils import generate_otp, send_verify_email
+
+User = get_user_model()
+signer = TimestampSigner()
+
+
+# ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
+
+
+def home(request):
+
+    query = request.GET.get("q", "").strip()
+    post_list = (
+        Post.objects.filter(is_published=True)
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+
+    if query:
+        post_list = post_list.filter(
+            Q(title__icontains=query)
+            | Q(excerpt__icontains=query)
+            | Q(content__icontains=query)
+        ).distinct()
+
+    paginator = Paginator(post_list, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    categories = (
+        Category.objects.annotate(
+            post_count=Count("posts", filter=Q(posts__is_published=True))
+        )
+        .filter(post_count__gt=0)
+        .order_by("name")
+    )
+
+    context = {
+        "page_obj": page_obj,
+        "categories": categories,
+        "search_query": query,
+    }
+
+    return render(request, "blog/home.html", context)
+
+
+def about(request):
+    return render(request, "blog/about.html")
+
+
+def technology(request):
+
+    TECH_CATEGORIES = [
+        "proqramlasdirma",
+        "suni-intellekt",
+        "python",
+        "django",
+        "texnologiya",
+        "backend",
+    ]
+
+    post_list = (
+        Post.objects.filter(category__slug__in=TECH_CATEGORIES)
+        .select_related("category", "author")
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(post_list, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "blog/technology.html", {"page_obj": page_obj})
+
+
+def contact(request):
+    return HttpResponse("Contact Us Page (demo)")
+
+
+# ------------------- POST DETAY + COMMENT ------------------- #
+
+
+def post_detail(request, slug):
+    """
+    Bir postun detal səhifəsi + şərhlər və rating forması.
+    Rating yalnız ilk şərhdə nəzərə alınır.
+    """
+    # 1) Postu statusdan asılı olmayaraq tap
+    post = get_object_or_404(Post, slug=slug)
+
+    # 2) Əgər post nəşr olunmayıbsa və bu user author DEYİLSƏ -> 404
+    if not post.is_published and request.user != post.author:
+        raise Http404("No Post matches the given query.")
+
+    comments = post.comments.select_related("user").order_by("-created_at")
+
+    user_first_comment = None
+    if request.user.is_authenticated:
+        user_first_comment = (
+            Comment.objects.filter(post=post, user=request.user)
+            .order_by("created_at")
+            .first()
+        )
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Şərh yazmaq üçün əvvəlcə daxil olun.")
+            return redirect("login")
+
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            if user_first_comment is None:
+                # İlk dəfə şərh yazır → həm text, həm rating götürürük
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.user = request.user
+                comment.save()
+                messages.success(
+                    request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐"
+                )
+            else:
+                # Artıq bu posta şərhi var → yeni şərh, eyni rating
+                comment = Comment(
+                    post=post,
+                    user=request.user,
+                    text=form.cleaned_data["text"],
+                    rating=user_first_comment.rating,
+                )
+                comment.save()
+                messages.success(
+                    request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂"
+                )
+
+            return redirect("post_detail", slug=post.slug)
+    else:
+        form = CommentForm()
+
+    context = {
+        "post": post,
+        "comments": comments,
+        "comment_form": form,
+        "user_first_comment": user_first_comment,
+    }
+    return render(request, "blog/postDetail.html", context)
+
+
+# ------------------- SUBSCRIBE ------------------- #
+
+
+def subscribe_page(request):
+    if request.method == "POST":
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+
+            try:
+                # 1. Abunəçini bazaya yaz
+                subscriber, created = Subscriber.objects.get_or_create(email=email)
+
+                if created or not subscriber.is_active:
+
+                    # 2. Email şablonunu yarat
+                    html_message = render_to_string(
+                        "email_templates/welcome_email.html", {"email": email}
+                    )
+
+                    # 3. Email göndər
+                    send_mail(
+                        "Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]",
+                        # Text versiyası (html-i dəstəkləməyən proqramlar üçün)
+                        f"Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.",
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        html_message=html_message,
+                        fail_silently=False,
+                    )
+
+                    messages.success(
+                        request,
+                        f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.",
+                    )
+
+                else:
+                    messages.warning(
+                        request, f"'{email}' ünvanı artıq abunəçilərimizdədir."
+                    )
+
+            except Exception as e:
+                # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
+                messages.error(
+                    request,
+                    "Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
+                )
+                print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
+
+            return redirect("subscribe")
+        else:
+            messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
+    else:
+        form = SubscriptionForm()
+
+    return render(request, "blog/subscribe.html", {"form": form})
+
+
+# ------------------- POST CRUD ------------------- #
+
+
+@login_required
+def create_post(request):
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+
+            new_cat_name = form.cleaned_data.get("new_category")
+            selected_cat = form.cleaned_data.get("category")
+
+            if new_cat_name:
+
+                category, created = Category.objects.get_or_create(name=new_cat_name)
+                post.category = category
+
+                if created:
+                    messages.info(
+                        request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı."
+                    )
+
+            elif selected_cat:
+                # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
+                post.category = selected_cat
+
+            else:
+                # 3. Heç nə seçməyibsə (istəyə bağlı):
+                # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
+                pass
+
+            # --- SLUG MƏNTİQİ SİLİNDİ ---
+            # Sənin Post modelinin save() metodu slug-ı və unikallığı
+            # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
+
+            post.save()
+            messages.success(request, "Post uğurla yaradıldı.")
+            return redirect("post_detail", slug=post.slug)
+    else:
+        form = PostForm()
+
+    return render(request, "post_form.html", {"form": form})
+
+
+# 1. POSTU REDAKTƏ ET (AJAX Endpoint)
+
+
+@login_required
+@require_POST
+def post_edit_ajax(request, pk):
+    # Yalnız öz postunu düzəldə bilsin
+    post = get_object_or_404(Post, pk=pk, author=request.user)
+
+    title = request.POST.get("title", "").strip()
+    content = request.POST.get("content", "").strip()
+    excerpt = request.POST.get("excerpt", "").strip()
+    category_id = request.POST.get("category")  # select name="category"
+    image_url = request.POST.get("image_url", "").strip()
+    is_published = bool(request.POST.get("is_published"))  # "on" gəlir
+
+    # Sadə validasiya (istəsən form ilə də edə bilərsən)
+    if not title or not content:
+        return JsonResponse(
+            {"success": False, "message": "Başlıq və məzmun tələb olunur."},
+            status=400,
+        )
+
+    # Məlumatları post-a yaz
+    post.title = title
+    post.content = content
+    post.excerpt = excerpt
+
+    # Kateqoriya
+    if category_id:
+        try:
+            post.category = Category.objects.get(pk=category_id)
+        except Category.DoesNotExist:
+            post.category = None
+    else:
+        post.category = None
+
+    # Şəkil faylı
+    image_file = request.FILES.get("image")
+    if image_file:
+        post.image = image_file
+
+    # Şəkil URL
+    post.image_url = image_url or None
+
+    # Dərc statusu
+    post.is_published = is_published
+
+    # Save
+    post.save()
+
+    return JsonResponse({"success": True})
+
+
+# 2. POSTU SİLMƏ (Təsdiqdən sonra)
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, pk=post_id, author=request.user)
+
+    if request.method == "POST":
+        # Yalnız POST gələndə silməni icra et (silmə düyməsi POST göndərməlidir)
+        post.delete()
+        # Və ya sadəcə redirect edirik (çünki JS modalı bağlayıb səhifəni yeniləyir)
+        return redirect("user_profile", username=request.user.username)
+
+    # Əgər GET gələrsə, xəta veririk və ya sadəcə silməni icra etmədən geri göndəririk
+    return redirect("user_profile", username=request.user.username)
+
+
+def list_posts(request):
+    """
+    Bütün postların siyahısı (əgər ayrıca page istəyirsənsə).
+    """
+    posts = Post.objects.select_related("category", "author").order_by("-created_at")
+    return render(request, "blog/post_list.html", {"posts": posts})
+
+
+def search_posts(request):
+    """
+    Sadə search: ?q=... ilə title və excerpt-də axtarır.
+    """
+    query = request.GET.get("q", "").strip()
+    posts = Post.objects.all()
+
+    if query:
+        posts = posts.filter(title__icontains=query) | posts.filter(
+            excerpt__icontains=query
+        )
+
+    posts = posts.order_by("-created_at")
+
+    return render(
+        request,
+        "blog/search_results.html",
+        {
+            "posts": posts,
+            "query": query,
+        },
+    )
+
+
+# ------------------- USER REGISTER / PROFILE / LOGOUT ------------------- #
+
+
+def register_view(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+
+            # password set
+            password = form.cleaned_data["password"]
+            user.set_password(password)
+
+            # email təsdiqlənənə qədər giriş qadağan
+            user.is_active = False
+            user.save()
+
+            code = generate_otp()
+            EmailOTP.objects.create(
+                user=user,
+                code=code,
+                expires_at=timezone.now() + timezone.timedelta(minutes=10),
+            )
+            send_verify_email(user, code)
+
+            request.session["pending_verify_email"] = user.email
+            messages.success(request, "Email-ə təsdiq kodu göndərildi.")
+            return redirect("verify_code")
+    else:
+        form = RegisterForm()
+
+    return render(request, "blog/register.html", {"form": form})
+
+
+def verify_code_view(request):
+    email = request.session.get("pending_verify_email")
+    if not email:
+        messages.error(
+            request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç."
+        )
+        return redirect("register")
+
+    if request.method == "POST":
+        code = request.POST.get("code", "").strip()
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            messages.error(request, "User tapılmadı.")
+            return redirect("register")
+
+        otp = (
+            EmailOTP.objects.filter(user=user, code=code, is_used=False)
+            .order_by("-created_at")
+            .first()
+        )
+        if not otp or otp.is_expired():
+            messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
+            return render(request, "blog/verify_code.html", {"email": email})
+
+        otp.is_used = True
+        otp.save()
+
+        user.is_active = True
+        user.save()
+
+        messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
+        return redirect("login")
+
+    return render(request, "blog/verify_code.html", {"email": email})
+
+
+def verify_email_link_view(request):
+    token = request.GET.get("token", "")
+    try:
+        user_id = signer.unsign(token, max_age=60 * 10)  # 10 dəqiqə
+        user = User.objects.get(pk=user_id)
+        user.is_active = True
+        user.save()
+        messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
+        return redirect("login")
+    except (BadSignature, SignatureExpired, User.DoesNotExist):
+        messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
+        return redirect("register")
+
+
+def resend_code_view(request):
+    email = request.session.get("pending_verify_email")
+    if not email:
+        messages.error(request, "Email tapılmadı.")
+        return redirect("register")
+
+    user = User.objects.filter(email=email).first()
+    if not user:
+        messages.error(request, "User tapılmadı.")
+        return redirect("register")
+
+    code = generate_otp()
+    EmailOTP.objects.create(
+        user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10)
+    )
+    send_verify_email(user, code)
+
+    messages.success(request, "Yeni kod göndərildi.")
+    return redirect("verify_code")
+
+
+def user_profile(request, username):
+    """
+    İstifadəçi profili.
+    """
+
+    profile_user = get_object_or_404(User, username=username)
+
+    # 1. Postların Filterlənməsi
+    if request.user == profile_user:
+        user_posts_list = (
+            Post.objects.filter(author=profile_user)
+            .select_related("category")
+            .order_by("-created_at")
+        )
+    else:
+        user_posts_list = (
+            Post.objects.filter(author=profile_user, is_published=True)
+            .select_related("category")
+            .order_by("-created_at")
+        )
+
+    # 2. Pagination
+    paginator = Paginator(user_posts_list, 6)
+    page_number = request.GET.get("page")
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
+
+    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
+    pending_count = 0
+    if (
+        request.user.is_authenticated
+        and request.user == profile_user
+        and getattr(request.user, "is_teacher", False)
+    ):
+        pending_count = (
+            ExamAttempt.objects.filter(
+                exam__author=request.user,
+                status__in=["submitted", "expired"],
+                checked_by_teacher=False,
+            )
+            .exclude(exam__exam_type="test")
+            .count()
+        )
+
+    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI
+    assigned_count = 0
+    if request.user.is_authenticated and request.user == profile_user:
+        assigned_count = (
+            Exam.objects.filter(is_active=True)
+            .filter(
+                Q(allowed_users=request.user) | Q(allowed_groups__students=request.user)
+            )
+            .distinct()
+            .count()
+        )
+
+    # ══════════════════════════════════════��════════════════════════
+    # 5. TƏLƏBƏNİN KURSLARI (YENİ)
+    # ═══════════════════════════════════════════════════════════════
+    student_courses = []
+    student_courses_count = 0
+
+    if request.user.is_authenticated and request.user == profile_user:
+        # Tələbə öz profilinə baxır
+        if getattr(request.user, "is_student", False):
+            # CourseMembership vasitəsilə tələbənin üzv olduğu kurslar
+            student_courses = (
+                Course.objects.filter(
+                    memberships__user=request.user,
+                    memberships__role="student",
+                    status="published",  # Yalnız published kurslar
+                )
+                .distinct()
+                .order_by("-created_at")
+            )
+
+            student_courses_count = student_courses.count()
+
+    # 6. Kateqoriyalar
+    categories = Category.objects.all().order_by("name")
+
+    context = {
+        "profile_user": profile_user,
+        "posts": posts,
+        "categories": categories,
+        "pending_count": pending_count,
+        "assigned_count": assigned_count,
+        "student_courses": student_courses,  # YENİ
+        "student_courses_count": student_courses_count,  # YENİ
+    }
+    return render(request, "blog/user_profile.html", context)
+
+
+def logout_view(request):
+    """
+    İstifadəçini çıxış etdirib ana səhifəyə yönləndirir.
+    """
+    logout(request)
+    return redirect("home")
+
+
+# ------------------- CATEGORY DETAIL ------------------- #
+
+
+def category_detail(request, slug):
+    # 1. Hazırkı seçilmiş kateqoriyanı tapırıq (yoxdursa 404 qaytarır)
+    category = get_object_or_404(Category, slug=slug)
+
+    # 2. YALNIZ bu kateqoriyaya aid olan və yayımlanmış postları tapırıq
+    posts = Post.objects.filter(category=category, is_published=True).order_by(
+        "-created_at"
+    )
+
+    # 3. Sidebar üçün bütün kateqoriyaları və post saylarını hesablayırıq (Home view-dakı kimi)
+    categories = (
+        Category.objects.annotate(
+            post_count=Count("posts", filter=Q(posts__is_published=True))
+        )
+        .filter(post_count__gt=0)
+        .order_by("name")
+    )
+
+    context = {
+        "category": category,  # Başlıqda adını yazmaq üçün
+        "posts": posts,  # Süzülmüş postlar
+        "categories": categories,  # Sidebar üçün siyahı
+    }
+
+    return render(request, "blog/category_detail.html", context)
+
+
+# ------------------- QUESTION SUBMISSION ------------------- #
+
+
+@login_required
+def create_question(request):
+    # Yalnız teacher qrupu olanlar sual yarada bilsin
+    if not request.user.is_teacher:
+        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
+            form.save_m2m()  # visible_users üçün lazımdır
+            return redirect("my_questions")
+    else:
+        form = QuestionForm()
+
+    return render(request, "blog/create_question.html", {"form": form})
+
+
+@login_required
+def my_questions(request):
+    """
+    Bu view müəllimin öz yaratdığı sualları göstərir.
+    """
+    questions = Question.objects.filter(author=request.user).order_by("-created_at")
+    return render(request, "blog/my_questions.html", {"questions": questions})
+
+
+@login_required
+def questions_i_can_see(request):
+    """
+    Bu view login olan user-in görə bildiyi bütün sualları göstərir.
+    visible_to_all = True olanlar,
+    + author = user olanlar,
+    + visible_users siyahısında user olanlar.
+    """
+
+    questions = (
+        Question.objects.filter(
+            Q(visible_to_all=True)
+            | Q(author=request.user)
+            | Q(visible_users=request.user)
+        )
+        .distinct()
+        .select_related("author")
+    )
+
+    return render(request, "blog/questions_i_can_see.html", {"questions": questions})
