@@ -19,7 +19,10 @@ from apps.exams.services.attempts import (
     generate_random_questions_for_attempt,
 )
 from apps.exams.services.randomizer import build_shuffled_options
-from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
+from apps.exams.services.utils import (
+    _clear_paint_from_answer,
+    _save_paint_png_to_answer,
+)
 
 
 @login_required
