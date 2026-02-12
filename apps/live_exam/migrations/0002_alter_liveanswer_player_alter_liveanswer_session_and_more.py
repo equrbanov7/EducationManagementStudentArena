@@ -7,23 +7,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('live_exam', '0001_initial'),
+        ("live_exam", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='liveanswer',
-            name='player',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='live_exam.liveplayer'),
+            model_name="liveanswer",
+            name="player",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="answers",
+                to="live_exam.liveplayer",
+            ),
         ),
         migrations.AlterField(
-            model_name='liveanswer',
-            name='session',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='live_exam.livesession'),
+            model_name="liveanswer",
+            name="session",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="answers",
+                to="live_exam.livesession",
+            ),
         ),
         migrations.AlterField(
-            model_name='liveplayer',
-            name='session',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='players', to='live_exam.livesession'),
+            model_name="liveplayer",
+            name="session",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="players",
+                to="live_exam.livesession",
+            ),
         ),
     ]

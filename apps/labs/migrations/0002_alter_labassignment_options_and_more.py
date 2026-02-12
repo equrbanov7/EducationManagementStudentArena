@@ -6,17 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('labs', '0001_initial'),
+        ("labs", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='labassignment',
-            options={'verbose_name': 'Lab Tapşırığı', 'verbose_name_plural': 'Lab Tapşırıqları'},
+            name="labassignment",
+            options={
+                "verbose_name": "Lab Tapşırığı",
+                "verbose_name_plural": "Lab Tapşırıqları",
+            },
         ),
         migrations.AlterField(
-            model_name='labassignment',
-            name='assigned_questions',
-            field=models.ManyToManyField(related_name='assignments', to='labs.labquestion', verbose_name='Təyin edilmiş suallar'),
+            model_name="labassignment",
+            name="assigned_questions",
+            field=models.ManyToManyField(
+                related_name="assignments",
+                to="labs.labquestion",
+                verbose_name="Təyin edilmiş suallar",
+            ),
         ),
     ]
