@@ -4,8 +4,9 @@ Security-hardened configuration for production deployment.
 """
 
 import os
-import sentry_sdk
+
 import dj_database_url
+import sentry_sdk
 from dotenv import load_dotenv
 
 from .base import *  # noqa
