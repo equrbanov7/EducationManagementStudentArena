@@ -4,7 +4,7 @@ Security-hardened configuration for production deployment.
 """
 
 import os
-
+import sentry_sdk
 import dj_database_url
 from dotenv import load_dotenv
 
@@ -86,3 +86,10 @@ LOGGING = {
         },
     },
 }
+
+sentry_sdk.init(
+    dsn="https://0acc4eea5c9437143169e1ab327eb7ed@o4510875228438528.ingest.de.sentry.io/4510875340767312",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
