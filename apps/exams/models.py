@@ -161,6 +161,68 @@ class Exam(models.Model):
         verbose_name="Kurs",
     )
 
+    # ══════════════════════════════════════════════════════════════════════════
+    # SPRINT 9: YENİ SAHƏLƏR
+    # ══════════════════════════════════════════════════════════════════════════
+
+    organization_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Təşkilat ID",
+        help_text="Gələcəkdə organizations.Organization FK olacaq",
+        db_index=True,
+    )
+
+    EXAM_TYPE_EXTENDED_CHOICES = (
+        ("quiz", "Kviz"),
+        ("midterm", "Midterm İmtahan"),
+        ("final", "Final İmtahan"),
+        ("placement", "Yerləşdirmə İmtahanı"),
+        ("practice", "Məşq İmtahanı"),
+    )
+
+    exam_type_extended = models.CharField(
+        "İmtahan tipi (genişləndirilmiş)",
+        max_length=20,
+        choices=EXAM_TYPE_EXTENDED_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Əlavə imtahan tipləri",
+    )
+
+    MODE_CHOICES = (
+        ("online", "Onlayn"),
+        ("offline", "Oflayn"),
+        ("hybrid", "Hibrid"),
+    )
+
+    mode = models.CharField(
+        "İmtahan rejimi",
+        max_length=20,
+        choices=MODE_CHOICES,
+        default="online",
+    )
+
+    PROCTORING_LEVEL_CHOICES = (
+        ("none", "Nəzarət Yoxdur"),
+        ("basic", "Əsas Nəzarət"),
+        ("strict", "Sərt Nəzarət"),
+    )
+
+    proctoring_level = models.CharField(
+        "Nəzarət səviyyəsi",
+        max_length=20,
+        choices=PROCTORING_LEVEL_CHOICES,
+        default="none",
+    )
+
+    settings = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Əlavə Parametrlər",
+        help_text="JSON formatında əlavə tənzimləmələr",
+    )
+
     # --- Giriş məhdudiyyətləri ---
 
     is_public = models.BooleanField(
@@ -353,6 +415,88 @@ class Exam(models.Model):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# MODEL: QuestionBank (Sprint 9)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class QuestionBank(models.Model):
+    """
+    Sual Bankı - sualları təşkil etmək üçün.
+
+    Nə üçün:
+    - Sualları mövzulara görə qruplaşdırmaq
+    - Sualları paylaşmaq və təkrar istifadə etmək
+    - Müxtəlif təşkilatlar üçün sual kitabxanaları yaratmaq
+    """
+
+    ORGANIZATION_TYPE_CHOICES = (
+        ("university", "Universitet"),
+        ("school", "Məktəb"),
+        ("course_center", "Kurs Mərkəzi"),
+        ("individual", "Fərdi"),
+    )
+
+    name = models.CharField(max_length=255, verbose_name="Sual Bankı Adı")
+
+    description = models.TextField(blank=True, verbose_name="Təsvir")
+
+    subject = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Fənn/Mövzu",
+        help_text="Məs: Riyaziyyat, Fizika, Proqramlaşdırma",
+    )
+
+    organization_type = models.CharField(
+        max_length=50,
+        choices=ORGANIZATION_TYPE_CHOICES,
+        default="individual",
+        verbose_name="Təşkilat Tipi",
+    )
+
+    is_shared = models.BooleanField(
+        default=False,
+        verbose_name="Paylaşılıb?",
+        help_text="Digər istifadəçilər istifadə edə bilər",
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Aktivdir?",
+        db_index=True,
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="question_banks",
+        verbose_name="Yaradan",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Yaradılma Tarixi"
+    )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə Tarixi")
+
+    class Meta:
+        verbose_name = "Sual Bankı"
+        verbose_name_plural = "Sual Bankları"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_by", "-created_at"]),
+            models.Index(fields=["is_active", "is_shared"]),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def question_count(self):
+        """Bu bankda neçə sual var?"""
+        return self.bank_questions.count()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # MODEL: QuestionBlock
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -414,6 +558,52 @@ class ExamQuestion(models.Model):
         verbose_name="Sual Bloku",
     )
     # --- BURANI ƏLAVƏ EDİN (END) ---
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # SPRINT 9: YENİ SAHƏLƏR
+    # ══════════════════════════════════════════════════════════════════════════
+
+    bank = models.ForeignKey(
+        QuestionBank,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bank_questions",
+        verbose_name="Sual Bankı",
+        help_text="Bu sual hansı sual bankından götürülüb",
+    )
+
+    DIFFICULTY_CHOICES = (
+        ("easy", "Asan"),
+        ("medium", "Orta"),
+        ("hard", "Çətin"),
+    )
+
+    difficulty = models.CharField(
+        max_length=20,
+        choices=DIFFICULTY_CHOICES,
+        default="medium",
+        verbose_name="Çətinlik Səviyyəsi",
+    )
+
+    tags = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="Etiketlər",
+        help_text="JSON siyahısı: ['algebra', 'equations', ...]",
+    )
+
+    explanation = models.TextField(
+        blank=True,
+        verbose_name="İzahat",
+        help_text="Sualın həlli və ya izahatı",
+    )
+
+    usage_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name="İstifadə Sayı",
+        help_text="Bu sual neçə dəfə istifadə olunub",
+    )
 
     text = models.TextField("Sual mətni")
 
@@ -759,3 +949,78 @@ class ExamAnswerFile(models.Model):
 
     def __str__(self):
         return f"{self.filename()} ({self.answer_id})"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MODEL: ProctoringLog (Sprint 9)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class ProctoringLog(models.Model):
+    """
+    Proktoring hadisələrinin qeyd edilməsi.
+
+    Nə üçün:
+    - İmtahan zamanı şübhəli fəaliyyətləri qeyd etmək
+    - Tələbənin davranışını izləmək
+    - Akademik ədaləti təmin etmək
+
+    Hadisə tipləri:
+    - tab_switch: Tələbə başqa tabə keçib
+    - copy_paste: Kopyala-yapışdır cəhdi
+    - right_click: Sağ klik istifadəsi
+    - fullscreen_exit: Tam ekran rejimindən çıxış
+    - focus_loss: Fokus itkisi
+    - browser_console: Developer console açılıb
+    """
+
+    EVENT_TYPE_CHOICES = (
+        ("tab_switch", "Tab Dəyişməsi"),
+        ("copy_paste", "Kopyala-Yapışdır"),
+        ("right_click", "Sağ Klik"),
+        ("fullscreen_exit", "Tam Ekrandan Çıxış"),
+        ("focus_loss", "Fokus İtkisi"),
+        ("browser_console", "Developer Console"),
+        ("screenshot_attempt", "Ekran Görüntüsü Cəhdi"),
+        ("multiple_windows", "Çoxlu Pəncərə"),
+        ("suspicious_activity", "Şübhəli Fəaliyyət"),
+        ("network_disconnect", "Şəbəkə Kəsilməsi"),
+        ("other", "Digər"),
+    )
+
+    exam_attempt = models.ForeignKey(
+        ExamAttempt,
+        on_delete=models.CASCADE,
+        related_name="proctoring_logs",
+        verbose_name="İmtahan Cəhdi",
+    )
+
+    event_type = models.CharField(
+        max_length=50,
+        choices=EVENT_TYPE_CHOICES,
+        verbose_name="Hadisə Tipi",
+    )
+
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Vaxt",
+    )
+
+    details = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Təfərrüatlar",
+        help_text="JSON: {ip, browser, location, ...}",
+    )
+
+    class Meta:
+        verbose_name = "Proktoring Qeydi"
+        verbose_name_plural = "Proktoring Qeydləri"
+        ordering = ["-timestamp"]
+        indexes = [
+            models.Index(fields=["exam_attempt", "-timestamp"]),
+            models.Index(fields=["event_type"]),
+        ]
+
+    def __str__(self):
+        return f"{self.exam_attempt.user.username} - {self.get_event_type_display()} @ {self.timestamp}"

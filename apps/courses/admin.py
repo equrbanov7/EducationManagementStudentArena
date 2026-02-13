@@ -11,7 +11,8 @@ Nə üçün:
 
 from django.contrib import admin
 
-from .models import Course, CourseMembership, CourseResource, CourseTopic
+from .models import (Course, CourseGroup, CourseInstructor, CourseMembership,
+                     CourseResource, CourseTopic)
 
 # ════════════════════════════════════════════════════════════════════════════
 # COURSE ADMIN
@@ -237,3 +238,91 @@ class CourseMembershipAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("joined_at",)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# COURSE INSTRUCTOR ADMIN (Sprint 7)
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@admin.register(CourseInstructor)
+class CourseInstructorAdmin(admin.ModelAdmin):
+    """
+    Kurs müəllimləri admin paneli.
+    """
+
+    list_display = ("user", "course", "role", "created_at")
+    list_filter = ("role", "course", "created_at")
+    search_fields = ("user__username", "course__title")
+
+    fieldsets = (
+        (
+            "Əsas Məlumat",
+            {
+                "fields": ("course", "user", "role"),
+            },
+        ),
+        (
+            "Səlahiyyətlər",
+            {
+                "fields": ("permissions",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    readonly_fields = ("created_at",)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# COURSE GROUP ADMIN (Sprint 7)
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@admin.register(CourseGroup)
+class CourseGroupAdmin(admin.ModelAdmin):
+    """
+    Kurs qrupları admin paneli.
+    """
+
+    list_display = (
+        "name",
+        "course",
+        "instructor",
+        "student_count_display",
+        "max_students",
+        "created_at",
+    )
+    list_filter = ("course", "instructor", "created_at")
+    search_fields = ("name", "course__title", "instructor__username")
+
+    fieldsets = (
+        (
+            "Əsas Məlumat",
+            {
+                "fields": ("course", "name", "instructor", "max_students"),
+            },
+        ),
+        (
+            "Cədvəl",
+            {
+                "fields": ("schedule",),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Üzvlər",
+            {
+                "fields": ("members",),
+            },
+        ),
+    )
+
+    filter_horizontal = ("members",)
+    readonly_fields = ("created_at",)
+
+    def student_count_display(self, obj):
+        """Tələbə sayı göstər."""
+        return f"{obj.student_count} / {obj.max_students}"
+
+    student_count_display.short_description = "Tələbə Sayı"

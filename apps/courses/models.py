@@ -94,6 +94,65 @@ class Course(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə Tarixi")
 
+    # ══════════════════════════════════════════════════════════════════════════
+    # SPRINT 7: YENİ SAHƏLƏR
+    # ══════════════════════════════════════════════════════════════════════════
+
+    organization_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Təşkilat ID",
+        help_text="Gələcəkdə organizations.Organization FK olacaq",
+        db_index=True,
+    )
+
+    unit_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Kafedra/Şöbə ID",
+        help_text="Placeholder - gələcək OrgUnit FK",
+        db_index=True,
+    )
+
+    period_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="Akademik Dövr ID",
+        help_text="Placeholder - gələcək AcademicPeriod FK",
+        db_index=True,
+    )
+
+    GRADING_TYPE_CHOICES = (
+        ("percentage", "Faiz (0-100)"),
+        ("letter", "Hərf (A, B, C, D, F)"),
+        ("pass_fail", "Keç/Qal"),
+        ("points", "Xal sistemi"),
+    )
+
+    grading_type = models.CharField(
+        max_length=20,
+        choices=GRADING_TYPE_CHOICES,
+        default="percentage",
+        verbose_name="Qiymətləndirmə Tipi",
+        help_text="Kursun qiymətləndirmə metodunu seçin",
+    )
+
+    passing_grade = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Keçid Qiyməti",
+        help_text="Minimum keçid balı (məs: 50.00)",
+    )
+
+    settings = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Əlavə Parametrlər",
+        help_text="JSON formatında əlavə tənzimləmələr",
+    )
+
     class Meta:
         verbose_name = "Kurs"
         verbose_name_plural = "Kurslar"
@@ -377,3 +436,166 @@ class CourseResource(models.Model):
     def is_link(self):
         """Bu resurs link mı?"""
         return bool(self.url) and not self.file
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 5. COURSE INSTRUCTOR MODEL (Sprint 7)
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class CourseInstructor(models.Model):
+    """
+    Kurs Müəllimləri və Asistantları.
+
+    Nə üçün:
+    - Bir kursda əsas müəllim və asistantlar ola bilər
+    - Hər müəllimin fərqli səlahiyyətləri ola bilər
+    - Qonaq müəllimlər dəvət edilə bilər
+
+    Atributlar:
+    - course: Hansı kurs
+    - user: Hansı istifadəçi (müəllim/asistant)
+    - role: primary (əsas), assistant (köməkçi), guest (qonaq)
+    - permissions: JSON formatında səlahiyyətlər
+    """
+
+    ROLE_CHOICES = (
+        ("primary", "Əsas Müəllim"),
+        ("assistant", "Asistant"),
+        ("guest", "Qonaq Müəllim"),
+    )
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="instructors",
+        verbose_name="Kurs",
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="instructor_courses",
+        verbose_name="Müəllim/Asistant",
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default="assistant",
+        verbose_name="Rol",
+    )
+
+    permissions = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Səlahiyyətlər",
+        help_text="JSON: {'can_grade': true, 'can_edit': false, ...}",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Əlavə Edilmə Tarixi"
+    )
+
+    class Meta:
+        verbose_name = "Kurs Müəllimi"
+        verbose_name_plural = "Kurs Müəllimləri"
+        unique_together = ("course", "user")
+        indexes = [
+            models.Index(fields=["course", "role"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} → {self.course.title} ({self.get_role_display()})"
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 6. COURSE GROUP MODEL (Sprint 7)
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class CourseGroup(models.Model):
+    """
+    Kurs Qrupları (Praktikum/Laboratoriya qrupları).
+
+    Nə üçün:
+    - Böyük kurslar kiçik qruplara bölünə bilər
+    - Hər qrupun öz cədvəli və müəllimi ola bilər
+    - Tələbə sayı məhdudlaşdırıla bilər
+
+    Atributlar:
+    - course: Hansı kursa aid
+    - name: Qrup adı (məs: "Qrup A", "Lab 1")
+    - schedule: Cədvəl məlumatı (JSON)
+    - instructor: Qrup müəllimi/asistantı
+    - max_students: Maksimum tələbə sayı
+    """
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="course_groups",
+        verbose_name="Kurs",
+    )
+
+    name = models.CharField(
+        max_length=100,
+        verbose_name="Qrup Adı",
+        help_text="Məs: Qrup A, Lab 1, Praktikum 2",
+    )
+
+    schedule = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Cədvəl",
+        help_text="JSON: {'day': 'Monday', 'time': '10:00', 'room': '301'}",
+    )
+
+    instructor = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="instructed_groups",
+        verbose_name="Qrup Müəllimi",
+        help_text="Bu qrupu tədris edən müəllim/asistant",
+    )
+
+    max_students = models.PositiveIntegerField(
+        default=30,
+        verbose_name="Maksimum Tələbə Sayı",
+        help_text="Bu qrupa daxil ola biləcək maksimum tələbə sayı",
+    )
+
+    members = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="course_group_memberships",
+        verbose_name="Qrup Üzvləri",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Yaradılma Tarixi"
+    )
+
+    class Meta:
+        verbose_name = "Kurs Qrupu"
+        verbose_name_plural = "Kurs Qrupları"
+        unique_together = ("course", "name")
+        indexes = [
+            models.Index(fields=["course"]),
+            models.Index(fields=["instructor"]),
+        ]
+
+    def __str__(self):
+        return f"{self.course.title} - {self.name}"
+
+    @property
+    def student_count(self):
+        """Bu qrupda neçə tələbə var?"""
+        return self.members.count()
+
+    @property
+    def is_full(self):
+        """Qrup dolubmu?"""
+        return self.student_count >= self.max_students
