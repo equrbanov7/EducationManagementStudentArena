@@ -1,82 +1,124 @@
-/* static/css/auth.css */
+/* Modern Login Page - Blue/Green Theme */
 
-/* --- Dəyişənlər (İstəyə görə rəngləri burdan dəyişə bilərsən) --- */
+/* --- CSS Variables --- */
 :root {
-    --primary-color: #2563eb;       /* Əsas rəng (Mavi) */
-    --primary-hover: #1e40af;       /* Hover rəngi (Tünd Mavi) */
-    --text-dark: #1f2937;           /* Tünd mətn */
-    --text-light: #6b7280;          /* Açıq mətn */
-    --bg-gradient-start: #e0f2f7;
-    --bg-gradient-end: #f0f8ff;
-    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --primary-blue: #2563eb;
+    --primary-green: #059669;
+    --primary-hover: #1e40af;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* --- Ümumi Səhifə Fonu və Mərkəzləşdirmə --- */
+/* --- Page Wrapper with Gradient Background --- */
 .auth-page-wrapper {
     min-height: calc(100vh - 170px);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8f4f8 100%);
     font-family: var(--font-main);
+    position: relative;
+    overflow: hidden;
 }
 
-/* --- Qeydiyyat/Daxilolma Kartı --- */
+.auth-page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.auth-page-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -20%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(5, 150, 105, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* --- Auth Card with Modern Design --- */
 .auth-card {
-    background: #ffffff;
+    background: white;
     max-width: 450px;
     width: 100%;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 50px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     text-align: center;
-    border: 1px solid #e0e0e0;
+    position: relative;
+    z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-/* --- Başlıqlar --- */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    border-radius: 24px 24px 0 0;
+}
+
+/* --- Headings --- */
 .auth-heading {
-    font-size: 2rem;
-    color: var(--text-dark);
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: 10px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .auth-subheading {
     color: var(--text-light);
-    font-size: 1rem;
-    margin-bottom: 30px;
+    font-size: 1.05rem;
+    margin-bottom: 35px;
+    line-height: 1.5;
 }
 
-/* --- Xəta Mesajları (Global) --- */
+/* --- Error Messages --- */
 .auth-global-errors {
-    background-color: #fee2e2;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     color: #991b1b;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 16px 20px;
+    border-radius: 12px;
     margin-bottom: 25px;
-    border: 1px solid #fecaca;
+    border: 1px solid #fca5a5;
     text-align: left;
     font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
-/* --- Forma Stili --- */
+/* --- Form Styles --- */
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Elementlər arası ümumi məsafə */
+    gap: 24px;
 }
 
-/* Label və Input Sahəsi */
 .auth-form-field {
     text-align: left;
 }
 
 .auth-form-field label {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-dark);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
@@ -84,76 +126,110 @@
 .auth-form-field input[type="email"],
 .auth-form-field input[type="password"] {
     width: 100%;
-    padding: 12px 15px;
+    padding: 14px 18px;
     font-size: 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
     outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
     background-color: #f9fafb;
-    box-sizing: border-box; /* Padding input ölçüsünü pozmasın deyə */
+    box-sizing: border-box;
 }
 
 .auth-form-field input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
     background-color: #ffffff;
-}
-
-/* Input Altı Xəta Mesajı */
-.auth-field-error {
-    color: #ef4444;
-    font-size: 0.85rem;
-    margin-top: 5px;
-}
-
-/* --- Şifrəni Unutmusunuz Linki (DÜZƏLİŞ EDİLDİ) --- */
-.auth-forgot-password {
-    text-align: right;
-    /* Yuxarıdakı 'gap: 20px' təsirini azaltmaq üçün mənfi margin veririk */
-    margin-top: -12px; 
-    /* Düymə ilə məsafəni tənzimləmək üçün */
-    margin-bottom: -5px;
-}
-
-.auth-forgot-password .auth-forget-password-link {
-    color: var(--primary-color);
-    font-size: 0.9rem; /* Yazı xətası düzəldildi */
-    text-decoration: none;
-    transition: color 0.3s ease;
-    font-weight: 500;
-}
-
-.auth-forgot-password .auth-forget-password-link:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
-}
-
-/* --- Göndər Düyməsi --- */
-.auth-submit-btn {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.auth-submit-btn:hover {
-    background-color: var(--primary-hover);
     transform: translateY(-2px);
 }
 
-.auth-submit-btn:active {
-    transform: translateY(0);
+.auth-field-error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* --- Alt Hissə (Login/Register keçidi) --- */
+.auth-field-error::before {
+    content: '⚠';
+}
+
+/* --- Forgot Password Link --- */
+.auth-forgot-password {
+    text-align: right;
+    margin-top: -12px;
+    margin-bottom: -8px;
+}
+
+.auth-forgot-password .auth-forget-password-link {
+    color: var(--primary-blue);
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+}
+
+.auth-forgot-password .auth-forget-password-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    transition: width 0.3s ease;
+}
+
+.auth-forgot-password .auth-forget-password-link:hover::after {
+    width: 100%;
+}
+
+/* --- Submit Button with Gradient --- */
+.auth-submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.auth-submit-btn:hover::before {
+    left: 100%;
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+}
+
+.auth-submit-btn:active {
+    transform: translateY(-1px);
+}
+
+/* --- Footer Text --- */
 .auth-footer-text {
     margin-top: 30px;
     color: var(--text-light);
@@ -161,24 +237,56 @@
 }
 
 .auth-footer-text a {
-    color: var(--primary-color);
+    color: var(--primary-blue);
     font-weight: 600;
     text-decoration: none;
     transition: color 0.3s ease;
+    position: relative;
 }
 
-.auth-footer-text a:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
+.auth-footer-text a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    transition: width 0.3s ease;
 }
 
-/* --- Responsive --- */
+.auth-footer-text a:hover::after {
+    width: 100%;
+}
+
+/* --- Responsive Design --- */
 @media (max-width: 500px) {
-    .auth-card {
-        padding: 30px 20px;
-        margin: 0 15px;
+    .auth-page-wrapper {
+        padding: 20px 15px;
     }
+
+    .auth-card {
+        padding: 35px 25px;
+        margin: 0;
+        border-radius: 20px;
+    }
+
     .auth-heading {
-        font-size: 1.8rem;
+        font-size: 2rem;
+    }
+
+    .auth-subheading {
+        font-size: 0.95rem;
+    }
+
+    .auth-form-field input[type="text"],
+    .auth-form-field input[type="email"],
+    .auth-form-field input[type="password"] {
+        padding: 12px 16px;
+    }
+
+    .auth-submit-btn {
+        padding: 14px;
+        font-size: 1rem;
     }
 }
