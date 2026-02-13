@@ -15,7 +15,13 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     list_display = ["user", "organization_type", "phone", "location", "created_at"]
     list_filter = ["organization_type", "created_at"]
-    search_fields = ["user__username", "user__email", "phone", "location", "supervisor_code"]
+    search_fields = [
+        "user__username",
+        "user__email",
+        "phone",
+        "location",
+        "supervisor_code",
+    ]
     readonly_fields = ["created_at", "updated_at"]
 
     fieldsets = (

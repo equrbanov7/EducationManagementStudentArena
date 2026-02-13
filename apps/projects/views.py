@@ -404,7 +404,10 @@ def grade_submission(request, pk):
     submission = get_object_or_404(ProjectSubmission, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher_or_above or submission.project.course.owner != request.user:
+    if (
+        not request.user.is_teacher_or_above
+        or submission.project.course.owner != request.user
+    ):
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:

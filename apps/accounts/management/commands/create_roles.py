@@ -36,10 +36,16 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"  ✓ Created group: {role_name}"))
             else:
                 existing_count += 1
-                self.stdout.write(self.style.WARNING(f"  ℹ Group already exists: {role_name}"))
+                self.stdout.write(
+                    self.style.WARNING(f"  ℹ Group already exists: {role_name}")
+                )
 
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(f"✓ Summary:"))
-        self.stdout.write(self.style.SUCCESS(f"  - Created: {created_count} new groups"))
+        self.stdout.write(
+            self.style.SUCCESS(f"  - Created: {created_count} new groups")
+        )
         self.stdout.write(self.style.SUCCESS(f"  - Existing: {existing_count} groups"))
-        self.stdout.write(self.style.SUCCESS(f"  - Total: {len(all_roles)} role groups"))
+        self.stdout.write(
+            self.style.SUCCESS(f"  - Total: {len(all_roles)} role groups")
+        )

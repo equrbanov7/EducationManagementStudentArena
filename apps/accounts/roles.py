@@ -5,7 +5,9 @@ Adds role-checking properties and methods to the User model.
 
 from django.contrib.auth import get_user_model
 
-from core.constants import ROLE_LEVELS, ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR, ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN
+from core.constants import (ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR,
+                            ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN,
+                            ROLE_LEVELS)
 
 User = get_user_model()
 
@@ -68,27 +70,44 @@ def _is_top_admin(self):
 # Add all basic role properties (exact role checks)
 User.add_to_class("is_teacher", property(lambda self: _has_group(self, "teacher")))
 User.add_to_class("is_student", property(lambda self: _has_group(self, "student")))
-User.add_to_class("is_assistant_teacher", property(lambda self: _has_group(self, "assistant_teacher")))
+User.add_to_class(
+    "is_assistant_teacher", property(lambda self: _has_group(self, "assistant_teacher"))
+)
 User.add_to_class("is_moderator", property(lambda self: _has_group(self, "moderator")))
 
 # University-specific roles
 User.add_to_class("is_rector", property(lambda self: _has_group(self, "rector")))
-User.add_to_class("is_vice_rector", property(lambda self: _has_group(self, "vice_rector")))
+User.add_to_class(
+    "is_vice_rector", property(lambda self: _has_group(self, "vice_rector"))
+)
 User.add_to_class("is_dean", property(lambda self: _has_group(self, "dean")))
 User.add_to_class("is_vice_dean", property(lambda self: _has_group(self, "vice_dean")))
-User.add_to_class("is_department_head", property(lambda self: _has_group(self, "department_head")))
+User.add_to_class(
+    "is_department_head", property(lambda self: _has_group(self, "department_head"))
+)
 User.add_to_class("is_professor", property(lambda self: _has_group(self, "professor")))
-User.add_to_class("is_associate_professor", property(lambda self: _has_group(self, "associate_professor")))
-User.add_to_class("is_lab_assistant", property(lambda self: _has_group(self, "lab_assistant")))
+User.add_to_class(
+    "is_associate_professor",
+    property(lambda self: _has_group(self, "associate_professor")),
+)
+User.add_to_class(
+    "is_lab_assistant", property(lambda self: _has_group(self, "lab_assistant"))
+)
 
 # School-specific roles
 User.add_to_class("is_director", property(lambda self: _has_group(self, "director")))
-User.add_to_class("is_vice_director", property(lambda self: _has_group(self, "vice_director")))
+User.add_to_class(
+    "is_vice_director", property(lambda self: _has_group(self, "vice_director"))
+)
 
 # Course center-specific roles
 User.add_to_class("is_manager", property(lambda self: _has_group(self, "manager")))
-User.add_to_class("is_senior_instructor", property(lambda self: _has_group(self, "senior_instructor")))
-User.add_to_class("is_instructor", property(lambda self: _has_group(self, "instructor")))
+User.add_to_class(
+    "is_senior_instructor", property(lambda self: _has_group(self, "senior_instructor"))
+)
+User.add_to_class(
+    "is_instructor", property(lambda self: _has_group(self, "instructor"))
+)
 User.add_to_class("is_assistant", property(lambda self: _has_group(self, "assistant")))
 
 # Individual/Personal roles
