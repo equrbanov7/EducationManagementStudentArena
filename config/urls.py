@@ -4,6 +4,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from core.views import health_check, ping, test_error
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("blog/", include("apps.blog.urls")),
@@ -15,6 +17,10 @@ urlpatterns = [
     path("labs/", include("apps.labs.urls")),
     # exams
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
+    
+     path('health/', health_check, name='health_check'),
+     path('ping/', ping, name='ping'),
+     path('test-error/', test_error, name='test_error'),
 ]
 
 if settings.DEBUG:
