@@ -72,8 +72,6 @@ def organization_dashboard(request, slug):
     """
     Organization dashboard with stats and recent activity.
     """
-    from django.db.models import Count
-
     from apps.audit.models import AuditLog
 
     organization = get_object_or_404(Organization, slug=slug, is_active=True)

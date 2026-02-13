@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 code="CS",
             )
 
-            dept = OrgUnit.objects.create(
+            OrgUnit.objects.create(
                 organization=university,
                 parent=faculty,
                 unit_type="department",
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                 code="SCI",
             )
 
-            grade = OrgUnit.objects.create(
+            OrgUnit.objects.create(
                 organization=school,
                 parent=section,
                 unit_type="grade_level",
@@ -170,7 +170,7 @@ class Command(BaseCommand):
             )
 
             # Create some units
-            branch = OrgUnit.objects.create(
+            OrgUnit.objects.create(
                 organization=center,
                 unit_type="branch",
                 name="Downtown Branch",
