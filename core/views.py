@@ -50,8 +50,8 @@ def test_error(request):
 
     # Və ya exception ilə
     try:
-        result = 1 / 0
-    except ZeroDivisionError as e:
+        _result = 1 / 0  # noqa: F841
+    except ZeroDivisionError:  # noqa: F841
         error_logger.exception("TEST ERROR: Division by zero")
 
     # Exception raise et

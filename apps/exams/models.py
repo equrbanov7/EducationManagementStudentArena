@@ -147,7 +147,10 @@ class Exam(models.Model):
     random_question_count = models.PositiveIntegerField(
         "Tələbəyə göstəriləcək sual sayı",
         default=10,
-        help_text="Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), bloklardan qarışıq şəkildə cəmi o qədər sual seçilir.",
+        help_text=(
+            "Əgər 0 olarsa, bütün suallar düşür. Əgər rəqəm yazılarsa (məs: 7), "
+            "bloklardan qarışıq şəkildə cəmi o qədər sual seçilir."
+        ),
     )
 
     default_question_points = models.PositiveIntegerField(default=1)
