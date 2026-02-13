@@ -7,6 +7,7 @@ import os
 import ssl
 from pathlib import Path
 
+
 from django.contrib.messages import constants as messages
 
 if hasattr(ssl, "_create_unverified_context"):
@@ -132,3 +133,8 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
+
+
+
+
+
