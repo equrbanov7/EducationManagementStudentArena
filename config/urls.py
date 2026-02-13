@@ -18,7 +18,12 @@ urlpatterns = [
     # exams
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
     # organizations
-    path("organizations/", include(("apps.organizations.urls", "organizations"), namespace="organizations")),
+    path(
+        "organizations/",
+        include(
+            ("apps.organizations.urls", "organizations"), namespace="organizations"
+        ),
+    ),
     # audit
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
     path("health/", health_check, name="health_check"),

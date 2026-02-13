@@ -7,7 +7,6 @@ import os
 import ssl
 from pathlib import Path
 
-
 from django.contrib.messages import constants as messages
 
 if hasattr(ssl, "_create_unverified_context"):
@@ -47,6 +46,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.organizations.middleware.OrganizationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -61,6 +61,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.organizations.context_processors.organization_context",
             ],
         },
     },
@@ -135,8 +136,3 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
-
-
-
-
-
