@@ -62,17 +62,17 @@
                             <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
                                 Profilim
                             </a>
-                            <a href="{% url 'logout' %}" class="blog-header__user-menu-item">
+                            <a href="{% url 'accounts:logout' %}" class="blog-header__user-menu-item">
                                 Çıxış et
                             </a>
                         </div>
                     </div>
                 {% else %}
                     <div class="blog-header__guest-actions">
-                        <a href="{% url 'login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
+                        <a href="{% url 'accounts:login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
                             Daxil ol
                         </a>
-                        <a href="{% url 'register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
+                        <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
                             Qeydiyyat
                         </a>
                     </div>
@@ -123,19 +123,19 @@
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'logout' %}" class="blog-header__nav-link">
+            <a href="{% url 'accounts:logout' %}" class="blog-header__nav-link">
                 Çıxış et
             </a>
         </li>
     {% else %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'login' %}" class="blog-header__nav-link">
+            <a href="{% url 'accounts:login' %}" class="blog-header__nav-link">
                 Daxil ol
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'register' %}" class="blog-header__nav-link">
+            <a href="{% url 'accounts:register' %}" class="blog-header__nav-link">
                 Qeydiyyat
             </a>
         </li>

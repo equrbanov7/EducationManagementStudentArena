@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Email təsdiqi{% endblock %}
+
+{% block content %}
+<div class="register-page-wrapper">
+  <div class="register-card">
+    <h1 class="register-heading">Email təsdiqi</h1>
+    <p class="register-subheading">{{ email }} ünvanına kod göndərildi.</p>
+
+    <form method="post" class="register-form">
+      {% csrf_token %}
+      <div class="register-form-field">
+        <label>Təsdiq kodu</label>
+        <input name="code" class="form-control" placeholder="6 rəqəmli kod..." />
+      </div>
+      <button class="register-submit-btn" type="submit">Təsdiqlə</button>
+    </form>
+
+    <form method="post" action="{% url 'resend_code' %}" style="margin-top:12px;">
+      {% csrf_token %}
+      <button class="register-submit-btn" type="submit">Kodu yenidən göndər</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

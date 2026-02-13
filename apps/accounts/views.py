@@ -132,11 +132,16 @@ def user_profile(request):
     """
     User profile page with edit functionality.
     Ensures profile exists before rendering.
+    Now accessible to ALL users (not just teachers).
     """
     from apps.accounts.models import UserProfile
+    from apps.blog.models import Post
 
     # Ensure profile exists (get_or_create for safety)
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    # Get active section from URL parameter (default: profile-info)
+    active_section = request.GET.get("section", "profile-info")
 
     if request.method == "POST":
         # Update user info
@@ -170,9 +175,25 @@ def user_profile(request):
         else []
     )
 
+    # Get user's posts for the posts section
+    user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
+    posts_count = Post.objects.filter(author=request.user).count()
+
+    # Get user's courses
+    from apps.courses.models import Course
+    my_courses = Course.objects.filter(
+        Q(owner=request.user) | Q(memberships__user=request.user)
+    ).distinct()[:10]
+    courses_count = my_courses.count()
+
     context = {
         "profile": profile,
         "user_roles": user_roles,
+        "active_section": active_section,
+        "user_posts": user_posts,
+        "posts_count": posts_count,
+        "my_courses": my_courses,
+        "courses_count": courses_count,
     }
 
     return render(request, "accounts/profile.html", context)
