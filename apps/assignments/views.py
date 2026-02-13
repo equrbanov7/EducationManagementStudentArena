@@ -47,7 +47,7 @@ def create_assignment(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     # İcazə yoxlaması - yalnız kurs sahibi
-    if not request.user.is_teacher or course.owner != request.user:
+    if not request.user.is_teacher_or_above or course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -103,7 +103,7 @@ def edit_assignment(request, pk):
     assignment = get_object_or_404(Assignment, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -210,7 +210,7 @@ def delete_assignment(request, pk):
     """
     assignment = get_object_or_404(Assignment, id=pk)
 
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -376,7 +376,7 @@ def review_submissions(request, pk):
     assignment = get_object_or_404(Assignment, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
         messages.error(request, "İcazəniz yoxdur")
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
@@ -407,7 +407,7 @@ def grade_submission(request, pk):
 
     # İcazə yoxlaması
     if (
-        not request.user.is_teacher
+        not request.user.is_teacher_or_above
         or submission.assignment.course.owner != request.user
     ):
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)

@@ -35,10 +35,10 @@ User = get_user_model()
 
 
 class IsTeacherMixin(UserPassesTestMixin):
-    """Yalnız müəllim (is_teacher) bu view-a girə bilər."""
+    """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər."""
 
     def test_func(self):
-        return getattr(self.request.user, "is_teacher", False)
+        return getattr(self.request.user, "is_teacher_or_above", False)
 
     def handle_no_permission(self):
         messages.error(self.request, "Bu əməliyyat yalnız müəllimlər üçün mümkündür.")
@@ -119,7 +119,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Context-ə rol məlumatlarını əlavə et
         # ─────────────────────────────────────────────────────────────────────
         context["is_owner"] = course.owner == user
-        context["is_teacher"] = getattr(user, "is_teacher", False)
+        context["is_teacher"] = getattr(user, "is_teacher_or_above", False)
         context["is_student"] = user_role == "student"
         context["is_assistant"] = user_role in ["assistant_teacher", "moderator"]
         context["can_view_members"] = context["is_owner"] or context["is_assistant"]

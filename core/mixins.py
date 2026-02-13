@@ -10,13 +10,14 @@ from django.shortcuts import redirect
 
 class TeacherRequiredMixin(AccessMixin):
     """
-    Mixin that requires the user to be a teacher.
+    Mixin that requires the user to be a teacher or higher role.
+    Uses group-based role system with is_teacher_or_above property.
     """
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if not hasattr(request.user, "role") or request.user.role != "teacher":
+        if not getattr(request.user, "is_teacher_or_above", False):
             messages.error(request, "You must be a teacher to access this page.")
             return redirect("blog:index")
         return super().dispatch(request, *args, **kwargs)
@@ -25,12 +26,13 @@ class TeacherRequiredMixin(AccessMixin):
 class StudentRequiredMixin(AccessMixin):
     """
     Mixin that requires the user to be a student.
+    Uses group-based role system with is_student property.
     """
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if not hasattr(request.user, "role") or request.user.role != "student":
+        if not getattr(request.user, "is_student", False):
             messages.error(request, "You must be a student to access this page.")
             return redirect("blog:index")
         return super().dispatch(request, *args, **kwargs)

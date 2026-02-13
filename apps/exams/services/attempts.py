@@ -11,7 +11,7 @@ from apps.exams.services.utils import (_attempt_has_any_answer,
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
 def _ensure_teacher(user):
-    if not getattr(user, "is_teacher", False):
+    if not getattr(user, "is_teacher_or_above", False):
         raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
 
 
