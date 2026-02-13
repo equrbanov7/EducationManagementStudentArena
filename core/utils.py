@@ -56,3 +56,49 @@ def send_template_email(
         html_message=html_message,
         fail_silently=False,
     )
+
+
+def generate_unique_slug(model_class, title, slug_field="slug"):
+    """
+    Generate a unique slug for a model instance.
+
+    Args:
+        model_class: The model class to check uniqueness against
+        title: The title/name to slugify
+        slug_field: Name of the slug field (default: 'slug')
+
+    Returns:
+        A unique slug string
+    """
+    from django.utils.text import slugify
+
+    base_slug = slugify(title)
+    slug = base_slug
+    counter = 1
+
+    # Check if slug exists
+    filter_kwargs = {slug_field: slug}
+    while model_class.objects.filter(**filter_kwargs).exists():
+        slug = f"{base_slug}-{counter}"
+        filter_kwargs = {slug_field: slug}
+        counter += 1
+
+    return slug
+
+
+def get_client_ip(request):
+    """
+    Get the client's IP address from the request.
+
+    Args:
+        request: Django HttpRequest object
+
+    Returns:
+        IP address as a string
+    """
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0].strip()
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    return ip

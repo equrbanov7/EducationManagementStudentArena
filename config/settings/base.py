@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.projects",
     "apps.labs",
+    "apps.organizations.apps.OrganizationsConfig",
+    "apps.audit.apps.AuditConfig",
     "daphne",
     "apps.exams",
     "django.contrib.admin",
