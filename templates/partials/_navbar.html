@@ -59,7 +59,7 @@
                         </button>
 
                         <div class="blog-header__user-menu">
-                            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__user-menu-item">
+                            <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
                                 Profilim
                             </a>
                             <a href="{% url 'logout' %}" class="blog-header__user-menu-item">
@@ -118,7 +118,7 @@
     {% if request.user.is_authenticated %}
     
         <li class="blog-header__nav-item">
-            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__nav-link">
+            <a href="{% url 'accounts:profile' %}" class="blog-header__nav-link">
                 Profilim ({{ request.user.username }})
             </a>
         </li>
