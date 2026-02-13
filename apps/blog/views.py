@@ -63,6 +63,7 @@ def home(request):
         "page_obj": page_obj,
         "categories": categories,
         "search_query": query,
+        "query": query,  # Also pass as 'query' for template compatibility
     }
 
     return render(request, "blog/home.html", context)
