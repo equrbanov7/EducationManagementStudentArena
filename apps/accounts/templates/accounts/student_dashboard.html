@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tələbə Dashboard{% endblock %}
+
+{% block extraCss %}
+<style>
+    .student-dashboard {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .dashboard-header {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-header h1 {
+        color: #2563eb;
+        margin-bottom: 10px;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .widget-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .widget-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    
+    .widget-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .widget-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-right: 15px;
+    }
+    
+    .widget-icon.courses {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .widget-icon.assignments {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+    
+    .widget-icon.exams {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+    
+    .widget-icon.grades {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+    }
+    
+    .widget-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .course-item, .assignment-item, .exam-item, .grade-item {
+        padding: 15px;
+        border-bottom: 1px solid #f3f4f6;
+        transition: background 0.2s;
+    }
+    
+    .course-item:hover, .assignment-item:hover, .exam-item:hover, .grade-item:hover {
+        background: #f9fafb;
+    }
+    
+    .course-item:last-child, .assignment-item:last-child, .exam-item:last-child, .grade-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 5px;
+    }
+    
+    .item-meta {
+        font-size: 14px;
+        color: #6b7280;
+    }
+    
+    .deadline-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+    
+    .deadline-badge.urgent {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .deadline-badge.soon {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .deadline-badge.normal {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    
+    .grade-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 16px;
+    }
+    
+    .grade-badge.excellent {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .grade-badge.good {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .grade-badge.average {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .grade-badge.poor {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #9ca3af;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="student-dashboard">
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Tələbə Dashboard</h1>
+            <p class="text-muted mb-0">Xoş gəldiniz, {{ request.user.get_full_name|default:request.user.username }}!</p>
+            <div class="quick-actions">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-action">
+                    <i class="fas fa-user me-2"></i>Profil
+                </a>
+                <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary btn-action">
+                    <i class="fas fa-book me-2"></i>Kurslar
+                </a>
+                <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-primary btn-action">
+                    <i class="fas fa-file-alt me-2"></i>İmtahanlar
+                </a>
+            </div>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Enrolled Courses -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon courses">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">Kurslarım</div>
+                        <small class="text-muted">{{ enrolled_courses|length }} kurs</small>
+                    </div>
+                </div>
+                {% if enrolled_courses %}
+                    <div>
+                        {% for course in enrolled_courses %}
+                        <div class="course-item">
+                            <div class="item-title">
+                                <a href="{% url 'courses:course_dashboard' course.id %}" class="text-decoration-none">
+                                    {{ course.title }}
+                                </a>
+                            </div>
+                            <div class="item-meta">
+                                <i class="fas fa-user text-muted me-1"></i>{{ course.owner.username }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                        Hamısına bax
+                    </a>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>Hələ heç bir kursa qeydiyyatdan keçməmisiniz</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pending Assignments -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon assignments">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">Tapşırıqlar</div>
+                        <small class="text-muted">{{ pending_assignments|length }} gözləyir</small>
+                    </div>
+                </div>
+                {% if pending_assignments %}
+                    <div>
+                        {% for assignment in pending_assignments %}
+                        <div class="assignment-item">
+                            <div class="item-title">
+                                <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="text-decoration-none">
+                                    {{ assignment.title }}
+                                </a>
+                            </div>
+                            <div class="item-meta">
+                                {{ assignment.course.title }}
+                            </div>
+                            {% if assignment.deadline %}
+                            <span class="deadline-badge 
+                                {% if assignment.deadline|timeuntil == '1 gün' %}urgent
+                                {% elif assignment.deadline|timeuntil == '3 gün' %}soon
+                                {% else %}normal{% endif %}">
+                                <i class="fas fa-clock me-1"></i>{{ assignment.deadline|date:"d M" }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Gözləyən tapşırıq yoxdur</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Upcoming Exams -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon exams">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">Gələcək İmtahanlar</div>
+                        <small class="text-muted">{{ upcoming_exams|length }} imtahan</small>
+                    </div>
+                </div>
+                {% if upcoming_exams %}
+                    <div>
+                        {% for exam in upcoming_exams %}
+                        <div class="exam-item">
+                            <div class="item-title">
+                                {{ exam.title }}
+                            </div>
+                            <div class="item-meta">
+                                <i class="fas fa-calendar text-muted me-1"></i>
+                                {{ exam.start_date|date:"d M Y, H:i" }}
+                            </div>
+                            <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-primary mt-2">
+                                <i class="fas fa-play me-1"></i>Başla
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>Gələcək imtahan yoxdur</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Recent Grades -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon grades">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">Son Qiymətlər</div>
+                        <small class="text-muted">{{ recent_grades|length }} cavab</small>
+                    </div>
+                </div>
+                {% if recent_grades %}
+                    <div>
+                        {% for submission in recent_grades %}
+                        <div class="grade-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="item-title">{{ submission.assignment.title }}</div>
+                                    <div class="item-meta">{{ submission.graded_at|date:"d M Y" }}</div>
+                                </div>
+                                <span class="grade-badge 
+                                    {% if submission.grade >= 90 %}excellent
+                                    {% elif submission.grade >= 70 %}good
+                                    {% elif submission.grade >= 50 %}average
+                                    {% else %}poor{% endif %}">
+                                    {{ submission.grade }}
+                                </span>
+                            </div>
+                            {% if submission.feedback %}
+                            <div class="mt-2 text-muted small">
+                                <i class="fas fa-comment me-1"></i>{{ submission.feedback|truncatewords:10 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Hələ qiymətləndirilmiş iş yoxdur</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
