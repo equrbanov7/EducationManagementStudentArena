@@ -121,3 +121,4 @@ yarn.lock
 *.key
 secrets/
 credentials/.env
+logs/*.log
