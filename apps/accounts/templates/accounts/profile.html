@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}İstifadəçi Profili - EMSArena{% endblock %}
+{% block title %}Profil - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <style>
@@ -10,80 +10,208 @@
         --primary-green: #10b981;
         --dark-blue: #1e40af;
         --light-blue: #dbeafe;
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 60px;
     }
 
-    .profile-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 2rem;
+    .profile-page {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        background: #f9fafb;
     }
 
-    .page-header {
+    /* Sidebar */
+    .profile-sidebar {
+        width: var(--sidebar-width);
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        transition: width 0.3s ease;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .profile-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar-header {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        transition: opacity 0.3s;
+    }
+
+    .collapsed .sidebar-title {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .sidebar-toggle {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .sidebar-toggle:hover {
+        background: var(--dark-blue);
+        transform: scale(1.1);
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu-item {
+        position: relative;
+    }
+
+    .sidebar-menu-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        color: #6b7280;
+        text-decoration: none;
+        transition: all 0.2s;
+        gap: 1rem;
+    }
+
+    .sidebar-menu-link:hover {
+        background: #f3f4f6;
+        color: var(--primary-blue);
+    }
+
+    .sidebar-menu-link.active {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+        border-right: 3px solid var(--primary-blue);
+        font-weight: 600;
+    }
+
+    .sidebar-menu-icon {
+        font-size: 1.25rem;
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .sidebar-menu-text {
+        transition: opacity 0.3s;
+        white-space: nowrap;
+    }
+
+    .collapsed .sidebar-menu-text {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+
+    .sidebar-menu-badge {
+        background: var(--primary-green);
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: 999px;
+        margin-left: auto;
+    }
+
+    .collapsed .sidebar-menu-badge {
+        display: none;
+    }
+
+    /* Main Content */
+    .profile-main {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .profile-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
     }
 
-    .page-title {
-        font-size: 1.75rem;
+    .profile-title {
+        font-size: 2rem;
         font-weight: 700;
         color: #1f2937;
     }
 
-    .back-btn {
-        background: var(--primary-blue);
-        color: white;
-        border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: background 0.2s;
-    }
-
-    .back-btn:hover {
-        background: var(--dark-blue);
-        color: white;
-    }
-
-    .profile-grid {
-        display: grid;
-        grid-template-columns: 350px 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    /* Profile Summary Card */
-    .summary-card {
+    .section-card {
         background: white;
         border-radius: 0.75rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         padding: 2rem;
-        height: fit-content;
-        position: sticky;
-        top: 80px;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: #1f2937;
     }
 
     .avatar-section {
         text-align: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
 
-    .avatar-wrapper {
-        position: relative;
-        display: inline-block;
-        margin-bottom: 1rem;
-    }
-
-    .avatar-image {
+    .avatar-large {
         width: 150px;
         height: 150px;
         border-radius: 50%;
         object-fit: cover;
         border: 4px solid var(--light-blue);
+        margin: 0 auto;
     }
 
     .avatar-placeholder {
@@ -95,73 +223,36 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
+        font-size: 4rem;
         font-weight: 700;
         border: 4px solid var(--light-blue);
-    }
-
-    .avatar-upload-btn {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        background: var(--primary-green);
-        color: white;
-        border: 3px solid white;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .avatar-upload-btn:hover {
-        background: #059669;
-    }
-
-    .avatar-upload-input {
-        display: none;
+        margin: 0 auto;
     }
 
     .user-name {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: #1f2937;
+        margin-top: 1rem;
         margin-bottom: 0.25rem;
     }
 
     .user-email {
         color: #6b7280;
         font-size: 0.875rem;
-        margin-bottom: 1rem;
     }
 
-    .roles-section {
-        margin-bottom: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid #f3f4f6;
-    }
-
-    .roles-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #6b7280;
-        margin-bottom: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .roles-list {
+    .role-badges {
         display: flex;
-        flex-wrap: wrap;
         gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 1rem;
     }
 
     .role-badge {
         padding: 0.375rem 0.75rem;
-        border-radius: 1rem;
+        border-radius: 999px;
         font-size: 0.75rem;
         font-weight: 600;
         display: inline-flex;
@@ -179,299 +270,193 @@
         color: #2563eb;
     }
 
-    .role-badge.moderator {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
     .role-badge.student {
         background: #d1fae5;
         color: #059669;
     }
 
-    .profile-stats {
-        padding-top: 1.5rem;
-        border-top: 2px solid #f3f4f6;
-    }
-
-    .stat-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f3f4f6;
-    }
-
-    .stat-row:last-child {
-        border-bottom: none;
-    }
-
-    .stat-label {
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-
-    .stat-value {
-        font-weight: 600;
-        color: #1f2937;
-    }
-
-    /* Edit Form Card */
-    .edit-card {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-    }
-
-    .card-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #f3f4f6;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
-    .form-section:last-of-type {
-        margin-bottom: 0;
-    }
-
-    .section-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .form-row {
+    .posts-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1rem;
-        margin-bottom: 1rem;
     }
 
-    .form-group {
-        margin-bottom: 0;
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        display: block;
-        font-size: 0.875rem;
-    }
-
-    .required-mark {
-        color: #ef4444;
-    }
-
-    .form-control, .form-select {
-        border: 2px solid #e5e7eb;
-        border-radius: 0.5rem;
-        padding: 0.625rem 1rem;
-        width: 100%;
-        transition: border-color 0.2s;
-        font-size: 0.875rem;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-blue);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        outline: none;
-    }
-
-    .form-control:disabled, .form-select:disabled {
-        background: #f9fafb;
-        cursor: not-allowed;
-    }
-
-    .form-text {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-
-    .readonly-field {
-        background: #f9fafb;
-        padding: 0.625rem 1rem;
-        border-radius: 0.5rem;
-        border: 2px solid #e5e7eb;
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-
-    .info-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: #fef3c7;
-        border-left: 3px solid #f59e0b;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        color: #92400e;
-        margin-top: 0.5rem;
-    }
-
-    .form-actions {
+    .post-item {
         display: flex;
         gap: 1rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid #f3f4f6;
-        margin-top: 2rem;
-    }
-
-    .btn {
-        padding: 0.75rem 2rem;
-        border: none;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: var(--primary-blue);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--dark-blue);
-    }
-
-    .btn-secondary {
-        background: #f3f4f6;
-        color: #374151;
-    }
-
-    .btn-secondary:hover {
-        background: #e5e7eb;
-    }
-
-    /* Password Section */
-    .password-section {
+        padding: 1rem;
         background: #f9fafb;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
     }
 
-    .password-toggle {
-        position: relative;
+    .post-item:hover {
+        background: #f3f4f6;
+        transform: translateY(-2px);
     }
 
-    .password-toggle-btn {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #6b7280;
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-
-    .password-toggle-btn:hover {
+    .post-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--light-blue);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: var(--primary-blue);
+        flex-shrink: 0;
     }
 
-    /* Responsive */
-    @media (max-width: 992px) {
-        .profile-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .summary-card {
-            position: static;
-        }
+    .post-info {
+        flex: 1;
     }
 
+    .post-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .post-date {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-        .profile-container {
-            padding: 0 1rem;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-
-        .form-actions {
+        .profile-page {
             flex-direction: column;
         }
 
-        .btn {
+        .profile-sidebar {
             width: 100%;
-            justify-content: center;
+            border-right: none;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .profile-sidebar.collapsed {
+            width: 100%;
+        }
+
+        .collapsed .sidebar-title,
+        .collapsed .sidebar-menu-text {
+            opacity: 1;
+            width: auto;
+        }
+
+        .profile-main {
+            padding: 1rem;
+        }
+
+        .profile-title {
+            font-size: 1.5rem;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <!-- Header -->
-    <div class="page-header">
-        <h1 class="page-title">
-            <i class="fas fa-user"></i>
-            İstifadəçi Profili
-        </h1>
-        <a href="{% url 'accounts:teacher_dashboard' %}" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Geri
-        </a>
-    </div>
+<div class="profile-page">
+    <!-- Sidebar -->
+    <aside class="profile-sidebar" id="profileSidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Profil</h2>
+            <button type="button" class="sidebar-toggle" id="sidebarToggle" title="Sidebar-ı bağla/aç">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
 
-    <!-- Profile Grid -->
-    <div class="profile-grid">
-        <!-- Summary Card -->
-        <div class="summary-card">
-            <div class="avatar-section">
-                <div class="avatar-wrapper">
-                    {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-image" id="avatarPreview">
-                    {% else %}
-                    <div class="avatar-placeholder" id="avatarPreview">
-                        {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
-                    </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:profile' %}?section=profile-info" 
+                   class="sidebar-menu-link {% if active_section == 'profile-info' %}active{% endif %}">
+                    <i class="fas fa-user sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Profil Məlumatları</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:profile' %}?section=posts" 
+                   class="sidebar-menu-link {% if active_section == 'posts' %}active{% endif %}">
+                    <i class="fas fa-newspaper sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Postlar</span>
+                    {% if posts_count > 0 %}
+                    <span class="sidebar-menu-badge">{{ posts_count }}</span>
                     {% endif %}
-                    <label for="avatarInput" class="avatar-upload-btn">
-                        <i class="fas fa-camera"></i>
-                    </label>
-                    <input type="file" id="avatarInput" class="avatar-upload-input" accept="image/*" onchange="previewAvatar(event)">
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:profile' %}?section=courses" 
+                   class="sidebar-menu-link {% if active_section == 'courses' %}active{% endif %}">
+                    <i class="fas fa-book sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Kurslar</span>
+                    {% if courses_count > 0 %}
+                    <span class="sidebar-menu-badge">{{ courses_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:profile' %}?section=settings" 
+                   class="sidebar-menu-link {% if active_section == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Parametrlər</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="profile-main">
+        {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" style="padding: 1rem; background: {% if message.tags == 'success' %}#d1fae5{% else %}#fee2e2{% endif %}; border-radius: 0.5rem; margin-bottom: 0.5rem;">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="profile-header">
+            <h1 class="profile-title">
+                {% if active_section == 'profile-info' %}Profil Məlumatları
+                {% elif active_section == 'posts' %}Postlarım
+                {% elif active_section == 'courses' %}Kurslarım
+                {% elif active_section == 'settings' %}Parametrlər
+                {% else %}Profil{% endif %}
+            </h1>
+        </div>
+
+        <!-- Profile Info Section -->
+        {% if active_section == 'profile-info' %}
+        <div class="section-card">
+            <div class="avatar-section">
+                {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-large">
+                {% else %}
+                <div class="avatar-placeholder">
+                    {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
                 </div>
+                {% endif %}
                 <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
                 <p class="user-email">{{ user.email }}</p>
-            </div>
-
-            <!-- Roles -->
-            <div class="roles-section">
-                <div class="roles-title">Rollar</div>
-                <div class="roles-list">
-                    {% if user.groups.all %}
-                        {% for group in user.groups.all %}
-                        <span class="role-badge {{ group.name }}">
+                
+                <div class="role-badges">
+                    {% if user_roles %}
+                        {% for role in user_roles %}
+                        <span class="role-badge {{ role }}">
                             <i class="fas fa-shield-alt"></i>
-                            {{ group.name|title }}
+                            {{ role|title }}
                         </span>
                         {% endfor %}
                     {% else %}
@@ -482,315 +467,223 @@
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Stats -->
-            <div class="profile-stats">
-                <div class="stat-row">
-                    <span class="stat-label">Qeydiyyat tarixi</span>
-                    <span class="stat-value">{{ user.date_joined|date:"d M Y" }}</span>
+            
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Şəxsi Məlumat
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">İstifadəçi adı</div>
+                    <div class="info-value">{{ user.username }}</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Son giriş</span>
-                    <span class="stat-value">{{ user.last_login|date:"d M Y, H:i"|default:"Heç vaxt" }}</span>
+                <div class="info-item">
+                    <div class="info-label">Ad</div>
+                    <div class="info-value">{{ user.first_name|default:"Təyin edilməyib" }}</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Təşkilat tipi</span>
-                    <span class="stat-value">{{ profile.get_organization_type_display|default:"Fərdi" }}</span>
+                <div class="info-item">
+                    <div class="info-label">Soyad</div>
+                    <div class="info-value">{{ user.last_name|default:"Təyin edilməyib" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ user.email }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Telefon</div>
+                    <div class="info-value">{{ profile.phone|default:"Təyin edilməyib" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Yer</div>
+                    <div class="info-value">{{ profile.location|default:"Təyin edilməyib" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Təşkilat tipi</div>
+                    <div class="info-value">{{ profile.get_organization_type_display|default:"Fərdi" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Qeydiyyat tarixi</div>
+                    <div class="info-value">{{ user.date_joined|date:"d M Y" }}</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Edit Form -->
-        <div class="edit-card">
-            <form method="post" enctype="multipart/form-data" id="profileForm">
+            {% if profile.bio %}
+            <div style="margin-top: 2rem;">
+                <div class="info-label">Haqqında</div>
+                <div class="info-value">{{ profile.bio }}</div>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'accounts:profile' %}?section=settings" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Profili Redaktə et
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Posts Section -->
+        {% if active_section == 'posts' %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-newspaper"></i>
+                Postlarım ({{ posts_count }})
+            </div>
+            
+            {% if user_posts %}
+            <div class="posts-grid">
+                {% for post in user_posts %}
+                <a href="{% url 'post_detail' post.slug %}" class="post-item" style="text-decoration: none; color: inherit;">
+                    <div class="post-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="post-info">
+                        <div class="post-title">{{ post.title }}</div>
+                        <div class="post-date">{{ post.created_at|date:"d M Y" }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div style="margin-top: 2rem;">
+                <a href="{% url 'create_post' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Yeni Post Yarat
+                </a>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-newspaper"></i>
+                <p>Hələ heç bir post yaratmamısınız</p>
+                <a href="{% url 'create_post' %}" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> İlk Postunuzu Yaradın
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Courses Section -->
+        {% if active_section == 'courses' %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-book"></i>
+                Kurslarım ({{ courses_count }})
+            </div>
+            
+            {% if my_courses %}
+            <div class="posts-grid">
+                {% for course in my_courses %}
+                <a href="{% url 'courses:course_detail' course.pk %}" class="post-item" style="text-decoration: none; color: inherit;">
+                    <div class="post-icon" style="background: #fef3c7; color: #d97706;">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="post-info">
+                        <div class="post-title">{{ course.title }}</div>
+                        <div class="post-date">{{ course.category|default:"Kateqoriya yoxdur" }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-book"></i>
+                <p>Hələ heç bir kursa qoşulmamısınız</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Settings Section -->
+        {% if active_section == 'settings' %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-cog"></i>
+                Profil Parametrləri
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 
-                <!-- Personal Information -->
-                <div class="form-section">
-                    <div class="card-header">
-                        <i class="fas fa-user-circle" style="color: var(--primary-blue); font-size: 1.5rem;"></i>
-                        <h3 class="card-title">Şəxsi Məlumat</h3>
+                <div class="info-grid" style="margin-bottom: 2rem;">
+                    <div class="info-item">
+                        <label class="info-label" for="first_name">Ad *</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                               value="{{ user.first_name }}" required>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="first_name">
-                                Ad <span class="required-mark">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="first_name" 
-                                name="first_name" 
-                                value="{{ user.first_name }}"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="last_name">
-                                Soyad <span class="required-mark">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="last_name" 
-                                name="last_name" 
-                                value="{{ user.last_name }}"
-                                required
-                            >
-                        </div>
+                    <div class="info-item">
+                        <label class="info-label" for="last_name">Soyad *</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                               value="{{ user.last_name }}" required>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="email">
-                                Email <span class="required-mark">*</span>
-                            </label>
-                            <input 
-                                type="email" 
-                                class="form-control" 
-                                id="email" 
-                                name="email" 
-                                value="{{ user.email }}"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="phone">
-                                Telefon
-                            </label>
-                            <input 
-                                type="tel" 
-                                class="form-control" 
-                                id="phone" 
-                                name="phone" 
-                                value="{{ profile.phone|default:'' }}"
-                                placeholder="+994 XX XXX XX XX"
-                            >
-                        </div>
+                    <div class="info-item">
+                        <label class="info-label" for="email">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" 
+                               value="{{ user.email }}" required>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="location">
-                            Yer (Şəhər/Ünvan)
-                        </label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            id="location" 
-                            name="location" 
-                            value="{{ profile.location|default:'' }}"
-                            placeholder="Bakı, Azərbaycan"
-                        >
+                    <div class="info-item">
+                        <label class="info-label" for="phone">Telefon</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ profile.phone|default:'' }}" placeholder="+994 XX XXX XX XX">
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="bio">
-                            Haqqında
-                        </label>
-                        <textarea 
-                            class="form-control" 
-                            id="bio" 
-                            name="bio" 
-                            rows="4"
-                            placeholder="Özünüz haqqında qısa məlumat..."
-                        >{{ profile.bio|default:'' }}</textarea>
+                    <div class="info-item">
+                        <label class="info-label" for="location">Yer</label>
+                        <input type="text" class="form-control" id="location" name="location" 
+                               value="{{ profile.location|default:'' }}" placeholder="Bakı, Azərbaycan">
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label" for="avatar">Avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
                     </div>
                 </div>
 
-                <!-- Organization Info -->
-                <div class="form-section">
-                    <div class="section-title">
-                        <i class="fas fa-building"></i>
-                        Təşkilat Məlumatı
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="organization_type">
-                            Təşkilat Tipi
-                        </label>
-                        <div class="readonly-field">
-                            {{ profile.get_organization_type_display|default:"Fərdi" }}
-                        </div>
-                        <small class="form-text">
-                            <i class="fas fa-info-circle"></i>
-                            Təşkilat tipi dəyişdirilə bilməz
-                        </small>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="supervisor_code">
-                            Nəzarətçi Kodu
-                        </label>
-                        {% if user.is_superuser or user.is_staff %}
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            id="supervisor_code" 
-                            name="supervisor_code" 
-                            value="{{ profile.supervisor_code|default:'' }}"
-                        >
-                        <small class="form-text">
-                            <i class="fas fa-crown"></i>
-                            Yalnız adminlər dəyişdirə bilər
-                        </small>
-                        {% else %}
-                        <div class="readonly-field">
-                            {{ profile.supervisor_code|default:"Təyin edilməyib" }}
-                        </div>
-                        <div class="info-badge">
-                            <i class="fas fa-lock"></i>
-                            Bu sahə təkcə admin tərəfindən təyin edilə bilər
-                        </div>
-                        {% endif %}
-                    </div>
+                <div class="info-item" style="margin-bottom: 2rem;">
+                    <label class="info-label" for="bio">Haqqında</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="4" 
+                              placeholder="Özünüz haqqında qısa məlumat...">{{ profile.bio|default:'' }}</textarea>
                 </div>
 
-                <!-- Password Change -->
-                <div class="form-section">
-                    <div class="section-title">
-                        <i class="fas fa-key"></i>
-                        Şifrə Dəyişikliyi
-                    </div>
-
-                    <div class="password-section">
-                        <div class="form-group">
-                            <label class="form-label" for="current_password">
-                                Cari Şifrə
-                            </label>
-                            <div class="password-toggle">
-                                <input 
-                                    type="password" 
-                                    class="form-control" 
-                                    id="current_password" 
-                                    name="current_password"
-                                    placeholder="Cari şifrənizi daxil edin"
-                                >
-                                <button type="button" class="password-toggle-btn" onclick="togglePassword('current_password')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label" for="new_password">
-                                    Yeni Şifrə
-                                </label>
-                                <div class="password-toggle">
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        id="new_password" 
-                                        name="new_password"
-                                        placeholder="Yeni şifrə"
-                                    >
-                                    <button type="button" class="password-toggle-btn" onclick="togglePassword('new_password')">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="confirm_password">
-                                    Şifrə Təkrarı
-                                </label>
-                                <div class="password-toggle">
-                                    <input 
-                                        type="password" 
-                                        class="form-control" 
-                                        id="confirm_password" 
-                                        name="confirm_password"
-                                        placeholder="Şifrəni təkrar daxil edin"
-                                    >
-                                    <button type="button" class="password-toggle-btn" onclick="togglePassword('confirm_password')">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <small class="form-text">
-                            <i class="fas fa-info-circle"></i>
-                            Şifrə ən azı 8 simvol olmalıdır və hərf və rəqəm ehtiva etməlidir
-                        </small>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="form-actions">
+                <div style="display: flex; gap: 1rem;">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Dəyişiklikləri Yadda saxla
+                        <i class="fas fa-save"></i> Yadda Saxla
                     </button>
-                    <button type="reset" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i>
-                        Sıfırla
-                    </button>
+                    <a href="{% url 'accounts:profile' %}?section=profile-info" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Ləğv et
+                    </a>
                 </div>
             </form>
         </div>
-    </div>
+        {% endif %}
+    </main>
 </div>
-{% endblock %}
 
-{% block extraJs %}
 <script>
-    function previewAvatar(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('avatarPreview');
-                preview.innerHTML = `<img src="${e.target.result}" alt="Avatar" class="avatar-image">`;
-            }
-            reader.readAsDataURL(file);
-        }
+// Sidebar toggle functionality
+document.getElementById('sidebarToggle').addEventListener('click', function() {
+    const sidebar = document.getElementById('profileSidebar');
+    const icon = this.querySelector('i');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        icon.classList.remove('fa-chevron-left');
+        icon.classList.add('fa-chevron-right');
+        this.title = 'Sidebar-ı aç';
+    } else {
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-left');
+        this.title = 'Sidebar-ı bağla';
     }
+    
+    // Save state to localStorage
+    localStorage.setItem('profileSidebarCollapsed', sidebar.classList.contains('collapsed'));
+});
 
-    function togglePassword(fieldId) {
-        const field = document.getElementById(fieldId);
-        const button = field.parentElement.querySelector('.password-toggle-btn i');
-        
-        if (field.type === 'password') {
-            field.type = 'text';
-            button.classList.remove('fa-eye');
-            button.classList.add('fa-eye-slash');
-        } else {
-            field.type = 'password';
-            button.classList.remove('fa-eye-slash');
-            button.classList.add('fa-eye');
-        }
+// Restore sidebar state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const isCollapsed = localStorage.getItem('profileSidebarCollapsed') === 'true';
+    if (isCollapsed) {
+        document.getElementById('sidebarToggle').click();
     }
-
-    // Form validation
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
-        const newPassword = document.getElementById('new_password').value;
-        const confirmPassword = document.getElementById('confirm_password').value;
-        const currentPassword = document.getElementById('current_password').value;
-
-        // If any password field is filled, all must be filled
-        if (newPassword || confirmPassword || currentPassword) {
-            if (!currentPassword) {
-                e.preventDefault();
-                alert('Yeni şifrə təyin etmək üçün cari şifrənizi daxil edin');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                e.preventDefault();
-                alert('Yeni şifrə və təkrar şifrə uyğun deyil');
-                return;
-            }
-
-            if (newPassword.length < 8) {
-                e.preventDefault();
-                alert('Şifrə ən azı 8 simvol olmalıdır');
-                return;
-            }
-        }
-    });
+});
 </script>
 {% endblock %}
