@@ -1,0 +1,293 @@
+{% load static %}
+{% load org_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.name }} - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .org-name {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1a202c;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-user {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .activity-action {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .activity-time {
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="org-name">{{ organization.name }}</div>
+            <nav class="nav-menu">
+                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
+                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+                <a href="{% url 'organizations:select' %}">Switch Org</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 style="margin-bottom: 2rem; font-size: 28px;">Dashboard</h1>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Members</div>
+                <div class="stat-value">{{ stats.total_members }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Organizational Units</div>
+                <div class="stat-value">{{ stats.total_units }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Roles</div>
+                <div class="stat-value">{{ stats.total_roles }}</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <div class="section-title">Quick Actions</div>
+            <div class="quick-actions">
+                {% has_perm 'member.invite' as can_invite %}
+                {% if can_invite %}
+                <a href="{% url 'organizations:members' organization.slug %}" class="btn">Invite Members</a>
+                {% endif %}
+                
+                {% has_perm 'unit.create' as can_create_unit %}
+                {% if can_create_unit %}
+                <a href="{% url 'organizations:structure' organization.slug %}" class="btn">Manage Structure</a>
+                {% endif %}
+                
+                {% has_perm 'role.view' as can_view_roles %}
+                {% if can_view_roles %}
+                <a href="{% url 'organizations:roles' organization.slug %}" class="btn-secondary btn">View Roles</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section">
+            <div class="section-title">Recent Activity</div>
+            {% if recent_activity %}
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-info">
+                        <div class="activity-user">
+                            {{ activity.user.username|default:"System" }}
+                        </div>
+                        <div class="activity-action">
+                            {{ activity.get_action_display }} - {{ activity.get_resource_display }}
+                        </div>
+                    </div>
+                    <div class="activity-time">
+                        {{ activity.created_at|timesince }} ago
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    No recent activity
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- User Roles -->
+        <div class="section">
+            <div class="section-title">Your Roles in This Organization</div>
+            {% if user_memberships %}
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    {% for membership in user_memberships %}
+                    <span style="background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 6px; font-size: 14px;">
+                        {{ membership.role.display_name }}
+                        {% if membership.scope_unit %}
+                        ({{ membership.scope_unit.name }})
+                        {% endif %}
+                    </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    No roles assigned
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
