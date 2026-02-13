@@ -17,10 +17,13 @@ urlpatterns = [
     path("labs/", include("apps.labs.urls")),
     # exams
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
-    
-     path('health/', health_check, name='health_check'),
-     path('ping/', ping, name='ping'),
-     path('test-error/', test_error, name='test_error'),
+    # organizations
+    path("organizations/", include(("apps.organizations.urls", "organizations"), namespace="organizations")),
+    # audit
+    path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
+    path("health/", health_check, name="health_check"),
+    path("ping/", ping, name="ping"),
+    path("test-error/", test_error, name="test_error"),
 ]
 
 if settings.DEBUG:
