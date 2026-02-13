@@ -447,8 +447,8 @@
         <div class="summary-card">
             <div class="avatar-section">
                 <div class="avatar-wrapper">
-                    {% if user.profile.avatar %}
-                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar-image" id="avatarPreview">
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-image" id="avatarPreview">
                     {% else %}
                     <div class="avatar-placeholder" id="avatarPreview">
                         {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
@@ -491,11 +491,11 @@
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Son giriş</span>
-                    <span class="stat-value">{{ user.last_login|date:"d M Y, H:i" }}</span>
+                    <span class="stat-value">{{ user.last_login|date:"d M Y, H:i"|default:"Heç vaxt" }}</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Təşkilat tipi</span>
-                    <span class="stat-value">{{ user.profile.get_organization_type_display }}</span>
+                    <span class="stat-value">{{ profile.get_organization_type_display|default:"Fərdi" }}</span>
                 </div>
             </div>
         </div>
@@ -566,7 +566,7 @@
                                 class="form-control" 
                                 id="phone" 
                                 name="phone" 
-                                value="{{ user.profile.phone }}"
+                                value="{{ profile.phone|default:'' }}"
                                 placeholder="+994 XX XXX XX XX"
                             >
                         </div>
@@ -581,7 +581,7 @@
                             class="form-control" 
                             id="location" 
                             name="location" 
-                            value="{{ user.profile.location }}"
+                            value="{{ profile.location|default:'' }}"
                             placeholder="Bakı, Azərbaycan"
                         >
                     </div>
@@ -596,7 +596,7 @@
                             name="bio" 
                             rows="4"
                             placeholder="Özünüz haqqında qısa məlumat..."
-                        >{{ user.profile.bio }}</textarea>
+                        >{{ profile.bio|default:'' }}</textarea>
                     </div>
                 </div>
 
@@ -612,7 +612,7 @@
                             Təşkilat Tipi
                         </label>
                         <div class="readonly-field">
-                            {{ user.profile.get_organization_type_display }}
+                            {{ profile.get_organization_type_display|default:"Fərdi" }}
                         </div>
                         <small class="form-text">
                             <i class="fas fa-info-circle"></i>
@@ -630,7 +630,7 @@
                             class="form-control" 
                             id="supervisor_code" 
                             name="supervisor_code" 
-                            value="{{ user.profile.supervisor_code }}"
+                            value="{{ profile.supervisor_code|default:'' }}"
                         >
                         <small class="form-text">
                             <i class="fas fa-crown"></i>
@@ -638,7 +638,7 @@
                         </small>
                         {% else %}
                         <div class="readonly-field">
-                            {{ user.profile.supervisor_code|default:"Təyin edilməyib" }}
+                            {{ profile.supervisor_code|default:"Təyin edilməyib" }}
                         </div>
                         <div class="info-badge">
                             <i class="fas fa-lock"></i>

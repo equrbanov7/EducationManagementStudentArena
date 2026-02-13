@@ -119,8 +119,12 @@ def student_dashboard(request):
 def user_profile(request):
     """
     User profile page with edit functionality.
+    Ensures profile exists before rendering.
     """
-    profile = request.user.profile if hasattr(request.user, "profile") else None
+    from apps.accounts.models import UserProfile
+
+    # Ensure profile exists (get_or_create for safety)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
         # Update user info
@@ -130,26 +134,29 @@ def user_profile(request):
         request.user.save()
 
         # Update profile
-        if profile:
-            profile.phone = request.POST.get("phone", "")
-            profile.bio = request.POST.get("bio", "")
-            profile.location = request.POST.get("location", "")
+        profile.phone = request.POST.get("phone", "")
+        profile.bio = request.POST.get("bio", "")
+        profile.location = request.POST.get("location", "")
 
-            # Handle avatar upload
-            if "avatar" in request.FILES:
-                profile.avatar = request.FILES["avatar"]
+        # Handle avatar upload
+        if "avatar" in request.FILES:
+            profile.avatar = request.FILES["avatar"]
 
-            # Only admins can change supervisor_code
-            if request.user.is_admin_level:
-                profile.supervisor_code = request.POST.get("supervisor_code", "")
+        # Only admins can change supervisor_code
+        if getattr(request.user, "is_admin_level", False):
+            profile.supervisor_code = request.POST.get("supervisor_code", "")
 
-            profile.save()
+        profile.save()
 
         messages.success(request, "Profil uğurla yeniləndi!")
         return redirect("accounts:profile")
 
     # Get user's roles
-    user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
+    user_roles = (
+        request.user.get_all_roles()
+        if hasattr(request.user, "get_all_roles")
+        else []
+    )
 
     context = {
         "profile": profile,
