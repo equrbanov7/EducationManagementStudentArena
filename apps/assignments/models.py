@@ -118,7 +118,7 @@ class Assignment(models.Model):
     def is_deadline_passed(self):
         from django.utils import timezone
 
-        return timezone.now() > self.due_date
+        return self.due_date and timezone.now() > self.due_date
 
     def get_user_attempts(self, user):
         """İstifadəçinin cəhd sayını qaytarır"""
