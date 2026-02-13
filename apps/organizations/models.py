@@ -7,13 +7,10 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 
-from core.constants import (
-    AcademicPeriodType,
-    OrganizationType,
-    OrgUnitType,
-    RoleScopeType,
-)
-from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
+from core.constants import (AcademicPeriodType, OrganizationType, OrgUnitType,
+                            RoleScopeType)
+from core.models import (ActiveManager, OrderedModel, TimeStampedModel,
+                         UUIDModel)
 
 
 class Organization(UUIDModel, TimeStampedModel):

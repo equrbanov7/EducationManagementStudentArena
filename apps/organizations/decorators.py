@@ -8,8 +8,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.views.generic import View
 
 from .permissions import has_permission
 

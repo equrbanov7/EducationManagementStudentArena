@@ -3,8 +3,6 @@ User extension methods for organization-related functionality.
 These are standalone functions that can be used with any User instance.
 """
 
-from django.db.models import Q
-
 
 def get_organizations(user):
     """
