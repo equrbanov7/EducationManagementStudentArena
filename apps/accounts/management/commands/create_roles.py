@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
         # Collect all unique role names
         all_roles = set()
-        for org_type, roles in ORGANIZATION_ROLES.items():
+        for _org_type, roles in ORGANIZATION_ROLES.items():
             all_roles.update(roles.keys())
 
         # Sort roles alphabetically
@@ -41,11 +41,7 @@ class Command(BaseCommand):
                 )
 
         self.stdout.write("")
-        self.stdout.write(self.style.SUCCESS(f"✓ Summary:"))
-        self.stdout.write(
-            self.style.SUCCESS(f"  - Created: {created_count} new groups")
-        )
+        self.stdout.write(self.style.SUCCESS("Summary:"))
+        self.stdout.write(self.style.SUCCESS(f"  - Created: {created_count} new groups"))
         self.stdout.write(self.style.SUCCESS(f"  - Existing: {existing_count} groups"))
-        self.stdout.write(
-            self.style.SUCCESS(f"  - Total: {len(all_roles)} role groups")
-        )
+        self.stdout.write(self.style.SUCCESS(f"  - Total: {len(all_roles)} role groups"))
