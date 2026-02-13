@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
-from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.randomizer import \
+    generate_random_questions_for_attempt
 
 
 @login_required

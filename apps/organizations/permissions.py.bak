@@ -149,16 +149,13 @@ def validate_permissions(permissions: List[str]) -> bool:
 
     all_valid_perms = set(get_all_permissions())
 
+    # Also allow category wildcards
+    for category in PERMISSION_CATEGORIES.keys():
+        all_valid_perms.add(f"{category}.*")
+
     # Check each permission
     for perm in permissions:
-        # Check if it's a category wildcard
-        if perm.endswith(".*"):
-            # For wildcards, check that at least one permission starts with this prefix
-            prefix = perm[:-1]  # Remove the * to get "course."
-            has_match = any(p.startswith(prefix) for p in all_valid_perms)
-            if not has_match:
-                return False
-        elif perm not in all_valid_perms:
+        if perm not in all_valid_perms:
             return False
 
     return True
@@ -178,15 +175,13 @@ def expand_wildcard_permissions(permissions: List[str]) -> Set[str]:
         return set(get_all_permissions())
 
     expanded = set()
-    all_perms = get_all_permissions()
 
     for perm in permissions:
         if perm.endswith(".*"):
-            # Category wildcard - find all permissions starting with this prefix
-            prefix = perm[:-1]  # Remove the * to get "course."
-            for p in all_perms:
-                if p.startswith(prefix):
-                    expanded.add(p)
+            # Category wildcard
+            category = perm[:-2]
+            category_perms = get_permissions_for_category(category)
+            expanded.update(category_perms)
         else:
             # Regular permission
             expanded.add(perm)
