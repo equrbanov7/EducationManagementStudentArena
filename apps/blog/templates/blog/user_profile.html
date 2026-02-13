@@ -6,14 +6,22 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pagination.css' %}"> {# Pagination CSS-i üçün #}
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="profile-page-wrapper">
     <header class="profile-section-header">
-        <h1><span>{{ profile_user.username }}</span> Profili</h1>
-        <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
+        <!-- Profile Info Container with Avatar -->
+        <div class="profile-info-container">
+            <div class="profile-avatar">
+                {{ profile_user.username|slice:":1"|upper }}
+            </div>
+            <div class="profile-text-info">
+                <h1><span>{{ profile_user.username }}</span> Profili</h1>
+                <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
+            </div>
+        </div>
 
         {% if request.user.is_authenticated and request.user == profile_user %}
             <div class="profile-buttons-container">
@@ -24,7 +32,7 @@
 
                 {% if assigned_count > 0 %}
                     <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlarım
+                        <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlar
                         <span class="pending-badge">{{ assigned_count }}</span>
                     </a>
                 {% endif %}
@@ -33,11 +41,8 @@
                     <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
                 </a>
 
-                {# ═══════════════════════════════════════════════════════ #}
-                {# TƏLƏBƏ KURSLARI - YENİ                                  #}
-                {# ═══════════════════════════════════════════════════════ #}
                 {% if request.user.is_student %}
-                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981;">
+                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981; color: white;">
                         <i class="fas fa-graduation-cap"></i> Kurslarım
                         {% if student_courses_count > 0 %}
                             <span class="pending-badge">{{ student_courses_count }}</span>
@@ -45,9 +50,6 @@
                     </a>
                 {% endif %}
 
-                {# ═══════════════════════════════════════════════════════ #}
-                {# MÜƏLLİM BUTTONLARI                                      #}
-                {# ═══════════════════════════════════════════════════════ #}
                 {% if request.user.is_teacher %}
                     <a href="{% url 'exams:teacher_exam_list' %}" class="profile-create-post-btn">
                         <i class="fas fa-file-alt"></i> İmtahanlarım
@@ -61,19 +63,19 @@
                     {% endif %}
                     
                     <a href="{% url 'exams:create_exam' %}" class="profile-create-post-btn">
-                        <i class="fas fa-plus-square"></i> Yeni imtahan yarat
+                        <i class="fas fa-plus-square"></i> Yeni imtahan
                     </a>
                     
                     <a href="{% url 'exams:teacher_group_list' %}" class="profile-create-post-btn">
                         <i class="fas fa-users"></i> Qruplarım
                     </a>
                      
-                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9;">
+                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9; color: white;">
                         <i class="fas fa-graduation-cap"></i> Kurslarım
                     </a>
                     
-                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #28a745;">
-                        <i class="fas fa-graduation-cap"></i> Yeni Kurs Yarat
+                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #059669; color: white;">
+                        <i class="fas fa-graduation-cap"></i> Yeni Kurs
                     </a>
                 {% endif %}
                 
