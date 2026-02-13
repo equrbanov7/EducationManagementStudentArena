@@ -8,3 +8,5 @@ class AccountsConfig(AppConfig):
     def ready(self):
         # ✅ accounts/signals.py yüklənsin
         from apps.accounts import signals  # noqa
+        # ✅ Import models to register UserProfile signals
+        from apps.accounts import models  # noqa
