@@ -16,7 +16,9 @@ class UserProfile(models.Model):
     Extended user profile with organization type and additional information.
     """
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
 
     organization_type = models.CharField(
         max_length=20,
@@ -34,9 +36,13 @@ class UserProfile(models.Model):
         help_text="Profil şəkli",
     )
 
-    phone = models.CharField(max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi")
+    phone = models.CharField(
+        max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi"
+    )
 
-    bio = models.TextField(blank=True, verbose_name="Haqqında", help_text="Qısa məlumat")
+    bio = models.TextField(
+        blank=True, verbose_name="Haqqında", help_text="Qısa məlumat"
+    )
 
     supervisor_code = models.CharField(
         max_length=50,
@@ -45,9 +51,13 @@ class UserProfile(models.Model):
         help_text="Admin/supervisor tərəfindən təyin edilir. User dəyişə bilməz.",
     )
 
-    location = models.CharField(max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan")
+    location = models.CharField(
+        max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan"
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Yaradılma tarixi"
+    )
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")
 
     class Meta:
