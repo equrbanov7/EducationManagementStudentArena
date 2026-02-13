@@ -46,7 +46,7 @@ def create_project(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     # İcazə yoxlaması - yalnız kurs sahibi
-    if not request.user.is_teacher or course.owner != request.user:
+    if not request.user.is_teacher_or_above or course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -103,7 +103,7 @@ def edit_project(request, pk):
     project = get_object_or_404(Project, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or project.course.owner != request.user:
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -208,7 +208,7 @@ def delete_project(request, pk):
     """
     project = get_object_or_404(Project, id=pk)
 
-    if not request.user.is_teacher or project.course.owner != request.user:
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -374,7 +374,7 @@ def review_submissions(request, pk):
     project = get_object_or_404(Project, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or project.course.owner != request.user:
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
         messages.error(request, "İcazəniz yoxdur")
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
@@ -404,7 +404,7 @@ def grade_submission(request, pk):
     submission = get_object_or_404(ProjectSubmission, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or submission.project.course.owner != request.user:
+    if not request.user.is_teacher_or_above or submission.project.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:

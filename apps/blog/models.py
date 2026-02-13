@@ -221,10 +221,3 @@ class Question(models.Model):
         if user == self.author:
             return True
         return self.visible_users.filter(id=user.id).exists()
-
-
-def _user_is_teacher(self):
-    return self.groups.filter(name="teacher").exists()
-
-
-User.add_to_class("is_teacher", property(_user_is_teacher))

@@ -5,7 +5,7 @@ Application-wide constants and enumerations.
 
 
 class UserRole:
-    """User role constants"""
+    """User role constants - Deprecated, use ORGANIZATION_ROLES instead"""
 
     TEACHER = "teacher"
     STUDENT = "student"
@@ -16,6 +16,83 @@ class UserRole:
         (STUDENT, "Student"),
         (ADMIN, "Admin"),
     ]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ORGANIZATION-TYPE-AWARE ROLE DEFINITIONS
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Organization-specific role definitions with hierarchy levels
+ORGANIZATION_ROLES = {
+    "university": {
+        "rector": {"level": 100, "label": "Rektor"},
+        "vice_rector": {"level": 95, "label": "Prorektor"},
+        "dean": {"level": 90, "label": "Dekan"},
+        "vice_dean": {"level": 85, "label": "Dekan müavini"},
+        "department_head": {"level": 80, "label": "Kafedra müdiri"},
+        "professor": {"level": 75, "label": "Professor"},
+        "associate_professor": {"level": 70, "label": "Dosent"},
+        "teacher": {"level": 60, "label": "Müəllim"},
+        "assistant_teacher": {"level": 55, "label": "Assistent"},
+        "lab_assistant": {"level": 50, "label": "Laborant"},
+        "moderator": {"level": 40, "label": "Moderator"},
+        "student": {"level": 10, "label": "Tələbə"},
+    },
+    "school": {
+        "director": {"level": 100, "label": "Direktor"},
+        "vice_director": {"level": 95, "label": "Direktor müavini"},
+        "department_head": {"level": 80, "label": "Şöbə müdiri"},
+        "teacher": {"level": 60, "label": "Müəllim"},
+        "assistant_teacher": {"level": 55, "label": "Müəllim köməkçisi"},
+        "moderator": {"level": 40, "label": "Moderator"},
+        "student": {"level": 10, "label": "Şagird"},
+    },
+    "course_center": {
+        "manager": {"level": 100, "label": "Menecer"},
+        "senior_instructor": {"level": 80, "label": "Baş təlimçi"},
+        "instructor": {"level": 60, "label": "Təlimçi"},
+        "assistant": {"level": 55, "label": "Köməkçi"},
+        "moderator": {"level": 40, "label": "Moderator"},
+        "student": {"level": 10, "label": "Kursant"},
+    },
+    "individual": {
+        "owner": {"level": 100, "label": "Sahibi"},
+        "student": {"level": 10, "label": "Tələbə"},
+    },
+}
+
+# Flat role → level mapping for quick lookups (all unique role names)
+ROLE_LEVELS = {
+    # University roles
+    "rector": 100,
+    "vice_rector": 95,
+    "dean": 90,
+    "vice_dean": 85,
+    "department_head": 80,
+    "professor": 75,
+    "associate_professor": 70,
+    # School roles
+    "director": 100,
+    "vice_director": 95,
+    # Course center roles
+    "manager": 100,
+    "senior_instructor": 80,
+    "instructor": 60,
+    "assistant": 55,
+    # Common roles (same across organizations)
+    "teacher": 60,
+    "assistant_teacher": 55,
+    "lab_assistant": 50,
+    "moderator": 40,
+    "student": 10,
+    "owner": 100,
+}
+
+# Role level thresholds
+ROLE_LEVEL_TEACHER = 60  # Teacher and above
+ROLE_LEVEL_MODERATOR = 40  # Moderator and above
+ROLE_LEVEL_ADMIN = 80  # Admin level (department_head and above)
+ROLE_LEVEL_TOP_ADMIN = 95  # Top admin (rector/director/vice_rector/vice_director)
 
 
 class ExamType:

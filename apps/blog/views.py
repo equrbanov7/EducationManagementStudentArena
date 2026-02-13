@@ -619,7 +619,7 @@ def category_detail(request, slug):
 @login_required
 def create_question(request):
     # Yalnız teacher qrupu olanlar sual yarada bilsin
-    if not request.user.is_teacher:
+    if not request.user.is_teacher_or_above:
         raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
 
     if request.method == "POST":
