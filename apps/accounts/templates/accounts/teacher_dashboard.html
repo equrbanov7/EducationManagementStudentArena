@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Müəllim Paneli - EMSArena{% endblock %}
+
+{% block extraCss %}
+<style>
+    :root {
+        --primary-blue: #2563eb;
+        --primary-green: #10b981;
+        --dark-blue: #1e40af;
+        --light-blue: #dbeafe;
+        --light-green: #d1fae5;
+        --sidebar-width: 260px;
+    }
+
+    body {
+        background: #f5f7fa;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: var(--sidebar-width);
+        background: linear-gradient(180deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+        color: white;
+        padding: 2rem 0;
+        position: fixed;
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        z-index: 100;
+    }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+        padding: 0 1.5rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .sidebar-header p {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        margin: 0;
+    }
+
+    .sidebar-nav {
+        padding: 1rem 0;
+    }
+
+    .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        text-decoration: none;
+        transition: background 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-left-color: var(--primary-green);
+    }
+
+    .sidebar-nav-item.active {
+        background: rgba(255, 255, 255, 0.15);
+        border-left-color: var(--primary-green);
+    }
+
+    .sidebar-nav-item i {
+        width: 24px;
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    /* Main content */
+    .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        padding: 2rem;
+        transition: margin-left 0.3s ease;
+    }
+
+    .main-content.expanded {
+        margin-left: 0;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .toggle-sidebar-btn {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .toggle-sidebar-btn:hover {
+        background: var(--dark-blue);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card.blue { border-left-color: var(--primary-blue); }
+    .stat-card.green { border-left-color: var(--primary-green); }
+    .stat-card.orange { border-left-color: #f59e0b; }
+    .stat-card.red { border-left-color: #ef4444; }
+
+    .stat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-card.blue .stat-icon {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+    }
+
+    .stat-card.green .stat-icon {
+        background: var(--light-green);
+        color: var(--primary-green);
+    }
+
+    .stat-card.orange .stat-icon {
+        background: #fef3c7;
+        color: #f59e0b;
+    }
+
+    .stat-card.red .stat-icon {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    /* Widget Cards */
+    .widgets-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .widget-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .widget-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .widget-link {
+        font-size: 0.875rem;
+        color: var(--primary-blue);
+        text-decoration: none;
+    }
+
+    .widget-link:hover {
+        text-decoration: underline;
+    }
+
+    .widget-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .widget-list-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .widget-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .widget-list-item a {
+        color: #1f2937;
+        text-decoration: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .widget-list-item a:hover {
+        color: var(--primary-blue);
+    }
+
+    .widget-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .widget-badge.urgent {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .widget-badge.pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .widget-badge.info {
+        background: var(--light-blue);
+        color: var(--primary-blue);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .widgets-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-chalkboard-teacher"></i> Müəllim Paneli</h4>
+            <p>{{ request.user.get_full_name|default:request.user.username }}</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'accounts:teacher_dashboard' %}" class="sidebar-nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Ana Səhifə</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-book"></i>
+                <span>Kurslar</span>
+            </a>
+            <a href="{% url 'accounts:grading_queue' %}" class="sidebar-nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>Qiymətləndirmə Növbəsi</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>İmtahanlar</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-users"></i>
+                <span>Tələbələr</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Hesabatlar</span>
+            </a>
+            <a href="{% url 'accounts:profile' %}" class="sidebar-nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Tənzimləmələr</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">İdarəetmə Paneli</h1>
+            <button class="toggle-sidebar-btn" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">Ümumi Kurslar</div>
+                        <div class="stat-value">{{ total_courses|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">Ümumi Tələbələr</div>
+                        <div class="stat-value">{{ total_students|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">Gözləyən Qiymətləndirmə</div>
+                        <div class="stat-value">{{ pending_grading|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card red">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">Risk Altında</div>
+                        <div class="stat-value">{{ at_risk_students|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widgets -->
+        <div class="widgets-grid">
+            <!-- Pending Grading Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-tasks text-primary"></i>
+                        Gözləyən Qiymətləndirmələr
+                    </h3>
+                    <a href="{% url 'accounts:grading_queue' %}" class="widget-link">
+                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if pending_submissions %}
+                <ul class="widget-list">
+                    {% for submission in pending_submissions %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ submission.student.get_full_name }}</strong><br>
+                                <small class="text-muted">{{ submission.assignment.title }}</small>
+                            </span>
+                            <span class="widget-badge pending">{{ submission.submitted_at|timesince }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Gözləyən qiymətləndirmə yoxdur</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Exams Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-calendar-alt text-success"></i>
+                        Gələcək İmtahanlar
+                    </h3>
+                    <a href="#" class="widget-link">
+                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if upcoming_exams %}
+                <ul class="widget-list">
+                    {% for exam in upcoming_exams %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ exam.title }}</strong><br>
+                                <small class="text-muted">{{ exam.course.title }}</small>
+                            </span>
+                            <span class="widget-badge info">{{ exam.start_time|date:"d M" }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check"></i>
+                    <p>Gələcək imtahan planlanmayıb</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Courses Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-book text-info"></i>
+                        Aktiv Kurslar
+                    </h3>
+                    <a href="#" class="widget-link">
+                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if recent_courses %}
+                <ul class="widget-list">
+                    {% for course in recent_courses %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ course.title }}</strong><br>
+                                <small class="text-muted">{{ course.memberships.count }} tələbə</small>
+                            </span>
+                            <span class="widget-badge info">{{ course.status }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <p>Hələ kurs yaradılmayıb</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- At-Risk Students Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                        Risk Altında Olan Tələbələr
+                    </h3>
+                    <a href="#" class="widget-link">
+                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if at_risk_list %}
+                <ul class="widget-list">
+                    {% for student in at_risk_list %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ student.user.get_full_name }}</strong><br>
+                                <small class="text-muted">Orta bal: {{ student.average_grade|floatformat:1 }}</small>
+                            </span>
+                            <span class="widget-badge urgent">Diqqət</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-smile"></i>
+                    <p>Bütün tələbələr yaxşı gedir</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+
+        toggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            }
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggleBtn.contains(e.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    });
+</script>
+{% endblock %}
