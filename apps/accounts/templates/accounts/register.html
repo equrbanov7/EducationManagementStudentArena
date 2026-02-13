@@ -41,6 +41,33 @@
             </div>
 
             <div class="register-form-field">
+                {{ form.first_name.label_tag }}
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="register-field-error">{{ form.first_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="register-form-field">
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="register-field-error">{{ form.last_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="register-form-field">
+                {{ form.organization_type.label_tag }}
+                {{ form.organization_type }}
+                {% if form.organization_type.errors %}
+                    <div class="register-field-error">{{ form.organization_type.errors.0 }}</div>
+                {% endif %}
+                <small style="display: block; margin-top: 0.25rem; font-size: 0.875rem; color: #6b7280;">
+                    Hansı təşkilat tipində qeydiyyatdan keçirsiniz?
+                </small>
+            </div>
+
+            <div class="register-form-field">
                 {{ form.password.label_tag }}
                 {{ form.password }}
                 {% if form.password.errors %}
@@ -60,7 +87,7 @@
         </form>
 
         <p class="register-footer-text">
-            Artıq hesabınız var? <a href="{% url 'login' %}">Daxil olun</a>
+            Artıq hesabınız var? <a href="{% url 'accounts:login' %}">Daxil olun</a>
         </p>
     </div>
 </div>
