@@ -74,7 +74,7 @@ def get_unit_type_display(unit_type: str) -> str:
     Returns:
         Display name string
     """
-    for org_type, types in UNIT_TYPES_BY_ORG.items():
+    for _org_type, types in UNIT_TYPES_BY_ORG.items():
         for ut, display in types:
             if ut == unit_type:
                 return display
