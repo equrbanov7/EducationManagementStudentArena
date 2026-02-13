@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.name }} - Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #1e40af;
+        }
+
+        .info-text {
+            color: #718096;
+            font-size: 14px;
+            margin-top: 0.25rem;
+        }
+
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
+            <nav class="nav-menu">
+                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
+                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 style="margin-bottom: 2rem;">Organization Settings</h1>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="settings-card">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>Organization Name</label>
+                    <input type="text" value="{{ organization.name }}" disabled>
+                    <div class="info-text">Contact support to change organization name</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Organization Type</label>
+                    <input type="text" value="{{ organization.get_org_type_display }}" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description">{{ organization.description }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ organization.email }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" value="{{ organization.phone }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="address">{{ organization.address }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" name="website" value="{{ organization.website }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Owner</label>
+                    <input type="text" value="{{ organization.owner.get_full_name|default:organization.owner.username }}" disabled>
+                    <div class="info-text">{{ organization.owner.email }}</div>
+                </div>
+
+                <button type="submit" class="btn">Save Settings</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
