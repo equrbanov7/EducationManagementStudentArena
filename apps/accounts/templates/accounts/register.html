@@ -170,8 +170,8 @@
 
 {% block extraJs %}
 <script src="{% static 'js/register_wizard.js' %}"></script>
+{{ organizations|json_script:"organizations-data" }}
 <script>
-    // Pass organization data from server to JS
-    window.ORGANIZATIONS_DATA = {{ organizations|safe }};
+    window.ORGANIZATIONS_DATA = JSON.parse(document.getElementById('organizations-data').textContent);
 </script>
 {% endblock %}
