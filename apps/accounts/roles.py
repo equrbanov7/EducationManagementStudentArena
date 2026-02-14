@@ -5,6 +5,7 @@ Checks profile.role first, falls back to Django Groups for backward compatibilit
 """
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.constants import ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR, ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN, ROLE_LEVELS
 
@@ -15,7 +16,7 @@ def _get_profile_safe(self):
     """Safely get user profile, returns None if not found."""
     try:
         return self.profile
-    except Exception:
+    except (ObjectDoesNotExist, AttributeError):
         return None
 
 
