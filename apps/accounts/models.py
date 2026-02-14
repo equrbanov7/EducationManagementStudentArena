@@ -36,6 +36,8 @@ class UserProfile(models.Model):
         help_text="Hansı təşkilat tipində qeydiyyatdan keçdiniz",
     )
 
+    country = models.CharField(max_length=100, blank=True, default="", verbose_name="Ölkə")
+
     avatar = models.ImageField(
         upload_to="avatars/",
         blank=True,

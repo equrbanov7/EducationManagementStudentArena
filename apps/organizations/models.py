@@ -19,6 +19,7 @@ class Organization(UUIDModel, TimeStampedModel):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     org_type = models.CharField(max_length=50, choices=OrganizationType.CHOICES)
+    country = models.CharField(max_length=100, blank=True, default="")
     logo = models.ImageField(upload_to="org_logos/", null=True, blank=True)
     description = models.TextField(blank=True)
     email = models.EmailField(blank=True)
@@ -33,6 +34,11 @@ class Organization(UUIDModel, TimeStampedModel):
     enabled_apps = models.JSONField(default=list, blank=True)
     settings = models.JSONField(default=dict, blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[("active", "Active"), ("pending", "Pending"), ("suspended", "Suspended")],
+        default="active",
+    )
 
     objects = models.Manager()
     active = ActiveManager()
