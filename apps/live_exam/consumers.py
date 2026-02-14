@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
-from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core import signing
 from django.utils import timezone
+
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -60,11 +61,7 @@ class LiveLobbyConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def _get_lobby_state(self, pin: str) -> dict:
         session = LiveSession.objects.get(pin=pin)
-        players = list(
-            session.players.order_by("-created_at").values(
-                "id", "nickname", "avatar_key"
-            )[:50]
-        )
+        players = list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[:50])
         return {
             "type": "lobby_state",
             "count": session.players.count(),
@@ -168,9 +165,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
             answer_ms = int(data.get("answer_ms") or 0)
 
             if isinstance(data.get("option_ids"), list):
-                option_ids = [
-                    int(x) for x in data.get("option_ids") if str(x).isdigit()
-                ]
+                option_ids = [int(x) for x in data.get("option_ids") if str(x).isdigit()]
             else:
                 option_ids = [int(data.get("option_id"))]
 
@@ -196,10 +191,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
 
         # distinct player count (daha doğru)
         answered_count = (
-            LiveAnswer.objects.filter(session=session, question_id=question_id)
-            .values("player_id")
-            .distinct()
-            .count()
+            LiveAnswer.objects.filter(session=session, question_id=question_id).values("player_id").distinct().count()
         )
 
         return {
@@ -209,9 +201,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         }
 
     @database_sync_to_async
-    def _save_answer_and_score(
-        self, pin, player_id, client_id, question_id, option_ids, answer_ms
-    ):
+    def _save_answer_and_score(self, pin, player_id, client_id, question_id, option_ids, answer_ms):
         # session
         try:
             session = LiveSession.objects.get(pin=pin)
@@ -220,16 +210,12 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
 
         # player
         try:
-            player = LivePlayer.objects.get(
-                id=player_id, session=session, client_id=client_id
-            )
+            player = LivePlayer.objects.get(id=player_id, session=session, client_id=client_id)
         except LivePlayer.DoesNotExist:
             return False, "Player not found"
 
         # idempotent (1 sual = 1 cavab)
-        if LiveAnswer.objects.filter(
-            session=session, player=player, question_id=question_id
-        ).exists():
+        if LiveAnswer.objects.filter(session=session, player=player, question_id=question_id).exists():
             return True, {"message": "Already answered", "score": player.score}
 
         # question
@@ -240,9 +226,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
 
         # correct ids
         correct_ids = list(
-            ExamQuestionOption.objects.filter(
-                question_id=question_id, is_correct=True
-            ).values_list("id", flat=True)
+            ExamQuestionOption.objects.filter(question_id=question_id, is_correct=True).values_list("id", flat=True)
         )
         if not correct_ids:
             return False, "No correct options marked for this question"
@@ -270,10 +254,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         # speed bonus
         bonus = 0
         if session.question_started_at and session.question_ends_at:
-            total_ms = int(
-                (session.question_ends_at - session.question_started_at).total_seconds()
-                * 1000
-            )
+            total_ms = int((session.question_ends_at - session.question_started_at).total_seconds() * 1000)
             if total_ms > 0:
                 answer_ms = max(0, min(int(answer_ms), total_ms))
                 remaining = total_ms - answer_ms

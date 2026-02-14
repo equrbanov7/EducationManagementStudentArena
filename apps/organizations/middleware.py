@@ -28,9 +28,7 @@ class OrganizationMiddleware:
                 from .models import Organization
 
                 try:
-                    request.organization = Organization.objects.get(
-                        slug=org_slug, is_active=True
-                    )
+                    request.organization = Organization.objects.get(slug=org_slug, is_active=True)
                 except Organization.DoesNotExist:
                     # Organization not found or inactive, clear session
                     request.session.pop("active_organization", None)
@@ -39,9 +37,7 @@ class OrganizationMiddleware:
             if request.organization:
                 # Get active memberships for this user in this organization
                 request.org_memberships = list(
-                    request.user.memberships.filter(
-                        organization=request.organization, is_active=True
-                    )
+                    request.user.memberships.filter(organization=request.organization, is_active=True)
                     .select_related("role", "scope_unit")
                     .order_by("-is_primary", "-role__level")
                 )

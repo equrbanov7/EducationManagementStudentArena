@@ -7,8 +7,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 
-from apps.exams.validators import (validate_file_extension, validate_file_size,
-                                   validate_zip_contents)
+from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
@@ -85,9 +84,7 @@ class Exam(models.Model):
         ("written", "Yazılı / praktiki"),
     )
 
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="exams", verbose_name="Müəllif"
-    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exams", verbose_name="Müəllif")
     title = models.CharField("Blok adı", max_length=200)
     description = models.TextField("Qısa izah", blank=True)
 
@@ -346,9 +343,7 @@ class Exam(models.Model):
 
         return False
 
-    def can_user_start(
-        self, user: User, code: str | None = None
-    ) -> tuple[bool, str | None]:
+    def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
         """
         Student yeni attempt başlaya bilərmi?
         """
@@ -374,9 +369,7 @@ class Exam(models.Model):
         if user == self.author:
             return True, None
 
-        in_allowed_any = self.allowed_users.filter(
-            id=user.id
-        ).exists() or self._user_in_allowed_groups(user)
+        in_allowed_any = self.allowed_users.filter(id=user.id).exists() or self._user_in_allowed_groups(user)
 
         # 4) Kod yoxdursa
         if not self.access_code:
@@ -476,9 +469,7 @@ class QuestionBank(models.Model):
         verbose_name="Yaradan",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə Tarixi")
 
     class Meta:
@@ -611,9 +602,7 @@ class ExamQuestion(models.Model):
     text = models.TextField("Sual mətni")
 
     # Test üçün "ideal" cavab mətni lazım olsa, yazılı üçün də istifadə etmək olar
-    correct_answer = models.TextField(
-        "Düzgün cavab / ideal cavab (yazılı üçün)", blank=True
-    )
+    correct_answer = models.TextField("Düzgün cavab / ideal cavab (yazılı üçün)", blank=True)
 
     order = models.PositiveIntegerField("Sıra", default=1)
 
@@ -634,9 +623,7 @@ class ExamQuestion(models.Model):
         help_text="Boş saxlasanız, Exam.default_question_time_seconds istifadə olunacaq.",
     )
 
-    image = models.ImageField(
-        "Sual şəkli (optional)", upload_to=question_media_path, blank=True, null=True
-    )
+    image = models.ImageField("Sual şəkli (optional)", upload_to=question_media_path, blank=True, null=True)
 
     video = models.FileField(
         "Sual videosu (optional)",
@@ -746,30 +733,20 @@ class ExamAttempt(models.Model):
         ("expired", "Vaxt bitib"),
     )
 
-    checked_by_teacher = models.BooleanField(
-        "Müəllim tərəfindən yoxlanılıb?", default=False
-    )
+    checked_by_teacher = models.BooleanField("Müəllim tərəfindən yoxlanılıb?", default=False)
     teacher_checked_at = models.DateTimeField("Yoxlanma tarixi", null=True, blank=True)
 
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="exam_attempts"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts")
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="attempts")
 
-    attempt_number = models.PositiveIntegerField(
-        "Cəhd nömrəsi", default=1, help_text="Eyni user üçün 1, 2, 3 və s."
-    )
+    attempt_number = models.PositiveIntegerField("Cəhd nömrəsi", default=1, help_text="Eyni user üçün 1, 2, 3 və s.")
 
-    status = models.CharField(
-        "Status", max_length=20, choices=STATUS_CHOICES, default="in_progress"
-    )
+    status = models.CharField("Status", max_length=20, choices=STATUS_CHOICES, default="in_progress")
 
     started_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(blank=True, null=True)
 
-    duration_seconds = models.PositiveIntegerField(
-        "Faktiki davametmə müddəti (saniyə)", blank=True, null=True
-    )
+    duration_seconds = models.PositiveIntegerField("Faktiki davametmə müddəti (saniyə)", blank=True, null=True)
 
     # Test üçün ümumi nəticə:
     correct_count = models.PositiveIntegerField(default=0)
@@ -847,12 +824,8 @@ class ExamAnswer(models.Model):
     Test + yazılı üçün birləşmiş model.
     """
 
-    attempt = models.ForeignKey(
-        ExamAttempt, on_delete=models.CASCADE, related_name="answers"
-    )
-    question = models.ForeignKey(
-        ExamQuestion, on_delete=models.CASCADE, related_name="answers"
-    )
+    attempt = models.ForeignKey(ExamAttempt, on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey(ExamQuestion, on_delete=models.CASCADE, related_name="answers")
 
     # Test üçün: seçilən variantlar (single/multiple)
     selected_options = models.ManyToManyField(
@@ -885,9 +858,7 @@ class ExamAnswer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     has_paint = models.BooleanField(default=False)  # bu sualda paint aktivdir?
-    paint_image = models.ImageField(
-        upload_to="exam_paints/%Y/%m/", null=True, blank=True
-    )
+    paint_image = models.ImageField(upload_to="exam_paints/%Y/%m/", null=True, blank=True)
     paint_updated_at = models.DateTimeField(null=True, blank=True)
 
     # istəsən raw data (debug üçün) saxlaya bilərsən, amma vacib deyil
@@ -913,9 +884,7 @@ class ExamAnswer(models.Model):
             # Yazılı imtahanlarda bu funksiyanı çağırmaya bilərik.
             return
 
-        correct_options = set(
-            self.question.options.filter(is_correct=True).values_list("id", flat=True)
-        )
+        correct_options = set(self.question.options.filter(is_correct=True).values_list("id", flat=True))
         selected = set(self.selected_options.values_list("id", flat=True))
 
         if not correct_options:

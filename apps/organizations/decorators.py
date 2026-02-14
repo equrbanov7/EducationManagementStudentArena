@@ -65,14 +65,10 @@ def org_level_required(min_level):
             # Get highest level from user's memberships
             max_level = 0
             if request.org_memberships:
-                max_level = max(
-                    [m.role.level for m in request.org_memberships], default=0
-                )
+                max_level = max([m.role.level for m in request.org_memberships], default=0)
 
             if max_level < min_level:
-                raise PermissionDenied(
-                    f"Insufficient role level. Required: {min_level}, Your level: {max_level}"
-                )
+                raise PermissionDenied(f"Insufficient role level. Required: {min_level}, Your level: {max_level}")
 
             return view_func(request, *args, **kwargs)
 
@@ -146,9 +142,7 @@ class PermissionRequiredMixin(OrganizationRequiredMixin):
         # Then check permission
         if self.permission_required:
             if not has_permission(request.org_permissions, self.permission_required):
-                return HttpResponseForbidden(
-                    f"You do not have permission: {self.permission_required}"
-                )
+                return HttpResponseForbidden(f"You do not have permission: {self.permission_required}")
 
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)
 
@@ -172,8 +166,6 @@ class LevelRequiredMixin(OrganizationRequiredMixin):
             max_level = max([m.role.level for m in request.org_memberships], default=0)
 
         if max_level < self.min_level:
-            return HttpResponseForbidden(
-                f"Insufficient role level. Required: {self.min_level}"
-            )
+            return HttpResponseForbidden(f"Insufficient role level. Required: {self.min_level}")
 
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)

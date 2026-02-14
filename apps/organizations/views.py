@@ -15,9 +15,7 @@ def select_organization(request):
     View for selecting/switching active organization.
     """
     # Get all organizations user is a member of
-    user_memberships = request.user.memberships.filter(is_active=True).select_related(
-        "organization", "role"
-    )
+    user_memberships = request.user.memberships.filter(is_active=True).select_related("organization", "role")
 
     organizations = {}
     for membership in user_memberships:
@@ -47,9 +45,7 @@ def switch_organization(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
     # Check if user is a member
-    has_membership = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).exists()
+    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
         messages.error(request, "You don't have access to this organization.")
@@ -77,9 +73,7 @@ def organization_dashboard(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
     # Check if user has access
-    has_membership = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).exists()
+    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
         messages.error(request, "You don't have access to this organization.")
@@ -97,15 +91,11 @@ def organization_dashboard(request, slug):
 
     # Get recent activity from audit log
     recent_activity = (
-        AuditLog.objects.filter(organization=organization)
-        .select_related("user")
-        .order_by("-created_at")[:10]
+        AuditLog.objects.filter(organization=organization).select_related("user").order_by("-created_at")[:10]
     )
 
     # Get user's memberships in this org
-    user_memberships = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).select_related("role")
+    user_memberships = request.user.memberships.filter(organization=organization, is_active=True).select_related("role")
 
     context = {
         "organization": organization,
@@ -125,20 +115,14 @@ def organization_structure(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
     # Check if user has access
-    has_membership = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).exists()
+    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
         messages.error(request, "You don't have access to this organization.")
         return redirect("organizations:select")
 
     # Get all units in tree structure
-    units = (
-        organization.units.filter(parent=None)
-        .prefetch_related("children", "children__children")
-        .order_by("order")
-    )
+    units = organization.units.filter(parent=None).prefetch_related("children", "children__children").order_by("order")
 
     context = {
         "organization": organization,
@@ -158,18 +142,14 @@ def organization_members(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
     # Check if user has access
-    has_membership = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).exists()
+    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
         messages.error(request, "You don't have access to this organization.")
         return redirect("organizations:select")
 
     # Get members with filters
-    members = organization.memberships.filter(is_active=True).select_related(
-        "user", "role", "scope_unit"
-    )
+    members = organization.memberships.filter(is_active=True).select_related("user", "role", "scope_unit")
 
     # Filter by role
     role_filter = request.GET.get("role")
@@ -208,9 +188,7 @@ def organization_roles(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
     # Check if user has access
-    has_membership = request.user.memberships.filter(
-        organization=organization, is_active=True
-    ).exists()
+    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
         messages.error(request, "You don't have access to this organization.")

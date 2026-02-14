@@ -110,11 +110,7 @@ def edit_assignment(request, pk):
     # GET - Mövcud məlumatları JSON olaraq qaytar
     # ─────────────────────────────────────────────────────────────────────────
     if request.method == "GET":
-        assigned_students = list(
-            assignment.assigned_students.values(
-                "id", "username", "first_name", "last_name"
-            )
-        )
+        assigned_students = list(assignment.assigned_students.values("id", "username", "first_name", "last_name"))
         assigned_student_ids = [s["id"] for s in assigned_students]
 
         # Tələbələrin qruplarını tap
@@ -133,16 +129,8 @@ def edit_assignment(request, pk):
             "id": assignment.id,
             "title": assignment.title,
             "description": assignment.description,
-            "start_date": (
-                assignment.start_date.strftime("%Y-%m-%dT%H:%M")
-                if assignment.start_date
-                else ""
-            ),
-            "deadline": (
-                assignment.deadline.strftime("%Y-%m-%dT%H:%M")
-                if assignment.deadline
-                else ""
-            ),
+            "start_date": (assignment.start_date.strftime("%Y-%m-%dT%H:%M") if assignment.start_date else ""),
+            "deadline": (assignment.deadline.strftime("%Y-%m-%dT%H:%M") if assignment.deadline else ""),
             "max_attempts": assignment.max_attempts,
             "status": assignment.status,
             "group_names": assigned_groups,
@@ -150,8 +138,7 @@ def edit_assignment(request, pk):
             "students": [
                 {
                     "id": s["id"],
-                    "name": f"{s['first_name']} {s['last_name']}".strip()
-                    or s["username"],
+                    "name": f"{s['first_name']} {s['last_name']}".strip() or s["username"],
                 }
                 for s in assigned_students
             ],
@@ -251,9 +238,7 @@ def assignment_detail(request, pk):
             return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = assignment.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    user_submissions = assignment.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = user_submissions.count()
 
     context = {
@@ -339,9 +324,7 @@ def my_submissions(request, pk):
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin cavablarını al
-    submissions = assignment.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    submissions = assignment.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = submissions.count()
 
     context = {
@@ -380,9 +363,7 @@ def review_submissions(request, pk):
         messages.error(request, "İcazəniz yoxdur")
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
-    submissions = assignment.submissions.select_related("student").order_by(
-        "-submitted_at"
-    )
+    submissions = assignment.submissions.select_related("student").order_by("-submitted_at")
 
     context = {
         "assignment": assignment,
@@ -406,10 +387,7 @@ def grade_submission(request, pk):
     submission = get_object_or_404(AssignmentSubmission, id=pk)
 
     # İcazə yoxlaması
-    if (
-        not request.user.is_teacher_or_above
-        or submission.assignment.course.owner != request.user
-    ):
+    if not request.user.is_teacher_or_above or submission.assignment.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -464,11 +442,7 @@ def search_students(request):
     results = [
         {
             "id": m.user.id,
-            "text": (
-                f"{m.user.get_full_name()} ({m.user.username})"
-                if m.user.first_name
-                else m.user.username
-            ),
+            "text": (f"{m.user.get_full_name()} ({m.user.username})" if m.user.first_name else m.user.username),
             "group_name": m.group_name or "",
         }
         for m in student_memberships
@@ -532,9 +506,7 @@ def students_by_groups(request):
 
     # Qruplardakı tələbələri tap
     memberships = (
-        CourseMembership.objects.filter(
-            course=course, group_name__in=group_names, role="student"
-        )
+        CourseMembership.objects.filter(course=course, group_name__in=group_names, role="student")
         .select_related("user")
         .order_by("group_name", "user__first_name")
     )

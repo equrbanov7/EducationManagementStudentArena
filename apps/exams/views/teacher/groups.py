@@ -15,9 +15,7 @@ def teacher_group_list(request):
     # _ensure_teacher(request.user)
 
     # Müəllimin mövcud qrupları
-    groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related(
-        "students"
-    )
+    groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related("students")
 
     # DÜZƏLİŞ: Formu yaradarkən 'teacher' parametrini ötürürük
     # Bu, formun __init__ metodunda işlənəcək və tələbə siyahısını filterləyəcək

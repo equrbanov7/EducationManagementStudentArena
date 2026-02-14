@@ -10,18 +10,10 @@ class AssignmentForm(forms.ModelForm):
         model = Assignment
         fields = ["title", "description", "deadline", "max_attempts", "status"]
         widgets = {
-            "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Sərbəst işin başlığı"}
-            ),
-            "description": forms.Textarea(
-                attrs={"class": "form-control", "rows": 4, "placeholder": "Təsvir..."}
-            ),
-            "deadline": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"}
-            ),
-            "max_attempts": forms.NumberInput(
-                attrs={"class": "form-control", "min": 1, "value": 3}
-            ),
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Sərbəst işin başlığı"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Təsvir..."}),
+            "deadline": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "max_attempts": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 3}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         labels = {
@@ -48,9 +40,7 @@ class AssignmentSubmissionForm(forms.ModelForm):
                     "required": True,
                 }
             ),
-            "file": forms.FileInput(
-                attrs={"class": "form-control", "accept": ".pdf,.doc,.docx,.txt,.zip"}
-            ),
+            "file": forms.FileInput(attrs={"class": "form-control", "accept": ".pdf,.doc,.docx,.txt,.zip"}),
         }
         labels = {"content": "Cavabınız", "file": "Fayl (opsional)"}
 

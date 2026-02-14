@@ -110,18 +110,12 @@ def edit_project(request, pk):
     # GET - Mövcud məlumatları JSON olaraq qaytar
     # ─────────────────────────────────────────────────────────────────────────
     if request.method == "GET":
-        assigned_students = list(
-            project.assigned_students.values(
-                "id", "username", "first_name", "last_name"
-            )
-        )
+        assigned_students = list(project.assigned_students.values("id", "username", "first_name", "last_name"))
         assigned_student_ids = [s["id"] for s in assigned_students]
 
         # Tələbələrin qruplarını tap
         assigned_groups = list(
-            CourseMembership.objects.filter(
-                course=project.course, user_id__in=assigned_student_ids, role="student"
-            )
+            CourseMembership.objects.filter(course=project.course, user_id__in=assigned_student_ids, role="student")
             .exclude(group_name="")
             .values_list("group_name", flat=True)
             .distinct()
@@ -131,14 +125,8 @@ def edit_project(request, pk):
             "id": project.id,
             "title": project.title,
             "description": project.description,
-            "start_date": (
-                project.start_date.strftime("%Y-%m-%dT%H:%M")
-                if project.start_date
-                else ""
-            ),
-            "deadline": (
-                project.deadline.strftime("%Y-%m-%dT%H:%M") if project.deadline else ""
-            ),
+            "start_date": (project.start_date.strftime("%Y-%m-%dT%H:%M") if project.start_date else ""),
+            "deadline": (project.deadline.strftime("%Y-%m-%dT%H:%M") if project.deadline else ""),
             "max_attempts": project.max_attempts,
             "max_score": project.max_score,
             "status": project.status,
@@ -147,8 +135,7 @@ def edit_project(request, pk):
             "students": [
                 {
                     "id": s["id"],
-                    "name": f"{s['first_name']} {s['last_name']}".strip()
-                    or s["username"],
+                    "name": f"{s['first_name']} {s['last_name']}".strip() or s["username"],
                 }
                 for s in assigned_students
             ],
@@ -249,9 +236,7 @@ def project_detail(request, pk):
             return redirect("courses:course_dashboard", course_id=project.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = project.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    user_submissions = project.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = user_submissions.count()
 
     context = {
@@ -337,9 +322,7 @@ def my_submissions(request, pk):
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
     # İstifadəçinin cavablarını al
-    submissions = project.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    submissions = project.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = submissions.count()
 
     context = {
@@ -378,9 +361,7 @@ def review_submissions(request, pk):
         messages.error(request, "İcazəniz yoxdur")
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
-    submissions = project.submissions.select_related("student").order_by(
-        "-submitted_at"
-    )
+    submissions = project.submissions.select_related("student").order_by("-submitted_at")
 
     context = {
         "project": project,
@@ -404,10 +385,7 @@ def grade_submission(request, pk):
     submission = get_object_or_404(ProjectSubmission, id=pk)
 
     # İcazə yoxlaması
-    if (
-        not request.user.is_teacher_or_above
-        or submission.project.course.owner != request.user
-    ):
+    if not request.user.is_teacher_or_above or submission.project.course.owner != request.user:
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
 
     try:
@@ -455,9 +433,7 @@ def api_get_groups(request):
         .order_by("group_name")
     )
 
-    return JsonResponse(
-        {"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]}
-    )
+    return JsonResponse({"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]})
 
 
 @login_required
@@ -482,9 +458,7 @@ def api_get_students(request):
 
     # Qruplardakı tələbələri tap
     memberships = (
-        CourseMembership.objects.filter(
-            course=course, group_name__in=group_names, role="student"
-        )
+        CourseMembership.objects.filter(course=course, group_name__in=group_names, role="student")
         .select_related("user")
         .order_by("group_name", "user__first_name")
     )

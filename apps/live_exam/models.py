@@ -24,16 +24,10 @@ class LiveSession(models.Model):
         (STATE_FINISHED, "Finished"),
     ]
 
-    exam = models.ForeignKey(
-        Exam, on_delete=models.CASCADE, related_name="live_sessions"
-    )
-    host_user = models.ForeignKey(
-        "auth.User", on_delete=models.CASCADE, related_name="hosted_live_sessions"
-    )
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="live_sessions")
+    host_user = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="hosted_live_sessions")
 
-    pin = models.CharField(
-        max_length=6, unique=True, default=generate_pin, db_index=True
-    )
+    pin = models.CharField(max_length=6, unique=True, default=generate_pin, db_index=True)
     state = models.CharField(max_length=12, choices=STATE_CHOICES, default=STATE_LOBBY)
 
     is_locked = models.BooleanField(default=False)
@@ -80,17 +74,11 @@ class LiveSession(models.Model):
     def get_exam_questions(self):
         # ExamQuestion ara modelində sıra field-in adı fərqlidirsə (məs: position),
         # bunu dəyişəcəksən:
-        return (
-            ExamQuestion.objects.filter(exam=self.exam)
-            .select_related("question")
-            .order_by("order")
-        )
+        return ExamQuestion.objects.filter(exam=self.exam).select_related("question").order_by("order")
 
 
 class LivePlayer(models.Model):
-    session = models.ForeignKey(
-        LiveSession, on_delete=models.CASCADE, related_name="players"
-    )
+    session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="players")
 
     nickname = models.CharField(max_length=32)
     avatar_key = models.CharField(max_length=32, default="avatar_1")
@@ -106,23 +94,15 @@ class LivePlayer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["session", "client_id"], name="uniq_player_per_session_client"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["session", "client_id"], name="uniq_player_per_session_client")]
 
     def __str__(self):
         return f"{self.nickname} ({self.session.pin})"
 
 
 class LiveAnswer(models.Model):
-    session = models.ForeignKey(
-        LiveSession, on_delete=models.CASCADE, related_name="answers"
-    )
-    player = models.ForeignKey(
-        LivePlayer, on_delete=models.CASCADE, related_name="answers"
-    )
+    session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="answers")
+    player = models.ForeignKey(LivePlayer, on_delete=models.CASCADE, related_name="answers")
 
     question_id = models.IntegerField()
 

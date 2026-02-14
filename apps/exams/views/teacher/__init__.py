@@ -1,16 +1,16 @@
 # exams/views/teacher/__init__.py
 
-from .exams import (createAndEditExamView, delete_exam, teacher_exam_detail,
-                    teacher_exam_list, toggle_exam_active)
-from .groups import (create_student_group, teacher_create_group,
-                     teacher_delete_group, teacher_group_list,
-                     teacher_update_group)
-from .question_bank import (create_question_bank, process_question_bank,
-                            test_question_bank)
-from .questions import (add_exam_question, delete_exam_question,
-                        edit_exam_question)
-from .results import (teacher_check_attempt, teacher_exam_results,
-                      teacher_pending_attempts, teacher_view_attempt)
+from .exams import createAndEditExamView, delete_exam, teacher_exam_detail, teacher_exam_list, toggle_exam_active
+from .groups import (
+    create_student_group,
+    teacher_create_group,
+    teacher_delete_group,
+    teacher_group_list,
+    teacher_update_group,
+)
+from .question_bank import create_question_bank, process_question_bank, test_question_bank
+from .questions import add_exam_question, delete_exam_question, edit_exam_question
+from .results import teacher_check_attempt, teacher_exam_results, teacher_pending_attempts, teacher_view_attempt
 
 __all__ = [
     "teacher_group_list",

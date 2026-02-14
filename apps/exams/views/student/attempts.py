@@ -7,13 +7,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.exams.models import (Exam, ExamAnswer, ExamAnswerFile, ExamAttempt,
-                               ExamQuestionOption)
-from apps.exams.services.attempts import (
-    _start_or_resume_attempt, generate_random_questions_for_attempt)
+from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
+from apps.exams.services.attempts import _start_or_resume_attempt, generate_random_questions_for_attempt
 from apps.exams.services.randomizer import build_shuffled_options
-from apps.exams.services.utils import (_clear_paint_from_answer,
-                                       _save_paint_png_to_answer)
+from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 
 
 @login_required
@@ -90,9 +87,7 @@ def take_exam(request, slug, attempt_id):
     is_time_up = False
     if exam.total_duration_minutes and attempt.started_at:
         now = timezone.now()
-        finish_time = attempt.started_at + timedelta(
-            minutes=exam.total_duration_minutes
-        )
+        finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
         diff = finish_time - now
         total_seconds = diff.total_seconds()
         if total_seconds <= 0:
@@ -116,20 +111,14 @@ def take_exam(request, slug, attempt_id):
                 if q.answer_mode == "single":
                     opt_id = request.POST.get(f"q_{q.id}")
                     if opt_id:
-                        opt = ExamQuestionOption.objects.filter(
-                            id=opt_id, question=q
-                        ).first()
+                        opt = ExamQuestionOption.objects.filter(id=opt_id, question=q).first()
                         if opt:
                             ans.selected_options.add(opt)
 
                 else:  # multiple
                     opt_ids = request.POST.getlist(f"q_{q.id}")
                     if opt_ids:
-                        opts = list(
-                            ExamQuestionOption.objects.filter(
-                                question=q, id__in=opt_ids
-                            )
-                        )
+                        opts = list(ExamQuestionOption.objects.filter(question=q, id__in=opt_ids))
                         if opts:
                             ans.selected_options.add(*opts)
 
@@ -163,9 +152,7 @@ def take_exam(request, slug, attempt_id):
                 if paint_clear:
                     _clear_paint_from_answer(ans)
 
-                if paint_enabled and paint_data_url.startswith(
-                    "data:image/png;base64,"
-                ):
+                if paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
                     _save_paint_png_to_answer(ans, paint_data_url)
                 elif not paint_enabled:
                     pass

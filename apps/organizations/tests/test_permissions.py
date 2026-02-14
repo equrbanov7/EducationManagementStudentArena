@@ -4,8 +4,7 @@ Permission tests for organizations app.
 
 from django.test import TestCase
 
-from ..permissions import (expand_wildcard_permissions, get_all_permissions,
-                           has_permission, validate_permissions)
+from ..permissions import expand_wildcard_permissions, get_all_permissions, has_permission, validate_permissions
 
 
 class PermissionSystemTest(TestCase):

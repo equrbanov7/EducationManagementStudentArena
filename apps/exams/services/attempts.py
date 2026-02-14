@@ -3,10 +3,8 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.randomizer import \
-    generate_random_questions_for_attempt
-from apps.exams.services.utils import (_attempt_has_any_answer,
-                                       _effective_needed_count)
+from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
 
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
@@ -23,11 +21,7 @@ def _start_or_resume_attempt(request, exam: Exam):
     user = request.user
 
     # ✅ DƏYİŞİKLİK: Bitməmiş attempt-i yoxla
-    current = (
-        exam.attempts.filter(user=user, status__in=["draft", "in_progress"])
-        .order_by("-started_at")
-        .first()
-    )
+    current = exam.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at").first()
 
     if current:
         # Suallar düzgün generate edilib?
@@ -41,9 +35,7 @@ def _start_or_resume_attempt(request, exam: Exam):
         return redirect("exams:take_exam", slug=exam.slug, attempt_id=current.id)
 
     # ✅ Bitmiş cəhdləri yoxla
-    finished_qs = exam.attempts.filter(
-        user=user, status__in=["submitted", "expired"]
-    ).order_by("-started_at")
+    finished_qs = exam.attempts.filter(user=user, status__in=["submitted", "expired"]).order_by("-started_at")
 
     finished_count = finished_qs.count()
 

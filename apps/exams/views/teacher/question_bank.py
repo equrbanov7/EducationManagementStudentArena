@@ -4,10 +4,8 @@ from django.contrib import messages
 from django.db.models import Max
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.exams.models import (Exam, ExamQuestion, ExamQuestionOption,
-                               QuestionBlock)
-from apps.exams.services.parsing import (extract_text_from_upload,
-                                         parse_bulk_mcq)
+from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock
+from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
 
 
@@ -79,16 +77,12 @@ def process_question_bank(request, slug):
                 db_id = request.POST.get(db_id_key)
 
                 # Validation: Bazada başqa blok eyni adda varmı? (özü xaric)
-                existing_check = QuestionBlock.objects.filter(
-                    exam=exam, name__iexact=block_name
-                )
+                existing_check = QuestionBlock.objects.filter(exam=exam, name__iexact=block_name)
                 if db_id:
                     existing_check = existing_check.exclude(id=db_id)
 
                 if existing_check.exists():
-                    messages.error(
-                        request, f"'{block_name}' adlı blok artıq bazada mövcuddur."
-                    )
+                    messages.error(request, f"'{block_name}' adlı blok artıq bazada mövcuddur.")
                     return redirect("exams:create_question_bank", slug=exam.slug)
 
                 if block_name:
@@ -99,9 +93,7 @@ def process_question_bank(request, slug):
                         if block_qs.exists():
                             block = block_qs.first()
                             block.name = block_name
-                            block.time_limit_minutes = (
-                                int(time_val) if time_val else None
-                            )
+                            block.time_limit_minutes = int(time_val) if time_val else None
                             block.order = current_order  # ✅ Düzgün order
                             block.save()
                             # Sualları yeniləyirik
@@ -170,11 +162,7 @@ def test_question_bank(request, slug):
     dp_value = str(dp_default)
 
     def build_fp_from_parsed(q):
-        return (
-            _norm(q["text"])
-            + "||"
-            + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
-        )
+        return _norm(q["text"]) + "||" + "||".join([_norm(q["options"].get(x, "")) for x in "ABCDE"])
 
     def build_fp_from_db(eq):
         # DB-də option-lar label saxlamadığı üçün sıra ilə götürürük (A..E)
@@ -183,11 +171,7 @@ def test_question_bank(request, slug):
         labels = list("ABCDE")
         for i, opt in enumerate(opts[:5]):
             opt_map[labels[i]] = opt.text
-        return (
-            _norm(eq.text)
-            + "||"
-            + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
-        )
+        return _norm(eq.text) + "||" + "||".join([_norm(opt_map.get(x, "")) for x in "ABCDE"])
 
     # GET
     if request.method != "POST":
@@ -319,17 +303,12 @@ def test_question_bank(request, slug):
 
         if new_block_name:
             max_order = blocks.aggregate(m=Max("order")).get("m") or 0
-            block_obj = QuestionBlock.objects.create(
-                exam=exam, name=new_block_name, order=max_order + 1
-            )
+            block_obj = QuestionBlock.objects.create(exam=exam, name=new_block_name, order=max_order + 1)
         elif block_id:
             block_obj = QuestionBlock.objects.filter(id=block_id, exam=exam).first()
 
         # ---- order başlanğıcı ----
-        start_order = (
-            ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m")
-            or 0
-        ) + 1
+        start_order = (ExamQuestion.objects.filter(exam=exam).aggregate(m=Max("order")).get("m") or 0) + 1
 
         created_count = 0
         skipped_count = 0
@@ -345,9 +324,7 @@ def test_question_bank(request, slug):
 
             # per-question points (opsional input: points_1, points_2, ...)
             p_raw = (request.POST.get(f"points_{idx}") or "").strip()
-            points = (
-                int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
-            )
+            points = int(p_raw) if p_raw.isdigit() and int(p_raw) > 0 else default_points
 
             eq = ExamQuestion.objects.create(
                 exam=exam,

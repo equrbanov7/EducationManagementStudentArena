@@ -38,9 +38,7 @@ class Command(BaseCommand):
         if created:
             user.set_password("admin123")
             user.save()
-            self.stdout.write(
-                self.style.SUCCESS(f"Created user: {username} (password: admin123)")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created user: {username} (password: admin123)"))
         else:
             self.stdout.write(self.style.WARNING(f"Using existing user: {username}"))
 
@@ -60,9 +58,7 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(
-                self.style.SUCCESS(f"Created organization: {university.name}")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created organization: {university.name}"))
 
             # Create some units
             faculty = OrgUnit.objects.create(
@@ -93,9 +89,7 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(self.style.SUCCESS(f"Assigned {username} as rector"))
         else:
-            self.stdout.write(
-                self.style.WARNING(f"Organization already exists: {university.name}")
-            )
+            self.stdout.write(self.style.WARNING(f"Organization already exists: {university.name}"))
 
         # Create School
         school, created = Organization.objects.get_or_create(
@@ -113,9 +107,7 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(
-                self.style.SUCCESS(f"Created organization: {school.name}")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created organization: {school.name}"))
 
             # Create some units
             section = OrgUnit.objects.create(
@@ -138,16 +130,10 @@ class Command(BaseCommand):
             # Assign user as director
             director_role = school.roles.filter(name="director").first()
             if director_role:
-                Membership.objects.create(
-                    user=user, organization=school, role=director_role
-                )
-                self.stdout.write(
-                    self.style.SUCCESS(f"Assigned {username} as director")
-                )
+                Membership.objects.create(user=user, organization=school, role=director_role)
+                self.stdout.write(self.style.SUCCESS(f"Assigned {username} as director"))
         else:
-            self.stdout.write(
-                self.style.WARNING(f"Organization already exists: {school.name}")
-            )
+            self.stdout.write(self.style.WARNING(f"Organization already exists: {school.name}"))
 
         # Create Course Center
         center, created = Organization.objects.get_or_create(
@@ -165,9 +151,7 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(
-                self.style.SUCCESS(f"Created organization: {center.name}")
-            )
+            self.stdout.write(self.style.SUCCESS(f"Created organization: {center.name}"))
 
             # Create some units
             OrgUnit.objects.create(
@@ -181,25 +165,11 @@ class Command(BaseCommand):
             # Assign user as manager
             manager_role = center.roles.filter(name="manager").first()
             if manager_role:
-                Membership.objects.create(
-                    user=user, organization=center, role=manager_role
-                )
+                Membership.objects.create(user=user, organization=center, role=manager_role)
                 self.stdout.write(self.style.SUCCESS(f"Assigned {username} as manager"))
         else:
-            self.stdout.write(
-                self.style.WARNING(f"Organization already exists: {center.name}")
-            )
+            self.stdout.write(self.style.WARNING(f"Organization already exists: {center.name}"))
 
-        self.stdout.write(
-            self.style.SUCCESS("\nSample organizations created successfully!")
-        )
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"\nYou can now log in as '{username}' and switch between organizations."
-            )
-        )
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Visit /organizations/select/ to see your organizations."
-            )
-        )
+        self.stdout.write(self.style.SUCCESS("\nSample organizations created successfully!"))
+        self.stdout.write(self.style.SUCCESS(f"\nYou can now log in as '{username}' and switch between organizations."))
+        self.stdout.write(self.style.SUCCESS("Visit /organizations/select/ to see your organizations."))

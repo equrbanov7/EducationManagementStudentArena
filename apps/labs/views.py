@@ -16,8 +16,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.courses.models import Course, CourseMembership
 
-from .models import (Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion,
-                     LabSubmission)
+from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
 # ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
@@ -87,29 +86,19 @@ def edit_lab(request, pk):
         # Mövcud qrupları al
         group_names = []
         if lab.allowed_groups:
-            group_names = [
-                g.strip() for g in lab.allowed_groups.split(",") if g.strip()
-            ]
+            group_names = [g.strip() for g in lab.allowed_groups.split(",") if g.strip()]
 
         # Mövcud tələbə ID-lərini al
         student_ids = []
         if lab.allowed_students:
-            student_ids = [
-                int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()
-            ]
+            student_ids = [int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()]
 
         data = {
             "id": lab.id,
             "title": lab.title or "",
             "description": lab.description or "",
-            "start_datetime": (
-                lab.start_datetime.strftime("%Y-%m-%dT%H:%M")
-                if lab.start_datetime
-                else ""
-            ),
-            "end_datetime": (
-                lab.end_datetime.strftime("%Y-%m-%dT%H:%M") if lab.end_datetime else ""
-            ),
+            "start_datetime": (lab.start_datetime.strftime("%Y-%m-%dT%H:%M") if lab.start_datetime else ""),
+            "end_datetime": (lab.end_datetime.strftime("%Y-%m-%dT%H:%M") if lab.end_datetime else ""),
             "max_score": lab.max_score or 100,
             "max_attempts": getattr(lab, "max_attempts", 1) or 1,
             "status": lab.status or "draft",
@@ -119,8 +108,7 @@ def edit_lab(request, pk):
             "allow_file_upload": lab.allow_file_upload,
             "allow_link_submission": lab.allow_link_submission,
             "max_file_size_mb": lab.max_file_size_mb or 50,
-            "allowed_extensions": lab.allowed_extensions
-            or "zip,pdf,docx,png,jpg,txt,py,java,cpp",
+            "allowed_extensions": lab.allowed_extensions or "zip,pdf,docx,png,jpg,txt,py,java,cpp",
             "teacher_instructions": lab.teacher_instructions or "",
             "teacher_files_url": lab.teacher_files.url if lab.teacher_files else None,
             "group_names": group_names,
@@ -144,9 +132,7 @@ def edit_lab(request, pk):
         if hasattr(lab, "max_attempts"):
             lab.max_attempts = int(request.POST.get("max_attempts", 1) or 1)
 
-        lab.questions_per_student = int(
-            request.POST.get("questions_per_student", 0) or 0
-        )
+        lab.questions_per_student = int(request.POST.get("questions_per_student", 0) or 0)
         lab.allow_late_submission = request.POST.get("allow_late_submission") == "on"
         lab.late_penalty_percent = int(request.POST.get("late_penalty_percent", 0) or 0)
         lab.allow_file_upload = request.POST.get("allow_file_upload") == "on"
@@ -389,9 +375,7 @@ def import_questions(request, block_id):
         questions_text = request.POST.get("questions_text", "")
 
         if not questions_text.strip():
-            return JsonResponse(
-                {"success": False, "error": "Boş mətn göndərildi"}, status=400
-            )
+            return JsonResponse({"success": False, "error": "Boş mətn göndərildi"}, status=400)
 
         # Regex pattern: başda rəqəm + nöqtə və ya mötərizə
         # Məs: "1. " və ya "2) " və ya "10. "
@@ -496,9 +480,7 @@ def lab_submissions(request, pk):
 
     if group_filter:
         # Qrup filter - membership üzərindən
-        student_ids = memberships.filter(group_name=group_filter).values_list(
-            "user_id", flat=True
-        )
+        student_ids = memberships.filter(group_name=group_filter).values_list("user_id", flat=True)
         submissions = submissions.filter(assignment__student_id__in=student_ids)
 
     # Statistika
@@ -582,9 +564,7 @@ def grade_submission_page(request, pk):
     except Exception:
         # Field yoxdursa, bütün cavabları göstər
         answers = (
-            LabAnswer.objects.filter(
-                lab=lab, student=submission.assignment.student, is_draft=False
-            )
+            LabAnswer.objects.filter(lab=lab, student=submission.assignment.student, is_draft=False)
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
@@ -609,9 +589,7 @@ def preview_randomization(request, pk):
 
     # Kurs tələbələrini al
 
-    memberships = CourseMembership.objects.filter(
-        course=lab.course, role="student"
-    ).select_related("user")
+    memberships = CourseMembership.objects.filter(course=lab.course, role="student").select_related("user")
 
     # Seçilmiş tələbə
     selected_student_id = request.GET.get("student")
@@ -627,9 +605,7 @@ def preview_randomization(request, pk):
 
             # Bu tələbə üçün assignment yarat/al
             assignment = LabAssignment.get_or_create_for_student(lab, selected_student)
-            questions = assignment.assigned_questions.all().order_by(
-                "block__order", "question_number"
-            )
+            questions = assignment.assigned_questions.all().order_by("block__order", "question_number")
         except Exception:
             pass
 
@@ -669,9 +645,7 @@ def lab_detail(request, pk):
                 .order_by("block__order", "question_number")
             )
 
-            print(
-                f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir"
-            )
+            print(f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir")
 
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
@@ -689,15 +663,13 @@ def lab_detail(request, pk):
             if questions.count() == 0:
                 print("[WARNING] Sual tapılmadı, yenidən assign edilir...")
                 assignment.assign_questions()
-                questions = assignment.assigned_questions.select_related(
-                    "block"
-                ).order_by("block__order", "question_number")
+                questions = assignment.assigned_questions.select_related("block").order_by(
+                    "block__order", "question_number"
+                )
                 print(f"[STUDENT] Yenidən assign: {questions.count()} sual")
 
             # Submission yoxlaması
-            submissions = LabSubmission.objects.filter(assignment=assignment).order_by(
-                "-submitted_at"
-            )
+            submissions = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
 
             attempt_count = submissions.count()
             has_submitted = attempt_count > 0
@@ -735,9 +707,7 @@ def auto_save_answer(request, pk):
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
-        is_open = (
-            lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-        )
+        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
     else:
         is_open = lab.status == "published"
 
@@ -749,9 +719,7 @@ def auto_save_answer(request, pk):
         assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
         current_attempt = 1
         if assignment:
-            submitted_count = LabSubmission.objects.filter(
-                assignment=assignment
-            ).count()
+            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
             current_attempt = submitted_count + 1
 
         if request.content_type == "application/json":
@@ -800,9 +768,7 @@ def submit_lab(request, pk):
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
-        is_open = (
-            lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-        )
+        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
     else:
         is_open = lab.status == "published"
 
@@ -838,9 +804,7 @@ def submit_lab(request, pk):
         return JsonResponse(
             {
                 "success": True,
-                "redirect_url": reverse(
-                    "courses:course_dashboard", args=[lab.course.id]
-                ),
+                "redirect_url": reverse("courses:course_dashboard", args=[lab.course.id]),
             }
         )
 
@@ -869,9 +833,7 @@ def api_get_groups(request, course_id):
         .distinct()
     )
 
-    return JsonResponse(
-        {"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]}
-    )
+    return JsonResponse({"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]})
 
 
 @login_required
@@ -882,9 +844,7 @@ def api_get_students(request, course_id):
     groups = request.GET.get("groups", "").split(",")
     groups = [g.strip() for g in groups if g.strip()]
 
-    memberships = CourseMembership.objects.filter(
-        course=course, role="student"
-    ).select_related("user")
+    memberships = CourseMembership.objects.filter(course=course, role="student").select_related("user")
 
     if groups:
         memberships = memberships.filter(group_name__in=groups)
@@ -928,9 +888,7 @@ def submission_answers(request, pk):
                 "question": ans.question.question_text,
                 "answer": ans.answer or "",
                 "file_url": ans.answer_file.url if ans.answer_file else None,
-                "file_name": (
-                    os.path.basename(ans.answer_file.name) if ans.answer_file else None
-                ),
+                "file_name": (os.path.basename(ans.answer_file.name) if ans.answer_file else None),
                 "score": float(ans.score) if ans.score else None,
             }
         )
@@ -948,9 +906,7 @@ def my_lab_answers(request, pk):
         messages.error(request, "Təyinat tapılmadı")
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
-    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by(
-        "attempt_number"
-    )
+    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by("attempt_number")
 
     if not all_submissions.exists():
         messages.error(request, "Göndəriş tapılmadı")
@@ -973,9 +929,7 @@ def my_lab_answers(request, pk):
     # Müddət
     duration = None
     if submission and submission.submitted_at:
-        start_time = (
-            assignment.assigned_at if assignment.assigned_at else lab.start_datetime
-        )
+        start_time = assignment.assigned_at if assignment.assigned_at else lab.start_datetime
         if start_time:
             delta = submission.submitted_at - start_time
             total_seconds = int(delta.total_seconds())

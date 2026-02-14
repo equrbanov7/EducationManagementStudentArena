@@ -15,9 +15,7 @@ class UserProfile(models.Model):
     Links user to an organization for multi-tenant support.
     """
 
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
-    )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
 
     # Organization linkage for multi-tenant support
     organization = models.ForeignKey(
@@ -46,13 +44,9 @@ class UserProfile(models.Model):
         help_text="Profil şəkli",
     )
 
-    phone = models.CharField(
-        max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi"
-    )
+    phone = models.CharField(max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi")
 
-    bio = models.TextField(
-        blank=True, verbose_name="Haqqında", help_text="Qısa məlumat"
-    )
+    bio = models.TextField(blank=True, verbose_name="Haqqında", help_text="Qısa məlumat")
 
     supervisor_code = models.CharField(
         max_length=50,
@@ -61,13 +55,9 @@ class UserProfile(models.Model):
         help_text="Admin/supervisor tərəfindən təyin edilir. User dəyişə bilməz.",
     )
 
-    location = models.CharField(
-        max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan"
-    )
+    location = models.CharField(max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan")
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")
 
     class Meta:
@@ -80,11 +70,10 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.get_organization_type_display()}"
-    
+
     @property
     def organization_name(self):
         """Get organization name or 'Fərdi' for individual users."""
         if self.organization:
             return self.organization.name
         return "Fərdi"
-

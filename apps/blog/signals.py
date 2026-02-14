@@ -16,17 +16,13 @@ def send_new_post_notification(sender, instance, created, **kwargs):
     if created and instance.is_published:
 
         # 1. Bütün aktiv abunəçiləri çək
-        active_subscribers = Subscriber.objects.filter(is_active=True).values_list(
-            "email", flat=True
-        )
+        active_subscribers = Subscriber.objects.filter(is_active=True).values_list("email", flat=True)
 
         if not active_subscribers:
             return  # Abunəçi yoxdursa dayandır
 
         # 2. Şablonu hazırla
-        html_message = render_to_string(
-            "email_templates/new_post_notification.html", {"post": instance}
-        )
+        html_message = render_to_string("email_templates/new_post_notification.html", {"post": instance})
 
         # 3. Toplu mail göndər
         send_mail(

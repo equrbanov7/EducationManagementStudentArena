@@ -92,9 +92,7 @@ class Assignment(models.Model):
         blank=True,
     )
 
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="draft", verbose_name="Status"
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft", verbose_name="Status")
 
     # Tələbələr və ya qruplar
     assigned_students = models.ManyToManyField(
@@ -222,9 +220,7 @@ class Submission(models.Model):
         verbose_name="Qiymətləndirən",
     )
 
-    graded_at = models.DateTimeField(
-        null=True, blank=True, verbose_name="Qiymətləndirmə Tarixi"
-    )
+    graded_at = models.DateTimeField(null=True, blank=True, verbose_name="Qiymətləndirmə Tarixi")
 
     class Meta:
         ordering = ["-submitted_at"]
@@ -283,9 +279,7 @@ class Notification(models.Model):
 
     is_read = models.BooleanField(default=False, verbose_name="Oxunub?")
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     link = models.URLField(blank=True, null=True, verbose_name="Link")
 

@@ -17,8 +17,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import (CreateView, DetailView, ListView, UpdateView,
-                                  View)
+from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
@@ -74,9 +73,7 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         form.instance.owner = self.request.user
         form.instance.status = "draft"
         response = super().form_valid(form)
-        messages.success(
-            self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!'
-        )
+        messages.success(self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!')
         return response
 
     def get_success_url(self):
@@ -136,9 +133,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # 3. ÜZVLƏR (Yalnız owner və assistant görür)
         # ═══════════════════════════════════════════════════════════════════
         if context["can_view_members"]:
-            context["members"] = course.memberships.select_related("user").order_by(
-                "group_name", "joined_at"
-            )
+            context["members"] = course.memberships.select_related("user").order_by("group_name", "joined_at")
         else:
             context["members"] = []
 
@@ -165,15 +160,9 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             assignments_with_user_data = []
             for a in assignments_qs:
                 user_attempts = a.submissions.filter(student=user).count()
-                is_deadline_passed = (
-                    a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
-                )
+                is_deadline_passed = a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
                 is_active = a.status == "active"
-                can_submit = (
-                    user_attempts < a.max_attempts
-                    and not is_deadline_passed
-                    and is_active
-                )
+                can_submit = user_attempts < a.max_attempts and not is_deadline_passed and is_active
                 attempts_left = a.max_attempts - user_attempts
 
                 assignments_with_user_data.append(
@@ -218,11 +207,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     user_attempts = p.submissions.filter(student=user).count()
                     is_deadline_passed = p.is_deadline_passed
                     is_active = p.status == "active"
-                    can_submit = (
-                        user_attempts < p.max_attempts
-                        and not is_deadline_passed
-                        and is_active
-                    )
+                    can_submit = user_attempts < p.max_attempts and not is_deadline_passed and is_active
                     attempts_left = p.max_attempts - user_attempts
 
                     projects_with_user_data.append(
@@ -250,15 +235,11 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
         if context["is_owner"] or context["is_teacher"]:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = Exam.objects.filter(course=course).order_by(
-                "-created_at"
-            )
+            context["course_exams"] = Exam.objects.filter(course=course).order_by("-created_at")
 
             # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
             context["teacher_exams"] = (
-                Exam.objects.filter(author=user)
-                .exclude(course=course)
-                .order_by("-created_at")[:10]
+                Exam.objects.filter(author=user).exclude(course=course).order_by("-created_at")[:10]
             )
 
         elif context["is_student"]:
@@ -270,9 +251,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 if exam.can_user_see(user):
                     # Bu tələbənin attempt-ları
                     attempts = (
-                        ExamAttempt.objects.filter(exam=exam, user=user)
-                        .exclude(status="draft")
-                        .order_by("-started_at")
+                        ExamAttempt.objects.filter(exam=exam, user=user).exclude(status="draft").order_by("-started_at")
                     )
 
                     last_attempt = attempts.first()
@@ -353,9 +332,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 # 2. Əgər student ID siyahısında varsa → görür
                 # 3. Əgər qrup siyahısında varsa → görür
 
-                has_any_filter = (
-                    len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
-                )
+                has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
 
                 if not has_any_filter:
                     # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
@@ -370,11 +347,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         print("DEBUG:   Assigned by student ID")  # DEBUG
 
                     # Qrup adı ilə yoxla
-                    if (
-                        not is_assigned
-                        and student_group
-                        and student_group in allowed_group_names
-                    ):
+                    if not is_assigned and student_group and student_group in allowed_group_names:
                         is_assigned = True
                         print("DEBUG:   Assigned by group name")  # DEBUG
 
@@ -393,14 +366,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 latest_submission = None
 
                 if assignment:
-                    submissions_qs = LabSubmission.objects.filter(
-                        assignment=assignment
-                    ).order_by("-submitted_at")
+                    submissions_qs = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
                     attempt_count = submissions_qs.count()
                     has_submitted = attempt_count > 0
-                    latest_submission = (
-                        submissions_qs.first() if has_submitted else None
-                    )
+                    latest_submission = submissions_qs.first() if has_submitted else None
 
                 max_attempts = lab.max_attempts or 1
                 can_submit = (attempt_count < max_attempts) and lab.is_open
@@ -495,12 +464,7 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.course = self.course
-        max_order = (
-            CourseTopic.objects.filter(course=self.course).aggregate(Max("order"))[
-                "order__max"
-            ]
-            or 0
-        )
+        max_order = CourseTopic.objects.filter(course=self.course).aggregate(Max("order"))["order__max"] or 0
         form.instance.order = max_order + 1
 
         response = super().form_valid(form)
@@ -706,9 +670,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         members = course.memberships.all().order_by("joined_at")
         teacher = members.filter(role="teacher").first()
         assistants = members.filter(role="assistant")
-        students = members.filter(role="student").order_by(
-            "group_name", "user__username"
-        )
+        students = members.filter(role="student").order_by("group_name", "user__username")
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
 
@@ -720,9 +682,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
                 .order_by("username")
             )
         else:
-            all_users = User.objects.exclude(id__in=course_user_ids).order_by(
-                "username"
-            )
+            all_users = User.objects.exclude(id__in=course_user_ids).order_by("username")
 
         try:
 
@@ -758,12 +718,7 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
 
-        qs = (
-            User.objects.exclude(id__in=course_user_ids)
-            .filter(groups__name="student")
-            .distinct()
-            .order_by("username")
-        )
+        qs = User.objects.exclude(id__in=course_user_ids).filter(groups__name="student").distinct().order_by("username")
 
         data = [
             {
@@ -791,9 +746,7 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return course.owner == self.request.user
 
     def handle_no_permission(self):
-        return JsonResponse(
-            {"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403
-        )
+        return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -803,9 +756,7 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         group_name = request.POST.get("group_name", "").strip()
 
         if not user_ids:
-            return JsonResponse(
-                {"success": False, "error": "Heç bir tələbə seçilməyib."}, status=400
-            )
+            return JsonResponse({"success": False, "error": "Heç bir tələbə seçilməyib."}, status=400)
 
         added_count = 0
 
@@ -824,9 +775,7 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
             except User.DoesNotExist:
                 continue
 
-        return JsonResponse(
-            {"success": True, "message": f"{added_count} tələbə kursa əlavə olundu."}
-        )
+        return JsonResponse({"success": True, "message": f"{added_count} tələbə kursa əlavə olundu."})
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -852,9 +801,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
         group_ids = request.POST.getlist("group_ids")
 
         if not group_ids:
-            return JsonResponse(
-                {"success": False, "error": "Qrup seçilməyib."}, status=400
-            )
+            return JsonResponse({"success": False, "error": "Qrup seçilməyib."}, status=400)
 
         try:
 
@@ -909,9 +856,7 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return course.owner == self.request.user
 
     def handle_no_permission(self):
-        return JsonResponse(
-            {"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403
-        )
+        return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -953,9 +898,7 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         course = get_object_or_404(Course, id=course_id)
 
-        deleted_count, _ = CourseMembership.objects.filter(
-            course=course, group_name=group_name
-        ).delete()
+        deleted_count, _ = CourseMembership.objects.filter(course=course, group_name=group_name).delete()
 
         messages.success(
             request,
@@ -1005,9 +948,7 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
         course_title = course.title
         course.delete()
 
-        messages.success(
-            request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.'
-        )
+        messages.success(request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.')
         return redirect("user_profile", username=request.user.username)
 
 
@@ -1048,9 +989,7 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
 
         # Tələbənin üzv olduğu kurslar
         return (
-            Course.objects.filter(
-                memberships__user=user, memberships__role="student", status="published"
-            )
+            Course.objects.filter(memberships__user=user, memberships__role="student", status="published")
             .distinct()
             .select_related("owner")
             .order_by("-created_at")
@@ -1062,9 +1001,7 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         # Hər kurs üçün əlavə məlumat
         courses_with_info = []
         for course in context["courses"]:
-            membership = CourseMembership.objects.filter(
-                course=course, user=self.request.user
-            ).first()
+            membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
 
             courses_with_info.append(
                 {

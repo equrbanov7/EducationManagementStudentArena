@@ -69,9 +69,7 @@ class Course(models.Model):
 
     description = models.TextField(blank=True, verbose_name="Kurs Təsviri")
 
-    slug = models.SlugField(
-        max_length=255, unique=True, blank=True, verbose_name="URL Slug"
-    )
+    slug = models.SlugField(max_length=255, unique=True, blank=True, verbose_name="URL Slug")
 
     status = models.CharField(
         max_length=20,
@@ -88,9 +86,7 @@ class Course(models.Model):
         verbose_name="Kurs Şəkli",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə Tarixi")
 
@@ -252,9 +248,7 @@ class CourseMembership(models.Model):
         verbose_name="İstifadəçi",
     )
 
-    role = models.CharField(
-        max_length=20, choices=ROLE_CHOICES, default="student", verbose_name="Rol"
-    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="student", verbose_name="Rol")
 
     group_name = models.CharField(
         max_length=100,
@@ -324,9 +318,7 @@ class CourseTopic(models.Model):
         help_text="1, 2, 3, ... (hansı mövzu əvvəl göstərilsin)",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     class Meta:
         verbose_name = "Kurs Mövzusu"
@@ -377,9 +369,7 @@ class CourseResource(models.Model):
         ("video", "Video"),
     )
 
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="resources", verbose_name="Kurs"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="resources", verbose_name="Kurs")
 
     topic = models.ForeignKey(
         CourseTopic,
@@ -410,13 +400,9 @@ class CourseResource(models.Model):
         help_text="Fayl yükləyin (PDF, ZIP, IMG, və s.)",
     )
 
-    url = models.URLField(
-        blank=True, verbose_name="URL Linki", help_text="Məs: https://docs.python.org"
-    )
+    url = models.URLField(blank=True, verbose_name="URL Linki", help_text="Məs: https://docs.python.org")
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     class Meta:
         verbose_name = "Kurs Resursu"
@@ -493,9 +479,7 @@ class CourseInstructor(models.Model):
         help_text="JSON: {'can_grade': true, 'can_edit': false, ...}",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Əlavə Edilmə Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Əlavə Edilmə Tarixi")
 
     class Meta:
         verbose_name = "Kurs Müəllimi"
@@ -574,9 +558,7 @@ class CourseGroup(models.Model):
         verbose_name="Qrup Üzvləri",
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name="Yaradılma Tarixi"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma Tarixi")
 
     class Meta:
         verbose_name = "Kurs Qrupu"

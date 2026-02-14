@@ -11,8 +11,7 @@ Nə üçün:
 
 from django.contrib import admin
 
-from .models import (Course, CourseGroup, CourseInstructor, CourseMembership,
-                     CourseResource, CourseTopic)
+from .models import Course, CourseGroup, CourseInstructor, CourseMembership, CourseResource, CourseTopic
 
 # ════════════════════════════════════════════════════════════════════════════
 # COURSE ADMIN

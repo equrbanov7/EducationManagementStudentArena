@@ -18,9 +18,7 @@ class Project(models.Model):
         ("archived", "Arxivləndi"),
     ]
 
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="projects", verbose_name="Kurs"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="projects", verbose_name="Kurs")
     title = models.CharField(max_length=255, verbose_name="Kurs İşi Adı")
     description = models.TextField(blank=True, verbose_name="Təsvir")
     start_date = models.DateTimeField(verbose_name="Başlanğıc tarixi")
@@ -72,12 +70,8 @@ class ProjectSubmission(models.Model):
         ("rejected", "Rədd edilib"),
     ]
 
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="submissions"
-    )
-    student = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="project_submissions"
-    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="submissions")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_submissions")
     content = models.TextField(verbose_name="Cavab / İzahat")
     file = models.FileField(upload_to="projects/submissions/", blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")

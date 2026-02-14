@@ -7,10 +7,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 
-from core.constants import (AcademicPeriodType, OrganizationType, OrgUnitType,
-                            RoleScopeType)
-from core.models import (ActiveManager, OrderedModel, TimeStampedModel,
-                         UUIDModel)
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
+from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 
 class Organization(UUIDModel, TimeStampedModel):
@@ -62,9 +60,7 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
     Supports hierarchical structure with materialized path.
     """
 
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="units"
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="units")
     parent = models.ForeignKey(
         "self",
         null=True,
@@ -154,9 +150,7 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
     Represents an academic period (semester, trimester, quarter, year).
     """
 
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="academic_periods"
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="academic_periods")
     name = models.CharField(max_length=100)
     period_type = models.CharField(max_length=20, choices=AcademicPeriodType.CHOICES)
     academic_year = models.CharField(max_length=20)
@@ -184,9 +178,9 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
     def save(self, *args, **kwargs):
         # Auto-deactivate previous current period
         if self.is_current:
-            AcademicPeriod.objects.filter(
-                organization=self.organization, is_current=True
-            ).exclude(pk=self.pk).update(is_current=False)
+            AcademicPeriod.objects.filter(organization=self.organization, is_current=True).exclude(pk=self.pk).update(
+                is_current=False
+            )
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -204,13 +198,8 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
             ).exclude(pk=self.pk)
 
             for period in overlapping:
-                if (
-                    self.start_date <= period.end_date
-                    and self.end_date >= period.start_date
-                ):
-                    raise ValidationError(
-                        f"This period overlaps with existing period: {period.name}"
-                    )
+                if self.start_date <= period.end_date and self.end_date >= period.start_date:
+                    raise ValidationError(f"This period overlaps with existing period: {period.name}")
 
 
 class Role(UUIDModel, TimeStampedModel):
@@ -218,9 +207,7 @@ class Role(UUIDModel, TimeStampedModel):
     Represents a role within an organization with associated permissions.
     """
 
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="roles"
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="roles")
     name = models.CharField(max_length=100)
     display_name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -257,9 +244,7 @@ class Membership(UUIDModel, TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="memberships",
     )
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="memberships"
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="memberships")
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="memberships")
     scope_unit = models.ForeignKey(
         OrgUnit,
@@ -300,9 +285,9 @@ class Membership(UUIDModel, TimeStampedModel):
     def save(self, *args, **kwargs):
         # Ensure only one primary membership per user per organization
         if self.is_primary:
-            Membership.objects.filter(
-                user=self.user, organization=self.organization, is_primary=True
-            ).exclude(pk=self.pk).update(is_primary=False)
+            Membership.objects.filter(user=self.user, organization=self.organization, is_primary=True).exclude(
+                pk=self.pk
+            ).update(is_primary=False)
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -310,9 +295,7 @@ class Membership(UUIDModel, TimeStampedModel):
         from django.core.exceptions import ValidationError
 
         if self.scope_unit and self.scope_unit.organization != self.organization:
-            raise ValidationError(
-                "Scope unit must belong to the same organization as the membership."
-            )
+            raise ValidationError("Scope unit must belong to the same organization as the membership.")
 
     def can_manage(self, target_membership):
         """Check if this membership can manage another membership."""

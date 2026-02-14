@@ -2,9 +2,10 @@
 Pytest configuration and fixtures for EMS Arena project.
 """
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+
+import pytest
 
 User = get_user_model()
 
@@ -15,12 +16,8 @@ def create_user():
     Fixture to create a user.
     """
 
-    def _create_user(
-        username="testuser", email="test@example.com", password="testpass123", **kwargs
-    ):
-        return User.objects.create_user(
-            username=username, email=email, password=password, **kwargs
-        )
+    def _create_user(username="testuser", email="test@example.com", password="testpass123", **kwargs):
+        return User.objects.create_user(username=username, email=email, password=password, **kwargs)
 
     return _create_user
 
