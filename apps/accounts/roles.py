@@ -86,22 +86,34 @@ def _can_assign_role(self, target_role_name: str) -> bool:
 
 
 def _is_teacher_or_above(self):
-    """Check if user has teacher role or any higher role (level >= 60)."""
+    """Check if user has teacher role or any higher role (level >= 60).
+    Django superusers always pass this check."""
+    if self.is_superuser:
+        return True
     return self._highest_role_level() >= ROLE_LEVEL_TEACHER
 
 
 def _is_moderator_or_above(self):
-    """Check if user has moderator role or any higher role (level >= 40)."""
+    """Check if user has moderator role or any higher role (level >= 40).
+    Django superusers always pass this check."""
+    if self.is_superuser:
+        return True
     return self._highest_role_level() >= ROLE_LEVEL_MODERATOR
 
 
 def _is_admin_level(self):
-    """Check if user has admin-level role (level >= 80, department_head and above)."""
+    """Check if user has admin-level role (level >= 80, department_head and above).
+    Django superusers always pass this check."""
+    if self.is_superuser:
+        return True
     return self._highest_role_level() >= ROLE_LEVEL_ADMIN
 
 
 def _is_top_admin(self):
-    """Check if user has top admin role (level >= 95, rector/director/vice_rector/vice_director)."""
+    """Check if user has top admin role (level >= 95, rector/director/vice_rector/vice_director).
+    Django superusers always pass this check."""
+    if self.is_superuser:
+        return True
     return self._highest_role_level() >= ROLE_LEVEL_TOP_ADMIN
 
 

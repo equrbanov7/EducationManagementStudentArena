@@ -13,8 +13,9 @@ class UserProfileAdmin(admin.ModelAdmin):
     Admin interface for UserProfile model.
     """
 
-    list_display = ["user", "organization_type", "phone", "location", "created_at"]
-    list_filter = ["organization_type", "created_at"]
+    list_display = ["user", "role", "organization", "organization_type", "phone", "location", "created_at"]
+    list_filter = ["role", "organization_type", "organization", "created_at"]
+    list_editable = ["role"]
     search_fields = [
         "user__username",
         "user__email",
@@ -28,7 +29,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         (
             "User Information",
             {
-                "fields": ("user", "organization_type", "avatar"),
+                "fields": ("user", "role", "organization", "organization_type", "country", "avatar"),
             },
         ),
         (

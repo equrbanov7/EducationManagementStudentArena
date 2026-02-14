@@ -44,9 +44,9 @@ def teacher_dashboard(request):
     ).select_related("assignment", "user")[:10]
 
     # Get upcoming exams
-    upcoming_exams = Exam.objects.filter(owner=request.user, is_active=True, start_date__gte=timezone.now()).order_by(
-        "start_date"
-    )[:5]
+    upcoming_exams = Exam.objects.filter(
+        author=request.user, is_active=True, start_datetime__gte=timezone.now()
+    ).order_by("start_datetime")[:5]
 
     # Calculate stats
     total_courses = Course.objects.filter(owner=request.user).count()
@@ -164,6 +164,10 @@ def user_profile(request):
     # Get user's roles
     user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
 
+    # Check role levels early (needed for context below)
+    is_teacher = getattr(request.user, "is_teacher_or_above", False)
+    is_admin = getattr(request.user, "is_admin_level", False)
+
     # Get user's posts for the posts section
     user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
     posts_count = Post.objects.filter(author=request.user).count()
@@ -173,6 +177,17 @@ def user_profile(request):
 
     my_courses = Course.objects.filter(Q(owner=request.user) | Q(memberships__user=request.user)).distinct()[:10]
     courses_count = my_courses.count()
+
+    # Teacher/admin: exams created by this user
+    my_exams_count = 0
+    my_exams = []
+    my_created_courses_count = 0
+    my_created_courses = []
+    if is_teacher:
+        my_exams = Exam.objects.filter(author=request.user).order_by("-created_at")[:10]
+        my_exams_count = Exam.objects.filter(author=request.user).count()
+        my_created_courses = Course.objects.filter(owner=request.user).order_by("-created_at")[:10]
+        my_created_courses_count = Course.objects.filter(owner=request.user).count()
 
     # Assigned exams count
     assigned_exams_count = (
@@ -194,7 +209,6 @@ def user_profile(request):
 
     # Pending review count (for teachers)
     pending_review_count = 0
-    is_teacher = getattr(request.user, "is_teacher_or_above", False)
     if is_teacher:
         pending_review_count = (
             ExamAttempt.objects.filter(
@@ -210,9 +224,6 @@ def user_profile(request):
             assignment__course__owner=request.user, status="submitted"
         ).count()
 
-    # Check if user has management permissions
-    is_admin = getattr(request.user, "is_admin_level", False)
-
     context = {
         "profile": profile,
         "user_roles": user_roles,
@@ -221,6 +232,10 @@ def user_profile(request):
         "posts_count": posts_count,
         "my_courses": my_courses,
         "courses_count": courses_count,
+        "my_exams": my_exams,
+        "my_exams_count": my_exams_count,
+        "my_created_courses": my_created_courses,
+        "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
         "assigned_courses_count": assigned_courses_count,
         "pending_review_count": pending_review_count,
