@@ -330,7 +330,7 @@ def assigned_exams(request):
             is_active=True,
         )
         .distinct()
-        .order_by("-start_date")
+        .order_by("-start_datetime")
     )
 
     search = request.GET.get("search", "")
