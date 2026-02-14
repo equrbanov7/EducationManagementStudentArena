@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class RegisterForm(forms.ModelForm):
-    """User registration form with email verification."""
+    """User registration form with multi-step wizard support."""
 
     password = forms.CharField(
         label="Şifrə",
@@ -31,6 +31,17 @@ class RegisterForm(forms.ModelForm):
         ),
     )
 
+    country = forms.CharField(
+        label="Ölkə",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Ölkənizi daxil edin...",
+                "class": "form-control",
+            }
+        ),
+    )
+
     organization_type = forms.ChoiceField(
         label="Təşkilat Tipi",
         choices=[
@@ -41,6 +52,23 @@ class RegisterForm(forms.ModelForm):
         ],
         widget=forms.Select(attrs={"class": "form-control"}),
         initial="individual",
+    )
+
+    organization_id = forms.CharField(
+        label="Təşkilat",
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
+    organization_name_other = forms.CharField(
+        label="Təşkilat adı (Digər)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Təşkilat adını daxil edin...",
+                "class": "form-control",
+            }
+        ),
     )
 
     class Meta:

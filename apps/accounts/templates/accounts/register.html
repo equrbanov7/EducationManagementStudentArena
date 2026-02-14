@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Qeydiyyat | MyBlog{% endblock %}
+{% block title %}Qeydiyyat | EMSArena{% endblock %}
  
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
@@ -11,7 +11,23 @@
 <div class="register-page-wrapper">
     <div class="register-card">
         <h1 class="register-heading">Hesab Yarat</h1>
-        <p class="register-subheading">Yeni hesab yaradın və öz bloqunuzu paylaşmağa başlayın.</p>
+        <p class="register-subheading">Yeni hesab yaradın və təhsil platformasına qoşulun.</p>
+
+        <!-- Wizard Steps Indicator -->
+        <div class="register-wizard-steps">
+            <div class="wizard-step active" data-step="1">
+                <span class="wizard-step-number">1</span>
+                <span class="wizard-step-label">Ölkə</span>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <span class="wizard-step-number">2</span>
+                <span class="wizard-step-label">Hesab tipi</span>
+            </div>
+            <div class="wizard-step" data-step="3">
+                <span class="wizard-step-number">3</span>
+                <span class="wizard-step-label">Məlumatlar</span>
+            </div>
+        </div>
 
         {% if form.non_field_errors %}
             <div class="register-global-errors">
@@ -21,69 +37,128 @@
             </div>
         {% endif %}
 
-        <form method="post" class="register-form" novalidate>
+        <form method="post" class="register-form" id="registerForm" novalidate>
             {% csrf_token %}
 
-            <div class="register-form-field">
-                {{ form.username.label_tag }}
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="register-field-error">{{ form.username.errors.0 }}</div>
-                {% endif %}
+            <!-- Step 1: Country Selection -->
+            <div class="wizard-panel" id="step1">
+                <h3 class="register-step-title">Ölkənizi seçin</h3>
+                <div class="register-form-field">
+                    {{ form.country.label_tag }}
+                    {{ form.country }}
+                    {% if form.country.errors %}
+                        <div class="register-field-error">{{ form.country.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="wizard-nav">
+                    <button type="button" class="register-submit-btn" onclick="wizardNext(2)">
+                        Davam et <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="register-form-field">
-                {{ form.email.label_tag }}
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="register-field-error">{{ form.email.errors.0 }}</div>
-                {% endif %}
+            <!-- Step 2: Account Type + Organization -->
+            <div class="wizard-panel" id="step2" hidden>
+                <h3 class="register-step-title">Hesab tipini seçin</h3>
+                <div class="register-form-field">
+                    {{ form.organization_type.label_tag }}
+                    {{ form.organization_type }}
+                    {% if form.organization_type.errors %}
+                        <div class="register-field-error">{{ form.organization_type.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Organization selection (hidden for Individual) -->
+                <div class="register-form-field" id="orgSelectField" hidden>
+                    <label>Təşkilat seçin</label>
+                    <select class="form-control" id="orgSelect">
+                        <option value="">-- Təşkilat seçin --</option>
+                        <option value="other">Digər (yeni təşkilat)</option>
+                    </select>
+                </div>
+
+                {{ form.organization_id }}
+
+                <div class="register-form-field" id="orgOtherField" hidden>
+                    {{ form.organization_name_other.label_tag }}
+                    {{ form.organization_name_other }}
+                    {% if form.organization_name_other.errors %}
+                        <div class="register-field-error">{{ form.organization_name_other.errors.0 }}</div>
+                    {% endif %}
+                    <small class="register-help-text">
+                        Təşkilatınız siyahıda yoxdursa, adını yazın. Yoxlama tələb olunacaq.
+                    </small>
+                </div>
+
+                <div class="wizard-nav">
+                    <button type="button" class="register-back-btn" onclick="wizardBack(1)">
+                        <i class="fas fa-arrow-left"></i> Geri
+                    </button>
+                    <button type="button" class="register-submit-btn" onclick="wizardNext(3)">
+                        Davam et <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="register-form-field">
-                {{ form.first_name.label_tag }}
-                {{ form.first_name }}
-                {% if form.first_name.errors %}
-                    <div class="register-field-error">{{ form.first_name.errors.0 }}</div>
-                {% endif %}
-            </div>
+            <!-- Step 3: User Details -->
+            <div class="wizard-panel" id="step3" hidden>
+                <h3 class="register-step-title">Şəxsi məlumatlar</h3>
 
-            <div class="register-form-field">
-                {{ form.last_name.label_tag }}
-                {{ form.last_name }}
-                {% if form.last_name.errors %}
-                    <div class="register-field-error">{{ form.last_name.errors.0 }}</div>
-                {% endif %}
-            </div>
+                <div class="register-form-field">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="register-field-error">{{ form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-            <div class="register-form-field">
-                {{ form.organization_type.label_tag }}
-                {{ form.organization_type }}
-                {% if form.organization_type.errors %}
-                    <div class="register-field-error">{{ form.organization_type.errors.0 }}</div>
-                {% endif %}
-                <small style="display: block; margin-top: 0.25rem; font-size: 0.875rem; color: #6b7280;">
-                    Hansı təşkilat tipində qeydiyyatdan keçirsiniz?
-                </small>
-            </div>
+                <div class="register-form-field">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="register-field-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-            <div class="register-form-field">
-                {{ form.password.label_tag }}
-                {{ form.password }}
-                {% if form.password.errors %}
-                    <div class="register-field-error">{{ form.password.errors.0 }}</div>
-                {% endif %}
-            </div>
+                <div class="register-form-field">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="register-field-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-            <div class="register-form-field">
-                {{ form.password2.label_tag }}
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                    <div class="register-field-error">{{ form.password2.errors.0 }}</div>
-                {% endif %}
-            </div>
+                <div class="register-form-field">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="register-field-error">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-            <button type="submit" class="register-submit-btn">Qeydiyyatdan keç</button>
+                <div class="register-form-field">
+                    {{ form.password.label_tag }}
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="register-field-error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="register-field-error">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="wizard-nav">
+                    <button type="button" class="register-back-btn" onclick="wizardBack(2)">
+                        <i class="fas fa-arrow-left"></i> Geri
+                    </button>
+                    <button type="submit" class="register-submit-btn">Qeydiyyatdan keç</button>
+                </div>
+            </div>
         </form>
 
         <p class="register-footer-text">
@@ -91,4 +166,12 @@
         </p>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/register_wizard.js' %}"></script>
+<script>
+    // Pass organization data from server to JS
+    window.ORGANIZATIONS_DATA = {{ organizations|safe }};
+</script>
 {% endblock %}
