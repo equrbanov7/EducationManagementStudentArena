@@ -67,7 +67,7 @@
                         <td>
                             <div class="user-info">
                                 <div class="user-avatar">
-                                    {{ p.user.get_full_name|default:p.user.username|truncatechars:2|upper }}
+                                    {{ p.user.first_name|first|default:p.user.username|first|upper }}{{ p.user.last_name|first|upper }}
                                 </div>
                                 <div>
                                     <div class="user-name">{{ p.user.get_full_name|default:p.user.username }}</div>

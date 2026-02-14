@@ -169,7 +169,7 @@
                 <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-large">
                 {% else %}
                 <div class="avatar-placeholder">
-                    {{ user.get_full_name|default:user.username|truncatechars:2|upper }}
+                    {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
                 </div>
                 {% endif %}
                 <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
