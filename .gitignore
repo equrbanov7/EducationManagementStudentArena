@@ -122,3 +122,4 @@ yarn.lock
 secrets/
 credentials/.env
 logs/*.log
+db.sqlite3

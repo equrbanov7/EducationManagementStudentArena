@@ -54,19 +54,35 @@ class ProfileViewTest(TestCase):
         self.assertIn("is_teacher", response.context)
         self.assertIn("is_admin", response.context)
 
-    def test_profile_settings_section(self):
-        """Test that settings section renders readonly account info."""
-        self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile") + "?section=settings")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Hesab Parametrləri")
-
     def test_profile_edit_section(self):
         """Test that edit-profile section renders form with save button."""
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
+
+    def test_superuser_is_teacher_and_admin(self):
+        """Test that superusers always pass role checks."""
+        superuser = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="adminpass123",
+        )
+        self.assertTrue(superuser.is_teacher_or_above)
+        self.assertTrue(superuser.is_admin_level)
+
+    def test_profile_my_exams_context_for_teacher(self):
+        """Test that teacher profile includes my_exams context."""
+        from apps.accounts.models import ProfileRole, UserProfile
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = ProfileRole.TEACHER
+        profile.save()
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertIn("my_exams_count", response.context)
+        self.assertIn("my_created_courses_count", response.context)
 
     def test_profile_role_field(self):
         """Test that profile has role field with default student role."""

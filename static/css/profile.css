@@ -307,6 +307,11 @@
     color: #d97706;
 }
 
+.post-icon--exam {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
 .post-info {
     flex: 1;
 }
