@@ -12,10 +12,22 @@ from core.constants import OrganizationType
 class UserProfile(models.Model):
     """
     Extended user profile with organization type and additional information.
+    Links user to an organization for multi-tenant support.
     """
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
+
+    # Organization linkage for multi-tenant support
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="members",
+        verbose_name="Təşkilat",
+        help_text="İstifadəçinin aid olduğu təşkilat",
     )
 
     organization_type = models.CharField(
@@ -62,7 +74,17 @@ class UserProfile(models.Model):
         verbose_name = "İstifadəçi profili"
         verbose_name_plural = "İstifadəçi profilləri"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.get_organization_type_display()}"
+    
+    @property
+    def organization_name(self):
+        """Get organization name or 'Fərdi' for individual users."""
+        if self.organization:
+            return self.organization.name
+        return "Fərdi"
 
