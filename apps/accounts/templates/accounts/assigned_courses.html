@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Təyin olunmuş kurslarım - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1000px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-graduation-cap"></i> Təyin olunmuş kurslarım
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        <div class="section-card">
+            <form method="get" class="search-form">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Kurs axtar..." class="form-control">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+
+        {% if courses %}
+        <div class="posts-grid">
+            {% for course in courses %}
+            <a href="{% url 'courses:course_detail' course.pk %}" class="post-item">
+                <div class="post-icon post-icon--course">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="post-info">
+                    <div class="post-title">{{ course.title }}</div>
+                    <div class="post-date">{{ course.category|default:"Kateqoriya yoxdur" }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-graduation-cap"></i>
+            <p>Təyin olunmuş kurs tapılmadı.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

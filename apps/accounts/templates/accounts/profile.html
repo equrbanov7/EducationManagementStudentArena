@@ -19,6 +19,8 @@
         </div>
 
         <ul class="sidebar-menu">
+            <!-- A) Overview -->
+            <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Ümumi</span></li>
             <li class="sidebar-menu-item">
                 <a href="{% url 'accounts:profile' %}?section=profile-info" 
                    class="sidebar-menu-link {% if active_section == 'profile-info' %}active{% endif %}">
@@ -26,6 +28,9 @@
                     <span class="sidebar-menu-text">Profil Məlumatları</span>
                 </a>
             </li>
+
+            <!-- B) Learning -->
+            <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Təhsil</span></li>
             <li class="sidebar-menu-item">
                 <a href="{% url 'accounts:profile' %}?section=posts" 
                    class="sidebar-menu-link {% if active_section == 'posts' %}active{% endif %}">
@@ -46,11 +51,81 @@
                     {% endif %}
                 </a>
             </li>
+
+            <!-- C) Assigned -->
+            <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Təyin olunmuş</span></li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:assigned_exams' %}" 
+                   class="sidebar-menu-link {% if active_section == 'assigned-exams' %}active{% endif %}">
+                    <i class="fas fa-file-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Təyin olunmuş imtahanlarım</span>
+                    {% if assigned_exams_count > 0 %}
+                    <span class="sidebar-menu-badge">{{ assigned_exams_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:assigned_courses' %}" 
+                   class="sidebar-menu-link {% if active_section == 'assigned-courses' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Təyin olunmuş kurslarım</span>
+                    {% if assigned_courses_count > 0 %}
+                    <span class="sidebar-menu-badge">{{ assigned_courses_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% if is_teacher %}
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:pending_review' %}" 
+                   class="sidebar-menu-link {% if active_section == 'pending-review' %}active{% endif %}">
+                    <i class="fas fa-tasks sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Yoxlanılacaq işlər</span>
+                    {% if pending_review_count > 0 %}
+                    <span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_review_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- D) Management (admin only) -->
+            {% if is_admin %}
+            <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">İdarəetmə</span></li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:role_assignment' %}" 
+                   class="sidebar-menu-link {% if active_section == 'role-assignment' %}active{% endif %}">
+                    <i class="fas fa-user-shield sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Role təyin et</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:permission_editor' %}" 
+                   class="sidebar-menu-link {% if active_section == 'permission-editor' %}active{% endif %}">
+                    <i class="fas fa-key sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Permission-lar</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:manage_roles' %}" 
+                   class="sidebar-menu-link {% if active_section == 'groups' %}active{% endif %}">
+                    <i class="fas fa-users sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Qruplar</span>
+                </a>
+            </li>
+            {% endif %}
+
+            <!-- E) Account -->
+            <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">Hesab</span></li>
             <li class="sidebar-menu-item">
                 <a href="{% url 'accounts:profile' %}?section=settings" 
                    class="sidebar-menu-link {% if active_section == 'settings' %}active{% endif %}">
                     <i class="fas fa-cog sidebar-menu-icon"></i>
                     <span class="sidebar-menu-text">Parametrlər</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:logout' %}" class="sidebar-menu-link sidebar-menu-link--logout">
+                    <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Çıxış</span>
                 </a>
             </li>
         </ul>
@@ -156,11 +231,52 @@
             </div>
             {% endif %}
 
+            {% if profile.supervisor_code %}
+            <div class="profile-bio">
+                <div class="info-label">Nəzarətçi kodu</div>
+                <div class="info-value info-value--readonly">{{ profile.supervisor_code }}</div>
+            </div>
+            {% endif %}
+
             <div class="profile-edit-link">
                 <a href="{% url 'accounts:profile' %}?section=settings" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Profili Redaktə et
                 </a>
             </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon--blue"><i class="fas fa-file-alt"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ assigned_exams_count|default:0 }}</div>
+                    <div class="stat-label">Təyin olunmuş imtahanlar</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon--green"><i class="fas fa-graduation-cap"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ assigned_courses_count|default:0 }}</div>
+                    <div class="stat-label">Təyin olunmuş kurslar</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon--purple"><i class="fas fa-newspaper"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ posts_count|default:0 }}</div>
+                    <div class="stat-label">Postlarım</div>
+                </div>
+            </div>
+            {% if is_teacher %}
+            <div class="stat-card">
+                <div class="stat-icon stat-icon--orange"><i class="fas fa-tasks"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ pending_review_count|default:0 }}</div>
+                    <div class="stat-label">Yoxlanılacaq işlər</div>
+                </div>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 

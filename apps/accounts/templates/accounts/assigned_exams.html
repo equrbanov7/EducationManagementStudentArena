@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Təyin olunmuş imtahanlarım - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1000px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-file-alt"></i> Təyin olunmuş imtahanlarım
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        <div class="section-card">
+            <form method="get" class="search-form">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="İmtahan axtar..." class="form-control">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+
+        {% if exams %}
+        <div class="posts-grid">
+            {% for exam in exams %}
+            <div class="post-item">
+                <div class="post-icon stat-icon--blue">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="post-info">
+                    <div class="post-title">{{ exam.title }}</div>
+                    <div class="post-date">
+                        {% if exam.start_date %}{{ exam.start_date|date:"d M Y H:i" }}{% endif %}
+                        {% if exam.exam_type %}<span class="role-badge student">{{ exam.exam_type }}</span>{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <p>Təyin olunmuş imtahan tapılmadı.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

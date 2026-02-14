@@ -176,6 +176,45 @@ def user_profile(request):
     my_courses = Course.objects.filter(Q(owner=request.user) | Q(memberships__user=request.user)).distinct()[:10]
     courses_count = my_courses.count()
 
+    # Assigned exams count
+    assigned_exams_count = (
+        Exam.objects.filter(is_active=True)
+        .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
+        .distinct()
+        .count()
+    )
+
+    # Assigned courses count
+    assigned_courses_count = (
+        Course.objects.filter(
+            memberships__user=request.user,
+            status="published",
+        )
+        .distinct()
+        .count()
+    )
+
+    # Pending review count (for teachers)
+    pending_review_count = 0
+    is_teacher = getattr(request.user, "is_teacher_or_above", False)
+    if is_teacher:
+        pending_review_count = (
+            ExamAttempt.objects.filter(
+                exam__author=request.user,
+                status__in=["submitted", "expired"],
+                checked_by_teacher=False,
+            )
+            .exclude(exam__exam_type="test")
+            .count()
+        )
+        # Also count pending assignment submissions
+        pending_review_count += Submission.objects.filter(
+            assignment__course__owner=request.user, status="submitted"
+        ).count()
+
+    # Check if user has management permissions
+    is_admin = getattr(request.user, "is_admin_level", False)
+
     context = {
         "profile": profile,
         "user_roles": user_roles,
@@ -184,6 +223,11 @@ def user_profile(request):
         "posts_count": posts_count,
         "my_courses": my_courses,
         "courses_count": courses_count,
+        "assigned_exams_count": assigned_exams_count,
+        "assigned_courses_count": assigned_courses_count,
+        "pending_review_count": pending_review_count,
+        "is_teacher": is_teacher,
+        "is_admin": is_admin,
     }
 
     return render(request, "accounts/profile.html", context)
@@ -275,6 +319,237 @@ def grading_queue(request):
     }
 
     return render(request, "accounts/grading_queue.html", context)
+
+
+@login_required
+def assigned_exams(request):
+    """Assigned exams list for the current user."""
+    exams = (
+        Exam.objects.filter(
+            Q(allowed_users=request.user) | Q(allowed_groups__students=request.user),
+            is_active=True,
+        )
+        .distinct()
+        .order_by("-start_date")
+    )
+
+    search = request.GET.get("search", "")
+    if search:
+        exams = exams.filter(Q(title__icontains=search) | Q(description__icontains=search))
+
+    context = {
+        "exams": exams,
+        "search_query": search,
+    }
+    return render(request, "accounts/assigned_exams.html", context)
+
+
+@login_required
+def assigned_courses(request):
+    """Assigned courses list for the current user."""
+    courses = (
+        Course.objects.filter(
+            memberships__user=request.user,
+            status="published",
+        )
+        .distinct()
+        .order_by("-created_at")
+    )
+
+    search = request.GET.get("search", "")
+    if search:
+        courses = courses.filter(Q(title__icontains=search) | Q(description__icontains=search))
+
+    context = {
+        "courses": courses,
+        "search_query": search,
+    }
+    return render(request, "accounts/assigned_courses.html", context)
+
+
+@login_required
+def pending_review(request):
+    """Pending review queue for teachers, grouped by groups."""
+    if not getattr(request.user, "is_teacher_or_above", False):
+        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+        return redirect("accounts:profile")
+
+    from apps.exams.models import StudentGroup
+
+    search = request.GET.get("search", "")
+    filter_type = request.GET.get("type", "all")
+    filter_status = request.GET.get("status", "all")
+
+    # Get teacher's groups
+    groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related("students")
+
+    grouped_items = []
+    for group in groups:
+        items = []
+
+        # Exam attempts
+        if filter_type in ("all", "exams"):
+            attempts = (
+                ExamAttempt.objects.filter(
+                    exam__author=request.user,
+                    student__in=group.students.all(),
+                    checked_by_teacher=False,
+                    status__in=["submitted", "expired"],
+                )
+                .exclude(exam__exam_type="test")
+                .select_related("exam", "student")
+            )
+
+            if search:
+                attempts = attempts.filter(
+                    Q(student__username__icontains=search)
+                    | Q(student__first_name__icontains=search)
+                    | Q(student__last_name__icontains=search)
+                    | Q(exam__title__icontains=search)
+                )
+
+            for attempt in attempts:
+                items.append(
+                    {
+                        "type": "exam",
+                        "student": attempt.student,
+                        "title": attempt.exam.title,
+                        "status": attempt.status,
+                        "date": attempt.started_at,
+                        "id": attempt.id,
+                    }
+                )
+
+        # Assignment submissions
+        if filter_type in ("all", "assignments"):
+            submissions = Submission.objects.filter(
+                assignment__course__owner=request.user,
+                user__in=group.students.all(),
+                status="submitted",
+            ).select_related("assignment", "user", "assignment__course")
+
+            if search:
+                submissions = submissions.filter(
+                    Q(user__username__icontains=search)
+                    | Q(user__first_name__icontains=search)
+                    | Q(assignment__title__icontains=search)
+                    | Q(assignment__course__title__icontains=search)
+                )
+
+            for sub in submissions:
+                items.append(
+                    {
+                        "type": "assignment",
+                        "student": sub.user,
+                        "title": f"{sub.assignment.course.title} - {sub.assignment.title}",
+                        "status": sub.status,
+                        "date": sub.submitted_at,
+                        "id": sub.id,
+                    }
+                )
+
+        # Sort items by date, newest first; items without dates go to end
+        epoch = timezone.datetime.min.replace(tzinfo=timezone.utc)
+        items.sort(key=lambda x: x["date"] if x["date"] else epoch, reverse=True)
+
+        if items:
+            grouped_items.append(
+                {
+                    "group": group,
+                    "items": items,
+                    "count": len(items),
+                }
+            )
+
+    context = {
+        "grouped_items": grouped_items,
+        "search_query": search,
+        "filter_type": filter_type,
+        "filter_status": filter_status,
+        "total_count": sum(g["count"] for g in grouped_items),
+    }
+    return render(request, "accounts/pending_review.html", context)
+
+
+@login_required
+def role_assignment(request):
+    """Organization-scoped role assignment UI."""
+    if not getattr(request.user, "is_admin_level", False):
+        messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
+        return redirect("accounts:profile")
+
+    from apps.organizations.models import Membership, Role
+    from apps.organizations.services import get_user_org_role_level, get_user_organization
+
+    org = get_user_organization(request.user)
+    if not org:
+        messages.error(request, "Təşkilat tapılmadı.")
+        return redirect("accounts:profile")
+
+    user_level = get_user_org_role_level(request.user, org)
+
+    # Get org members
+    members = (
+        Membership.objects.filter(organization=org, is_active=True)
+        .select_related("user", "role")
+        .order_by("-role__level", "user__username")
+    )
+
+    # Get assignable roles (lower than current user's level)
+    assignable_roles = Role.objects.filter(organization=org, is_active=True, level__lt=user_level).order_by("-level")
+
+    search = request.GET.get("search", "")
+    if search:
+        members = members.filter(
+            Q(user__username__icontains=search)
+            | Q(user__email__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+        )
+
+    context = {
+        "organization": org,
+        "members": members,
+        "assignable_roles": assignable_roles,
+        "user_level": user_level,
+        "search_query": search,
+    }
+    return render(request, "accounts/role_assignment.html", context)
+
+
+@login_required
+def permission_editor(request):
+    """Organization-scoped permission editor UI."""
+    if not getattr(request.user, "is_admin_level", False):
+        messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
+        return redirect("accounts:profile")
+
+    from apps.organizations.models import Role
+    from apps.organizations.permissions import PERMISSION_CATEGORIES
+    from apps.organizations.services import get_user_org_role_level, get_user_organization
+
+    org = get_user_organization(request.user)
+    if not org:
+        messages.error(request, "Təşkilat tapılmadı.")
+        return redirect("accounts:profile")
+
+    user_level = get_user_org_role_level(request.user, org)
+
+    roles = Role.objects.filter(organization=org, is_active=True, level__lt=user_level).order_by("-level")
+
+    selected_role_id = request.GET.get("role")
+    selected_role = None
+    if selected_role_id:
+        selected_role = roles.filter(id=selected_role_id).first()
+
+    context = {
+        "organization": org,
+        "roles": roles,
+        "selected_role": selected_role,
+        "permission_categories": PERMISSION_CATEGORIES,
+        "user_level": user_level,
+    }
+    return render(request, "accounts/permission_editor.html", context)
 
 
 # ------------------- AUTHENTICATION VIEWS ------------------- #
