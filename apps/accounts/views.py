@@ -556,7 +556,7 @@ def permission_editor(request):
 
 
 def register_view(request):
-    """User registration with email verification."""
+    """User registration with email verification and organization selection."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -570,9 +570,42 @@ def register_view(request):
             user.is_active = False
             user.save()
 
-            # Create user profile with organization type
+            # Handle organization selection
             organization_type = form.cleaned_data.get("organization_type", "individual")
-            UserProfile.objects.create(user=user, organization_type=organization_type)
+            country = form.cleaned_data.get("country", "")
+            organization = None
+
+            if organization_type != "individual":
+                org_id = form.cleaned_data.get("organization_id", "")
+                org_name_other = form.cleaned_data.get("organization_name_other", "")
+
+                if org_id:
+                    # User selected an existing organization
+                    from apps.organizations.models import Organization
+
+                    try:
+                        organization = Organization.objects.get(id=org_id)
+                    except Organization.DoesNotExist:
+                        pass
+                elif org_name_other:
+                    # User entered "Other" - create pending organization
+                    from apps.organizations.models import Organization
+
+                    organization = Organization.objects.create(
+                        name=org_name_other,
+                        org_type=organization_type,
+                        country=country,
+                        owner=user,
+                        status="pending",
+                    )
+
+            # Create user profile
+            UserProfile.objects.create(
+                user=user,
+                organization_type=organization_type,
+                organization=organization,
+                country=country,
+            )
 
             # Generate and send verification code
             code = generate_otp()
@@ -589,7 +622,21 @@ def register_view(request):
     else:
         form = RegisterForm()
 
-    return render(request, "accounts/register.html", {"form": form})
+    # Get organizations for the dropdown (filtered by JS based on country+type)
+    from apps.organizations.models import Organization
+
+    organizations = Organization.objects.filter(is_active=True, status="active").values(
+        "id", "name", "org_type", "country"
+    )
+
+    return render(
+        request,
+        "accounts/register.html",
+        {
+            "form": form,
+            "organizations": list(organizations),
+        },
+    )
 
 
 def verify_code_view(request):
