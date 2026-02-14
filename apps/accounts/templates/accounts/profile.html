@@ -116,6 +116,13 @@
             <!-- E) Account -->
             <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">Hesab</span></li>
             <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:profile' %}?section=edit-profile" 
+                   class="sidebar-menu-link {% if active_section == 'edit-profile' %}active{% endif %}">
+                    <i class="fas fa-user-edit sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Profili Redaktə Et</span>
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
                 <a href="{% url 'accounts:profile' %}?section=settings" 
                    class="sidebar-menu-link {% if active_section == 'settings' %}active{% endif %}">
                     <i class="fas fa-cog sidebar-menu-icon"></i>
@@ -148,7 +155,8 @@
                 {% if active_section == 'profile-info' %}Profil Məlumatları
                 {% elif active_section == 'posts' %}Postlarım
                 {% elif active_section == 'courses' %}Kurslarım
-                {% elif active_section == 'settings' %}Parametrlər
+                {% elif active_section == 'edit-profile' %}Profili Redaktə Et
+                {% elif active_section == 'settings' %}Hesab Parametrləri
                 {% else %}Profil{% endif %}
             </h1>
         </div>
@@ -161,7 +169,7 @@
                 <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-large">
                 {% else %}
                 <div class="avatar-placeholder">
-                    {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
+                    {{ user.get_full_name|default:user.username|truncatechars:2|upper }}
                 </div>
                 {% endif %}
                 <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
@@ -239,7 +247,7 @@
             {% endif %}
 
             <div class="profile-edit-link">
-                <a href="{% url 'accounts:profile' %}?section=settings" class="btn btn-primary">
+                <a href="{% url 'accounts:profile' %}?section=edit-profile" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Profili Redaktə et
                 </a>
             </div>
@@ -350,12 +358,12 @@
         </div>
         {% endif %}
 
-        <!-- Settings Section -->
-        {% if active_section == 'settings' %}
+        <!-- Edit Profile Section -->
+        {% if active_section == 'edit-profile' %}
         <div class="section-card">
             <div class="section-title">
-                <i class="fas fa-cog"></i>
-                Profil Parametrləri
+                <i class="fas fa-user-edit"></i>
+                Profili Redaktə Et
             </div>
             
             <form method="post" enctype="multipart/form-data">
@@ -408,6 +416,49 @@
                     </a>
                 </div>
             </form>
+        </div>
+        {% endif %}
+
+        <!-- Settings Section (Account Settings) -->
+        {% if active_section == 'settings' %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-cog"></i>
+                Hesab Parametrləri
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">İstifadəçi adı</div>
+                    <div class="info-value info-value--readonly">{{ user.username }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Rol</div>
+                    <div class="info-value info-value--readonly">{{ profile.get_role_display|default:"Tələbə" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Təşkilat</div>
+                    <div class="info-value info-value--readonly">{{ profile.organization_name }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Təşkilat tipi</div>
+                    <div class="info-value info-value--readonly">{{ profile.get_organization_type_display|default:"Fərdi" }}</div>
+                </div>
+                {% if profile.supervisor_code %}
+                <div class="info-item">
+                    <div class="info-label">Nəzarətçi kodu</div>
+                    <div class="info-value info-value--readonly">{{ profile.supervisor_code }}</div>
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <div class="info-label">Qeydiyyat tarixi</div>
+                    <div class="info-value info-value--readonly">{{ user.date_joined|date:"d M Y" }}</div>
+                </div>
+            </div>
+            <p class="settings-note">
+                <i class="fas fa-info-circle"></i>
+                Yuxarıdakı məlumatlar yalnız administrator tərəfindən dəyişdirilə bilər.
+            </p>
         </div>
         {% endif %}
     </main>
