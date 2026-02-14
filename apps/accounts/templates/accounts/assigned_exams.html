@@ -36,7 +36,7 @@
                 <div class="post-info">
                     <div class="post-title">{{ exam.title }}</div>
                     <div class="post-date">
-                        {% if exam.start_date %}{{ exam.start_date|date:"d M Y H:i" }}{% endif %}
+                        {% if exam.start_datetime %}{{ exam.start_datetime|date:"d M Y H:i" }}{% endif %}
                         {% if exam.exam_type %}<span class="role-badge student">{{ exam.exam_type }}</span>{% endif %}
                     </div>
                 </div>
