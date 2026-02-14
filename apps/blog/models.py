@@ -13,9 +13,7 @@ from django.utils.text import slugify
 
 
 class EmailOTP(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps"
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -168,9 +166,7 @@ class Comment(models.Model):
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
-    conf_token = models.CharField(
-        max_length=64, blank=True, null=True
-    )  # Təsdiq linki üçün token
+    conf_token = models.CharField(max_length=64, blank=True, null=True)  # Təsdiq linki üçün token
     is_active = models.BooleanField(default=False)  # Təsdiq olunmayıbsa passivdir
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -182,9 +178,7 @@ class Subscriber(models.Model):
 
 
 class Question(models.Model):
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="questions", verbose_name="Müəllif"
-    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="questions", verbose_name="Müəllif")
     question_text = models.TextField("Sual")
     answer_text = models.TextField("Cavab", blank=True, null=True)
 

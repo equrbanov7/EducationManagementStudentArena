@@ -18,9 +18,7 @@ def add_exam_question(request, slug):
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
 
     if request.method == "POST":
-        form = ExamQuestionCreateForm(
-            request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks
-        )
+        form = ExamQuestionCreateForm(request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks)
         if form.is_valid():
             # Sualı yaradıq
             last_q = exam.questions.order_by("-order").first()

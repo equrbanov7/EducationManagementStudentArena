@@ -18,9 +18,7 @@ class ProjectForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Kurs işinin adı"}
-            ),
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Kurs işinin adı"}),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
@@ -28,18 +26,10 @@ class ProjectForm(forms.ModelForm):
                     "placeholder": "Layihə haqqında təsvir...",
                 }
             ),
-            "start_date": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"}
-            ),
-            "deadline": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"}
-            ),
-            "max_attempts": forms.NumberInput(
-                attrs={"class": "form-control", "min": 1, "value": 1}
-            ),
-            "max_score": forms.NumberInput(
-                attrs={"class": "form-control", "min": 1, "value": 100}
-            ),
+            "start_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "deadline": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "max_attempts": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 1}),
+            "max_score": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 100}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         labels = {
@@ -68,9 +58,7 @@ class ProjectSubmissionForm(forms.ModelForm):
                     "required": True,
                 }
             ),
-            "file": forms.FileInput(
-                attrs={"class": "form-control", "accept": ".zip,.pdf,.rar"}
-            ),
+            "file": forms.FileInput(attrs={"class": "form-control", "accept": ".zip,.pdf,.rar"}),
         }
         labels = {"content": "Layihə İzahatı", "file": "Layihə Faylı (ZIP, PDF)"}
 

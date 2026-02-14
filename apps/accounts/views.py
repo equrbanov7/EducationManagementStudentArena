@@ -4,20 +4,17 @@ Account views for user dashboards, profile management, authentication, and role 
 
 from datetime import timedelta
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login as auth_login, logout
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
-from apps.blog.models import EmailOTP, Post
+from apps.blog.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
@@ -49,9 +46,9 @@ def teacher_dashboard(request):
     ).select_related("assignment", "user")[:10]
 
     # Get upcoming exams
-    upcoming_exams = Exam.objects.filter(
-        owner=request.user, is_active=True, start_date__gte=timezone.now()
-    ).order_by("start_date")[:5]
+    upcoming_exams = Exam.objects.filter(owner=request.user, is_active=True, start_date__gte=timezone.now()).order_by(
+        "start_date"
+    )[:5]
 
     # Calculate stats
     total_courses = Course.objects.filter(owner=request.user).count()
@@ -60,20 +57,18 @@ def teacher_dashboard(request):
         .aggregate(count=Count("memberships__user", distinct=True))
         .get("count", 0)
     )
-    pending_count = Submission.objects.filter(
-        assignment__course__owner=request.user, status="submitted"
-    ).count()
+    pending_count = Submission.objects.filter(assignment__course__owner=request.user, status="submitted").count()
 
     # Students at risk (failing grades or missing submissions)
     at_risk_students = []
     for course in Course.objects.filter(owner=request.user):
         # Find students with low grades or missing submissions
-        submissions = Submission.objects.filter(
-            assignment__course=course, status="graded", grade__lt=50
-        ).values_list("user_id", flat=True).distinct()
-        at_risk_students.extend(
-            User.objects.filter(id__in=submissions).values("id", "username")[:3]
+        submissions = (
+            Submission.objects.filter(assignment__course=course, status="graded", grade__lt=50)
+            .values_list("user_id", flat=True)
+            .distinct()
         )
+        at_risk_students.extend(User.objects.filter(id__in=submissions).values("id", "username")[:3])
 
     context = {
         "my_courses": my_courses,
@@ -94,9 +89,7 @@ def student_dashboard(request):
     Student dashboard with enrolled courses, assignments, and upcoming exams.
     """
     # Get enrolled courses
-    enrolled_courses = Course.objects.filter(
-        memberships__user=request.user, status="published"
-    ).distinct()[:6]
+    enrolled_courses = Course.objects.filter(memberships__user=request.user, status="published").distinct()[:6]
 
     # Get pending assignments
     pending_assignments = Assignment.objects.filter(
@@ -106,16 +99,18 @@ def student_dashboard(request):
     ).order_by("deadline")[:5]
 
     # Get upcoming exams
-    upcoming_exams = Exam.objects.filter(
-        Q(assigned_students=request.user) | Q(assigned_groups__students=request.user),
-        is_active=True,
-        start_date__gte=timezone.now(),
-    ).distinct().order_by("start_date")[:5]
+    upcoming_exams = (
+        Exam.objects.filter(
+            Q(assigned_students=request.user) | Q(assigned_groups__students=request.user),
+            is_active=True,
+            start_date__gte=timezone.now(),
+        )
+        .distinct()
+        .order_by("start_date")[:5]
+    )
 
     # Get recent grades
-    recent_grades = Submission.objects.filter(
-        user=request.user, status="graded"
-    ).order_by("-graded_at")[:5]
+    recent_grades = Submission.objects.filter(user=request.user, status="graded").order_by("-graded_at")[:5]
 
     context = {
         "enrolled_courses": enrolled_courses,
@@ -169,11 +164,7 @@ def user_profile(request):
         return redirect("accounts:profile")
 
     # Get user's roles
-    user_roles = (
-        request.user.get_all_roles()
-        if hasattr(request.user, "get_all_roles")
-        else []
-    )
+    user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
 
     # Get user's posts for the posts section
     user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
@@ -181,9 +172,8 @@ def user_profile(request):
 
     # Get user's courses
     from apps.courses.models import Course
-    my_courses = Course.objects.filter(
-        Q(owner=request.user) | Q(memberships__user=request.user)
-    ).distinct()[:10]
+
+    my_courses = Course.objects.filter(Q(owner=request.user) | Q(memberships__user=request.user)).distinct()[:10]
     courses_count = my_courses.count()
 
     context = {
@@ -236,10 +226,7 @@ def manage_roles(request):
     users = User.objects.all().prefetch_related("groups")
 
     # Get all roles that current user can assign
-    assignable_roles = [
-        role_name for role_name in ROLE_LEVELS.keys()
-        if request.user.can_assign_role(role_name)
-    ]
+    assignable_roles = [role_name for role_name in ROLE_LEVELS.keys() if request.user.can_assign_role(role_name)]
 
     context = {
         "users": users,
@@ -264,9 +251,9 @@ def grading_queue(request):
     assignment_id = request.GET.get("assignment")
 
     # Base query
-    submissions = Submission.objects.filter(
-        assignment__course__owner=request.user, status="submitted"
-    ).select_related("assignment", "user", "assignment__course")
+    submissions = Submission.objects.filter(assignment__course__owner=request.user, status="submitted").select_related(
+        "assignment", "user", "assignment__course"
+    )
 
     # Apply filters
     if course_id:
@@ -310,10 +297,7 @@ def register_view(request):
 
             # Create user profile with organization type
             organization_type = form.cleaned_data.get("organization_type", "individual")
-            UserProfile.objects.create(
-                user=user,
-                organization_type=organization_type
-            )
+            UserProfile.objects.create(user=user, organization_type=organization_type)
 
             # Generate and send verification code
             code = generate_otp()
@@ -337,9 +321,7 @@ def verify_code_view(request):
     """Verify email using OTP code."""
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(
-            request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç."
-        )
+        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
         return redirect("accounts:register")
 
     if request.method == "POST":
@@ -350,11 +332,7 @@ def verify_code_view(request):
             messages.error(request, "User tapılmadı.")
             return redirect("accounts:register")
 
-        otp = (
-            EmailOTP.objects.filter(user=user, code=code, is_used=False)
-            .order_by("-created_at")
-            .first()
-        )
+        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
         if not otp or otp.is_expired():
             messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
             return render(request, "accounts/verify_code.html", {"email": email})
@@ -399,9 +377,7 @@ def resend_code_view(request):
         return redirect("accounts:register")
 
     code = generate_otp()
-    EmailOTP.objects.create(
-        user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10)
-    )
+    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10))
     send_verify_email(user, code)
 
     messages.success(request, "Yeni kod göndərildi.")
@@ -423,8 +399,9 @@ def public_user_profile(request, username):
     Public user profile showing user's posts and activity.
     Different from the accounts:profile which is for editing own profile.
     """
-    from apps.blog.models import Post
     from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+
+    from apps.blog.models import Post
 
     profile_user = get_object_or_404(User, username=username)
 
@@ -433,11 +410,7 @@ def public_user_profile(request, username):
 
     # 1. Posts filtering
     if request.user == profile_user:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user)
-            .select_related("category")
-            .order_by("-created_at")
-        )
+        user_posts_list = Post.objects.filter(author=profile_user).select_related("category").order_by("-created_at")
     else:
         user_posts_list = (
             Post.objects.filter(author=profile_user, is_published=True)
@@ -457,11 +430,7 @@ def public_user_profile(request, username):
 
     # 3. Pending exams count (for teachers)
     pending_count = 0
-    if (
-        request.user.is_authenticated
-        and request.user == profile_user
-        and getattr(request.user, "is_teacher", False)
-    ):
+    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, "is_teacher", False):
         pending_count = (
             ExamAttempt.objects.filter(
                 exam__author=request.user,
@@ -477,9 +446,7 @@ def public_user_profile(request, username):
     if request.user.is_authenticated and request.user == profile_user:
         assigned_count = (
             Exam.objects.filter(is_active=True)
-            .filter(
-                Q(allowed_users=request.user) | Q(allowed_groups__students=request.user)
-            )
+            .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
             .distinct()
             .count()
         )

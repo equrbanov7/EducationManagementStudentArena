@@ -2,8 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from apps.exams.models import (Exam, ExamQuestion, ExamQuestionOption,
-                               QuestionBlock, StudentGroup)
+from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
 
 
 class ExamForm(forms.ModelForm):
@@ -137,19 +136,13 @@ class ExamForm(forms.ModelForm):
 
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.all().order_by("username")
-        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by(
-            "name"
-        )
+        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by("name")
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
-            self.fields["allowed_users"].queryset = User.objects.exclude(
-                id=user.id
-            ).order_by("username")
+            self.fields["allowed_users"].queryset = User.objects.exclude(id=user.id).order_by("username")
 
-            self.fields["allowed_groups"].queryset = StudentGroup.objects.filter(
-                teacher=user
-            ).order_by("name")
+            self.fields["allowed_groups"].queryset = StudentGroup.objects.filter(teacher=user).order_by("name")
 
     def clean_access_code(self):
         code = (self.cleaned_data.get("access_code") or "").strip()
@@ -157,9 +150,7 @@ class ExamForm(forms.ModelForm):
             return ""  # boş buraxmaq olar
 
         if not code.isdigit() or len(code) != 6:
-            raise forms.ValidationError(
-                "Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456)."
-            )
+            raise forms.ValidationError("Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456).")
 
         return code
 
@@ -174,16 +165,12 @@ class ExamForm(forms.ModelForm):
         exam_type = cleaned_data.get("exam_type")
 
         if exam_type == "test" and enable_paint:
-            raise ValidationError(
-                "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər."
-            )
+            raise ValidationError("Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər.")
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:
             if start_dt >= end_dt:
-                raise forms.ValidationError(
-                    "Bitmə tarixi başlama tarixindən sonra olmalıdır."
-                )
+                raise forms.ValidationError("Bitmə tarixi başlama tarixindən sonra olmalıdır.")
 
         return cleaned_data
 
@@ -278,9 +265,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 }
             ),
             # ✅ DƏYİŞİKLİK: ClearableFileInput ilə clear funksionallığı
-            "image": forms.ClearableFileInput(
-                attrs={"class": "form-control", "accept": "image/*"}
-            ),
+            "image": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "video": forms.ClearableFileInput(
                 attrs={
                     "class": "form-control",
@@ -350,13 +335,9 @@ class ExamQuestionCreateForm(forms.ModelForm):
         if answer_mode == "single":
             correct_count = sum(1 for (_, is_corr) in opts if is_corr)
             if correct_count == 0:
-                raise forms.ValidationError(
-                    "Tək cavab rejimində ən azı 1 düzgün variant seçilməlidir."
-                )
+                raise forms.ValidationError("Tək cavab rejimində ən azı 1 düzgün variant seçilməlidir.")
             if correct_count > 1:
-                raise forms.ValidationError(
-                    "Tək cavab rejimində yalnız 1 düzgün variant ola bilər."
-                )
+                raise forms.ValidationError("Tək cavab rejimində yalnız 1 düzgün variant ola bilər.")
 
         return cleaned_data
 

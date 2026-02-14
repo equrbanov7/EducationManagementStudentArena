@@ -77,9 +77,7 @@ def extract_text_from_upload(uploaded_file) -> str:
 
     if ext == ".pdf":
         if ZipReader is None:
-            raise ValueError(
-                "PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin."
-            )
+            raise ValueError("PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin.")
 
         reader = PdfReader(uploaded_file)
         parts = []
@@ -253,24 +251,18 @@ def parse_bulk_mcq(raw_text: str):
         # missing A-D
         for must in ["A", "B", "C", "D"]:
             if must not in q["options"]:
-                q["warnings"].append(
-                    {"type": "missing_option", "msg": f"{must} variantı tapılmadı."}
-                )
+                q["warnings"].append({"type": "missing_option", "msg": f"{must} variantı tapılmadı."})
 
         # E optional warning
         if "E" not in q["options"]:
-            q["warnings"].append(
-                {"type": "missing_option_e", "msg": "E variantı yoxdur (opsional)."}
-            )
+            q["warnings"].append({"type": "missing_option_e", "msg": "E variantı yoxdur (opsional)."})
 
         # duplicate options text warning
         norm_map = defaultdict(list)
         for lab, txt in q["options"].items():
             norm_map[_norm(txt)].append(lab)
 
-        dup_groups = [
-            labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1
-        ]
+        dup_groups = [labs for norm_txt, labs in norm_map.items() if norm_txt and len(labs) > 1]
         for labs in dup_groups:
             q["warnings"].append(
                 {

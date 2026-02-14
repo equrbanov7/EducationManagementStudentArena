@@ -16,11 +16,7 @@ def get_organizations(user):
     """
     from apps.organizations.models import Organization
 
-    org_ids = (
-        user.memberships.filter(is_active=True)
-        .values_list("organization_id", flat=True)
-        .distinct()
-    )
+    org_ids = user.memberships.filter(is_active=True).values_list("organization_id", flat=True).distinct()
 
     return Organization.objects.filter(id__in=org_ids, is_active=True)
 
@@ -36,9 +32,7 @@ def get_memberships(user, organization=None):
     Returns:
         QuerySet of Membership objects
     """
-    memberships = user.memberships.filter(is_active=True).select_related(
-        "organization", "role", "scope_unit"
-    )
+    memberships = user.memberships.filter(is_active=True).select_related("organization", "role", "scope_unit")
 
     if organization:
         memberships = memberships.filter(organization=organization)
@@ -77,21 +71,14 @@ def get_primary_organization(user):
     Returns:
         Organization instance or None
     """
-    primary_membership = (
-        user.memberships.filter(is_active=True, is_primary=True)
-        .select_related("organization")
-        .first()
-    )
+    primary_membership = user.memberships.filter(is_active=True, is_primary=True).select_related("organization").first()
 
     if primary_membership:
         return primary_membership.organization
 
     # If no primary, return first active membership's organization
     first_membership = (
-        user.memberships.filter(is_active=True)
-        .select_related("organization")
-        .order_by("-role__level")
-        .first()
+        user.memberships.filter(is_active=True).select_related("organization").order_by("-role__level").first()
     )
 
     return first_membership.organization if first_membership else None

@@ -33,21 +33,13 @@ def organization_context(request):
 
     # User's max level in current org
     if hasattr(request, "org_memberships") and request.org_memberships:
-        context["user_max_level"] = max(
-            [m.role.level for m in request.org_memberships], default=0
-        )
+        context["user_max_level"] = max([m.role.level for m in request.org_memberships], default=0)
 
     # All organizations user is a member of
     from .models import Organization
 
-    user_org_ids = (
-        request.user.memberships.filter(is_active=True)
-        .values_list("organization_id", flat=True)
-        .distinct()
-    )
+    user_org_ids = request.user.memberships.filter(is_active=True).values_list("organization_id", flat=True).distinct()
 
-    context["user_organizations"] = list(
-        Organization.active.filter(id__in=user_org_ids).order_by("name")
-    )
+    context["user_organizations"] = list(Organization.active.filter(id__in=user_org_ids).order_by("name"))
 
     return context

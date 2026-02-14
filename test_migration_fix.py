@@ -2,6 +2,7 @@
 """
 Test script to verify the migration fix works correctly.
 """
+
 import os
 import sys
 
@@ -21,9 +22,7 @@ def test_unique_constraint():
 
     # Check that the model has the constraint
     constraints = [c.name for c in LivePlayer._meta.constraints]
-    assert (
-        "uniq_player_per_session_client" in constraints
-    ), "Constraint not found in model!"
+    assert "uniq_player_per_session_client" in constraints, "Constraint not found in model!"
     print("✅ Model has the constraint defined")
 
     # Check that unique_together is NOT duplicated

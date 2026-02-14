@@ -28,9 +28,7 @@ def validate_file_extension(file):
     ext = os.path.splitext(file.name)[1].lower()
 
     if ext in BLOCKED_EXTENSIONS:
-        raise ValidationError(
-            "Bu tip fayl təhlükəli ola bilər və yüklənməsi qadağandır."
-        )
+        raise ValidationError("Bu tip fayl təhlükəli ola bilər və yüklənməsi qadağandır.")
 
     if ext not in ALLOWED_EXTENSIONS:
         raise ValidationError("Bu fayl tipi icazəli deyil. Yalnız PDF, JPG, PNG, ZIP.")
@@ -62,6 +60,4 @@ def validate_zip_contents(file):
             continue
 
         if inner_ext in BLOCKED_EXTENSIONS:
-            raise ValidationError(
-                f"ZIP içində təhlükəli fayl aşkarlandı: {info.filename}"
-            )
+            raise ValidationError(f"ZIP içində təhlükəli fayl aşkarlandı: {info.filename}")

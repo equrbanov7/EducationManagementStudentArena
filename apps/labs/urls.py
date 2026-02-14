@@ -46,9 +46,7 @@ urlpatterns = [
     # ═══════════════════════════════════════════════════════════════════
     # Preview
     # ═══════════════════════════════════════════════════════════════════
-    path(
-        "<int:pk>/preview/", views.preview_randomization, name="preview_randomization"
-    ),
+    path("<int:pk>/preview/", views.preview_randomization, name="preview_randomization"),
     # ═══════════════════════════════════════════════════════════════════
     # Student (Lab Detail & Submit)
     # ═══════════════════════════════════════════════════════════════════
@@ -60,9 +58,7 @@ urlpatterns = [
     # API
     # ═══════════════════════════════════════════════════════════════════
     path("api/groups/<int:course_id>/", views.api_get_groups, name="api_get_groups"),
-    path(
-        "api/students/<int:course_id>/", views.api_get_students, name="api_get_students"
-    ),
+    path("api/students/<int:course_id>/", views.api_get_students, name="api_get_students"),
     path(
         "submissions/<int:pk>/answers/",
         views.submission_answers,

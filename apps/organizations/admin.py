@@ -166,15 +166,11 @@ class AcademicPeriodAdmin(admin.ModelAdmin):
     def set_current(self, request, queryset):
         """Set selected period as current."""
         if queryset.count() != 1:
-            self.message_user(
-                request, "Please select exactly one period.", level="error"
-            )
+            self.message_user(request, "Please select exactly one period.", level="error")
             return
 
         period = queryset.first()
-        AcademicPeriod.objects.filter(
-            organization=period.organization, is_current=True
-        ).update(is_current=False)
+        AcademicPeriod.objects.filter(organization=period.organization, is_current=True).update(is_current=False)
         period.is_current = True
         period.save()
         self.message_user(request, f"{period.name} set as current period.")
@@ -301,9 +297,7 @@ class MembershipAdmin(admin.ModelAdmin):
     def set_primary(self, request, queryset):
         """Set selected membership as primary."""
         if queryset.count() != 1:
-            self.message_user(
-                request, "Please select exactly one membership.", level="error"
-            )
+            self.message_user(request, "Please select exactly one membership.", level="error")
             return
 
         membership = queryset.first()

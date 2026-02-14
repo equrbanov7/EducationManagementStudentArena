@@ -19,8 +19,7 @@ from django.views.decorators.http import require_POST
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
 
-from .forms import (CommentForm, PostForm, QuestionForm, RegisterForm,
-                    SubscriptionForm)
+from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
 from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
 from .utils import generate_otp, send_verify_email
 
@@ -34,17 +33,11 @@ signer = TimestampSigner()
 def home(request):
 
     query = request.GET.get("q", "").strip()
-    post_list = (
-        Post.objects.filter(is_published=True)
-        .select_related("category", "author")
-        .order_by("-created_at")
-    )
+    post_list = Post.objects.filter(is_published=True).select_related("category", "author").order_by("-created_at")
 
     if query:
         post_list = post_list.filter(
-            Q(title__icontains=query)
-            | Q(excerpt__icontains=query)
-            | Q(content__icontains=query)
+            Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(content__icontains=query)
         ).distinct()
 
     paginator = Paginator(post_list, 6)
@@ -52,9 +45,7 @@ def home(request):
     page_obj = paginator.get_page(page_number)
 
     categories = (
-        Category.objects.annotate(
-            post_count=Count("posts", filter=Q(posts__is_published=True))
-        )
+        Category.objects.annotate(post_count=Count("posts", filter=Q(posts__is_published=True)))
         .filter(post_count__gt=0)
         .order_by("name")
     )
@@ -120,11 +111,7 @@ def post_detail(request, slug):
 
     user_first_comment = None
     if request.user.is_authenticated:
-        user_first_comment = (
-            Comment.objects.filter(post=post, user=request.user)
-            .order_by("created_at")
-            .first()
-        )
+        user_first_comment = Comment.objects.filter(post=post, user=request.user).order_by("created_at").first()
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -140,9 +127,7 @@ def post_detail(request, slug):
                 comment.post = post
                 comment.user = request.user
                 comment.save()
-                messages.success(
-                    request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐"
-                )
+                messages.success(request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐")
             else:
                 # Artıq bu posta şərhi var → yeni şərh, eyni rating
                 comment = Comment(
@@ -152,9 +137,7 @@ def post_detail(request, slug):
                     rating=user_first_comment.rating,
                 )
                 comment.save()
-                messages.success(
-                    request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂"
-                )
+                messages.success(request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂")
 
             return redirect("post_detail", slug=post.slug)
     else:
@@ -185,9 +168,7 @@ def subscribe_page(request):
                 if created or not subscriber.is_active:
 
                     # 2. Email şablonunu yarat
-                    html_message = render_to_string(
-                        "email_templates/welcome_email.html", {"email": email}
-                    )
+                    html_message = render_to_string("email_templates/welcome_email.html", {"email": email})
 
                     # 3. Email göndər
                     send_mail(
@@ -206,9 +187,7 @@ def subscribe_page(request):
                     )
 
                 else:
-                    messages.warning(
-                        request, f"'{email}' ünvanı artıq abunəçilərimizdədir."
-                    )
+                    messages.warning(request, f"'{email}' ünvanı artıq abunəçilərimizdədir.")
 
             except Exception as e:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
@@ -247,9 +226,7 @@ def create_post(request):
                 post.category = category
 
                 if created:
-                    messages.info(
-                        request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı."
-                    )
+                    messages.info(request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı.")
 
             elif selected_cat:
                 # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
@@ -358,9 +335,7 @@ def search_posts(request):
     posts = Post.objects.all()
 
     if query:
-        posts = posts.filter(title__icontains=query) | posts.filter(
-            excerpt__icontains=query
-        )
+        posts = posts.filter(title__icontains=query) | posts.filter(excerpt__icontains=query)
 
     posts = posts.order_by("-created_at")
 
@@ -411,9 +386,7 @@ def register_view(request):
 def verify_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(
-            request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç."
-        )
+        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
         return redirect("register")
 
     if request.method == "POST":
@@ -424,11 +397,7 @@ def verify_code_view(request):
             messages.error(request, "User tapılmadı.")
             return redirect("register")
 
-        otp = (
-            EmailOTP.objects.filter(user=user, code=code, is_used=False)
-            .order_by("-created_at")
-            .first()
-        )
+        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
         if not otp or otp.is_expired():
             messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
             return render(request, "blog/verify_code.html", {"email": email})
@@ -471,9 +440,7 @@ def resend_code_view(request):
         return redirect("register")
 
     code = generate_otp()
-    EmailOTP.objects.create(
-        user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10)
-    )
+    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
     send_verify_email(user, code)
 
     messages.success(request, "Yeni kod göndərildi.")
@@ -489,11 +456,7 @@ def user_profile(request, username):
 
     # 1. Postların Filterlənməsi
     if request.user == profile_user:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user)
-            .select_related("category")
-            .order_by("-created_at")
-        )
+        user_posts_list = Post.objects.filter(author=profile_user).select_related("category").order_by("-created_at")
     else:
         user_posts_list = (
             Post.objects.filter(author=profile_user, is_published=True)
@@ -513,11 +476,7 @@ def user_profile(request, username):
 
     # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
     pending_count = 0
-    if (
-        request.user.is_authenticated
-        and request.user == profile_user
-        and getattr(request.user, "is_teacher", False)
-    ):
+    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, "is_teacher", False):
         pending_count = (
             ExamAttempt.objects.filter(
                 exam__author=request.user,
@@ -533,9 +492,7 @@ def user_profile(request, username):
     if request.user.is_authenticated and request.user == profile_user:
         assigned_count = (
             Exam.objects.filter(is_active=True)
-            .filter(
-                Q(allowed_users=request.user) | Q(allowed_groups__students=request.user)
-            )
+            .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
             .distinct()
             .count()
         )
@@ -593,15 +550,11 @@ def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
 
     # 2. YALNIZ bu kateqoriyaya aid olan və yayımlanmış postları tapırıq
-    posts = Post.objects.filter(category=category, is_published=True).order_by(
-        "-created_at"
-    )
+    posts = Post.objects.filter(category=category, is_published=True).order_by("-created_at")
 
     # 3. Sidebar üçün bütün kateqoriyaları və post saylarını hesablayırıq (Home view-dakı kimi)
     categories = (
-        Category.objects.annotate(
-            post_count=Count("posts", filter=Q(posts__is_published=True))
-        )
+        Category.objects.annotate(post_count=Count("posts", filter=Q(posts__is_published=True)))
         .filter(post_count__gt=0)
         .order_by("name")
     )
@@ -657,11 +610,7 @@ def questions_i_can_see(request):
     """
 
     questions = (
-        Question.objects.filter(
-            Q(visible_to_all=True)
-            | Q(author=request.user)
-            | Q(visible_users=request.user)
-        )
+        Question.objects.filter(Q(visible_to_all=True) | Q(author=request.user) | Q(visible_users=request.user))
         .distinct()
         .select_related("author")
     )

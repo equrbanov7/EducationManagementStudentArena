@@ -194,13 +194,9 @@ class CourseResourceForm(forms.ModelForm):
         url = cleaned_data.get("url")
 
         if not file and not url:
-            raise forms.ValidationError(
-                "Fayl yüklə və ya URL linki əlavə et (ikisindən biri lazımdır)."
-            )
+            raise forms.ValidationError("Fayl yüklə və ya URL linki əlavə et (ikisindən biri lazımdır).")
 
         if file and url:
-            raise forms.ValidationError(
-                "Fayl VƏ URL bir vaxtda ola bilməz. Birini seç."
-            )
+            raise forms.ValidationError("Fayl VƏ URL bir vaxtda ola bilməz. Birini seç.")
 
         return cleaned_data

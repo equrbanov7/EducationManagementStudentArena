@@ -32,9 +32,7 @@ def generate_code(length=8):
     return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 
-def send_template_email(
-    subject, template_name, context, recipient_list, from_email=None
-):
+def send_template_email(subject, template_name, context, recipient_list, from_email=None):
     """
     Send an email using a template.
 

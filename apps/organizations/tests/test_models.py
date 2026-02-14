@@ -22,9 +22,7 @@ class OrganizationModelTest(TestCase):
         # Disconnect signal to avoid unique constraint errors in tests
         post_save.disconnect(create_default_roles, sender=Organization)
 
-        self.user = User.objects.create_user(
-            username="testuser", email="test@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
 
     def tearDown(self):
         """Clean up after tests."""
@@ -71,9 +69,7 @@ class OrgUnitModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.user = User.objects.create_user(
-            username="testuser", email="test@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
             slug="test-university",
@@ -118,9 +114,7 @@ class RoleModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.user = User.objects.create_user(
-            username="testuser", email="test@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
             slug="test-university",
@@ -148,9 +142,7 @@ class MembershipModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.user = User.objects.create_user(
-            username="testuser", email="test@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
             slug="test-university",
@@ -218,9 +210,7 @@ class AcademicPeriodModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
-        self.user = User.objects.create_user(
-            username="testuser", email="test@test.com", password="testpass123"
-        )
+        self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
             slug="test-university",

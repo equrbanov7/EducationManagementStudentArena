@@ -23,10 +23,7 @@ def assigned_student_exam_list(request):
     # --- SEARCH (Axtarış) ---
     search_query = request.GET.get("q")
     if search_query:
-        exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query)
-            | Q(author__username__icontains=search_query)
-        )
+        exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")
@@ -102,19 +99,14 @@ def student_exam_list(request):
     # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
     exams_qs = (
         Exam.objects.filter(is_active=True)
-        .filter(
-            Q(end_datetime__isnull=True) | Q(end_datetime__gte=now)
-        )  # ✅ keçmişləri gizlədir
+        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
         .select_related("author")
     )
 
     # --- SEARCH ---
     search_query = request.GET.get("q")
     if search_query:
-        exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query)
-            | Q(author__username__icontains=search_query)
-        )
+        exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")

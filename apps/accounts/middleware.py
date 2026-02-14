@@ -2,7 +2,7 @@
 Custom middleware for session management and auto-logout.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth import logout
@@ -29,7 +29,7 @@ class SessionTimeoutMiddleware:
                 # Convert to datetime if it's a string
                 if isinstance(last_activity, str):
                     last_activity = datetime.fromisoformat(last_activity)
-                
+
                 # Check if session has expired
                 time_since_activity = timezone.now() - last_activity
                 if time_since_activity.total_seconds() > self.timeout_seconds:
@@ -37,9 +37,9 @@ class SessionTimeoutMiddleware:
                     logout(request)
                     # You can add a message here if needed
                     # messages.info(request, "Siz uzun müddət aktiv olmadığınız üçün sistemdən çıxarıldınız.")
-            
+
             # Update last activity time
             request.session["last_activity"] = timezone.now().isoformat()
-        
+
         response = self.get_response(request)
         return response

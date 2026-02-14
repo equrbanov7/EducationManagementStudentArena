@@ -22,9 +22,7 @@ urlpatterns = [
     # organizations
     path(
         "organizations/",
-        include(
-            ("apps.organizations.urls", "organizations"), namespace="organizations"
-        ),
+        include(("apps.organizations.urls", "organizations"), namespace="organizations"),
     ),
     # audit
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),

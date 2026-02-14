@@ -7,8 +7,7 @@ from django.utils import timezone
 
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
-from apps.exams.services.randomizer import \
-    generate_random_questions_for_attempt
+from apps.exams.services.randomizer import generate_random_questions_for_attempt
 
 
 @login_required
@@ -68,9 +67,7 @@ def teacher_exam_results(request, slug):
     if selected_attempt is None:
         attempt_param = request.GET.get("attempt")
         if attempt_param:
-            selected_attempt = (
-                exam.attempts.filter(id=attempt_param).select_related("user").first()
-            )
+            selected_attempt = exam.attempts.filter(id=attempt_param).select_related("user").first()
 
     if selected_attempt:
         selected_answers = (
@@ -115,9 +112,7 @@ def teacher_exam_results(request, slug):
     # ═══════════════════════════════════════════════════════════════════
     # Statistikalar (əvvəlki kimi)
     # ═══════════════════════════════════════════════════════════════════
-    fastest_attempts = sorted(
-        [a for a in attempts if a.duration_seconds], key=lambda a: a.duration_seconds
-    )[:5]
+    fastest_attempts = sorted([a for a in attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[:5]
 
     questions = exam.questions.all()
     hardest_questions = sorted(questions, key=lambda q: q.correct_ratio)[:5]
@@ -190,17 +185,11 @@ def teacher_check_attempt(request, slug, attempt_id):
     # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
     if attempt.checked_by_teacher and attempt.teacher_checked_at:
 
-        minutes_passed = int(
-            (timezone.now() - attempt.teacher_checked_at).total_seconds() / 60
-        )
+        minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
 
         if minutes_passed >= 5:
-            messages.warning(
-                request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz."
-            )
-            return redirect(
-                "exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id
-            )
+            messages.warning(request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.")
+            return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
 
     # YALNIZ bu attempt-ə düşən suallar
     answers_qs = (
@@ -222,17 +211,11 @@ def teacher_check_attempt(request, slug, attempt_id):
     if request.method == "POST":
         # ✅ DOUBLE-CHECK: POST zamanı da yoxla
         if attempt.checked_by_teacher and attempt.teacher_checked_at:
-            minutes_passed = int(
-                (timezone.now() - attempt.teacher_checked_at).total_seconds() / 60
-            )
+            minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
 
             if minutes_passed >= 5:
-                messages.error(
-                    request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz."
-                )
-                return redirect(
-                    "exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id
-                )
+                messages.error(request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.")
+                return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
 
         total_score = 0
         any_score = False
@@ -261,9 +244,7 @@ def teacher_check_attempt(request, slug, attempt_id):
         attempt.teacher_score = total_score if any_score else None
         attempt.checked_by_teacher = True
         attempt.teacher_checked_at = timezone.now()  # ✅ Hər dəyişiklikdə yenilənir
-        attempt.save(
-            update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"]
-        )
+        attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
         messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
         return redirect("exams:teacher_exam_results", slug=exam.slug)

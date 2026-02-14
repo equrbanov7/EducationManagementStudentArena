@@ -64,11 +64,7 @@ def createAndEditExamView(request, slug=None):
 
             messages.success(
                 request,
-                (
-                    "İmtahan uğurla yeniləndi!"
-                    if is_editing
-                    else "İmtahan uğurla yaradıldı!"
-                ),
+                ("İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"),
             )
             return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
     else:

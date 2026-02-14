@@ -81,14 +81,10 @@ class Lab(models.Model):
     )
 
     # Status
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="draft", verbose_name="Status"
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft", verbose_name="Status")
 
     # Gecikmə
-    allow_late_submission = models.BooleanField(
-        default=False, verbose_name="Gecikmiş göndərişə icazə ver"
-    )
+    allow_late_submission = models.BooleanField(default=False, verbose_name="Gecikmiş göndərişə icazə ver")
 
     late_penalty_percent = models.PositiveIntegerField(
         default=0,
@@ -113,13 +109,9 @@ class Lab(models.Model):
     )
 
     # Submission ayarları
-    allow_file_upload = models.BooleanField(
-        default=True, verbose_name="Fayl yükləməyə icazə"
-    )
+    allow_file_upload = models.BooleanField(default=True, verbose_name="Fayl yükləməyə icazə")
 
-    allow_link_submission = models.BooleanField(
-        default=True, verbose_name="Link göndərməyə icazə"
-    )
+    allow_link_submission = models.BooleanField(default=True, verbose_name="Link göndərməyə icazə")
 
     allowed_extensions = models.CharField(
         max_length=255,
@@ -128,9 +120,7 @@ class Lab(models.Model):
         help_text="Vergüllə ayırın: zip,pdf,docx",
     )
 
-    max_file_size_mb = models.PositiveIntegerField(
-        default=50, verbose_name="Maks fayl ölçüsü (MB)"
-    )
+    max_file_size_mb = models.PositiveIntegerField(default=50, verbose_name="Maks fayl ölçüsü (MB)")
 
     # Random sual ayarları
     questions_per_student = models.PositiveIntegerField(
@@ -169,10 +159,7 @@ class Lab(models.Model):
     def is_open(self):
         """Lab açıqdır?"""
         now = timezone.now()
-        return (
-            self.status == "published"
-            and self.start_datetime <= now <= self.end_datetime
-        )
+        return self.status == "published" and self.start_datetime <= now <= self.end_datetime
 
     @property
     def is_upcoming(self):
@@ -197,11 +184,7 @@ class Lab(models.Model):
 
     def get_allowed_extensions_list(self):
         """İcazəli extension-ları list kimi qaytar"""
-        return [
-            ext.strip().lower()
-            for ext in self.allowed_extensions.split(",")
-            if ext.strip()
-        ]
+        return [ext.strip().lower() for ext in self.allowed_extensions.split(",") if ext.strip()]
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -217,9 +200,7 @@ class LabBlock(models.Model):
     Hər blokdan neçə sual düşəcəyini təyin edə bilər.
     """
 
-    lab = models.ForeignKey(
-        Lab, on_delete=models.CASCADE, related_name="blocks", verbose_name="Lab"
-    )
+    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name="blocks", verbose_name="Lab")
 
     title = models.CharField(
         max_length=255,
@@ -273,9 +254,7 @@ class LabQuestion(models.Model):
         verbose_name="Blok",
     )
 
-    question_number = models.PositiveIntegerField(
-        default=1, verbose_name="Sual nömrəsi"
-    )
+    question_number = models.PositiveIntegerField(default=1, verbose_name="Sual nömrəsi")
 
     question_text = models.TextField(verbose_name="Sual mətni")
 
@@ -288,9 +267,7 @@ class LabQuestion(models.Model):
     )
 
     # Sual balı (optional, əgər suallar fərqli bal daşıyırsa)
-    points = models.PositiveIntegerField(
-        default=0, verbose_name="Bal", help_text="0 = bərabər paylanacaq"
-    )
+    points = models.PositiveIntegerField(default=0, verbose_name="Bal", help_text="0 = bərabər paylanacaq")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -315,9 +292,7 @@ class LabAssignment(models.Model):
     Hər tələbəyə unikal sual dəsti təyin olunur.
     """
 
-    lab = models.ForeignKey(
-        Lab, on_delete=models.CASCADE, related_name="assignments", verbose_name="Lab"
-    )
+    lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name="assignments", verbose_name="Lab")
 
     student = models.ForeignKey(
         User,
@@ -364,9 +339,7 @@ class LabAssignment(models.Model):
         for block in self.lab.blocks.all().order_by("order"):
             block_questions = list(block.questions.all())
 
-            if block.questions_to_pick > 0 and block.questions_to_pick < len(
-                block_questions
-            ):
+            if block.questions_to_pick > 0 and block.questions_to_pick < len(block_questions):
                 # Bu blokdan məhdud sayda seç
                 selected = random.sample(block_questions, block.questions_to_pick)
             else:
@@ -376,9 +349,7 @@ class LabAssignment(models.Model):
             all_questions.extend(selected)
 
         # Əgər lab səviyyəsində limit varsa
-        if self.lab.questions_per_student > 0 and self.lab.questions_per_student < len(
-            all_questions
-        ):
+        if self.lab.questions_per_student > 0 and self.lab.questions_per_student < len(all_questions):
             all_questions = random.sample(all_questions, self.lab.questions_per_student)
 
         # Sualları təyin et
@@ -414,17 +385,11 @@ class LabSubmission(models.Model):
     )
 
     # Cavab
-    submission_text = models.TextField(
-        blank=True, verbose_name="Cavab mətni", help_text="Əlavə qeyd, izahat"
-    )
+    submission_text = models.TextField(blank=True, verbose_name="Cavab mətni", help_text="Əlavə qeyd, izahat")
 
-    submission_file = models.FileField(
-        upload_to="labs/submissions/%Y/%m/", blank=True, null=True, verbose_name="Fayl"
-    )
+    submission_file = models.FileField(upload_to="labs/submissions/%Y/%m/", blank=True, null=True, verbose_name="Fayl")
 
-    submission_link = models.URLField(
-        blank=True, verbose_name="Link", help_text="GitHub, Google Drive, Figma və s."
-    )
+    submission_link = models.URLField(blank=True, verbose_name="Link", help_text="GitHub, Google Drive, Figma və s.")
 
     # Status
     status = models.CharField(
@@ -435,9 +400,7 @@ class LabSubmission(models.Model):
     )
 
     # Qiymətləndirmə
-    score = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Qiymət"
-    )
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, verbose_name="Qiymət")
 
     feedback = models.TextField(blank=True, verbose_name="Müəllim rəyi")
 
@@ -450,9 +413,7 @@ class LabSubmission(models.Model):
         verbose_name="Qiymətləndirən",
     )
 
-    graded_at = models.DateTimeField(
-        null=True, blank=True, verbose_name="Qiymətləndirmə tarixi"
-    )
+    graded_at = models.DateTimeField(null=True, blank=True, verbose_name="Qiymətləndirmə tarixi")
 
     # Metadata
     submitted_at = models.DateTimeField(auto_now_add=True)
@@ -502,12 +463,8 @@ class LabAnswer(models.Model):
     """
 
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name="answers")
-    question = models.ForeignKey(
-        "LabQuestion", on_delete=models.CASCADE, related_name="answers"
-    )
-    student = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="lab_answers"
-    )
+    question = models.ForeignKey("LabQuestion", on_delete=models.CASCADE, related_name="answers")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="lab_answers")
 
     # Hansı cəhdə aiddir
     submission = models.ForeignKey(
@@ -522,9 +479,7 @@ class LabAnswer(models.Model):
     attempt_number = models.PositiveIntegerField(default=1)
 
     answer = models.TextField(blank=True)
-    answer_file = models.FileField(
-        upload_to="labs/answers/%Y/%m/", blank=True, null=True
-    )
+    answer_file = models.FileField(upload_to="labs/answers/%Y/%m/", blank=True, null=True)
 
     is_draft = models.BooleanField(default=True)
     is_correct = models.BooleanField(null=True, blank=True)
