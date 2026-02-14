@@ -52,4 +52,12 @@ urlpatterns = [
     path("manage-roles/", views.manage_roles, name="manage_roles"),
     # Grading
     path("grading-queue/", views.grading_queue, name="grading_queue"),
+    # Assigned items
+    path("assigned-exams/", views.assigned_exams, name="assigned_exams"),
+    path("assigned-courses/", views.assigned_courses, name="assigned_courses"),
+    # Pending review
+    path("pending-review/", views.pending_review, name="pending_review"),
+    # RBAC management
+    path("role-assignment/", views.role_assignment, name="role_assignment"),
+    path("permission-editor/", views.permission_editor, name="permission_editor"),
 ]

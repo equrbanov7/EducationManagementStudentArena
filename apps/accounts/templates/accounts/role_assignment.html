@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Role Təyin Et - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-user-shield"></i> Role Təyin Et
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        {% if organization %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-building"></i> {{ organization.name }}
+            </div>
+            <form method="get" class="search-form">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="İstifadəçi axtar..." class="form-control">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+
+        <div class="section-card">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>İstifadəçi</th>
+                        <th>Email</th>
+                        <th>Hazırki rol</th>
+                        <th>Səviyyə</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td>{{ member.user.get_full_name|default:member.user.username }}</td>
+                        <td>{{ member.user.email }}</td>
+                        <td><span class="role-badge">{{ member.role.display_name }}</span></td>
+                        <td>{{ member.role.level }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Üzv tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-building"></i>
+            <p>Təşkilat tapılmadı. Profil parametrlərindən təşkilat seçin.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
