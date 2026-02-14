@@ -7,7 +7,6 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,7 +17,6 @@ from apps.blog.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
-from core.constants import ROLE_LEVELS
 
 from .forms import RegisterForm
 from .models import UserProfile
@@ -237,45 +235,79 @@ def user_profile(request):
 def manage_roles(request):
     """
     Role assignment view for admin-level users.
-    Only users with admin level (level >= 80) can access.
+    Uses UserProfile.role (RBAC) instead of Django Groups.
+    Organization-scoped: only shows users from the same org.
     """
     if not getattr(request.user, "is_admin_level", False):
         messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
         return redirect("home")
 
+    from apps.accounts.models import ProfileRole
+
+    # Get user's organization for scoping
+    user_org = getattr(getattr(request.user, "profile", None), "organization", None)
+
     if request.method == "POST":
         user_id = request.POST.get("user_id")
         role_name = request.POST.get("role_name")
-        action = request.POST.get("action")  # "add" or "remove"
+        action = request.POST.get("action")  # "assign" or "remove"
 
-        user = get_object_or_404(User, id=user_id)
+        target_user = get_object_or_404(User, id=user_id)
 
-        # Check if current user can assign this role
+        # Ensure target is in same organization
+        target_org = getattr(getattr(target_user, "profile", None), "organization", None)
+        if user_org and target_org and user_org.id != target_org.id:
+            messages.error(request, "Başqa təşkilatdakı istifadəçini idarə edə bilməzsiniz.")
+            return redirect("accounts:manage_roles")
+
+        # Check hierarchy: can't assign role >= own level
         if not request.user.can_assign_role(role_name):
             messages.error(request, "Bu rolu təyin etmək icazəniz yoxdur.")
             return redirect("accounts:manage_roles")
 
-        group = get_object_or_404(Group, name=role_name)
+        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
-        if action == "add":
-            user.groups.add(group)
-            messages.success(request, f"{role_name} rolu {user.username} istifadəçisinə əlavə edildi.")
+        if action == "assign" and role_name:
+            target_profile.role = role_name
+            target_profile.save()
+            messages.success(
+                request,
+                f"{target_profile.get_role_display()} rolu {target_user.username} istifadəçisinə təyin edildi.",
+            )
         elif action == "remove":
-            user.groups.remove(group)
-            messages.success(request, f"{role_name} rolu {user.username} istifadəçisindən silindi.")
+            target_profile.role = ProfileRole.STUDENT
+            target_profile.save()
+            messages.success(request, f"{target_user.username} istifadəçisinin rolu sıfırlandı.")
 
         return redirect("accounts:manage_roles")
 
-    # Get all users
-    users = User.objects.all().prefetch_related("groups")
+    # Get org-scoped users
+    if user_org:
+        profiles = UserProfile.objects.filter(organization=user_org).select_related("user")
+    else:
+        profiles = UserProfile.objects.all().select_related("user")
 
-    # Get all roles that current user can assign
-    assignable_roles = [role_name for role_name in ROLE_LEVELS.keys() if request.user.can_assign_role(role_name)]
+    # Search
+    search = request.GET.get("search", "")
+    if search:
+        profiles = profiles.filter(
+            Q(user__username__icontains=search)
+            | Q(user__email__icontains=search)
+            | Q(user__first_name__icontains=search)
+            | Q(user__last_name__icontains=search)
+        )
+
+    # Filter assignable roles: only roles with level lower than current user
+    user_level = request.user._highest_role_level()
+    assignable_roles = [
+        (name, display) for name, display in ProfileRole.CHOICES if ProfileRole.LEVELS.get(name, 0) < user_level
+    ]
 
     context = {
-        "users": users,
+        "profiles": profiles.order_by("-role"),
         "assignable_roles": assignable_roles,
-        "role_levels": ROLE_LEVELS,
+        "search_query": search,
+        "organization": user_org,
     }
 
     return render(request, "accounts/manage_roles.html", context)

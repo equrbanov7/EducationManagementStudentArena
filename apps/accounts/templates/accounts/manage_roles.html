@@ -4,393 +4,7 @@
 {% block title %}Rol İdarəetməsi - EMSArena{% endblock %}
 
 {% block extraCss %}
-<style>
-    :root {
-        --primary-blue: #2563eb;
-        --primary-green: #10b981;
-        --dark-blue: #1e40af;
-        --light-blue: #dbeafe;
-    }
-
-    .roles-container {
-        max-width: 1400px;
-        margin: 2rem auto;
-        padding: 0 2rem;
-    }
-
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1f2937;
-    }
-
-    .back-btn {
-        background: var(--primary-blue);
-        color: white;
-        border: none;
-        padding: 0.5rem 1.5rem;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: background 0.2s;
-    }
-
-    .back-btn:hover {
-        background: var(--dark-blue);
-        color: white;
-    }
-
-    /* Info Card */
-    .info-card {
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-        color: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .info-card h3 {
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .info-card p {
-        margin: 0;
-        opacity: 0.9;
-        font-size: 0.875rem;
-    }
-
-    /* Role Legend */
-    .role-legend {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .legend-title {
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 1rem;
-        font-size: 1rem;
-    }
-
-    .legend-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        background: #f9fafb;
-    }
-
-    .legend-badge {
-        padding: 0.375rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        white-space: nowrap;
-    }
-
-    .legend-level {
-        font-size: 0.75rem;
-        color: #6b7280;
-    }
-
-    /* Role Badges - Color Coded by Level */
-    .role-badge {
-        padding: 0.375rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-    }
-
-    /* Top Admin (100) - Red */
-    .role-badge.level-100 {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    /* High Admin (95-90) - Orange */
-    .role-badge.level-95,
-    .role-badge.level-90 {
-        background: #fed7aa;
-        color: #ea580c;
-    }
-
-    /* Mid Admin (85-80) - Amber */
-    .role-badge.level-85,
-    .role-badge.level-80 {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    /* Senior Teacher (75-70) - Purple */
-    .role-badge.level-75,
-    .role-badge.level-70 {
-        background: #e9d5ff;
-        color: #9333ea;
-    }
-
-    /* Teacher (60-55) - Blue */
-    .role-badge.level-60,
-    .role-badge.level-55 {
-        background: #dbeafe;
-        color: #2563eb;
-    }
-
-    /* Assistant (50) - Cyan */
-    .role-badge.level-50 {
-        background: #cffafe;
-        color: #0891b2;
-    }
-
-    /* Moderator (40) - Teal */
-    .role-badge.level-40 {
-        background: #ccfbf1;
-        color: #0d9488;
-    }
-
-    /* Student (10) - Green */
-    .role-badge.level-10 {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    /* Users Table */
-    .users-card {
-        background: white;
-        border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .search-section {
-        padding: 1.5rem;
-        border-bottom: 2px solid #f3f4f6;
-    }
-
-    .search-box {
-        position: relative;
-        max-width: 400px;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.625rem 1rem 0.625rem 2.5rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.5rem;
-        transition: border-color 0.2s;
-    }
-
-    .search-input:focus {
-        border-color: var(--primary-blue);
-        outline: none;
-    }
-
-    .search-icon {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    .users-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .users-table thead {
-        background: #f9fafb;
-    }
-
-    .users-table th {
-        padding: 1rem;
-        text-align: left;
-        font-weight: 600;
-        color: #374151;
-        border-bottom: 2px solid #e5e7eb;
-    }
-
-    .users-table td {
-        padding: 1rem;
-        border-bottom: 1px solid #f3f4f6;
-        vertical-align: middle;
-    }
-
-    .users-table tbody tr:hover {
-        background: #f9fafb;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: #1f2937;
-    }
-
-    .user-email {
-        font-size: 0.875rem;
-        color: #6b7280;
-    }
-
-    .roles-cell {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.375rem;
-    }
-
-    /* Role Actions */
-    .role-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .role-btn {
-        padding: 0.375rem 0.75rem;
-        border: none;
-        border-radius: 0.375rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-    }
-
-    .role-btn-add {
-        background: var(--primary-green);
-        color: white;
-    }
-
-    .role-btn-add:hover {
-        background: #059669;
-        transform: translateY(-2px);
-    }
-
-    .role-btn-remove {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    .role-btn-remove:hover {
-        background: #fecaca;
-        transform: translateY(-2px);
-    }
-
-    .role-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none !important;
-    }
-
-    /* Loading State */
-    .loading {
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #9ca3af;
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .roles-container {
-            padding: 1rem;
-        }
-
-        .legend-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .users-table {
-            font-size: 0.875rem;
-        }
-
-        .users-table th,
-        .users-table td {
-            padding: 0.75rem 0.5rem;
-        }
-
-        .role-actions {
-            flex-direction: column;
-        }
-
-        .role-btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/manage_roles.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -401,7 +15,7 @@
             <i class="fas fa-user-shield"></i>
             Rol İdarəetməsi
         </h1>
-        <a href="{% url 'accounts:teacher_dashboard' %}" class="back-btn">
+        <a href="{% url 'accounts:profile' %}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             Geri
         </a>
@@ -414,152 +28,77 @@
             Rol İdarəetməsi Haqqında
         </h3>
         <p>
-            Bu səhifədə istifadəçilərə rol təyin edə və ya rol silə bilərsiniz. 
+            Bu səhifədə təşkilatınızdakı istifadəçilərə rol təyin edə bilərsiniz.
             Yalnız öz səviyyənizdən aşağı rolları idarə edə bilərsiniz.
-            Sizin cari səviyyəniz: <strong>{{ user_level }}</strong>
+            {% if organization %}Təşkilat: <strong>{{ organization.name }}</strong>{% endif %}
         </p>
-    </div>
-
-    <!-- Role Legend -->
-    <div class="role-legend">
-        <div class="legend-title">
-            <i class="fas fa-palette"></i>
-            Rol Rəng Kodları və Səviyyələr
-        </div>
-        <div class="legend-grid">
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-100">
-                    <i class="fas fa-crown"></i> Top Admin
-                </span>
-                <span class="legend-level">Səviyyə 100</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-95">
-                    <i class="fas fa-star"></i> High Admin
-                </span>
-                <span class="legend-level">Səviyyə 90-95</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-80">
-                    <i class="fas fa-user-tie"></i> Mid Admin
-                </span>
-                <span class="legend-level">Səviyyə 80-85</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-75">
-                    <i class="fas fa-graduation-cap"></i> Senior Teacher
-                </span>
-                <span class="legend-level">Səviyyə 70-75</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-60">
-                    <i class="fas fa-chalkboard-teacher"></i> Teacher
-                </span>
-                <span class="legend-level">Səviyyə 55-60</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-50">
-                    <i class="fas fa-user-plus"></i> Assistant
-                </span>
-                <span class="legend-level">Səviyyə 50</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-40">
-                    <i class="fas fa-user-check"></i> Moderator
-                </span>
-                <span class="legend-level">Səviyyə 40</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-badge role-badge level-10">
-                    <i class="fas fa-user"></i> Student
-                </span>
-                <span class="legend-level">Səviyyə 10</span>
-            </div>
-        </div>
     </div>
 
     <!-- Users Table -->
     <div class="users-card">
         <div class="search-section">
-            <div class="search-box">
+            <form method="get" class="search-box">
                 <i class="fas fa-search search-icon"></i>
-                <input 
-                    type="text" 
-                    class="search-input" 
+                <input
+                    type="text"
+                    class="search-input"
                     id="searchInput"
+                    name="search"
                     placeholder="İstifadəçi axtar..."
+                    value="{{ search_query }}"
                     onkeyup="filterUsers()"
                 >
-            </div>
+            </form>
         </div>
 
-        {% if users %}
+        {% if profiles %}
         <div class="table-responsive">
             <table class="users-table" id="usersTable">
                 <thead>
                     <tr>
                         <th>İstifadəçi</th>
-                        <th>Cari Rollar</th>
-                        <th>Əməliyyatlar</th>
+                        <th>Cari Rol</th>
+                        <th>Rol Təyin Et</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for target_user in users %}
+                    {% for p in profiles %}
                     <tr>
                         <td>
                             <div class="user-info">
                                 <div class="user-avatar">
-                                    {{ target_user.first_name.0|default:target_user.username.0|upper }}{{ target_user.last_name.0|upper }}
+                                    {{ p.user.get_full_name|default:p.user.username|truncatechars:2|upper }}
                                 </div>
                                 <div>
-                                    <div class="user-name">{{ target_user.get_full_name|default:target_user.username }}</div>
-                                    <div class="user-email">{{ target_user.email }}</div>
+                                    <div class="user-name">{{ p.user.get_full_name|default:p.user.username }}</div>
+                                    <div class="user-email">{{ p.user.email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="roles-cell" id="userRoles{{ target_user.id }}">
-                                {% if target_user.groups.all %}
-                                    {% for group in target_user.groups.all %}
-                                    <span class="role-badge level-{{ group.role_level|default:0 }}">
-                                        <i class="fas fa-shield-alt"></i>
-                                        {{ group.name }}
-                                    </span>
-                                    {% endfor %}
-                                {% else %}
-                                <span class="role-badge level-10">
-                                    <i class="fas fa-user"></i>
-                                    Rol yoxdur
-                                </span>
-                                {% endif %}
-                            </div>
+                            <span class="role-badge-manage role-{{ p.role }}">
+                                <i class="fas fa-shield-alt"></i>
+                                {{ p.get_role_display }}
+                            </span>
                         </td>
                         <td>
-                            <div class="role-actions">
-                                {% for role in available_roles %}
-                                {% if target_user.groups.all|length > 0 and role.name in target_user.groups.values_list %}
-                                <button 
-                                    class="role-btn role-btn-remove"
-                                    onclick="removeRole({{ target_user.id }}, '{{ role.name }}', this)"
-                                    data-user-id="{{ target_user.id }}"
-                                    data-role="{{ role.name }}"
-                                >
-                                    <i class="fas fa-minus-circle"></i>
-                                    {{ role.name }}
+                            <form method="post" class="role-actions">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ p.user.id }}">
+                                <select name="role_name" class="role-select">
+                                    {% for role_val, role_label in assignable_roles %}
+                                    <option value="{{ role_val }}" {% if p.role == role_val %}selected{% endif %}>
+                                        {{ role_label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" name="action" value="assign" class="role-btn role-btn-assign">
+                                    <i class="fas fa-check"></i> Təyin et
                                 </button>
-                                {% else %}
-                                <button 
-                                    class="role-btn role-btn-add"
-                                    onclick="addRole({{ target_user.id }}, '{{ role.name }}', this)"
-                                    data-user-id="{{ target_user.id }}"
-                                    data-role="{{ role.name }}"
-                                >
-                                    <i class="fas fa-plus-circle"></i>
-                                    {{ role.name }}
+                                <button type="submit" name="action" value="remove" class="role-btn role-btn-reset">
+                                    <i class="fas fa-undo"></i> Sıfırla
                                 </button>
-                                {% endif %}
-                                {% endfor %}
-                            </div>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -570,7 +109,7 @@
         <div class="empty-state">
             <i class="fas fa-users-slash"></i>
             <h3>İstifadəçi tapılmadı</h3>
-            <p>Sistem-də hələ idarə ediləcək istifadəçi yoxdur</p>
+            <p>Sistemdə hələ idarə ediləcək istifadəçi yoxdur</p>
         </div>
         {% endif %}
     </div>
@@ -578,170 +117,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
-    function addRole(userId, roleName, button) {
-        if (button.disabled) return;
-        
-        button.disabled = true;
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<span class="loading"></span> Gözləyin...';
-        
-        fetch(`/accounts/assign-role/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                role_name: roleName,
-                action: 'add'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Change button to remove
-                button.className = 'role-btn role-btn-remove';
-                button.innerHTML = '<i class="fas fa-minus-circle"></i> ' + roleName;
-                button.onclick = function() { removeRole(userId, roleName, this); };
-                
-                // Update roles display
-                updateUserRoles(userId, data.roles);
-                
-                showMessage('success', 'Rol uğurla əlavə edildi!');
-            } else {
-                button.innerHTML = originalHTML;
-                showMessage('error', data.error || 'Xəta baş verdi!');
-            }
-            button.disabled = false;
-        })
-        .catch(error => {
-            button.innerHTML = originalHTML;
-            button.disabled = false;
-            showMessage('error', 'Xəta baş verdi: ' + error.message);
-        });
-    }
-    
-    function removeRole(userId, roleName, button) {
-        if (button.disabled) return;
-        
-        if (!confirm(`"${roleName}" rolunu silmək istədiyinizə əminsiniz?`)) {
-            return;
-        }
-        
-        button.disabled = true;
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<span class="loading"></span> Gözləyin...';
-        
-        fetch(`/accounts/assign-role/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                role_name: roleName,
-                action: 'remove'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Change button to add
-                button.className = 'role-btn role-btn-add';
-                button.innerHTML = '<i class="fas fa-plus-circle"></i> ' + roleName;
-                button.onclick = function() { addRole(userId, roleName, this); };
-                
-                // Update roles display
-                updateUserRoles(userId, data.roles);
-                
-                showMessage('success', 'Rol uğurla silindi!');
-            } else {
-                button.innerHTML = originalHTML;
-                showMessage('error', data.error || 'Xəta baş verdi!');
-            }
-            button.disabled = false;
-        })
-        .catch(error => {
-            button.innerHTML = originalHTML;
-            button.disabled = false;
-            showMessage('error', 'Xəta baş verdi: ' + error.message);
-        });
-    }
-    
-    function updateUserRoles(userId, roles) {
-        const rolesCell = document.getElementById(`userRoles${userId}`);
-        if (!rolesCell) return;
-        
-        if (roles.length === 0) {
-            rolesCell.innerHTML = '<span class="role-badge level-10"><i class="fas fa-user"></i> Rol yoxdur</span>';
-        } else {
-            rolesCell.innerHTML = roles.map(role => 
-                `<span class="role-badge level-${role.level || 0}">
-                    <i class="fas fa-shield-alt"></i> ${role.name}
-                </span>`
-            ).join('');
-        }
-    }
-    
-    function filterUsers() {
-        const input = document.getElementById('searchInput');
-        const filter = input.value.toUpperCase();
-        const table = document.getElementById('usersTable');
-        const rows = table.getElementsByTagName('tr');
-        
-        for (let i = 1; i < rows.length; i++) {
-            const userInfo = rows[i].getElementsByClassName('user-info')[0];
-            if (userInfo) {
-                const text = userInfo.textContent || userInfo.innerText;
-                if (text.toUpperCase().indexOf(filter) > -1) {
-                    rows[i].style.display = '';
-                } else {
-                    rows[i].style.display = 'none';
-                }
-            }
-        }
-    }
-    
-    function showMessage(type, message) {
-        const toast = document.createElement('div');
-        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-        toast.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        let container = document.querySelector('.toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-        
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.add('fade-out');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-</script>
+<script src="{% static 'js/manage_roles.js' %}"></script>
 {% endblock %}
