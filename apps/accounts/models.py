@@ -9,6 +9,39 @@ from django.db import models
 from core.constants import OrganizationType
 
 
+class ProfileRole:
+    """Role constants for UserProfile.role field."""
+
+    SUPERADMIN = "superadmin"
+    ORG_OWNER = "org_owner"
+    ORG_ADMIN = "org_admin"
+    TEACHER = "teacher"
+    ASSISTANT_TEACHER = "assistant_teacher"
+    LEAD_STUDENT = "lead_student"
+    STUDENT = "student"
+
+    CHOICES = [
+        (SUPERADMIN, "Super Admin"),
+        (ORG_OWNER, "Təşkilat Sahibi"),
+        (ORG_ADMIN, "Təşkilat Admini"),
+        (TEACHER, "Müəllim"),
+        (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
+        (LEAD_STUDENT, "Baş Tələbə"),
+        (STUDENT, "Tələbə"),
+    ]
+
+    # Level mapping for hierarchy checks
+    LEVELS = {
+        SUPERADMIN: 100,
+        ORG_OWNER: 90,
+        ORG_ADMIN: 80,
+        TEACHER: 60,
+        ASSISTANT_TEACHER: 55,
+        LEAD_STUDENT: 30,
+        STUDENT: 10,
+    }
+
+
 class UserProfile(models.Model):
     """
     Extended user profile with organization type and additional information.
@@ -37,6 +70,16 @@ class UserProfile(models.Model):
     )
 
     country = models.CharField(max_length=100, blank=True, default="", verbose_name="Ölkə")
+
+    # RBAC role field – single source of truth for role checks
+    role = models.CharField(
+        max_length=30,
+        choices=ProfileRole.CHOICES,
+        default=ProfileRole.STUDENT,
+        db_index=True,
+        verbose_name="Rol",
+        help_text="İstifadəçinin sistəmdəki rolu",
+    )
 
     avatar = models.ImageField(
         upload_to="avatars/",
@@ -68,10 +111,11 @@ class UserProfile(models.Model):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["organization", "created_at"]),
+            models.Index(fields=["role"]),
         ]
 
     def __str__(self):
-        return f"{self.user.username} - {self.get_organization_type_display()}"
+        return f"{self.user.username} - {self.get_role_display()}"
 
     @property
     def organization_name(self):
@@ -79,3 +123,8 @@ class UserProfile(models.Model):
         if self.organization:
             return self.organization.name
         return "Fərdi"
+
+    @property
+    def role_level(self):
+        """Numeric level for the current role."""
+        return ProfileRole.LEVELS.get(self.role, 0)

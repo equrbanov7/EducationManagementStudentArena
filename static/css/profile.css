@@ -574,3 +574,42 @@
     flex-direction: column;
     min-height: calc(100vh - 140px);
 }
+
+/* Settings note */
+.settings-note {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0.5rem;
+    color: #0369a1;
+    font-size: 0.85rem;
+}
+
+.settings-note i {
+    margin-right: 0.5rem;
+}
+
+/* Mobile sidebar overlay */
+@media (max-width: 768px) {
+    .profile-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1050;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+        transform: translateX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .profile-sidebar.collapsed {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+    }
+
+    .profile-main {
+        margin-left: 0;
+        width: 100%;
+    }
+}

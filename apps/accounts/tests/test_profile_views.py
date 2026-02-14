@@ -55,11 +55,38 @@ class ProfileViewTest(TestCase):
         self.assertIn("is_admin", response.context)
 
     def test_profile_settings_section(self):
-        """Test that settings section renders form."""
+        """Test that settings section renders readonly account info."""
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=settings")
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Hesab Parametrləri")
+
+    def test_profile_edit_section(self):
+        """Test that edit-profile section renders form with save button."""
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
+
+    def test_profile_role_field(self):
+        """Test that profile has role field with default student role."""
+        from apps.accounts.models import ProfileRole, UserProfile
+
+        self.client.login(username="testuser", password="testpass123")
+        profile = UserProfile.objects.get(user=self.user)
+        self.assertEqual(profile.role, ProfileRole.STUDENT)
+        self.assertEqual(profile.role_level, 10)
+
+    def test_profile_role_level_check(self):
+        """Test that profile role is used for role level checks."""
+        from apps.accounts.models import ProfileRole, UserProfile
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = ProfileRole.TEACHER
+        profile.save()
+        # Reload user
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_teacher_or_above)
 
 
 class AssignedItemsViewTest(TestCase):

@@ -86,6 +86,11 @@ ROLE_LEVELS = {
     "moderator": 40,
     "student": 10,
     "owner": 100,
+    # Profile-level roles (from UserProfile.role)
+    "superadmin": 100,
+    "org_owner": 90,
+    "org_admin": 80,
+    "lead_student": 30,
 }
 
 # Role level thresholds

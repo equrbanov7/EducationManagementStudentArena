@@ -114,6 +114,9 @@ class RoleModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
+        # Disconnect signal to avoid unique constraint errors in tests
+        post_save.disconnect(create_default_roles, sender=Organization)
+
         self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
@@ -121,6 +124,10 @@ class RoleModelTest(TestCase):
             org_type=OrganizationType.UNIVERSITY,
             owner=self.user,
         )
+
+    def tearDown(self):
+        """Clean up after tests."""
+        post_save.connect(create_default_roles, sender=Organization)
 
     def test_role_creation(self):
         """Test creating a role."""
@@ -142,6 +149,9 @@ class MembershipModelTest(TestCase):
 
     def setUp(self):
         """Set up test data."""
+        # Disconnect signal to avoid unique constraint errors in tests
+        post_save.disconnect(create_default_roles, sender=Organization)
+
         self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpass123")
         self.org = Organization.objects.create(
             name="Test University",
@@ -157,6 +167,10 @@ class MembershipModelTest(TestCase):
             scope_type=RoleScopeType.COURSE,
             permissions=["course.*"],
         )
+
+    def tearDown(self):
+        """Clean up after tests."""
+        post_save.connect(create_default_roles, sender=Organization)
 
     def test_membership_creation(self):
         """Test creating a membership."""
