@@ -419,7 +419,7 @@
             {% if my_created_courses %}
             <div class="posts-grid">
                 {% for course in my_created_courses %}
-                <a href="{% url 'courses:course_detail' course.pk %}" class="post-item">
+                <a href="{% url 'courses:course_dashboard' course.pk %}" class="post-item">
                     <div class="post-icon post-icon--course">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
@@ -458,7 +458,7 @@
             {% if my_courses %}
             <div class="posts-grid">
                 {% for course in my_courses %}
-                <a href="{% url 'courses:course_detail' course.pk %}" class="post-item">
+                <a href="{% url 'courses:course_dashboard' course.pk %}" class="post-item">
                     <div class="post-icon post-icon--course">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
