@@ -44,14 +44,14 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # LAN host for development
-LAN_HOST = os.getenv("LAN_HOST", "127.0.0.1:8000")
+LAN_HOST = os.getenv("LAN_HOST", "172.20.10.11:8000")
 
 # CSRF trusted origins
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 
 # Site URL for development
-SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
+SITE_URL = os.getenv("SITE_URL", "http://172.20.10.11:8000")
 
 
 # Add django-extensions for development if installed
@@ -70,7 +70,7 @@ if DEBUG:
 
         INSTALLED_APPS += ["debug_toolbar"]
         MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
-        INTERNAL_IPS = ["127.0.0.1"]
+        INTERNAL_IPS = ["172.20.10.11"]
     except ImportError:
         pass
 
@@ -89,40 +89,40 @@ LOGS_DIR = BASE_DIR / "logs"
 if not os.path.exists(LOGS_DIR):
     os.makedirs(LOGS_DIR)
 
-# SUPER SADƏ - yalnız console, heç bir fayl
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": True,  # Köhnə logger-ları söndür
-    "formatters": {
-        "simple": {
-            "format": "{levelname}: {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",  # Yalnız warning və error
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        # Autoreload noise-ı tamamilə söndür
-        "django.utils.autoreload": {
-            "handlers": [],
-            "propagate": False,
-        },
-    },
-}
+# # SUPER SADƏ - yalnız console, heç bir fayl
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": True,  # Köhnə logger-ları söndür
+#     "formatters": {
+#         "simple": {
+#             "format": "{levelname}: {message}",
+#             "style": "{",
+#         },
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "simple",
+#         },
+#     },
+#     "root": {
+#         "handlers": ["console"],
+#         "level": "WARNING",  # Yalnız warning və error
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["console"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         # Autoreload noise-ı tamamilə söndür
+#         "django.utils.autoreload": {
+#             "handlers": [],
+#             "propagate": False,
+#         },
+#     },
+# }
 
-# Logging - development üçün sadə
-LOGGING["handlers"]["console"]["level"] = "DEBUG"
-LOGGING["loggers"]["django"]["level"] = "DEBUG"
+# # Logging - development üçün sadə
+# LOGGING["handlers"]["console"]["level"] = "DEBUG"
+# LOGGING["loggers"]["django"]["level"] = "DEBUG"
