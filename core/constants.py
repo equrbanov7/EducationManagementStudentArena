@@ -90,6 +90,8 @@ ROLE_LEVELS = {
     "superadmin": 100,
     "org_owner": 90,
     "org_admin": 80,
+    "hr": 65,
+    "member": 20,
     "lead_student": 30,
 }
 

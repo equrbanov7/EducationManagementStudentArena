@@ -45,6 +45,17 @@
                 <i class="fas fa-lock"></i> {{ selected_role.display_name }} - Permission-lar
             </div>
 
+            <div class="mb-4">
+                <div class="info-label">Sizin aktiv permission-larınız</div>
+                <div class="role-badges">
+                    {% for perm in actor_permissions %}
+                    <span class="role-badge">{{ perm }}</span>
+                    {% empty %}
+                    <span class="text-muted">Permission tapılmadı.</span>
+                    {% endfor %}
+                </div>
+            </div>
+
             {% for category, perms in permission_categories.items %}
             <div class="pending-group">
                 <div class="section-title pending-group-header">
@@ -58,9 +69,23 @@
                         </div>
                         <div>
                             {% if perm in selected_role.permissions or '*' in selected_role.permissions %}
-                            <span class="role-badge admin"><i class="fas fa-check"></i> Aktiv</span>
+                            <form method="post" style="display:inline-flex; gap: 8px; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="role_id" value="{{ selected_role.id }}">
+                                <input type="hidden" name="permission" value="{{ perm }}">
+                                <input type="hidden" name="action" value="remove">
+                                <span class="role-badge admin"><i class="fas fa-check"></i> Aktiv</span>
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                            </form>
                             {% else %}
-                            <span class="role-badge student"><i class="fas fa-times"></i> Deaktiv</span>
+                            <form method="post" style="display:inline-flex; gap: 8px; align-items: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="role_id" value="{{ selected_role.id }}">
+                                <input type="hidden" name="permission" value="{{ perm }}">
+                                <input type="hidden" name="action" value="add">
+                                <span class="role-badge student"><i class="fas fa-times"></i> Deaktiv</span>
+                                <button type="submit" class="btn btn-sm btn-outline-success">Əlavə et</button>
+                            </form>
                             {% endif %}
                         </div>
                     </div>

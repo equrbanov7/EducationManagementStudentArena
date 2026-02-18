@@ -11,6 +11,54 @@ from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, Ro
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 
+class Country(models.Model):
+    """
+    Country master data for signup institution filtering.
+    """
+
+    code = models.CharField(max_length=2, unique=True)
+    name = models.CharField(max_length=120, unique=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Institution(models.Model):
+    """
+    Institution master data (school/university/course center) scoped by country.
+    """
+
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="institutions")
+    institution_type = models.CharField(
+        max_length=30,
+        choices=[
+            (OrganizationType.SCHOOL, "School"),
+            (OrganizationType.UNIVERSITY, "University"),
+            (OrganizationType.COURSE_CENTER, "Course Center"),
+        ],
+    )
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=120, blank=True, default="")
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["name"]
+        unique_together = [("country", "institution_type", "name")]
+        indexes = [
+            models.Index(
+                fields=["country", "institution_type", "is_active"],
+                name="org_inst_country_type_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.country.code})"
+
+
 class Organization(UUIDModel, TimeStampedModel):
     """
     Represents a top-level organization (university, school, course center, or individual).
@@ -20,6 +68,18 @@ class Organization(UUIDModel, TimeStampedModel):
     slug = models.SlugField(max_length=255, unique=True)
     org_type = models.CharField(max_length=50, choices=OrganizationType.CHOICES)
     country = models.CharField(max_length=100, blank=True, default="")
+    organization_identifier = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        help_text="Rəsmi təşkilat kodu/nömrəsi (məktəb və universitet üçün)",
+    )
+    license_identifier = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        help_text="Lisenziya/VÖEN və ya əlavə identifikator",
+    )
     logo = models.ImageField(upload_to="org_logos/", null=True, blank=True)
     description = models.TextField(blank=True)
     email = models.EmailField(blank=True)
@@ -39,6 +99,8 @@ class Organization(UUIDModel, TimeStampedModel):
         choices=[("active", "Active"), ("pending", "Pending"), ("suspended", "Suspended")],
         default="active",
     )
+    suspended_at = models.DateTimeField(null=True, blank=True)
+    suspension_reason = models.TextField(blank=True, default="")
 
     objects = models.Manager()
     active = ActiveManager()
@@ -53,11 +115,20 @@ class Organization(UUIDModel, TimeStampedModel):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or "organization"
+            self.slug = base_slug
+            suffix = 2
+            while Organization.objects.exclude(pk=self.pk).filter(slug=self.slug).exists():
+                self.slug = f"{base_slug}-{suffix}"
+                suffix += 1
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("organizations:detail", kwargs={"slug": self.slug})
+
+    @property
+    def is_suspended(self):
+        return self.status == "suspended" or not self.is_active
 
 
 class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):

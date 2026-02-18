@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Daxil ol | MyBlog{% endblock %}
+{% block title %}Daxil ol | EMSArena{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
@@ -41,7 +41,7 @@
             </div>
 
             <div class="auth-forgot-password "> 
-                <a class="auth-forget-password-link" href="{% url 'password_reset' %}">Şifrəni unutdun?</a>
+                <a class="auth-forget-password-link" href="{% url 'accounts:password_reset' %}">Şifrəni unutdun?</a>
             </div>
             
 
@@ -49,7 +49,7 @@
         </form>
 
         <p class="auth-footer-text">
-            Hesabınız yoxdur? <a href="{% url 'register' %}">Qeydiyyatdan keçin</a>
+            Hesabınız yoxdur? <a href="{% url 'accounts:register' %}">Qeydiyyatdan keçin</a>
         </p>
     </div>
 </div>

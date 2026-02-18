@@ -110,6 +110,18 @@ DEFAULT_ROLES = {
             ],
             "description": "Student with view and self-service permissions",
         },
+        {
+            "name": "member",
+            "display_name": "Member",
+            "level": 20,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "course.view",
+                "exam.view",
+                "analytics.view_own",
+            ],
+            "description": "Default onboarding role before specialized assignment",
+        },
     ],
     OrganizationType.SCHOOL: [
         {
@@ -183,6 +195,18 @@ DEFAULT_ROLES = {
             "description": "Student with view permissions",
         },
         {
+            "name": "member",
+            "display_name": "Member",
+            "level": 20,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "course.view",
+                "exam.view",
+                "analytics.view_own",
+            ],
+            "description": "Default onboarding role before student/teacher assignment",
+        },
+        {
             "name": "parent",
             "display_name": "Parent",
             "level": 5,
@@ -245,6 +269,18 @@ DEFAULT_ROLES = {
             ],
             "description": "Student enrolled in courses",
         },
+        {
+            "name": "member",
+            "display_name": "Member",
+            "level": 20,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "course.view",
+                "exam.view",
+                "analytics.view_own",
+            ],
+            "description": "Default onboarding role",
+        },
     ],
     OrganizationType.INDIVIDUAL: [
         {
@@ -279,6 +315,18 @@ DEFAULT_ROLES = {
                 "analytics.view_own",
             ],
             "description": "Student with view permissions",
+        },
+        {
+            "name": "member",
+            "display_name": "Member",
+            "level": 20,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": [
+                "course.view",
+                "exam.view",
+                "analytics.view_own",
+            ],
+            "description": "Default onboarding role",
         },
     ],
 }

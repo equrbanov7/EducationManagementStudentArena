@@ -85,13 +85,13 @@ class ProfileViewTest(TestCase):
         self.assertIn("my_created_courses_count", response.context)
 
     def test_profile_role_field(self):
-        """Test that profile has role field with default student role."""
+        """Test that profile has role field with default member role."""
         from apps.accounts.models import ProfileRole, UserProfile
 
         self.client.login(username="testuser", password="testpass123")
         profile = UserProfile.objects.get(user=self.user)
-        self.assertEqual(profile.role, ProfileRole.STUDENT)
-        self.assertEqual(profile.role_level, 10)
+        self.assertEqual(profile.role, ProfileRole.MEMBER)
+        self.assertEqual(profile.role_level, 20)
 
     def test_profile_role_level_check(self):
         """Test that profile role is used for role level checks."""

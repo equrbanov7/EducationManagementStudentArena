@@ -23,6 +23,7 @@ urlpatterns = [
     # TEACHER - Student Groups (sabit)
     # ==========================
     path("groups/", views.teacher_group_list, name="teacher_group_list"),
+    path("groups/create/form/", views.create_student_group, name="create_student_group"),
     path("groups/create/", views.teacher_create_group, name="teacher_create_group"),
     path(
         "groups/<int:group_id>/update/",

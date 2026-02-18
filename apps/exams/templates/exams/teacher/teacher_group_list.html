@@ -24,16 +24,10 @@
         <input type="text" id="groupListSearch" placeholder="Qrup adı axtar..." class="group-search-input">
       </div>
 
-      {# onclick YOX! #}
-      <button
-        type="button"
-        class="btn-create-new"
-        id="btnOpenCreateGroup"
-        data-create-url="{% url 'exams:teacher_create_group' %}"
-      >
+      <a href="{% url 'exams:create_student_group' %}" class="btn-create-new">
         <i class="fas fa-plus"></i>
         <span>Yeni qrup yarat</span>
-      </button>
+      </a>
     </div>
   </div>
 
@@ -95,14 +89,9 @@
       <h3>Hələ qrup yaratmamısan</h3>
       <p class="text-muted">Başlamaq üçün yeni qrup yarat.</p>
 
-      <button
-        type="button"
-        class="btn-create-new mt-3"
-        id="btnOpenCreateGroupEmpty"
-        data-create-url="{% url 'exams:teacher_create_group' %}"
-      >
+      <a href="{% url 'exams:create_student_group' %}" class="btn-create-new mt-3">
         İlk qrupunu yarat
-      </button>
+      </a>
     </div>
   {% endif %}
 </div>
@@ -111,8 +100,8 @@
 <div
   id="groupModal"
   class="custom-modal-overlay"
-  data-update-url-template="/teacher/groups/update/__ID__/"
-  data-delete-url-template="/teacher/groups/delete/__ID__/"
+  data-update-url-template="{% url 'exams:teacher_update_group' 0 %}"
+  data-delete-url-template="{% url 'exams:teacher_delete_group' 0 %}"
 >
   <div class="custom-modal-content">
 
@@ -361,12 +350,12 @@
     modalTitle.innerText = "Qrupu Redaktə Et";
     if (nameInput) nameInput.value = groupName || "";
 
-    const updateTpl = groupModal.dataset.updateUrlTemplate || "/teacher/groups/update/__ID__/";
-    const deleteTpl = groupModal.dataset.deleteUrlTemplate || "/teacher/groups/delete/__ID__/";
+    const updateTpl = groupModal.dataset.updateUrlTemplate || "{% url 'exams:teacher_update_group' 0 %}";
+    const deleteTpl = groupModal.dataset.deleteUrlTemplate || "{% url 'exams:teacher_delete_group' 0 %}";
 
-    groupForm.action = updateTpl.replace("__ID__", groupId);
+    groupForm.action = updateTpl.replace("/0/", `/${groupId}/`);
     deleteBtn.style.display = 'inline-flex';
-    deleteBtn.href = deleteTpl.replace("__ID__", groupId);
+    deleteBtn.href = deleteTpl.replace("/0/", `/${groupId}/`);
 
     // select existing students
     (studentIds || []).forEach(id => {

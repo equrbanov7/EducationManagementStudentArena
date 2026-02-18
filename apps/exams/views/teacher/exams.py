@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
+from apps.organizations.services import get_user_organization
 
 
 @login_required
@@ -35,6 +36,7 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
+    organization = getattr(request, "organization", None) or get_user_organization(request.user)
 
     # Əgər slug varsa -> Edit mode
     if slug:
@@ -47,10 +49,10 @@ def createAndEditExamView(request, slug=None):
     if request.method == "POST":
         if is_editing:
             # Edit mode
-            form = ExamForm(request.POST, instance=exam, user=request.user)
+            form = ExamForm(request.POST, instance=exam, user=request.user, organization=organization)
         else:
             # Create mode
-            form = ExamForm(request.POST, user=request.user)
+            form = ExamForm(request.POST, user=request.user, organization=organization)
 
         if form.is_valid():
             exam_instance = form.save(commit=False)
@@ -70,9 +72,9 @@ def createAndEditExamView(request, slug=None):
     else:
         # GET request
         if is_editing:
-            form = ExamForm(instance=exam, user=request.user)
+            form = ExamForm(instance=exam, user=request.user, organization=organization)
         else:
-            form = ExamForm(user=request.user)
+            form = ExamForm(user=request.user, organization=organization)
 
     return render(
         request,

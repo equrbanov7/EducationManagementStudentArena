@@ -7,7 +7,9 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
+from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -17,12 +19,160 @@ from apps.blog.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
+from core.constants import OrganizationType
 
-from .forms import RegisterForm
-from .models import UserProfile
+from .forms import CustomLoginForm, RegisterForm
+from .models import ProfileRole, UserProfile
 
 User = get_user_model()
 signer = TimestampSigner()
+
+
+def _is_superadmin_user(user):
+    return user.is_superuser or getattr(user, "is_superadmin", False)
+
+
+def _get_active_organization(request):
+    """
+    Use middleware-selected organization first; fallback to profile organization.
+    """
+    from apps.organizations.services import get_user_organization
+
+    return getattr(request, "organization", None) or get_user_organization(request.user)
+
+
+def _collect_actor_permissions(user, organization):
+    """
+    Return two sets:
+    1. effective permissions user currently has in org
+    2. explicitly grantable permissions declared as `grant:<permission>` in role permissions
+    """
+    from apps.organizations.models import Membership
+
+    effective_permissions = set()
+    grantable_permissions = set()
+
+    memberships = Membership.objects.filter(user=user, organization=organization, is_active=True).select_related("role")
+    for membership in memberships:
+        for permission in membership.role.permissions or []:
+            if permission.startswith("grant:"):
+                grantable_permissions.add(permission.split("grant:", 1)[1].strip())
+            else:
+                effective_permissions.add(permission)
+
+    return effective_permissions, grantable_permissions
+
+
+def _permission_is_grantable(permission, effective_permissions, grantable_permissions):
+    """
+    A permission can be granted when:
+    - actor already has that permission, or
+    - permission is explicitly grantable via `grant:*`, `grant:category.*` or `grant:exact.permission`.
+    """
+    from apps.organizations.permissions import has_permission
+
+    effective_list = list(effective_permissions)
+    grantable_list = list(grantable_permissions)
+    return has_permission(effective_list, permission) or has_permission(grantable_list, permission)
+
+
+def _map_signup_role_to_profile_role(initial_role):
+    role_map = {
+        ProfileRole.STUDENT: ProfileRole.STUDENT,
+        ProfileRole.MEMBER: ProfileRole.MEMBER,
+        ProfileRole.TEACHER: ProfileRole.TEACHER,
+        ProfileRole.HR: ProfileRole.HR,
+        ProfileRole.ORG_ADMIN: ProfileRole.ORG_ADMIN,
+    }
+    return role_map.get(initial_role, ProfileRole.MEMBER)
+
+
+def _map_org_role_to_profile_role(role):
+    role_name = (role.name or "").lower()
+    if role_name == "member":
+        return ProfileRole.MEMBER
+    if role_name == "student" or role.level <= 20:
+        return ProfileRole.STUDENT
+    if "hr" in role_name:
+        return ProfileRole.HR
+    if role.level >= 80:
+        return ProfileRole.ORG_ADMIN
+    if any(token in role_name for token in ["teacher", "instructor", "professor", "assistant"]):
+        return ProfileRole.TEACHER
+    return ProfileRole.MEMBER
+
+
+def _resolve_membership_role(organization, initial_role):
+    from apps.organizations.models import Role
+
+    roles = Role.objects.filter(organization=organization, is_active=True)
+    if not roles.exists():
+        return None
+
+    if initial_role == ProfileRole.ORG_ADMIN:
+        return roles.order_by("-level").first()
+
+    if initial_role == ProfileRole.MEMBER:
+        member_role = roles.filter(name="member").first()
+        if member_role:
+            return member_role
+        student_role = roles.filter(name="student").first()
+        if student_role:
+            return student_role
+        return roles.order_by("level").first()
+
+    if initial_role == ProfileRole.STUDENT:
+        return roles.filter(name="student").first() or roles.order_by("level").first()
+
+    if initial_role == ProfileRole.TEACHER:
+        for role_name in [
+            "teacher",
+            "instructor",
+            "assistant_teacher",
+            "professor",
+            "associate_professor",
+            "assistant",
+        ]:
+            match = roles.filter(name=role_name).first()
+            if match:
+                return match
+        return roles.filter(level__gte=50).order_by("level").first() or roles.order_by("-level").first()
+
+    if initial_role == ProfileRole.HR:
+        hr_role = roles.filter(name="hr").first()
+        if hr_role:
+            return hr_role
+        return Role.objects.create(
+            organization=organization,
+            name="hr",
+            display_name="HR",
+            level=65,
+            scope_type="organization",
+            permissions=["member.view", "member.invite", "member.edit"],
+            is_system=False,
+            is_active=True,
+        )
+
+    return roles.order_by("level").first()
+
+
+def _get_signup_lookup_payload():
+    """
+    Return lookup payload for signup institution filtering.
+    """
+    from apps.organizations.models import Country, Institution
+
+    countries = list(Country.objects.filter(is_active=True).values("code", "name").order_by("name"))
+    institutions = list(
+        Institution.objects.filter(is_active=True)
+        .select_related("country")
+        .values("id", "name", "code", "institution_type", "country__code")
+        .order_by("name")
+    )
+    return {
+        "countries": countries,
+        "institutions": institutions,
+    }
 
 
 @login_required
@@ -137,16 +287,26 @@ def user_profile(request):
     active_section = request.GET.get("section", "profile-info")
 
     if request.method == "POST":
+        new_email = (request.POST.get("email", "") or "").strip().lower()
+        student_university_name = (request.POST.get("student_university_name", "") or "").strip()
+        student_school_identifier = (request.POST.get("student_school_identifier", "") or "").strip()
+
+        if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
+            messages.error(request, "Bu email artıq istifadə olunur.")
+            return redirect("accounts:profile" + "?section=edit-profile")
+
         # Update user info
         request.user.first_name = request.POST.get("first_name", "")
         request.user.last_name = request.POST.get("last_name", "")
-        request.user.email = request.POST.get("email", "")
+        request.user.email = new_email
         request.user.save()
 
         # Update profile
         profile.phone = request.POST.get("phone", "")
         profile.bio = request.POST.get("bio", "")
         profile.location = request.POST.get("location", "")
+        profile.student_university_name = student_university_name
+        profile.student_school_identifier = student_school_identifier
 
         # Handle avatar upload
         if "avatar" in request.FILES:
@@ -155,6 +315,15 @@ def user_profile(request):
         # Only admins can change supervisor_code
         if getattr(request.user, "is_admin_level", False):
             profile.supervisor_code = request.POST.get("supervisor_code", "")
+
+        if profile.role == ProfileRole.STUDENT and not (
+            profile.student_university_name or profile.student_school_identifier
+        ):
+            messages.error(
+                request,
+                "Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir.",
+            )
+            return redirect("accounts:profile" + "?section=edit-profile")
 
         profile.save()
 
@@ -167,6 +336,7 @@ def user_profile(request):
     # Check role levels early (needed for context below)
     is_teacher = getattr(request.user, "is_teacher_or_above", False)
     is_admin = getattr(request.user, "is_admin_level", False)
+    is_superadmin = _is_superadmin_user(request.user)
 
     # Get user's posts for the posts section
     user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
@@ -241,6 +411,7 @@ def user_profile(request):
         "pending_review_count": pending_review_count,
         "is_teacher": is_teacher,
         "is_admin": is_admin,
+        "is_superadmin": is_superadmin,
     }
 
     return render(request, "accounts/profile.html", context)
@@ -253,14 +424,18 @@ def manage_roles(request):
     Uses UserProfile.role (RBAC) instead of Django Groups.
     Organization-scoped: only shows users from the same org.
     """
-    if not getattr(request.user, "is_admin_level", False):
+    is_superadmin = _is_superadmin_user(request.user)
+    if not is_superadmin and not getattr(request.user, "is_admin_level", False):
         messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
         return redirect("home")
 
     from apps.accounts.models import ProfileRole
 
-    # Get user's organization for scoping
-    user_org = getattr(getattr(request.user, "profile", None), "organization", None)
+    # Get user's active organization for scoping
+    user_org = _get_active_organization(request)
+    if not is_superadmin and not user_org:
+        messages.error(request, "Rol idarəetməsi üçün aktiv təşkilat tapılmadı.")
+        return redirect("accounts:profile")
 
     if request.method == "POST":
         user_id = request.POST.get("user_id")
@@ -271,8 +446,8 @@ def manage_roles(request):
 
         # Ensure target is in same organization
         target_org = getattr(getattr(target_user, "profile", None), "organization", None)
-        if user_org and target_org and user_org.id != target_org.id:
-            messages.error(request, "Başqa təşkilatdakı istifadəçini idarə edə bilməzsiniz.")
+        if not is_superadmin and target_org != user_org:
+            messages.error(request, "Yalnız öz təşkilatınızdakı istifadəçiləri idarə edə bilərsiniz.")
             return redirect("accounts:manage_roles")
 
         # Check hierarchy: can't assign role >= own level
@@ -282,7 +457,11 @@ def manage_roles(request):
 
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
+        valid_roles = {choice[0] for choice in ProfileRole.CHOICES}
         if action == "assign" and role_name:
+            if role_name not in valid_roles:
+                messages.error(request, "Seçilən rol etibarlı deyil.")
+                return redirect("accounts:manage_roles")
             target_profile.role = role_name
             target_profile.save()
             messages.success(
@@ -290,17 +469,17 @@ def manage_roles(request):
                 f"{target_profile.get_role_display()} rolu {target_user.username} istifadəçisinə təyin edildi.",
             )
         elif action == "remove":
-            target_profile.role = ProfileRole.STUDENT
+            target_profile.role = ProfileRole.MEMBER
             target_profile.save()
             messages.success(request, f"{target_user.username} istifadəçisinin rolu sıfırlandı.")
 
         return redirect("accounts:manage_roles")
 
     # Get org-scoped users
-    if user_org:
-        profiles = UserProfile.objects.filter(organization=user_org).select_related("user")
-    else:
+    if is_superadmin:
         profiles = UserProfile.objects.all().select_related("user")
+    else:
+        profiles = UserProfile.objects.filter(organization=user_org).select_related("user")
 
     # Search
     search = request.GET.get("search", "")
@@ -426,9 +605,13 @@ def pending_review(request):
     search = request.GET.get("search", "")
     filter_type = request.GET.get("type", "all")
     filter_status = request.GET.get("status", "all")
+    organization = getattr(getattr(request.user, "profile", None), "organization", None)
 
     # Get teacher's groups
-    groups = StudentGroup.objects.filter(teacher=request.user).prefetch_related("students")
+    groups = StudentGroup.objects.filter(teacher=request.user)
+    if organization is not None:
+        groups = groups.filter(organization=organization)
+    groups = groups.prefetch_related("students")
 
     grouped_items = []
     for group in groups:
@@ -520,30 +703,145 @@ def pending_review(request):
 
 @login_required
 def role_assignment(request):
-    """Organization-scoped role assignment UI."""
-    if not getattr(request.user, "is_admin_level", False):
-        messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
-        return redirect("accounts:profile")
-
+    """Organization-scoped role assignment UI with strict server-side permission checks."""
     from apps.organizations.models import Membership, Role
-    from apps.organizations.services import get_user_org_role_level, get_user_organization
+    from apps.organizations.permissions import has_permission
+    from apps.organizations.services import create_audit_log, get_user_org_role_level
 
-    org = get_user_organization(request.user)
+    org = _get_active_organization(request)
     if not org:
-        messages.error(request, "Təşkilat tapılmadı.")
+        messages.error(request, "Aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
 
-    user_level = get_user_org_role_level(request.user, org)
+    is_superadmin = _is_superadmin_user(request.user)
+    user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
+    actor_permissions, _ = _collect_actor_permissions(request.user, org)
+    can_assign_roles = is_superadmin or has_permission(list(actor_permissions), "role.assign")
 
-    # Get org members
+    # Teacher+ can at least assign Student/Member roles.
+    # Default teacher membership level is 50 in org role templates.
+    if not is_superadmin and user_level < 50:
+        messages.error(request, "Bu səhifəyə yalnız müəllim və yuxarı səviyyə daxil ola bilər.")
+        return redirect("accounts:profile")
+
+    if request.method == "POST":
+        action = request.POST.get("action", "update_member")
+        role_id = request.POST.get("role_id")
+        target_role = get_object_or_404(Role, id=role_id, organization=org, is_active=True)
+
+        if not is_superadmin and target_role.level >= user_level:
+            messages.error(request, "Yalnız sizdən aşağı səviyyəli rolları təyin edə bilərsiniz.")
+            return redirect("accounts:role_assignment")
+
+        # Teacher+ can assign student/member even without explicit role.assign permission.
+        teacher_can_assign_basic = not is_superadmin and user_level >= 50 and target_role.name in {"student", "member"}
+
+        if not (can_assign_roles or teacher_can_assign_basic):
+            messages.error(request, "Rol təyin etmək üçün lazımi icazəniz yoxdur.")
+            return redirect("accounts:role_assignment")
+
+        if action == "attach_user":
+            user_id = request.POST.get("user_id")
+            target_user = get_object_or_404(User, id=user_id, is_active=True)
+            target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+
+            if target_profile.organization and target_profile.organization != org:
+                messages.error(request, "İstifadəçi artıq başqa təşkilata bağlıdır.")
+                return redirect("accounts:role_assignment")
+
+            membership, created = Membership.objects.get_or_create(
+                user=target_user,
+                organization=org,
+                defaults={
+                    "role": target_role,
+                    "assigned_by": request.user,
+                    "is_primary": True,
+                    "is_active": True,
+                },
+            )
+            if not created:
+                if not is_superadmin and membership.role.level >= user_level:
+                    messages.error(request, "Bu istifadəçinin rolunu dəyişmək icazəniz yoxdur.")
+                    return redirect("accounts:role_assignment")
+                membership.role = target_role
+                membership.assigned_by = request.user
+                membership.is_active = True
+                membership.save(update_fields=["role", "assigned_by", "is_active", "updated_at"])
+
+            target_profile.organization = org
+            target_profile.organization_type = org.org_type
+            target_profile.role = _map_org_role_to_profile_role(target_role)
+            target_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+            create_audit_log(
+                user=request.user,
+                organization=org,
+                action="update",
+                resource_type="membership",
+                resource_id=membership.id,
+                resource_repr=str(membership),
+                old_values=None,
+                new_values={"role": target_role.name, "attached_user": target_user.username},
+                request=request,
+            )
+
+            messages.success(
+                request, f"{target_user.username} təşkilata əlavə edildi və `{target_role.display_name}` rolu verildi."
+            )
+            return redirect("accounts:role_assignment")
+
+        # Default action: update existing org membership
+        membership_id = request.POST.get("membership_id")
+        target_membership = get_object_or_404(
+            Membership.objects.select_related("role", "user"),
+            id=membership_id,
+            organization=org,
+            is_active=True,
+        )
+
+        if not is_superadmin and target_membership.role.level >= user_level:
+            messages.error(request, "Yalnız sizdən aşağı səviyyəli istifadəçilərin rolunu dəyişə bilərsiniz.")
+            return redirect("accounts:role_assignment")
+
+        old_role_name = target_membership.role.name
+        target_membership.role = target_role
+        target_membership.assigned_by = request.user
+        target_membership.save(update_fields=["role", "assigned_by", "updated_at"])
+
+        target_profile, _ = UserProfile.objects.get_or_create(user=target_membership.user)
+        target_profile.role = _map_org_role_to_profile_role(target_role)
+        target_profile.organization = org
+        target_profile.organization_type = org.org_type
+        target_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        create_audit_log(
+            user=request.user,
+            organization=org,
+            action="update",
+            resource_type="membership",
+            resource_id=target_membership.id,
+            resource_repr=str(target_membership),
+            old_values={"role": old_role_name},
+            new_values={"role": target_role.name},
+            request=request,
+        )
+
+        messages.success(
+            request, f"{target_membership.user.username} üçün rol `{target_role.display_name}` olaraq yeniləndi."
+        )
+        return redirect("accounts:role_assignment")
+
     members = (
         Membership.objects.filter(organization=org, is_active=True)
         .select_related("user", "role")
         .order_by("-role__level", "user__username")
     )
+    if not is_superadmin:
+        members = members.filter(role__level__lt=user_level)
 
-    # Get assignable roles (lower than current user's level)
-    assignable_roles = Role.objects.filter(organization=org, is_active=True, level__lt=user_level).order_by("-level")
+    assignable_roles = Role.objects.filter(organization=org, is_active=True).order_by("-level")
+    if not is_superadmin:
+        assignable_roles = assignable_roles.filter(level__lt=user_level)
 
     search = request.GET.get("search", "")
     if search:
@@ -554,38 +852,112 @@ def role_assignment(request):
             | Q(user__last_name__icontains=search)
         )
 
+    unassigned_search = request.GET.get("unassigned_search", "")
+    unassigned_users = UserProfile.objects.filter(user__is_active=True, organization__isnull=True).select_related(
+        "user"
+    )
+    if unassigned_search:
+        unassigned_users = unassigned_users.filter(
+            Q(user__username__icontains=unassigned_search)
+            | Q(user__email__icontains=unassigned_search)
+            | Q(user__first_name__icontains=unassigned_search)
+            | Q(user__last_name__icontains=unassigned_search)
+        )
+
     context = {
         "organization": org,
         "members": members,
         "assignable_roles": assignable_roles,
         "user_level": user_level,
         "search_query": search,
+        "unassigned_search_query": unassigned_search,
+        "unassigned_users": unassigned_users.order_by("user__username")[:100],
+        "is_superadmin": is_superadmin,
+        "can_assign_roles": can_assign_roles or user_level >= 50,
     }
     return render(request, "accounts/role_assignment.html", context)
 
 
 @login_required
 def permission_editor(request):
-    """Organization-scoped permission editor UI."""
-    if not getattr(request.user, "is_admin_level", False):
-        messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
-        return redirect("accounts:profile")
-
+    """Organization-scoped permission editor with add/remove enforcement."""
     from apps.organizations.models import Role
-    from apps.organizations.permissions import PERMISSION_CATEGORIES
-    from apps.organizations.services import get_user_org_role_level, get_user_organization
+    from apps.organizations.permissions import PERMISSION_CATEGORIES, get_all_permissions, has_permission
+    from apps.organizations.services import create_audit_log, get_user_org_role_level
 
-    org = get_user_organization(request.user)
+    org = _get_active_organization(request)
     if not org:
-        messages.error(request, "Təşkilat tapılmadı.")
+        messages.error(request, "Aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
 
-    user_level = get_user_org_role_level(request.user, org)
+    is_superadmin = _is_superadmin_user(request.user)
+    user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
+    actor_permissions, grantable_permissions = _collect_actor_permissions(request.user, org)
 
-    roles = Role.objects.filter(organization=org, is_active=True, level__lt=user_level).order_by("-level")
+    can_manage_permissions = is_superadmin or has_permission(list(actor_permissions), "role.assign")
+    if not is_superadmin and not can_manage_permissions:
+        messages.error(request, "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur.")
+        return redirect("accounts:profile")
 
-    selected_role_id = request.GET.get("role")
+    roles = Role.objects.filter(organization=org, is_active=True).order_by("-level")
+    if not is_superadmin:
+        roles = roles.filter(level__lt=user_level)
+
     selected_role = None
+    selected_role_id = request.GET.get("role")
+    if request.method == "POST":
+        selected_role_id = request.POST.get("role_id")
+        selected_permission = request.POST.get("permission")
+        action = request.POST.get("action")
+        selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
+
+        if not is_superadmin and selected_role.level >= user_level:
+            messages.error(request, "Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə bilərsiniz.")
+            return redirect(f"{request.path}?role={selected_role.id}")
+
+        all_permissions = set(get_all_permissions())
+        if selected_permission not in all_permissions:
+            messages.error(request, "Yanlış permission seçimi.")
+            return redirect(f"{request.path}?role={selected_role.id}")
+
+        role_permissions = list(selected_role.permissions or [])
+        role_permissions_set = set(role_permissions)
+        old_permissions = sorted(role_permissions_set)
+
+        if action == "add":
+            if (
+                not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
+                and not is_superadmin
+            ):
+                messages.error(request, "Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə bilərsiniz.")
+                return redirect(f"{request.path}?role={selected_role.id}")
+            role_permissions_set.add(selected_permission)
+            result_message = f"`{selected_permission}` permission-u əlavə edildi."
+        elif action == "remove":
+            role_permissions_set.discard(selected_permission)
+            result_message = f"`{selected_permission}` permission-u silindi."
+        else:
+            messages.error(request, "Naməlum əməliyyat.")
+            return redirect(f"{request.path}?role={selected_role.id}")
+
+        selected_role.permissions = sorted(role_permissions_set)
+        selected_role.save(update_fields=["permissions", "updated_at"])
+
+        create_audit_log(
+            user=request.user,
+            organization=org,
+            action="update",
+            resource_type="role",
+            resource_id=selected_role.id,
+            resource_repr=selected_role.display_name,
+            old_values={"permissions": old_permissions},
+            new_values={"permissions": selected_role.permissions},
+            request=request,
+        )
+
+        messages.success(request, result_message)
+        return redirect(f"{request.path}?role={selected_role.id}")
+
     if selected_role_id:
         selected_role = roles.filter(id=selected_role_id).first()
 
@@ -595,93 +967,173 @@ def permission_editor(request):
         "selected_role": selected_role,
         "permission_categories": PERMISSION_CATEGORIES,
         "user_level": user_level,
+        "actor_permissions": sorted(actor_permissions),
+        "grantable_permissions": sorted(grantable_permissions),
+        "can_manage_permissions": can_manage_permissions,
     }
     return render(request, "accounts/permission_editor.html", context)
+
+
+@login_required
+def superadmin_organizations(request):
+    """
+    Superadmin oversight screen for all organizations with suspend/unsuspend controls.
+    """
+    if not _is_superadmin_user(request.user):
+        messages.error(request, "Bu səhifəyə yalnız superadmin daxil ola bilər.")
+        return redirect("accounts:profile")
+
+    from apps.organizations.models import Organization
+
+    if request.method == "POST":
+        organization = get_object_or_404(Organization, id=request.POST.get("organization_id"))
+        action = request.POST.get("action")
+        reason = (request.POST.get("reason") or "").strip()
+
+        if action == "suspend":
+            organization.status = "suspended"
+            organization.is_active = False
+            organization.suspended_at = timezone.now()
+            organization.suspension_reason = reason
+            organization.save(update_fields=["status", "is_active", "suspended_at", "suspension_reason", "updated_at"])
+            messages.success(request, f"`{organization.name}` təşkilatı dayandırıldı.")
+        elif action == "unsuspend":
+            organization.status = "active"
+            organization.is_active = True
+            organization.suspended_at = None
+            organization.suspension_reason = ""
+            organization.save(update_fields=["status", "is_active", "suspended_at", "suspension_reason", "updated_at"])
+            messages.success(request, f"`{organization.name}` təşkilatı yenidən aktiv edildi.")
+        else:
+            messages.error(request, "Naməlum əməliyyat.")
+
+        return redirect("accounts:superadmin_organizations")
+
+    organizations = (
+        Organization.objects.select_related("owner")
+        .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
+        .order_by("name")
+    )
+
+    all_modules = [
+        "accounts",
+        "organizations",
+        "courses",
+        "exams",
+        "assignments",
+        "projects",
+        "labs",
+        "live_exam",
+        "blog",
+        "audit",
+    ]
+
+    context = {
+        "organizations": organizations,
+        "all_modules": all_modules,
+    }
+    return render(request, "accounts/superadmin_organizations.html", context)
 
 
 # ------------------- AUTHENTICATION VIEWS ------------------- #
 
 
+class CustomLoginView(LoginView):
+    """Login view with custom form and suspended-organization checks."""
+
+    template_name = "accounts/login.html"
+    authentication_form = CustomLoginForm
+    redirect_authenticated_user = True
+
+
 def register_view(request):
-    """User registration with email verification and organization selection."""
+    """User registration with organization bootstrap and immediate login eligibility."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+            from apps.organizations.models import Country, Membership, Organization, Role
 
-            # Set password
-            password = form.cleaned_data["password"]
-            user.set_password(password)
+            with transaction.atomic():
+                user = form.save(commit=False)
+                user.email = form.cleaned_data["email"]
+                user.set_password(form.cleaned_data["password"])
+                user.is_active = True
+                user.save()
 
-            # Disable account until email is verified
-            user.is_active = False
-            user.save()
+                organization_type = form.cleaned_data["organization_type"]
+                country_code = form.cleaned_data.get("country", "")
+                country_obj = Country.objects.filter(code=country_code).first()
+                country_name = country_obj.name if country_obj else country_code
+                institution = form.cleaned_data.get("institution")
+                institution_not_listed_name = form.cleaned_data.get("institution_not_listed_name", "")
+                organization_identifier = form.cleaned_data.get("organization_identifier", "")
+                organization_license_identifier = form.cleaned_data.get("organization_license_identifier", "")
+                initial_role = form.cleaned_data.get("initial_role", ProfileRole.MEMBER)
 
-            # Handle organization selection
-            organization_type = form.cleaned_data.get("organization_type", "individual")
-            country = form.cleaned_data.get("country", "")
-            organization = None
-
-            if organization_type != "individual":
-                org_id = form.cleaned_data.get("organization_id", "")
-                org_name_other = form.cleaned_data.get("organization_name_other", "")
-
-                if org_id:
-                    # User selected an existing organization
-                    from apps.organizations.models import Organization
-
-                    try:
-                        organization = Organization.objects.get(id=org_id)
-                    except Organization.DoesNotExist:
-                        pass
-                elif org_name_other:
-                    # User entered "Other" - create pending organization
-                    from apps.organizations.models import Organization
+                organization = None
+                if organization_type != OrganizationType.INDIVIDUAL:
+                    organization_name = institution.name if institution else institution_not_listed_name
+                    resolved_identifier = organization_identifier or (institution.code if institution else "")
 
                     organization = Organization.objects.create(
-                        name=org_name_other,
+                        name=organization_name,
                         org_type=organization_type,
-                        country=country,
+                        country=country_name,
                         owner=user,
-                        status="pending",
+                        status="active",
+                        is_active=True,
+                        organization_identifier=resolved_identifier,
+                        license_identifier=organization_license_identifier,
                     )
 
-            # Create user profile
-            UserProfile.objects.create(
-                user=user,
-                organization_type=organization_type,
-                organization=organization,
-                country=country,
-            )
+                profile, _ = UserProfile.objects.get_or_create(user=user)
+                profile.organization_type = organization_type
+                profile.organization = organization
+                profile.country = country_name
+                profile.role = _map_signup_role_to_profile_role(initial_role)
+                profile.student_university_name = ""
+                profile.student_school_identifier = ""
+                profile.save()
 
-            # Generate and send verification code
-            code = generate_otp()
-            EmailOTP.objects.create(
-                user=user,
-                code=code,
-                expires_at=timezone.now() + timedelta(minutes=10),
-            )
-            send_verify_email(user, code)
+                if organization is not None:
+                    membership_role = _resolve_membership_role(organization, initial_role)
+                    if membership_role is None:
+                        membership_role = Role.objects.create(
+                            organization=organization,
+                            name="member",
+                            display_name="Member",
+                            level=20,
+                            scope_type="organization",
+                            permissions=["course.view", "exam.view", "analytics.view_own"],
+                            is_system=False,
+                            is_active=True,
+                        )
 
-            request.session["pending_verify_email"] = user.email
-            messages.success(request, "Email-ə təsdiq kodu göndərildi.")
-            return redirect("accounts:verify_code")
+                    Membership.objects.create(
+                        user=user,
+                        organization=organization,
+                        role=membership_role,
+                        is_primary=True,
+                        is_active=True,
+                        assigned_by=user,
+                    )
+
+                    request.session["active_organization"] = organization.slug
+
+            messages.success(
+                request,
+                "Qeydiyyat tamamlandı. İndi eyni istifadəçi adı/email və şifrə ilə daxil ola bilərsiniz.",
+            )
+            return redirect("accounts:login")
     else:
         form = RegisterForm()
-
-    # Get organizations for the dropdown (filtered by JS based on country+type)
-    from apps.organizations.models import Organization
-
-    organizations = Organization.objects.filter(is_active=True, status="active").values(
-        "id", "name", "org_type", "country"
-    )
 
     return render(
         request,
         "accounts/register.html",
         {
             "form": form,
-            "organizations": list(organizations),
+            "lookup_payload": _get_signup_lookup_payload(),
         },
     )
 
@@ -713,7 +1165,7 @@ def verify_code_view(request):
         user.save()
 
         messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
-        return redirect("login")
+        return redirect("accounts:login")
 
     return render(request, "accounts/verify_code.html", {"email": email})
 
@@ -727,7 +1179,7 @@ def verify_email_link_view(request):
         user.is_active = True
         user.save()
         messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
-        return redirect("login")
+        return redirect("accounts:login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
         messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
         return redirect("accounts:register")
