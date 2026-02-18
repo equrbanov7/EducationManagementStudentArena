@@ -128,6 +128,7 @@ class ExamForm(forms.ModelForm):
         view-dən ExamForm(user=request.user, ...) şəklində çağırmaq məqsədi ilə.
         """
         user = kwargs.pop("user", None)
+        organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
 
         # ✅ YENİ: DateTime field-lərini input_formats ilə düzəlt
@@ -135,14 +136,20 @@ class ExamForm(forms.ModelForm):
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
 
         # Default querysets
-        self.fields["allowed_users"].queryset = User.objects.all().order_by("username")
-        self.fields["allowed_groups"].queryset = StudentGroup.objects.all().order_by("name")
+        self.fields["allowed_users"].queryset = User.objects.filter(is_active=True).order_by("username")
+        self.fields["allowed_groups"].queryset = StudentGroup.objects.none()
 
         # Əgər teacher məlumatı gəlirsə, onu nəzərə alaq
         if user is not None:
-            self.fields["allowed_users"].queryset = User.objects.exclude(id=user.id).order_by("username")
+            user_qs = User.objects.filter(is_active=True).exclude(id=user.id)
+            if organization is not None:
+                user_qs = user_qs.filter(profile__organization=organization)
+                group_qs = StudentGroup.objects.filter(organization=organization)
+            else:
+                group_qs = StudentGroup.objects.filter(teacher=user)
 
-            self.fields["allowed_groups"].queryset = StudentGroup.objects.filter(teacher=user).order_by("name")
+            self.fields["allowed_users"].queryset = user_qs.distinct().order_by("username")
+            self.fields["allowed_groups"].queryset = group_qs.order_by("name")
 
     def clean_access_code(self):
         code = (self.cleaned_data.get("access_code") or "").strip()
@@ -390,6 +397,7 @@ class StudentGroupForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         teacher = kwargs.pop("teacher", None)
+        organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
 
         qs = User.objects.filter(is_active=True).order_by("username")
@@ -397,4 +405,7 @@ class StudentGroupForm(forms.ModelForm):
         if teacher is not None:
             qs = qs.exclude(id=teacher.id)
 
-        self.fields["students"].queryset = qs
+        if organization is not None:
+            qs = qs.filter(profile__organization=organization)
+
+        self.fields["students"].queryset = qs.distinct()

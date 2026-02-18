@@ -15,6 +15,8 @@ class ProfileRole:
     SUPERADMIN = "superadmin"
     ORG_OWNER = "org_owner"
     ORG_ADMIN = "org_admin"
+    MEMBER = "member"
+    HR = "hr"
     TEACHER = "teacher"
     ASSISTANT_TEACHER = "assistant_teacher"
     LEAD_STUDENT = "lead_student"
@@ -24,6 +26,8 @@ class ProfileRole:
         (SUPERADMIN, "Super Admin"),
         (ORG_OWNER, "Təşkilat Sahibi"),
         (ORG_ADMIN, "Təşkilat Admini"),
+        (MEMBER, "Üzv"),
+        (HR, "HR"),
         (TEACHER, "Müəllim"),
         (ASSISTANT_TEACHER, "Müəllim Köməkçisi"),
         (LEAD_STUDENT, "Baş Tələbə"),
@@ -35,6 +39,8 @@ class ProfileRole:
         SUPERADMIN: 100,
         ORG_OWNER: 90,
         ORG_ADMIN: 80,
+        MEMBER: 20,
+        HR: 65,
         TEACHER: 60,
         ASSISTANT_TEACHER: 55,
         LEAD_STUDENT: 30,
@@ -71,11 +77,27 @@ class UserProfile(models.Model):
 
     country = models.CharField(max_length=100, blank=True, default="", verbose_name="Ölkə")
 
+    student_university_name = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Universitet adı",
+        help_text="Tələbə üçün universitet adı (əgər varsa)",
+    )
+
+    student_school_identifier = models.CharField(
+        max_length=120,
+        blank=True,
+        default="",
+        verbose_name="Məktəb nömrəsi/identifikatoru",
+        help_text="Tələbə üçün məktəb nömrəsi və ya rəsmi identifikator",
+    )
+
     # RBAC role field – single source of truth for role checks
     role = models.CharField(
         max_length=30,
         choices=ProfileRole.CHOICES,
-        default=ProfileRole.STUDENT,
+        default=ProfileRole.MEMBER,
         db_index=True,
         verbose_name="Rol",
         help_text="İstifadəçinin sistəmdəki rolu",

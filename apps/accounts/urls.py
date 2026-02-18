@@ -17,7 +17,7 @@ urlpatterns = [
     path("resend-code/", views.resend_code_view, name="resend_code"),
     path(
         "login/",
-        auth_views.LoginView.as_view(template_name="accounts/login.html"),
+        views.CustomLoginView.as_view(),
         name="login",
     ),
     path("logout/", views.logout_view, name="logout"),
@@ -61,4 +61,6 @@ urlpatterns = [
     # RBAC management
     path("role-assignment/", views.role_assignment, name="role_assignment"),
     path("permission-editor/", views.permission_editor, name="permission_editor"),
+    # Superadmin oversight
+    path("superadmin/organizations/", views.superadmin_organizations, name="superadmin_organizations"),
 ]

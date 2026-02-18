@@ -4,7 +4,21 @@ Admin configuration for the organizations app.
 
 from django.contrib import admin
 
-from .models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from .models import AcademicPeriod, Country, Institution, Membership, Organization, OrgUnit, Role
+
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    list_display = ["code", "name", "is_active"]
+    list_filter = ["is_active"]
+    search_fields = ["code", "name"]
+
+
+@admin.register(Institution)
+class InstitutionAdmin(admin.ModelAdmin):
+    list_display = ["name", "institution_type", "country", "code", "is_active"]
+    list_filter = ["institution_type", "country", "is_active"]
+    search_fields = ["name", "code", "country__name", "country__code"]
 
 
 class OrgUnitInline(admin.TabularInline):
@@ -23,11 +37,12 @@ class OrganizationAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "org_type",
+        "status",
         "owner",
         "is_active",
         "created_at",
     ]
-    list_filter = ["org_type", "is_active", "created_at"]
+    list_filter = ["org_type", "status", "is_active", "created_at"]
     search_fields = ["name", "slug", "description", "email"]
     prepopulated_fields = {"slug": ("name",)}
     readonly_fields = ["id", "created_at", "updated_at"]
@@ -39,7 +54,11 @@ class OrganizationAdmin(admin.ModelAdmin):
                     "name",
                     "slug",
                     "org_type",
+                    "status",
                     "owner",
+                    "country",
+                    "organization_identifier",
+                    "license_identifier",
                     "logo",
                     "description",
                 ]
@@ -51,7 +70,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         ),
         (
             "Configuration",
-            {"fields": ["enabled_apps", "settings", "is_active"]},
+            {"fields": ["enabled_apps", "settings", "is_active", "suspended_at", "suspension_reason"]},
         ),
         ("Metadata", {"fields": ["id", "created_at", "updated_at"]}),
     ]

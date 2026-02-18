@@ -42,6 +42,14 @@ class StudentGroup(models.Model):
         related_name="student_groups",
         verbose_name="Müəllim",
     )
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="student_groups",
+        null=True,
+        blank=True,
+        verbose_name="Təşkilat",
+    )
     name = models.CharField("Qrup adı / nömrəsi", max_length=50)
 
     students = models.ManyToManyField(
@@ -57,12 +65,15 @@ class StudentGroup(models.Model):
         verbose_name = "Tələbə qrupu"
         verbose_name_plural = "Tələbə qrupları"
         unique_together = (
+            "organization",
             "teacher",
             "name",
         )  # eyni müəllimdə eyni adda iki qrup olmasın
         ordering = ["name"]
 
     def __str__(self):
+        if self.organization:
+            return f"{self.name} ({self.teacher.username} @ {self.organization.name})"
         return f"{self.name} ({self.teacher.username})"
 
     def has_student(self, user: User) -> bool:

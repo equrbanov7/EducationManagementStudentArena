@@ -432,8 +432,11 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-
-                context["all_groups"] = StudentGroup.objects.all().order_by("name")
+                user_org = getattr(getattr(user, "profile", None), "organization", None)
+                qs = StudentGroup.objects.filter(teacher=user)
+                if user_org is not None:
+                    qs = qs.filter(organization=user_org)
+                context["all_groups"] = qs.order_by("name")
             except ImportError:
                 context["all_groups"] = []
         else:
@@ -685,8 +688,11 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
             all_users = User.objects.exclude(id__in=course_user_ids).order_by("username")
 
         try:
-
-            all_groups = StudentGroup.objects.all().order_by("name")
+            user_org = getattr(getattr(request.user, "profile", None), "organization", None)
+            all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
+            if user_org is not None:
+                all_groups_qs = all_groups_qs.filter(organization=user_org)
+            all_groups = all_groups_qs.order_by("name")
         except ImportError:
             all_groups = []
 
@@ -804,8 +810,10 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({"success": False, "error": "Qrup seçilməyib."}, status=400)
 
         try:
-
-            groups = StudentGroup.objects.filter(id__in=group_ids)
+            user_org = getattr(getattr(request.user, "profile", None), "organization", None)
+            groups = StudentGroup.objects.filter(id__in=group_ids, teacher=request.user)
+            if user_org is not None:
+                groups = groups.filter(organization=user_org)
 
             added_count = 0
 

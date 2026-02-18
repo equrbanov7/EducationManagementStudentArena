@@ -38,6 +38,7 @@
                         <th>Email</th>
                         <th>Hazırki rol</th>
                         <th>Səviyyə</th>
+                        <th>Yeni rol</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,10 +48,70 @@
                         <td>{{ member.user.email }}</td>
                         <td><span class="role-badge">{{ member.role.display_name }}</span></td>
                         <td>{{ member.role.level }}</td>
+                        <td>
+                            <form method="post" class="d-flex gap-2 align-items-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="update_member">
+                                <input type="hidden" name="membership_id" value="{{ member.id }}">
+                                <select name="role_id" class="form-control" required>
+                                    {% for role in assignable_roles %}
+                                    <option value="{{ role.id }}" {% if role.id == member.role.id %}selected{% endif %}>
+                                        {{ role.display_name }} ({{ role.level }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm" {% if not can_assign_roles %}disabled{% endif %}>Yenilə</button>
+                            </form>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">Üzv tapılmadı.</td>
+                        <td colspan="5" class="text-center">Üzv tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-card mt-4">
+            <div class="section-title">
+                <i class="fas fa-user-plus"></i> Unassigned Users (Təşkilata əlavə et)
+            </div>
+            <form method="get" class="search-form mb-3">
+                <input type="text" name="unassigned_search" value="{{ unassigned_search_query }}" placeholder="Unassigned user axtar..." class="form-control">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>İstifadəçi</th>
+                        <th>Email</th>
+                        <th>Rol + Əlavə et</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_users %}
+                    <tr>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>
+                            <form method="post" class="d-flex gap-2 align-items-center">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="attach_user">
+                                <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                                <select name="role_id" class="form-control" required>
+                                    {% for role in assignable_roles %}
+                                    <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-success btn-sm" {% if not can_assign_roles %}disabled{% endif %}>Əlavə et</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">Unassigned istifadəçi tapılmadı.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

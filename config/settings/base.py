@@ -45,6 +45,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
 ]
@@ -97,9 +98,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Login / logout settings
-LOGIN_URL = "/blog/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/blog/"
 LOGOUT_REDIRECT_URL = "/blog/"
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    "apps.accounts.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # Internationalization
 LANGUAGE_CODE = "en-us"

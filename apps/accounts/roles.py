@@ -158,6 +158,8 @@ User.add_to_class("is_owner", property(lambda self: _is_role(self, "owner")))
 User.add_to_class("is_superadmin", property(lambda self: _get_profile_role(self) == "superadmin"))
 User.add_to_class("is_org_owner", property(lambda self: _get_profile_role(self) == "org_owner"))
 User.add_to_class("is_org_admin", property(lambda self: _get_profile_role(self) == "org_admin"))
+User.add_to_class("is_member", property(lambda self: _get_profile_role(self) == "member"))
+User.add_to_class("is_hr", property(lambda self: _get_profile_role(self) == "hr"))
 User.add_to_class("is_lead_student", property(lambda self: _get_profile_role(self) == "lead_student"))
 
 # Helper properties for role-level checks

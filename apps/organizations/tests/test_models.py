@@ -50,6 +50,21 @@ class OrganizationModelTest(TestCase):
         )
         self.assertEqual(org.slug, "another-university")
 
+    def test_organization_duplicate_name_generates_unique_slug(self):
+        """Organizations with same name should still get unique slugs."""
+        org1 = Organization.objects.create(
+            name="Duplicate Name Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+        )
+        org2 = Organization.objects.create(
+            name="Duplicate Name Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+        )
+        self.assertNotEqual(org1.slug, org2.slug)
+        self.assertTrue(org2.slug.startswith("duplicate-name-org-"))
+
     # Commented out as signal may run multiple times in tests
     # def test_default_roles_created(self):
     #     """Test that default roles are created for new organization."""

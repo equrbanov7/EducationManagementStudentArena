@@ -136,6 +136,14 @@
                 </a>
             </li>
             {% endif %}
+            {% if is_superadmin %}
+            <li class="sidebar-menu-item">
+                <a href="{% url 'accounts:superadmin_organizations' %}" class="sidebar-menu-link">
+                    <i class="fas fa-building sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Superadmin Nəzarəti</span>
+                </a>
+            </li>
+            {% endif %}
 
             <!-- E) Account -->
             <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">Hesab</span></li>
@@ -247,6 +255,14 @@
                 <div class="info-item">
                     <div class="info-label">Təşkilat</div>
                     <div class="info-value">{{ profile.organization_name|default:"Fərdi" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Student universitet adı</div>
+                    <div class="info-value">{{ profile.student_university_name|default:"-" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Student məktəb identifikatoru</div>
+                    <div class="info-value">{{ profile.student_school_identifier|default:"-" }}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Qeydiyyat tarixi</div>
@@ -518,6 +534,16 @@
                     <div class="info-item">
                         <label class="info-label" for="avatar">Avatar</label>
                         <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label" for="student_university_name">Student universitet adı</label>
+                        <input type="text" class="form-control" id="student_university_name" name="student_university_name"
+                               value="{{ profile.student_university_name|default:'' }}" placeholder="Universitet adı">
+                    </div>
+                    <div class="info-item">
+                        <label class="info-label" for="student_school_identifier">Student məktəb identifikatoru</label>
+                        <input type="text" class="form-control" id="student_school_identifier" name="student_school_identifier"
+                               value="{{ profile.student_school_identifier|default:'' }}" placeholder="Məktəb kodu/nömrəsi">
                     </div>
                 </div>
 

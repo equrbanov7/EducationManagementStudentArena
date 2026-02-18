@@ -5,7 +5,9 @@ Custom middleware for session management and auto-logout.
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import logout
+from django.shortcuts import redirect
 from django.utils import timezone
 
 
@@ -43,3 +45,28 @@ class SessionTimeoutMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class SuspendedOrganizationMiddleware:
+    """
+    Blocks regular users from accessing the app when their organization is suspended.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated and not request.user.is_superuser:
+            profile = getattr(request.user, "profile", None)
+            organization = getattr(profile, "organization", None) if profile else None
+
+            if organization and (organization.status == "suspended" or not organization.is_active):
+                if not getattr(request.user, "is_superadmin", False):
+                    logout(request)
+                    messages.error(
+                        request,
+                        "Təşkilatınız dayandırılıb. Hesaba giriş müvəqqəti bloklanıb.",
+                    )
+                    return redirect("accounts:login")
+
+        return self.get_response(request)

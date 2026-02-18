@@ -11,7 +11,7 @@
 <div class="register-page-wrapper">
     <div class="register-card">
         <h1 class="register-heading">Hesab Yarat</h1>
-        <p class="register-subheading">Yeni hesab yaradın və təhsil platformasına qoşulun.</p>
+        <p class="register-subheading">Multi-tenant hesab yaradın və rolunuzu seçərək platformaya qoşulun.</p>
 
         <!-- Wizard Steps Indicator -->
         <div class="register-wizard-steps">
@@ -59,7 +59,7 @@
 
             <!-- Step 2: Account Type + Organization -->
             <div class="wizard-panel" id="step2" hidden>
-                <h3 class="register-step-title">Hesab tipini seçin</h3>
+                <h3 class="register-step-title">Qeydiyyat tipini seçin</h3>
                 <div class="register-form-field">
                     {{ form.organization_type.label_tag }}
                     {{ form.organization_type }}
@@ -68,26 +68,49 @@
                     {% endif %}
                 </div>
 
-                <!-- Organization selection (hidden for Individual) -->
-                <div class="register-form-field" id="orgSelectField" hidden>
-                    <label>Təşkilat seçin</label>
-                    <select class="form-control" id="orgSelect">
-                        <option value="">-- Təşkilat seçin --</option>
-                        <option value="other">Digər (yeni təşkilat)</option>
-                    </select>
-                </div>
+                <div id="orgFields" hidden>
+                    <div class="register-form-field">
+                        <label for="institutionSearchInput">Müəssisə axtar</label>
+                        <input type="text" id="institutionSearchInput" class="form-control" placeholder="Müəssisə axtar...">
+                    </div>
 
-                {{ form.organization_id }}
+                    <div class="register-form-field" id="institutionSelectField">
+                        {{ form.institution.label_tag }}
+                        {{ form.institution }}
+                        {% if form.institution.errors %}
+                            <div class="register-field-error">{{ form.institution.errors.0 }}</div>
+                        {% endif %}
+                    </div>
 
-                <div class="register-form-field" id="orgOtherField" hidden>
-                    {{ form.organization_name_other.label_tag }}
-                    {{ form.organization_name_other }}
-                    {% if form.organization_name_other.errors %}
-                        <div class="register-field-error">{{ form.organization_name_other.errors.0 }}</div>
-                    {% endif %}
-                    <small class="register-help-text">
-                        Təşkilatınız siyahıda yoxdursa, adını yazın. Yoxlama tələb olunacaq.
-                    </small>
+                    <div class="register-form-field">
+                        {{ form.institution_not_listed_name.label_tag }}
+                        {{ form.institution_not_listed_name }}
+                        {% if form.institution_not_listed_name.errors %}
+                            <div class="register-field-error">{{ form.institution_not_listed_name.errors.0 }}</div>
+                        {% endif %}
+                        <small class="register-help-text">
+                            Siyahıda yoxdursa “Not listed” kimi müəssisə adını əl ilə daxil edin.
+                        </small>
+                    </div>
+
+                    <div class="register-form-field" id="orgIdentifierField">
+                        {{ form.organization_identifier.label_tag }}
+                        {{ form.organization_identifier }}
+                        {% if form.organization_identifier.errors %}
+                            <div class="register-field-error">{{ form.organization_identifier.errors.0 }}</div>
+                        {% endif %}
+                        <small class="register-help-text" id="orgIdentifierHelp">
+                            School və University üçün bu sahə məcburidir.
+                        </small>
+                    </div>
+
+                    <div class="register-form-field">
+                        {{ form.organization_license_identifier.label_tag }}
+                        {{ form.organization_license_identifier }}
+                        {% if form.organization_license_identifier.errors %}
+                            <div class="register-field-error">{{ form.organization_license_identifier.errors.0 }}</div>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="wizard-nav">
@@ -137,6 +160,14 @@
                 </div>
 
                 <div class="register-form-field">
+                    {{ form.initial_role.label_tag }}
+                    {{ form.initial_role }}
+                    {% if form.initial_role.errors %}
+                        <div class="register-field-error">{{ form.initial_role.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="register-form-field">
                     {{ form.password.label_tag }}
                     {{ form.password }}
                     {% if form.password.errors %}
@@ -170,8 +201,8 @@
 
 {% block extraJs %}
 <script src="{% static 'js/register_wizard.js' %}"></script>
-{{ organizations|json_script:"organizations-data" }}
+{{ lookup_payload|json_script:"signup-lookup-data" }}
 <script>
-    window.ORGANIZATIONS_DATA = JSON.parse(document.getElementById('organizations-data').textContent);
+    window.SIGNUP_LOOKUP_DATA = JSON.parse(document.getElementById('signup-lookup-data').textContent);
 </script>
 {% endblock %}

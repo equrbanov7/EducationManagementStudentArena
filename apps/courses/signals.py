@@ -25,10 +25,13 @@ def sync_group_rename_to_course_memberships(sender, instance, created, **kwargs)
     if old_name and old_name != instance.name:
         # yalnız həmin müəllimin kursları üçün (əgər teacher field-i varsa)
         teacher = getattr(instance, "teacher", None)
+        student_ids = list(instance.students.values_list("id", flat=True))
 
         qs = CourseMembership.objects.filter(group_name=old_name)
         if teacher is not None:
             qs = qs.filter(course__owner=teacher)
+        if student_ids:
+            qs = qs.filter(user_id__in=student_ids)
 
         qs.update(group_name=instance.name)
 
