@@ -112,6 +112,12 @@
             Haqqımızda
         </a>
     </li>
+    <li class="blog-header__nav-item">
+        <a href="{% url 'exams:student_exam_list' %}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
+            Exams
+        </a>
+    </li>
     
 
     {# Mobil menyuda da auth hissəsi olsun #}

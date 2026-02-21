@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 
+from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
@@ -9,7 +10,12 @@ from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
 def _ensure_teacher(user):
-    if not getattr(user, "is_teacher_or_above", False):
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return
+
+    profile = getattr(user, "profile", None)
+    role = getattr(profile, "role", None)
+    if role not in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
         raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
 
 

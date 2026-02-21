@@ -75,8 +75,11 @@
 
         <div class="section-card mt-4">
             <div class="section-title">
-                <i class="fas fa-user-plus"></i> Unassigned Users (Təşkilata əlavə et)
+                <i class="fas fa-user-plus"></i> Pending istifadəçilər (yalnız bu təşkilatı seçənlər)
             </div>
+            <p class="text-muted mb-3">
+                Burada yalnız bu təşkilata müraciət etmiş, hələ heç bir təşkilata bağlı olmayan istifadəçilər görünür.
+            </p>
             <form method="get" class="search-form mb-3">
                 <input type="text" name="unassigned_search" value="{{ unassigned_search_query }}" placeholder="Unassigned user axtar..." class="form-control">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
@@ -87,6 +90,7 @@
                     <tr>
                         <th>İstifadəçi</th>
                         <th>Email</th>
+                        <th>Müraciət etdiyi təşkilat</th>
                         <th>Rol + Əlavə et</th>
                     </tr>
                 </thead>
@@ -95,6 +99,15 @@
                     <tr>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
                         <td>{{ profile.user.email }}</td>
+                        <td>
+                            {% if profile.requested_organization %}
+                                {{ profile.requested_organization.name }}
+                            {% elif profile.requested_organization_name %}
+                                {{ profile.requested_organization_name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                         <td>
                             <form method="post" class="d-flex gap-2 align-items-center">
                                 {% csrf_token %}
@@ -111,7 +124,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" class="text-center">Unassigned istifadəçi tapılmadı.</td>
+                        <td colspan="4" class="text-center">Pending istifadəçi tapılmadı.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

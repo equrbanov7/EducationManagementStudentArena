@@ -31,7 +31,7 @@
                 </a>
 
                 {% if assigned_count > 0 %}
-                    <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
+                    <a href="{% url 'accounts:assigned_exams' %}" class="profile-create-post-btn">
                         <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlar
                         <span class="pending-badge">{{ assigned_count }}</span>
                     </a>

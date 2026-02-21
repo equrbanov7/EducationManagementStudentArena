@@ -5,9 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt
+from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
 
 
 @login_required
@@ -18,7 +19,7 @@ def teacher_exam_results(request, slug):
     - aşağıda/sağda seçilmiş cəhdin cavabları + qiymətləndirmə formu
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     attempts = exam.attempts.select_related("user").order_by("-started_at")
 
@@ -140,7 +141,7 @@ def teacher_view_attempt(request, slug, attempt_id):
     """
     _ensure_teacher(request.user)
 
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
     # Cavabları al
@@ -179,7 +180,7 @@ def teacher_check_attempt(request, slug, attempt_id):
     """
     _ensure_teacher(request.user)
 
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
     # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
@@ -263,14 +264,14 @@ def teacher_pending_attempts(request):
     Müəllimin bütün imtahanlarından yığılmış,
     yoxlanılmağı gözləyən (Pending) işlərin siyahısı.
     """
-    # Yalnız müəllimlər görə bilsin
-    if not getattr(request.user, "is_teacher", False):
-        return render(request, "403_forbidden.html")
+    _ensure_teacher(request.user)
+
+    teacher_exams = tenant_scoped_exams(request, request.user.exams.all())
 
     # Yoxlanılacaq işləri tapırıq
     pending_attempts = (
         ExamAttempt.objects.filter(
-            exam__author=request.user,  # Bu müəllimin imtahanları
+            exam__in=teacher_exams,  # Bu müəllimin aktiv tenant imtahanları
             status__in=["submitted", "expired"],  # Bitmiş imtahanlar
             checked_by_teacher=False,  # Hələ yoxlanmayıb
         )

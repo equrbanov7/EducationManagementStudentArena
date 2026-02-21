@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/create_student_group.css' %}">
+    <link rel="stylesheet" href="{% static 'css/_searchable_multi_select.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -21,7 +22,7 @@
                 </div>
 
                 <div class="card-body-custom">
-                    <form method="post" novalidate>
+                    <form method="post" action="{% url 'exams:teacher_create_group' %}" novalidate>
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -42,28 +43,71 @@
                         </div>
 
                         <div class="mb-3">
-                            {{ form.students.label_tag }}
-                            {{ form.students }}
-                            {% if form.students.help_text %}
-                                <div class="form-text">{{ form.students.help_text }}</div>
+                            {{ form.primary_teacher.label_tag }}
+                            {% if can_multi_assign_teachers %}
+                                <div class="search-wrapper mb-2">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input
+                                        type="text"
+                                        id="primaryTeacherSearch"
+                                        class="custom-search-input"
+                                        placeholder="Primary müəllim axtar..."
+                                    >
+                                </div>
+                                {{ form.primary_teacher }}
+                                <div class="form-text mt-1">
+                                    Qrupun əsas müəllimi (single assignment). Tenant müəllim sayı: <strong>{{ teacher_count }}</strong>
+                                </div>
+                                {% if teacher_count == 0 %}
+                                    <div class="alert alert-warning mt-2 mb-0">
+                                        Bu tenantda müəllim yoxdur. Demo data üçün:
+                                        <code>python manage.py seed_group_demo_data</code>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="form-text">
-                                    Birdən çox tələbə seçmək üçün 
-                                    <strong>Ctrl</strong> (Windows) və ya <strong>Cmd</strong> (Mac)
-                                    düyməsini basılı saxlayaraq click et.
+                                    Bu rol üçün yalnız bir primary müəllim seçilə bilər.
                                 </div>
+                                {{ form.primary_teacher }}
                             {% endif %}
-                            {% for error in form.students.errors %}
+                            {% for error in form.primary_teacher.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
                             {% endfor %}
                         </div>
+
+                        <div class="mb-3">
+                            {% include "partials/_searchable_multi_select.html" with field=form.students label="Tələbələri əlavə et" search_placeholder="Tələbə axtar (ad, username)..." container_id="groupStudentsSelector" %}
+                            {% if form.students.help_text %}
+                                <div class="form-text">{{ form.students.help_text }}</div>
+                            {% endif %}
+                            <div class="form-text mt-1">Tenant tələbə sayı: <strong>{{ student_count }}</strong></div>
+                            {% if student_count == 0 %}
+                                <div class="alert alert-warning mt-2 mb-0">
+                                    Bu tenantda tələbə yoxdur. Demo data üçün:
+                                    <code>python manage.py seed_group_demo_data</code>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if can_multi_assign_teachers %}
+                            <div class="mb-3">
+                                {% include "partials/_searchable_multi_select.html" with field=form.assigned_teachers label="Müəllimləri təyin et (multi)" search_placeholder="Müəllim axtar..." container_id="groupTeachersSelector" %}
+                                <div class="form-text">
+                                    Müəllimdən yuxarı rollar bir qrupa maksimum {{ max_multi_teachers }} müəllim təyin edə bilər.
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="display:none;">
+                                {{ form.assigned_teachers }}
+                            </div>
+                        {% endif %}
 
                         <div class="form-footer d-flex justify-content-between align-items-center">
                             <a href="{% url 'exams:teacher_group_list' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Qruplara qayıt
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Qrupu yarat
+                                <i class="fas fa-save me-1"></i> {{ is_editing|yesno:"Qrupu yenilə,Qrupu yarat" }}
                             </button>
                         </div>
                     </form>
@@ -77,4 +121,32 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+(function () {
+  const searchInput = document.getElementById("primaryTeacherSearch");
+  const teacherSelect = document.getElementById("{{ form.primary_teacher.id_for_label }}");
+
+  if (!searchInput || !teacherSelect) return;
+
+  searchInput.addEventListener("input", function () {
+    const filter = (this.value || "").toLowerCase();
+    const options = Array.from(teacherSelect.options);
+
+    options.forEach((option) => {
+      option.hidden = !(option.text || "").toLowerCase().includes(filter);
+    });
+
+    const selectedVisible = options.find((option) => option.selected && !option.hidden);
+    if (!selectedVisible) {
+      const firstVisible = options.find((option) => !option.hidden);
+      if (firstVisible) {
+        firstVisible.selected = true;
+      }
+    }
+  });
+})();
+</script>
 {% endblock %}

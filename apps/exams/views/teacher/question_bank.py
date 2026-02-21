@@ -1,16 +1,21 @@
 import re
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Max
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
-from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock
+from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
+from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
+from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
+@login_required
 def create_question_bank(request, slug):
-    exam = get_object_or_404(Exam, slug=slug)
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     # Mövcud blokları gətiririk ki, ekranda görsənsin
     blocks = exam.question_blocks.all().order_by("order")
@@ -32,8 +37,10 @@ def create_question_bank(request, slug):
     )
 
 
+@login_required
 def process_question_bank(request, slug):
-    exam = get_object_or_404(Exam, slug=slug)
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
         # 1. Silinməli olan blokları silirik
@@ -132,8 +139,10 @@ def process_question_bank(request, slug):
     return redirect("exams:create_question_bank", slug=exam.slug)
 
 
+@login_required
 def test_question_bank(request, slug):
-    exam = get_object_or_404(Exam, slug=slug)
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     # yalnız test imtahanı üçün
     if exam.exam_type != "test":

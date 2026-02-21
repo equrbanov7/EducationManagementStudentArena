@@ -141,7 +141,27 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Select a valid choice")
 
-    def test_school_signup_requires_identifier_when_institution_has_no_code(self):
+    def test_university_signup_requires_identifier_when_institution_has_no_code(self):
+        university = Institution.objects.create(
+            country=self.az,
+            institution_type=OrganizationType.UNIVERSITY,
+            name="University No Code",
+            code="",
+            is_active=True,
+        )
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type=OrganizationType.UNIVERSITY,
+                institution=str(university.id),
+                organization_identifier="",
+                initial_role=ProfileRole.ORG_ADMIN,
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "University üçün rəsmi identifikator")
+
+    def test_school_signup_allows_empty_identifier(self):
         school = Institution.objects.create(
             country=self.az,
             institution_type=OrganizationType.SCHOOL,
@@ -152,14 +172,34 @@ class SignupAndLoginFlowTest(TestCase):
         response = self.client.post(
             self.register_url,
             self._register_payload(
+                username="school_no_code",
+                email="school_no_code@example.com",
                 organization_type=OrganizationType.SCHOOL,
                 institution=str(school.id),
                 organization_identifier="",
                 initial_role=ProfileRole.ORG_ADMIN,
             ),
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "School/University üçün rəsmi identifikator")
+        self.assertRedirects(response, self.login_url)
+
+    def test_non_admin_signup_is_saved_as_pending_requested_organization(self):
+        school = self._institution(OrganizationType.SCHOOL)
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="teacher_pending",
+                email="teacher_pending@example.com",
+                organization_type=OrganizationType.SCHOOL,
+                institution=str(school.id),
+                initial_role=ProfileRole.TEACHER,
+            ),
+        )
+        self.assertRedirects(response, self.login_url)
+        profile = User.objects.get(username="teacher_pending").profile
+        self.assertIsNone(profile.organization)
+        if profile.requested_organization:
+            self.assertEqual(profile.requested_organization.name, school.name)
+        self.assertEqual(profile.requested_organization_name, school.name)
 
 
 class ProfileAndSuspensionFlowTest(TestCase):
@@ -309,6 +349,11 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             email="freeuser@example.com",
             password="StrongPass123!",
         )
+        self.unassigned_other = User.objects.create_user(
+            username="freeuser_other",
+            email="freeuser_other@example.com",
+            password="StrongPass123!",
+        )
 
         self.org_a = Organization.objects.create(
             name="Org A",
@@ -375,7 +420,17 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         free_profile.organization = None
         free_profile.organization_type = OrganizationType.INDIVIDUAL
         free_profile.role = ProfileRole.MEMBER
+        free_profile.requested_organization = self.org_a
+        free_profile.requested_organization_name = self.org_a.name
         free_profile.save()
+
+        free_other_profile = self.unassigned_other.profile
+        free_other_profile.organization = None
+        free_other_profile.organization_type = OrganizationType.INDIVIDUAL
+        free_other_profile.role = ProfileRole.MEMBER
+        free_other_profile.requested_organization = self.org_b
+        free_other_profile.requested_organization_name = self.org_b.name
+        free_other_profile.save()
 
         self.client.force_login(self.admin_user)
 
@@ -407,6 +462,8 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.target_user.username)
         self.assertNotContains(response, self.external_user.username)
+        self.assertContains(response, self.unassigned_user.username)
+        self.assertNotContains(response, self.unassigned_other.username)
 
     def test_teacher_can_attach_unassigned_user_and_assign_student_role(self):
         teacher_user = User.objects.create_user(
@@ -450,6 +507,45 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.unassigned_user.profile.refresh_from_db()
         self.assertEqual(self.unassigned_user.profile.organization, self.org_a)
         self.assertEqual(self.unassigned_user.profile.role, ProfileRole.STUDENT)
+
+    def test_attach_unassigned_user_rejected_when_requested_other_tenant(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_blocked",
+            email="teacher_blocked@example.com",
+            password="StrongPass123!",
+        )
+        Membership.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            role=self.org_a_teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save()
+
+        self.client.force_login(teacher_user)
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "attach_user",
+                "user_id": str(self.unassigned_other.id),
+                "role_id": str(self.org_a_student_role.id),
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "signup zamanı seçməyib")
+        self.assertFalse(
+            Membership.objects.filter(
+                user=self.unassigned_other,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )
 
     def test_permission_editor_rejects_grant_when_actor_lacks_permission(self):
         constrained_admin = User.objects.create_user(
@@ -590,3 +686,27 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_org_owner_without_membership_gets_permission_editor_access(self):
+        owner_without_membership = User.objects.create_user(
+            username="owner_no_membership",
+            email="owner_no_membership@example.com",
+            password="StrongPass123!",
+        )
+        owner_profile = owner_without_membership.profile
+        owner_profile.organization = self.org_a
+        owner_profile.organization_type = self.org_a.org_type
+        owner_profile.role = ProfileRole.ORG_OWNER
+        owner_profile.save()
+
+        self.client.force_login(owner_without_membership)
+        response = self.client.get(reverse("accounts:permission_editor"), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur.")
+        self.assertTrue(
+            Membership.objects.filter(
+                user=owner_without_membership,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )

@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.views.shared.tenant import exam_in_active_tenant, tenant_scoped_exams
 
 
 @login_required
@@ -11,6 +12,8 @@ def exam_result(request, slug, attempt_id):
     Yalnız həmin attempt üçün seçilmiş suallar göstərilir.
     """
     exam = get_object_or_404(Exam, slug=slug)
+    if not exam_in_active_tenant(request, exam):
+        return render(request, "403_forbidden.html", status=403)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
 
     # YALNIZ bu attempt-ə düşən suallar:
@@ -43,8 +46,15 @@ def exam_result(request, slug, attempt_id):
 @login_required
 def student_exam_history(request):
     # Tələbənin bitirdiyi və ya vaxtı bitmiş bütün cəhdləri gətiririk
-    attempts = ExamAttempt.objects.filter(user=request.user, status__in=["submitted", "graded", "expired"]).order_by(
-        "-started_at"
+    active_tenant_exams = tenant_scoped_exams(request)
+    attempts = (
+        ExamAttempt.objects.filter(
+            user=request.user,
+            exam__in=active_tenant_exams,
+            status__in=["submitted", "graded", "expired"],
+        )
+        .select_related("exam")
+        .order_by("-started_at")
     )
 
     context = {"attempts": attempts}

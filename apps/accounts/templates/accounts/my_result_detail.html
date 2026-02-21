@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Result Detail - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 900px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">{{ item_title }}</h1>
+            <a href="{% url 'accounts:my_results' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> My Results
+            </a>
+        </div>
+
+        <div class="section-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Type</div>
+                    <div class="info-value">{{ item_type|title }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Course/Context</div>
+                    <div class="info-value">{{ item_subtitle }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">
+                        <span class="result-status result-status--{{ status }}">{{ status_raw }}</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Submitted At</div>
+                    <div class="info-value">{{ submitted_at|date:"d M Y H:i" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Score/Grade</div>
+                    <div class="info-value">{% if score != None %}{{ score }}{% else %}-{% endif %}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-align-left"></i> Answer / Submission
+            </div>
+            {% if content_text %}
+            <pre class="result-content">{{ content_text }}</pre>
+            {% else %}
+            <div class="info-value">Mətn cavabı yoxdur.</div>
+            {% endif %}
+
+            {% if files %}
+            <div class="result-files">
+                {% for file in files %}
+                <div class="result-file-item">
+                    <a href="{{ file.path }}" target="_blank" rel="noopener">
+                        {{ file.name|default:"File" }}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if submission_file %}
+            <div class="result-files">
+                <div class="result-file-item">
+                    <a href="{{ submission_file.url }}" target="_blank" rel="noopener">
+                        Fayla bax
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if submission_link %}
+            <div class="result-files">
+                <div class="result-file-item">
+                    <a href="{{ submission_link }}" target="_blank" rel="noopener">
+                        Linkə bax
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-comment-dots"></i> Teacher Feedback
+            </div>
+            <div class="info-value">
+                {% if feedback %}
+                    {{ feedback }}
+                {% else %}
+                    Rəy hələ əlavə edilməyib.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

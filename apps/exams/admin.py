@@ -75,8 +75,8 @@ class ExamAnswerAdmin(admin.ModelAdmin):
 class StudentGroupAdmin(admin.ModelAdmin):
     list_display = ("name", "organization", "teacher", "created_at")
     list_filter = ("organization", "teacher")
-    search_fields = ("name", "organization__name", "teacher__username", "students__username")
-    filter_horizontal = ("students",)
+    search_fields = ("name", "organization__name", "teacher__username", "students__username", "teachers__username")
+    filter_horizontal = ("students", "teachers")
 
 
 @admin.register(QuestionBank)
