@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,11 +22,30 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
+from core.tenancy import get_organization_int_id, get_request_organization, scoped_by_organization_id
 
 from .forms import CourseForm, CourseResourceForm, CourseTopicForm
 from .models import Course, CourseMembership, CourseResource, CourseTopic
 
 User = get_user_model()
+
+
+def _tenant_scoped_courses(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Course.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="owner__profile__organization",
+    )
+
+
+def _owner_courses_queryset(request):
+    return _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+
+
+def _get_owner_course_or_404(request, course_id):
+    return get_object_or_404(_owner_courses_queryset(request), id=course_id)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -49,8 +69,7 @@ class IsCourseOwnerMixin(UserPassesTestMixin):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         messages.error(self.request, "Bu kursu redaktə etməyə icazəniz yoxdur.")
@@ -72,6 +91,8 @@ class CreateCourseView(IsTeacherMixin, CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         form.instance.status = "draft"
+        organization = get_request_organization(self.request)
+        form.instance.organization_id = get_organization_int_id(organization)
         response = super().form_valid(form)
         messages.success(self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!')
         return response
@@ -101,6 +122,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
     context_object_name = "course"
     pk_url_kwarg = "course_id"
 
+    def get_queryset(self):
+        return _tenant_scoped_courses(self.request).select_related("owner", "owner__profile")
+
+    def get_object(self, queryset=None):
+        course = super().get_object(queryset=queryset)
+        membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
+        is_owner = course.owner_id == self.request.user.id
+
+        if not is_owner and membership is None:
+            raise PermissionDenied("Bu kursa giriş icazəniz yoxdur.")
+
+        self._membership = membership
+        return course
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
@@ -109,17 +144,18 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ═══════════════════════════════════════════════════════════════════
         # 1. İSTİFADƏÇİ ROLUNU TƏYİN ET
         # ═══════════════════════════════════════════════════════════════════
-        membership = CourseMembership.objects.filter(course=course, user=user).first()
+        membership = getattr(self, "_membership", None)
         user_role = membership.role if membership else None
 
         # ─────────────────────────────────────────────────────────────────────
         # Context-ə rol məlumatlarını əlavə et
         # ─────────────────────────────────────────────────────────────────────
-        context["is_owner"] = course.owner == user
-        context["is_teacher"] = getattr(user, "is_teacher_or_above", False)
+        context["is_owner"] = course.owner_id == user.id
+        context["is_teacher"] = context["is_owner"] or user_role in {"teacher", "assistant"}
         context["is_student"] = user_role == "student"
-        context["is_assistant"] = user_role in ["assistant_teacher", "moderator"]
-        context["can_view_members"] = context["is_owner"] or context["is_assistant"]
+        context["is_assistant"] = user_role == "assistant"
+        context["can_manage_course"] = context["is_owner"] or context["is_assistant"] or user_role == "teacher"
+        context["can_view_members"] = context["can_manage_course"]
         context["user_role"] = user_role
         context["membership"] = membership  # Template-də lazım ola bilər
 
@@ -143,7 +179,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Müəllim: Bütün assignment-ları görür
         # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
         # ═══════════════════════════════════════════════════════════════════
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün assignment-lar
             context["assignments"] = course.assignments.all().order_by("-created_at")
             context["assignments_with_user_data"] = []
@@ -187,7 +223,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Müəllim: Bütün project-ləri görür
         # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
         # ═════════════════════════════════════════��═════════════════════════
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün project-lər
             context["projects"] = course.projects.all().order_by("-created_at")
             context["projects_with_user_data"] = []
@@ -233,18 +269,31 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # 7. İMTAHANLAR
         # ───────────────────────────────────────────────────────────────────
 
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = Exam.objects.filter(course=course).order_by("-created_at")
+            context["course_exams"] = scoped_by_organization_id(
+                Exam.objects.filter(course=course),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ).order_by("-created_at")
 
             # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
-            context["teacher_exams"] = (
-                Exam.objects.filter(author=user).exclude(course=course).order_by("-created_at")[:10]
-            )
+            context["teacher_exams"] = scoped_by_organization_id(
+                Exam.objects.filter(author=user).exclude(course=course),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ).order_by("-created_at")[:10]
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
-            all_course_exams = Exam.objects.filter(course=course, is_active=True)
+            all_course_exams = scoped_by_organization_id(
+                Exam.objects.filter(course=course, is_active=True),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            )
 
             exams_with_data = []
             for exam in all_course_exams:
@@ -281,7 +330,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
         # ═══════════════════════════════════════════════════════════════════
 
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün lab-lar
             context["labs"] = course.labs.all().order_by("-created_at")
             context["labs_with_user_data"] = []
@@ -294,16 +343,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             if membership and hasattr(membership, "group_name"):
                 student_group = membership.group_name or ""
 
-            print(f"DEBUG: Student ID: {user.id}, Group: '{student_group}'")  # DEBUG
-
             labs_with_user_data = []
 
             # Published olan lab-ları yoxla
             for lab in course.labs.filter(status="published").order_by("-created_at"):
-
-                print(f"DEBUG: Checking Lab '{lab.title}' (ID: {lab.id})")  # DEBUG
-                print(f"DEBUG:   allowed_students: '{lab.allowed_students}'")  # DEBUG
-                print(f"DEBUG:   allowed_groups: '{lab.allowed_groups}'")  # DEBUG
 
                 # Bu lab tələbəyə təyin olunubmu?
                 is_assigned = False
@@ -324,9 +367,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         if g:
                             allowed_group_names.append(g)
 
-                print(f"DEBUG:   Parsed student IDs: {allowed_student_ids}")  # DEBUG
-                print(f"DEBUG:   Parsed group names: {allowed_group_names}")  # DEBUG
-
                 # ƏSAS MƏNTİQ:
                 # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
                 # 2. Əgər student ID siyahısında varsa → görür
@@ -338,20 +378,15 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
                     # Əgər heç bir tələbə/qrup seçilməyibsə, heç kim görməsin:
                     is_assigned = False
-                    print("DEBUG:   No filter set - NOT assigned")  # DEBUG
                 else:
                     # Filtr var - yoxla
                     # Student ID ilə yoxla
                     if user.id in allowed_student_ids:
                         is_assigned = True
-                        print("DEBUG:   Assigned by student ID")  # DEBUG
 
                     # Qrup adı ilə yoxla
                     if not is_assigned and student_group and student_group in allowed_group_names:
                         is_assigned = True
-                        print("DEBUG:   Assigned by group name")  # DEBUG
-
-                print(f"DEBUG:   Final is_assigned: {is_assigned}")  # DEBUG
 
                 # Əgər təyin olunmayıbsa, skip et
                 if not is_assigned:
@@ -389,7 +424,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
             context["labs"] = []
             context["labs_with_user_data"] = labs_with_user_data
-            print(f"DEBUG: Total labs for student: {len(labs_with_user_data)}")  # DEBUG
 
         else:
             context["labs"] = []
@@ -421,18 +455,16 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Kursa əlavə olunmamış istifadəçilər (üzv əlavə etmək üçün)
             # ─────────────────────────────────────────────────────────────────
             course_user_ids = course.memberships.values_list("user_id", flat=True)
-            context["all_users"] = (
-                User.objects.exclude(id__in=course_user_ids)
-                .filter(groups__name="student")
-                .distinct()
-                .order_by("username")
-            )
+            user_org = get_request_organization(self.request)
+            user_candidates = User.objects.exclude(id__in=course_user_ids)
+            if user_org is not None:
+                user_candidates = user_candidates.filter(profile__organization=user_org)
+            context["all_users"] = user_candidates.filter(profile__role="student").distinct().order_by("username")
 
             # ─────────────────────────────────────────────────────────────────
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-                user_org = getattr(getattr(user, "profile", None), "organization", None)
                 qs = StudentGroup.objects.filter(teacher=user)
                 if user_org is not None:
                     qs = qs.filter(organization=user_org)
@@ -460,9 +492,7 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
     form_class = CourseTopicForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.course = get_object_or_404(Course, id=kwargs["course_id"])
-        if self.course.owner != request.user:
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        self.course = _get_owner_course_or_404(request, kwargs["course_id"])
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -510,10 +540,14 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
     form_class = CourseTopicForm
     pk_url_kwarg = "topic_id"
 
+    def test_func(self):
+        topic = self.get_object()
+        return _owner_courses_queryset(self.request).filter(id=topic.course_id).exists()
+
     def dispatch(self, request, *args, **kwargs):
         self.topic = self.get_object()
         self.course = self.topic.course
-        if self.course.owner != request.user:
+        if not _owner_courses_queryset(request).filter(id=self.course.id).exists():
             return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
         return super().dispatch(request, *args, **kwargs)
 
@@ -560,12 +594,8 @@ class DeleteTopicView(IsCourseOwnerMixin, View):
         course_id = kwargs.get("course_id")
         topic_id = kwargs.get("topic_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         topic = get_object_or_404(CourseTopic, id=topic_id, course=course)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu əməliyyata icazəniz yoxdur.")
-            return redirect("courses:course_dashboard", course_id=course_id)
 
         topic_title = topic.title
         topic.delete()
@@ -590,9 +620,7 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
     form_class = CourseResourceForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.course = get_object_or_404(Course, id=kwargs["course_id"])
-        if self.course.owner != request.user:
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        self.course = _get_owner_course_or_404(request, kwargs["course_id"])
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -631,12 +659,8 @@ class DeleteResourceView(IsCourseOwnerMixin, View):
         course_id = kwargs.get("course_id")
         resource_id = kwargs.get("resource_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         resource = get_object_or_404(CourseResource, id=resource_id, course=course)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu əməliyyata icazəniz yoxdur.")
-            return redirect("courses:course_dashboard", course_id=course_id)
 
         resource_title = resource.title
         resource.delete()
@@ -659,8 +683,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         messages.error(self.request, "Bu səhifəyə giriş icazəniz yoxdur.")
@@ -668,7 +691,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         members = course.memberships.all().order_by("joined_at")
         teacher = members.filter(role="teacher").first()
@@ -677,18 +700,13 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
 
-        if hasattr(User, "groups"):
-            all_users = (
-                User.objects.exclude(id__in=course_user_ids)
-                .filter(groups__name="student")
-                .distinct()
-                .order_by("username")
-            )
-        else:
-            all_users = User.objects.exclude(id__in=course_user_ids).order_by("username")
+        user_org = get_request_organization(request)
+        all_users = User.objects.exclude(id__in=course_user_ids)
+        if user_org is not None:
+            all_users = all_users.filter(profile__organization=user_org)
+        all_users = all_users.filter(profile__role="student").distinct().order_by("username")
 
         try:
-            user_org = getattr(getattr(request.user, "profile", None), "organization", None)
             all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
             if user_org is not None:
                 all_groups_qs = all_groups_qs.filter(organization=user_org)
@@ -715,16 +733,19 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def get(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
+        user_org = get_request_organization(request)
 
-        qs = User.objects.exclude(id__in=course_user_ids).filter(groups__name="student").distinct().order_by("username")
+        qs = User.objects.exclude(id__in=course_user_ids)
+        if user_org is not None:
+            qs = qs.filter(profile__organization=user_org)
+        qs = qs.filter(profile__role="student").distinct().order_by("username")
 
         data = [
             {
@@ -748,15 +769,14 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         user_ids = request.POST.getlist("user_ids")
         group_name = request.POST.get("group_name", "").strip()
@@ -766,9 +786,13 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         added_count = 0
 
+        owner_org = get_request_organization(request)
         for uid in user_ids:
             try:
-                user = User.objects.get(id=uid)
+                user_qs = User.objects.filter(id=uid)
+                if owner_org is not None:
+                    user_qs = user_qs.filter(profile__organization=owner_org)
+                user = user_qs.get()
                 membership, created = CourseMembership.objects.get_or_create(
                     course=course,
                     user=user,
@@ -794,15 +818,14 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         return JsonResponse({"success": False, "error": "İcazəniz yoxdur."}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         group_ids = request.POST.getlist("group_ids")
 
@@ -810,7 +833,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({"success": False, "error": "Qrup seçilməyib."}, status=400)
 
         try:
-            user_org = getattr(getattr(request.user, "profile", None), "organization", None)
+            user_org = get_request_organization(request)
             groups = StudentGroup.objects.filter(id__in=group_ids, teacher=request.user)
             if user_org is not None:
                 groups = groups.filter(organization=user_org)
@@ -860,8 +883,7 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
@@ -870,7 +892,7 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         course_id = kwargs.get("course_id")
         member_id = kwargs.get("member_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         membership = get_object_or_404(CourseMembership, id=member_id, course=course)
 
         username = membership.user.username
@@ -893,8 +915,7 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -904,7 +925,7 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
             messages.error(request, "Qrup adı tapılmadı.")
             return redirect("courses:course_members", course_id=course_id)
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         deleted_count, _ = CourseMembership.objects.filter(course=course, group_name=group_name).delete()
 
@@ -947,11 +968,7 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu kursu silməyə icazəniz yoxdur.")
-            return redirect("home")
+        course = _get_owner_course_or_404(request, course_id)
 
         course_title = course.title
         course.delete()
@@ -971,7 +988,7 @@ class MyCoursesListView(LoginRequiredMixin, ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Course.objects.filter(owner=self.request.user).order_by("-created_at")
+        return _owner_courses_queryset(self.request).order_by("-created_at")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -996,12 +1013,13 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         user = self.request.user
 
         # Tələbənin üzv olduğu kurslar
-        return (
+        courses = (
             Course.objects.filter(memberships__user=user, memberships__role="student", status="published")
             .distinct()
             .select_related("owner")
             .order_by("-created_at")
         )
+        return _tenant_scoped_courses(self.request, courses)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1027,16 +1045,19 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
 @require_POST
 def link_exam_to_course(request, pk):
     """İmtahanı kursa əlaqələndir"""
-    course = get_object_or_404(Course, id=pk)
-
-    if course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    course = _get_owner_course_or_404(request, pk)
 
     try:
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam = get_object_or_404(Exam, id=exam_id, author=request.user)
+        exam_qs = scoped_by_organization_id(
+            Exam.objects.filter(author=request.user),
+            request,
+            org_id_field="organization_id",
+            fallback_org_field="author__profile__organization",
+        )
+        exam = get_object_or_404(exam_qs, id=exam_id)
         exam.course = course
         exam.save()
 
@@ -1049,16 +1070,21 @@ def link_exam_to_course(request, pk):
 @require_POST
 def unlink_exam_from_course(request, pk):
     """İmtahanı kursdan ayır"""
-    course = get_object_or_404(Course, id=pk)
-
-    if course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    course = _get_owner_course_or_404(request, pk)
 
     try:
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam = get_object_or_404(Exam, id=exam_id, course=course)
+        exam = get_object_or_404(
+            scoped_by_organization_id(
+                Exam.objects.filter(course=course),
+                request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ),
+            id=exam_id,
+        )
         exam.course = None
         exam.save()
 

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
 
 
@@ -371,6 +372,30 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
 
 class StudentGroupForm(forms.ModelForm):
+    MAX_MULTI_TEACHERS = 3
+
+    primary_teacher = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        required=True,
+        label="Primary müəllim",
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
+    assigned_teachers = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(),
+        required=False,
+        label="Təyin olunmuş müəllimlər",
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+        help_text="Bu qrupu idarə edə bilən əlavə müəllimlər.",
+    )
+
     class Meta:
         model = StudentGroup
         fields = ["name", "students"]
@@ -392,20 +417,173 @@ class StudentGroupForm(forms.ModelForm):
             "students": "Qrupdakı tələbələr",
         }
         help_texts = {
-            "students": "Birdən çox tələbə seçmək üçün Ctrl/Cmd düyməsini basılı saxlayın.",
+            "students": "Yalnız aktiv tenant-a aid tələbələr görünür.",
         }
 
     def __init__(self, *args, **kwargs):
-        teacher = kwargs.pop("teacher", None)
+        actor = kwargs.pop("actor", None)
+        teacher = kwargs.pop("teacher", None)  # backward compatibility
         organization = kwargs.pop("organization", None)
+        can_multi_assign_teachers = kwargs.pop("can_multi_assign_teachers", False)
+        is_superadmin = kwargs.pop("is_superadmin", False)
         super().__init__(*args, **kwargs)
 
-        qs = User.objects.filter(is_active=True).order_by("username")
+        self.actor = actor or teacher
+        if self.actor:
+            try:
+                actor_profile = self.actor.profile
+            except Exception:
+                actor_profile = None
+        else:
+            actor_profile = None
+        self.actor_role = getattr(actor_profile, "role", None)
+        self.organization = organization
+        self.is_superadmin = bool(is_superadmin)
+        self.can_multi_assign_teachers = bool(can_multi_assign_teachers)
 
-        if teacher is not None:
-            qs = qs.exclude(id=teacher.id)
+        users_qs = User.objects.filter(is_active=True).select_related("profile").order_by("username")
+        if self.organization is not None:
+            users_qs = users_qs.filter(profile__organization=self.organization)
+        elif not self.is_superadmin:
+            users_qs = users_qs.none()
 
-        if organization is not None:
-            qs = qs.filter(profile__organization=organization)
+        students_qs = users_qs.filter(profile__role=ProfileRole.STUDENT).distinct()
+        teachers_qs = users_qs.filter(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).distinct()
 
-        self.fields["students"].queryset = qs.distinct()
+        self.fields["students"].queryset = students_qs
+        self.fields["primary_teacher"].queryset = teachers_qs
+        self.fields["assigned_teachers"].queryset = teachers_qs
+
+        if self.instance and self.instance.pk:
+            self.fields["primary_teacher"].initial = self.instance.teacher_id
+            initial_assigned = list(self.instance.teachers.values_list("id", flat=True))
+            if self.instance.teacher_id not in initial_assigned:
+                initial_assigned.append(self.instance.teacher_id)
+            self.fields["assigned_teachers"].initial = initial_assigned
+
+        actor_is_teacher = self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        if self.actor is not None and actor_is_teacher and not self.can_multi_assign_teachers:
+            self.fields["primary_teacher"].queryset = teachers_qs.filter(id=self.actor.id)
+            self.fields["assigned_teachers"].queryset = teachers_qs.filter(id=self.actor.id)
+            self.fields["primary_teacher"].initial = self.actor.id
+            self.fields["assigned_teachers"].initial = [self.actor.id]
+            self.fields["assigned_teachers"].help_text = "Müəllim rolunda yalnız özünü təyin edə bilərsən."
+        elif self.actor is not None and not self.can_multi_assign_teachers:
+            self.fields["assigned_teachers"].help_text = "Bu rol üçün yalnız bir müəllim təyin edilə bilər."
+
+        self.fields["students"].label_from_instance = self._user_option_label
+        self.fields["primary_teacher"].label_from_instance = self._user_option_label
+        self.fields["assigned_teachers"].label_from_instance = self._user_option_label
+
+    def _user_option_label(self, user):
+        full_name = (user.get_full_name() or "").strip()
+        if full_name:
+            return f"{user.username} - {full_name}"
+        return user.username
+
+    def _is_teacher_profile(self, user):
+        if user is None:
+            return False
+        try:
+            profile = user.profile
+        except Exception:
+            profile = None
+        return getattr(profile, "role", None) in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        students = cleaned_data.get("students")
+        primary_teacher = cleaned_data.get("primary_teacher")
+        assigned_teachers = cleaned_data.get("assigned_teachers")
+
+        if self.organization is None:
+            raise ValidationError("Aktiv təşkilat olmadan qrup yaratmaq/yeniləmək olmaz.")
+
+        if students is not None:
+            invalid_students = students.exclude(profile__organization=self.organization)
+            if invalid_students.exists():
+                raise ValidationError("Qrupa yalnız eyni tenant-dakı tələbələr əlavə edilə bilər.")
+
+        if primary_teacher is None:
+            raise ValidationError("Qrup üçün primary müəllim seçilməlidir.")
+
+        if not self._is_teacher_profile(primary_teacher):
+            raise ValidationError("Primary müəllim mütləq teacher rolunda olmalıdır.")
+
+        try:
+            primary_teacher_profile = primary_teacher.profile
+        except Exception:
+            primary_teacher_profile = None
+
+        primary_teacher_org = getattr(primary_teacher_profile, "organization", None)
+        if primary_teacher_org != self.organization:
+            raise ValidationError("Primary müəllim qrupla eyni tenant-da olmalıdır.")
+
+        assigned_list = list(assigned_teachers) if assigned_teachers is not None else []
+
+        invalid_assigned = []
+        for teacher in assigned_list:
+            try:
+                teacher_profile = teacher.profile
+            except Exception:
+                teacher_profile = None
+            teacher_org = getattr(teacher_profile, "organization", None)
+
+            if not self._is_teacher_profile(teacher) or teacher_org != self.organization:
+                invalid_assigned.append(teacher)
+        if invalid_assigned:
+            raise ValidationError("Təyin olunan müəllimlərin hamısı eyni tenant-da teacher olmalıdır.")
+
+        assigned_ids = {teacher.id for teacher in assigned_list}
+        assigned_ids.add(primary_teacher.id)
+
+        actor_is_teacher = self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+
+        if self.can_multi_assign_teachers:
+            if len(assigned_ids) > self.MAX_MULTI_TEACHERS:
+                raise ValidationError(
+                    f"Müəllimdən yuxarı rollar bir qrupa maksimum {self.MAX_MULTI_TEACHERS} müəllim təyin edə bilər."
+                )
+        elif actor_is_teacher and self.actor is not None:
+            if primary_teacher.id != self.actor.id:
+                raise ValidationError("Müəllim rolunda yalnız özünü primary müəllim kimi təyin edə bilərsən.")
+
+            non_actor_ids = {teacher_id for teacher_id in assigned_ids if teacher_id != self.actor.id}
+            if non_actor_ids:
+                raise ValidationError("Müəllim rolunda əlavə müəllim təyin etmək qadağandır.")
+
+            assigned_ids = {self.actor.id}
+        else:
+            # Teacher olmayan, amma multi icazəsi də olmayan rollar yalnız 1 müəllim seçə bilər.
+            assigned_ids = {primary_teacher.id}
+
+        self._validated_assigned_teacher_ids = assigned_ids
+        return cleaned_data
+
+    def _post_clean(self):
+        # Ensure model-level validation receives tenant + primary teacher before full_clean().
+        if self.organization is not None:
+            self.instance.organization = self.organization
+
+        primary_teacher = self.cleaned_data.get("primary_teacher")
+        if primary_teacher is not None:
+            self.instance.teacher = primary_teacher
+
+        super()._post_clean()
+
+    def save(self, commit=True):
+        group = super().save(commit=False)
+        group.organization = self.organization
+        group.teacher = self.cleaned_data["primary_teacher"]
+
+        if not commit:
+            return group
+
+        group.save()
+        self.save_m2m()
+
+        assigned_teacher_ids = getattr(self, "_validated_assigned_teacher_ids", {group.teacher_id})
+        teachers_qs = User.objects.filter(id__in=assigned_teacher_ids)
+        group.teachers.set(teachers_qs)
+
+        return group

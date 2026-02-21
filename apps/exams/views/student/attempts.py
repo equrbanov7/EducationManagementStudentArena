@@ -11,6 +11,7 @@ from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, Exa
 from apps.exams.services.attempts import _start_or_resume_attempt, generate_random_questions_for_attempt
 from apps.exams.services.randomizer import build_shuffled_options
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
+from apps.exams.views.shared.tenant import exam_in_active_tenant
 
 
 @login_required
@@ -19,6 +20,9 @@ def start_exam(request, slug):
     İmtahan başlatma view-ı
     """
     exam = get_object_or_404(Exam, slug=slug, is_active=True)
+    if not exam_in_active_tenant(request, exam):
+        messages.error(request, "Bu imtahana giriş icazəniz yoxdur.")
+        return redirect("exams:student_exam_list")
 
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
@@ -38,6 +42,9 @@ def take_exam(request, slug, attempt_id):
         user=request.user,
     )
     exam = attempt.exam
+    if not exam_in_active_tenant(request, exam):
+        messages.error(request, "Bu imtahana giriş icazəniz yoxdur.")
+        return redirect("exams:student_exam_list")
 
     if attempt.is_finished:
         return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)

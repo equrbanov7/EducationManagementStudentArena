@@ -70,12 +70,13 @@
 
                 <div id="orgFields" hidden>
                     <div class="register-form-field">
-                        <label for="institutionSearchInput">Müəssisə axtar</label>
+                        <label for="institutionSearchInput" id="institutionSearchLabel">Müəssisə axtar</label>
                         <input type="text" id="institutionSearchInput" class="form-control" placeholder="Müəssisə axtar...">
+                        <small class="register-help-text" id="institutionTypeHint"></small>
                     </div>
 
                     <div class="register-form-field" id="institutionSelectField">
-                        {{ form.institution.label_tag }}
+                        <label for="{{ form.institution.id_for_label }}" id="institutionSelectLabel">{{ form.institution.label }}</label>
                         {{ form.institution }}
                         {% if form.institution.errors %}
                             <div class="register-field-error">{{ form.institution.errors.0 }}</div>
@@ -83,24 +84,24 @@
                     </div>
 
                     <div class="register-form-field">
-                        {{ form.institution_not_listed_name.label_tag }}
+                        <label for="{{ form.institution_not_listed_name.id_for_label }}" id="institutionManualLabel">{{ form.institution_not_listed_name.label }}</label>
                         {{ form.institution_not_listed_name }}
                         {% if form.institution_not_listed_name.errors %}
                             <div class="register-field-error">{{ form.institution_not_listed_name.errors.0 }}</div>
                         {% endif %}
                         <small class="register-help-text">
-                            Siyahıda yoxdursa “Not listed” kimi müəssisə adını əl ilə daxil edin.
+                            Siyahıda yoxdursa “Not listed / Other” seçərək müəssisə adını əl ilə daxil edin.
                         </small>
                     </div>
 
                     <div class="register-form-field" id="orgIdentifierField">
-                        {{ form.organization_identifier.label_tag }}
+                        <label for="{{ form.organization_identifier.id_for_label }}" id="orgIdentifierLabel">{{ form.organization_identifier.label }}</label>
                         {{ form.organization_identifier }}
                         {% if form.organization_identifier.errors %}
                             <div class="register-field-error">{{ form.organization_identifier.errors.0 }}</div>
                         {% endif %}
                         <small class="register-help-text" id="orgIdentifierHelp">
-                            School və University üçün bu sahə məcburidir.
+                            University üçün bu sahə məcburidir.
                         </small>
                     </div>
 

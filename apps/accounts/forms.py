@@ -6,9 +6,8 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 
-from core.constants import OrganizationType
-
 from apps.organizations.models import Country, Institution
+from core.constants import OrganizationType
 
 from .models import ProfileRole
 
@@ -172,12 +171,12 @@ class RegisterForm(forms.ModelForm):
                     self.add_error("institution", "Müəssisə seçilən ölkəyə aid deyil.")
                 if institution.institution_type != organization_type:
                     self.add_error("institution", "Müəssisə tipi qeydiyyat tipi ilə uyğun deyil.")
-            if organization_type in {OrganizationType.SCHOOL, OrganizationType.UNIVERSITY} and not (
+            if organization_type == OrganizationType.UNIVERSITY and not (
                 organization_identifier or (institution and institution.code)
             ):
                 self.add_error(
                     "organization_identifier",
-                    "School/University üçün rəsmi identifikator və ya kod tələb olunur.",
+                    "University üçün rəsmi identifikator və ya kod tələb olunur.",
                 )
         else:
             cleaned_data["institution"] = None

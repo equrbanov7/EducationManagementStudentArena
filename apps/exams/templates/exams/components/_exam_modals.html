@@ -42,7 +42,7 @@
                         <div class="text-center py-4 text-muted">
                             <i class="fas fa-info-circle fa-2x mb-2"></i>
                             <p>Əlaqələndirilə biləcək imtahan yoxdur.</p>
-                            <a href="{% url 'create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                            <a href="{% url 'exams:create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
                                 <i class="fas fa-plus"></i> Yeni İmtahan Yarat
                             </a>
                         </div>

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Results - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1100px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-clipboard-check"></i> My Results
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        <div class="section-card">
+            <div class="results-tabs">
+                <a href="{% url 'accounts:my_results' %}?type=all"
+                   class="results-tab {% if active_filter == 'all' %}active{% endif %}">
+                    All ({{ counts.all|default:0 }})
+                </a>
+                <a href="{% url 'accounts:my_results' %}?type=exams"
+                   class="results-tab {% if active_filter == 'exams' %}active{% endif %}">
+                    Exams ({{ counts.exams|default:0 }})
+                </a>
+                <a href="{% url 'accounts:my_results' %}?type=courses"
+                   class="results-tab {% if active_filter == 'courses' %}active{% endif %}">
+                    Courses ({{ counts.courses|default:0 }})
+                </a>
+                <a href="{% url 'accounts:my_results' %}?type=labs"
+                   class="results-tab {% if active_filter == 'labs' %}active{% endif %}">
+                    Labs ({{ counts.labs|default:0 }})
+                </a>
+                <a href="{% url 'accounts:my_results' %}?type=independent"
+                   class="results-tab {% if active_filter == 'independent' %}active{% endif %}">
+                    Independent Work ({{ counts.independent|default:0 }})
+                </a>
+            </div>
+        </div>
+
+        {% if items %}
+        <div class="posts-grid">
+            {% for item in items %}
+            <div class="post-item result-item">
+                <div class="post-icon stat-icon--blue">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="post-info">
+                    <div class="post-title">{{ item.title }}</div>
+                    <div class="post-date">
+                        {{ item.kind }}
+                        {% if item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                    </div>
+                    <div class="result-meta">
+                        <span class="result-status result-status--{{ item.status }}">{{ item.status }}</span>
+                        {% if item.score != None %}
+                        <span class="result-score">Score: {{ item.score }}</span>
+                        {% endif %}
+                    </div>
+                    {% if item.feedback %}
+                    <div class="result-feedback">
+                        {{ item.feedback|truncatechars:180 }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="result-action">
+                    <a href="{{ item.detail_url }}" class="btn btn-primary btn-sm">
+                        View answer/details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state section-card">
+            <i class="fas fa-clipboard-list"></i>
+            <p>Hələ nəticə/cavab tapılmadı.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

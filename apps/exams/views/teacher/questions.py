@@ -2,8 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.exams.forms import ExamQuestionCreateForm
-from apps.exams.models import Exam, ExamQuestion, QuestionBlock
+from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
 @login_required
@@ -14,7 +15,7 @@ def add_exam_question(request, slug):
     Yazılı imtahan üçün yalnız sual mətni + ideal cavab hissəsi istifadə edilir.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
 
     if request.method == "POST":
@@ -64,7 +65,7 @@ def edit_exam_question(request, slug, question_id):
     Mövcud sualı redaktə etmək (text, blok, cavab rejimi, vaxt, variantlar və s.).
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
 
     # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
@@ -92,7 +93,7 @@ def edit_exam_question(request, slug, question_id):
                 form.save_options(q)
 
             if "save_and_continue" in request.POST:
-                return redirect("exams::add_exam_question", slug=exam.slug)
+                return redirect("exams:add_exam_question", slug=exam.slug)
 
             return redirect("exams:teacher_exam_detail", slug=exam.slug)
     else:
@@ -120,7 +121,7 @@ def delete_exam_question(request, slug, question_id):
     Sualı silmək – əvvəlcə təsdiq istənilir.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
 
     if request.method == "POST":

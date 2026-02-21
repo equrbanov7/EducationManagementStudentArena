@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.exams.models import Exam
+from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 
 @login_required
@@ -13,11 +14,20 @@ def assigned_student_exam_list(request):
 
     # 1) BAZA SORĞUSU (İlkin Filter)
     # Fərq burdadır: yalnız user-ə təyin olunmuş aktiv imtahanlar
-    exams_qs = (
-        Exam.objects.filter(is_active=True)
-        .filter(Q(allowed_users=user) | Q(allowed_groups__students=user))
+    exams_qs = tenant_scoped_exams(
+        request,
+        Exam.objects.filter(is_active=True, is_public=False)
+        .filter(
+            Q(allowed_users=user)
+            | Q(allowed_groups__students=user)
+            | Q(
+                course__memberships__user=user,
+                course__memberships__role="student",
+                course__status="published",
+            )
+        )
         .distinct()
-        .select_related("author")
+        .select_related("author"),
     )
 
     # --- SEARCH (Axtarış) ---
@@ -97,10 +107,23 @@ def student_exam_list(request):
     now = timezone.now()
 
     # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
-    exams_qs = (
+    exams_qs = tenant_scoped_exams(
+        request,
         Exam.objects.filter(is_active=True)
+        .filter(
+            Q(is_public=True)
+            | Q(allowed_users=user)
+            | Q(allowed_groups__students=user)
+            | Q(
+                course__memberships__user=user,
+                course__memberships__role="student",
+                course__status="published",
+            )
+            | Q(author=user)
+        )
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
-        .select_related("author")
+        .distinct()
+        .select_related("author"),
     )
 
     # --- SEARCH ---
@@ -161,6 +184,7 @@ def student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
+        "page_title": "Mövcud imtahanlar",
         "current_url_name": "student_exam_list",
     }
 

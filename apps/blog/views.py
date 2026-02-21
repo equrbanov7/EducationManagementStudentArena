@@ -27,6 +27,13 @@ User = get_user_model()
 signer = TimestampSigner()
 
 
+def _can_manage_blog_content(user):
+    """
+    Any authenticated user can create and manage their own posts.
+    """
+    return getattr(user, "is_authenticated", False)
+
+
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
 
 
@@ -211,6 +218,9 @@ def subscribe_page(request):
 
 @login_required
 def create_post(request):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -256,6 +266,9 @@ def create_post(request):
 @login_required
 @require_POST
 def post_edit_ajax(request, pk):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+
     # Yalnız öz postunu düzəldə bilsin
     post = get_object_or_404(Post, pk=pk, author=request.user)
 
@@ -307,6 +320,9 @@ def post_edit_ajax(request, pk):
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
 @login_required
 def delete_post(request, post_id):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+
     post = get_object_or_404(Post, pk=post_id, author=request.user)
 
     if request.method == "POST":
@@ -491,8 +507,19 @@ def user_profile(request, username):
     assigned_count = 0
     if request.user.is_authenticated and request.user == profile_user:
         assigned_count = (
-            Exam.objects.filter(is_active=True)
-            .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
+            Exam.objects.filter(
+                is_active=True,
+                is_public=False,
+            )
+            .filter(
+                Q(allowed_users=request.user)
+                | Q(allowed_groups__students=request.user)
+                | Q(
+                    course__memberships__user=request.user,
+                    course__memberships__role="student",
+                    course__status="published",
+                )
+            )
             .distinct()
             .count()
         )

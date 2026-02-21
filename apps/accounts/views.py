@@ -12,6 +12,7 @@ from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
@@ -19,7 +20,10 @@ from apps.blog.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
+from apps.labs.models import LabSubmission
+from apps.projects.models import ProjectSubmission
 from core.constants import OrganizationType
+from core.tenancy import get_request_organization, scoped_by_organization_id
 
 from .forms import CustomLoginForm, RegisterForm
 from .models import ProfileRole, UserProfile
@@ -36,9 +40,157 @@ def _get_active_organization(request):
     """
     Use middleware-selected organization first; fallback to profile organization.
     """
-    from apps.organizations.services import get_user_organization
+    return get_request_organization(request)
 
-    return getattr(request, "organization", None) or get_user_organization(request.user)
+
+def _tenant_scoped_courses(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Course.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="owner__profile__organization",
+    )
+
+
+def _tenant_scoped_exams(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Exam.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="author__profile__organization",
+    )
+
+
+def _assigned_courses_queryset(request, user):
+    return _tenant_scoped_courses(
+        request,
+        Course.objects.filter(
+            memberships__user=user,
+            memberships__role="student",
+            status="published",
+        ).distinct(),
+    )
+
+
+def _assigned_exams_queryset(request, user, *, active_only=True):
+    assignment_filter = (
+        Q(allowed_users=user)
+        | Q(allowed_groups__students=user)
+        | Q(
+            course__memberships__user=user,
+            course__memberships__role="student",
+            course__status="published",
+        )
+    )
+
+    exams = Exam.objects.filter(assignment_filter, is_public=False)
+    if active_only:
+        exams = exams.filter(is_active=True)
+
+    return _tenant_scoped_exams(request, exams).distinct()
+
+
+def _normalized_org_name(value):
+    return " ".join((value or "").strip().lower().split())
+
+
+def _role_capabilities(user, profile):
+    role = profile.role if profile and profile.role else ProfileRole.MEMBER
+    is_superadmin = _is_superadmin_user(user)
+    is_student = role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
+    is_teacher = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+    is_org_admin = role in {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR}
+
+    can_manage_org = is_superadmin or is_org_admin
+    can_view_owned_learning = is_superadmin or is_teacher or is_org_admin
+    can_review_submissions = is_superadmin or is_teacher
+    can_view_student_assignments = is_student or role == ProfileRole.MEMBER
+    can_manage_blog = getattr(user, "is_authenticated", False)
+
+    if is_superadmin:
+        allowed_sections = {
+            "profile-info",
+            "posts",
+            "my-results",
+            "my-exams",
+            "my-courses",
+            "courses",
+            "assigned-exams",
+            "assigned-courses",
+            "groups",
+            "pending-review",
+            "role-assignment",
+            "permission-editor",
+            "manage-roles",
+            "superadmin-organizations",
+            "blog",
+            "edit-profile",
+        }
+    elif is_org_admin:
+        allowed_sections = {
+            "profile-info",
+            "posts",
+            "my-results",
+            "my-exams",
+            "my-courses",
+            "groups",
+            "role-assignment",
+            "permission-editor",
+            "manage-roles",
+            "blog",
+            "edit-profile",
+        }
+    elif is_teacher:
+        allowed_sections = {
+            "profile-info",
+            "posts",
+            "my-results",
+            "my-exams",
+            "my-courses",
+            "groups",
+            "pending-review",
+            "blog",
+            "edit-profile",
+        }
+    elif is_student:
+        allowed_sections = {
+            "profile-info",
+            "posts",
+            "my-results",
+            "assigned-exams",
+            "assigned-courses",
+            "blog",
+            "edit-profile",
+        }
+    else:
+        allowed_sections = {
+            "profile-info",
+            "posts",
+            "my-results",
+            "courses",
+            "assigned-exams",
+            "assigned-courses",
+            "groups",
+            "blog",
+            "edit-profile",
+        }
+
+    return {
+        "role": role,
+        "is_superadmin": is_superadmin,
+        "is_student": is_student,
+        "is_teacher": is_teacher,
+        "is_org_admin": is_org_admin,
+        "can_manage_org": can_manage_org,
+        "can_view_owned_learning": can_view_owned_learning,
+        "can_review_submissions": can_review_submissions,
+        "can_view_student_assignments": can_view_student_assignments,
+        "can_view_blog": True,
+        "can_manage_blog": can_manage_blog,
+        "allowed_sections": allowed_sections,
+    }
 
 
 def _collect_actor_permissions(user, organization):
@@ -61,6 +213,41 @@ def _collect_actor_permissions(user, organization):
                 effective_permissions.add(permission)
 
     return effective_permissions, grantable_permissions
+
+
+def _ensure_profile_admin_membership(user, organization):
+    """
+    Backfill membership for org owner/admin profiles that are missing organization membership.
+    This prevents false-negative `role.assign` errors for valid tenant admins.
+    """
+    from apps.organizations.models import Membership, Role
+
+    if _is_superadmin_user(user):
+        return
+
+    profile = getattr(user, "profile", None)
+    profile_role = getattr(profile, "role", None)
+    profile_org = getattr(profile, "organization", None)
+
+    if profile_role not in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
+        return
+    if not organization or profile_org != organization:
+        return
+    if Membership.objects.filter(user=user, organization=organization, is_active=True).exists():
+        return
+
+    fallback_role = Role.objects.filter(organization=organization, is_active=True).order_by("-level").first()
+    if fallback_role is None:
+        return
+
+    Membership.objects.create(
+        user=user,
+        organization=organization,
+        role=fallback_role,
+        is_primary=True,
+        is_active=True,
+        assigned_by=user,
+    )
 
 
 def _permission_is_grantable(permission, effective_permissions, grantable_permissions):
@@ -175,41 +362,222 @@ def _get_signup_lookup_payload():
     }
 
 
+def _result_status_badge(status, is_graded=False):
+    """Normalize source-specific statuses into submitted/graded/pending."""
+    if is_graded:
+        return "graded"
+
+    normalized_status = (status or "").lower()
+    if normalized_status in {"graded"}:
+        return "graded"
+    if normalized_status in {"grading", "returned", "rejected", "expired", "draft", "in_progress"}:
+        return "pending"
+    return "submitted"
+
+
+def _collect_my_results(request):
+    """
+    Build a unified result list for current user across exams, assignments, labs, and projects.
+    """
+    user = request.user
+    filter_type = (request.GET.get("type") or "all").lower()
+    if filter_type not in {"all", "exams", "courses", "labs", "independent"}:
+        filter_type = "all"
+
+    scoped_exams = _tenant_scoped_exams(request)
+    scoped_courses = _tenant_scoped_courses(request)
+    scoped_exam_ids = scoped_exams.values_list("id", flat=True)
+    scoped_course_ids = scoped_courses.values_list("id", flat=True)
+
+    items = []
+    counts = {"exams": 0, "courses": 0, "labs": 0, "independent": 0}
+
+    if filter_type in {"all", "exams"}:
+        attempts = (
+            ExamAttempt.objects.filter(
+                user=user,
+                exam_id__in=scoped_exam_ids,
+                status__in=["submitted", "expired"],
+            )
+            .select_related("exam")
+            .order_by("-started_at")
+        )
+        for attempt in attempts:
+            is_auto_test = attempt.exam.exam_type == "test"
+            score_value = attempt.teacher_score
+            if score_value is None and is_auto_test and (attempt.correct_count + attempt.wrong_count) > 0:
+                score_value = attempt.score_percent
+
+            items.append(
+                {
+                    "category": "exams",
+                    "title": attempt.exam.title,
+                    "kind": attempt.exam.get_exam_type_display() or "Exam",
+                    "submitted_at": attempt.finished_at or attempt.started_at,
+                    "status": _result_status_badge(
+                        attempt.status,
+                        is_graded=attempt.checked_by_teacher or score_value is not None,
+                    ),
+                    "status_raw": attempt.get_status_display(),
+                    "score": score_value,
+                    "feedback": attempt.teacher_feedback,
+                    "detail_url": reverse(
+                        "exams:exam_result",
+                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                    ),
+                }
+            )
+            counts["exams"] += 1
+
+    if filter_type in {"all", "courses"}:
+        assignment_submissions = (
+            Submission.objects.filter(
+                user=user,
+                assignment__course_id__in=scoped_course_ids,
+            )
+            .select_related("assignment", "assignment__course")
+            .order_by("-submitted_at")
+        )
+        for submission in assignment_submissions:
+            items.append(
+                {
+                    "category": "courses",
+                    "title": submission.assignment.title,
+                    "kind": submission.assignment.course.title,
+                    "submitted_at": submission.submitted_at,
+                    "status": _result_status_badge(submission.status),
+                    "status_raw": submission.get_status_display(),
+                    "score": submission.grade,
+                    "feedback": submission.feedback,
+                    "detail_url": reverse(
+                        "accounts:my_result_detail",
+                        kwargs={"item_type": "courses", "item_id": submission.id},
+                    ),
+                }
+            )
+            counts["courses"] += 1
+
+    if filter_type in {"all", "labs"}:
+        lab_submissions = (
+            LabSubmission.objects.filter(
+                assignment__student=user,
+                assignment__lab__course_id__in=scoped_course_ids,
+            )
+            .select_related("assignment", "assignment__lab", "assignment__lab__course")
+            .order_by("-submitted_at")
+        )
+        for submission in lab_submissions:
+            items.append(
+                {
+                    "category": "labs",
+                    "title": submission.assignment.lab.title,
+                    "kind": submission.assignment.lab.course.title,
+                    "submitted_at": submission.submitted_at,
+                    "status": _result_status_badge(submission.status),
+                    "status_raw": submission.get_status_display(),
+                    "score": submission.score,
+                    "feedback": submission.feedback,
+                    "detail_url": reverse(
+                        "accounts:my_result_detail",
+                        kwargs={"item_type": "labs", "item_id": submission.id},
+                    ),
+                }
+            )
+            counts["labs"] += 1
+
+    if filter_type in {"all", "independent"}:
+        project_submissions = (
+            ProjectSubmission.objects.filter(
+                student=user,
+                project__course_id__in=scoped_course_ids,
+            )
+            .select_related("project", "project__course")
+            .order_by("-submitted_at")
+        )
+        for submission in project_submissions:
+            items.append(
+                {
+                    "category": "independent",
+                    "title": submission.project.title,
+                    "kind": submission.project.course.title,
+                    "submitted_at": submission.submitted_at,
+                    "status": _result_status_badge(submission.status),
+                    "status_raw": submission.get_status_display(),
+                    "score": submission.grade,
+                    "feedback": submission.feedback,
+                    "detail_url": reverse(
+                        "accounts:my_result_detail",
+                        kwargs={"item_type": "independent", "item_id": submission.id},
+                    ),
+                }
+            )
+            counts["independent"] += 1
+
+    items.sort(key=lambda item: item["submitted_at"] or timezone.now(), reverse=True)
+    if filter_type != "all":
+        counts = {
+            "exams": ExamAttempt.objects.filter(
+                user=user,
+                exam_id__in=scoped_exam_ids,
+                status__in=["submitted", "expired"],
+            ).count(),
+            "courses": Submission.objects.filter(
+                user=user,
+                assignment__course_id__in=scoped_course_ids,
+            ).count(),
+            "labs": LabSubmission.objects.filter(
+                assignment__student=user,
+                assignment__lab__course_id__in=scoped_course_ids,
+            ).count(),
+            "independent": ProjectSubmission.objects.filter(
+                student=user,
+                project__course_id__in=scoped_course_ids,
+            ).count(),
+        }
+    counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"]
+
+    return items, counts, filter_type
+
+
 @login_required
 def teacher_dashboard(request):
     """
     Teacher dashboard with widgets showing courses, pending grading, and stats.
     """
-    # Only teachers and above can access
-    if not getattr(request.user, "is_teacher_or_above", False):
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
         messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
         return redirect("home")
 
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+
     # Get teacher's courses
-    my_courses = Course.objects.filter(owner=request.user, status="published")[:5]
+    my_courses = teacher_courses.filter(status="published")[:5]
 
     # Get pending submissions
     pending_submissions = Submission.objects.filter(
-        assignment__course__owner=request.user, status="submitted"
+        assignment__course__in=teacher_courses, status="submitted"
     ).select_related("assignment", "user")[:10]
 
     # Get upcoming exams
-    upcoming_exams = Exam.objects.filter(
-        author=request.user, is_active=True, start_datetime__gte=timezone.now()
+    upcoming_exams = _tenant_scoped_exams(
+        request,
+        Exam.objects.filter(
+            author=request.user,
+            is_active=True,
+            start_datetime__gte=timezone.now(),
+        ),
     ).order_by("start_datetime")[:5]
 
     # Calculate stats
-    total_courses = Course.objects.filter(owner=request.user).count()
-    total_students = (
-        Course.objects.filter(owner=request.user)
-        .aggregate(count=Count("memberships__user", distinct=True))
-        .get("count", 0)
-    )
-    pending_count = Submission.objects.filter(assignment__course__owner=request.user, status="submitted").count()
+    total_courses = teacher_courses.count()
+    total_students = teacher_courses.aggregate(count=Count("memberships__user", distinct=True)).get("count", 0)
+    pending_count = Submission.objects.filter(assignment__course__in=teacher_courses, status="submitted").count()
 
     # Students at risk (failing grades or missing submissions)
     at_risk_students = []
-    for course in Course.objects.filter(owner=request.user):
+    for course in teacher_courses:
         # Find students with low grades or missing submissions
         submissions = (
             Submission.objects.filter(assignment__course=course, status="graded", grade__lt=50)
@@ -237,7 +605,7 @@ def student_dashboard(request):
     Student dashboard with enrolled courses, assignments, and upcoming exams.
     """
     # Get enrolled courses
-    enrolled_courses = Course.objects.filter(memberships__user=request.user, status="published").distinct()[:6]
+    enrolled_courses = _assigned_courses_queryset(request, request.user)[:6]
 
     # Get pending assignments
     pending_assignments = Assignment.objects.filter(
@@ -248,13 +616,9 @@ def student_dashboard(request):
 
     # Get upcoming exams
     upcoming_exams = (
-        Exam.objects.filter(
-            Q(assigned_students=request.user) | Q(assigned_groups__students=request.user),
-            is_active=True,
-            start_date__gte=timezone.now(),
-        )
-        .distinct()
-        .order_by("start_date")[:5]
+        _assigned_exams_queryset(request, request.user, active_only=True)
+        .filter(start_datetime__gte=timezone.now())
+        .order_by("start_datetime")[:5]
     )
 
     # Get recent grades
@@ -277,14 +641,16 @@ def user_profile(request):
     Ensures profile exists before rendering.
     Now accessible to ALL users (not just teachers).
     """
-    from apps.accounts.models import UserProfile
     from apps.blog.models import Post
 
     # Ensure profile exists (get_or_create for safety)
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    capabilities = _role_capabilities(request.user, profile)
 
     # Get active section from URL parameter (default: profile-info)
-    active_section = request.GET.get("section", "profile-info")
+    requested_section = request.GET.get("section", "profile-info")
+    allowed_sections = capabilities["allowed_sections"]
+    active_section = requested_section if requested_section in allowed_sections else "profile-info"
 
     if request.method == "POST":
         new_email = (request.POST.get("email", "") or "").strip().lower()
@@ -333,71 +699,91 @@ def user_profile(request):
     # Get user's roles
     user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
 
-    # Check role levels early (needed for context below)
-    is_teacher = getattr(request.user, "is_teacher_or_above", False)
-    is_admin = getattr(request.user, "is_admin_level", False)
-    is_superadmin = _is_superadmin_user(request.user)
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+    created_courses_qs = teacher_courses.order_by("-created_at")
+    enrolled_courses_qs = _assigned_courses_queryset(request, request.user).order_by("-created_at")
+    my_exams_qs = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
 
-    # Get user's posts for the posts section
-    user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
-    posts_count = Post.objects.filter(author=request.user).count()
+    if capabilities["is_student"]:
+        visible_courses_qs = enrolled_courses_qs
+    else:
+        visible_courses_qs = created_courses_qs
 
-    # Get user's courses
-    from apps.courses.models import Course
+    my_courses = list(visible_courses_qs[:10])
+    courses_count = visible_courses_qs.count()
 
-    my_courses = Course.objects.filter(Q(owner=request.user) | Q(memberships__user=request.user)).distinct()[:10]
-    courses_count = my_courses.count()
-
-    # Teacher/admin: exams created by this user
-    my_exams_count = 0
-    my_exams = []
-    my_created_courses_count = 0
     my_created_courses = []
-    if is_teacher:
-        my_exams = Exam.objects.filter(author=request.user).order_by("-created_at")[:10]
-        my_exams_count = Exam.objects.filter(author=request.user).count()
-        my_created_courses = Course.objects.filter(owner=request.user).order_by("-created_at")[:10]
-        my_created_courses_count = Course.objects.filter(owner=request.user).count()
+    my_created_courses_count = 0
+    my_exams = []
+    my_exams_count = 0
+    if capabilities["can_view_owned_learning"]:
+        my_created_courses = list(created_courses_qs[:10])
+        my_created_courses_count = created_courses_qs.count()
+        my_exams = list(my_exams_qs[:10])
+        my_exams_count = my_exams_qs.count()
 
-    # Assigned exams count
-    assigned_exams_count = (
-        Exam.objects.filter(is_active=True)
-        .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
-        .distinct()
-        .count()
-    )
+    user_posts = []
+    posts_count = 0
+    if capabilities["can_manage_blog"]:
+        user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
+        posts_count = Post.objects.filter(author=request.user).count()
 
-    # Assigned courses count
-    assigned_courses_count = (
-        Course.objects.filter(
-            memberships__user=request.user,
-            status="published",
+    assigned_exams_count = 0
+    assigned_courses_count = 0
+    my_results_count = 0
+    if capabilities["can_view_student_assignments"]:
+        assigned_exams_count = _assigned_exams_queryset(request, request.user, active_only=True).count()
+        assigned_courses_count = enrolled_courses_qs.count()
+        my_results_count = (
+            ExamAttempt.objects.filter(
+                user=request.user,
+                exam__in=_tenant_scoped_exams(request),
+                status__in=["submitted", "expired"],
+            ).count()
+            + Submission.objects.filter(
+                user=request.user,
+                assignment__course__in=_tenant_scoped_courses(request),
+            ).count()
+            + LabSubmission.objects.filter(
+                assignment__student=request.user,
+                assignment__lab__course__in=_tenant_scoped_courses(request),
+            ).count()
+            + ProjectSubmission.objects.filter(
+                student=request.user,
+                project__course__in=_tenant_scoped_courses(request),
+            ).count()
         )
-        .distinct()
-        .count()
-    )
 
-    # Pending review count (for teachers)
     pending_review_count = 0
-    if is_teacher:
+    if capabilities["can_review_submissions"]:
         pending_review_count = (
             ExamAttempt.objects.filter(
-                exam__author=request.user,
+                exam__in=my_exams_qs,
                 status__in=["submitted", "expired"],
                 checked_by_teacher=False,
             )
             .exclude(exam__exam_type="test")
             .count()
         )
-        # Also count pending assignment submissions
         pending_review_count += Submission.objects.filter(
-            assignment__course__owner=request.user, status="submitted"
+            assignment__course__in=teacher_courses,
+            status="submitted",
+        ).count()
+        pending_review_count += ProjectSubmission.objects.filter(
+            project__course__in=teacher_courses,
+            status="pending",
+        ).count()
+        pending_review_count += LabSubmission.objects.filter(
+            assignment__lab__course__in=teacher_courses,
+            status__in=["submitted", "late"],
         ).count()
 
     context = {
         "profile": profile,
         "user_roles": user_roles,
         "active_section": active_section,
+        "allowed_sections": allowed_sections,
+        "role_capabilities": capabilities,
         "user_posts": user_posts,
         "posts_count": posts_count,
         "my_courses": my_courses,
@@ -408,10 +794,17 @@ def user_profile(request):
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
         "assigned_courses_count": assigned_courses_count,
+        "my_results_count": my_results_count,
         "pending_review_count": pending_review_count,
-        "is_teacher": is_teacher,
-        "is_admin": is_admin,
-        "is_superadmin": is_superadmin,
+        "is_teacher": capabilities["is_teacher"],
+        "is_admin": capabilities["can_manage_org"],
+        "is_superadmin": capabilities["is_superadmin"],
+        "can_manage_org": capabilities["can_manage_org"],
+        "can_view_owned_learning": capabilities["can_view_owned_learning"],
+        "can_review_submissions": capabilities["can_review_submissions"],
+        "can_view_blog": capabilities["can_view_blog"],
+        "can_manage_blog": capabilities["can_manage_blog"],
+        "can_view_student_assignments": capabilities["can_view_student_assignments"],
     }
 
     return render(request, "accounts/profile.html", context)
@@ -512,7 +905,9 @@ def grading_queue(request):
     """
     Grading queue for teachers showing all pending submissions.
     """
-    if not getattr(request.user, "is_teacher_or_above", False):
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
         messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
         return redirect("home")
 
@@ -520,10 +915,13 @@ def grading_queue(request):
     course_id = request.GET.get("course")
     assignment_id = request.GET.get("assignment")
 
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+
     # Base query
-    submissions = Submission.objects.filter(assignment__course__owner=request.user, status="submitted").select_related(
-        "assignment", "user", "assignment__course"
-    )
+    submissions = Submission.objects.filter(
+        assignment__course__in=teacher_courses,
+        status="submitted",
+    ).select_related("assignment", "user", "assignment__course")
 
     # Apply filters
     if course_id:
@@ -535,7 +933,7 @@ def grading_queue(request):
     submissions = submissions.order_by("submitted_at")
 
     # Get courses for filter dropdown
-    courses = Course.objects.filter(owner=request.user)
+    courses = teacher_courses
 
     context = {
         "submissions": submissions,
@@ -550,21 +948,30 @@ def grading_queue(request):
 @login_required
 def assigned_exams(request):
     """Assigned exams list for the current user."""
-    exams = (
-        Exam.objects.filter(
-            Q(allowed_users=request.user) | Q(allowed_groups__students=request.user),
-            is_active=True,
-        )
-        .distinct()
-        .order_by("-start_datetime")
-    )
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_view_student_assignments"]:
+        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        return redirect("accounts:profile")
+
+    exams = _assigned_exams_queryset(request, request.user, active_only=True).order_by("-start_datetime", "-created_at")
 
     search = request.GET.get("search", "")
     if search:
         exams = exams.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
+    exam_items = []
+    for exam in exams:
+        can_start_without_code, _ = exam.can_user_start(request.user, code=None)
+        exam_items.append(
+            {
+                "exam": exam,
+                "requires_code": bool(exam.access_code and not can_start_without_code),
+            }
+        )
+
     context = {
-        "exams": exams,
+        "exam_items": exam_items,
         "search_query": search,
     }
     return render(request, "accounts/assigned_exams.html", context)
@@ -573,14 +980,13 @@ def assigned_exams(request):
 @login_required
 def assigned_courses(request):
     """Assigned courses list for the current user."""
-    courses = (
-        Course.objects.filter(
-            memberships__user=request.user,
-            status="published",
-        )
-        .distinct()
-        .order_by("-created_at")
-    )
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_view_student_assignments"]:
+        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        return redirect("accounts:profile")
+
+    courses = _assigned_courses_queryset(request, request.user).order_by("-created_at")
 
     search = request.GET.get("search", "")
     if search:
@@ -594,109 +1000,288 @@ def assigned_courses(request):
 
 
 @login_required
-def pending_review(request):
-    """Pending review queue for teachers, grouped by groups."""
-    if not getattr(request.user, "is_teacher_or_above", False):
-        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+def my_results(request):
+    """Unified submission/result list for students and member-level users."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_view_student_assignments"]:
+        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
         return redirect("accounts:profile")
 
-    from apps.exams.models import StudentGroup
+    items, counts, active_filter = _collect_my_results(request)
+    context = {
+        "items": items,
+        "counts": counts,
+        "active_filter": active_filter,
+    }
+    return render(request, "accounts/my_results.html", context)
+
+
+@login_required
+def my_result_detail(request, item_type, item_id):
+    """Detail page for a single item from My Results."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_view_student_assignments"]:
+        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        return redirect("accounts:profile")
+
+    normalized_type = (item_type or "").lower()
+    tenant_course_ids = _tenant_scoped_courses(request).values_list("id", flat=True)
+
+    if normalized_type == "exams":
+        attempt = get_object_or_404(
+            ExamAttempt.objects.select_related("exam"),
+            id=item_id,
+            user=request.user,
+            exam__in=_tenant_scoped_exams(request),
+        )
+        return redirect("exams:exam_result", slug=attempt.exam.slug, attempt_id=attempt.id)
+
+    if normalized_type == "courses":
+        submission = get_object_or_404(
+            Submission.objects.select_related("assignment", "assignment__course"),
+            id=item_id,
+            user=request.user,
+            assignment__course_id__in=tenant_course_ids,
+        )
+        context = {
+            "item_type": "courses",
+            "item_title": submission.assignment.title,
+            "item_subtitle": submission.assignment.course.title,
+            "submitted_at": submission.submitted_at,
+            "status": _result_status_badge(submission.status),
+            "status_raw": submission.get_status_display(),
+            "score": submission.grade,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "files": submission.files or [],
+        }
+        return render(request, "accounts/my_result_detail.html", context)
+
+    if normalized_type == "labs":
+        submission = get_object_or_404(
+            LabSubmission.objects.select_related("assignment", "assignment__lab", "assignment__lab__course"),
+            id=item_id,
+            assignment__student=request.user,
+            assignment__lab__course_id__in=tenant_course_ids,
+        )
+        context = {
+            "item_type": "labs",
+            "item_title": submission.assignment.lab.title,
+            "item_subtitle": submission.assignment.lab.course.title,
+            "submitted_at": submission.submitted_at,
+            "status": _result_status_badge(submission.status),
+            "status_raw": submission.get_status_display(),
+            "score": submission.score,
+            "feedback": submission.feedback,
+            "content_text": submission.submission_text,
+            "submission_link": submission.submission_link,
+            "submission_file": submission.submission_file,
+        }
+        return render(request, "accounts/my_result_detail.html", context)
+
+    if normalized_type == "independent":
+        submission = get_object_or_404(
+            ProjectSubmission.objects.select_related("project", "project__course"),
+            id=item_id,
+            student=request.user,
+            project__course_id__in=tenant_course_ids,
+        )
+        context = {
+            "item_type": "independent",
+            "item_title": submission.project.title,
+            "item_subtitle": submission.project.course.title,
+            "submitted_at": submission.submitted_at,
+            "status": _result_status_badge(submission.status),
+            "status_raw": submission.get_status_display(),
+            "score": submission.grade,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "submission_file": submission.file,
+        }
+        return render(request, "accounts/my_result_detail.html", context)
+
+    messages.error(request, "Nəticə tipi tanınmadı.")
+    return redirect("accounts:my_results")
+
+
+@login_required
+def pending_review(request):
+    """Teacher review queue across exams, assignments, labs, and projects."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
+        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+        return redirect("accounts:profile")
 
     search = request.GET.get("search", "")
     filter_type = request.GET.get("type", "all")
     filter_status = request.GET.get("status", "all")
-    organization = getattr(getattr(request.user, "profile", None), "organization", None)
 
-    # Get teacher's groups
-    groups = StudentGroup.objects.filter(teacher=request.user)
-    if organization is not None:
-        groups = groups.filter(organization=organization)
-    groups = groups.prefetch_related("students")
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
 
-    grouped_items = []
-    for group in groups:
-        items = []
+    student_memberships = []
+    if teacher_courses.exists():
+        from apps.courses.models import CourseMembership
 
-        # Exam attempts
-        if filter_type in ("all", "exams"):
-            attempts = (
-                ExamAttempt.objects.filter(
-                    exam__author=request.user,
-                    student__in=group.students.all(),
-                    checked_by_teacher=False,
-                    status__in=["submitted", "expired"],
-                )
-                .exclude(exam__exam_type="test")
-                .select_related("exam", "student")
+        student_memberships = CourseMembership.objects.filter(
+            course__in=teacher_courses,
+            role="student",
+        ).values("course_id", "user_id", "group_name")
+
+    group_map = {
+        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
+        for membership in student_memberships
+    }
+
+    items = []
+
+    if filter_type in {"all", "exams"}:
+        attempts = (
+            ExamAttempt.objects.filter(
+                exam__in=teacher_exams,
+                status__in=["submitted", "expired"],
+                checked_by_teacher=False,
             )
-
-            if search:
-                attempts = attempts.filter(
-                    Q(student__username__icontains=search)
-                    | Q(student__first_name__icontains=search)
-                    | Q(student__last_name__icontains=search)
-                    | Q(exam__title__icontains=search)
-                )
-
-            for attempt in attempts:
-                items.append(
-                    {
-                        "type": "exam",
-                        "student": attempt.student,
-                        "title": attempt.exam.title,
-                        "status": attempt.status,
-                        "date": attempt.started_at,
-                        "id": attempt.id,
-                    }
-                )
-
-        # Assignment submissions
-        if filter_type in ("all", "assignments"):
-            submissions = Submission.objects.filter(
-                assignment__course__owner=request.user,
-                user__in=group.students.all(),
-                status="submitted",
-            ).select_related("assignment", "user", "assignment__course")
-
-            if search:
-                submissions = submissions.filter(
-                    Q(user__username__icontains=search)
-                    | Q(user__first_name__icontains=search)
-                    | Q(assignment__title__icontains=search)
-                    | Q(assignment__course__title__icontains=search)
-                )
-
-            for sub in submissions:
-                items.append(
-                    {
-                        "type": "assignment",
-                        "student": sub.user,
-                        "title": f"{sub.assignment.course.title} - {sub.assignment.title}",
-                        "status": sub.status,
-                        "date": sub.submitted_at,
-                        "id": sub.id,
-                    }
-                )
-
-        # Sort items by date, newest first; items without dates go to end
-        epoch = timezone.datetime.min.replace(tzinfo=timezone.utc)
-        items.sort(key=lambda x: x["date"] if x["date"] else epoch, reverse=True)
-
-        if items:
-            grouped_items.append(
+            .exclude(exam__exam_type="test")
+            .select_related("exam", "user", "exam__course")
+        )
+        if search:
+            attempts = attempts.filter(
+                Q(user__username__icontains=search)
+                | Q(user__first_name__icontains=search)
+                | Q(user__last_name__icontains=search)
+                | Q(exam__title__icontains=search)
+            )
+        for attempt in attempts:
+            course = attempt.exam.course
+            items.append(
                 {
-                    "group": group,
-                    "items": items,
-                    "count": len(items),
+                    "type": "exam",
+                    "student": attempt.user,
+                    "title": attempt.exam.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
+                    "status": attempt.status,
+                    "date": attempt.started_at,
+                    "action_url": reverse(
+                        "exams:teacher_check_attempt",
+                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                    ),
+                    "action_label": "Yoxla",
                 }
             )
 
+    if filter_type in {"all", "assignments"}:
+        submissions = Submission.objects.filter(
+            assignment__course__in=teacher_courses,
+            status="submitted",
+        ).select_related("assignment", "user", "assignment__course")
+        if search:
+            submissions = submissions.filter(
+                Q(user__username__icontains=search)
+                | Q(user__first_name__icontains=search)
+                | Q(user__last_name__icontains=search)
+                | Q(assignment__title__icontains=search)
+                | Q(assignment__course__title__icontains=search)
+            )
+        for submission in submissions:
+            course = submission.assignment.course
+            items.append(
+                {
+                    "type": "assignment",
+                    "student": submission.user,
+                    "title": submission.assignment.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, submission.user_id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "assignments:review_assignment_submissions",
+                        kwargs={"pk": submission.assignment_id},
+                    ),
+                    "action_label": "Tapşırığa keç",
+                }
+            )
+
+    if filter_type in {"all", "projects"}:
+        project_submissions = ProjectSubmission.objects.filter(
+            project__course__in=teacher_courses,
+            status="pending",
+        ).select_related("project", "project__course", "student")
+        if search:
+            project_submissions = project_submissions.filter(
+                Q(student__username__icontains=search)
+                | Q(student__first_name__icontains=search)
+                | Q(student__last_name__icontains=search)
+                | Q(project__title__icontains=search)
+                | Q(project__course__title__icontains=search)
+            )
+        for submission in project_submissions:
+            course = submission.project.course
+            items.append(
+                {
+                    "type": "project",
+                    "student": submission.student,
+                    "title": submission.project.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, submission.student_id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "projects:review_project_submissions",
+                        kwargs={"pk": submission.project_id},
+                    ),
+                    "action_label": "Layihəyə keç",
+                }
+            )
+
+    if filter_type in {"all", "labs"}:
+        lab_submissions = LabSubmission.objects.filter(
+            assignment__lab__course__in=teacher_courses,
+            status__in=["submitted", "late"],
+        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        if search:
+            lab_submissions = lab_submissions.filter(
+                Q(assignment__student__username__icontains=search)
+                | Q(assignment__student__first_name__icontains=search)
+                | Q(assignment__student__last_name__icontains=search)
+                | Q(assignment__lab__title__icontains=search)
+                | Q(assignment__lab__course__title__icontains=search)
+            )
+        for submission in lab_submissions:
+            student = submission.assignment.student
+            course = submission.assignment.lab.course
+            items.append(
+                {
+                    "type": "lab",
+                    "student": student,
+                    "title": submission.assignment.lab.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, student.id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "labs:grade_submission_page",
+                        kwargs={"pk": submission.id},
+                    ),
+                    "action_label": "Qiymətləndir",
+                }
+            )
+
+    if filter_status != "all":
+        items = [item for item in items if item["status"] == filter_status]
+
+    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
+
     context = {
-        "grouped_items": grouped_items,
+        "review_items": items,
         "search_query": search,
         "filter_type": filter_type,
         "filter_status": filter_status,
-        "total_count": sum(g["count"] for g in grouped_items),
+        "total_count": len(items),
     }
     return render(request, "accounts/pending_review.html", context)
 
@@ -712,6 +1297,8 @@ def role_assignment(request):
     if not org:
         messages.error(request, "Aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
+
+    _ensure_profile_admin_membership(request.user, org)
 
     is_superadmin = _is_superadmin_user(request.user)
     user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
@@ -749,6 +1336,19 @@ def role_assignment(request):
                 messages.error(request, "İstifadəçi artıq başqa təşkilata bağlıdır.")
                 return redirect("accounts:role_assignment")
 
+            if not is_superadmin:
+                requested_org = target_profile.requested_organization
+                requested_name = _normalized_org_name(target_profile.requested_organization_name)
+                is_requested_for_org = (requested_org is not None and requested_org == org) or (
+                    requested_org is None and requested_name and requested_name == _normalized_org_name(org.name)
+                )
+                if not is_requested_for_org:
+                    messages.error(
+                        request,
+                        "Bu istifadəçi sizin təşkilatınızı signup zamanı seçməyib. Yalnız həmin pending istifadəçiləri əlavə edə bilərsiniz.",
+                    )
+                    return redirect("accounts:role_assignment")
+
             membership, created = Membership.objects.get_or_create(
                 user=target_user,
                 organization=org,
@@ -771,7 +1371,18 @@ def role_assignment(request):
             target_profile.organization = org
             target_profile.organization_type = org.org_type
             target_profile.role = _map_org_role_to_profile_role(target_role)
-            target_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+            target_profile.requested_organization = org
+            target_profile.requested_organization_name = org.name
+            target_profile.save(
+                update_fields=[
+                    "organization",
+                    "organization_type",
+                    "role",
+                    "requested_organization",
+                    "requested_organization_name",
+                    "updated_at",
+                ]
+            )
 
             create_audit_log(
                 user=request.user,
@@ -812,7 +1423,18 @@ def role_assignment(request):
         target_profile.role = _map_org_role_to_profile_role(target_role)
         target_profile.organization = org
         target_profile.organization_type = org.org_type
-        target_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        target_profile.requested_organization = org
+        target_profile.requested_organization_name = org.name
+        target_profile.save(
+            update_fields=[
+                "role",
+                "organization",
+                "organization_type",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
 
         create_audit_log(
             user=request.user,
@@ -854,8 +1476,17 @@ def role_assignment(request):
 
     unassigned_search = request.GET.get("unassigned_search", "")
     unassigned_users = UserProfile.objects.filter(user__is_active=True, organization__isnull=True).select_related(
-        "user"
+        "user",
+        "requested_organization",
     )
+    if not is_superadmin:
+        unassigned_users = unassigned_users.filter(
+            Q(requested_organization=org)
+            | Q(
+                requested_organization__isnull=True,
+                requested_organization_name__iexact=org.name,
+            )
+        )
     if unassigned_search:
         unassigned_users = unassigned_users.filter(
             Q(user__username__icontains=unassigned_search)
@@ -889,6 +1520,8 @@ def permission_editor(request):
     if not org:
         messages.error(request, "Aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
+
+    _ensure_profile_admin_membership(request.user, org)
 
     is_superadmin = _is_superadmin_user(request.user)
     user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
@@ -1071,28 +1704,61 @@ def register_view(request):
                 initial_role = form.cleaned_data.get("initial_role", ProfileRole.MEMBER)
 
                 organization = None
+                requested_organization = None
+                requested_organization_name = ""
+                resolved_identifier = organization_identifier
                 if organization_type != OrganizationType.INDIVIDUAL:
                     organization_name = institution.name if institution else institution_not_listed_name
+                    requested_organization_name = organization_name
                     resolved_identifier = organization_identifier or (institution.code if institution else "")
 
-                    organization = Organization.objects.create(
-                        name=organization_name,
-                        org_type=organization_type,
-                        country=country_name,
-                        owner=user,
-                        status="active",
-                        is_active=True,
-                        organization_identifier=resolved_identifier,
-                        license_identifier=organization_license_identifier,
-                    )
+                    if initial_role == ProfileRole.ORG_ADMIN:
+                        organization = Organization.objects.create(
+                            name=organization_name,
+                            org_type=organization_type,
+                            country=country_name,
+                            owner=user,
+                            status="active",
+                            is_active=True,
+                            organization_identifier=resolved_identifier,
+                            license_identifier=organization_license_identifier,
+                        )
+                        requested_organization = organization
+                        requested_organization_name = organization.name
+                    else:
+                        requested_organization = (
+                            Organization.objects.filter(
+                                name__iexact=organization_name,
+                                org_type=organization_type,
+                                country=country_name,
+                                is_active=True,
+                            )
+                            .order_by("name")
+                            .first()
+                        )
+                        if requested_organization is not None:
+                            requested_organization_name = requested_organization.name
 
                 profile, _ = UserProfile.objects.get_or_create(user=user)
                 profile.organization_type = organization_type
                 profile.organization = organization
+                profile.requested_organization = requested_organization
+                profile.requested_organization_name = requested_organization_name
                 profile.country = country_name
                 profile.role = _map_signup_role_to_profile_role(initial_role)
-                profile.student_university_name = ""
-                profile.student_school_identifier = ""
+                profile.student_university_name = (
+                    requested_organization_name
+                    if organization_type
+                    in {
+                        OrganizationType.UNIVERSITY,
+                        OrganizationType.SCHOOL,
+                        OrganizationType.COURSE_CENTER,
+                    }
+                    else ""
+                )
+                profile.student_school_identifier = (
+                    resolved_identifier if organization_type == OrganizationType.SCHOOL else ""
+                )
                 profile.save()
 
                 if organization is not None:
@@ -1120,10 +1786,16 @@ def register_view(request):
 
                     request.session["active_organization"] = organization.slug
 
-            messages.success(
-                request,
-                "Qeydiyyat tamamlandı. İndi eyni istifadəçi adı/email və şifrə ilə daxil ola bilərsiniz.",
-            )
+            if organization is None and requested_organization_name:
+                messages.success(
+                    request,
+                    "Qeydiyyat tamamlandı. Hesabınız yaradıldı və təşkilat müraciətiniz qeydə alındı.",
+                )
+            else:
+                messages.success(
+                    request,
+                    "Qeydiyyat tamamlandı. İndi eyni istifadəçi adı/email və şifrə ilə daxil ola bilərsiniz.",
+                )
             return redirect("accounts:login")
     else:
         form = RegisterForm()
@@ -1265,12 +1937,7 @@ def public_user_profile(request, username):
     # 4. Assigned exams count
     assigned_count = 0
     if request.user.is_authenticated and request.user == profile_user:
-        assigned_count = (
-            Exam.objects.filter(is_active=True)
-            .filter(Q(allowed_users=request.user) | Q(allowed_groups__students=request.user))
-            .distinct()
-            .count()
-        )
+        assigned_count = _assigned_exams_queryset(request, request.user, active_only=True).count()
 
     # 5. Student courses
     student_courses = []

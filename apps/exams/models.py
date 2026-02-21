@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
 
+from apps.accounts.models import ProfileRole
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -58,6 +59,12 @@ class StudentGroup(models.Model):
         blank=True,
         verbose_name="Tələbələr",
     )
+    teachers = models.ManyToManyField(
+        User,
+        related_name="student_groups_as_teacher",
+        blank=True,
+        verbose_name="Təyin olunmuş müəllimlər",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -76,11 +83,49 @@ class StudentGroup(models.Model):
             return f"{self.name} ({self.teacher.username} @ {self.organization.name})"
         return f"{self.name} ({self.teacher.username})"
 
+    def clean(self):
+        errors = {}
+
+        if self.organization_id is None:
+            errors["organization"] = "Qrup mütləq bir təşkilata aid olmalıdır."
+
+        if self.teacher_id:
+            try:
+                profile = self.teacher.profile
+            except Exception:
+                profile = None
+            teacher_org = getattr(profile, "organization", None)
+            teacher_role = getattr(profile, "role", None)
+            teacher_is_allowed = self.teacher.is_superuser or getattr(self.teacher, "is_superadmin", False) or (
+                teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+            )
+
+            if not teacher_is_allowed:
+                errors["teacher"] = "Primary müəllim müəllim rolunda olmalıdır."
+
+            if self.organization_id and teacher_org != self.organization:
+                errors["teacher"] = "Primary müəllim qrupun təşkilatı ilə eyni tenant-da olmalıdır."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def has_student(self, user: User) -> bool:
         """
         Verilən user bu qrupun üzvüdürmü?
         """
         return self.students.filter(id=user.id).exists()
+
+    def has_teacher(self, user: User) -> bool:
+        """
+        Verilən user qrupun primary və ya assigned müəllimidir?
+        """
+        if user is None:
+            return False
+        return self.teacher_id == user.id or self.teachers.filter(id=user.id).exists()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -327,6 +372,12 @@ class Exam(models.Model):
         """User hər hansı icazəli qrupun üzvüdürmü?"""
         return self.allowed_groups.filter(students=user).exists()
 
+    def _user_in_assigned_course(self, user: User) -> bool:
+        """User bu imtahana bağlı kursa tələbə kimi təyin olunubmu?"""
+        if not self.course_id:
+            return False
+        return self.course.memberships.filter(user=user, role="student").exists()
+
     def can_user_see(self, user: User) -> bool:
         """Student imtahan kartını görməlidirmi?"""
         if user == self.author:
@@ -335,18 +386,17 @@ class Exam(models.Model):
         if not self.is_active:
             return False
 
-        if (
-            self.is_public
-            and not self.allowed_users.exists()
-            and not self.allowed_groups.exists()
-            and not self.access_code
-        ):
+        # Public exams are globally visible in the exams list for all authenticated users.
+        if self.is_public:
             return True
 
         if self.allowed_users.filter(id=user.id).exists():
             return True
 
         if self._user_in_allowed_groups(user):
+            return True
+
+        if self._user_in_assigned_course(user):
             return True
 
         if self.access_code:
@@ -380,7 +430,11 @@ class Exam(models.Model):
         if user == self.author:
             return True, None
 
-        in_allowed_any = self.allowed_users.filter(id=user.id).exists() or self._user_in_allowed_groups(user)
+        in_allowed_any = (
+            self.allowed_users.filter(id=user.id).exists()
+            or self._user_in_allowed_groups(user)
+            or self._user_in_assigned_course(user)
+        )
 
         # 4) Kod yoxdursa
         if not self.access_code:
@@ -390,9 +444,9 @@ class Exam(models.Model):
                 return True, None
             return False, "Bu imtahan üçün giriş icazəniz yoxdur."
 
-        # 5) Kod varsa
-        if in_allowed_any:
-            return True, None
+        # 5) Kod varsa: əvvəlcə visibility/assignment icazəsi olmalıdır.
+        if not self.is_public and not in_allowed_any:
+            return False, "Bu imtahan üçün giriş icazəniz yoxdur."
 
         if not code:
             return False, "İmtahan kodu tələb olunur."
@@ -410,12 +464,6 @@ class Exam(models.Model):
             return False
 
         if not self.access_code:
-            return False
-
-        if self.allowed_users.filter(id=user.id).exists():
-            return False
-
-        if self._user_in_allowed_groups(user):
             return False
 
         return True

@@ -1,12 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
-from apps.organizations.services import get_user_organization
+from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from core.tenancy import get_organization_int_id
 
 
 @login_required
@@ -15,7 +16,7 @@ def teacher_exam_list(request):
     Müəllimin yaratdığı bütün imtahanların siyahısı.
     """
     _ensure_teacher(request.user)
-    exams = Exam.objects.filter(author=request.user).order_by("-created_at")
+    exams = tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
     return render(
         request,
         "exams/teacher/teacher_exam_list.html",
@@ -36,11 +37,11 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
-    organization = getattr(request, "organization", None) or get_user_organization(request.user)
+    organization = get_active_organization(request)
 
     # Əgər slug varsa -> Edit mode
     if slug:
-        exam = get_object_or_404(Exam, slug=slug, author=request.user)
+        exam = get_teacher_exam_or_404(request, slug=slug)
         is_editing = True
     else:
         exam = None
@@ -60,6 +61,7 @@ def createAndEditExamView(request, slug=None):
             # Yeni imtahanda author-u set et
             if not is_editing:
                 exam_instance.author = request.user
+            exam_instance.organization_id = get_organization_int_id(organization)
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
@@ -97,7 +99,7 @@ def teacher_exam_detail(request, slug):
     (sonra bura statistikalar, attempts və s. də əlavə ediləcək).
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
 
     return render(
@@ -116,7 +118,7 @@ def toggle_exam_active(request, slug):
     Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
         exam.is_active = not exam.is_active
@@ -131,7 +133,7 @@ def delete_exam(request, slug):
     Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     if exam.attempts.exists():
         # sadə variant: hazırda cəhd varsa silməyə icazə vermirik

@@ -56,6 +56,10 @@
     min-height: 180px;
 }
 
+#id_primary_teacher {
+    min-height: 44px;
+}
+
 /* Footer buttons */
 .form-footer {
     margin-top: 10px;

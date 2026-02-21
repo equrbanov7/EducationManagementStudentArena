@@ -67,6 +67,24 @@ class UserProfile(models.Model):
         help_text="İstifadəçinin aid olduğu təşkilat",
     )
 
+    requested_organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="requested_members",
+        verbose_name="Müraciət edilən təşkilat",
+        help_text="Signup zamanı seçilən, amma hələ qoşulmadığı təşkilat",
+    )
+
+    requested_organization_name = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Müraciət edilən təşkilat adı",
+        help_text="Təşkilat DB-də yoxdursa signup zamanı daxil edilən ad",
+    )
+
     organization_type = models.CharField(
         max_length=20,
         choices=OrganizationType.CHOICES,
@@ -134,6 +152,7 @@ class UserProfile(models.Model):
         indexes = [
             models.Index(fields=["organization", "created_at"]),
             models.Index(fields=["role"]),
+            models.Index(fields=["requested_organization"]),
         ]
 
     def __str__(self):

@@ -43,7 +43,6 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     # Dashboards
-   
     path("dashboard/student/", views.student_dashboard, name="student_dashboard"),
     path("dashboard/teacher/", views.teacher_dashboard, name="teacher_dashboard"),
     # Profile
@@ -56,6 +55,8 @@ urlpatterns = [
     # Assigned items
     path("assigned-exams/", views.assigned_exams, name="assigned_exams"),
     path("assigned-courses/", views.assigned_courses, name="assigned_courses"),
+    path("my-results/", views.my_results, name="my_results"),
+    path("my-results/<str:item_type>/<int:item_id>/", views.my_result_detail, name="my_result_detail"),
     # Pending review
     path("pending-review/", views.pending_review, name="pending_review"),
     # RBAC management

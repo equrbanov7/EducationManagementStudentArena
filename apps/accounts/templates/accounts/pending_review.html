@@ -14,7 +14,7 @@
             <h1 class="profile-title">
                 <i class="fas fa-tasks"></i> Yoxlanılacaq işlər
                 {% if total_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ total_count }}</span>
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ total_count }}</span>
                 {% endif %}
             </h1>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
@@ -22,50 +22,61 @@
             </a>
         </div>
 
-        <!-- Filters -->
         <div class="section-card">
             <form method="get" class="search-form">
-                <input type="text" name="search" value="{{ search_query }}" placeholder="Tələbə, imtahan, kurs axtar..." class="form-control">
-                <select name="type" class="form-control" style="max-width: 200px;">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Tələbə, kurs, imtahan axtar..." class="form-control">
+                <select name="type" class="form-control" style="max-width: 220px;">
                     <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Hamısı</option>
-                    <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>İmtahanlar</option>
-                    <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>Tapşırıqlar</option>
+                    <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>İmtahan</option>
+                    <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>Tapşırıq</option>
+                    <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>Layihə</option>
+                    <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>Lab</option>
                 </select>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Axtar</button>
+                <select name="status" class="form-control" style="max-width: 220px;">
+                    <option value="all" {% if filter_status == 'all' %}selected{% endif %}>Bütün statuslar</option>
+                    <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>submitted</option>
+                    <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>expired</option>
+                    <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>pending</option>
+                    <option value="late" {% if filter_status == 'late' %}selected{% endif %}>late</option>
+                </select>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filtrlə</button>
             </form>
         </div>
 
-        {% if grouped_items %}
-        {% for group_data in grouped_items %}
-        <div class="section-card pending-group">
-            <div class="section-title pending-group-header" data-toggle="collapse" data-target="#group-{{ group_data.group.id }}">
-                <i class="fas fa-users"></i>
-                {{ group_data.group.name }}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ group_data.count }}</span>
-                <i class="fas fa-chevron-down pending-group-toggle"></i>
+        {% if review_items %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-list-check"></i>
+                Yoxlanacaq siyahı ({{ total_count }})
             </div>
-            <div id="group-{{ group_data.group.id }}" class="pending-group-body">
-                {% for item in group_data.items %}
-                <div class="post-item pending-item">
-                    <div class="post-icon {% if item.type == 'exam' %}stat-icon--blue{% else %}stat-icon--green{% endif %}">
-                        <i class="fas {% if item.type == 'exam' %}fa-file-alt{% else %}fa-tasks{% endif %}"></i>
-                    </div>
-                    <div class="post-info">
-                        <div class="post-title">{{ item.title }}</div>
-                        <div class="post-date">
-                            <strong>{{ item.student.get_full_name|default:item.student.username }}</strong>
-                            &middot; 
-                            {% if item.date %}{{ item.date|date:"d M Y H:i" }}{% endif %}
-                            <span class="role-badge {% if item.status == 'submitted' %}student{% else %}teacher{% endif %}">
-                                {{ item.status }}
-                            </span>
-                        </div>
+
+            {% for item in review_items %}
+            <div class="post-item pending-item">
+                <div class="post-icon {% if item.type == 'exam' %}stat-icon--blue{% elif item.type == 'assignment' %}stat-icon--green{% elif item.type == 'project' %}stat-icon--purple{% else %}stat-icon--orange{% endif %}">
+                    <i class="fas {% if item.type == 'exam' %}fa-file-alt{% elif item.type == 'assignment' %}fa-book-open{% elif item.type == 'project' %}fa-diagram-project{% else %}fa-flask{% endif %}"></i>
+                </div>
+
+                <div class="post-info">
+                    <div class="post-title">{{ item.title }}</div>
+                    <div class="post-date">
+                        <strong>{{ item.student.get_full_name|default:item.student.username }}</strong>
+                        · {{ item.course_title|default:"-" }}
+                        {% if item.group_name %}· Qrup: {{ item.group_name }}{% endif %}
+                        {% if item.date %}· {{ item.date|date:"d M Y H:i" }}{% endif %}
+                        <span class="role-badge {% if item.status == 'submitted' or item.status == 'late' or item.status == 'pending' %}student{% else %}teacher{% endif %}">
+                            {{ item.status }}
+                        </span>
                     </div>
                 </div>
-                {% endfor %}
+
+                <div class="ms-auto">
+                    <a href="{{ item.action_url }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-arrow-up-right-from-square"></i> {{ item.action_label }}
+                    </a>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
         {% else %}
         <div class="empty-state">
             <i class="fas fa-tasks"></i>
