@@ -6,6 +6,11 @@
  * 3) Account details
  */
 document.addEventListener("DOMContentLoaded", function () {
+    var i18n = window.REGISTER_I18N || {};
+    function tr(key, fallback) {
+        return i18n[key] || fallback;
+    }
+
     var countrySelect = document.getElementById("id_country");
     var orgTypeSelect = document.getElementById("id_organization_type");
     var orgFields = document.getElementById("orgFields");
@@ -35,10 +40,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getSelectEmptyLabel() {
         var selectedType = orgTypeSelect ? orgTypeSelect.value : "";
-        if (selectedType === "university") return "Universitet seçin";
-        if (selectedType === "school") return "Məktəb seçin";
-        if (selectedType === "course_center") return "Kurs mərkəzi seçin";
-        return "Müəssisə seçin";
+        if (selectedType === "university") return tr("select_empty_university", "Universitet seçin");
+        if (selectedType === "school") return tr("select_empty_school", "Məktəb seçin");
+        if (selectedType === "course_center") return tr("select_empty_course_center", "Kurs mərkəzi seçin");
+        return tr("select_empty_default", "Müəssisə seçin");
     }
 
     function filteredInstitutions(searchText) {
@@ -75,52 +80,117 @@ document.addEventListener("DOMContentLoaded", function () {
         var selectedCountry = (countrySelect ? countrySelect.value : "").toUpperCase();
 
         if (orgType === "university") {
-            if (institutionSearchLabel) institutionSearchLabel.textContent = "Universitet axtar";
-            if (institutionSearchInput) institutionSearchInput.placeholder = "Universitet adı axtar...";
-            if (institutionSelectLabel) institutionSelectLabel.textContent = "Universitet";
-            if (institutionManualLabel) institutionManualLabel.textContent = "Universitet adı (Not listed / Other)";
-            if (institutionNotListedInput) {
-                institutionNotListedInput.placeholder = "Universitet siyahıda yoxdursa adını daxil edin...";
+            if (institutionSearchLabel) institutionSearchLabel.textContent = tr("label_search_university", "Universitet axtar");
+            if (institutionSearchInput) {
+                institutionSearchInput.placeholder = tr("placeholder_search_university", "Universitet adı axtar...");
             }
-            if (orgIdentifierLabel) orgIdentifierLabel.textContent = "Universitet kodu / identifikatoru";
+            if (institutionSelectLabel) institutionSelectLabel.textContent = tr("label_university", "Universitet");
+            if (institutionManualLabel) {
+                institutionManualLabel.textContent = tr(
+                    "label_university_manual",
+                    "Universitet adı (Not listed / Other)"
+                );
+            }
+            if (institutionNotListedInput) {
+                institutionNotListedInput.placeholder = tr(
+                    "placeholder_university_manual",
+                    "Universitet siyahıda yoxdursa adını daxil edin..."
+                );
+            }
+            if (orgIdentifierLabel) {
+                orgIdentifierLabel.textContent = tr("label_university_identifier", "Universitet kodu / identifikatoru");
+            }
             if (institutionTypeHint) {
                 institutionTypeHint.textContent =
                     selectedCountry === "AZ"
-                        ? "Azərbaycan universitetləri siyahıdan seçilə bilər."
-                        : "Ölkə üzrə universitet siyahısından seçim edin.";
+                        ? tr("hint_university_az", "Azərbaycan universitetləri siyahıdan seçilə bilər.")
+                        : tr("hint_university_global", "Ölkə üzrə universitet siyahısından seçim edin.");
             }
         } else if (orgType === "school") {
-            if (institutionSearchLabel) institutionSearchLabel.textContent = "Məktəb axtar (ad və ya nömrə)";
-            if (institutionSearchInput) institutionSearchInput.placeholder = "Məktəb adı və ya nömrəsi axtar...";
-            if (institutionSelectLabel) institutionSelectLabel.textContent = "Məktəb (opsional)";
-            if (institutionManualLabel) institutionManualLabel.textContent = "Məktəb adı (Not listed / Other)";
-            if (institutionNotListedInput) {
-                institutionNotListedInput.placeholder = "Məktəb siyahıda yoxdursa adını daxil edin...";
+            if (institutionSearchLabel) {
+                institutionSearchLabel.textContent = tr("label_search_school", "Məktəb axtar (ad və ya nömrə)");
             }
-            if (orgIdentifierLabel) orgIdentifierLabel.textContent = "Məktəb nömrəsi / kodu (opsional)";
+            if (institutionSearchInput) {
+                institutionSearchInput.placeholder = tr(
+                    "placeholder_search_school",
+                    "Məktəb adı və ya nömrəsi axtar..."
+                );
+            }
+            if (institutionSelectLabel) {
+                institutionSelectLabel.textContent = tr("label_school_optional", "Məktəb (opsional)");
+            }
+            if (institutionManualLabel) {
+                institutionManualLabel.textContent = tr("label_school_manual", "Məktəb adı (Not listed / Other)");
+            }
+            if (institutionNotListedInput) {
+                institutionNotListedInput.placeholder = tr(
+                    "placeholder_school_manual",
+                    "Məktəb siyahıda yoxdursa adını daxil edin..."
+                );
+            }
+            if (orgIdentifierLabel) {
+                orgIdentifierLabel.textContent = tr("label_school_identifier", "Məktəb nömrəsi / kodu (opsional)");
+            }
             if (institutionTypeHint) {
-                institutionTypeHint.textContent =
-                    "Məktəbinizi seçin və ya əl ilə yazın. Məktəb nömrəsi ayrıca daxil edilə bilər.";
+                institutionTypeHint.textContent = tr(
+                    "hint_school",
+                    "Məktəbinizi seçin və ya əl ilə yazın. Məktəb nömrəsi ayrıca daxil edilə bilər."
+                );
             }
         } else if (orgType === "course_center") {
-            if (institutionSearchLabel) institutionSearchLabel.textContent = "Kurs mərkəzi axtar";
-            if (institutionSearchInput) institutionSearchInput.placeholder = "Kurs mərkəzi adı axtar...";
-            if (institutionSelectLabel) institutionSelectLabel.textContent = "Kurs mərkəzi (opsional)";
-            if (institutionManualLabel) institutionManualLabel.textContent = "Kurs mərkəzi adı (Not listed / Other)";
-            if (institutionNotListedInput) {
-                institutionNotListedInput.placeholder = "Kurs mərkəzi siyahıda yoxdursa adını daxil edin...";
+            if (institutionSearchLabel) {
+                institutionSearchLabel.textContent = tr("label_search_course_center", "Kurs mərkəzi axtar");
             }
-            if (orgIdentifierLabel) orgIdentifierLabel.textContent = "Mərkəz identifikatoru (opsional)";
+            if (institutionSearchInput) {
+                institutionSearchInput.placeholder = tr(
+                    "placeholder_search_course_center",
+                    "Kurs mərkəzi adı axtar..."
+                );
+            }
+            if (institutionSelectLabel) {
+                institutionSelectLabel.textContent = tr(
+                    "label_course_center_optional",
+                    "Kurs mərkəzi (opsional)"
+                );
+            }
+            if (institutionManualLabel) {
+                institutionManualLabel.textContent = tr(
+                    "label_course_center_manual",
+                    "Kurs mərkəzi adı (Not listed / Other)"
+                );
+            }
+            if (institutionNotListedInput) {
+                institutionNotListedInput.placeholder = tr(
+                    "placeholder_course_center_manual",
+                    "Kurs mərkəzi siyahıda yoxdursa adını daxil edin..."
+                );
+            }
+            if (orgIdentifierLabel) {
+                orgIdentifierLabel.textContent = tr("label_course_center_identifier", "Mərkəz identifikatoru (opsional)");
+            }
             if (institutionTypeHint) {
-                institutionTypeHint.textContent =
-                    "Kurs mərkəzi siyahıdan seçilə və ya Not listed / Other ilə əl ilə daxil edilə bilər.";
+                institutionTypeHint.textContent = tr(
+                    "hint_course_center",
+                    "Kurs mərkəzi siyahıdan seçilə və ya Not listed / Other ilə əl ilə daxil edilə bilər."
+                );
             }
         } else {
-            if (institutionSearchLabel) institutionSearchLabel.textContent = "Müəssisə axtar";
-            if (institutionSearchInput) institutionSearchInput.placeholder = "Müəssisə axtar...";
-            if (institutionSelectLabel) institutionSelectLabel.textContent = "Müəssisə";
-            if (institutionManualLabel) institutionManualLabel.textContent = "Müəssisə adı (Not listed / Other)";
-            if (orgIdentifierLabel) orgIdentifierLabel.textContent = "Rəsmi identifikator / kod";
+            if (institutionSearchLabel) institutionSearchLabel.textContent = tr("label_search_default", "Müəssisə axtar");
+            if (institutionSearchInput) {
+                institutionSearchInput.placeholder = tr("placeholder_search_default", "Müəssisə axtar...");
+            }
+            if (institutionSelectLabel) {
+                institutionSelectLabel.textContent = tr("label_institution_default", "Müəssisə");
+            }
+            if (institutionManualLabel) {
+                institutionManualLabel.textContent = tr(
+                    "label_institution_manual_default",
+                    "Müəssisə adı (Not listed / Other)"
+                );
+            }
+            if (orgIdentifierLabel) {
+                orgIdentifierLabel.textContent = tr("label_identifier_default", "Rəsmi identifikator / kod");
+            }
             if (institutionTypeHint) institutionTypeHint.textContent = "";
         }
     }
@@ -171,9 +241,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (isIndividual) {
                 orgIdentifierHelp.textContent = "";
             } else if (needsOfficialIdentifier) {
-                orgIdentifierHelp.textContent = "University üçün rəsmi identifikator məcburidir.";
+                orgIdentifierHelp.textContent = tr(
+                    "help_identifier_required",
+                    "University üçün rəsmi identifikator məcburidir."
+                );
             } else {
-                orgIdentifierHelp.textContent = "Bu sahə opsionaldır.";
+                orgIdentifierHelp.textContent = tr("help_identifier_optional", "Bu sahə opsionaldır.");
             }
         }
     }

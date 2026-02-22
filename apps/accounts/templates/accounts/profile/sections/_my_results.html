@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
     <div class="section-card">
@@ -6,7 +7,7 @@
             <div class="section-title mb-0">
                 <div class="title-left">
                     <i class="fas fa-chart-pie text-teal"></i>
-                    <span>Nəticələrim</span>
+                    <span>{% trans "title" context "profile.results" %}</span>
                 </div>
             </div>
         </div>
@@ -14,23 +15,23 @@
         <div class="modern-results-tabs">
             <a href="{{ profile_base_url }}?section=my-results&results_type=all"
                class="modern-tab {% if my_results_active_filter == 'all' %}active{% endif %}">
-                Hamısı <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
+                {% trans "tab_all" context "profile.results" %} <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=my-results&results_type=exams"
                class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
-                İmtahanlar <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
+                {% trans "tab_exams" context "profile.results" %} <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=my-results&results_type=courses"
                class="modern-tab {% if my_results_active_filter == 'courses' %}active{% endif %}">
-                  Sərbəst İşlər <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
+                  {% trans "tab_assignments" context "profile.results" %} <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=my-results&results_type=labs"
                class="modern-tab {% if my_results_active_filter == 'labs' %}active{% endif %}">
-                Laboratoriyalar <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
+                {% trans "tab_labs" context "profile.results" %} <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=my-results&results_type=independent"
                class="modern-tab {% if my_results_active_filter == 'independent' %}active{% endif %}">
-               Kurs İşləri <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
+               {% trans "tab_independent" context "profile.results" %} <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
             </a>
         </div>
 
@@ -61,7 +62,7 @@
                 <div class="result-card-body">
                     {% if item.score != None %}
                     <div class="result-score-box">
-                        <span class="score-label">Toplanılan Xal:</span>
+                        <span class="score-label">{% trans "score_label" context "profile.results" %}:</span>
                         <span class="score-value">{{ item.score }}</span>
                     </div>
                     {% endif %}
@@ -78,11 +79,11 @@
                         <div class="pending-icon"><i class="fas fa-hourglass-half"></i></div>
                         <p>
                             {% if item.status == "submitted" %}
-                                Cavabınız göndərilib. Müəllim yoxlamasını gözləyir.
+                                {% trans "pending_submitted" context "profile.results" %}
                             {% elif item.status == "pending" %}
-                                Cavabınız emal olunur. Nəticə hazır olduqda burada görünəcək.
+                                {% trans "pending_processing" context "profile.results" %}
                             {% else %}
-                                Nəticə hələ hazır deyil. Bir az sonra yenidən yoxlayın.
+                                {% trans "pending_default" context "profile.results" %}
                             {% endif %}
                         </p>
                     </div>
@@ -91,7 +92,7 @@
 
                 <div class="result-card-footer">
                     <a href="{{ item.detail_url }}" class="btn-action btn-teal">
-                        <i class="fas fa-eye"></i> Nəticəyə Bax
+                        <i class="fas fa-eye"></i> {% trans "view_result" context "profile.results" %}
                     </a>
                 </div>
                 
@@ -104,8 +105,8 @@
             <div class="empty-icon-wrapper icon-teal-light">
                 <i class="fas fa-clipboard-list"></i>
             </div>
-            <h3>Nəticə tapılmadı</h3>
-            <p>Seçdiyiniz filtrə uyğun hələ heç bir nəticə və ya cavab yoxdur.</p>
+            <h3>{% trans "empty_title" context "profile.results" %}</h3>
+            <p>{% trans "empty_description" context "profile.results" %}</p>
         </div>
         {% endif %}
         

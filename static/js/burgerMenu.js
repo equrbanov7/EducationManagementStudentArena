@@ -1,13 +1,15 @@
-// static/js/main.js (və ya navbar.js)
 document.addEventListener('DOMContentLoaded', function () {
-    const navToggle = document.querySelector('.blog-header__toggle');
-    const mobileNavPanel = document.querySelector('.mobile-nav-panel'); // Partial faylın içindəki mobil menyu paneli
-    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay'); // Partial faylın içindəki overlay
-    const body = document.body; // Body elementinə overflow gizlətmək üçün
+    initMobileNav();
+    initUserMenu();
+});
 
-    // Elementlərin olub-olmadığını yoxlayırıq
+function initMobileNav() {
+    const navToggle = document.querySelector('.blog-header__toggle');
+    const mobileNavPanel = document.querySelector('.mobile-nav-panel');
+    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+    const body = document.body;
+
     if (!navToggle || !mobileNavPanel || !mobileNavOverlay) {
-        console.warn("Burger menyu elementləri tapılmadı. JS işləməyəcək.");
         return;
     }
 
@@ -15,67 +17,61 @@ document.addEventListener('DOMContentLoaded', function () {
         mobileNavPanel.classList.add('is-open');
         mobileNavOverlay.classList.add('is-open');
         navToggle.classList.add('is-open');
-        body.style.overflow = 'hidden'; // Scrollu bağlayır
+        body.style.overflow = 'hidden';
     }
 
     function closeMobileNav() {
         mobileNavPanel.classList.remove('is-open');
         mobileNavOverlay.classList.remove('is-open');
         navToggle.classList.remove('is-open');
-        body.style.overflow = ''; // Scrollu geri qaytarır
+        body.style.overflow = '';
     }
 
-    // Burger düyməsinə klikləmə
-    navToggle.addEventListener('click', () => {
+    navToggle.addEventListener('click', function () {
         if (mobileNavPanel.classList.contains('is-open')) {
             closeMobileNav();
-        } else {
-            openMobileNav();
+            return;
         }
+        openMobileNav();
     });
 
-    // Overlay-ə klikləmə (kənara basdıqda bağlamaq üçün)
-    mobileNavOverlay.addEventListener('click', () => {
-        closeMobileNav();
+    mobileNavOverlay.addEventListener('click', closeMobileNav);
+
+    mobileNavPanel.querySelectorAll('.blog-header__nav-link').forEach(function (link) {
+        link.addEventListener('click', closeMobileNav);
     });
 
-    // Menyu daxilindəki linklərə klikləmə (naviqasiyadan sonra bağlamaq üçün)
-    mobileNavPanel.querySelectorAll('.blog-header__nav-link').forEach(link => {
-        link.addEventListener('click', (event) => {
-            closeMobileNav();
-        });
-    });
-
-    // Klaviaturada 'Escape' düyməsinə basdıqda bağlamaq (yaxşı UX üçün)
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && mobileNavPanel.classList.contains('is-open')) {
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && mobileNavPanel.classList.contains('is-open')) {
             closeMobileNav();
         }
     });
+}
 
+function initUserMenu() {
     const userToggle = document.querySelector('.blog-header__user-toggle');
     const userMenu = document.querySelector('.blog-header__user-menu');
 
-    if (userToggle && userMenu) {
-        // Aç / bağla
-        userToggle.addEventListener('click', function (e) {
-            e.stopPropagation(); // body click eventinə düşməsin
-            const isOpen = userMenu.classList.contains('blog-header__user-menu--open');
-            if (isOpen) {
-                userMenu.classList.remove('blog-header__user-menu--open');
-                userToggle.setAttribute('aria-expanded', 'false');
-            } else {
-                userMenu.classList.add('blog-header__user-menu--open');
-                userToggle.setAttribute('aria-expanded', 'true');
-            }
-        });
-
-        // Çöldə klik edəndə bağla
-        document.addEventListener('click', function () {
-            if (userMenu.classList.contains('blog-header__user-menu--open')) {
-                userMenu.classList.remove('blog-header__user-menu--open');
-                userToggle.setAttribute('aria-expanded', 'false');
-            }
-        });
+    if (!userToggle || !userMenu) {
+        return;
     }
-});
+
+    userToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const isOpen = userMenu.classList.contains('blog-header__user-menu--open');
+        if (isOpen) {
+            userMenu.classList.remove('blog-header__user-menu--open');
+            userToggle.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        userMenu.classList.add('blog-header__user-menu--open');
+        userToggle.setAttribute('aria-expanded', 'true');
+    });
+
+    document.addEventListener('click', function () {
+        if (userMenu.classList.contains('blog-header__user-menu--open')) {
+            userMenu.classList.remove('blog-header__user-menu--open');
+            userToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+}

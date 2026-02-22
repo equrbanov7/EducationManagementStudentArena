@@ -1,3 +1,5 @@
+{% load i18n %}
+{% trans "organization_not_found" context "profile.permission_editor" as permission_editor_org_not_found %}
 {% if organization %}
 <div class="section-card">
     <div class="section-title">
@@ -12,7 +14,7 @@
     {% else %}
     <div class="info-grid">
         <div class="info-item">
-            <div class="info-label">Rol seçin</div>
+            <div class="info-label">{% trans "select_role" context "profile.permission_editor" %}</div>
             <div class="info-value">
                 {% for role in roles %}
                     {% if embedded_in_profile %}
@@ -32,7 +34,7 @@
     </div>
     <p class="settings-note mt-3 mb-0">
         <i class="fas fa-circle-info"></i>
-        Rol badge-lərinə klik etdikdə həmin rolun permission-ları aşağıda açılır.
+        {% trans "role_click_note" context "profile.permission_editor" %}
     </p>
     {% endif %}
 </div>
@@ -40,16 +42,16 @@
 {% if not access_denied_message and selected_role %}
 <div class="section-card">
     <div class="section-title">
-        <i class="fas fa-lock"></i> {{ selected_role.display_name }} - Permission-lar
+        <i class="fas fa-lock"></i> {{ selected_role.display_name }} - {% trans "permissions_suffix" context "profile.permission_editor" %}
     </div>
 
     <div class="mb-4">
-        <div class="info-label">Sizin aktiv permission-larınız</div>
+        <div class="info-label">{% trans "active_permissions_label" context "profile.permission_editor" %}</div>
         <div class="role-badges">
             {% for perm in actor_permissions %}
             <span class="role-badge">{{ perm }}</span>
             {% empty %}
-            <span class="text-muted">Permission tapılmadı.</span>
+            <span class="text-muted">{% trans "permissions_not_found" context "profile.permission_editor" %}</span>
             {% endfor %}
         </div>
     </div>
@@ -72,8 +74,8 @@
                         <input type="hidden" name="role_id" value="{{ selected_role.id }}">
                         <input type="hidden" name="permission" value="{{ perm }}">
                         <input type="hidden" name="action" value="remove">
-                        <span class="role-badge admin"><i class="fas fa-check"></i> Aktiv</span>
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>
+                        <span class="role-badge admin"><i class="fas fa-check"></i> {% trans "status_active" context "profile.permission_editor" %}</span>
+                        <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "remove" context "profile.permission_editor" %}</button>
                     </form>
                     {% else %}
                     <form method="post" action="{% url 'accounts:permission_editor' %}" style="display:inline-flex; gap: 8px; align-items: center;">
@@ -81,8 +83,8 @@
                         <input type="hidden" name="role_id" value="{{ selected_role.id }}">
                         <input type="hidden" name="permission" value="{{ perm }}">
                         <input type="hidden" name="action" value="add">
-                        <span class="role-badge student"><i class="fas fa-times"></i> Deaktiv</span>
-                        <button type="submit" class="btn btn-sm btn-outline-success">Əlavə et</button>
+                        <span class="role-badge student"><i class="fas fa-times"></i> {% trans "status_inactive" context "profile.permission_editor" %}</span>
+                        <button type="submit" class="btn btn-sm btn-outline-success">{% trans "add" context "profile.permission_editor" %}</button>
                     </form>
                     {% endif %}
                 </div>
@@ -96,6 +98,6 @@
 {% else %}
 <div class="empty-state">
     <i class="fas fa-building"></i>
-    <p>{{ access_denied_message|default:"Təşkilat tapılmadı." }}</p>
+    <p>{{ access_denied_message|default:permission_editor_org_not_found }}</p>
 </div>
 {% endif %}

@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Assignment, Submission
 from apps.blog.models import EmailOTP
@@ -759,7 +760,8 @@ def _collect_my_results(request, filter_type=None):
                 {
                     "category": "exams",
                     "title": attempt.exam.title,
-                    "kind": attempt.exam.get_exam_type_display() or "Exam",
+                    "kind": attempt.exam.get_exam_type_display()
+                    or pgettext_lazy("accounts.my_results.kind", "exam"),
                     "submitted_at": attempt.finished_at or attempt.started_at,
                     "status": _result_status_badge(
                         attempt.status,
@@ -967,7 +969,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         "exams:teacher_check_attempt",
                         kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
                     ),
-                    "action_label": "Yoxla",
+                    "action_label": pgettext_lazy("profile.pending_review.action", "review"),
                 }
             )
 
@@ -999,7 +1001,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         "assignments:review_assignment_submissions",
                         kwargs={"pk": submission.assignment_id},
                     ),
-                    "action_label": "Tapşırığa keç",
+                    "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
                 }
             )
 
@@ -1031,7 +1033,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         "projects:review_project_submissions",
                         kwargs={"pk": submission.project_id},
                     ),
-                    "action_label": "Layihəyə keç",
+                    "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
                 }
             )
 
@@ -1064,7 +1066,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         "labs:grade_submission_page",
                         kwargs={"pk": submission.id},
                     ),
-                    "action_label": "Qiymətləndir",
+                    "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
                 }
             )
 
@@ -1083,7 +1085,7 @@ def teacher_dashboard(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_review_submissions"]:
-        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.grading_queue.message", "teacher_only"))
         return redirect("home")
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
@@ -1206,11 +1208,11 @@ def user_profile(request):
         ).strip()
 
         if not first_name or not last_name or not new_email:
-            messages.error(request, "Ad, soyad və email sahələri boş buraxıla bilməz.")
+            messages.error(request, pgettext_lazy("accounts.profile_edit.message", "required_fields_missing"))
             return redirect("accounts:profile" + "?section=edit-profile")
 
         if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
-            messages.error(request, "Bu email artıq istifadə olunur.")
+            messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
             return redirect("accounts:profile" + "?section=edit-profile")
 
         # Update user info
@@ -1239,13 +1241,13 @@ def user_profile(request):
         ):
             messages.error(
                 request,
-                "Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir.",
+                pgettext_lazy("accounts.profile_edit.message", "student_university_or_school_required"),
             )
             return redirect("accounts:profile" + "?section=edit-profile")
 
         profile.save()
 
-        messages.success(request, "Profil uğurla yeniləndi!")
+        messages.success(request, pgettext_lazy("accounts.profile_edit.message", "profile_updated_successfully"))
         return redirect("accounts:profile")
 
     # Get user's roles
@@ -1678,23 +1680,23 @@ def user_profile(request):
         )
 
     section_titles = {
-        "profile-info": "Profil Məlumatları",
-        "posts": "Postlarım",
-        "create-post": "Yeni Post Yarat",
-        "courses": "Kurslarım",
-        "my-exams": "İmtahanlarım",
-        "my-courses": "Yaratdığım Kurslar",
-        "assigned-exams": "Təyin olunmuş tapşırıqlar",
-        "assigned-courses": "Təyin olunmuş kurslar",
-        "my-results": "My Results",
-        "groups": "Qruplar",
-        "pending-review": "To Review",
-        "role-assignment": "Role təyin et",
-        "permission-editor": "Permission-lar",
-        "manage-roles": "Rolları idarə et",
-        "superadmin-organizations": "Superadmin Nəzarəti",
-        "blog": "Blog",
-        "edit-profile": "Profili Redaktə Et",
+        "profile-info": pgettext_lazy("profile.section", "profile_info"),
+        "posts": pgettext_lazy("profile.section", "posts"),
+        "create-post": pgettext_lazy("profile.section", "create_post"),
+        "courses": pgettext_lazy("profile.section", "my_courses"),
+        "my-exams": pgettext_lazy("profile.section", "my_exams"),
+        "my-courses": pgettext_lazy("profile.section", "my_created_courses"),
+        "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
+        "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
+        "my-results": pgettext_lazy("profile.section", "my_results"),
+        "groups": pgettext_lazy("profile.section", "groups"),
+        "pending-review": pgettext_lazy("profile.section", "pending_review"),
+        "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
+        "permission-editor": pgettext_lazy("profile.section", "permissions"),
+        "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
+        "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
+        "blog": pgettext_lazy("profile.section", "blog"),
+        "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
     }
 
     shortcut_sections = []
@@ -1706,8 +1708,8 @@ def user_profile(request):
                 "url": reverse("create_post"),
                 "icon": "fas fa-plus-circle",
                 "source_url": reverse("create_post"),
-                "description": "Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin.",
-                "action_label": "Post yarat",
+                "description": pgettext_lazy("profile.shortcut", "create_post_description"),
+                "action_label": pgettext_lazy("profile.shortcut", "create_post_action"),
             }
         )
     if capabilities["can_view_blog"]:
@@ -1718,12 +1720,12 @@ def user_profile(request):
                 "url": reverse("home"),
                 "icon": "fas fa-blog",
                 "source_url": reverse("home"),
-                "description": "Blog lentinə keçmək üçün aşağıdakı düyməyə klik edin.",
-                "action_label": "Blogu aç",
+                "description": pgettext_lazy("profile.shortcut", "open_blog_description"),
+                "action_label": pgettext_lazy("profile.shortcut", "open_blog_action"),
             }
         )
 
-    active_section_title = section_titles.get(active_section, "Profil")
+    active_section_title = section_titles.get(active_section, pgettext_lazy("profile.sidebar", "title"))
 
     context = {
         "profile": profile,
@@ -1793,13 +1795,13 @@ def manage_roles(request):
     """
     is_superadmin = _is_superadmin_user(request.user)
     if not is_superadmin and not getattr(request.user, "is_admin_level", False):
-        messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.manage_roles.message", "admin_only"))
         return redirect("home")
 
     # Get user's active organization for scoping
     user_org = _get_active_organization(request)
     if not is_superadmin and not user_org:
-        messages.error(request, "Rol idarəetməsi üçün aktiv təşkilat tapılmadı.")
+        messages.error(request, pgettext_lazy("accounts.manage_roles.message", "active_organization_not_found"))
         return redirect("accounts:profile")
 
     actor_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
@@ -1812,7 +1814,7 @@ def manage_roles(request):
         next_url = _resolve_next_url(request, reverse("accounts:manage_roles"))
 
         if not user_id:
-            messages.error(request, "İstifadəçi seçilməyib.")
+            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "user_not_selected"))
             return redirect(next_url)
 
         target_user = get_object_or_404(User, id=user_id)
@@ -1820,12 +1822,12 @@ def manage_roles(request):
         # Ensure target is in same organization
         target_org = getattr(getattr(target_user, "profile", None), "organization", None)
         if not is_superadmin and target_org != user_org:
-            messages.error(request, "Yalnız öz təşkilatınızdakı istifadəçiləri idarə edə bilərsiniz.")
+            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "manage_only_own_org_users"))
             return redirect(next_url)
 
         target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
         if not is_superadmin and target_user != request.user and target_level >= actor_level:
-            messages.error(request, "Bu istifadəçinin rolunu idarə etmək üçün səviyyəniz kifayət etmir.")
+            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "insufficient_level_for_target_user"))
             return redirect(next_url)
 
         selected_role_names = set(request.POST.getlist("role_names"))
@@ -1840,12 +1842,12 @@ def manage_roles(request):
 
         invalid_roles = selected_role_names - PROFILE_ROLE_NAMES
         if invalid_roles:
-            messages.error(request, "Seçilən rollar etibarlı deyil.")
+            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "invalid_roles_selected"))
             return redirect(next_url)
 
         disallowed_roles = selected_role_names - assignable_role_names
         if disallowed_roles:
-            messages.error(request, "Seçilən rollardan bəzilərini təyin etmək icazəniz yoxdur.")
+            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "not_allowed_to_assign_some_roles"))
             return redirect(next_url)
 
         current_roles = set(_extract_profile_roles_for_user(target_user))
@@ -1872,7 +1874,8 @@ def manage_roles(request):
         assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
         messages.success(
             request,
-            f"{target_user.username} üçün rollar yeniləndi: {', '.join(assigned_labels)}.",
+            pgettext_lazy("accounts.manage_roles.message", "roles_updated_for_user")
+            % {"username": target_user.username, "roles": ", ".join(assigned_labels)},
         )
         return redirect(next_url)
 
@@ -1921,7 +1924,7 @@ def grading_queue(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_review_submissions"]:
-        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.grading_queue.message", "teacher_only"))
         return redirect("home")
 
     # Get filter parameters
@@ -1964,7 +1967,7 @@ def assigned_exams(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
-        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
     exams = _assigned_exams_queryset(request, request.user, active_only=True).order_by("-start_datetime", "-created_at")
@@ -1996,7 +1999,7 @@ def assigned_courses(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
-        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
     courses = _assigned_courses_queryset(request, request.user).order_by("-created_at")
@@ -2018,7 +2021,7 @@ def my_results(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
-        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
     items, counts, active_filter = _collect_my_results(request, filter_type=request.GET.get("type"))
@@ -2036,7 +2039,7 @@ def my_result_detail(request, item_type, item_id):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_view_student_assignments"]:
-        messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
+        messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
     results_filter = _normalize_results_filter(request.GET.get("results_type") or request.GET.get("type"))
@@ -2067,6 +2070,7 @@ def my_result_detail(request, item_type, item_id):
         )
         context = {
             "item_type": "courses",
+            "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "course"),
             "item_title": submission.assignment.title,
             "item_subtitle": submission.assignment.course.title,
             "submitted_at": submission.submitted_at,
@@ -2089,6 +2093,7 @@ def my_result_detail(request, item_type, item_id):
         )
         context = {
             "item_type": "labs",
+            "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "lab"),
             "item_title": submission.assignment.lab.title,
             "item_subtitle": submission.assignment.lab.course.title,
             "submitted_at": submission.submitted_at,
@@ -2112,6 +2117,7 @@ def my_result_detail(request, item_type, item_id):
         )
         context = {
             "item_type": "independent",
+            "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "independent_work"),
             "item_title": submission.project.title,
             "item_subtitle": submission.project.course.title,
             "submitted_at": submission.submitted_at,
@@ -2125,7 +2131,7 @@ def my_result_detail(request, item_type, item_id):
         }
         return render(request, "accounts/my_result_detail.html", context)
 
-    messages.error(request, "Nəticə tipi tanınmadı.")
+    messages.error(request, pgettext_lazy("accounts.my_results.message", "unknown_result_type"))
     return redirect(back_url)
 
 
@@ -2135,7 +2141,7 @@ def pending_review(request):
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
     if not capabilities["can_review_submissions"]:
-        messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
         return redirect("accounts:profile")
 
     items, search, filter_type, filter_status = _collect_pending_review_items(request)
@@ -2159,7 +2165,7 @@ def role_assignment(request):
 
     org = _get_active_organization(request)
     if not org:
-        messages.error(request, "Aktiv təşkilat tapılmadı.")
+        messages.error(request, pgettext_lazy("accounts.role_assignment.message", "active_organization_not_found"))
         return redirect("accounts:profile")
 
     _ensure_profile_admin_membership(request.user, org)
@@ -2172,7 +2178,7 @@ def role_assignment(request):
     # Teacher+ can at least assign Student/Member roles.
     # Default teacher membership level is 50 in org role templates.
     if not is_superadmin and user_level < 50:
-        messages.error(request, "Bu səhifəyə yalnız müəllim və yuxarı səviyyə daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.role_assignment.message", "teacher_or_higher_only"))
         return redirect("accounts:profile")
 
     if request.method == "POST":
@@ -2181,14 +2187,14 @@ def role_assignment(request):
         target_role = get_object_or_404(Role, id=role_id, organization=org, is_active=True)
 
         if not is_superadmin and target_role.level >= user_level:
-            messages.error(request, "Yalnız sizdən aşağı səviyyəli rolları təyin edə bilərsiniz.")
+            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "assign_lower_roles_only"))
             return redirect("accounts:role_assignment")
 
         # Teacher+ can assign student/member even without explicit role.assign permission.
         teacher_can_assign_basic = not is_superadmin and user_level >= 50 and target_role.name in {"student", "member"}
 
         if not (can_assign_roles or teacher_can_assign_basic):
-            messages.error(request, "Rol təyin etmək üçün lazımi icazəniz yoxdur.")
+            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "missing_role_assign_permission"))
             return redirect("accounts:role_assignment")
 
         if action == "attach_user":
@@ -2197,7 +2203,7 @@ def role_assignment(request):
             target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
             if target_profile.organization and target_profile.organization != org:
-                messages.error(request, "İstifadəçi artıq başqa təşkilata bağlıdır.")
+                messages.error(request, pgettext_lazy("accounts.role_assignment.message", "user_bound_to_other_org"))
                 return redirect("accounts:role_assignment")
 
             if not is_superadmin:
@@ -2209,7 +2215,7 @@ def role_assignment(request):
                 if not is_requested_for_org:
                     messages.error(
                         request,
-                        "Bu istifadəçi sizin təşkilatınızı signup zamanı seçməyib. Yalnız həmin pending istifadəçiləri əlavə edə bilərsiniz.",
+                        pgettext_lazy("accounts.role_assignment.message", "user_did_not_select_this_org_on_signup"),
                     )
                     return redirect("accounts:role_assignment")
 
@@ -2225,7 +2231,10 @@ def role_assignment(request):
             )
             if not created:
                 if not is_superadmin and membership.role.level >= user_level:
-                    messages.error(request, "Bu istifadəçinin rolunu dəyişmək icazəniz yoxdur.")
+                    messages.error(
+                        request,
+                        pgettext_lazy("accounts.role_assignment.message", "not_allowed_to_change_user_role"),
+                    )
                     return redirect("accounts:role_assignment")
                 membership.role = target_role
                 membership.assigned_by = request.user
@@ -2261,7 +2270,9 @@ def role_assignment(request):
             )
 
             messages.success(
-                request, f"{target_user.username} təşkilata əlavə edildi və `{target_role.display_name}` rolu verildi."
+                request,
+                pgettext_lazy("accounts.role_assignment.message", "user_added_to_org_with_role")
+                % {"username": target_user.username, "role_display": target_role.display_name},
             )
             return redirect("accounts:role_assignment")
 
@@ -2275,7 +2286,7 @@ def role_assignment(request):
         )
 
         if not is_superadmin and target_membership.role.level >= user_level:
-            messages.error(request, "Yalnız sizdən aşağı səviyyəli istifadəçilərin rolunu dəyişə bilərsiniz.")
+            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "change_lower_level_users_only"))
             return redirect("accounts:role_assignment")
 
         old_role_name = target_membership.role.name
@@ -2313,7 +2324,9 @@ def role_assignment(request):
         )
 
         messages.success(
-            request, f"{target_membership.user.username} üçün rol `{target_role.display_name}` olaraq yeniləndi."
+            request,
+            pgettext_lazy("accounts.role_assignment.message", "role_updated_for_user")
+            % {"username": target_membership.user.username, "role_display": target_role.display_name},
         )
         return redirect("accounts:role_assignment")
 
@@ -2398,7 +2411,7 @@ def permission_editor(request):
 
     org = _get_active_organization(request)
     if not org:
-        messages.error(request, "Aktiv təşkilat tapılmadı.")
+        messages.error(request, pgettext_lazy("accounts.permission_editor.message", "active_organization_not_found"))
         return redirect("accounts:profile")
 
     _ensure_profile_admin_membership(request.user, org)
@@ -2409,7 +2422,7 @@ def permission_editor(request):
 
     can_manage_permissions = is_superadmin or has_permission(list(actor_permissions), "role.assign")
     if not is_superadmin and not can_manage_permissions:
-        messages.error(request, "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur.")
+        messages.error(request, pgettext_lazy("accounts.permission_editor.message", "role_assign_permission_required"))
         return redirect("accounts:profile")
 
     roles = Role.objects.filter(organization=org, is_active=True).order_by("-level")
@@ -2425,12 +2438,12 @@ def permission_editor(request):
         selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
 
         if not is_superadmin and selected_role.level >= user_level:
-            messages.error(request, "Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə bilərsiniz.")
+            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "manage_lower_role_permissions_only"))
             return redirect(f"{request.path}?role={selected_role.id}")
 
         all_permissions = set(get_all_permissions())
         if selected_permission not in all_permissions:
-            messages.error(request, "Yanlış permission seçimi.")
+            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection"))
             return redirect(f"{request.path}?role={selected_role.id}")
 
         role_permissions = list(selected_role.permissions or [])
@@ -2442,15 +2455,24 @@ def permission_editor(request):
                 not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
                 and not is_superadmin
             ):
-                messages.error(request, "Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə bilərsiniz.")
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"),
+                )
                 return redirect(f"{request.path}?role={selected_role.id}")
             role_permissions_set.add(selected_permission)
-            result_message = f"`{selected_permission}` permission-u əlavə edildi."
+            result_message = (
+                pgettext_lazy("accounts.permission_editor.message", "permission_added")
+                % {"permission": selected_permission}
+            )
         elif action == "remove":
             role_permissions_set.discard(selected_permission)
-            result_message = f"`{selected_permission}` permission-u silindi."
+            result_message = (
+                pgettext_lazy("accounts.permission_editor.message", "permission_removed")
+                % {"permission": selected_permission}
+            )
         else:
-            messages.error(request, "Naməlum əməliyyat.")
+            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "unknown_action"))
             return redirect(f"{request.path}?role={selected_role.id}")
 
         selected_role.permissions = sorted(role_permissions_set)
@@ -2495,7 +2517,7 @@ def superadmin_organizations(request):
     Superadmin oversight screen for all organizations with suspend/unsuspend controls.
     """
     if not _is_superadmin_user(request.user):
-        messages.error(request, "Bu səhifəyə yalnız superadmin daxil ola bilər.")
+        messages.error(request, pgettext_lazy("accounts.superadmin_orgs.message", "superadmin_only"))
         return redirect("accounts:profile")
 
     from apps.organizations.models import Organization
@@ -2511,16 +2533,24 @@ def superadmin_organizations(request):
             organization.suspended_at = timezone.now()
             organization.suspension_reason = reason
             organization.save(update_fields=["status", "is_active", "suspended_at", "suspension_reason", "updated_at"])
-            messages.success(request, f"`{organization.name}` təşkilatı dayandırıldı.")
+            messages.success(
+                request,
+                pgettext_lazy("accounts.superadmin_orgs.message", "organization_suspended")
+                % {"organization_name": organization.name},
+            )
         elif action == "unsuspend":
             organization.status = "active"
             organization.is_active = True
             organization.suspended_at = None
             organization.suspension_reason = ""
             organization.save(update_fields=["status", "is_active", "suspended_at", "suspension_reason", "updated_at"])
-            messages.success(request, f"`{organization.name}` təşkilatı yenidən aktiv edildi.")
+            messages.success(
+                request,
+                pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
+                % {"organization_name": organization.name},
+            )
         else:
-            messages.error(request, "Naməlum əməliyyat.")
+            messages.error(request, pgettext_lazy("accounts.superadmin_orgs.message", "unknown_action"))
 
         return redirect("accounts:superadmin_organizations")
 
@@ -2681,12 +2711,12 @@ def register_view(request):
             if organization is None and requested_organization_name:
                 messages.success(
                     request,
-                    "Qeydiyyat tamamlandı. Hesabınız yaradıldı və təşkilat müraciətiniz qeydə alındı.",
+                    pgettext_lazy("accounts.auth.message", "registration_completed_request_recorded"),
                 )
             else:
                 messages.success(
                     request,
-                    "Qeydiyyat tamamlandı. İndi eyni istifadəçi adı/email və şifrə ilə daxil ola bilərsiniz.",
+                    pgettext_lazy("accounts.auth.message", "registration_completed_you_can_login_now"),
                 )
             return redirect("accounts:login")
     else:
@@ -2706,7 +2736,7 @@ def verify_code_view(request):
     """Verify email using OTP code."""
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
+        messages.error(request, pgettext_lazy("accounts.auth.message", "verification_email_not_found_register_again"))
         return redirect("accounts:register")
 
     if request.method == "POST":
@@ -2714,12 +2744,12 @@ def verify_code_view(request):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            messages.error(request, "User tapılmadı.")
+            messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
             return redirect("accounts:register")
 
         otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
         if not otp or otp.is_expired():
-            messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
+            messages.error(request, pgettext_lazy("accounts.auth.message", "code_invalid_or_expired"))
             return render(request, "accounts/verify_code.html", {"email": email})
 
         otp.is_used = True
@@ -2728,7 +2758,7 @@ def verify_code_view(request):
         user.is_active = True
         user.save()
 
-        messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
+        messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
         return redirect("accounts:login")
 
     return render(request, "accounts/verify_code.html", {"email": email})
@@ -2742,10 +2772,10 @@ def verify_email_link_view(request):
         user = User.objects.get(pk=user_id)
         user.is_active = True
         user.save()
-        messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
+        messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
         return redirect("accounts:login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
-        messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
+        messages.error(request, pgettext_lazy("accounts.auth.message", "link_invalid_or_expired"))
         return redirect("accounts:register")
 
 
@@ -2753,26 +2783,26 @@ def resend_code_view(request):
     """Resend email verification code."""
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Email tapılmadı.")
+        messages.error(request, pgettext_lazy("accounts.auth.message", "email_not_found"))
         return redirect("accounts:register")
 
     user = User.objects.filter(email=email).first()
     if not user:
-        messages.error(request, "User tapılmadı.")
+        messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
         return redirect("accounts:register")
 
     code = generate_otp()
     EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10))
     send_verify_email(user, code)
 
-    messages.success(request, "Yeni kod göndərildi.")
+    messages.success(request, pgettext_lazy("accounts.auth.message", "new_code_sent"))
     return redirect("accounts:verify_code")
 
 
 def logout_view(request):
     """Logout user and redirect to home."""
     logout(request)
-    messages.success(request, "Uğurla çıxış etdiniz.")
+    messages.success(request, pgettext_lazy("accounts.auth.message", "logout_success"))
     return redirect("home")
 
 

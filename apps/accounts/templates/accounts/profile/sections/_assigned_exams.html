@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
     <div class="section-card">
@@ -5,7 +6,7 @@
             <div class="section-title mb-0">
                 <div class="title-left">
                     <i class="fas fa-tasks text-indigo"></i>
-                    <span>Təyin olunmuş tapşırıqlar</span>
+                    <span>{% trans "title" context "profile.assigned_tasks" %}</span>
                 </div>
             </div>
         </div>
@@ -13,23 +14,23 @@
         <div class="modern-results-tabs assigned-task-tabs">
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=all"
                class="modern-tab {% if assigned_tasks_active_filter == 'all' %}active{% endif %}">
-                Hamısı <span class="tab-count">{{ assigned_task_counts.all|default:0 }}</span>
+                {% trans "tab_all" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.all|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=courses"
                class="modern-tab {% if assigned_tasks_active_filter == 'courses' %}active{% endif %}">
-                Kurslar <span class="tab-count">{{ assigned_task_counts.courses|default:0 }}</span>
+                {% trans "tab_courses" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.courses|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=assignments"
                class="modern-tab {% if assigned_tasks_active_filter == 'assignments' %}active{% endif %}">
-                Sərbəst İşlər <span class="tab-count">{{ assigned_task_counts.assignments|default:0 }}</span>
+                {% trans "tab_assignments" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.assignments|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=labs"
                class="modern-tab {% if assigned_tasks_active_filter == 'labs' %}active{% endif %}">
-                Laboratoriyalar <span class="tab-count">{{ assigned_task_counts.labs|default:0 }}</span>
+                {% trans "tab_labs" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.labs|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=independent"
                class="modern-tab {% if assigned_tasks_active_filter == 'independent' %}active{% endif %}">
-                Kurs İşləri <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
+                {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
             </a>
         </div>
 
@@ -51,7 +52,7 @@
                             {% endif %}
                             {% if item.deadline %}
                             <span class="meta-divider">•</span>
-                            <span><i class="fas fa-hourglass-end"></i> Son tarix: {{ item.deadline|date:"d M Y H:i" }}</span>
+                            <span><i class="fas fa-hourglass-end"></i> {% trans "deadline_prefix" context "profile.assigned_tasks" %}: {{ item.deadline|date:"d M Y H:i" }}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -70,7 +71,7 @@
 
                 <div class="result-card-footer task-card-footer">
                     <a href="{{ item.detail_url }}" class="btn-action btn-task-primary">
-                        <span>Tapşırığa Keçid</span>
+                        <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
                         <i class="fas fa-arrow-right icon-arrow"></i>
                     </a>
                 </div>
@@ -83,8 +84,8 @@
             <div class="empty-icon-wrapper icon-indigo-light">
                 <i class="fas fa-tasks"></i>
             </div>
-            <h3>Təyin olunmuş tapşırıq yoxdur</h3>
-            <p>Hazırda sizə təyin edilmiş kurs, sərbəst iş, lab və ya kurs işi tapılmadı.</p>
+            <h3>{% trans "empty_title" context "profile.assigned_tasks" %}</h3>
+            <p>{% trans "empty_description" context "profile.assigned_tasks" %}</p>
         </div>
         {% endif %}
     </div>

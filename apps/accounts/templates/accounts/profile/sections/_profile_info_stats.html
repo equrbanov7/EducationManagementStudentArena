@@ -1,17 +1,18 @@
+{% load i18n %}
 <div class="stats-grid">
     {% if can_view_owned_learning %}
     <div class="stat-card">
         <div class="stat-icon stat-icon--blue"><i class="fas fa-file-alt"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ my_exams_count|default:0 }}</div>
-            <div class="stat-label">İmtahanlarım</div>
+            <div class="stat-label">{% trans "my_exams" context "profile.stats" %}</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon stat-icon--green"><i class="fas fa-book"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ my_created_courses_count|default:0 }}</div>
-            <div class="stat-label">Yaratdığım kurslar</div>
+            <div class="stat-label">{% trans "my_created_courses" context "profile.stats" %}</div>
         </div>
     </div>
     {% endif %}
@@ -21,7 +22,7 @@
         <div class="stat-icon stat-icon--purple"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ assigned_tasks_count }}</div>
-            <div class="stat-label">Təyin olunmuş tapşırıqlar</div>
+            <div class="stat-label">{% trans "assigned_tasks" context "profile.stats" %}</div>
         </div>
     </div> 
     {% endif %}
@@ -31,7 +32,7 @@
         <div class="stat-icon stat-icon--green"><i class="fas fa-graduation-cap"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ assigned_courses_count }}</div>
-            <div class="stat-label">Təyin olunmuş kurslar</div>
+            <div class="stat-label">{% trans "assigned_courses" context "profile.stats" %}</div>
         </div>
     </div>
     {% endif %}
@@ -41,7 +42,7 @@
         <div class="stat-icon stat-icon--purple"><i class="fas fa-newspaper"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ posts_count|default:0 }}</div>
-            <div class="stat-label">Postlarım</div>
+            <div class="stat-label">{% trans "posts" context "profile.stats" %}</div>
         </div>
     </div>
     {% endif %}
@@ -51,7 +52,7 @@
         <div class="stat-icon stat-icon--orange"><i class="fas fa-tasks"></i></div>
         <div class="stat-info">
             <div class="stat-value">{{ pending_review_count }}</div>
-            <div class="stat-label">Yoxlanılacaq işlər</div>
+            <div class="stat-label">{% trans "pending_reviews" context "profile.stats" %}</div>
         </div>
     </div>
     {% endif %}

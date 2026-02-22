@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Daxil ol | EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.login" %} | EMSArena{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
@@ -10,8 +10,8 @@
 {% block content %}
 <div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
     <div class="auth-card">
-        <h1 class="auth-heading">Daxil ol</h1> {# auth-title -> auth-heading #}
-        <p class="auth-subheading">Hesabınıza daxil olun və öz postlarınızı idarə edin.</p> {# auth-subtitle -> auth-subheading #}
+        <h1 class="auth-heading">{% trans "heading" context "accounts.login" %}</h1> {# auth-title -> auth-heading #}
+        <p class="auth-subheading">{% trans "subheading" context "accounts.login" %}</p> {# auth-subtitle -> auth-subheading #}
 
         {% if form.non_field_errors %}
             <div class="auth-global-errors"> {# auth-errors -> auth-global-errors #}
@@ -41,15 +41,15 @@
             </div>
 
             <div class="auth-forgot-password "> 
-                <a class="auth-forget-password-link" href="{% url 'accounts:password_reset' %}">Şifrəni unutdun?</a>
+                <a class="auth-forget-password-link" href="{% url 'accounts:password_reset' %}">{% trans "forgot_password" context "accounts.login" %}</a>
             </div>
             
 
-            <button type="submit" class="auth-submit-btn">Daxil ol</button> {# auth-btn -> auth-submit-btn #}
+            <button type="submit" class="auth-submit-btn">{% trans "submit" context "accounts.login" %}</button> {# auth-btn -> auth-submit-btn #}
         </form>
 
         <p class="auth-footer-text">
-            Hesabınız yoxdur? <a href="{% url 'accounts:register' %}">Qeydiyyatdan keçin</a>
+            {% trans "no_account" context "accounts.login" %} <a href="{% url 'accounts:register' %}">{% trans "register_now" context "accounts.login" %}</a>
         </p>
     </div>
 </div>

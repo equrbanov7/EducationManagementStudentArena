@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Qiymətləndirmə Növbəsi - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.grading_queue_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/grading_queue.css' %}">
@@ -13,11 +13,11 @@
     <div class="page-header">
         <h1 class="page-title">
             <i class="fas fa-tasks"></i>
-            Qiymətləndirmə Növbəsi
+            {% trans "heading" context "accounts.grading_queue_page" %}
         </h1>
         <a href="{% url 'accounts:teacher_dashboard' %}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
-            Geri
+            {% trans "back" context "accounts.grading_queue_page" %}
         </a>
     </div>
 
@@ -26,9 +26,9 @@
         <form method="get" id="filterForm">
             <div class="filter-grid">
                 <div class="form-group">
-                    <label class="form-label" for="course">Kurs</label>
+                    <label class="form-label" for="course">{% trans "filter_course_label" context "accounts.grading_queue_page" %}</label>
                     <select class="form-select" id="course" name="course">
-                        <option value="">Bütün kurslar</option>
+                        <option value="">{% trans "filter_course_all" context "accounts.grading_queue_page" %}</option>
                         {% for course in courses %}
                         <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:"s" %}selected{% endif %}>
                             {{ course.title }}
@@ -38,9 +38,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="assignment">Tapşırıq</label>
+                    <label class="form-label" for="assignment">{% trans "filter_assignment_label" context "accounts.grading_queue_page" %}</label>
                     <select class="form-select" id="assignment" name="assignment">
-                        <option value="">Bütün tapşırıqlar</option>
+                        <option value="">{% trans "filter_assignment_all" context "accounts.grading_queue_page" %}</option>
                         {% for assignment in assignments %}
                         <option value="{{ assignment.id }}" {% if request.GET.assignment == assignment.id|stringformat:"s" %}selected{% endif %}>
                             {{ assignment.title }}
@@ -50,17 +50,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="sort">Sıralama</label>
+                    <label class="form-label" for="sort">{% trans "filter_sort_label" context "accounts.grading_queue_page" %}</label>
                     <select class="form-select" id="sort" name="sort">
-                        <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>Ən köhnə</option>
-                        <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>Ən yeni</option>
+                        <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>{% trans "sort_oldest" context "accounts.grading_queue_page" %}</option>
+                        <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>{% trans "sort_newest" context "accounts.grading_queue_page" %}</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <button type="submit" class="filter-btn w-100">
                         <i class="fas fa-filter"></i>
-                        Filtr tətbiq et
+                        {% trans "filter_apply" context "accounts.grading_queue_page" %}
                     </button>
                 </div>
             </div>
@@ -71,15 +71,15 @@
     <div class="stats-bar">
         <div class="stat-item">
             <div class="stat-value">{{ total_pending|default:0 }}</div>
-            <div class="stat-label">Gözləyən</div>
+            <div class="stat-label">{% trans "stat_pending" context "accounts.grading_queue_page" %}</div>
         </div>
         <div class="stat-item">
             <div class="stat-value">{{ graded_today|default:0 }}</div>
-            <div class="stat-label">Bu gün qiymətləndirilən</div>
+            <div class="stat-label">{% trans "stat_graded_today" context "accounts.grading_queue_page" %}</div>
         </div>
         <div class="stat-item">
             <div class="stat-value">{{ avg_grading_time|default:"0" }}</div>
-            <div class="stat-label">Orta vaxt (dəq)</div>
+            <div class="stat-label">{% trans "stat_avg_time" context "accounts.grading_queue_page" %}</div>
         </div>
     </div>
 
@@ -90,11 +90,11 @@
             <table class="submissions-table">
                 <thead>
                     <tr>
-                        <th>Tələbə</th>
-                        <th>Tapşırıq</th>
-                        <th>Təqdim vaxtı</th>
-                        <th>Fayl</th>
-                        <th>Qiymətləndirmə</th>
+                        <th>{% trans "table_student" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_assignment" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_submitted_at" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_file" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_grading" context "accounts.grading_queue_page" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +118,7 @@
                         <td>
                             {% with days_ago=submission.submitted_at|timesince|slice:":2" %}
                             <span class="time-badge {% if '0' in days_ago or '1' in days_ago %}urgent{% elif '2' in days_ago or '3' in days_ago %}warning{% else %}normal{% endif %}">
-                                {{ submission.submitted_at|timesince }} əvvəl
+                                {{ submission.submitted_at|timesince }} {% trans "time_ago_suffix" context "accounts.grading_queue_page" %}
                             </span>
                             {% endwith %}
                         </td>
@@ -126,13 +126,13 @@
                             {% if submission.file %}
                             <a href="{{ submission.file.url }}" class="view-link" target="_blank">
                                 <i class="fas fa-file-download"></i>
-                                Yüklə
+                                {% trans "file_download" context "accounts.grading_queue_page" %}
                             </a>
                             {% endif %}
                             {% if submission.text_submission %}
                             <a href="#" class="view-link" onclick="viewSubmission({{ submission.id }}); return false;">
                                 <i class="fas fa-eye"></i>
-                                Bax
+                                {% trans "file_view" context "accounts.grading_queue_page" %}
                             </a>
                             {% endif %}
                         </td>
@@ -144,7 +144,7 @@
                                         type="number" 
                                         class="grade-input" 
                                         name="score" 
-                                        placeholder="Bal"
+                                        placeholder="{% trans 'score_placeholder' context 'accounts.grading_queue_page' %}"
                                         min="0" 
                                         max="{{ submission.assignment.max_points|default:100 }}"
                                         required
@@ -154,15 +154,15 @@
                                 <textarea 
                                     class="feedback-input" 
                                     name="feedback" 
-                                    placeholder="Rəy (ixtiyari)"
+                                    placeholder="{% trans 'feedback_placeholder' context 'accounts.grading_queue_page' %}"
                                     rows="2"
                                 ></textarea>
                                 <div class="grade-actions">
                                     <button type="submit" class="grade-btn grade-btn-submit">
-                                        <i class="fas fa-check"></i> Təsdiqlə
+                                        <i class="fas fa-check"></i> {% trans "submit_grade" context "accounts.grading_queue_page" %}
                                     </button>
                                     <button type="button" class="grade-btn grade-btn-next" onclick="submitGrade(event, {{ submission.id }}, true)">
-                                        <i class="fas fa-forward"></i> Növbəti
+                                        <i class="fas fa-forward"></i> {% trans "next_grade" context "accounts.grading_queue_page" %}
                                     </button>
                                 </div>
                             </form>
@@ -175,8 +175,8 @@
         {% else %}
         <div class="empty-state">
             <i class="fas fa-check-double"></i>
-            <h3>Əla iş!</h3>
-            <p>Qiymətləndirmə növbəsi boşdur</p>
+            <h3>{% trans "empty_title" context "accounts.grading_queue_page" %}</h3>
+            <p>{% trans "empty_description" context "accounts.grading_queue_page" %}</p>
         </div>
         {% endif %}
     </div>
@@ -184,13 +184,18 @@
     <!-- Loading Spinner -->
     <div class="loading-spinner" id="loadingSpinner">
         <div class="spinner"></div>
-        <p>Yüklənir...</p>
+        <p>{% trans "loading" context "accounts.grading_queue_page" %}</p>
     </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
 <script>
+    const gradeQueueSuccessMessage = "{% trans 'toast_success' context 'accounts.grading_queue_page' %}";
+    const gradeQueueGenericErrorMessage = "{% trans 'toast_error_generic' context 'accounts.grading_queue_page' %}";
+    const gradeQueueErrorPrefix = "{% trans 'toast_error_prefix' context 'accounts.grading_queue_page' %}";
+    const viewSubmissionAlertTemplate = "{% trans 'view_submission_alert_template' context 'accounts.grading_queue_page' %}";
+
     function submitGrade(event, submissionId, goToNext) {
         event.preventDefault();
         
@@ -223,7 +228,7 @@
                 updateStats();
                 
                 // Show success message
-                showMessage('success', 'Qiymətləndirmə uğurla tamamlandı!');
+                showMessage('success', gradeQueueSuccessMessage);
                 
                 if (goToNext) {
                     // Scroll to next submission
@@ -234,12 +239,12 @@
                     }
                 }
             } else {
-                showMessage('error', data.error || 'Xəta baş verdi!');
+                showMessage('error', data.error || gradeQueueGenericErrorMessage);
             }
         })
         .catch(error => {
             document.getElementById('loadingSpinner').classList.remove('active');
-            showMessage('error', 'Xəta baş verdi: ' + error.message);
+            showMessage('error', gradeQueueErrorPrefix + ': ' + error.message);
         });
     }
     
@@ -277,7 +282,7 @@
     function viewSubmission(submissionId) {
         // Open modal to view text submission
         // This would require a modal implementation
-        alert('Təqdim məzmununu görmək üçün modal pəncərə açılacaq. ID: ' + submissionId);
+        alert(viewSubmissionAlertTemplate.replace('{id}', submissionId));
     }
     
     // Auto-submit on course selection change

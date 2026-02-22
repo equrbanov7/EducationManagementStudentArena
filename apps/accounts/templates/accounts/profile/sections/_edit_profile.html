@@ -1,9 +1,10 @@
+{% load i18n %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-user-edit"></i>
-            Profili Redaktə Et
+            {% trans "edit_profile" context "profile.section" %}
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -13,59 +14,59 @@
 
             <div class="info-grid profile-form-grid">
                 <div class="info-item">
-                    <label class="info-label" for="first_name">Ad *</label>
+                    <label class="info-label" for="first_name">{% trans "first_name" context "profile.edit" %} *</label>
                     <input type="text" class="form-control" id="first_name" name="first_name"
                            value="{{ user.first_name }}" required>
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="last_name">Soyad *</label>
+                    <label class="info-label" for="last_name">{% trans "last_name" context "profile.edit" %} *</label>
                     <input type="text" class="form-control" id="last_name" name="last_name"
                            value="{{ user.last_name }}" required>
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="email">Email *</label>
+                    <label class="info-label" for="email">{% trans "email" context "profile.edit" %} *</label>
                     <input type="email" class="form-control" id="email" name="email"
                            value="{{ user.email }}" required>
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="phone">Telefon</label>
+                    <label class="info-label" for="phone">{% trans "phone" context "profile.edit" %}</label>
                     <input type="tel" class="form-control" id="phone" name="phone"
-                           value="{{ profile.phone|default:'' }}" placeholder="+994 XX XXX XX XX">
+                           value="{{ profile.phone|default:'' }}" placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="location">Yer</label>
+                    <label class="info-label" for="location">{% trans "location" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="location" name="location"
-                           value="{{ profile.location|default:'' }}" placeholder="Bakı, Azərbaycan">
+                           value="{{ profile.location|default:'' }}" placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="avatar">Avatar</label>
+                    <label class="info-label" for="avatar">{% trans "avatar" context "profile.edit" %}</label>
                     <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="student_university_name">Müəssisə adı</label>
+                    <label class="info-label" for="student_university_name">{% trans "institution_name" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="student_university_name" name="student_university_name"
-                           value="{{ profile.student_university_name|default:'' }}" placeholder="Universitet / Məktəb / Kurs mərkəzi">
+                           value="{{ profile.student_university_name|default:'' }}" placeholder="{% trans 'placeholder_institution' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
-                    <label class="info-label" for="student_school_identifier">Məktəb nömrəsi / kodu</label>
+                    <label class="info-label" for="student_school_identifier">{% trans "school_code" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="student_school_identifier" name="student_school_identifier"
-                           value="{{ profile.student_school_identifier|default:'' }}" placeholder="Məktəb kodu/nömrəsi">
+                           value="{{ profile.student_school_identifier|default:'' }}" placeholder="{% trans 'placeholder_school_code' context 'profile.edit' %}">
                 </div>
             </div>
 
             <div class="info-item profile-form-grid">
-                <label class="info-label" for="bio">Haqqında</label>
+                <label class="info-label" for="bio">{% trans "about" context "profile.edit" %}</label>
                 <textarea class="form-control" id="bio" name="bio" rows="4"
-                          placeholder="Özünüz haqqında qısa məlumat...">{{ profile.bio|default:'' }}</textarea>
+                          placeholder="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
             </div>
 
             <div class="profile-form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Yadda Saxla
+                    <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
                 </button>
                 <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
-                   data-section="profile-info" data-title="Profil Məlumatları">
-                    <i class="fas fa-times"></i> Ləğv et
+                   data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
+                    <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
                 </a>
             </div>
         </form>

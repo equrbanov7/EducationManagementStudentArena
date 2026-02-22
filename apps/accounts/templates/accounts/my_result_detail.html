@@ -1,44 +1,45 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Result Detail - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
 {% block content %}
+{% trans "file_name_fallback" context "accounts.my_result_detail_page" as file_name_fallback %}
 <div class="profile-page">
     <div class="profile-main" style="max-width: 900px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">{{ item_title }}</h1>
             <a href="{{ back_url }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> My Results
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_results" context "accounts.my_result_detail_page" %}
             </a>
         </div>
 
         <div class="section-card">
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Type</div>
-                    <div class="info-value">{{ item_type|title }}</div>
+                    <div class="info-label">{% trans "label_type" context "accounts.my_result_detail_page" %}</div>
+                    <div class="info-value">{{ item_type_label|default:item_type|title }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Course/Context</div>
+                    <div class="info-label">{% trans "label_context" context "accounts.my_result_detail_page" %}</div>
                     <div class="info-value">{{ item_subtitle }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Status</div>
+                    <div class="info-label">{% trans "label_status" context "accounts.my_result_detail_page" %}</div>
                     <div class="info-value">
                         <span class="result-status result-status--{{ status }}">{{ status_raw }}</span>
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Submitted At</div>
+                    <div class="info-label">{% trans "label_submitted_at" context "accounts.my_result_detail_page" %}</div>
                     <div class="info-value">{{ submitted_at|date:"d M Y H:i" }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Score/Grade</div>
+                    <div class="info-label">{% trans "label_score" context "accounts.my_result_detail_page" %}</div>
                     <div class="info-value">{% if score != None %}{{ score }}{% else %}-{% endif %}</div>
                 </div>
             </div>
@@ -46,12 +47,12 @@
 
         <div class="section-card">
             <div class="section-title">
-                <i class="fas fa-align-left"></i> Answer / Submission
+                <i class="fas fa-align-left"></i> {% trans "answer_submission_title" context "accounts.my_result_detail_page" %}
             </div>
             {% if content_text %}
             <pre class="result-content">{{ content_text }}</pre>
             {% else %}
-            <div class="info-value">Mətn cavabı yoxdur.</div>
+            <div class="info-value">{% trans "no_text_answer" context "accounts.my_result_detail_page" %}</div>
             {% endif %}
 
             {% if files %}
@@ -59,7 +60,7 @@
                 {% for file in files %}
                 <div class="result-file-item">
                     <a href="{{ file.path }}" target="_blank" rel="noopener">
-                        {{ file.name|default:"File" }}
+                        {{ file.name|default:file_name_fallback }}
                     </a>
                 </div>
                 {% endfor %}
@@ -70,7 +71,7 @@
             <div class="result-files">
                 <div class="result-file-item">
                     <a href="{{ submission_file.url }}" target="_blank" rel="noopener">
-                        Fayla bax
+                        {% trans "view_file" context "accounts.my_result_detail_page" %}
                     </a>
                 </div>
             </div>
@@ -80,7 +81,7 @@
             <div class="result-files">
                 <div class="result-file-item">
                     <a href="{{ submission_link }}" target="_blank" rel="noopener">
-                        Linkə bax
+                        {% trans "view_link" context "accounts.my_result_detail_page" %}
                     </a>
                 </div>
             </div>
@@ -89,13 +90,13 @@
 
         <div class="section-card">
             <div class="section-title">
-                <i class="fas fa-comment-dots"></i> Teacher Feedback
+                <i class="fas fa-comment-dots"></i> {% trans "teacher_feedback_title" context "accounts.my_result_detail_page" %}
             </div>
             <div class="info-value">
                 {% if feedback %}
                     {{ feedback }}
                 {% else %}
-                    Rəy hələ əlavə edilməyib.
+                    {% trans "feedback_missing" context "accounts.my_result_detail_page" %}
                 {% endif %}
             </div>
         </div>

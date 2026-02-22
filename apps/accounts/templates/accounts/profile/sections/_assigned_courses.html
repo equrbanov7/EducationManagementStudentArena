@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-courses {% if active_section == 'assigned-courses' %}is-active{% endif %}" data-profile-section-panel="assigned-courses" data-source-url="{% url 'accounts:assigned_courses' %}">
     <div class="section-card">
@@ -6,12 +7,13 @@
             <div class="section-title mb-0">
                 <div class="title-left">
                     <i class="fas fa-user-graduate text-emerald"></i>
-                    <span>Təyin olunmuş kurslar</span>
+                    <span>{% trans "title" context "profile.assigned_courses" %}</span>
                 </div>
             </div>
         </div>
 
         {% if assigned_courses %}
+        {% trans "uncategorized" context "profile.assigned_courses" as assigned_uncategorized %}
         <div class="assigned-course-cards-grid">
             {% for course in assigned_courses %}
             <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=assigned-courses" class="modern-assigned-course-card">
@@ -23,12 +25,12 @@
                 <div class="assigned-course-content">
                     <h4 class="assigned-course-title">{{ course.title }}</h4>
                     <div class="assigned-course-meta">
-                        <span class="meta-item"><i class="fas fa-layer-group"></i> {{ course.category|default:"Kateqoriya yoxdur" }}</span>
+                        <span class="meta-item"><i class="fas fa-layer-group"></i> {{ course.category|default:assigned_uncategorized }}</span>
                     </div>
                 </div>
 
                 <div class="assigned-course-action">
-                    <span class="btn-action-text">Daxil ol</span>
+                    <span class="btn-action-text">{% trans "enter_course" context "profile.assigned_courses" %}</span>
                     <i class="fas fa-chevron-right"></i>
                 </div>
                 
@@ -41,8 +43,8 @@
             <div class="empty-icon-wrapper icon-emerald-light">
                 <i class="fas fa-laptop-house"></i>
             </div>
-            <h3>Sizə kurs təyin edilməyib</h3>
-            <p>Sistem tərəfindən və ya müəlliminiz tərəfindən sizə hələ heç bir xüsusi kurs təyin olunmayıb.</p>
+            <h3>{% trans "empty_title" context "profile.assigned_courses" %}</h3>
+            <p>{% trans "empty_description" context "profile.assigned_courses" %}</p>
         </div>
         {% endif %}
         

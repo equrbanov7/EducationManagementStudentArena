@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Texnologiya Xəbərləri və Yeniliklər{% endblock %}
+{% block title %}{% trans "title" context "blog.technology_page" %}{% endblock %}
 
 {% block extraCss %}  
     <link rel="stylesheet" href="{% static 'css/technology.css' %}">
@@ -13,9 +13,9 @@
 <div class="blog-container">
 
     <header class="page-header">
-        <h1 class="main-title">Texnologiya Dünyası</h1>
+        <h1 class="main-title">{% trans "heading" context "blog.technology_page" %}</h1>
         <p class="sub-title">
-            Süni intellekt, proqramlaşdırma, yeni qadjetlər və rəqəmsal dünya haqqında ən son analizlər.
+            {% trans "subtitle" context "blog.technology_page" %}
         </p>
     </header>
 
@@ -61,15 +61,15 @@
                                 <span class="author-name">{{ post.author.username|title }}</span> 
                             </a>
                         </div>
-                        <a href="{% url 'post_detail' post.slug %}" class="read-more-btn">Oxu &rarr;</a>
+                        <a href="{% url 'post_detail' post.slug %}" class="read-more-btn">{% trans "read_more" context "blog.technology_page" %} &rarr;</a>
                     </div>
                 </div>
             </article>
 
         {% empty %}
             <div class="empty-state">
-                <h3>Hələ ki, bu kateqoriyada məqalə yoxdur.</h3>
-                <p>Tezliklə yeni məqalələr əlavə olunacaq. Bizi izləməyə davam edin!</p>
+                <h3>{% trans "empty_title" context "blog.technology_page" %}</h3>
+                <p>{% trans "empty_description" context "blog.technology_page" %}</p>
             </div>
         {% endfor %}
     </section>

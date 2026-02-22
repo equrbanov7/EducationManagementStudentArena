@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Profil - {{ user.username }} - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -13,7 +13,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile-page" data-profile-base-url="{{ profile_base_url }}" data-default-section="profile-info">
+<div class="profile-page"
+     data-profile-base-url="{{ profile_base_url }}"
+     data-default-section="profile-info"
+     data-default-section-title="{% trans 'title' context 'profile.sidebar' %}">
     {% include "accounts/profile/_sidebar.html" %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
 

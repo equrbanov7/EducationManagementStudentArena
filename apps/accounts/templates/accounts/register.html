@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Qeydiyyat | EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.register" %} | EMSArena{% endblock %}
  
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
@@ -10,22 +10,22 @@
 {% block content %}
 <div class="register-page-wrapper">
     <div class="register-card">
-        <h1 class="register-heading">Hesab Yarat</h1>
-        <p class="register-subheading">Multi-tenant hesab yaradın və rolunuzu seçərək platformaya qoşulun.</p>
+        <h1 class="register-heading">{% trans "heading" context "accounts.register" %}</h1>
+        <p class="register-subheading">{% trans "subheading" context "accounts.register" %}</p>
 
         <!-- Wizard Steps Indicator -->
         <div class="register-wizard-steps">
             <div class="wizard-step active" data-step="1">
                 <span class="wizard-step-number">1</span>
-                <span class="wizard-step-label">Ölkə</span>
+                <span class="wizard-step-label">{% trans "step_country" context "accounts.register" %}</span>
             </div>
             <div class="wizard-step" data-step="2">
                 <span class="wizard-step-number">2</span>
-                <span class="wizard-step-label">Hesab tipi</span>
+                <span class="wizard-step-label">{% trans "step_account_type" context "accounts.register" %}</span>
             </div>
             <div class="wizard-step" data-step="3">
                 <span class="wizard-step-number">3</span>
-                <span class="wizard-step-label">Məlumatlar</span>
+                <span class="wizard-step-label">{% trans "step_details" context "accounts.register" %}</span>
             </div>
         </div>
 
@@ -42,7 +42,7 @@
 
             <!-- Step 1: Country Selection -->
             <div class="wizard-panel" id="step1">
-                <h3 class="register-step-title">Ölkənizi seçin</h3>
+                <h3 class="register-step-title">{% trans "choose_country" context "accounts.register" %}</h3>
                 <div class="register-form-field">
                     {{ form.country.label_tag }}
                     {{ form.country }}
@@ -52,14 +52,14 @@
                 </div>
                 <div class="wizard-nav">
                     <button type="button" class="register-submit-btn" onclick="wizardNext(2)">
-                        Davam et <i class="fas fa-arrow-right"></i>
+                        {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Step 2: Account Type + Organization -->
             <div class="wizard-panel" id="step2" hidden>
-                <h3 class="register-step-title">Qeydiyyat tipini seçin</h3>
+                <h3 class="register-step-title">{% trans "choose_registration_type" context "accounts.register" %}</h3>
                 <div class="register-form-field">
                     {{ form.organization_type.label_tag }}
                     {{ form.organization_type }}
@@ -76,15 +76,15 @@
                             <div class="register-field-error">{{ form.join_organization.errors.0 }}</div>
                         {% endif %}
                         <small class="register-help-text">
-                            Individual seçimi zamanı qurum seçimi məcburidir. Rol avtomatik tələbə olacaq.
+                            {% trans "individual_org_required_help" context "accounts.register" %}
                         </small>
                     </div>
                 </div>
 
                 <div id="orgFields" hidden>
                     <div class="register-form-field">
-                        <label for="institutionSearchInput" id="institutionSearchLabel">Müəssisə axtar</label>
-                        <input type="text" id="institutionSearchInput" class="form-control" placeholder="Müəssisə axtar...">
+                        <label for="institutionSearchInput" id="institutionSearchLabel">{% trans "institution_search_label" context "accounts.register" %}</label>
+                        <input type="text" id="institutionSearchInput" class="form-control" placeholder="{% trans 'institution_search_placeholder' context 'accounts.register' %}">
                         <small class="register-help-text" id="institutionTypeHint"></small>
                     </div>
 
@@ -103,7 +103,7 @@
                             <div class="register-field-error">{{ form.institution_not_listed_name.errors.0 }}</div>
                         {% endif %}
                         <small class="register-help-text">
-                            Siyahıda yoxdursa “Not listed / Other” seçərək müəssisə adını əl ilə daxil edin.
+                            {% trans "institution_not_listed_help" context "accounts.register" %}
                         </small>
                     </div>
 
@@ -114,7 +114,7 @@
                             <div class="register-field-error">{{ form.organization_identifier.errors.0 }}</div>
                         {% endif %}
                         <small class="register-help-text" id="orgIdentifierHelp">
-                            University üçün bu sahə məcburidir.
+                            {% trans "org_identifier_help_university" context "accounts.register" %}
                         </small>
                     </div>
 
@@ -129,17 +129,17 @@
 
                 <div class="wizard-nav">
                     <button type="button" class="register-back-btn" onclick="wizardBack(1)">
-                        <i class="fas fa-arrow-left"></i> Geri
+                        <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
                     <button type="button" class="register-submit-btn" onclick="wizardNext(3)">
-                        Davam et <i class="fas fa-arrow-right"></i>
+                        {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Step 3: User Details -->
             <div class="wizard-panel" id="step3" hidden>
-                <h3 class="register-step-title">Şəxsi məlumatlar</h3>
+                <h3 class="register-step-title">{% trans "personal_info" context "accounts.register" %}</h3>
 
                 <div class="register-form-field">
                     {{ form.username.label_tag }}
@@ -183,7 +183,7 @@
 
                 <div class="register-form-field" id="autoStudentRoleInfo" hidden>
                     <small class="register-help-text">
-                        Seçilmiş individual qurum üçün status avtomatik tələbə kimi təyin ediləcək.
+                        {% trans "auto_student_role_info" context "accounts.register" %}
                     </small>
                 </div>
 
@@ -205,15 +205,15 @@
 
                 <div class="wizard-nav">
                     <button type="button" class="register-back-btn" onclick="wizardBack(2)">
-                        <i class="fas fa-arrow-left"></i> Geri
+                        <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
-                    <button type="submit" class="register-submit-btn">Qeydiyyatdan keç</button>
+                    <button type="submit" class="register-submit-btn">{% trans "submit" context "accounts.register" %}</button>
                 </div>
             </div>
         </form>
 
         <p class="register-footer-text">
-            Artıq hesabınız var? <a href="{% url 'accounts:login' %}">Daxil olun</a>
+            {% trans "already_have_account" context "accounts.register" %} <a href="{% url 'accounts:login' %}">{% trans "login_now" context "accounts.register" %}</a>
         </p>
     </div>
 </div>
@@ -224,5 +224,40 @@
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script>
     window.SIGNUP_LOOKUP_DATA = JSON.parse(document.getElementById('signup-lookup-data').textContent);
+    window.REGISTER_I18N = {
+        select_empty_university: "{% trans 'select_empty_university' context 'accounts.register.js' %}",
+        select_empty_school: "{% trans 'select_empty_school' context 'accounts.register.js' %}",
+        select_empty_course_center: "{% trans 'select_empty_course_center' context 'accounts.register.js' %}",
+        select_empty_default: "{% trans 'select_empty_default' context 'accounts.register.js' %}",
+        label_search_university: "{% trans 'label_search_university' context 'accounts.register.js' %}",
+        placeholder_search_university: "{% trans 'placeholder_search_university' context 'accounts.register.js' %}",
+        label_university: "{% trans 'label_university' context 'accounts.register.js' %}",
+        label_university_manual: "{% trans 'label_university_manual' context 'accounts.register.js' %}",
+        placeholder_university_manual: "{% trans 'placeholder_university_manual' context 'accounts.register.js' %}",
+        label_university_identifier: "{% trans 'label_university_identifier' context 'accounts.register.js' %}",
+        hint_university_az: "{% trans 'hint_university_az' context 'accounts.register.js' %}",
+        hint_university_global: "{% trans 'hint_university_global' context 'accounts.register.js' %}",
+        label_search_school: "{% trans 'label_search_school' context 'accounts.register.js' %}",
+        placeholder_search_school: "{% trans 'placeholder_search_school' context 'accounts.register.js' %}",
+        label_school_optional: "{% trans 'label_school_optional' context 'accounts.register.js' %}",
+        label_school_manual: "{% trans 'label_school_manual' context 'accounts.register.js' %}",
+        placeholder_school_manual: "{% trans 'placeholder_school_manual' context 'accounts.register.js' %}",
+        label_school_identifier: "{% trans 'label_school_identifier' context 'accounts.register.js' %}",
+        hint_school: "{% trans 'hint_school' context 'accounts.register.js' %}",
+        label_search_course_center: "{% trans 'label_search_course_center' context 'accounts.register.js' %}",
+        placeholder_search_course_center: "{% trans 'placeholder_search_course_center' context 'accounts.register.js' %}",
+        label_course_center_optional: "{% trans 'label_course_center_optional' context 'accounts.register.js' %}",
+        label_course_center_manual: "{% trans 'label_course_center_manual' context 'accounts.register.js' %}",
+        placeholder_course_center_manual: "{% trans 'placeholder_course_center_manual' context 'accounts.register.js' %}",
+        label_course_center_identifier: "{% trans 'label_course_center_identifier' context 'accounts.register.js' %}",
+        hint_course_center: "{% trans 'hint_course_center' context 'accounts.register.js' %}",
+        label_search_default: "{% trans 'label_search_default' context 'accounts.register.js' %}",
+        placeholder_search_default: "{% trans 'placeholder_search_default' context 'accounts.register.js' %}",
+        label_institution_default: "{% trans 'label_institution_default' context 'accounts.register.js' %}",
+        label_institution_manual_default: "{% trans 'label_institution_manual_default' context 'accounts.register.js' %}",
+        label_identifier_default: "{% trans 'label_identifier_default' context 'accounts.register.js' %}",
+        help_identifier_required: "{% trans 'help_identifier_required' context 'accounts.register.js' %}",
+        help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}"
+    };
 </script>
 {% endblock %}

@@ -1,24 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Email təsdiqi{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "title" context "accounts.verify_code" %}{% endblock %}
 
 {% block content %}
 <div class="register-page-wrapper">
   <div class="register-card">
-    <h1 class="register-heading">Email təsdiqi</h1>
-    <p class="register-subheading">{{ email }} ünvanına kod göndərildi.</p>
+    <h1 class="register-heading">{% trans "heading" context "accounts.verify_code" %}</h1>
+    <p class="register-subheading">{{ email }} {% trans "code_sent_suffix" context "accounts.verify_code" %}</p>
 
     <form method="post" class="register-form">
       {% csrf_token %}
       <div class="register-form-field">
-        <label>Təsdiq kodu</label>
-        <input name="code" class="form-control" placeholder="6 rəqəmli kod..." />
+        <label>{% trans "code_label" context "accounts.verify_code" %}</label>
+        <input name="code" class="form-control" placeholder="{% trans 'code_placeholder' context 'accounts.verify_code' %}" />
       </div>
-      <button class="register-submit-btn" type="submit">Təsdiqlə</button>
+      <button class="register-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
     </form>
 
     <form method="post" action="{% url 'resend_code' %}" style="margin-top:12px;">
       {% csrf_token %}
-      <button class="register-submit-btn" type="submit">Kodu yenidən göndər</button>
+      <button class="register-submit-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
     </form>
   </div>
 </div>

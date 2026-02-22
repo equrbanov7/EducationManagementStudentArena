@@ -5,6 +5,7 @@ Forms for accounts app (authentication and user management).
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils.translation import pgettext_lazy
 
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
@@ -18,99 +19,123 @@ class RegisterForm(forms.ModelForm):
     """User registration form with multi-step wizard support."""
 
     password = forms.CharField(
-        label="Şifrə",
+        label=pgettext_lazy("accounts.form.register.label", "password"),
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "Şifrənizi daxil edin...",
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "password"),
                 "class": "form-control",
             }
         ),
     )
     password2 = forms.CharField(
-        label="Şifrə təkrar",
+        label=pgettext_lazy("accounts.form.register.label", "password_confirm"),
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "Şifrəni təkrar daxil edin...",
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "password_confirm"),
                 "class": "form-control",
             }
         ),
     )
 
     country = forms.ChoiceField(
-        label="Ölkə",
+        label=pgettext_lazy("accounts.form.register.label", "country"),
         required=True,
         choices=[],
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     organization_type = forms.ChoiceField(
-        label="Qeydiyyat tipi",
+        label=pgettext_lazy("accounts.form.register.label", "registration_type"),
         choices=[
-            (OrganizationType.INDIVIDUAL, "Individual"),
-            (OrganizationType.SCHOOL, "School"),
-            (OrganizationType.UNIVERSITY, "University"),
-            (OrganizationType.COURSE_CENTER, "Course Center"),
+            (
+                OrganizationType.INDIVIDUAL,
+                pgettext_lazy("accounts.form.register.choice", "org_type_individual"),
+            ),
+            (
+                OrganizationType.SCHOOL,
+                pgettext_lazy("accounts.form.register.choice", "org_type_school"),
+            ),
+            (
+                OrganizationType.UNIVERSITY,
+                pgettext_lazy("accounts.form.register.choice", "org_type_university"),
+            ),
+            (
+                OrganizationType.COURSE_CENTER,
+                pgettext_lazy("accounts.form.register.choice", "org_type_course_center"),
+            ),
         ],
         widget=forms.Select(attrs={"class": "form-control"}),
         initial=OrganizationType.INDIVIDUAL,
     )
 
     institution = forms.ModelChoiceField(
-        label="Müəssisə",
+        label=pgettext_lazy("accounts.form.register.label", "institution"),
         queryset=Institution.objects.none(),
         required=False,
-        empty_label="Müəssisə seçin",
+        empty_label=pgettext_lazy("accounts.form.register.choice", "institution_empty"),
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     join_organization = forms.ModelChoiceField(
-        label="Qoşulmaq istədiyiniz qurum",
+        label=pgettext_lazy("accounts.form.register.label", "join_organization"),
         queryset=Organization.objects.none(),
         required=False,
-        empty_label="Qurum seçin",
+        empty_label=pgettext_lazy("accounts.form.register.choice", "organization_empty"),
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     institution_not_listed_name = forms.CharField(
-        label="Müəssisə adı (Not listed)",
+        label=pgettext_lazy("accounts.form.register.label", "institution_not_listed"),
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": "Müəssisə siyahıda yoxdursa adını daxil edin...",
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "institution_not_listed"),
                 "class": "form-control",
             }
         ),
     )
 
     organization_identifier = forms.CharField(
-        label="Rəsmi identifikator / kod",
+        label=pgettext_lazy("accounts.form.register.label", "official_identifier"),
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": "Məs: School No. 132 və ya UNI-2026",
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "official_identifier"),
                 "class": "form-control",
             }
         ),
     )
 
     organization_license_identifier = forms.CharField(
-        label="Lisenziya / VÖEN (opsional)",
+        label=pgettext_lazy("accounts.form.register.label", "license_identifier_optional"),
         required=False,
         widget=forms.TextInput(
             attrs={
-                "placeholder": "Opsional lisenziya və ya vergi kodu",
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "license_identifier_optional"),
                 "class": "form-control",
             }
         ),
     )
 
     initial_role = forms.ChoiceField(
-        label="İlkin rol",
+        label=pgettext_lazy("accounts.form.register.label", "initial_role"),
         choices=[
-            (ProfileRole.MEMBER, "Member / Pending"),
-            (ProfileRole.TEACHER, "Teacher"),
-            (ProfileRole.HR, "HR"),
-            (ProfileRole.ORG_ADMIN, "Organization Admin"),
+            (
+                ProfileRole.MEMBER,
+                pgettext_lazy("accounts.form.register.choice", "role_member_pending"),
+            ),
+            (
+                ProfileRole.TEACHER,
+                pgettext_lazy("accounts.form.register.choice", "role_teacher"),
+            ),
+            (
+                ProfileRole.HR,
+                pgettext_lazy("accounts.form.register.choice", "role_hr"),
+            ),
+            (
+                ProfileRole.ORG_ADMIN,
+                pgettext_lazy("accounts.form.register.choice", "role_org_admin"),
+            ),
         ],
         widget=forms.Select(attrs={"class": "form-control"}),
         initial=ProfileRole.MEMBER,
@@ -122,25 +147,25 @@ class RegisterForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(
                 attrs={
-                    "placeholder": "İstifadəçi adınız...",
+                    "placeholder": pgettext_lazy("accounts.form.register.placeholder", "username"),
                     "class": "form-control",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
-                    "placeholder": "Email ünvanınız...",
+                    "placeholder": pgettext_lazy("accounts.form.register.placeholder", "email"),
                     "class": "form-control",
                 }
             ),
             "first_name": forms.TextInput(
                 attrs={
-                    "placeholder": "Adınız...",
+                    "placeholder": pgettext_lazy("accounts.form.register.placeholder", "first_name"),
                     "class": "form-control",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
-                    "placeholder": "Soyadınız...",
+                    "placeholder": pgettext_lazy("accounts.form.register.placeholder", "last_name"),
                     "class": "form-control",
                 }
             ),
@@ -161,31 +186,43 @@ class RegisterForm(forms.ModelForm):
         initial_role = cleaned_data.get("initial_role")
 
         if p1 and p2 and p1 != p2:
-            self.add_error("password2", "Şifrələr uyğun gəlmir.")
+            self.add_error("password2", pgettext_lazy("accounts.form.register.error", "password_mismatch"))
 
         if not country_code:
-            self.add_error("country", "Ölkə seçimi tələb olunur.")
+            self.add_error("country", pgettext_lazy("accounts.form.register.error", "country_required"))
         elif not Country.objects.filter(code=country_code, is_active=True).exists():
-            self.add_error("country", "Seçilən ölkə etibarlı deyil.")
+            self.add_error("country", pgettext_lazy("accounts.form.register.error", "country_invalid"))
 
         if initial_role == ProfileRole.STUDENT and organization_type != OrganizationType.INDIVIDUAL:
-            self.add_error("initial_role", "Signup zamanı Student rolu seçilə bilməz.")
+            self.add_error(
+                "initial_role",
+                pgettext_lazy("accounts.form.register.error", "signup_student_role_not_allowed"),
+            )
 
         if organization_type in {OrganizationType.SCHOOL, OrganizationType.UNIVERSITY, OrganizationType.COURSE_CENTER}:
             if not institution and not institution_not_listed_name:
-                self.add_error("institution", "Müəssisə seçin və ya Not listed sahəsini doldurun.")
-                self.add_error("institution_not_listed_name", "Müəssisə adı tələb olunur.")
+                self.add_error("institution", pgettext_lazy("accounts.form.register.error", "institution_required"))
+                self.add_error(
+                    "institution_not_listed_name",
+                    pgettext_lazy("accounts.form.register.error", "institution_name_required"),
+                )
             if institution:
                 if institution.country.code != country_code:
-                    self.add_error("institution", "Müəssisə seçilən ölkəyə aid deyil.")
+                    self.add_error(
+                        "institution",
+                        pgettext_lazy("accounts.form.register.error", "institution_country_mismatch"),
+                    )
                 if institution.institution_type != organization_type:
-                    self.add_error("institution", "Müəssisə tipi qeydiyyat tipi ilə uyğun deyil.")
+                    self.add_error(
+                        "institution",
+                        pgettext_lazy("accounts.form.register.error", "institution_type_mismatch"),
+                    )
             if organization_type == OrganizationType.UNIVERSITY and not (
                 organization_identifier or (institution and institution.code)
             ):
                 self.add_error(
                     "organization_identifier",
-                    "University üçün rəsmi identifikator və ya kod tələb olunur.",
+                    pgettext_lazy("accounts.form.register.error", "university_identifier_required"),
                 )
             cleaned_data["join_organization"] = None
         else:
@@ -194,7 +231,10 @@ class RegisterForm(forms.ModelForm):
             cleaned_data["organization_identifier"] = ""
             cleaned_data["organization_license_identifier"] = ""
             if not join_organization:
-                self.add_error("join_organization", "Individual qeydiyyat üçün qurum seçimi tələb olunur.")
+                self.add_error(
+                    "join_organization",
+                    pgettext_lazy("accounts.form.register.error", "individual_organization_required"),
+                )
             else:
                 # Individual + selected organization should always onboard as student.
                 cleaned_data["initial_role"] = ProfileRole.STUDENT
@@ -213,20 +253,22 @@ class RegisterForm(forms.ModelForm):
     def clean_username(self):
         username = (self.cleaned_data.get("username") or "").strip()
         if username and User.objects.filter(username__iexact=username).exists():
-            raise forms.ValidationError("Bu istifadəçi adı artıq istifadə olunur.")
+            raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "username_taken"))
         return username
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
         if email and User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("Bu email artıq istifadə olunur.")
+            raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "email_taken"))
         return email
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         countries = Country.objects.filter(is_active=True).order_by("name")
-        self.fields["country"].choices = [("", "Ölkə seçin")] + [(country.code, country.name) for country in countries]
+        self.fields["country"].choices = [
+            ("", pgettext_lazy("accounts.form.register.choice", "country_select"))
+        ] + [(country.code, country.name) for country in countries]
 
         selected_country = (self.data.get("country") or self.initial.get("country") or "").upper()
         selected_org_type = self.data.get("organization_type") or self.initial.get("organization_type")
@@ -251,20 +293,20 @@ class CustomLoginForm(AuthenticationForm):
     """Custom login form with styled fields."""
 
     username = forms.CharField(
-        label="İstifadəçi adı və ya email",
+        label=pgettext_lazy("accounts.form.login.label", "username_or_email"),
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "İstifadəçi adı və ya email",
+                "placeholder": pgettext_lazy("accounts.form.login.placeholder", "username_or_email"),
             }
         ),
     )
     password = forms.CharField(
-        label="Şifrə",
+        label=pgettext_lazy("accounts.form.login.label", "password"),
         widget=forms.PasswordInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Şifrəniz",
+                "placeholder": pgettext_lazy("accounts.form.login.placeholder", "password"),
             }
         ),
     )
@@ -274,7 +316,10 @@ class CustomLoginForm(AuthenticationForm):
         Extend default active-user check with organization suspension guard.
         """
         if not user.is_active:
-            raise forms.ValidationError("Hesab aktiv deyil. Dəstək xidməti ilə əlaqə saxlayın.", code="inactive")
+            raise forms.ValidationError(
+                pgettext_lazy("accounts.form.login.error", "account_inactive"),
+                code="inactive",
+            )
 
         if user.is_superuser or getattr(user, "is_superadmin", False):
             return
@@ -283,6 +328,6 @@ class CustomLoginForm(AuthenticationForm):
         organization = getattr(profile, "organization", None) if profile else None
         if organization and (organization.status == "suspended" or not organization.is_active):
             raise forms.ValidationError(
-                "Təşkilatınız dayandırılıb. Giriş bloklanıb, administrator ilə əlaqə saxlayın.",
+                pgettext_lazy("accounts.form.login.error", "organization_suspended"),
                 code="org_suspended",
             )

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import pgettext_lazy
 
 from .models import Assignment, Notification, Submission
 
@@ -19,12 +20,12 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (
-            "Əsas Məlumat",
+            pgettext_lazy("assignment.admin.fieldset", "basic_information"),
             {"fields": ("course", "type", "title", "description", "instructions")},
         ),
-        ("Qiymətləndirmə", {"fields": ("max_score", "weight")}),
+        (pgettext_lazy("assignment.admin.fieldset", "grading"), {"fields": ("max_score", "weight")}),
         (
-            "Vaxt",
+            pgettext_lazy("assignment.admin.fieldset", "timing"),
             {
                 "fields": (
                     "start_date",
@@ -34,8 +35,8 @@ class AssignmentAdmin(admin.ModelAdmin):
                 )
             },
         ),
-        ("Parametrlər", {"fields": ("max_attempts", "status", "created_by")}),
-        ("Tələbələr", {"fields": ("assigned_students",), "classes": ("collapse",)}),
+        (pgettext_lazy("assignment.admin.fieldset", "settings"), {"fields": ("max_attempts", "status", "created_by")}),
+        (pgettext_lazy("assignment.admin.fieldset", "students"), {"fields": ("assigned_students",), "classes": ("collapse",)}),
     )
 
     filter_horizontal = ["assigned_students"]
@@ -69,7 +70,7 @@ class SubmissionAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (
-            "Cavab Məlumatı",
+            pgettext_lazy("assignment.submission.admin.fieldset", "submission_information"),
             {
                 "fields": (
                     "assignment",
@@ -82,11 +83,11 @@ class SubmissionAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Gecikmiş Məlumat",
+            pgettext_lazy("assignment.submission.admin.fieldset", "late_information"),
             {"fields": ("is_late", "late_days")},
         ),
         (
-            "Qiymətləndirmə",
+            pgettext_lazy("assignment.submission.admin.fieldset", "grading"),
             {"fields": ("status", "grade", "feedback", "graded_by", "graded_at")},
         ),
     )
@@ -106,11 +107,11 @@ class NotificationAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (
-            "Bildiriş Məlumatı",
+            pgettext_lazy("assignment.notification.admin.fieldset", "notification_information"),
             {"fields": ("user", "type", "title", "message", "link")},
         ),
         (
-            "Status",
+            pgettext_lazy("assignment.notification.admin.fieldset", "status"),
             {"fields": ("is_read", "created_at")},
         ),
     )

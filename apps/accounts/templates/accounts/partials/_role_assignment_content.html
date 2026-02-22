@@ -1,3 +1,5 @@
+{% load i18n %}
+{% trans "organization_not_found_choose_in_profile" context "profile.role_assignment" as role_assignment_org_not_found %}
 {% if organization %}
 <div class="section-card">
     <div class="section-title">
@@ -10,7 +12,7 @@
         <input type="hidden" name="section" value="role-assignment">
         {% endif %}
         <input type="hidden" name="unassigned_search" value="{{ unassigned_search_query }}">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="İstifadəçi axtar..." class="form-control">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_user_placeholder' context 'profile.role_assignment' %}" class="form-control">
         <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
     </form>
 </div>
@@ -25,11 +27,11 @@
     <table class="table">
         <thead>
             <tr>
-                <th>İstifadəçi</th>
-                <th>Email</th>
-                <th>Hazırki rol</th>
-                <th>Səviyyə</th>
-                <th>Yeni rol</th>
+                <th>{% trans "table_user" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_email" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_current_role" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_level" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_new_role" context "profile.role_assignment" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -51,13 +53,13 @@
                             </option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn btn-primary btn-sm" {% if not can_assign_roles %}disabled{% endif %}>Yenilə</button>
+                        <button type="submit" class="btn btn-primary btn-sm" {% if not can_assign_roles %}disabled{% endif %}>{% trans "update" context "profile.role_assignment" %}</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="text-center">Üzv tapılmadı.</td>
+                <td colspan="5" class="text-center">{% trans "members_not_found" context "profile.role_assignment" %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -67,10 +69,10 @@
 
 <div class="section-card mt-4">
     <div class="section-title">
-        <i class="fas fa-user-plus"></i> Pending istifadəçilər (yalnız bu təşkilatı seçənlər)
+        <i class="fas fa-user-plus"></i> {% trans "pending_users_title" context "profile.role_assignment" %}
     </div>
     <p class="text-muted mb-3">
-        Burada yalnız bu təşkilata müraciət etmiş, hələ heç bir təşkilata bağlı olmayan istifadəçilər görünür.
+        {% trans "pending_users_description" context "profile.role_assignment" %}
     </p>
     <form method="get"
           class="search-form mb-3"
@@ -79,17 +81,17 @@
         <input type="hidden" name="section" value="role-assignment">
         {% endif %}
         <input type="hidden" name="search" value="{{ search_query }}">
-        <input type="text" name="unassigned_search" value="{{ unassigned_search_query }}" placeholder="Unassigned user axtar..." class="form-control">
+        <input type="text" name="unassigned_search" value="{{ unassigned_search_query }}" placeholder="{% trans 'search_unassigned_user_placeholder' context 'profile.role_assignment' %}" class="form-control">
         <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
     </form>
 
     <table class="table">
         <thead>
             <tr>
-                <th>İstifadəçi</th>
-                <th>Email</th>
-                <th>Müraciət etdiyi təşkilat</th>
-                <th>Rol + Əlavə et</th>
+                <th>{% trans "table_user" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_email" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_requested_organization" context "profile.role_assignment" %}</th>
+                <th>{% trans "table_role_add" context "profile.role_assignment" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -116,13 +118,13 @@
                             <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn btn-success btn-sm" {% if not can_assign_roles %}disabled{% endif %}>Əlavə et</button>
+                        <button type="submit" class="btn btn-success btn-sm" {% if not can_assign_roles %}disabled{% endif %}>{% trans "add" context "profile.role_assignment" %}</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="text-center">Pending istifadəçi tapılmadı.</td>
+                <td colspan="4" class="text-center">{% trans "pending_users_not_found" context "profile.role_assignment" %}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -133,6 +135,6 @@
 {% else %}
 <div class="empty-state">
     <i class="fas fa-building"></i>
-    <p>{{ access_denied_message|default:"Təşkilat tapılmadı. Profil parametrlərindən təşkilat seçin." }}</p>
+    <p>{{ access_denied_message|default:role_assignment_org_not_found }}</p>
 </div>
 {% endif %}

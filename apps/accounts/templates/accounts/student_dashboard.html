@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Tələbə Dashboard{% endblock %}
+{% block title %}{% trans "title" context "accounts.student_dashboard" %}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}">
@@ -12,17 +12,17 @@
     <div class="container">
         <!-- Header -->
         <div class="dashboard-header">
-            <h1>Tələbə Dashboard</h1>
-            <p class="text-muted mb-0">Xoş gəldiniz, {{ request.user.get_full_name|default:request.user.username }}!</p>
+            <h1>{% trans "heading" context "accounts.student_dashboard" %}</h1>
+            <p class="text-muted mb-0">{% trans "welcome" context "accounts.student_dashboard" %}, {{ request.user.get_full_name|default:request.user.username }}!</p>
             <div class="quick-actions">
                 <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-action">
-                    <i class="fas fa-user me-2"></i>Profil
+                    <i class="fas fa-user me-2"></i>{% trans "btn_profile" context "accounts.student_dashboard" %}
                 </a>
                 <a href="{% url 'courses:student_courses' %}" class="btn btn-outline-primary btn-action">
-                    <i class="fas fa-book me-2"></i>Kurslar
+                    <i class="fas fa-book me-2"></i>{% trans "btn_courses" context "accounts.student_dashboard" %}
                 </a>
                 <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-primary btn-action">
-                    <i class="fas fa-file-alt me-2"></i>İmtahanlar
+                    <i class="fas fa-file-alt me-2"></i>{% trans "btn_exams" context "accounts.student_dashboard" %}
                 </a>
             </div>
         </div>
@@ -36,8 +36,8 @@
                         <i class="fas fa-book"></i>
                     </div>
                     <div>
-                        <div class="widget-title">Kurslarım</div>
-                        <small class="text-muted">{{ enrolled_courses|length }} kurs</small>
+                        <div class="widget-title">{% trans "widget_courses_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ enrolled_courses|length }} {% trans "course_unit" context "accounts.student_dashboard" %}</small>
                     </div>
                 </div>
                 {% if enrolled_courses %}
@@ -56,12 +56,12 @@
                         {% endfor %}
                     </div>
                     <a href="{% url 'courses:student_courses' %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
-                        Hamısına bax
+                        {% trans "view_all" context "accounts.student_dashboard" %}
                     </a>
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-book-open"></i>
-                        <p>Hələ heç bir kursa qeydiyyatdan keçməmisiniz</p>
+                        <p>{% trans "empty_courses" context "accounts.student_dashboard" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -73,8 +73,8 @@
                         <i class="fas fa-tasks"></i>
                     </div>
                     <div>
-                        <div class="widget-title">Tapşırıqlar</div>
-                        <small class="text-muted">{{ pending_assignments|length }} gözləyir</small>
+                        <div class="widget-title">{% trans "widget_assignments_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ pending_assignments|length }} {% trans "pending_unit" context "accounts.student_dashboard" %}</small>
                     </div>
                 </div>
                 {% if pending_assignments %}
@@ -103,7 +103,7 @@
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-check-circle"></i>
-                        <p>Gözləyən tapşırıq yoxdur</p>
+                        <p>{% trans "empty_assignments" context "accounts.student_dashboard" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -115,8 +115,8 @@
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div>
-                        <div class="widget-title">Gələcək İmtahanlar</div>
-                        <small class="text-muted">{{ upcoming_exams|length }} imtahan</small>
+                        <div class="widget-title">{% trans "widget_upcoming_exams_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ upcoming_exams|length }} {% trans "exam_unit" context "accounts.student_dashboard" %}</small>
                     </div>
                 </div>
                 {% if upcoming_exams %}
@@ -131,7 +131,7 @@
                                 {{ exam.start_date|date:"d M Y, H:i" }}
                             </div>
                             <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-primary mt-2">
-                                <i class="fas fa-play me-1"></i>Başla
+                                <i class="fas fa-play me-1"></i>{% trans "start_exam" context "accounts.student_dashboard" %}
                             </a>
                         </div>
                         {% endfor %}
@@ -139,7 +139,7 @@
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-calendar-check"></i>
-                        <p>Gələcək imtahan yoxdur</p>
+                        <p>{% trans "empty_upcoming_exams" context "accounts.student_dashboard" %}</p>
                     </div>
                 {% endif %}
             </div>
@@ -151,8 +151,8 @@
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div>
-                        <div class="widget-title">Son Qiymətlər</div>
-                        <small class="text-muted">{{ recent_grades|length }} cavab</small>
+                        <div class="widget-title">{% trans "widget_recent_grades_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ recent_grades|length }} {% trans "answer_unit" context "accounts.student_dashboard" %}</small>
                     </div>
                 </div>
                 {% if recent_grades %}
@@ -183,7 +183,7 @@
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-clipboard-list"></i>
-                        <p>Hələ qiymətləndirilmiş iş yoxdur</p>
+                        <p>{% trans "empty_recent_grades" context "accounts.student_dashboard" %}</p>
                     </div>
                 {% endif %}
             </div>

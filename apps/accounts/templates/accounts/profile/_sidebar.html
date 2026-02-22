@@ -1,34 +1,40 @@
+{% load i18n %}
 <aside class="profile-sidebar" id="profileSidebar">
     <div class="sidebar-header">
-        <h2 class="sidebar-title">Profil</h2>
-        <button type="button" class="sidebar-toggle" id="sidebarToggle" title="Sidebar-ı bağla/aç">
+        <h2 class="sidebar-title">{% trans "title" context "profile.sidebar" %}</h2>
+        <button type="button"
+                class="sidebar-toggle"
+                id="sidebarToggle"
+                title="{% trans 'toggle_close' context 'profile.sidebar' %}"
+                data-title-expand="{% trans 'toggle_open' context 'profile.sidebar' %}"
+                data-title-collapse="{% trans 'toggle_close' context 'profile.sidebar' %}">
             <i class="fas fa-chevron-left"></i>
         </button>
     </div>
 
     <ul class="sidebar-menu">
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Ümumi</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_general" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=profile-info"
                data-section="profile-info"
-               data-title="Profil Məlumatları"
+               data-title="{% trans 'profile_info' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'profile-info' %}active{% endif %}">
                 <i class="fas fa-user sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Profil Məlumatları</span>
+                <span class="sidebar-menu-text">{% trans "profile_info" context "profile.sidebar" %}</span>
             </a>
         </li>
 
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Təhsil</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_education" context "profile.sidebar" %}</span></li>
         {% if 'posts' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=posts"
                data-section="posts"
-               data-title="Postlarım"
+               data-title="{% trans 'posts' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'posts' %}active{% endif %}">
                 <i class="fas fa-newspaper sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">My Posts</span>
+                <span class="sidebar-menu-text">{% trans "posts" context "profile.sidebar" %}</span>
                 {% if posts_count > 0 %}<span class="sidebar-menu-badge">{{ posts_count }}</span>{% endif %}
             </a>
         </li>
@@ -38,11 +44,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=create-post"
                data-section="create-post"
-               data-title="Yeni Post Yarat"
+               data-title="{% trans 'create_post' context 'profile.section' %}"
                data-source-url="{% url 'create_post' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-post' %}active{% endif %}">
                 <i class="fas fa-plus-circle sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Create Post</span>
+                <span class="sidebar-menu-text">{% trans "create_post" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -51,11 +57,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-exams"
                data-section="my-exams"
-               data-title="İmtahanlarım"
+               data-title="{% trans 'my_exams' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-exams' %}active{% endif %}">
                 <i class="fas fa-file-alt sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">İmtahanlarım</span>
+                <span class="sidebar-menu-text">{% trans "my_exams" context "profile.sidebar" %}</span>
                 {% if my_exams_count > 0 %}<span class="sidebar-menu-badge">{{ my_exams_count }}</span>{% endif %}
             </a>
         </li>
@@ -65,11 +71,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-courses"
                data-section="my-courses"
-               data-title="Yaratdığım kurslar"
+               data-title="{% trans 'my_created_courses' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
                 <i class="fas fa-book sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Yaratdığım kurslar</span>
+                <span class="sidebar-menu-text">{% trans "my_created_courses" context "profile.sidebar" %}</span>
                 {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge">{{ my_created_courses_count }}</span>{% endif %}
             </a>
         </li>
@@ -79,66 +85,66 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=courses"
                data-section="courses"
-               data-title="Kurslarım"
+               data-title="{% trans 'my_courses' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'courses' %}active{% endif %}">
                 <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Kurslarım</span>
+                <span class="sidebar-menu-text">{% trans "my_courses" context "profile.sidebar" %}</span>
                 {% if courses_count > 0 %}<span class="sidebar-menu-badge">{{ courses_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
 
         {% if can_view_student_assignments %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Təyin olunmuş</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_assigned" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=assigned-exams"
                data-section="assigned-exams"
-               data-title="Təyin olunmuş tapşırıqlar"
+               data-title="{% trans 'assigned_tasks' context 'profile.section' %}"
                data-source-url="{% url 'accounts:assigned_exams' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
                 <i class="fas fa-tasks sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Təyin olunmuş tapşırıqlar</span>
+                <span class="sidebar-menu-text">{% trans "assigned_tasks" context "profile.sidebar" %}</span>
                 {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_tasks_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=assigned-courses"
                data-section="assigned-courses"
-               data-title="Təyin olunmuş kurslar"
+               data-title="{% trans 'assigned_courses' context 'profile.section' %}"
                data-source-url="{% url 'accounts:assigned_courses' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-courses' %}active{% endif %}">
                 <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% if role_capabilities.is_student %}My Courses{% else %}Təyin olunmuş kurslar{% endif %}</span>
+                <span class="sidebar-menu-text">{% if role_capabilities.is_student %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "assigned_courses" context "profile.sidebar" %}{% endif %}</span>
                 {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_courses_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-results"
                data-section="my-results"
-               data-title="My Results"
+               data-title="{% trans 'my_results' context 'profile.section' %}"
                data-source-url="{% url 'accounts:my_results' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-results' %}active{% endif %}">
                 <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">My Results</span>
+                <span class="sidebar-menu-text">{% trans "my_results" context "profile.sidebar" %}</span>
                 {% if my_results_count > 0 %}<span class="sidebar-menu-badge">{{ my_results_count }}</span>{% endif %}
             </a>
         </li>
         {% endif %}
 
         {% if 'groups' in allowed_sections or 'pending-review' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Müəllim</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_teacher" context "profile.sidebar" %}</span></li>
         {% endif %}
 
         {% if 'groups' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=groups"
                data-section="groups"
-               data-title="Qruplar"
+               data-title="{% trans 'groups' context 'profile.section' %}"
                data-source-url="{% url 'exams:teacher_group_list' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'groups' %}active{% endif %}">
                 <i class="fas fa-users sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Qruplar</span>
+                <span class="sidebar-menu-text">{% trans "groups" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -147,11 +153,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=pending-review"
                data-section="pending-review"
-               data-title="To Review"
+               data-title="{% trans 'pending_review' context 'profile.section' %}"
                data-source-url="{% url 'accounts:pending_review' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-review' %}active{% endif %}">
                 <i class="fas fa-tasks sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">To Review</span>
+                <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
                 {% if pending_review_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ pending_review_count }}</span>
                 {% endif %}
@@ -160,17 +166,17 @@
         {% endif %}
 
         {% if can_manage_org or 'superadmin-organizations' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">İdarəetmə</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_management" context "profile.sidebar" %}</span></li>
 
         {% if 'role-assignment' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=role-assignment"
                data-section="role-assignment"
-               data-title="Role təyin et"
+               data-title="{% trans 'role_assignment' context 'profile.section' %}"
                data-source-url="{% url 'accounts:role_assignment' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'role-assignment' %}active{% endif %}">
                 <i class="fas fa-user-shield sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Role təyin et</span>
+                <span class="sidebar-menu-text">{% trans "role_assignment" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -179,11 +185,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=permission-editor"
                data-section="permission-editor"
-               data-title="Permission-lar"
+               data-title="{% trans 'permissions' context 'profile.section' %}"
                data-source-url="{% url 'accounts:permission_editor' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'permission-editor' %}active{% endif %}">
                 <i class="fas fa-key sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Permission-lar</span>
+                <span class="sidebar-menu-text">{% trans "permissions" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -192,11 +198,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=manage-roles"
                data-section="manage-roles"
-               data-title="Rolları idarə et"
+               data-title="{% trans 'manage_roles' context 'profile.section' %}"
                data-source-url="{% url 'accounts:manage_roles' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-roles' %}active{% endif %}">
                 <i class="fas fa-user-cog sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Rolları idarə et</span>
+                <span class="sidebar-menu-text">{% trans "manage_roles" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -205,45 +211,50 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=superadmin-organizations"
                data-section="superadmin-organizations"
-               data-title="Superadmin Nəzarəti"
+               data-title="{% trans 'superadmin_control' context 'profile.section' %}"
                data-source-url="{% url 'accounts:superadmin_organizations' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-organizations' %}active{% endif %}">
                 <i class="fas fa-building sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Superadmin Nəzarəti</span>
+                <span class="sidebar-menu-text">{% trans "superadmin_control" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
         {% endif %}
 
         {% if can_view_blog %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">Blog</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_blog" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=blog"
                data-section="blog"
-               data-title="Blog"
+               data-title="{% trans 'blog' context 'profile.section' %}"
                data-source-url="{% url 'home' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'blog' %}active{% endif %}">
                 <i class="fas fa-blog sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Blog</span>
+                <span class="sidebar-menu-text">{% trans "blog" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
 
-        <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">Hesab</span></li>
+        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_language" context "profile.sidebar" %}</span></li>
+        <li class="sidebar-menu-item sidebar-language">
+            {% include "partials/_language_switcher.html" with switcher_variant="sidebar" %}
+        </li>
+
+        <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">{% trans "group_account" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=edit-profile"
                data-section="edit-profile"
-               data-title="Profili Redaktə Et"
+               data-title="{% trans 'edit_profile' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'edit-profile' %}active{% endif %}">
                 <i class="fas fa-user-edit sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Profili Redaktə Et</span>
+                <span class="sidebar-menu-text">{% trans "edit_profile" context "profile.sidebar" %}</span>
             </a>
         </li>
         <li class="sidebar-menu-item">
             <a href="{% url 'accounts:logout' %}" class="sidebar-menu-link sidebar-menu-link--logout">
                 <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Çıxış</span>
+                <span class="sidebar-menu-text">{% trans "logout" context "profile.sidebar" %}</span>
             </a>
         </li>
     </ul>

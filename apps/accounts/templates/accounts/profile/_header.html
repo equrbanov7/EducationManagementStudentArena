@@ -1,11 +1,12 @@
+{% load i18n %}
 <div class="profile-header">
     <button type="button"
             class="profile-mobile-sidebar-trigger"
             id="profileMobileSidebarTrigger"
             aria-controls="profileSidebar"
             aria-expanded="true"
-            aria-label="Sidebar-ı aç"
-            title="Sidebar-ı aç/bağla">
+            aria-label="{% trans 'toggle_open' context 'profile.sidebar' %}"
+            title="{% trans 'toggle_open_or_close' context 'profile.sidebar' %}">
         <i class="fas fa-chevron-right" aria-hidden="true"></i>
     </button>
     <h1 class="profile-title" id="profileSectionTitle">{{ active_section_title }}</h1>

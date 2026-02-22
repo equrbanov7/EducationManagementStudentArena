@@ -1,25 +1,26 @@
+{% load i18n %}
 <div class="info-card section-card">
     <div class="section-title">
-        <i class="fas fa-info-circle"></i> Rol İdarəetməsi Haqqında
+        <i class="fas fa-info-circle"></i> {% trans "info_title" context "profile.manage_roles" %}
     </div>
     <p class="manage-roles-summary mb-0">
-        Bu bölmədə istifadəçilərə birdən çox rol təyin edə bilərsiniz.
-        İstifadəçinin əsas rolu avtomatik ən yüksək səviyyəli rol kimi saxlanılır.
-        Yalnız öz səviyyənizdən aşağı rolları idarə edə bilərsiniz.
-        {% if organization %}Təşkilat: <strong>{{ organization.name }}</strong>{% endif %}
+        {% trans "summary_line_1" context "profile.manage_roles" %}
+        {% trans "summary_line_2" context "profile.manage_roles" %}
+        {% trans "summary_line_3" context "profile.manage_roles" %}
+        {% if organization %}{% trans "organization_label" context "profile.manage_roles" %}: <strong>{{ organization.name }}</strong>{% endif %}
     </p>
-    <div class="manage-roles-diff" aria-label="Role təyin et və Rolları idarə et fərqi">
+    <div class="manage-roles-diff" aria-label="{% trans 'diff_aria_label' context 'profile.manage_roles' %}">
         <div class="manage-roles-diff-item">
             <span class="manage-roles-diff-pill manage-roles-diff-pill--blue">
-                <i class="fas fa-user-shield"></i> Role təyin et
+                <i class="fas fa-user-shield"></i> {% trans "diff_assign_role_title" context "profile.manage_roles" %}
             </span>
-            <span>Təşkilatdaxili üzvlük rolunu (membership) idarə edir.</span>
+            <span>{% trans "diff_assign_role_description" context "profile.manage_roles" %}</span>
         </div>
         <div class="manage-roles-diff-item">
             <span class="manage-roles-diff-pill manage-roles-diff-pill--green">
-                <i class="fas fa-user-cog"></i> Rolları idarə et
+                <i class="fas fa-user-cog"></i> {% trans "diff_manage_roles_title" context "profile.manage_roles" %}
             </span>
-            <span>İstifadəçiyə bir neçə profil rolu verə bilir (əsas + əlavə rollar).</span>
+            <span>{% trans "diff_manage_roles_description" context "profile.manage_roles" %}</span>
         </div>
     </div>
 </div>
@@ -44,7 +45,7 @@
                 class="search-input"
                 id="searchInput"
                 name="{% if embedded_in_profile %}manage_roles_search{% else %}search{% endif %}"
-                placeholder="İstifadəçi axtar..."
+                placeholder="{% trans 'search_user_placeholder' context 'profile.manage_roles' %}"
                 value="{{ search_query }}"
             >
             <button type="submit" class="btn btn-primary">
@@ -58,9 +59,9 @@
         <table class="users-table" id="usersTable">
             <thead>
                 <tr>
-                    <th>İstifadəçi</th>
-                    <th>Cari Rollar</th>
-                    <th>Rolları Dəyiş</th>
+                    <th>{% trans "table_user" context "profile.manage_roles" %}</th>
+                    <th>{% trans "table_current_roles" context "profile.manage_roles" %}</th>
+                    <th>{% trans "table_change_roles" context "profile.manage_roles" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -113,10 +114,10 @@
                                 class="role-btn role-btn-assign"
                                 {% if not p.can_edit_roles %}disabled{% endif %}
                             >
-                                <i class="fas fa-check"></i> Yadda saxla
+                                <i class="fas fa-check"></i> {% trans "save" context "profile.manage_roles" %}
                             </button>
                             {% if not p.can_edit_roles %}
-                            <span class="role-edit-locked">Səviyyə limiti</span>
+                            <span class="role-edit-locked">{% trans "level_limit" context "profile.manage_roles" %}</span>
                             {% endif %}
                         </form>
                     </td>
@@ -129,8 +130,8 @@
     {% else %}
     <div class="empty-state">
         <i class="fas fa-users-slash"></i>
-        <h3>İstifadəçi tapılmadı</h3>
-        <p>Sistemdə hələ idarə ediləcək istifadəçi yoxdur</p>
+        <h3>{% trans "empty_users_title" context "profile.manage_roles" %}</h3>
+        <p>{% trans "empty_users_description" context "profile.manage_roles" %}</p>
     </div>
     {% endif %}
 </div>

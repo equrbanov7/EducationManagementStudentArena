@@ -7,6 +7,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var mobileSidebarTrigger = document.getElementById("profileMobileSidebarTrigger");
     var sidebarBackdrop = document.getElementById("profileSidebarBackdrop");
     var mobileMediaQuery = window.matchMedia("(max-width: 768px)");
+    var sidebarExpandTitle = toggleBtn ? toggleBtn.getAttribute("data-title-expand") || "Open sidebar" : "Open sidebar";
+    var sidebarCollapseTitle = toggleBtn
+        ? toggleBtn.getAttribute("data-title-collapse") || "Close sidebar"
+        : "Close sidebar";
 
     function isMobileViewport() {
         return mobileMediaQuery.matches;
@@ -33,11 +37,11 @@ document.addEventListener("DOMContentLoaded", function () {
             if (isCollapsed) {
                 icon.classList.remove("fa-chevron-left");
                 icon.classList.add("fa-chevron-right");
-                toggleBtn.title = "Sidebar-ı aç";
+                toggleBtn.title = sidebarExpandTitle;
             } else {
                 icon.classList.remove("fa-chevron-right");
                 icon.classList.add("fa-chevron-left");
-                toggleBtn.title = "Sidebar-ı bağla";
+                toggleBtn.title = sidebarCollapseTitle;
             }
         }
 
@@ -93,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var profileBaseUrl = profilePage.getAttribute("data-profile-base-url") || window.location.pathname;
     var defaultSection = profilePage.getAttribute("data-default-section") || "profile-info";
+    var defaultSectionTitle = profilePage.getAttribute("data-default-section-title") || "Profile";
     var sectionLinks = document.querySelectorAll(".js-profile-section-link[data-section]");
     var sidebarSectionLinks = document.querySelectorAll(".profile-sidebar .js-profile-section-link[data-section]");
     var sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
@@ -130,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var isMatch = link.getAttribute("data-section") === section;
             link.classList.toggle("active", isMatch);
             if (isMatch && sectionTitle) {
-                sectionTitle.textContent = link.getAttribute("data-title") || "Profil";
+                sectionTitle.textContent = link.getAttribute("data-title") || defaultSectionTitle;
             }
         });
 
