@@ -15,7 +15,7 @@
         {% if my_courses %}
         <div class="course-cards-grid">
             {% for course in my_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}" class="modern-course-card">
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=courses" class="modern-course-card">
                 <div class="course-card-icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
@@ -40,7 +40,7 @@
             <h3>Hələ heç bir kursa qoşulmamısınız</h3>
             <p>Yeni biliklər kəşf etmək və öyrənməyə başlamaq üçün platformadakı mövcud kurslara göz atın.</p>
             
-            <a href="{% url 'courses:course_list' %}" class="btn-create-new btn-orange mt-3">
+            <a href="{% url 'courses:student_courses' %}" class="btn-create-new btn-orange mt-3">
                 <i class="fas fa-search"></i> Kursları Kəşf Et
             </a>
         </div>

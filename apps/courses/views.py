@@ -7,16 +7,18 @@ Labs app inteqrasiyası əlavə edilib.
 """
 
 import json
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.template.loader import render_to_string
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
@@ -28,6 +30,7 @@ from .forms import CourseForm, CourseResourceForm, CourseTopicForm
 from .models import Course, CourseMembership, CourseResource, CourseTopic
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
 
 
 def _tenant_scoped_courses(request, queryset=None):
@@ -46,6 +49,12 @@ def _owner_courses_queryset(request):
 
 def _get_owner_course_or_404(request, course_id):
     return get_object_or_404(_owner_courses_queryset(request), id=course_id)
+
+
+def _student_users_queryset(queryset):
+    return queryset.filter(
+        Q(profile__role__in=["student", "lead_student"]) | Q(groups__name__in=["student", "lead_student"])
+    ).distinct()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -87,15 +96,52 @@ class CreateCourseView(IsTeacherMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = "courses/create_course.html"
+    modal_form_template_name = "courses/partials/_create_course_modal_form.html"
+
+    def _is_modal_request(self):
+        return self.request.GET.get("modal") == "1"
+
+    def get(self, request, *args, **kwargs):
+        if self._is_modal_request():
+            self.object = None
+            form = self.get_form()
+            return render(
+                request,
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+            )
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         form.instance.status = "draft"
         organization = get_request_organization(self.request)
         form.instance.organization_id = get_organization_int_id(organization)
-        response = super().form_valid(form)
+        super().form_valid(form)
         messages.success(self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!')
-        return response
+        if self._is_modal_request():
+            return JsonResponse(
+                {
+                    "success": True,
+                    "course_id": self.object.id,
+                    "dashboard_url": str(self.get_success_url()),
+                }
+            )
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        if self._is_modal_request():
+            html = render_to_string(
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse_lazy("courses:course_dashboard", args=[self.object.id])
@@ -158,6 +204,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         context["can_view_members"] = context["can_manage_course"]
         context["user_role"] = user_role
         context["membership"] = membership  # Template-də lazım ola bilər
+
+        requested_profile_section = (self.request.GET.get("from_section") or "").strip()
+        valid_profile_sections = {"my-courses", "assigned-courses", "courses", "assigned-exams"}
+        if requested_profile_section not in valid_profile_sections:
+            requested_profile_section = "assigned-courses" if context["is_student"] else "my-courses"
+
+        profile_return_params = {"section": requested_profile_section}
+        if requested_profile_section == "assigned-exams":
+            assigned_type = (self.request.GET.get("assigned_type") or "").strip().lower()
+            if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+                profile_return_params["assigned_type"] = assigned_type
+
+        context["profile_return_section"] = requested_profile_section
+        context["profile_return_url"] = f"{reverse('accounts:profile')}?{urlencode(profile_return_params)}"
 
         # ═══════════════════════════════════════════════════════════════════
         # 2. MÖVZULAR & RESURSLAR (Hamı görür)
@@ -459,7 +519,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             user_candidates = User.objects.exclude(id__in=course_user_ids)
             if user_org is not None:
                 user_candidates = user_candidates.filter(profile__organization=user_org)
-            context["all_users"] = user_candidates.filter(profile__role="student").distinct().order_by("username")
+            context["all_users"] = _student_users_queryset(user_candidates).order_by("username")
 
             # ─────────────────────────────────────────────────────────────────
             # Bütün qruplar (StudentGroup modelindən)
@@ -704,7 +764,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         all_users = User.objects.exclude(id__in=course_user_ids)
         if user_org is not None:
             all_users = all_users.filter(profile__organization=user_org)
-        all_users = all_users.filter(profile__role="student").distinct().order_by("username")
+        all_users = _student_users_queryset(all_users).order_by("username")
 
         try:
             all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
@@ -745,7 +805,7 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
         qs = User.objects.exclude(id__in=course_user_ids)
         if user_org is not None:
             qs = qs.filter(profile__organization=user_org)
-        qs = qs.filter(profile__role="student").distinct().order_by("username")
+        qs = _student_users_queryset(qs).order_by("username")
 
         data = [
             {

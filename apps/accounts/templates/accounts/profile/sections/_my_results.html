@@ -72,6 +72,21 @@
                         <p>{{ item.feedback|truncatechars:180 }}</p>
                     </div>
                     {% endif %}
+
+                    {% if item.score == None and not item.feedback %}
+                    <div class="result-pending-box result-pending-box--{{ item.status|lower }}">
+                        <div class="pending-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <p>
+                            {% if item.status == "submitted" %}
+                                Cavabınız göndərilib. Müəllim yoxlamasını gözləyir.
+                            {% elif item.status == "pending" %}
+                                Cavabınız emal olunur. Nəticə hazır olduqda burada görünəcək.
+                            {% else %}
+                                Nəticə hələ hazır deyil. Bir az sonra yenidən yoxlayın.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="result-card-footer">

@@ -10,12 +10,15 @@ Sərbəst işlər üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -24,6 +27,19 @@ from apps.courses.models import Course, CourseMembership
 from .models import Assignment, AssignmentSubmission
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+
+
+def _assignment_back_url(request, assignment):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -247,6 +263,7 @@ def assignment_detail(request, pk):
         "user_attempts": user_attempts,
         "can_submit": assignment.can_user_submit(request.user),
         "attempts_left": assignment.max_attempts - user_attempts,
+        "back_url": _assignment_back_url(request, assignment),
     }
 
     return render(request, "assignments/assignment_detail.html", context)

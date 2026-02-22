@@ -1,0 +1,226 @@
+#profileGroupModal .modal-dialog.profile-group-modal {
+    width: min(760px, 96vw);
+    max-width: 760px;
+    margin: 1rem auto;
+}
+
+#profileGroupModal .modal-content.profile-group-modal__content {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+    /* overflow: hidden; */
+    width: 100%;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-dialog-scrollable .modal-content {
+    overflow: auto !important;
+}
+
+#profileGroupModal .profile-group-modal__header {
+    padding: 1.1rem 1.35rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+#profileGroupModal .profile-group-modal__header .modal-title {
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.01em;
+}
+
+#profileGroupModal .profile-group-modal__body {
+    padding: 1.1rem 1.35rem 1rem;
+    background: #ffffff;
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+#profileGroupModal .group-modal-section {
+    margin-bottom: 1rem;
+}
+
+#profileGroupModal .group-modal-section--last {
+    margin-bottom: 0;
+}
+
+#profileGroupModal .group-modal-label {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+#profileGroupModal .group-modal-section input[type="text"],
+#profileGroupModal .group-modal-section select.form-select,
+#profileGroupModal .group-modal-section .form-control {
+    border-radius: 10px;
+    border-color: #cbd5e1;
+}
+
+#profileGroupModal .group-modal-section select.form-select {
+    min-height: 44px;
+}
+
+#profileGroupModal .group-checklist {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 0.75rem;
+}
+
+#profileGroupModal .group-checklist__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#profileGroupModal .group-checklist__actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+#profileGroupModal .group-checklist__actions .btn-link {
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+#profileGroupModal .group-checklist__actions .btn-link:hover {
+    color: #1d4ed8;
+}
+
+#profileGroupModal .group-checklist__search {
+    position: relative;
+    margin-top: 0.55rem;
+}
+
+#profileGroupModal .group-checklist__search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+#profileGroupModal .group-checklist__search .form-control {
+    padding-left: 2rem;
+    height: 40px;
+}
+
+#profileGroupModal .group-checklist__search--single {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+#profileGroupModal .group-checklist__list {
+    margin-top: 0.55rem;
+    max-height: 190px;
+    overflow: auto;
+    background: #ffffff;
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+}
+
+#profileGroupModal .group-checklist__row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid #eef2f7;
+    cursor: pointer;
+}
+
+#profileGroupModal .group-checklist__row:last-child {
+    border-bottom: 0;
+}
+
+#profileGroupModal .group-checklist__row:hover {
+    background: #eff6ff;
+}
+
+#profileGroupModal .group-checklist__row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #2563eb;
+}
+
+#profileGroupModal .group-checklist__row span {
+    font-size: 0.92rem;
+    color: #1f2937;
+    line-height: 1.3;
+}
+
+#profileGroupModal .group-checklist__empty {
+    padding: 1rem;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+#profileGroupModal .group-checklist__meta {
+    margin-top: 0.5rem;
+    text-align: right;
+    font-size: 0.82rem;
+    color: #475569;
+}
+
+#profileGroupModal .group-checklist .form-text {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+}
+
+#profileGroupModal .profile-group-modal__footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 0.9rem 1.35rem 1rem;
+    background: #f8fafc;
+}
+
+#profileGroupDeleteModal .modal-dialog.profile-group-delete-modal {
+    max-width: 460px;
+}
+
+#profileGroupDeleteModal .profile-group-delete-modal__content {
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 22px 54px rgba(15, 23, 42, 0.24);
+}
+
+#profileGroupDeleteModal .profile-group-delete-modal__header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.9rem 1rem;
+}
+
+#profileGroupDeleteModal .profile-group-delete-modal__body {
+    padding: 1rem;
+    color: #334155;
+}
+
+#profileGroupDeleteModal .profile-group-delete-modal__footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem 1rem;
+}
+
+@media (max-width: 768px) {
+    #profileGroupModal .modal-dialog.profile-group-modal {
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem auto;
+    }
+
+    #profileGroupModal .modal-content.profile-group-modal__content {
+        max-height: 95vh;
+        border-radius: 14px;
+    }
+
+    #profileGroupModal .profile-group-modal__body {
+        padding: 0.9rem 0.9rem 0.8rem;
+    }
+}

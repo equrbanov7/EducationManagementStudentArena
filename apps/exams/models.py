@@ -95,10 +95,14 @@ class StudentGroup(models.Model):
             except Exception:
                 profile = None
             teacher_org = getattr(profile, "organization", None)
-            teacher_role = getattr(profile, "role", None)
-            teacher_is_allowed = self.teacher.is_superuser or getattr(self.teacher, "is_superadmin", False) or (
-                teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
-            )
+            teacher_is_allowed = self.teacher.is_superuser or getattr(self.teacher, "is_superadmin", False)
+            if not teacher_is_allowed and hasattr(self.teacher, "has_role"):
+                teacher_is_allowed = self.teacher.has_role(ProfileRole.TEACHER) or self.teacher.has_role(
+                    ProfileRole.ASSISTANT_TEACHER
+                )
+            if not teacher_is_allowed:
+                teacher_role = getattr(profile, "role", None)
+                teacher_is_allowed = teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
 
             if not teacher_is_allowed:
                 errors["teacher"] = "Primary müəllim müəllim rolunda olmalıdır."

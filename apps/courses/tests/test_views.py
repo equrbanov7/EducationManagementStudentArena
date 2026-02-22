@@ -90,3 +90,21 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_a.title)
         self.assertNotContains(response, self.course_b.title)
+
+    def test_course_dashboard_preserves_assigned_tasks_profile_return_context(self):
+        self.client.force_login(self.student)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+            {"from_section": "assigned-exams", "assigned_type": "labs"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_section"], "assigned-exams")
+        self.assertEqual(
+            response.context["profile_return_url"],
+            f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=labs",
+        )

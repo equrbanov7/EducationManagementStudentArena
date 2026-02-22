@@ -215,9 +215,60 @@
     line-height: 1.5;
 }
 
+.result-pending-box {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-left: 3px solid #94a3b8;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.result-pending-box .pending-icon {
+    font-size: 1rem;
+    line-height: 1;
+    margin-top: 0.15rem;
+    color: #64748b;
+}
+
+.result-pending-box p {
+    margin: 0;
+    line-height: 1.5;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.result-pending-box--submitted {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    border-left-color: #3b82f6;
+}
+
+.result-pending-box--submitted .pending-icon,
+.result-pending-box--submitted p {
+    color: #1e3a8a;
+}
+
+.result-pending-box--pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+    border-left-color: #f59e0b;
+}
+
+.result-pending-box--pending .pending-icon,
+.result-pending-box--pending p {
+    color: #92400e;
+}
+
 /* Kart Footer (Düymə) */
 .result-card-footer {
     margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
 }
 
 .btn-teal {
@@ -225,7 +276,12 @@
     color: #ffffff;
     border: none;
     width: 100%;
+    display: flex;
     justify-content: center;
+    align-items: center;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 8px;
 }
 
 .btn-teal:hover {

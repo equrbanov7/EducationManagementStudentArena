@@ -5,6 +5,7 @@ Labs Views - Bütün view-lar pk istifadə edir
 import json
 import os
 import traceback
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,6 +18,20 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.courses.models import Course, CourseMembership
 
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+
+
+def _lab_back_url(request, lab):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
 
 # ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
@@ -694,6 +709,7 @@ def lab_detail(request, pk):
         "submission": submission,
         "attempt_count": attempt_count,
         "can_retry": can_retry,
+        "back_url": _lab_back_url(request, lab),
     }
 
     return render(request, "labs/lab_detail.html", context)

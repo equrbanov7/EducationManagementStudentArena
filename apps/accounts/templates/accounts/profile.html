@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+    <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -27,6 +29,12 @@
             {% include "accounts/profile/sections/_assigned_exams.html" %}
             {% include "accounts/profile/sections/_assigned_courses.html" %}
             {% include "accounts/profile/sections/_my_results.html" %}
+            {% include "accounts/profile/sections/_groups.html" %}
+            {% include "accounts/profile/sections/_pending_review.html" %}
+            {% include "accounts/profile/sections/_role_assignment.html" %}
+            {% include "accounts/profile/sections/_permission_editor.html" %}
+            {% include "accounts/profile/sections/_manage_roles.html" %}
+            {% include "accounts/profile/sections/_superadmin_organizations.html" %}
             {% include "accounts/profile/sections/_edit_profile.html" %}
             {% include "accounts/profile/sections/_shortcut_sections.html" %}
         </div>
@@ -37,4 +45,6 @@
 {% block extraJs %}
 <script src="{% static 'js/profile.js' %}"></script>
 <script src="{% static 'js/user_profile.js' %}"></script>
+<script src="{% static 'courses/js/create_course_modal.js' %}"></script>
+<script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260222-2"></script>
 {% endblock %}

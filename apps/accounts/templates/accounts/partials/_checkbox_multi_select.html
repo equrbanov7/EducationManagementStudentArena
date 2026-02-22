@@ -1,0 +1,37 @@
+<div class="group-checklist" data-checkbox-select>
+    <div class="group-checklist__top">
+        <label class="group-modal-label mb-0">{{ label }}</label>
+        <div class="group-checklist__actions">
+            <button type="button" class="btn btn-link p-0 js-select-all">Hamısını seç</button>
+            <button type="button" class="btn btn-link p-0 js-clear-selected">Seçilənləri ləğv et</button>
+        </div>
+    </div>
+
+    <div class="group-checklist__search">
+        <i class="fas fa-search"></i>
+        <input
+            type="text"
+            class="form-control js-select-search"
+            placeholder="{{ search_placeholder }}"
+            id="{{ container_id }}_search"
+        >
+    </div>
+
+    <div class="group-checklist__list js-select-list" id="{{ container_id }}_list"></div>
+
+    <div class="group-checklist__meta">
+        Seçilib: <span class="js-selected-count">0</span>
+    </div>
+
+    <div class="d-none">
+        {{ field }}
+    </div>
+
+    {% if help_text %}
+        <div class="form-text">{{ help_text }}</div>
+    {% endif %}
+
+    {% if field.errors %}
+        <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
+    {% endif %}
+</div>

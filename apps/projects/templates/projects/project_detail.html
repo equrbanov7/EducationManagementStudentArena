@@ -21,7 +21,7 @@
                 <i class="fa-solid fa-folder-open text-info me-2"></i> {{ project.title }}
             </h3>
         </div>
-        <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
+        <a href="{{ back_url }}" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left me-1"></i> Geri
         </a>
     </div>

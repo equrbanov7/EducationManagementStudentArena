@@ -51,6 +51,7 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile"))
         self.assertIn("assigned_exams_count", response.context)
         self.assertIn("assigned_courses_count", response.context)
+        self.assertIn("assigned_tasks_count", response.context)
         self.assertIn("is_teacher", response.context)
         self.assertIn("is_admin", response.context)
 
@@ -265,6 +266,183 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:permission_editor"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         self.assertContains(response, reverse("exams:teacher_group_list"))
+
+    def test_org_owner_with_teacher_secondary_role_sees_teacher_navigation(self):
+        from django.contrib.auth.models import Group
+
+        from apps.accounts.models import ProfileRole, UserProfile
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = ProfileRole.ORG_OWNER
+        profile.save(update_fields=["role", "updated_at"])
+
+        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
+        self.user.groups.add(teacher_group)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("accounts:pending_review"))
+
+    def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
+        from apps.accounts.models import ProfileRole
+
+        User.objects.create_superuser(
+            username="superadmin_manage_roles",
+            email="superadmin_manage_roles@example.com",
+            password="adminpass123",
+        )
+        self.client.login(username="superadmin_manage_roles", password="adminpass123")
+
+        response = self.client.post(
+            reverse("accounts:manage_roles"),
+            data={
+                "user_id": self.user.id,
+                "action": "assign",
+                "role_names": [ProfileRole.TEACHER, ProfileRole.ORG_OWNER],
+                "next": reverse("accounts:manage_roles"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:manage_roles"))
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.profile.role, ProfileRole.ORG_OWNER)
+        self.assertTrue(self.user.has_role(ProfileRole.ORG_OWNER))
+        self.assertTrue(self.user.has_role(ProfileRole.TEACHER))
+        self.assertIn(
+            ProfileRole.TEACHER,
+            set(self.user.groups.values_list("name", flat=True)),
+        )
+        self.assertNotIn(
+            ProfileRole.ORG_OWNER,
+            set(self.user.groups.values_list("name", flat=True)),
+        )
+
+    def test_manage_roles_respects_next_redirect_url(self):
+        from apps.accounts.models import ProfileRole
+
+        User.objects.create_superuser(
+            username="superadmin_manage_roles_next",
+            email="superadmin_manage_roles_next@example.com",
+            password="adminpass123",
+        )
+        self.client.login(username="superadmin_manage_roles_next", password="adminpass123")
+
+        next_url = reverse("accounts:profile") + "?section=manage-roles"
+        response = self.client.post(
+            reverse("accounts:manage_roles"),
+            data={
+                "user_id": self.user.id,
+                "action": "assign",
+                "role_names": [ProfileRole.TEACHER],
+                "next": next_url,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+
+    def test_assigned_tasks_section_lists_course_assignment_lab_and_project(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment
+        from apps.courses.models import Course, CourseMembership
+        from apps.labs.models import Lab
+        from apps.projects.models import Project
+        from django.utils import timezone
+
+        teacher = User.objects.create_user(
+            username="tasks_teacher",
+            email="tasks_teacher@example.com",
+            password="testpass123",
+        )
+        self.user.profile.role = ProfileRole.STUDENT
+        self.user.profile.save(update_fields=["role", "updated_at"])
+
+        course = Course.objects.create(
+            owner=teacher,
+            title="Task Course",
+            status="published",
+        )
+        CourseMembership.objects.create(
+            course=course,
+            user=self.user,
+            role="student",
+            group_name="850",
+        )
+
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Task Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        assignment.assigned_students.add(self.user)
+
+        unassigned_assignment = Assignment.objects.create(
+            course=course,
+            title="Unassigned Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        unassigned_assignment.assigned_students.add(teacher)
+
+        lab = Lab.objects.create(
+            course=course,
+            title="Task Lab",
+            start_datetime=timezone.now() - timedelta(hours=2),
+            end_datetime=timezone.now() + timedelta(days=1),
+            status="published",
+            allowed_students=str(self.user.id),
+            created_by=teacher,
+        )
+
+        project = Project.objects.create(
+            course=course,
+            title="Task Project",
+            start_date=timezone.now() - timedelta(days=1),
+            deadline=timezone.now() + timedelta(days=3),
+            status="active",
+        )
+        project.assigned_students.add(self.user)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=assigned-exams")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Təyin olunmuş tapşırıqlar")
+        self.assertContains(response, course.title)
+        self.assertContains(response, assignment.title)
+        self.assertContains(response, lab.title)
+        self.assertContains(response, project.title)
+        self.assertNotContains(response, unassigned_assignment.title)
+
+        self.assertEqual(response.context["assigned_tasks_count"], 4)
+        self.assertEqual(response.context["assigned_task_counts"]["courses"], 1)
+        self.assertEqual(response.context["assigned_task_counts"]["assignments"], 1)
+        self.assertEqual(response.context["assigned_task_counts"]["labs"], 1)
+        self.assertEqual(response.context["assigned_task_counts"]["independent"], 1)
+
+        assignment_item = next(
+            item for item in response.context["assigned_task_items"] if item["category"] == "assignments"
+        )
+        course_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "courses")
+        lab_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "labs")
+        project_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "independent")
+
+        self.assertIn("from_section=assigned-exams", course_item["detail_url"])
+        self.assertIn("assigned_type=all", course_item["detail_url"])
+        self.assertIn("from_section=assigned-exams", assignment_item["detail_url"])
+        self.assertIn("assigned_type=all", assignment_item["detail_url"])
+        self.assertIn("from_section=assigned-exams", lab_item["detail_url"])
+        self.assertIn("assigned_type=all", lab_item["detail_url"])
+        self.assertIn("from_section=assigned-exams", project_item["detail_url"])
+        self.assertIn("assigned_type=all", project_item["detail_url"])
 
 
 class AssignedItemsViewTest(TestCase):

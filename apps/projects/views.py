@@ -10,11 +10,14 @@ Kurs işləri üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -23,6 +26,19 @@ from apps.courses.models import Course, CourseMembership
 from .models import Project, ProjectSubmission
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+
+
+def _project_back_url(request, project):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": project.course.id})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -245,6 +261,7 @@ def project_detail(request, pk):
         "user_attempts": user_attempts,
         "can_submit": project.can_user_submit(request.user),
         "attempts_left": project.max_attempts - user_attempts,
+        "back_url": _project_back_url(request, project),
     }
 
     return render(request, "projects/project_detail.html", context)

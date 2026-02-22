@@ -1,0 +1,76 @@
+<div class="section-card">
+    <form method="get" class="search-form">
+        {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="pending-review">
+        {% endif %}
+
+        <input
+            type="text"
+            name="search"
+            value="{{ search_query }}"
+            placeholder="Tələbə, kurs, imtahan axtar..."
+            class="form-control"
+        >
+
+        <select name="type" class="form-control" style="max-width: 220px;">
+            <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Hamısı</option>
+            <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>İmtahan</option>
+            <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>Tapşırıq</option>
+            <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>Layihə</option>
+            <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>Lab</option>
+        </select>
+
+        <select name="status" class="form-control" style="max-width: 220px;">
+            <option value="all" {% if filter_status == 'all' %}selected{% endif %}>Bütün statuslar</option>
+            <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>submitted</option>
+            <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>expired</option>
+            <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>pending</option>
+            <option value="late" {% if filter_status == 'late' %}selected{% endif %}>late</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i> Filtrlə
+        </button>
+    </form>
+</div>
+
+{% if review_items %}
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-list-check"></i>
+            Yoxlanacaq siyahı ({{ total_count }})
+        </div>
+
+        {% for item in review_items %}
+            <div class="post-item pending-item">
+                <div class="post-icon {% if item.type == 'exam' %}stat-icon--blue{% elif item.type == 'assignment' %}stat-icon--green{% elif item.type == 'project' %}stat-icon--purple{% else %}stat-icon--orange{% endif %}">
+                    <i class="fas {% if item.type == 'exam' %}fa-file-alt{% elif item.type == 'assignment' %}fa-book-open{% elif item.type == 'project' %}fa-diagram-project{% else %}fa-flask{% endif %}"></i>
+                </div>
+
+                <div class="post-info">
+                    <div class="post-title">{{ item.title }}</div>
+                    <div class="post-date">
+                        <strong>{{ item.student.get_full_name|default:item.student.username }}</strong>
+                        · {{ item.course_title|default:"-" }}
+                        {% if item.group_name %}· Qrup: {{ item.group_name }}{% endif %}
+                        {% if item.date %}· {{ item.date|date:"d M Y H:i" }}{% endif %}
+                        <span class="role-badge {% if item.status == 'submitted' or item.status == 'late' or item.status == 'pending' %}student{% else %}teacher{% endif %}">
+                            {{ item.status }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="ms-auto">
+                    <a href="{{ item.action_url }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-arrow-up-right-from-square"></i> {{ item.action_label }}
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-tasks"></i>
+        <p>Yoxlanılacaq iş tapılmadı.</p>
+    </div>
+{% endif %}

@@ -61,7 +61,7 @@
                 type="button"
                 class="btn btn-sm btn-outline-secondary btn-edit-custom jsOpenEditGroup"
                 data-group-id="{{ group.id }}"
-                data-group-name="{{ group.name|escapejs }}"
+                data-group-name="{{ group.name|escape }}"
                 data-primary-teacher="{{ group.teacher_id }}"
                 data-students="[{% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
                 data-teachers="[{% for t in group.teachers.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"

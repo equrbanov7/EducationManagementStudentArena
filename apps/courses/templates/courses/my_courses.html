@@ -5,6 +5,7 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
 <style>
   .my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
   .course-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
@@ -110,7 +111,11 @@
       <div class="text-muted" style="font-size: 15px;">Yaratdığın bütün kurslar burada görünür.</div>
     </div>
 
-    <a class="btn-dashboard" href="{% url 'courses:create_course' %}" style="width: auto; padding: 12px 24px;">
+    <a class="btn-dashboard js-open-create-course"
+       href="{% url 'courses:create_course' %}"
+       data-create-course-url="{% url 'courses:create_course' %}"
+       data-success-url="{{ request.get_full_path }}"
+       style="width: auto; padding: 12px 24px;">
       <i class="fas fa-plus me-2"></i>Yeni Kurs
     </a>
   </div>
@@ -152,7 +157,7 @@
             </div>
 
             {# ✅ YALNIZ DASHBOARD DÜYMƏSI #}
-            <a class="btn-dashboard" href="{% url 'courses:course_dashboard' course.id %}">
+            <a class="btn-dashboard" href="{% url 'courses:course_dashboard' course.id %}?from_section=my-courses">
               <i class="fas fa-rocket me-2"></i>Dashboard-a Get
             </a>
           </div>
@@ -199,10 +204,20 @@
       <p style="color: #64748b; max-width: 480px; margin: 0 auto 24px;">
         İlk kursunu yarat və dashboard-da mövzular, sərbəst işlər, lab işləri əlavə et.
       </p>
-      <a class="btn-dashboard" href="{% url 'courses:create_course' %}" style="width: auto; padding: 14px 28px; display: inline-block;">
+      <a class="btn-dashboard js-open-create-course"
+         href="{% url 'courses:create_course' %}"
+         data-create-course-url="{% url 'courses:create_course' %}"
+         data-success-url="{{ request.get_full_path }}"
+         style="width: auto; padding: 14px 28px; display: inline-block;">
         <i class="fas fa-plus me-2"></i>Yeni Kurs Yarat
       </a>
     </div>
   {% endif %}
+
+  {% include "courses/partials/_create_course_modal.html" %}
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'courses/js/create_course_modal.js' %}"></script>
 {% endblock %}
