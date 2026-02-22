@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var countrySelect = document.getElementById("id_country");
     var orgTypeSelect = document.getElementById("id_organization_type");
     var orgFields = document.getElementById("orgFields");
+    var individualOrgFields = document.getElementById("individualOrgFields");
+    var joinOrganizationSelect = document.getElementById("id_join_organization");
     var institutionSelect = document.getElementById("id_institution");
     var institutionSearchInput = document.getElementById("institutionSearchInput");
     var institutionNotListedInput = document.getElementById("id_institution_not_listed_name");
@@ -20,6 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var institutionManualLabel = document.getElementById("institutionManualLabel");
     var orgIdentifierLabel = document.getElementById("orgIdentifierLabel");
     var orgIdentifierField = document.getElementById("orgIdentifierField");
+    var initialRoleField = document.getElementById("initialRoleField");
+    var autoStudentRoleInfo = document.getElementById("autoStudentRoleInfo");
+    var initialRoleSelect = document.getElementById("id_initial_role");
 
     var lookupData = window.SIGNUP_LOOKUP_DATA || {};
     var institutions = lookupData.institutions || [];
@@ -128,8 +133,19 @@ document.addEventListener("DOMContentLoaded", function () {
         var hasManualInstitution = institutionNotListedInput && institutionNotListedInput.value.trim() !== "";
 
         updateInstitutionCopy();
+        if (individualOrgFields) individualOrgFields.hidden = !isIndividual;
         if (orgFields) orgFields.hidden = isIndividual;
         if (orgIdentifierField) orgIdentifierField.hidden = isIndividual;
+        if (initialRoleField) initialRoleField.hidden = isIndividual;
+        if (autoStudentRoleInfo) autoStudentRoleInfo.hidden = !isIndividual;
+
+        if (joinOrganizationSelect) {
+            joinOrganizationSelect.required = isIndividual;
+            if (!isIndividual) joinOrganizationSelect.value = "";
+        }
+        if (initialRoleSelect && isIndividual) {
+            initialRoleSelect.value = "member";
+        }
 
         if (institutionSelect) {
             institutionSelect.required = !isIndividual && !hasManualInstitution;

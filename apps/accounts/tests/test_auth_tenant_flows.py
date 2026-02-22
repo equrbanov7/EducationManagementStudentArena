@@ -19,6 +19,19 @@ class SignupAndLoginFlowTest(TestCase):
         self.register_url = reverse("accounts:register")
         self.login_url = reverse("accounts:login")
         self.az = Country.objects.get(code="AZ")
+        self.org_owner = User.objects.create_user(
+            username="seedowner",
+            email="seedowner@example.com",
+            password="StrongPass123!",
+        )
+        self.signup_target_org = Organization.objects.create(
+            name="Signup Target School",
+            org_type=OrganizationType.SCHOOL,
+            country=self.az.name,
+            owner=self.org_owner,
+            status="active",
+            is_active=True,
+        )
 
     def _institution(self, org_type):
         institution = Institution.objects.filter(country=self.az, institution_type=org_type, is_active=True).first()
@@ -35,6 +48,7 @@ class SignupAndLoginFlowTest(TestCase):
             "password2": "StrongPass123!",
             "country": "AZ",
             "organization_type": OrganizationType.INDIVIDUAL,
+            "join_organization": str(self.signup_target_org.id),
             "institution": "",
             "institution_not_listed_name": "",
             "organization_identifier": "",
@@ -60,10 +74,18 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertTrue(self.client.login(username="newuser@example.com", password="StrongPass123!"))
 
         profile = user.profile
-        self.assertEqual(profile.role, ProfileRole.MEMBER)
-        self.assertIsNone(profile.organization)
-        self.assertEqual(profile.organization_type, OrganizationType.INDIVIDUAL)
-        self.assertFalse(Membership.objects.filter(user=user, is_primary=True).exists())
+        self.assertEqual(profile.role, ProfileRole.STUDENT)
+        self.assertEqual(profile.organization, self.signup_target_org)
+        self.assertEqual(profile.requested_organization, self.signup_target_org)
+        self.assertEqual(profile.requested_organization_name, self.signup_target_org.name)
+        self.assertEqual(profile.organization_type, self.signup_target_org.org_type)
+        self.assertTrue(Membership.objects.filter(user=user, organization=self.signup_target_org, is_primary=True).exists())
+
+    def test_individual_signup_requires_organization_selection(self):
+        response = self.client.post(self.register_url, self._register_payload(join_organization=""))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Individual qeydiyyat üçün qurum seçimi tələb olunur.")
+        self.assertFalse(User.objects.filter(username="newuser").exists())
 
     def test_signup_form_does_not_offer_student_role(self):
         response = self.client.get(self.register_url)
@@ -231,6 +253,7 @@ class ProfileAndSuspensionFlowTest(TestCase):
         response = self.client.post(
             reverse("accounts:profile") + "?section=edit-profile",
             {
+                "profile_form": "edit-profile",
                 "first_name": "Stu",
                 "last_name": "Dent",
                 "email": "studentprofile@example.com",

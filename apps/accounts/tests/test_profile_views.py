@@ -61,6 +61,91 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
 
+    def test_profile_edit_section_prefills_existing_values(self):
+        from apps.accounts.models import UserProfile
+        from apps.courses.models import Course
+
+        self.user.first_name = "Elvin"
+        self.user.last_name = "Qurbanov"
+        self.user.email = "elvin@example.com"
+        self.user.save(update_fields=["first_name", "last_name", "email"])
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.phone = "+994501112233"
+        profile.location = "Baku"
+        profile.student_university_name = "ADA University"
+        profile.student_school_identifier = "AZ-123"
+        profile.bio = "Bio test text"
+        profile.save(
+            update_fields=[
+                "phone",
+                "location",
+                "student_university_name",
+                "student_school_identifier",
+                "bio",
+                "updated_at",
+            ]
+        )
+        Course.objects.create(owner=self.user, title="Owned Course", status="published")
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="Elvin"')
+        self.assertContains(response, 'value="Qurbanov"')
+        self.assertContains(response, 'value="elvin@example.com"')
+        self.assertContains(response, 'value="+994501112233"')
+        self.assertContains(response, 'value="Baku"')
+        self.assertContains(response, 'value="ADA University"')
+        self.assertContains(response, 'value="AZ-123"')
+        self.assertContains(response, "Bio test text")
+
+    def test_non_profile_post_does_not_overwrite_profile_fields(self):
+        from apps.accounts.models import UserProfile
+
+        self.user.first_name = "Elvin"
+        self.user.last_name = "Qurbanov"
+        self.user.email = "elvin@example.com"
+        self.user.save(update_fields=["first_name", "last_name", "email"])
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.phone = "+994501112233"
+        profile.location = "Baku"
+        profile.student_university_name = "ADA University"
+        profile.student_school_identifier = "AZ-123"
+        profile.bio = "Bio test text"
+        profile.save(
+            update_fields=[
+                "phone",
+                "location",
+                "student_university_name",
+                "student_school_identifier",
+                "bio",
+                "updated_at",
+            ]
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=posts",
+            data={"title": "Post title", "content": "Post content"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=posts")
+
+        self.user.refresh_from_db()
+        profile.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Elvin")
+        self.assertEqual(self.user.last_name, "Qurbanov")
+        self.assertEqual(self.user.email, "elvin@example.com")
+        self.assertEqual(profile.phone, "+994501112233")
+        self.assertEqual(profile.location, "Baku")
+        self.assertEqual(profile.student_university_name, "ADA University")
+        self.assertEqual(profile.student_school_identifier, "AZ-123")
+        self.assertEqual(profile.bio, "Bio test text")
+
     def test_superuser_is_teacher_and_admin(self):
         """Test that superusers always pass role checks."""
         superuser = User.objects.create_superuser(
@@ -431,6 +516,21 @@ class MyResultsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Unified Assignment")
         self.assertContains(response, "Assignment feedback")
+        self.assertContains(response, reverse("accounts:profile") + "?section=my-results")
+        self.assertContains(response, "results_type=all")
+
+    def test_my_result_detail_preserves_profile_results_filter_in_back_link(self):
+        self.client.login(username="results_student", password="testpass123")
+        response = self.client.get(
+            reverse(
+                "accounts:my_result_detail",
+                kwargs={"item_type": "courses", "item_id": self.assignment_submission.id},
+            )
+            + "?results_type=courses"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("accounts:profile") + "?section=my-results")
+        self.assertContains(response, "results_type=courses")
 
 
 class PendingReviewViewTest(TestCase):

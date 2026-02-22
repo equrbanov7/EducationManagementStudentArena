@@ -42,7 +42,7 @@
                             {% for submission in submissions %}
                             <tr>
                                 <td>
-                                    <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
+                                    <strong>{{ submission.user.get_full_name|default:submission.user.username }}</strong>
                                 </td>
                                 <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
                              
@@ -67,7 +67,7 @@
                                             data-bs-toggle="modal"
                                             data-bs-target="#submissionModal"
                                             data-id="{{ submission.id }}"
-                                            data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
+                                            data-student="{{ submission.user.get_full_name|default:submission.user.username }}"
                                             data-content="{{ submission.content }}"
                                             data-file="{% if submission.file %}{{ submission.file.url }}{% endif %}"
                                             data-filename="{% if submission.file %}{{ submission.file.name|cut:'assignments/submissions/' }}{% endif %}"

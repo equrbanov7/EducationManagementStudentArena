@@ -1,64 +1,87 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# 1. Səhifə başlığını təyin edirik #}
-{% block title %}Haqqımızda | My Awesome Blog{% endblock %}
+{% block title %}EMSArena Haqqında | Təhsil Platforması{% endblock %}
 
-{# 2. Bu səhifəyə məxsus CSS faylını qoşuruq #}
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/about.css' %}">
+    {# Animasiyalar üçün əlavə kitabxana (əgər yoxdursa) - opsional #}
+    {# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> #}
 {% endblock %}
 
-{# 3. Əsas məzmunu yerləşdiririk #}
 {% block content %}
-<div class="about-container">
+<div class="ems-container">
 
-    <header class="about-header">
-        <h1>Bizim Hekayəmiz</h1>
-        <p class="about-lead-text">
-            Blogumuzun necə yarandığı, missiyamız və bizi hər gün yazmağa ruhlandıran səbəblər haqqında.
+    <header class="ems-hero animate-fade-down">
+        <h1 class="main-title">
+            <span class="highlight">EMSArena</span>: Təhsil İdarəetmə və Tələbə Qiymətləndirmə Platforması
+        </h1>
+        <p class="hero-description">
+            EMSArena – universitetlər, məktəblər, təlim mərkəzləri və fərdi təlimçilər üçün nəzərdə tutulmuş vahid, miqyaslana bilən və çoxfunksiyalı rəqəmsal təhsil ekosistemidir. Biz tədris prosesini rəqəmsallaşdırır və idarəetməni asanlaşdırırıq.
         </p>
     </header>
 
-    <section class="about-content-block">
-        <div class="about-text">
-            <h2>Missiyamız Nədir?</h2>
-            <p>Burada blogunuzun əsas məqsədini yaza bilərsiniz. Məsələn: "Bizim əsas məqsədimiz mürəkkəb texnoloji yenilikləri və proqramlaşdırma dünyasındakı trendləri ana dilimizdə, sadə və anlaşıqlı şəkildə oxuculara çatdırmaqdır."</p>
-            <p>Biz inanırıq ki, bilik paylaşıldıqca dəyər qazanır. Hər bir məqaləmizlə oxucularımıza yeni bir baxış bucağı qazandırmağı hədəfləyirik.</p>
-        </div>
-        <div class="about-image-wrapper">
-            <img src="https://picsum.photos/id/2/600/400" alt="Bizim missiyamız">
+    <section class="ems-features-section">
+        <h2 class="section-title animate-fade-in">Platformanın Üstünlükləri və İmkanları</h2>
+        
+        <div class="features-grid">
+            
+            <div class="feature-card animate-slide-up delay-1">
+                <div class="icon-wrapper">
+                    <i class="fas fa-folder-open"></i> </div>
+                <h3 class="feature-title">Vahid Məzmun İdarəetməsi</h3>
+                <p class="feature-text">
+                    Elmi və tədris materiallarının (mühazirə qeydləri, təqdimatlar, fayllar, faydalı linklər və s.) tək bir mərkəzi platforma üzərindən paylaşılması və idarə edilməsi.
+                </p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-2">
+                <div class="icon-wrapper">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <h3 class="feature-title">Tədrisin Rəqəmsallaşdırılması</h3>
+                <p class="feature-text">
+                    Kursların, mövzuların, resursların və tapşırıqların vahid, strukturlaşdırılmış şəkildə təşkili. Tədris prosesinin tam rəqəmsal mühitə keçidi.
+                </p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-3">
+                <div class="icon-wrapper">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3 class="feature-title">Fərdi Portallar və Panellər</h3>
+                <p class="feature-text">
+                    Müəllimlər, tələbələr və rəhbərlik üçün xüsusi idarəetmə panelləri. E-jurnal, qiymətləndirmə, davamiyyət və nəticələrin analitik monitorinqi daxildir.
+                </p>
+            </div>
+
+            <div class="feature-card animate-slide-up delay-4">
+                <div class="icon-wrapper">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <h3 class="feature-title">Çoxformatlı Qiymətləndirmə</h3>
+                <p class="feature-text">
+                    Test, yazılı, praktiki və real-vaxt (canlı) imtahanların keçirilməsi. Geniş sual bankı və sınaq imtahanları (mock exams) yaratmaq imkanı.
+                </p>
+            </div>
+
+             <div class="feature-card animate-slide-up delay-5" style="grid-column: span 1 / -1; max-width: 800px; margin: 0 auto;">
+                <div class="icon-wrapper">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="feature-title">Çox-təşkilatlı (Multi-tenant) Struktur</h3>
+                <p class="feature-text">
+                    Eyni platformada birdən çox təşkilatın fəaliyyəti. Hər təşkilat üçün ayrı rol/idarəetmə qaydaları və tam izolyasiya edilmiş məlumat bazası təhlükəsizliyi.
+                </p>
+            </div>
+
         </div>
     </section>
 
-    <section class="about-content-block reverse">
-        <div class="about-text">
-            <h2>Komandamızla Tanış Olun</h2>
-            <p>Bu blog bir nəfərin həvəsi ilə başlasa da, indi böyük bir cəmiyyətə çevrilib. Biz fərqli sahələrdən gələn, amma ortaq maraqları paylaşan bir qrup entuziastıq.</p>
-            <p>Yazarlarımız öz sahələrində təcrübəli mütəxəssislərdir və hər zaman ən dəqiq məlumatı araşdırıb sizə təqdim etməyə çalışırlar.</p>
-        </div>
-        <div class="about-image-wrapper">
-             <img src="https://picsum.photos/id/107/600/400" alt="Bizim komanda">
-        </div>
-    </section>
-
-    <section class="about-values-section">
-        <h2>Dəyərlərimiz</h2>
-        <div class="about-values-grid">
-            <div class="value-item">
-                <h3>Keyfiyyət</h3>
-                <p>Kəmiyyətə deyil, məzmunun dərinliyinə və keyfiyyətinə önəm veririk.</p>
-            </div>
-            <div class="value-item">
-                <h3>Obyektivlik</h3>
-                <p>Mövzuları tərəfsiz araşdırır və fərqli baxış bucaqlarını təqdim edirik.</p>
-            </div>
-            <div class="value-item">
-                <h3>İnkişaf</h3>
-                <p>Daim öyrənir, yenilikləri izləyir və blogumuzu təkmilləşdiririk.</p>
-            </div>
-        </div>
-    </section>
+    <div class="cta-section animate-fade-in delay-6">
+        <p>Təhsilin gələcəyini EMSArena ilə kəşf edin.</p>
+        <a href="#" class="cta-button">Platformaya Keçid Edin &rarr;</a>
+    </div>
 
 </div>
 {% endblock %}

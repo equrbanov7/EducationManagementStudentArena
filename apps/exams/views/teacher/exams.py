@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
@@ -46,6 +48,7 @@ def createAndEditExamView(request, slug=None):
     else:
         exam = None
         is_editing = False
+    is_modal_request = request.GET.get("modal") == "1"
 
     if request.method == "POST":
         if is_editing:
@@ -70,13 +73,37 @@ def createAndEditExamView(request, slug=None):
                 request,
                 ("İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"),
             )
+            if is_modal_request:
+                return JsonResponse({"success": True, "slug": exam_instance.slug})
             return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
+        if is_modal_request:
+            html = render_to_string(
+                "exams/teacher/partials/_create_exam_modal_form.html",
+                {
+                    "form": form,
+                    "is_editing": is_editing,
+                    "exam": exam,
+                },
+                request=request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
     else:
         # GET request
         if is_editing:
             form = ExamForm(instance=exam, user=request.user, organization=organization)
         else:
             form = ExamForm(user=request.user, organization=organization)
+
+    if is_modal_request:
+        return render(
+            request,
+            "exams/teacher/partials/_create_exam_modal_form.html",
+            {
+                "form": form,
+                "exam": exam,
+                "is_editing": is_editing,
+            },
+        )
 
     return render(
         request,

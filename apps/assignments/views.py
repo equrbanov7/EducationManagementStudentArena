@@ -57,7 +57,7 @@ def create_assignment(request, course_id):
             title=request.POST.get("title"),
             description=request.POST.get("description", ""),
             start_date=request.POST.get("start_date"),
-            deadline=request.POST.get("deadline"),
+            due_date=request.POST.get("deadline"),
             max_attempts=request.POST.get("max_attempts", 3),
             status=request.POST.get("status", "active"),
         )
@@ -130,7 +130,7 @@ def edit_assignment(request, pk):
             "title": assignment.title,
             "description": assignment.description,
             "start_date": (assignment.start_date.strftime("%Y-%m-%dT%H:%M") if assignment.start_date else ""),
-            "deadline": (assignment.deadline.strftime("%Y-%m-%dT%H:%M") if assignment.deadline else ""),
+            "deadline": (assignment.due_date.strftime("%Y-%m-%dT%H:%M") if assignment.due_date else ""),
             "max_attempts": assignment.max_attempts,
             "status": assignment.status,
             "group_names": assigned_groups,
@@ -152,7 +152,7 @@ def edit_assignment(request, pk):
         assignment.title = request.POST.get("title")
         assignment.description = request.POST.get("description", "")
         assignment.start_date = request.POST.get("start_date")
-        assignment.deadline = request.POST.get("deadline")
+        assignment.due_date = request.POST.get("deadline")
         assignment.max_attempts = request.POST.get("max_attempts", 3)
         assignment.status = request.POST.get("status", "active")
         assignment.save()
@@ -238,7 +238,7 @@ def assignment_detail(request, pk):
             return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = assignment.submissions.filter(student=request.user).order_by("-submitted_at")
+    user_submissions = assignment.submissions.filter(user=request.user).order_by("-submitted_at")
     user_attempts = user_submissions.count()
 
     context = {
@@ -278,7 +278,7 @@ def submit_assignment(request, pk):
     try:
         submission = AssignmentSubmission.objects.create(
             assignment=assignment,
-            student=request.user,
+            user=request.user,
             content=request.POST.get("content", ""),
         )
 
@@ -324,7 +324,7 @@ def my_submissions(request, pk):
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin cavablarını al
-    submissions = assignment.submissions.filter(student=request.user).order_by("-submitted_at")
+    submissions = assignment.submissions.filter(user=request.user).order_by("-submitted_at")
     user_attempts = submissions.count()
 
     context = {
@@ -363,7 +363,7 @@ def review_submissions(request, pk):
         messages.error(request, "İcazəniz yoxdur")
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
-    submissions = assignment.submissions.select_related("student").order_by("-submitted_at")
+    submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
 
     context = {
         "assignment": assignment,

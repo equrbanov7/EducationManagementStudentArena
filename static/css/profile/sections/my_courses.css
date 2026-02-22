@@ -1,0 +1,128 @@
+/* --- Rəng Dəyişənləri (Kurslar üçün Narıncı/Kəhrəba Tonları) --- */
+:root {
+    --course-primary: #d97706;       /* Əsas narıncı */
+    --course-hover: #b45309;         /* Tünd narıncı (Hover) */
+    --course-light: #fef3c7;         /* Açıq arxa plan */
+    --course-border-hover: #fde68a;  /* Border hover */
+}
+
+/* --- Xüsusi Rəng Klassları --- */
+.text-orange {
+    color: var(--course-primary) !important;
+}
+
+.badge-orange {
+    background: var(--course-light) !important;
+    color: var(--course-primary) !important;
+}
+
+.btn-orange {
+    background-color: var(--course-primary) !important;
+    color: #ffffff !important;
+    border: none;
+    
+
+
+}
+
+.btn-orange:hover {
+    background-color: var(--course-hover) !important;
+    box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2) !important;
+}
+
+.icon-orange-light {
+    color: var(--course-primary) !important;
+    background: var(--course-light) !important;
+}
+
+/* --- Kurs Grid Sistemi --- */
+.course-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- Kurs Kartı Dizaynı --- */
+.modern-course-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.modern-course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.1);
+    border-color: var(--course-border-hover);
+}
+
+/* Kart İkonu */
+.course-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: var(--course-light);
+    color: var(--course-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.modern-course-card:hover .course-card-icon {
+    background: var(--course-primary);
+    color: #ffffff;
+}
+
+/* Kart Məzmunu */
+.course-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.course-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.4rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.course-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.badge-status {
+    background: #f1f5f9;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Sağ Tərəf Ox İşarəsi (Action) */
+.course-card-action {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, color 0.2s;
+}
+
+.modern-course-card:hover .course-card-action {
+    color: var(--course-primary);
+    transform: translateX(4px);
+}

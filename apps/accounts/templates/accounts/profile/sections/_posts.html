@@ -1,0 +1,241 @@
+{% if can_manage_blog %}
+<section class="profile-section-panel profile-section--posts {% if active_section == 'posts' %}is-active{% endif %}" data-profile-section-panel="posts">
+    <div class="section-card profile-posts-card">
+        <div class="section-title">
+            <i class="fas fa-newspaper"></i>
+            Postlarım ({{ posts_count }})
+        </div>
+
+        <section class="profile-posts-section">
+            {% if user_posts %}
+                <div class="blog-grid-container">
+                    {% for post in user_posts %}
+                        <article class="profile-post-card">
+                            <div class="post-controls">
+                                <span class="post-status-badge {% if post.is_published %}status-published{% else %}status-draft{% endif %}">
+                                    {% if post.is_published %}
+                                        <i class="fas fa-check-circle"></i> Nəşr olunub
+                                    {% else %}
+                                        <i class="fas fa-pencil-alt"></i> Qaralama
+                                    {% endif %}
+                                </span>
+
+                                <div class="action-icons">
+                                    <button class="icon-action-btn edit-btn js-edit-post"
+                                            data-post-id="{{ post.pk }}"
+                                            data-title="{{ post.title|escape }}"
+                                            data-content="{{ post.content|escape }}"
+                                            data-category="{{ post.category.id|default_if_none:'' }}"
+                                            data-excerpt="{{ post.excerpt|default_if_none:''|escape }}"
+                                            data-image-url="{{ post.image_url|default_if_none:''|escape }}"
+                                            data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
+                                            data-is-published="{{ post.is_published|yesno:'true,false' }}"
+                                            data-slug="{{ post.slug|escape }}"
+                                            data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
+                                            data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
+                                            title="Redaktə et">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+
+                                    <button class="icon-action-btn delete-btn js-open-delete"
+                                            data-post-id="{{ post.pk }}"
+                                            data-title="{{ post.title|escape }}"
+                                            title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {% include "partials/_blogCard.html" with post=post %}
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="profile-edit-link">
+                    <button type="button" class="btn btn-primary js-open-create-post">
+                        <i class="fas fa-plus"></i> Yeni Post Yarat
+                    </button>
+                </div>
+                {% if user_posts.has_other_pages %}
+                    {% include "partials/_pagination.html" with page_obj=user_posts extra_query="section=posts" %}
+                {% endif %}
+            {% else %}
+                <div class="profile-no-posts-message">
+                    Hələ heç bir post yaratmamısınız. İlk postunu yarat.
+                </div>
+                <div class="profile-edit-link">
+                    <button type="button" class="btn btn-primary js-open-create-post">
+                        <i class="fas fa-plus"></i> İlk Postunu Yarat
+                    </button>
+                </div>
+            {% endif %}
+        </section>
+
+        <div id="createModal" class="modal-overlay">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3>Yeni Post Yarat</h3>
+                    <button class="modal-close-btn" id="closeCreateModal" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div id="createFormError" class="create-form-error" hidden></div>
+
+                <form id="createForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="createTitle">Başlıq</label>
+                        <input type="text" id="createTitle" name="title" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createCategory">Kateqoriya</label>
+                        <select id="createCategory" name="category" class="form-control">
+                            <option value="">--- Kateqoriya Seçin ---</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createNewCategory">Yeni Kateqoriya</label>
+                        <input type="text" id="createNewCategory" name="new_category" class="form-control"
+                               placeholder="Siyahıda yoxdursa yenisini yazın...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createExcerpt">Qısa məzmun</label>
+                        <textarea id="createExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createContent">Məzmun</label>
+                        <textarea id="createContent" name="content" class="form-control" rows="10" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createImageUrl">Şəkil URL</label>
+                        <input type="url" id="createImageUrl" name="image_url" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="createImage">Şəkil yüklə (optional)</label>
+                        <input type="file" id="createImage" name="image" class="form-control" accept="image/*">
+                    </div>
+
+                    <div class="form-group form-check">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="createIsPublished" name="is_published" checked>
+                            Məqalə dərc olunsun
+                        </label>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" id="cancelCreate" class="modal-cancel-btn">Ləğv Et</button>
+                        <button type="submit" id="saveCreate" class="modal-confirm-btn">Yarat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="editModal" class="modal-overlay">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h3>Postu Redaktə Et</h3>
+                    <button class="modal-close-btn" id="closeEditModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="form-meta">
+                    <p><strong>Slug:</strong> <span id="editSlugInfo"></span></p>
+                    <p><strong>Yaradılma:</strong> <span id="editCreatedAtInfo"></span></p>
+                    <p><strong>Son yenilənmə:</strong> <span id="editUpdatedAtInfo"></span></p>
+                </div>
+
+                <form id="editForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="editTitle">Başlıq</label>
+                        <input type="text" id="editTitle" name="title" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editCategory">Kateqoriya</label>
+                        <select id="editCategory" name="category" class="form-control" required>
+                            <option value="" disabled>Kateqoriya seçin</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editExcerpt">Qısa məzmun</label>
+                        <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editContent">Məzmun</label>
+                        <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mövcud şəkil</label>
+                        <div id="editImagePreviewWrapper" class="image-preview-wrapper">
+                            <img id="editImagePreview" src="" alt="Post şəkli" class="image-preview" style="display:none;">
+                            <p id="noImageText" class="no-image-text">Şəkil təyin edilməyib</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editImage">Yeni şəkil yüklə (optional)</label>
+                        <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editImageUrl">Şəkil URL (əgər fayl yoxdursa)</label>
+                        <input type="url" id="editImageUrl" name="image_url" class="form-control">
+                    </div>
+
+                    <div class="form-group form-check">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="editIsPublished" name="is_published">
+                            Məqalə dərc olunsun
+                        </label>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="button" id="cancelEdit" class="modal-cancel-btn">Ləğv Et</button>
+                        <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>Yadda Saxla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="deleteModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Silinməni Təsdiqlə</h3>
+                <p>Əminsiniz ki, <span id="deleteTitle" class="fw-bold"></span> başlıqlı postu silmək istəyirsiniz?</p>
+                <div class="modal-buttons">
+                    <button id="cancelDelete" class="modal-cancel-btn">Ləğv Et</button>
+                    <button id="confirmDelete" class="modal-confirm-btn delete-btn">Sil</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="warningModal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Yadda Saxlanılmamış Dəyişikliklər</h3>
+                <p>Postda etdiyiniz dəyişikliklər yadda saxlanılmayıb. Saxlamadan çıxmaq istəyirsiniz?</p>
+                <div class="modal-buttons">
+                    <button id="stayOnModal" class="modal-cancel-btn">Qal</button>
+                    <button id="discardChanges" class="modal-confirm-btn warning-btn">Saxlamadan Çıx</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}

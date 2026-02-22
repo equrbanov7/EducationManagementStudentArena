@@ -195,9 +195,9 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Hər assignment üçün user-specific məlumat hazırla
             assignments_with_user_data = []
             for a in assignments_qs:
-                user_attempts = a.submissions.filter(student=user).count()
+                user_attempts = a.submissions.filter(user=user).count()
                 is_deadline_passed = a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
-                is_active = a.status == "active"
+                is_active = a.status in {"active", "published"}
                 can_submit = user_attempts < a.max_attempts and not is_deadline_passed and is_active
                 attempts_left = a.max_attempts - user_attempts
 

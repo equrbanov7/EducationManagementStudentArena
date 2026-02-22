@@ -54,7 +54,7 @@
                                     <i class="fa-solid fa-calendar-days"></i> 
                                     {{ a.deadline|date:"d.m.Y H:i" }}
                                     
-                                    {% if a.status == 'active' %}
+                                    {% if a.is_open_status %}
                                         {% if a.is_deadline_passed %}
                                             <span class="badge bg-danger ms-1">Müddət Keçib</span>
                                         {% else %}
@@ -120,7 +120,7 @@
                                     <i class="fa-solid fa-calendar-days"></i> 
                                     {{ a.deadline|date:"d.m.Y H:i" }}
                                     
-                                    {% if a.status == 'active' %}
+                                    {% if a.is_open_status %}
                                         {% if item.is_deadline_passed %}
                                             <span class="badge bg-danger ms-1">Müddət Keçib</span>
                                         {% else %}
@@ -137,7 +137,7 @@
                                     <span class="{% if item.attempts_left == 0 %}text-danger fw-bold{% endif %}">
                                         {{ item.user_attempts }} / {{ a.max_attempts }}
                                     </span>
-                                    {% if item.attempts_left > 0 and not item.is_deadline_passed and a.status == 'active' %}
+                                    {% if item.attempts_left > 0 and not item.is_deadline_passed and a.is_open_status %}
                                         <span class="badge bg-info ms-1">{{ item.attempts_left }} qalıb</span>
                                     {% elif item.attempts_left == 0 %}
                                         <span class="badge bg-danger ms-1">Cəhd bitdi</span>
@@ -163,7 +163,7 @@
                                         <span class="btn btn-sm btn-secondary disabled">
                                             <i class="fa-solid fa-lock"></i> Müddət keçib
                                         </span>
-                                    {% elif a.status != 'active' %}
+                                    {% elif not a.is_open_status %}
                                         <span class="btn btn-sm btn-secondary disabled">
                                             <i class="fa-solid fa-pause"></i> Deaktiv
                                         </span>

@@ -8,18 +8,20 @@ class AssignmentForm(forms.ModelForm):
 
     class Meta:
         model = Assignment
-        fields = ["title", "description", "deadline", "max_attempts", "status"]
+        fields = ["title", "description", "start_date", "due_date", "max_attempts", "status"]
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Sərbəst işin başlığı"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Təsvir..."}),
-            "deadline": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "start_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            "due_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
             "max_attempts": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 3}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         labels = {
             "title": "Başlıq",
             "description": "Təsvir",
-            "deadline": "Son tarix",
+            "start_date": "Başlama tarixi",
+            "due_date": "Son tarix",
             "max_attempts": "Maksimum cəhd",
             "status": "Status",
         }

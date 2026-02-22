@@ -3,11 +3,13 @@ Account views for user dashboards, profile management, authentication, and role 
 """
 
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Count, Q
@@ -30,6 +32,7 @@ from .models import ProfileRole, UserProfile
 
 User = get_user_model()
 signer = TimestampSigner()
+RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
 
 
 def _is_superadmin_user(user):
@@ -176,6 +179,9 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
         }
+
+    if can_manage_blog:
+        allowed_sections.add("create-post")
 
     return {
         "role": role,
@@ -375,14 +381,28 @@ def _result_status_badge(status, is_graded=False):
     return "submitted"
 
 
-def _collect_my_results(request):
+def _normalize_results_filter(value):
+    normalized = (value or "all").lower()
+    if normalized in RESULT_FILTER_CHOICES:
+        return normalized
+    return "all"
+
+
+def _append_query_params(url, **params):
+    clean_params = {key: value for key, value in params.items() if value not in (None, "")}
+    if not clean_params:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode(clean_params)}"
+
+
+def _collect_my_results(request, filter_type=None):
     """
     Build a unified result list for current user across exams, assignments, labs, and projects.
     """
     user = request.user
-    filter_type = (request.GET.get("type") or "all").lower()
-    if filter_type not in {"all", "exams", "courses", "labs", "independent"}:
-        filter_type = "all"
+    selected_filter = filter_type if filter_type is not None else request.GET.get("type")
+    filter_type = _normalize_results_filter(selected_filter)
 
     scoped_exams = _tenant_scoped_exams(request)
     scoped_courses = _tenant_scoped_courses(request)
@@ -449,9 +469,12 @@ def _collect_my_results(request):
                     "status_raw": submission.get_status_display(),
                     "score": submission.grade,
                     "feedback": submission.feedback,
-                    "detail_url": reverse(
-                        "accounts:my_result_detail",
-                        kwargs={"item_type": "courses", "item_id": submission.id},
+                    "detail_url": _append_query_params(
+                        reverse(
+                            "accounts:my_result_detail",
+                            kwargs={"item_type": "courses", "item_id": submission.id},
+                        ),
+                        results_type=filter_type,
                     ),
                 }
             )
@@ -477,9 +500,12 @@ def _collect_my_results(request):
                     "status_raw": submission.get_status_display(),
                     "score": submission.score,
                     "feedback": submission.feedback,
-                    "detail_url": reverse(
-                        "accounts:my_result_detail",
-                        kwargs={"item_type": "labs", "item_id": submission.id},
+                    "detail_url": _append_query_params(
+                        reverse(
+                            "accounts:my_result_detail",
+                            kwargs={"item_type": "labs", "item_id": submission.id},
+                        ),
+                        results_type=filter_type,
                     ),
                 }
             )
@@ -505,9 +531,12 @@ def _collect_my_results(request):
                     "status_raw": submission.get_status_display(),
                     "score": submission.grade,
                     "feedback": submission.feedback,
-                    "detail_url": reverse(
-                        "accounts:my_result_detail",
-                        kwargs={"item_type": "independent", "item_id": submission.id},
+                    "detail_url": _append_query_params(
+                        reverse(
+                            "accounts:my_result_detail",
+                            kwargs={"item_type": "independent", "item_id": submission.id},
+                        ),
+                        results_type=filter_type,
                     ),
                 }
             )
@@ -610,9 +639,9 @@ def student_dashboard(request):
     # Get pending assignments
     pending_assignments = Assignment.objects.filter(
         course__in=enrolled_courses,
-        deadline__gte=timezone.now(),
-        status="published",
-    ).order_by("deadline")[:5]
+        due_date__gte=timezone.now(),
+        status__in=["published", "active"],
+    ).order_by("due_date")[:5]
 
     # Get upcoming exams
     upcoming_exams = (
@@ -641,7 +670,7 @@ def user_profile(request):
     Ensures profile exists before rendering.
     Now accessible to ALL users (not just teachers).
     """
-    from apps.blog.models import Post
+    from apps.blog.models import Category, Post
 
     # Ensure profile exists (get_or_create for safety)
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -653,24 +682,40 @@ def user_profile(request):
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
 
     if request.method == "POST":
-        new_email = (request.POST.get("email", "") or "").strip().lower()
-        student_university_name = (request.POST.get("student_university_name", "") or "").strip()
-        student_school_identifier = (request.POST.get("student_school_identifier", "") or "").strip()
+        if request.POST.get("profile_form") != "edit-profile":
+            target_section = request.GET.get("section") or request.POST.get("section") or active_section
+            if target_section not in allowed_sections:
+                target_section = "profile-info"
+            return redirect(f"{reverse('accounts:profile')}?section={target_section}")
+
+        first_name = (request.POST.get("first_name", request.user.first_name) or "").strip()
+        last_name = (request.POST.get("last_name", request.user.last_name) or "").strip()
+        new_email = (request.POST.get("email", request.user.email) or "").strip().lower()
+        student_university_name = (
+            request.POST.get("student_university_name", profile.student_university_name) or ""
+        ).strip()
+        student_school_identifier = (
+            request.POST.get("student_school_identifier", profile.student_school_identifier) or ""
+        ).strip()
+
+        if not first_name or not last_name or not new_email:
+            messages.error(request, "Ad, soyad və email sahələri boş buraxıla bilməz.")
+            return redirect("accounts:profile" + "?section=edit-profile")
 
         if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
             messages.error(request, "Bu email artıq istifadə olunur.")
             return redirect("accounts:profile" + "?section=edit-profile")
 
         # Update user info
-        request.user.first_name = request.POST.get("first_name", "")
-        request.user.last_name = request.POST.get("last_name", "")
+        request.user.first_name = first_name
+        request.user.last_name = last_name
         request.user.email = new_email
         request.user.save()
 
         # Update profile
-        profile.phone = request.POST.get("phone", "")
-        profile.bio = request.POST.get("bio", "")
-        profile.location = request.POST.get("location", "")
+        profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
+        profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
+        profile.location = (request.POST.get("location", profile.location) or "").strip()
         profile.student_university_name = student_university_name
         profile.student_school_identifier = student_school_identifier
 
@@ -722,37 +767,51 @@ def user_profile(request):
         my_exams = list(my_exams_qs[:10])
         my_exams_count = my_exams_qs.count()
 
-    user_posts = []
+    user_posts = None
     posts_count = 0
+    categories = []
     if capabilities["can_manage_blog"]:
-        user_posts = Post.objects.filter(author=request.user).order_by("-created_at")[:10]
-        posts_count = Post.objects.filter(author=request.user).count()
+        user_posts_qs = Post.objects.filter(author=request.user).select_related("category").order_by("-created_at")
+        posts_count = user_posts_qs.count()
+        user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
+        categories = Category.objects.all().order_by("name")
 
     assigned_exams_count = 0
     assigned_courses_count = 0
     my_results_count = 0
+    assigned_exam_items = []
+    assigned_courses = []
+    my_result_items = []
+    my_result_counts = {
+        "all": 0,
+        "exams": 0,
+        "courses": 0,
+        "labs": 0,
+        "independent": 0,
+    }
+    my_results_active_filter = "all"
     if capabilities["can_view_student_assignments"]:
-        assigned_exams_count = _assigned_exams_queryset(request, request.user, active_only=True).count()
-        assigned_courses_count = enrolled_courses_qs.count()
-        my_results_count = (
-            ExamAttempt.objects.filter(
-                user=request.user,
-                exam__in=_tenant_scoped_exams(request),
-                status__in=["submitted", "expired"],
-            ).count()
-            + Submission.objects.filter(
-                user=request.user,
-                assignment__course__in=_tenant_scoped_courses(request),
-            ).count()
-            + LabSubmission.objects.filter(
-                assignment__student=request.user,
-                assignment__lab__course__in=_tenant_scoped_courses(request),
-            ).count()
-            + ProjectSubmission.objects.filter(
-                student=request.user,
-                project__course__in=_tenant_scoped_courses(request),
-            ).count()
+        assigned_exams_qs = _assigned_exams_queryset(request, request.user, active_only=True).order_by(
+            "-start_datetime",
+            "-created_at",
         )
+        assigned_exams_count = assigned_exams_qs.count()
+        assigned_courses_count = enrolled_courses_qs.count()
+        assigned_courses = list(enrolled_courses_qs[:20])
+        for exam in assigned_exams_qs[:20]:
+            can_start_without_code, _ = exam.can_user_start(request.user, code=None)
+            assigned_exam_items.append(
+                {
+                    "exam": exam,
+                    "requires_code": bool(exam.access_code and not can_start_without_code),
+                }
+            )
+
+        my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
+            request,
+            filter_type=request.GET.get("results_type"),
+        )
+        my_results_count = my_result_counts.get("all", 0)
 
     pending_review_count = 0
     if capabilities["can_review_submissions"]:
@@ -778,14 +837,138 @@ def user_profile(request):
             status__in=["submitted", "late"],
         ).count()
 
+    section_titles = {
+        "profile-info": "Profil Məlumatları",
+        "posts": "Postlarım",
+        "create-post": "Yeni Post Yarat",
+        "courses": "Kurslarım",
+        "my-exams": "İmtahanlarım",
+        "my-courses": "Yaratdığım Kurslar",
+        "assigned-exams": "Təyin olunmuş imtahanlar",
+        "assigned-courses": "Təyin olunmuş kurslar",
+        "my-results": "My Results",
+        "groups": "Qruplar",
+        "pending-review": "To Review",
+        "role-assignment": "Role təyin et",
+        "permission-editor": "Permission-lar",
+        "manage-roles": "Rolları idarə et",
+        "superadmin-organizations": "Superadmin Nəzarəti",
+        "blog": "Blog",
+        "edit-profile": "Profili Redaktə Et",
+    }
+
+    shortcut_sections = []
+    if "create-post" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "create-post",
+                "title": section_titles["create-post"],
+                "url": reverse("create_post"),
+                "icon": "fas fa-plus-circle",
+                "source_url": reverse("create_post"),
+                "description": "Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin.",
+                "action_label": "Post yarat",
+            }
+        )
+    if "groups" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "groups",
+                "title": section_titles["groups"],
+                "url": reverse("exams:teacher_group_list"),
+                "icon": "fas fa-users",
+                "source_url": reverse("exams:teacher_group_list"),
+                "description": "Qrup idarəetməsini açmaq üçün aşağıdakı düyməyə keçin.",
+                "action_label": "Qrupları aç",
+            }
+        )
+    if "pending-review" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "pending-review",
+                "title": section_titles["pending-review"],
+                "url": reverse("accounts:pending_review"),
+                "icon": "fas fa-tasks",
+                "source_url": reverse("accounts:pending_review"),
+                "description": "Yoxlanılacaq işlərin tam siyahısını açmaq üçün düymədən istifadə edin.",
+                "action_label": "Yoxlama səhifəsini aç",
+            }
+        )
+    if "role-assignment" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "role-assignment",
+                "title": section_titles["role-assignment"],
+                "url": reverse("accounts:role_assignment"),
+                "icon": "fas fa-user-shield",
+                "source_url": reverse("accounts:role_assignment"),
+                "description": "Rol təyinatı üçün idarəetmə səhifəsi ayrıca açılır.",
+                "action_label": "Role təyin et",
+            }
+        )
+    if "permission-editor" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "permission-editor",
+                "title": section_titles["permission-editor"],
+                "url": reverse("accounts:permission_editor"),
+                "icon": "fas fa-key",
+                "source_url": reverse("accounts:permission_editor"),
+                "description": "Permission redaktəsi üçün idarəetmə səhifəsi ayrıca açılır.",
+                "action_label": "Permission-ları aç",
+            }
+        )
+    if "manage-roles" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "manage-roles",
+                "title": section_titles["manage-roles"],
+                "url": reverse("accounts:manage_roles"),
+                "icon": "fas fa-user-cog",
+                "source_url": reverse("accounts:manage_roles"),
+                "description": "Klassik rol idarəetmə səhifəsini açmaq üçün düymədən istifadə edin.",
+                "action_label": "Rolları idarə et",
+            }
+        )
+    if "superadmin-organizations" in allowed_sections:
+        shortcut_sections.append(
+            {
+                "section": "superadmin-organizations",
+                "title": section_titles["superadmin-organizations"],
+                "url": reverse("accounts:superadmin_organizations"),
+                "icon": "fas fa-building",
+                "source_url": reverse("accounts:superadmin_organizations"),
+                "description": "Superadmin təşkilat nəzarəti ayrıca səhifədədir.",
+                "action_label": "Nəzarət səhifəsini aç",
+            }
+        )
+    if capabilities["can_view_blog"]:
+        shortcut_sections.append(
+            {
+                "section": "blog",
+                "title": section_titles["blog"],
+                "url": reverse("home"),
+                "icon": "fas fa-blog",
+                "source_url": reverse("home"),
+                "description": "Blog lentinə keçmək üçün aşağıdakı düyməyə klik edin.",
+                "action_label": "Blogu aç",
+            }
+        )
+
+    active_section_title = section_titles.get(active_section, "Profil")
+
     context = {
         "profile": profile,
         "user_roles": user_roles,
         "active_section": active_section,
+        "active_section_title": active_section_title,
         "allowed_sections": allowed_sections,
+        "profile_base_url": reverse("accounts:profile"),
+        "shortcut_sections": shortcut_sections,
         "role_capabilities": capabilities,
         "user_posts": user_posts,
         "posts_count": posts_count,
+        "categories": categories,
         "my_courses": my_courses,
         "courses_count": courses_count,
         "my_exams": my_exams,
@@ -794,7 +977,12 @@ def user_profile(request):
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
         "assigned_courses_count": assigned_courses_count,
+        "assigned_exam_items": assigned_exam_items,
+        "assigned_courses": assigned_courses,
         "my_results_count": my_results_count,
+        "my_result_items": my_result_items,
+        "my_result_counts": my_result_counts,
+        "my_results_active_filter": my_results_active_filter,
         "pending_review_count": pending_review_count,
         "is_teacher": capabilities["is_teacher"],
         "is_admin": capabilities["can_manage_org"],
@@ -1008,7 +1196,7 @@ def my_results(request):
         messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
         return redirect("accounts:profile")
 
-    items, counts, active_filter = _collect_my_results(request)
+    items, counts, active_filter = _collect_my_results(request, filter_type=request.GET.get("type"))
     context = {
         "items": items,
         "counts": counts,
@@ -1025,6 +1213,13 @@ def my_result_detail(request, item_type, item_id):
     if not capabilities["can_view_student_assignments"]:
         messages.error(request, "Bu səhifə yalnız tələbə/member rolları üçün nəzərdə tutulub.")
         return redirect("accounts:profile")
+
+    results_filter = _normalize_results_filter(request.GET.get("results_type") or request.GET.get("type"))
+    back_url = _append_query_params(
+        reverse("accounts:profile"),
+        section="my-results",
+        results_type=results_filter,
+    )
 
     normalized_type = (item_type or "").lower()
     tenant_course_ids = _tenant_scoped_courses(request).values_list("id", flat=True)
@@ -1056,6 +1251,7 @@ def my_result_detail(request, item_type, item_id):
             "feedback": submission.feedback,
             "content_text": submission.content,
             "files": submission.files or [],
+            "back_url": back_url,
         }
         return render(request, "accounts/my_result_detail.html", context)
 
@@ -1078,6 +1274,7 @@ def my_result_detail(request, item_type, item_id):
             "content_text": submission.submission_text,
             "submission_link": submission.submission_link,
             "submission_file": submission.submission_file,
+            "back_url": back_url,
         }
         return render(request, "accounts/my_result_detail.html", context)
 
@@ -1099,11 +1296,12 @@ def my_result_detail(request, item_type, item_id):
             "feedback": submission.feedback,
             "content_text": submission.content,
             "submission_file": submission.file,
+            "back_url": back_url,
         }
         return render(request, "accounts/my_result_detail.html", context)
 
     messages.error(request, "Nəticə tipi tanınmadı.")
-    return redirect("accounts:my_results")
+    return redirect(back_url)
 
 
 @login_required
@@ -1698,6 +1896,7 @@ def register_view(request):
                 country_obj = Country.objects.filter(code=country_code).first()
                 country_name = country_obj.name if country_obj else country_code
                 institution = form.cleaned_data.get("institution")
+                join_organization = form.cleaned_data.get("join_organization")
                 institution_not_listed_name = form.cleaned_data.get("institution_not_listed_name", "")
                 organization_identifier = form.cleaned_data.get("organization_identifier", "")
                 organization_license_identifier = form.cleaned_data.get("organization_license_identifier", "")
@@ -1707,7 +1906,12 @@ def register_view(request):
                 requested_organization = None
                 requested_organization_name = ""
                 resolved_identifier = organization_identifier
-                if organization_type != OrganizationType.INDIVIDUAL:
+                if organization_type == OrganizationType.INDIVIDUAL:
+                    if join_organization is not None:
+                        organization = join_organization
+                        requested_organization = join_organization
+                        requested_organization_name = join_organization.name
+                else:
                     organization_name = institution.name if institution else institution_not_listed_name
                     requested_organization_name = organization_name
                     resolved_identifier = organization_identifier or (institution.code if institution else "")
@@ -1740,7 +1944,7 @@ def register_view(request):
                             requested_organization_name = requested_organization.name
 
                 profile, _ = UserProfile.objects.get_or_create(user=user)
-                profile.organization_type = organization_type
+                profile.organization_type = organization.org_type if organization is not None else organization_type
                 profile.organization = organization
                 profile.requested_organization = requested_organization
                 profile.requested_organization_name = requested_organization_name

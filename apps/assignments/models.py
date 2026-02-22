@@ -21,6 +21,9 @@ class Assignment(models.Model):
     STATUS_CHOICES = [
         ("draft", "Qaralama"),
         ("published", "Yayımlandı"),
+        # Backward compatibility with older UI/API values
+        ("active", "Aktiv"),
+        ("inactive", "Deaktiv"),
         ("archived", "Arxivləndi"),
     ]
 
@@ -104,6 +107,12 @@ class Assignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __init__(self, *args, **kwargs):
+        # Backward compatibility: old code may still pass `deadline`.
+        if "deadline" in kwargs and "due_date" not in kwargs:
+            kwargs["due_date"] = kwargs.pop("deadline")
+        super().__init__(*args, **kwargs)
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Sərbəst İş"
@@ -113,10 +122,23 @@ class Assignment(models.Model):
         return f"{self.course.title} - {self.title}"
 
     @property
+    def deadline(self):
+        # Backward compatibility for templates/old views.
+        return self.due_date
+
+    @deadline.setter
+    def deadline(self, value):
+        self.due_date = value
+
+    @property
     def is_deadline_passed(self):
         from django.utils import timezone
 
         return self.due_date and timezone.now() > self.due_date
+
+    @property
+    def is_open_status(self):
+        return self.status in {"active", "published"}
 
     def get_user_attempts(self, user):
         """İstifadəçinin cəhd sayını qaytarır"""
@@ -136,7 +158,7 @@ class Assignment(models.Model):
 
         if not self.allow_late and self.is_deadline_passed:
             return False
-        if self.status != "published":
+        if not self.is_open_status:
             return False
         if timezone.now() < self.start_date:
             return False

@@ -6,7 +6,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 
-from apps.organizations.models import Country, Institution
+from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
 
 from .models import ProfileRole
@@ -60,6 +60,14 @@ class RegisterForm(forms.ModelForm):
         queryset=Institution.objects.none(),
         required=False,
         empty_label="Müəssisə seçin",
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+
+    join_organization = forms.ModelChoiceField(
+        label="Qoşulmaq istədiyiniz qurum",
+        queryset=Organization.objects.none(),
+        required=False,
+        empty_label="Qurum seçin",
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
@@ -146,6 +154,7 @@ class RegisterForm(forms.ModelForm):
         country_code = cleaned_data.get("country")
         organization_type = cleaned_data.get("organization_type")
         institution = cleaned_data.get("institution")
+        join_organization = cleaned_data.get("join_organization")
         institution_not_listed_name = (cleaned_data.get("institution_not_listed_name") or "").strip()
         organization_identifier = (cleaned_data.get("organization_identifier") or "").strip()
         organization_license_identifier = (cleaned_data.get("organization_license_identifier") or "").strip()
@@ -159,7 +168,7 @@ class RegisterForm(forms.ModelForm):
         elif not Country.objects.filter(code=country_code, is_active=True).exists():
             self.add_error("country", "Seçilən ölkə etibarlı deyil.")
 
-        if initial_role == ProfileRole.STUDENT:
+        if initial_role == ProfileRole.STUDENT and organization_type != OrganizationType.INDIVIDUAL:
             self.add_error("initial_role", "Signup zamanı Student rolu seçilə bilməz.")
 
         if organization_type in {OrganizationType.SCHOOL, OrganizationType.UNIVERSITY, OrganizationType.COURSE_CENTER}:
@@ -178,16 +187,26 @@ class RegisterForm(forms.ModelForm):
                     "organization_identifier",
                     "University üçün rəsmi identifikator və ya kod tələb olunur.",
                 )
+            cleaned_data["join_organization"] = None
         else:
             cleaned_data["institution"] = None
             cleaned_data["institution_not_listed_name"] = ""
+            cleaned_data["organization_identifier"] = ""
+            cleaned_data["organization_license_identifier"] = ""
+            if not join_organization:
+                self.add_error("join_organization", "Individual qeydiyyat üçün qurum seçimi tələb olunur.")
+            else:
+                # Individual + selected organization should always onboard as student.
+                cleaned_data["initial_role"] = ProfileRole.STUDENT
 
         cleaned_data["country"] = (country_code or "").upper()
         cleaned_data["organization_type"] = organization_type
-        cleaned_data["initial_role"] = initial_role
+        cleaned_data["initial_role"] = cleaned_data.get("initial_role", initial_role)
         cleaned_data["institution_not_listed_name"] = institution_not_listed_name
-        cleaned_data["organization_identifier"] = organization_identifier
-        cleaned_data["organization_license_identifier"] = organization_license_identifier
+        cleaned_data["organization_identifier"] = cleaned_data.get("organization_identifier", organization_identifier)
+        cleaned_data["organization_license_identifier"] = cleaned_data.get(
+            "organization_license_identifier", organization_license_identifier
+        )
 
         return cleaned_data
 
@@ -221,6 +240,11 @@ class RegisterForm(forms.ModelForm):
             institutions = institutions.none()
 
         self.fields["institution"].queryset = institutions.order_by("name")
+        self.fields["join_organization"].queryset = (
+            Organization.objects.filter(is_active=True, status="active")
+            .exclude(org_type=OrganizationType.INDIVIDUAL)
+            .order_by("name")
+        )
 
 
 class CustomLoginForm(AuthenticationForm):

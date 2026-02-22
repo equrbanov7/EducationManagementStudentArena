@@ -63,3 +63,41 @@ class BlogRoleAccessTest(TestCase):
         self.client.force_login(self.teacher)
         response = self.client.get(reverse("create_post"))
         self.assertEqual(response.status_code, 200)
+
+    def test_author_can_delete_own_post_via_ajax(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("delete_post", args=[self.teacher_post.id]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"success": True, "message": '"Teacher Post" postu silindi.'})
+        self.assertFalse(Post.objects.filter(id=self.teacher_post.id).exists())
+
+    def test_other_user_cannot_delete_post(self):
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("delete_post", args=[self.teacher_post.id]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Post.objects.filter(id=self.teacher_post.id).exists())
+
+    def test_author_can_create_post_via_ajax(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("create_post"),
+            {
+                "title": "Ajax Created Post",
+                "content": "Ajax content",
+                "excerpt": "Ajax excerpt",
+                "category": "",
+                "new_category": "",
+                "image_url": "",
+                "is_published": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"success": true')
+        self.assertTrue(Post.objects.filter(author=self.teacher, title="Ajax Created Post").exists())

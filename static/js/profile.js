@@ -1,35 +1,407 @@
 /**
- * Profile page sidebar toggle functionality.
+ * Profile page sidebar and section switching functionality.
  */
-document.addEventListener('DOMContentLoaded', function () {
-    var toggleBtn = document.getElementById('sidebarToggle');
-    var sidebar = document.getElementById('profileSidebar');
+document.addEventListener("DOMContentLoaded", function () {
+    var toggleBtn = document.getElementById("sidebarToggle");
+    var sidebar = document.getElementById("profileSidebar");
 
-    if (!toggleBtn || !sidebar) {
+    function syncSidebarToggleState() {
+        if (!toggleBtn || !sidebar) {
+            return;
+        }
+
+        var icon = toggleBtn.querySelector("i");
+        var isCollapsed = sidebar.classList.contains("collapsed");
+
+        if (!icon) {
+            return;
+        }
+
+        if (isCollapsed) {
+            icon.classList.remove("fa-chevron-left");
+            icon.classList.add("fa-chevron-right");
+            toggleBtn.title = "Sidebar-ı aç";
+        } else {
+            icon.classList.remove("fa-chevron-right");
+            icon.classList.add("fa-chevron-left");
+            toggleBtn.title = "Sidebar-ı bağla";
+        }
+    }
+
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("collapsed");
+            syncSidebarToggleState();
+            localStorage.setItem("profileSidebarCollapsed", sidebar.classList.contains("collapsed"));
+        });
+
+        if (localStorage.getItem("profileSidebarCollapsed") === "true") {
+            sidebar.classList.add("collapsed");
+        }
+        syncSidebarToggleState();
+    }
+
+    var profilePage = document.querySelector(".profile-page");
+    if (!profilePage) {
         return;
     }
 
-    toggleBtn.addEventListener('click', function () {
-        var icon = this.querySelector('i');
-        sidebar.classList.toggle('collapsed');
+    var profileBaseUrl = profilePage.getAttribute("data-profile-base-url") || window.location.pathname;
+    var defaultSection = profilePage.getAttribute("data-default-section") || "profile-info";
+    var sectionLinks = document.querySelectorAll(".js-profile-section-link[data-section]");
+    var sidebarSectionLinks = document.querySelectorAll(".profile-sidebar .js-profile-section-link[data-section]");
+    var sectionPanels = document.querySelectorAll("[data-profile-section-panel]");
+    var sectionTitle = document.getElementById("profileSectionTitle");
+    var createExamModal = document.getElementById("createExamModal");
+    var createExamModalBody = document.getElementById("createExamModalBody");
+    var closeCreateExamModalBtn = document.getElementById("closeCreateExamModal");
+    var createExamSubmitInFlight = false;
 
-        if (sidebar.classList.contains('collapsed')) {
-            icon.classList.remove('fa-chevron-left');
-            icon.classList.add('fa-chevron-right');
-            this.title = 'Sidebar-ı aç';
-        } else {
-            icon.classList.remove('fa-chevron-right');
-            icon.classList.add('fa-chevron-left');
-            this.title = 'Sidebar-ı bağla';
+    function resolveSectionFromUrl() {
+        try {
+            var params = new URLSearchParams(window.location.search);
+            return params.get("section") || defaultSection;
+        } catch (error) {
+            return defaultSection;
+        }
+    }
+
+    function setActiveSection(section, updateUrl) {
+        var hasTargetPanel = false;
+
+        sectionPanels.forEach(function (panel) {
+            var isMatch = panel.getAttribute("data-profile-section-panel") === section;
+            panel.classList.toggle("is-active", isMatch);
+            if (isMatch) {
+                hasTargetPanel = true;
+            }
+        });
+
+        if (!hasTargetPanel) {
+            return false;
         }
 
-        // Save state to localStorage
-        localStorage.setItem('profileSidebarCollapsed', sidebar.classList.contains('collapsed'));
+        sidebarSectionLinks.forEach(function (link) {
+            var isMatch = link.getAttribute("data-section") === section;
+            link.classList.toggle("active", isMatch);
+            if (isMatch && sectionTitle) {
+                sectionTitle.textContent = link.getAttribute("data-title") || "Profil";
+            }
+        });
+
+        if (updateUrl && window.history && window.history.pushState) {
+            var nextUrl = new URL(profileBaseUrl, window.location.origin);
+            nextUrl.searchParams.set("section", section);
+            window.history.pushState({ section: section }, "", nextUrl.pathname + nextUrl.search);
+        }
+
+        return true;
+    }
+
+    function openCreatePostModal() {
+        if (typeof window.openCreatePostModal === "function") {
+            window.openCreatePostModal();
+            return;
+        }
+
+        // Fallback: if create modal is already in DOM, open it even if bridge function is not ready yet.
+        var createModal = document.getElementById("createModal");
+        if (createModal) {
+            ensureModalRoot(createModal);
+            createModal.classList.add("active");
+            document.body.style.overflow = "hidden";
+            var createTitle = document.getElementById("createTitle");
+            if (createTitle) {
+                createTitle.focus();
+            }
+        }
+    }
+
+    function ensureModalRoot(modal) {
+        if (!modal || !modal.parentElement || modal.parentElement === document.body) {
+            return;
+        }
+        document.body.appendChild(modal);
+    }
+
+    function createExamModalLoadingMarkup() {
+        return '<div class="create-exam-modal-loading">Form yüklənir...</div>';
+    }
+
+    function buildCreateExamModalUrl(createExamUrl) {
+        try {
+            var url = new URL(createExamUrl, window.location.origin);
+            url.searchParams.set("modal", "1");
+            return url.pathname + url.search;
+        } catch (error) {
+            return createExamUrl + (createExamUrl.indexOf("?") === -1 ? "?modal=1" : "&modal=1");
+        }
+    }
+
+    function bindCreateExamModalForm() {
+        if (!createExamModalBody) {
+            return;
+        }
+
+        var closeInlineBtn = createExamModalBody.querySelector(".js-close-create-exam");
+        if (closeInlineBtn) {
+            closeInlineBtn.addEventListener("click", function () {
+                closeCreateExamModal(true);
+            });
+        }
+
+        var form = createExamModalBody.querySelector("#createExamModalForm");
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            if (createExamSubmitInFlight) {
+                return;
+            }
+
+            createExamSubmitInFlight = true;
+            var submitBtn = form.querySelector('button[type="submit"]');
+            var originalSubmitText = submitBtn ? submitBtn.innerHTML : "";
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Yaradılır...";
+            }
+
+            try {
+                var response = await fetch(form.getAttribute("action"), {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                var contentType = response.headers.get("content-type") || "";
+                if (response.ok && contentType.indexOf("application/json") !== -1) {
+                    var data = await response.json();
+                    if (data.success) {
+                        closeCreateExamModal(true);
+                        var nextUrl = new URL(profileBaseUrl, window.location.origin);
+                        nextUrl.searchParams.set("section", "my-exams");
+                        window.location.href = nextUrl.pathname + nextUrl.search;
+                        return;
+                    }
+                }
+
+                if (contentType.indexOf("application/json") !== -1) {
+                    var jsonError = await response.json();
+                    if (jsonError.html) {
+                        createExamModalBody.innerHTML = jsonError.html;
+                        bindCreateExamModalForm();
+                        return;
+                    }
+                }
+
+                var html = await response.text();
+                createExamModalBody.innerHTML = html || '<div class="create-exam-modal-error">Form yenilənmədi. Yenidən cəhd edin.</div>';
+                bindCreateExamModalForm();
+            } catch (error) {
+                if (createExamModalBody) {
+                    createExamModalBody.innerHTML = '<div class="create-exam-modal-error">Xəta baş verdi. Yenidən cəhd edin.</div>';
+                }
+            } finally {
+                createExamSubmitInFlight = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalSubmitText;
+                }
+            }
+        });
+    }
+
+    async function openCreateExamModal(createExamUrl) {
+        if (!createExamUrl || !createExamModal || !createExamModalBody) {
+            return;
+        }
+
+        ensureModalRoot(createExamModal);
+        createExamModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+        createExamModalBody.innerHTML = createExamModalLoadingMarkup();
+
+        var modalUrl = buildCreateExamModalUrl(createExamUrl);
+        createExamModal.dataset.createExamUrl = modalUrl;
+
+        try {
+            var response = await fetch(modalUrl, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+            var html = await response.text();
+            if (!response.ok) {
+                throw new Error("create exam modal load failed");
+            }
+            createExamModalBody.innerHTML = html;
+            bindCreateExamModalForm();
+        } catch (error) {
+            createExamModalBody.innerHTML = '<div class="create-exam-modal-error">Form yüklənmədi. Yenidən cəhd edin.</div>';
+        }
+    }
+
+    function closeCreateExamModal(resetContent) {
+        if (!createExamModal) {
+            return;
+        }
+        createExamModal.classList.remove("active");
+        document.body.style.overflow = "";
+        if (resetContent && createExamModalBody) {
+            createExamModalBody.innerHTML = createExamModalLoadingMarkup();
+        }
+    }
+
+    if (createExamModal) {
+        ensureModalRoot(createExamModal);
+    }
+
+    if (closeCreateExamModalBtn) {
+        closeCreateExamModalBtn.addEventListener("click", function () {
+            closeCreateExamModal(true);
+        });
+    }
+
+    if (createExamModal) {
+        createExamModal.addEventListener("click", function (event) {
+            if (event.target === createExamModal) {
+                closeCreateExamModal(true);
+            }
+        });
+    }
+
+    window.openCreateExamModal = openCreateExamModal;
+
+    if (!sectionLinks.length || !sectionPanels.length) {
+        return;
+    }
+
+    sectionLinks.forEach(function (link) {
+        link.addEventListener("click", function (event) {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+
+            var section = link.getAttribute("data-section");
+            if (!section) {
+                return;
+            }
+
+            if (setActiveSection(section, true)) {
+                event.preventDefault();
+            }
+        });
     });
 
-    // Restore sidebar state on page load
-    var isCollapsed = localStorage.getItem('profileSidebarCollapsed') === 'true';
-    if (isCollapsed) {
-        toggleBtn.click();
+    // Any "create post" CTA should always open modal in-place.
+    document.addEventListener("click", function (event) {
+        var trigger = event.target.closest(".js-open-create-post");
+        if (!trigger) {
+            return;
+        }
+
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        event.preventDefault();
+        setActiveSection("create-post", true);
+        openCreatePostModal();
+    });
+
+    document.addEventListener("click", function (event) {
+        var trigger = event.target.closest(".js-open-create-exam");
+        if (!trigger) {
+            return;
+        }
+
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        event.preventDefault();
+        setActiveSection("my-exams", true);
+        openCreateExamModal(trigger.getAttribute("data-create-exam-url"));
+    });
+
+    var resolvedSection = resolveSectionFromUrl();
+    if (!setActiveSection(resolvedSection, false)) {
+        setActiveSection(defaultSection, false);
     }
+
+    window.addEventListener("popstate", function () {
+        var section = resolveSectionFromUrl();
+        if (!setActiveSection(section, false)) {
+            setActiveSection(defaultSection, false);
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && createExamModal && createExamModal.classList.contains("active")) {
+            closeCreateExamModal(true);
+        }
+    });
+
+    var backdrop = document.getElementById("exam-code-backdrop");
+    var titleEl = document.getElementById("exam-code-title");
+    var textEl = document.getElementById("exam-code-text");
+    var slugInput = document.getElementById("exam-code-exam-slug");
+    var codeInput = document.getElementById("exam-code-input");
+
+    function openExamCodeModal(button) {
+        if (!backdrop || !button || !slugInput || !codeInput) {
+            return;
+        }
+
+        var slug = button.getAttribute("data-exam-slug");
+        var examTitle = button.getAttribute("data-exam-title");
+
+        slugInput.value = slug || "";
+        if (titleEl) {
+            titleEl.textContent = "Giriş Kodu";
+        }
+        if (textEl) {
+            textEl.innerHTML = '<strong>"' + (examTitle || "") + '"</strong> imtahanına keçid üçün kodu yazın.';
+        }
+        codeInput.value = "";
+
+        backdrop.style.display = "flex";
+        window.setTimeout(function () {
+            backdrop.classList.add("show");
+            codeInput.focus();
+        }, 10);
+    }
+
+    function closeExamCodeModal() {
+        if (!backdrop) {
+            return;
+        }
+
+        backdrop.classList.remove("show");
+        window.setTimeout(function () {
+            backdrop.style.display = "none";
+        }, 300);
+    }
+
+    if (backdrop) {
+        backdrop.addEventListener("click", function (event) {
+            if (event.target === backdrop) {
+                closeExamCodeModal();
+            }
+        });
+    }
+
+    if (codeInput) {
+        codeInput.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+        });
+    }
+
+    window.openExamCodeModal = openExamCodeModal;
+    window.closeExamCodeModal = closeExamCodeModal;
 });

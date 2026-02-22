@@ -1,0 +1,97 @@
+<form id="createExamModalForm" method="post" action="{{ request.path }}?modal=1" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="create-exam-form-errors">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="create-exam-form-grid">
+        <div class="form-group form-group-full">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.exam_type.label_tag }}
+            {{ form.exam_type }}
+            {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.access_code.label_tag }}
+            {{ form.access_code }}
+            {% if form.access_code.errors %}<div class="field-error">{{ form.access_code.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.start_datetime.label_tag }}
+            {{ form.start_datetime }}
+            {% if form.start_datetime.errors %}<div class="field-error">{{ form.start_datetime.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.end_datetime.label_tag }}
+            {{ form.end_datetime }}
+            {% if form.end_datetime.errors %}<div class="field-error">{{ form.end_datetime.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.total_duration_minutes.label_tag }}
+            {{ form.total_duration_minutes }}
+            {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.default_question_time_seconds.label_tag }}
+            {{ form.default_question_time_seconds }}
+            {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.max_attempts_per_user.label_tag }}
+            {{ form.max_attempts_per_user }}
+            {% if form.max_attempts_per_user.errors %}<div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="modal-check-label">{{ form.is_active }} {{ form.is_active.label }}</label>
+            {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="modal-check-label">{{ form.is_public }} {{ form.is_public.label }}</label>
+            {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="modal-check-label">{{ form.enable_paint }} Paint cavabı aktiv olsun</label>
+            {% if form.enable_paint.errors %}<div class="field-error">{{ form.enable_paint.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            {{ form.allowed_groups.label_tag }}
+            {{ form.allowed_groups }}
+            {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            {{ form.allowed_users.label_tag }}
+            {{ form.allowed_users }}
+            {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="modal-buttons create-exam-modal-actions">
+        <button type="button" class="modal-cancel-btn js-close-create-exam">Ləğv et</button>
+        <button type="submit" class="modal-confirm-btn">{% if is_editing %}Yadda saxla{% else %}Yarat{% endif %}</button>
+    </div>
+</form>
