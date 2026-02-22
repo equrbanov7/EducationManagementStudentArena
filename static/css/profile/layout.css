@@ -14,8 +14,9 @@
 
 .profile-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 0.75rem;
     margin-bottom: 2rem;
 }
 
@@ -23,6 +24,35 @@
     font-size: 1.875rem;
     font-weight: 700;
     color: var(--text-main);
+}
+
+.profile-mobile-sidebar-trigger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: none;
+    background: #e5ecf7;
+    color: #4f67a5;
+    border-radius: 999px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.profile-mobile-sidebar-trigger:hover {
+    background: #d9e3f3;
+}
+
+.profile-mobile-sidebar-trigger i {
+    font-size: 1.5rem;
+    transform: translateX(2px);
+}
+
+.profile-sidebar-backdrop {
+    display: none;
 }
 
 .section-card {

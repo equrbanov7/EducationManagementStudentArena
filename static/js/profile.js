@@ -4,41 +4,86 @@
 document.addEventListener("DOMContentLoaded", function () {
     var toggleBtn = document.getElementById("sidebarToggle");
     var sidebar = document.getElementById("profileSidebar");
+    var mobileSidebarTrigger = document.getElementById("profileMobileSidebarTrigger");
+    var sidebarBackdrop = document.getElementById("profileSidebarBackdrop");
+    var mobileMediaQuery = window.matchMedia("(max-width: 768px)");
 
-    function syncSidebarToggleState() {
-        if (!toggleBtn || !sidebar) {
-            return;
-        }
-
-        var icon = toggleBtn.querySelector("i");
-        var isCollapsed = sidebar.classList.contains("collapsed");
-
-        if (!icon) {
-            return;
-        }
-
-        if (isCollapsed) {
-            icon.classList.remove("fa-chevron-left");
-            icon.classList.add("fa-chevron-right");
-            toggleBtn.title = "Sidebar-ı aç";
-        } else {
-            icon.classList.remove("fa-chevron-right");
-            icon.classList.add("fa-chevron-left");
-            toggleBtn.title = "Sidebar-ı bağla";
-        }
+    function isMobileViewport() {
+        return mobileMediaQuery.matches;
     }
 
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener("click", function () {
-            sidebar.classList.toggle("collapsed");
-            syncSidebarToggleState();
-            localStorage.setItem("profileSidebarCollapsed", sidebar.classList.contains("collapsed"));
-        });
+    function setSidebarCollapsed(isCollapsed) {
+        if (!sidebar) {
+            return;
+        }
+        sidebar.classList.toggle("collapsed", isCollapsed);
+        localStorage.setItem("profileSidebarCollapsed", isCollapsed ? "true" : "false");
+        syncSidebarToggleState();
+    }
+
+    function syncSidebarToggleState() {
+        if (!sidebar) {
+            return;
+        }
+
+        var icon = toggleBtn ? toggleBtn.querySelector("i") : null;
+        var isCollapsed = sidebar.classList.contains("collapsed");
+
+        if (icon && toggleBtn) {
+            if (isCollapsed) {
+                icon.classList.remove("fa-chevron-left");
+                icon.classList.add("fa-chevron-right");
+                toggleBtn.title = "Sidebar-ı aç";
+            } else {
+                icon.classList.remove("fa-chevron-right");
+                icon.classList.add("fa-chevron-left");
+                toggleBtn.title = "Sidebar-ı bağla";
+            }
+        }
+
+        if (mobileSidebarTrigger) {
+            mobileSidebarTrigger.classList.toggle("is-hidden", !isCollapsed || !isMobileViewport());
+            mobileSidebarTrigger.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        }
+
+        if (sidebarBackdrop) {
+            sidebarBackdrop.classList.toggle("is-visible", isMobileViewport() && !isCollapsed);
+        }
+
+        document.body.classList.toggle("profile-sidebar-open-mobile", isMobileViewport() && !isCollapsed);
+    }
+
+    if (sidebar) {
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", function () {
+                setSidebarCollapsed(!sidebar.classList.contains("collapsed"));
+            });
+        }
 
         if (localStorage.getItem("profileSidebarCollapsed") === "true") {
             sidebar.classList.add("collapsed");
         }
         syncSidebarToggleState();
+    }
+
+    if (mobileSidebarTrigger && sidebar) {
+        mobileSidebarTrigger.addEventListener("click", function () {
+            setSidebarCollapsed(false);
+        });
+    }
+
+    if (sidebarBackdrop && sidebar) {
+        sidebarBackdrop.addEventListener("click", function () {
+            if (isMobileViewport()) {
+                setSidebarCollapsed(true);
+            }
+        });
+    }
+
+    if (typeof mobileMediaQuery.addEventListener === "function") {
+        mobileMediaQuery.addEventListener("change", syncSidebarToggleState);
+    } else if (typeof mobileMediaQuery.addListener === "function") {
+        mobileMediaQuery.addListener(syncSidebarToggleState);
     }
 
     var profilePage = document.querySelector(".profile-page");
@@ -435,6 +480,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (setActiveSection(section, true)) {
                 event.preventDefault();
+                if (isMobileViewport()) {
+                    setSidebarCollapsed(true);
+                }
             }
         });
     });
@@ -485,6 +533,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape" && createExamModal && createExamModal.classList.contains("active")) {
             closeCreateExamModal(true);
+            return;
+        }
+
+        if (event.key === "Escape" && isMobileViewport() && sidebar && !sidebar.classList.contains("collapsed")) {
+            setSidebarCollapsed(true);
         }
     });
 

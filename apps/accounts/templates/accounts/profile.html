@@ -15,6 +15,7 @@
 {% block content %}
 <div class="profile-page" data-profile-base-url="{{ profile_base_url }}" data-default-section="profile-info">
     {% include "accounts/profile/_sidebar.html" %}
+    <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
 
     <main class="profile-main">
         {% include "accounts/profile/_messages.html" %}
