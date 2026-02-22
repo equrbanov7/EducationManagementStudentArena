@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Minimal Blog | Ana Səhifə{% endblock%} 
+{% block title %}{% trans "title" context "blog.home_page" %}{% endblock %}
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
@@ -13,8 +13,8 @@
 
 <section class="home-hero-section">
   <div class="site-main-container">
-    <h1>Düşüncələr və Hekayələr</h1>
-    <p>Texnologiya, proqramlaşdırma və həyat tərzi haqqında ən son yazılar.</p>
+    <h1>{% trans "hero_title" context "blog.home_page" %}</h1>
+    <p>{% trans "hero_subtitle" context "blog.home_page" %}</p>
   </div>
 </section>
 
@@ -27,7 +27,7 @@
             value="{{ query|default:'' }}" 
             id="searchInput" 
             class="home-search-input" 
-            placeholder="Məqalə axtar..." 
+            placeholder="{% trans 'search_placeholder' context 'blog.home_page' %}"
         />
         </form>
 </div>
@@ -39,7 +39,7 @@
           {% for post in page_obj %}
            {% include "partials/_blogCard.html" with post=post %} 
           {% empty %}
-          <p class="home-no-posts-message">Hələ heç bir yazı yoxdur.</p>
+          <p class="home-no-posts-message">{% trans "no_posts" context "blog.home_page" %}</p>
           {% endfor %}
         </section>
 
@@ -51,11 +51,11 @@
                 {% if page_obj.has_previous %}
                     <li>
                         <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
-                            <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                            <i class="fas fa-chevron-left"></i> <span>{% trans "pagination_prev" context "blog.home_page" %}</span>
                         </a>
                     </li>
                 {% else %}
-                     <li><span class="page-link disabled prev-next"><i class="fas fa-chevron-left"></i> <span>Geri</span></span></li>
+                     <li><span class="page-link disabled prev-next"><i class="fas fa-chevron-left"></i> <span>{% trans "pagination_prev" context "blog.home_page" %}</span></span></li>
                 {% endif %}
         
                 {# --- RƏQƏMLƏR --- #}
@@ -78,11 +78,11 @@
                 {% if page_obj.has_next %}
                     <li>
                         <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
-                            <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                            <span>{% trans "pagination_next" context "blog.home_page" %}</span> <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
                 {% else %}
-                    <li><span class="page-link disabled prev-next"><span>İrəli</span> <i class="fas fa-chevron-right"></i></span></li>
+                    <li><span class="page-link disabled prev-next"><span>{% trans "pagination_next" context "blog.home_page" %}</span> <i class="fas fa-chevron-right"></i></span></li>
                 {% endif %}
         
             </ul>

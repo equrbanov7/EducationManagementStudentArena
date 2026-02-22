@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ assignment.title }} - Cavablarım{% endblock %}
+{% block title %}{{ assignment.title }} - {% trans "page_title_suffix" context "assignment.my_submissions" %}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    
-    <!-- Header -->
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -18,28 +17,27 @@
                 </ol>
             </nav>
             <h3 class="mb-0">
-                <i class="fa-solid fa-list-check text-warning me-2"></i> Mənim Cavablarım
+                <i class="fa-solid fa-list-check text-warning me-2"></i> {% trans "title" context "assignment.my_submissions" %}
             </h3>
         </div>
         <div>
             {% if can_submit %}
             <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-warning">
-                <i class="fa-solid fa-plus me-1"></i> Yeni Cavab Ver
+                <i class="fa-solid fa-plus me-1"></i> {% trans "new_submission" context "assignment.my_submissions" %}
             </a>
             {% endif %}
             <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-1"></i> Geri
+                <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "assignment.my_submissions" %}
             </a>
         </div>
     </div>
-    
-    <!-- Stats -->
+
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <h4 class="mb-0">{{ user_attempts }} / {{ assignment.max_attempts }}</h4>
-                    <small class="text-muted">İstifadə olunmuş cəhd</small>
+                    <small class="text-muted">{% trans "attempts_used" context "assignment.my_submissions" %}</small>
                 </div>
             </div>
         </div>
@@ -49,7 +47,7 @@
                     <h4 class="mb-0 {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
                         {{ attempts_left }}
                     </h4>
-                    <small class="text-muted">Qalan cəhd</small>
+                    <small class="text-muted">{% trans "attempts_left" context "assignment.my_submissions" %}</small>
                 </div>
             </div>
         </div>
@@ -57,11 +55,11 @@
             <div class="card bg-light">
                 <div class="card-body text-center">
                     {% if assignment.is_deadline_passed %}
-                        <span class="badge bg-danger fs-6">Müddət Keçib</span>
+                        <span class="badge bg-danger fs-6">{% trans "status_deadline_passed" context "assignment.my_submissions" %}</span>
                     {% elif not assignment.is_open_status %}
-                        <span class="badge bg-warning fs-6">Deaktiv</span>
+                        <span class="badge bg-warning fs-6">{% trans "status_inactive" context "assignment.my_submissions" %}</span>
                     {% else %}
-                        <span class="badge bg-success fs-6">Aktiv</span>
+                        <span class="badge bg-success fs-6">{% trans "status_active" context "assignment.my_submissions" %}</span>
                     {% endif %}
                     <br>
                     <small class="text-muted">{{ assignment.deadline|date:"d.m.Y H:i" }}</small>
@@ -69,12 +67,11 @@
             </div>
         </div>
     </div>
-    
-    <!-- Submissions List -->
+
     {% if submissions %}
     <div class="card">
         <div class="card-header bg-warning text-dark">
-            <i class="fa-solid fa-history me-2"></i> Göndərdiyim Cavablar
+            <i class="fa-solid fa-history me-2"></i> {% trans "submitted_answers" context "assignment.my_submissions" %}
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -82,11 +79,10 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th>Göndərilmə Tarixi</th>
-                     
-                            <th>Status</th>
-                            <th>Qiymət</th>
-                            <th>Əməliyyat</th>
+                            <th>{% trans "table_submitted_at" context "assignment.my_submissions" %}</th>
+                            <th>{% trans "table_status" context "assignment.my_submissions" %}</th>
+                            <th>{% trans "table_grade" context "assignment.my_submissions" %}</th>
+                            <th>{% trans "table_action" context "assignment.my_submissions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,12 +90,12 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
-                           
+
                             <td>
                                 {% if sub.status == 'pending' %}
-                                    <span class="badge bg-warning">Gözləyir</span>
+                                    <span class="badge bg-warning">{% trans "status_pending" context "assignment.my_submissions" %}</span>
                                 {% elif sub.status == 'graded' %}
-                                    <span class="badge bg-success">Qiymətləndirildi</span>
+                                    <span class="badge bg-success">{% trans "status_graded" context "assignment.my_submissions" %}</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ sub.status }}</span>
                                 {% endif %}
@@ -112,10 +108,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        data-bs-toggle="modal" 
+                                <button class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#viewSubmission{{ sub.id }}">
-                                    <i class="fa-solid fa-eye"></i> Bax
+                                    <i class="fa-solid fa-eye"></i> {% trans "view" context "assignment.my_submissions" %}
                                 </button>
                             </td>
                         </tr>
@@ -125,47 +121,46 @@
             </div>
         </div>
     </div>
-    
-    <!-- Modals -->
+
     {% for sub in submissions %}
     <div class="modal fade" id="viewSubmission{{ sub.id }}" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">Cavab #{{ forloop.counter }}</h5>
+                    <h5 class="modal-title">{% trans "submission_number" context "assignment.my_submissions" %} #{{ forloop.counter }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <strong>Göndərilmə tarixi:</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                        <strong>{% trans "submitted_at" context "assignment.my_submissions" %}:</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
                     </div>
-                    
+
                     {% if sub.content %}
                     <div class="mb-3">
-                        <strong>Mətn cavabı:</strong>
+                        <strong>{% trans "text_answer" context "assignment.my_submissions" %}:</strong>
                         <div class="bg-light p-3 rounded mt-2">{{ sub.content|linebreaks }}</div>
                     </div>
                     {% endif %}
-                    
+
                     {% if sub.file %}
                     <div class="mb-3">
-                        <strong>Fayl:</strong>
+                        <strong>{% trans "file" context "assignment.my_submissions" %}:</strong>
                         <a href="{{ sub.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="fa-solid fa-download"></i> {{ sub.file.name|cut:"assignments/submissions/" }}
                         </a>
                     </div>
                     {% endif %}
-                    
+
                     {% if sub.status == 'graded' %}
                     <hr>
                     <div class="mb-3">
-                        <strong>Qiymət:</strong> 
+                        <strong>{% trans "grade" context "assignment.my_submissions" %}:</strong>
                         <span class="badge bg-success fs-5 ms-2">{{ sub.grade }}</span>
                     </div>
-                    
+
                     {% if sub.feedback %}
                     <div class="mb-3">
-                        <strong>Müəllim rəyi:</strong>
+                        <strong>{% trans "teacher_feedback" context "assignment.my_submissions" %}:</strong>
                         <div class="bg-light p-3 rounded mt-2 border-start border-4 border-success">
                             {{ sub.feedback|linebreaks }}
                         </div>
@@ -174,24 +169,24 @@
                     {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "close" context "assignment.my_submissions" %}</button>
                 </div>
             </div>
         </div>
     </div>
     {% endfor %}
-    
+
     {% else %}
     <div class="alert alert-light text-center py-5">
         <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
-        <h5>Hələ heç bir cavab göndərməmisiniz</h5>
+        <h5>{% trans "empty_title" context "assignment.my_submissions" %}</h5>
         {% if can_submit %}
         <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-warning mt-3">
-            <i class="fa-solid fa-plus me-1"></i> İlk Cavabı Göndər
+            <i class="fa-solid fa-plus me-1"></i> {% trans "submit_first" context "assignment.my_submissions" %}
         </a>
         {% endif %}
     </div>
     {% endif %}
-    
+
 </div>
 {% endblock %}

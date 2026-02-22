@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="section-card">
     <form method="get" class="search-form">
         {% if embedded_in_profile %}
@@ -8,28 +9,28 @@
             type="text"
             name="search"
             value="{{ search_query }}"
-            placeholder="Tələbə, kurs, imtahan axtar..."
+            placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
             class="form-control"
         >
 
         <select name="type" class="form-control" style="max-width: 220px;">
-            <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Hamısı</option>
-            <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>İmtahan</option>
-            <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>Tapşırıq</option>
-            <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>Layihə</option>
-            <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>Lab</option>
+            <option value="all" {% if filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
+            <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
+            <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
+            <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+            <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
         </select>
 
         <select name="status" class="form-control" style="max-width: 220px;">
-            <option value="all" {% if filter_status == 'all' %}selected{% endif %}>Bütün statuslar</option>
-            <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>submitted</option>
-            <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>expired</option>
-            <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>pending</option>
-            <option value="late" {% if filter_status == 'late' %}selected{% endif %}>late</option>
+            <option value="all" {% if filter_status == 'all' %}selected{% endif %}>{% trans "status_all" context "profile.pending_review" %}</option>
+            <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>{% trans "status_submitted" context "profile.pending_review" %}</option>
+            <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>{% trans "status_expired" context "profile.pending_review" %}</option>
+            <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>{% trans "status_pending" context "profile.pending_review" %}</option>
+            <option value="late" {% if filter_status == 'late' %}selected{% endif %}>{% trans "status_late" context "profile.pending_review" %}</option>
         </select>
 
         <button type="submit" class="btn btn-primary">
-            <i class="fas fa-search"></i> Filtrlə
+            <i class="fas fa-search"></i> {% trans "filter_button" context "profile.pending_review" %}
         </button>
     </form>
 </div>
@@ -38,7 +39,7 @@
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-list-check"></i>
-            Yoxlanacaq siyahı ({{ total_count }})
+            {% trans "list_title" context "profile.pending_review" %} ({{ total_count }})
         </div>
 
         {% for item in review_items %}
@@ -52,10 +53,20 @@
                     <div class="post-date">
                         <strong>{{ item.student.get_full_name|default:item.student.username }}</strong>
                         · {{ item.course_title|default:"-" }}
-                        {% if item.group_name %}· Qrup: {{ item.group_name }}{% endif %}
+                        {% if item.group_name %}· {% trans "group_prefix" context "profile.pending_review" %}: {{ item.group_name }}{% endif %}
                         {% if item.date %}· {{ item.date|date:"d M Y H:i" }}{% endif %}
                         <span class="role-badge {% if item.status == 'submitted' or item.status == 'late' or item.status == 'pending' %}student{% else %}teacher{% endif %}">
-                            {{ item.status }}
+                            {% if item.status == 'submitted' %}
+                                {% trans "status_submitted" context "profile.pending_review" %}
+                            {% elif item.status == 'expired' %}
+                                {% trans "status_expired" context "profile.pending_review" %}
+                            {% elif item.status == 'pending' %}
+                                {% trans "status_pending" context "profile.pending_review" %}
+                            {% elif item.status == 'late' %}
+                                {% trans "status_late" context "profile.pending_review" %}
+                            {% else %}
+                                {{ item.status }}
+                            {% endif %}
                         </span>
                     </div>
                 </div>
@@ -71,6 +82,6 @@
 {% else %}
     <div class="empty-state">
         <i class="fas fa-tasks"></i>
-        <p>Yoxlanılacaq iş tapılmadı.</p>
+        <p>{% trans "empty_not_found" context "profile.pending_review" %}</p>
     </div>
 {% endif %}

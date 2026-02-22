@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}My Results - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.my_results_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -12,10 +12,10 @@
     <div class="profile-main" style="max-width: 1100px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-clipboard-check"></i> My Results
+                <i class="fas fa-clipboard-check"></i> {% trans "heading" context "accounts.my_results_page" %}
             </h1>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Profilə qayıt
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.my_results_page" %}
             </a>
         </div>
 
@@ -23,23 +23,23 @@
             <div class="results-tabs">
                 <a href="{% url 'accounts:my_results' %}?type=all"
                    class="results-tab {% if active_filter == 'all' %}active{% endif %}">
-                    All ({{ counts.all|default:0 }})
+                    {% trans "tab_all" context "accounts.my_results_page" %} ({{ counts.all|default:0 }})
                 </a>
                 <a href="{% url 'accounts:my_results' %}?type=exams"
                    class="results-tab {% if active_filter == 'exams' %}active{% endif %}">
-                    Exams ({{ counts.exams|default:0 }})
+                    {% trans "tab_exams" context "accounts.my_results_page" %} ({{ counts.exams|default:0 }})
                 </a>
                 <a href="{% url 'accounts:my_results' %}?type=courses"
                    class="results-tab {% if active_filter == 'courses' %}active{% endif %}">
-                    Courses ({{ counts.courses|default:0 }})
+                    {% trans "tab_courses" context "accounts.my_results_page" %} ({{ counts.courses|default:0 }})
                 </a>
                 <a href="{% url 'accounts:my_results' %}?type=labs"
                    class="results-tab {% if active_filter == 'labs' %}active{% endif %}">
-                    Labs ({{ counts.labs|default:0 }})
+                    {% trans "tab_labs" context "accounts.my_results_page" %} ({{ counts.labs|default:0 }})
                 </a>
                 <a href="{% url 'accounts:my_results' %}?type=independent"
                    class="results-tab {% if active_filter == 'independent' %}active{% endif %}">
-                    Independent Work ({{ counts.independent|default:0 }})
+                    {% trans "tab_independent" context "accounts.my_results_page" %} ({{ counts.independent|default:0 }})
                 </a>
             </div>
         </div>
@@ -58,9 +58,17 @@
                         {% if item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
                     </div>
                     <div class="result-meta">
-                        <span class="result-status result-status--{{ item.status }}">{{ item.status }}</span>
+                        <span class="result-status result-status--{{ item.status }}">
+                            {% if item.status == "graded" %}
+                                {% trans "status_graded" context "accounts.my_results_page" %}
+                            {% elif item.status == "pending" %}
+                                {% trans "status_pending" context "accounts.my_results_page" %}
+                            {% else %}
+                                {% trans "status_submitted" context "accounts.my_results_page" %}
+                            {% endif %}
+                        </span>
                         {% if item.score != None %}
-                        <span class="result-score">Score: {{ item.score }}</span>
+                        <span class="result-score">{% trans "score_prefix" context "accounts.my_results_page" %}: {{ item.score }}</span>
                         {% endif %}
                     </div>
                     {% if item.feedback %}
@@ -71,7 +79,7 @@
                 </div>
                 <div class="result-action">
                     <a href="{{ item.detail_url }}" class="btn btn-primary btn-sm">
-                        View answer/details
+                        {% trans "view_details" context "accounts.my_results_page" %}
                     </a>
                 </div>
             </div>
@@ -80,7 +88,7 @@
         {% else %}
         <div class="empty-state section-card">
             <i class="fas fa-clipboard-list"></i>
-            <p>Hələ nəticə/cavab tapılmadı.</p>
+            <p>{% trans "empty_state" context "accounts.my_results_page" %}</p>
         </div>
         {% endif %}
     </div>

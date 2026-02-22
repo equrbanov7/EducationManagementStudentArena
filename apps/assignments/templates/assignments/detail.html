@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}{{ assignment.title }}{% endblock %}
 
@@ -7,7 +8,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-lg-8">
-            <!-- Sərəbəst İş Məlumatları -->
+            <!-- Assignment details -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">{{ assignment.title }}</h4>
@@ -19,17 +20,17 @@
                         <div class="col-md-6">
                             <small>
                                 <i class="bi bi-calendar-event"></i> 
-                                <strong>Müddət:</strong> 
+                                <strong>{% trans "label_duration" context "assignment.legacy.detail" %}:</strong> 
                                 {{ assignment.deadline|date:"d.m.Y H:i" }}
                                 {% if assignment.is_deadline_passed %}
-                                <span class="badge bg-danger ms-2">Müddət Keçib</span>
+                                <span class="badge bg-danger ms-2">{% trans "status_deadline_passed" context "assignment.legacy.detail" %}</span>
                                 {% endif %}
                             </small>
                         </div>
                         <div class="col-md-6">
                             <small>
                                 <i class="bi bi-repeat"></i>
-                                <strong>Cəhdlər:</strong> 
+                                <strong>{% trans "label_attempts" context "assignment.legacy.detail" %}:</strong> 
                                 {{ submissions.count }} / {{ assignment.max_attempts }}
                             </small>
                         </div>
@@ -37,56 +38,56 @@
                 </div>
             </div>
 
-            <!-- Cavab Forması (Draft varsa) -->
+            <!-- Submission form (if draft exists) -->
             {% if current_submission %}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Cavab (Qaralama)</h5>
+                    <h5 class="mb-0">{% trans "draft_answer_title" context "assignment.legacy.detail" %}</h5>
                 </div>
                 <form id="submitForm" method="post" action="{% url 'assignments:submit_assignment' assignment.id %}">
                     {% csrf_token %}
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label">Cavab *</label>
+                            <label class="form-label">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
                             <textarea name="text_answer" class="form-control" rows="6" required>
                                 {{ current_submission.text_answer }}
                             </textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Fayllar</label>
+                            <label class="form-label">{% trans "label_files" context "assignment.legacy.detail" %}</label>
                             <input type="file" name="files" class="form-control" multiple>
-                            <small class="text-muted">Çoxlu fayl seçə bilərsən (PDF, DOC, IMG, etc)</small>
+                            <small class="text-muted">{% trans "files_help" context "assignment.legacy.detail" %}</small>
                         </div>
                     </div>
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success" 
                                 {% if assignment.is_deadline_passed %}disabled{% endif %}>
-                            <i class="bi bi-send"></i> Göndər
+                            <i class="bi bi-send"></i> {% trans "send" context "assignment.legacy.detail" %}
                         </button>
                     </div>
                 </form>
             </div>
             {% elif can_submit %}
-            <div class="alert alert-info">Yeni cəhd başlamaq üçün formanı doldurun</div>
+            <div class="alert alert-info">{% trans "start_new_attempt_info" context "assignment.legacy.detail" %}</div>
             {% else %}
-            <div class="alert alert-warning">Cəhd sayı limitini keçdin</div>
+            <div class="alert alert-warning">{% trans "attempt_limit_exceeded" context "assignment.legacy.detail" %}</div>
             {% endif %}
 
-            <!-- Əvvəlki Cavablar -->
+            <!-- Previous submissions -->
             {% if submissions %}
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Əvvəlki Cavablar</h5>
+                    <h5 class="mb-0">{% trans "previous_answers_title" context "assignment.legacy.detail" %}</h5>
                 </div>
                 <div class="list-group list-group-flush">
                     {% for submission in submissions %}
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
-                                <h6 class="mb-1">Cəhd {{ submission.attempt_number }}</h6>
+                                <h6 class="mb-1">{% trans "attempt_label" context "assignment.legacy.detail" %} {{ submission.attempt_number }}</h6>
                                 <small class="text-muted">
-                                    Göndərildi: {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                                    {% trans "submitted_at_label" context "assignment.legacy.detail" %}: {{ submission.submitted_at|date:"d.m.Y H:i" }}
                                 </small>
                                 <div class="mt-2">{{ submission.text_answer|truncatewords:20 }}</div>
                             </div>
@@ -103,7 +104,7 @@
                         </div>
                         {% if submission.feedback %}
                         <div class="mt-2 p-2 bg-light rounded">
-                            <strong>Rəy:</strong> {{ submission.feedback }}
+                            <strong>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong> {{ submission.feedback }}
                         </div>
                         {% endif %}
                     </div>
@@ -113,17 +114,17 @@
             {% endif %}
         </div>
 
-        <!-- Sidebar: Cari Nəticə -->
+        <!-- Sidebar: current score -->
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body text-center">
-                    <h6 class="text-muted">Cari Balın</h6>
+                    <h6 class="text-muted">{% trans "current_score" context "assignment.legacy.detail" %}</h6>
                     {% if submissions|dictsort:"status"|last.status == 'graded' %}
                         <h3 class="text-success">
                             {{ submissions|dictsort:"status"|last.score }}/{{ submissions|dictsort:"status"|last.max_score }}
                         </h3>
                     {% else %}
-                        <h3 class="text-muted">Gözləyən...</h3>
+                        <h3 class="text-muted">{% trans "waiting" context "assignment.legacy.detail" %}</h3>
                     {% endif %}
                 </div>
             </div>
@@ -132,7 +133,9 @@
 </div>
 
 <script>
-document.getElementById('submitForm').addEventListener('submit', function(e) {
+const submitForm = document.getElementById('submitForm');
+if (submitForm) {
+submitForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
@@ -150,9 +153,10 @@ document.getElementById('submitForm').addEventListener('submit', function(e) {
             alert(data.message);
             location.reload();
         } else {
-            alert('Xəta: ' + JSON.stringify(data.errors));
+            alert('{% trans "error_prefix" context "assignment.legacy.detail" %}: ' + JSON.stringify(data.errors));
         }
     });
 });
+}
 </script>
 {% endblock %}

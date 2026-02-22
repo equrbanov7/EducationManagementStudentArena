@@ -28,6 +28,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var updateTemplate = modalElement.getAttribute("data-update-url-template") || "";
   var nextUrl = modalElement.getAttribute("data-next-url") || "";
   var defaultPrimaryTeacher = modalElement.getAttribute("data-default-primary-teacher") || "";
+  var modalTitleCreate = modalElement.getAttribute("data-title-create") || "Yeni qrup yarat";
+  var modalTitleEdit = modalElement.getAttribute("data-title-edit") || "Qrupu redaktə et";
+  var submitLabelCreate = modalElement.getAttribute("data-submit-create") || "Qrupu yarat";
+  var submitLabelEdit = modalElement.getAttribute("data-submit-edit") || "Dəyişiklikləri saxla";
+  var searchNoResultsLabel = modalElement.getAttribute("data-empty-search-result") || "Məlumat tapılmadı.";
+  var fallbackThisLabel = modalElement.getAttribute("data-fallback-this") || "Bu";
 
   var nameInput = form.querySelector('input[name="name"]');
   var primaryTeacherSelect = form.querySelector('select[name="primary_teacher"]');
@@ -115,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (!visibleCount) {
-        listContainer.innerHTML = '<div class="group-checklist__empty">Məlumat tapılmadı.</div>';
+        listContainer.innerHTML = '<div class="group-checklist__empty">' + searchNoResultsLabel + "</div>";
       }
 
       updateCounter();
@@ -396,10 +402,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     if (titleEl) {
-      titleEl.textContent = "Yeni qrup yarat";
+      titleEl.textContent = modalTitleCreate;
     }
     if (submitLabel) {
-      submitLabel.textContent = "Qrupu yarat";
+      submitLabel.textContent = submitLabelCreate;
     }
 
     modal.show();
@@ -508,10 +514,10 @@ document.addEventListener("DOMContentLoaded", function () {
     applyEditState(editState);
 
     if (titleEl) {
-      titleEl.textContent = "Qrupu redaktə et";
+      titleEl.textContent = modalTitleEdit;
     }
     if (submitLabel) {
-      submitLabel.textContent = "Dəyişiklikləri saxla";
+      submitLabel.textContent = submitLabelEdit;
     }
 
     modal.show();
@@ -558,7 +564,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     event.preventDefault();
     var formId = deleteButton.getAttribute("data-delete-form-id");
-    var groupName = deleteButton.getAttribute("data-group-name") || "Bu";
+    var groupName = deleteButton.getAttribute("data-group-name") || fallbackThisLabel;
     pendingDeleteForm = formId ? document.getElementById(formId) : null;
 
     if (deleteNameEl) {

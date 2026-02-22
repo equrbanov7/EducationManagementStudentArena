@@ -117,6 +117,10 @@
     gap: 16px;
 }
 
+.blog-header__auth .language-switcher {
+    z-index: 205;
+}
+
 .blog-header__guest-actions {
     display: flex;
     align-items: center;
@@ -289,6 +293,12 @@
     background-color: #1e40af;
 }
 
+.mobile-nav-panel .blog-header__nav-item--language {
+    border-bottom: none;
+    padding-top: 18px;
+    padding-bottom: 8px;
+}
+
 /* --- Responsive Media Queries --- */
 
 @media (max-width: 768px) {
@@ -300,6 +310,9 @@
     }
     .blog-header__guest-actions {
         display: none; /* Mobil menyuda ayrıca göstəririk */
+    }
+    .blog-header__auth > .language-switcher {
+        display: none;
     }
     /* Mobil menyu paneli və overlay JavaScript tərəfindən idarə olunacaq */
 }

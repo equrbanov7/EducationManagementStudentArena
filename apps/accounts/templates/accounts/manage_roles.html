@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Rol İdarəetməsi - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.manage_roles_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/manage_roles.css' %}">
@@ -13,11 +13,11 @@
     <div class="page-header">
         <h1 class="page-title">
             <i class="fas fa-user-shield"></i>
-            Rol İdarəetməsi
+            {% trans "heading" context "accounts.manage_roles_page" %}
         </h1>
         <a href="{% url 'accounts:profile' %}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
-            Geri
+            {% trans "back" context "accounts.manage_roles_page" %}
         </a>
     </div>
 

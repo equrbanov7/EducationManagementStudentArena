@@ -20,6 +20,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import Course, CourseMembership
@@ -64,7 +65,10 @@ def create_assignment(request, course_id):
 
     # İcazə yoxlaması - yalnız kurs sahibi
     if not request.user.is_teacher_or_above or course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         # Assignment yarat
@@ -99,11 +103,14 @@ def create_assignment(request, course_id):
             ).distinct()
             assignment.assigned_students.set(group_students)
 
-        messages.success(request, "Sərbəst iş uğurla yaradıldı!")
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_created_successfully"))
         return JsonResponse({"success": True, "assignment_id": assignment.id})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_create_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -120,7 +127,10 @@ def edit_assignment(request, pk):
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # GET - Mövcud məlumatları JSON olaraq qaytar
@@ -195,11 +205,16 @@ def edit_assignment(request, pk):
         else:
             assignment.assigned_students.clear()
 
-        messages.success(request, "Sərbəst iş yeniləndi!")
-        return JsonResponse({"success": True, "message": "Sərbəst iş yeniləndi"})
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_updated_successfully"))
+        return JsonResponse(
+            {"success": True, "message": pgettext_lazy("assignment.message", "assignment_updated_successfully")}
+        )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_update_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -214,14 +229,22 @@ def delete_assignment(request, pk):
     assignment = get_object_or_404(Assignment, id=pk)
 
     if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         assignment.delete()
-        messages.success(request, "Sərbəst iş silindi!")
-        return JsonResponse({"success": True, "message": "Silindi"})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_deleted_successfully"))
+        return JsonResponse(
+            {"success": True, "message": pgettext_lazy("assignment.message", "deleted")}
+        )
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_delete_failed")},
+            status=400,
+        )
 
 
 # ���══════════════════════════════════════════════════════════════════════════════
@@ -250,7 +273,7 @@ def assignment_detail(request, pk):
     if getattr(request.user, "is_student", False):
         has_access = assignment.assigned_students.filter(id=request.user.id).exists()
         if not has_access:
-            messages.error(request, "Bu tapşırığa giriş icazəniz yoxdur")
+            messages.error(request, pgettext_lazy("assignment.message", "access_denied_for_assignment"))
             return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
@@ -287,7 +310,7 @@ def submit_assignment(request, pk):
         return JsonResponse(
             {
                 "success": False,
-                "error": "Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib.",
+                "error": pgettext_lazy("assignment.message", "submission_not_allowed_attempts_or_deadline"),
             },
             status=400,
         )
@@ -304,17 +327,20 @@ def submit_assignment(request, pk):
             submission.file = request.FILES["file"]
             submission.save()
 
-        messages.success(request, "Cavabınız göndərildi!")
+        messages.success(request, pgettext_lazy("assignment.message", "submission_sent_successfully"))
         return JsonResponse(
             {
                 "success": True,
-                "message": "Cavab göndərildi",
+                "message": pgettext_lazy("assignment.message", "submission_sent"),
                 "submission_id": submission.id,
             }
         )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "submission_send_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -337,7 +363,7 @@ def my_submissions(request, pk):
     # İcazə yoxlaması - yalnız özünə təyin olunmuş assignment-lara baxa bilər
     # ──────────────────��──────────────────────────────────────────────────────
     if not assignment.assigned_students.filter(id=request.user.id).exists():
-        messages.error(request, "Bu tapşırığa giriş icazəniz yoxdur")
+        messages.error(request, pgettext_lazy("assignment.message", "access_denied_for_assignment"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin cavablarını al
@@ -377,7 +403,7 @@ def review_submissions(request, pk):
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+        messages.error(request, pgettext_lazy("assignment.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
@@ -405,7 +431,10 @@ def grade_submission(request, pk):
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or submission.assignment.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         submission.grade = request.POST.get("grade")
@@ -415,11 +444,16 @@ def grade_submission(request, pk):
         submission.graded_by = request.user
         submission.save()
 
-        messages.success(request, "Qiymət verildi!")
-        return JsonResponse({"success": True, "message": "Qiymətləndirildi"})
+        messages.success(request, pgettext_lazy("assignment.message", "grade_given_successfully"))
+        return JsonResponse(
+            {"success": True, "message": pgettext_lazy("assignment.message", "graded")}
+        )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "grade_save_failed")},
+            status=400,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

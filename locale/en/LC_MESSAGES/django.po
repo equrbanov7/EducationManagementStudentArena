@@ -1,0 +1,5806 @@
+# English translations for EMSArena.
+# Copyright (C) 2026
+# This file is distributed under the same license as the EMSArena package.
+msgid ""
+msgstr ""
+"Project-Id-Version: EMSArena\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-23 01:39+0400\n"
+"PO-Revision-Date: 2026-02-22 23:58+0400\n"
+"Last-Translator: Codex <noreply@example.com>\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/accounts/forms.py:22
+msgctxt "accounts.form.register.label"
+msgid "password"
+msgstr "Password"
+
+#: apps/accounts/forms.py:25
+msgctxt "accounts.form.register.placeholder"
+msgid "password"
+msgstr "Password"
+
+#: apps/accounts/forms.py:31
+msgctxt "accounts.form.register.label"
+msgid "password_confirm"
+msgstr "Password confirm"
+
+#: apps/accounts/forms.py:34
+msgctxt "accounts.form.register.placeholder"
+msgid "password_confirm"
+msgstr "Password confirm"
+
+#: apps/accounts/forms.py:41
+msgctxt "accounts.form.register.label"
+msgid "country"
+msgstr "Country"
+
+#: apps/accounts/forms.py:48
+#| msgctxt "assignment.notification.field"
+#| msgid "notification_type"
+msgctxt "accounts.form.register.label"
+msgid "registration_type"
+msgstr "Registration type"
+
+#: apps/accounts/forms.py:52
+msgctxt "accounts.form.register.choice"
+msgid "org_type_individual"
+msgstr "Organization type individual"
+
+#: apps/accounts/forms.py:56
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school"
+msgstr "Organization type school"
+
+#: apps/accounts/forms.py:60
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university"
+msgstr "Organization type university"
+
+#: apps/accounts/forms.py:64
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_center"
+msgstr "Organization type course center"
+
+#: apps/accounts/forms.py:72
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.label"
+msgid "institution"
+msgstr "Institution"
+
+#: apps/accounts/forms.py:75
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.choice"
+msgid "institution_empty"
+msgstr "Institution empty"
+
+#: apps/accounts/forms.py:80
+#| msgctxt "profile.info"
+#| msgid "organization"
+msgctxt "accounts.form.register.label"
+msgid "join_organization"
+msgstr "Join organization"
+
+#: apps/accounts/forms.py:83
+#| msgctxt "profile.info"
+#| msgid "organization"
+msgctxt "accounts.form.register.choice"
+msgid "organization_empty"
+msgstr "Organization empty"
+
+#: apps/accounts/forms.py:88
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.label"
+msgid "institution_not_listed"
+msgstr "Institution not listed"
+
+#: apps/accounts/forms.py:92
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.placeholder"
+msgid "institution_not_listed"
+msgstr "Institution not listed"
+
+#: apps/accounts/forms.py:99
+msgctxt "accounts.form.register.label"
+msgid "official_identifier"
+msgstr "Official identifier"
+
+#: apps/accounts/forms.py:103
+msgctxt "accounts.form.register.placeholder"
+msgid "official_identifier"
+msgstr "Official identifier"
+
+#: apps/accounts/forms.py:110
+#| msgctxt "assignment.form.label"
+#| msgid "submission_file_optional"
+msgctxt "accounts.form.register.label"
+msgid "license_identifier_optional"
+msgstr "License identifier optional"
+
+#: apps/accounts/forms.py:114
+#| msgctxt "assignment.form.label"
+#| msgid "submission_file_optional"
+msgctxt "accounts.form.register.placeholder"
+msgid "license_identifier_optional"
+msgstr "License identifier optional"
+
+#: apps/accounts/forms.py:121
+#| msgctxt "profile.role_assignment"
+#| msgid "table_new_role"
+msgctxt "accounts.form.register.label"
+msgid "initial_role"
+msgstr "Initial role"
+
+#: apps/accounts/forms.py:125
+msgctxt "accounts.form.register.choice"
+msgid "role_member_pending"
+msgstr "Member / Pending"
+
+#: apps/accounts/forms.py:129
+#| msgctxt "profile.sidebar"
+#| msgid "group_teacher"
+msgctxt "accounts.form.register.choice"
+msgid "role_teacher"
+msgstr "Role teacher"
+
+#: apps/accounts/forms.py:133
+#| msgctxt "profile.info"
+#| msgid "role"
+msgctxt "accounts.form.register.choice"
+msgid "role_hr"
+msgstr "Role hr"
+
+#: apps/accounts/forms.py:137
+msgctxt "accounts.form.register.choice"
+msgid "role_org_admin"
+msgstr "Organization Admin"
+
+#: apps/accounts/forms.py:150
+#| msgctxt "profile.info"
+#| msgid "username"
+msgctxt "accounts.form.register.placeholder"
+msgid "username"
+msgstr "Username"
+
+#: apps/accounts/forms.py:156
+#| msgctxt "profile.edit"
+#| msgid "email"
+msgctxt "accounts.form.register.placeholder"
+msgid "email"
+msgstr "Email"
+
+#: apps/accounts/forms.py:162
+#| msgctxt "profile.edit"
+#| msgid "first_name"
+msgctxt "accounts.form.register.placeholder"
+msgid "first_name"
+msgstr "First name"
+
+#: apps/accounts/forms.py:168
+#| msgctxt "profile.edit"
+#| msgid "last_name"
+msgctxt "accounts.form.register.placeholder"
+msgid "last_name"
+msgstr "Last name"
+
+#: apps/accounts/forms.py:189
+msgctxt "accounts.form.register.error"
+msgid "password_mismatch"
+msgstr "Password mismatch"
+
+#: apps/accounts/forms.py:192
+msgctxt "accounts.form.register.error"
+msgid "country_required"
+msgstr "Country required"
+
+#: apps/accounts/forms.py:194
+msgctxt "accounts.form.register.error"
+msgid "country_invalid"
+msgstr "Country invalid"
+
+#: apps/accounts/forms.py:199
+msgctxt "accounts.form.register.error"
+msgid "signup_student_role_not_allowed"
+msgstr "Student role cannot be selected during signup."
+
+#: apps/accounts/forms.py:204
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.error"
+msgid "institution_required"
+msgstr "Institution required"
+
+#: apps/accounts/forms.py:207
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.error"
+msgid "institution_name_required"
+msgstr "Institution name required"
+
+#: apps/accounts/forms.py:213
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.error"
+msgid "institution_country_mismatch"
+msgstr "Institution country mismatch"
+
+#: apps/accounts/forms.py:218
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.form.register.error"
+msgid "institution_type_mismatch"
+msgstr "Institution type mismatch"
+
+#: apps/accounts/forms.py:225
+#| msgctxt "accounts.profile_edit.message"
+#| msgid "student_university_or_school_required"
+msgctxt "accounts.form.register.error"
+msgid "university_identifier_required"
+msgstr "An official university identifier or code is required."
+
+#: apps/accounts/forms.py:236
+#| msgctxt "profile.superadmin_orgs"
+#| msgid "all_organizations_title"
+msgctxt "accounts.form.register.error"
+msgid "individual_organization_required"
+msgstr "Organization selection is required for individual registration."
+
+#: apps/accounts/forms.py:256
+#| msgctxt "profile.info"
+#| msgid "username"
+msgctxt "accounts.form.register.error"
+msgid "username_taken"
+msgstr "Username taken"
+
+#: apps/accounts/forms.py:262
+#| msgctxt "profile.edit"
+#| msgid "email"
+msgctxt "accounts.form.register.error"
+msgid "email_taken"
+msgstr "Email taken"
+
+#: apps/accounts/forms.py:270
+#| msgctxt "accounts.manage_roles.message"
+#| msgid "user_not_selected"
+msgctxt "accounts.form.register.choice"
+msgid "country_select"
+msgstr "Country select"
+
+#: apps/accounts/forms.py:296
+#| msgctxt "profile.info"
+#| msgid "username"
+msgctxt "accounts.form.login.label"
+msgid "username_or_email"
+msgstr "Username or email"
+
+#: apps/accounts/forms.py:300
+#| msgctxt "profile.info"
+#| msgid "username"
+msgctxt "accounts.form.login.placeholder"
+msgid "username_or_email"
+msgstr "Username or email"
+
+#: apps/accounts/forms.py:305
+msgctxt "accounts.form.login.label"
+msgid "password"
+msgstr "Password"
+
+#: apps/accounts/forms.py:309
+msgctxt "accounts.form.login.placeholder"
+msgid "password"
+msgstr "Password"
+
+#: apps/accounts/forms.py:320
+#| msgctxt "profile.permission_editor"
+#| msgid "status_inactive"
+msgctxt "accounts.form.login.error"
+msgid "account_inactive"
+msgstr "Account is inactive. Please contact support."
+
+#: apps/accounts/forms.py:331
+#| msgctxt "accounts.superadmin_orgs.message"
+#| msgid "organization_suspended"
+msgctxt "accounts.form.login.error"
+msgid "organization_suspended"
+msgstr ""
+"Your organization has been suspended. Login is blocked, contact the "
+"administrator."
+
+#: apps/accounts/templates/accounts/assigned_courses.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.assigned_courses_page"
+msgid "title"
+msgstr "My assigned courses"
+
+#: apps/accounts/templates/accounts/assigned_courses.html:11
+msgctxt "accounts.assigned_courses_page"
+msgid "category_missing"
+msgstr "No category"
+
+#: apps/accounts/templates/accounts/assigned_courses.html:16
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.assigned_courses_page"
+msgid "heading"
+msgstr "My assigned courses"
+
+#: apps/accounts/templates/accounts/assigned_courses.html:19
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.assigned_courses_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/assigned_courses.html:25
+#| msgctxt "profile.pending_review"
+#| msgid "search_placeholder"
+msgctxt "accounts.assigned_courses_page"
+msgid "search_placeholder"
+msgstr "Search course..."
+
+#: apps/accounts/templates/accounts/assigned_courses.html:47
+#| msgctxt "profile.assigned_courses"
+#| msgid "empty_title"
+msgctxt "accounts.assigned_courses_page"
+msgid "empty_state"
+msgstr "No courses assigned yet."
+
+#: apps/accounts/templates/accounts/assigned_exams.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.assigned_exams_page"
+msgid "title"
+msgstr "My assigned exams"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:16
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.assigned_exams_page"
+msgid "heading"
+msgstr "My assigned exams"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:19
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.assigned_exams_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:25
+#| msgctxt "profile.pending_review"
+#| msgid "search_placeholder"
+msgctxt "accounts.assigned_exams_page"
+msgid "search_placeholder"
+msgstr "Search exam..."
+
+#: apps/accounts/templates/accounts/assigned_exams.html:52
+#| msgctxt "assignment.form.label"
+#| msgid "start_date"
+msgctxt "accounts.assigned_exams_page"
+msgid "start_with_code"
+msgstr "Start with code"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:56
+#| msgctxt "assignment.form.label"
+#| msgid "start_date"
+msgctxt "accounts.assigned_exams_page"
+msgid "start"
+msgstr "Start"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:67
+#| msgctxt "profile.assigned_courses"
+#| msgid "empty_title"
+msgctxt "accounts.assigned_exams_page"
+msgid "empty_state"
+msgstr "No assigned exams found."
+
+#: apps/accounts/templates/accounts/assigned_exams.html:80
+#: apps/accounts/templates/accounts/assigned_exams.html:111
+#| msgctxt "assignment.review_submissions"
+#| msgid "modal_title"
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_title"
+msgstr "Access code"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:81
+#| msgctxt "assignment.review_submissions"
+#| msgid "modal_title"
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_text"
+msgstr "Enter the exam code."
+
+#: apps/accounts/templates/accounts/assigned_exams.html:92
+#| msgctxt "assignment.review_submissions"
+#| msgid "grade_placeholder"
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_code_placeholder"
+msgstr "• • • • • •"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:98
+#| msgctxt "profile.groups"
+#| msgid "modal_create_title"
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_cancel"
+msgstr "Cancel"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:99
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_confirm"
+msgstr "Confirm"
+
+#: apps/accounts/templates/accounts/assigned_exams.html:112
+#| msgctxt "assignment.review_submissions"
+#| msgid "modal_title"
+msgctxt "accounts.assigned_exams_page"
+msgid "modal_prompt_template"
+msgstr "Enter the code to access the {title} exam."
+
+#: apps/accounts/templates/accounts/grading_queue.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.grading_queue_page"
+msgid "title"
+msgstr "Grading queue"
+
+#: apps/accounts/templates/accounts/grading_queue.html:16
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.grading_queue_page"
+msgid "heading"
+msgstr "Grading queue"
+
+#: apps/accounts/templates/accounts/grading_queue.html:20
+#| msgctxt "assignment.detail"
+#| msgid "back"
+msgctxt "accounts.grading_queue_page"
+msgid "back"
+msgstr "Back"
+
+#: apps/accounts/templates/accounts/grading_queue.html:29
+#| msgctxt "assignment.review_submissions"
+#| msgid "course_label"
+msgctxt "accounts.grading_queue_page"
+msgid "filter_course_label"
+msgstr "Course"
+
+#: apps/accounts/templates/accounts/grading_queue.html:31
+#| msgctxt "profile.assigned_courses"
+#| msgid "enter_course"
+msgctxt "accounts.grading_queue_page"
+msgid "filter_course_all"
+msgstr "All courses"
+
+#: apps/accounts/templates/accounts/grading_queue.html:41
+#| msgctxt "profile.pending_review"
+#| msgid "type_assignment"
+msgctxt "accounts.grading_queue_page"
+msgid "filter_assignment_label"
+msgstr "Assignment"
+
+#: apps/accounts/templates/accounts/grading_queue.html:43
+#| msgctxt "profile.pending_review"
+#| msgid "type_assignment"
+msgctxt "accounts.grading_queue_page"
+msgid "filter_assignment_all"
+msgstr "All assignments"
+
+#: apps/accounts/templates/accounts/grading_queue.html:53
+#| msgctxt "profile.results"
+#| msgid "score_label"
+msgctxt "accounts.grading_queue_page"
+msgid "filter_sort_label"
+msgstr "Sort"
+
+#: apps/accounts/templates/accounts/grading_queue.html:55
+msgctxt "accounts.grading_queue_page"
+msgid "sort_oldest"
+msgstr "Oldest first"
+
+#: apps/accounts/templates/accounts/grading_queue.html:56
+msgctxt "accounts.grading_queue_page"
+msgid "sort_newest"
+msgstr "Newest first"
+
+#: apps/accounts/templates/accounts/grading_queue.html:63
+msgctxt "accounts.grading_queue_page"
+msgid "filter_apply"
+msgstr "Apply filters"
+
+#: apps/accounts/templates/accounts/grading_queue.html:74
+#| msgctxt "profile.pending_review"
+#| msgid "status_pending"
+msgctxt "accounts.grading_queue_page"
+msgid "stat_pending"
+msgstr "Pending"
+
+#: apps/accounts/templates/accounts/grading_queue.html:78
+#| msgctxt "assignment.detail"
+#| msgid "status_graded"
+msgctxt "accounts.grading_queue_page"
+msgid "stat_graded_today"
+msgstr "Graded today"
+
+#: apps/accounts/templates/accounts/grading_queue.html:82
+#| msgctxt "profile.permission_editor"
+#| msgid "status_active"
+msgctxt "accounts.grading_queue_page"
+msgid "stat_avg_time"
+msgstr "Avg time"
+
+#: apps/accounts/templates/accounts/grading_queue.html:93
+#| msgctxt "assignment.review_submissions"
+#| msgid "table_student"
+msgctxt "accounts.grading_queue_page"
+msgid "table_student"
+msgstr "Student"
+
+#: apps/accounts/templates/accounts/grading_queue.html:94
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_assignments"
+msgctxt "accounts.grading_queue_page"
+msgid "table_assignment"
+msgstr "Assignment"
+
+#: apps/accounts/templates/accounts/grading_queue.html:95
+#| msgctxt "assignment.my_submissions"
+#| msgid "table_submitted_at"
+msgctxt "accounts.grading_queue_page"
+msgid "table_submitted_at"
+msgstr "Submitted at"
+
+#: apps/accounts/templates/accounts/grading_queue.html:96
+#| msgctxt "assignment.detail"
+#| msgid "table_file"
+msgctxt "accounts.grading_queue_page"
+msgid "table_file"
+msgstr "File"
+
+#: apps/accounts/templates/accounts/grading_queue.html:97
+#| msgctxt "assignment.detail"
+#| msgid "table_grade"
+msgctxt "accounts.grading_queue_page"
+msgid "table_grading"
+msgstr "Grading"
+
+#: apps/accounts/templates/accounts/grading_queue.html:121
+#| msgctxt "assignment.review_submissions"
+#| msgid "title_suffix"
+msgctxt "accounts.grading_queue_page"
+msgid "time_ago_suffix"
+msgstr "ago"
+
+#: apps/accounts/templates/accounts/grading_queue.html:129
+#| msgctxt "assignment.review_submissions"
+#| msgid "download"
+msgctxt "accounts.grading_queue_page"
+msgid "file_download"
+msgstr "File download"
+
+#: apps/accounts/templates/accounts/grading_queue.html:135
+#| msgctxt "profile.pending_review.action"
+#| msgid "review"
+msgctxt "accounts.grading_queue_page"
+msgid "file_view"
+msgstr "File view"
+
+#: apps/accounts/templates/accounts/grading_queue.html:147
+#| msgctxt "assignment.review_submissions"
+#| msgid "grade_placeholder"
+msgctxt "accounts.grading_queue_page"
+msgid "score_placeholder"
+msgstr "Score"
+
+#: apps/accounts/templates/accounts/grading_queue.html:157
+#| msgctxt "assignment.review_submissions"
+#| msgid "feedback_placeholder"
+msgctxt "accounts.grading_queue_page"
+msgid "feedback_placeholder"
+msgstr "Feedback (optional)"
+
+#: apps/accounts/templates/accounts/grading_queue.html:162
+#| msgctxt "profile.groups"
+#| msgid "submit_create"
+msgctxt "accounts.grading_queue_page"
+msgid "submit_grade"
+msgstr "Submit grade"
+
+#: apps/accounts/templates/accounts/grading_queue.html:165
+#| msgctxt "assignment.detail"
+#| msgid "table_grade"
+msgctxt "accounts.grading_queue_page"
+msgid "next_grade"
+msgstr "Next grade"
+
+#: apps/accounts/templates/accounts/grading_queue.html:178
+#| msgctxt "profile.assigned_courses"
+#| msgid "empty_title"
+msgctxt "accounts.grading_queue_page"
+msgid "empty_title"
+msgstr "Great work!"
+
+#: apps/accounts/templates/accounts/grading_queue.html:179
+#| msgctxt "profile.assigned_courses"
+#| msgid "empty_description"
+msgctxt "accounts.grading_queue_page"
+msgid "empty_description"
+msgstr "The grading queue is empty"
+
+#: apps/accounts/templates/accounts/grading_queue.html:187
+#| msgctxt "assignment.modals"
+#| msgid "loading"
+msgctxt "accounts.grading_queue_page"
+msgid "loading"
+msgstr "Loading"
+
+#: apps/accounts/templates/accounts/grading_queue.html:194
+#| msgctxt "accounts.auth.message"
+#| msgid "logout_success"
+msgctxt "accounts.grading_queue_page"
+msgid "toast_success"
+msgstr "Grading completed successfully!"
+
+#: apps/accounts/templates/accounts/grading_queue.html:195
+msgctxt "accounts.grading_queue_page"
+msgid "toast_error_generic"
+msgstr "Something went wrong!"
+
+#: apps/accounts/templates/accounts/grading_queue.html:196
+#| msgctxt "assignment.detail"
+#| msgid "error_prefix"
+msgctxt "accounts.grading_queue_page"
+msgid "toast_error_prefix"
+msgstr "Error"
+
+#: apps/accounts/templates/accounts/grading_queue.html:197
+msgctxt "accounts.grading_queue_page"
+msgid "view_submission_alert_template"
+msgstr "A modal will open to view the submission content. ID: {id}"
+
+#: apps/accounts/templates/accounts/login.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.login"
+msgid "title"
+msgstr "Login"
+
+#: apps/accounts/templates/accounts/login.html:13
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.login"
+msgid "heading"
+msgstr "Login"
+
+#: apps/accounts/templates/accounts/login.html:14
+msgctxt "accounts.login"
+msgid "subheading"
+msgstr "Sign in to your account and manage your posts."
+
+#: apps/accounts/templates/accounts/login.html:44
+msgctxt "accounts.login"
+msgid "forgot_password"
+msgstr "Forgot password?"
+
+#: apps/accounts/templates/accounts/login.html:48
+#| msgctxt "assignment.detail"
+#| msgid "submit"
+msgctxt "accounts.login"
+msgid "submit"
+msgstr "Submit"
+
+#: apps/accounts/templates/accounts/login.html:52
+#| msgctxt "profile.sidebar"
+#| msgid "group_account"
+msgctxt "accounts.login"
+msgid "no_account"
+msgstr "Don't have an account?"
+
+#: apps/accounts/templates/accounts/login.html:52
+msgctxt "accounts.login"
+msgid "register_now"
+msgstr "Register"
+
+#: apps/accounts/templates/accounts/manage_roles.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.manage_roles_page"
+msgid "title"
+msgstr "Role management"
+
+#: apps/accounts/templates/accounts/manage_roles.html:16
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.manage_roles_page"
+msgid "heading"
+msgstr "Role management"
+
+#: apps/accounts/templates/accounts/manage_roles.html:20
+#| msgctxt "assignment.detail"
+#| msgid "back"
+msgctxt "accounts.manage_roles_page"
+msgid "back"
+msgstr "Back"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.my_result_detail_page"
+msgid "title"
+msgstr "Result detail"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:11
+msgctxt "accounts.my_result_detail_page"
+msgid "file_name_fallback"
+msgstr "File"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:17
+#| msgctxt "profile.groups"
+#| msgid "search_no_results"
+msgctxt "accounts.my_result_detail_page"
+msgid "back_to_results"
+msgstr "My Results"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:24
+#| msgctxt "profile.superadmin_orgs"
+#| msgid "table_type"
+msgctxt "accounts.my_result_detail_page"
+msgid "label_type"
+msgstr "Type"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:28
+#| msgctxt "profile.posts"
+#| msgid "label_content"
+msgctxt "accounts.my_result_detail_page"
+msgid "label_context"
+msgstr "Context"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:32
+#| msgctxt "assignment.modals"
+#| msgid "label_status"
+msgctxt "accounts.my_result_detail_page"
+msgid "label_status"
+msgstr "Status"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:38
+#| msgctxt "assignment.my_submissions"
+#| msgid "table_submitted_at"
+msgctxt "accounts.my_result_detail_page"
+msgid "label_submitted_at"
+msgstr "Submitted at"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:42
+#| msgctxt "assignment.legacy.modals"
+#| msgid "label_max_score"
+msgctxt "accounts.my_result_detail_page"
+msgid "label_score"
+msgstr "Score"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:50
+#| msgctxt "assignment.my_submissions"
+#| msgid "new_submission"
+msgctxt "accounts.my_result_detail_page"
+msgid "answer_submission_title"
+msgstr "Answer / Submission"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:55
+#| msgctxt "assignment.detail"
+#| msgid "text_answer"
+msgctxt "accounts.my_result_detail_page"
+msgid "no_text_answer"
+msgstr "No text answer"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:74
+#| msgctxt "assignment.detail"
+#| msgid "table_file"
+msgctxt "accounts.my_result_detail_page"
+msgid "view_file"
+msgstr "View file"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:84
+#| msgctxt "assignment.notification.field"
+#| msgid "link"
+msgctxt "accounts.my_result_detail_page"
+msgid "view_link"
+msgstr "View link"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:93
+#| msgctxt "assignment.my_submissions"
+#| msgid "teacher_feedback"
+msgctxt "accounts.my_result_detail_page"
+msgid "teacher_feedback_title"
+msgstr "Teacher feedback"
+
+#: apps/accounts/templates/accounts/my_result_detail.html:99
+#| msgctxt "assignment.form.placeholder"
+#| msgid "feedback"
+msgctxt "accounts.my_result_detail_page"
+msgid "feedback_missing"
+msgstr "Feedback missing"
+
+#: apps/accounts/templates/accounts/my_results.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.my_results_page"
+msgid "title"
+msgstr "My Results"
+
+#: apps/accounts/templates/accounts/my_results.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.my_results_page"
+msgid "heading"
+msgstr "My Results"
+
+#: apps/accounts/templates/accounts/my_results.html:18
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.my_results_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/my_results.html:26
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_all"
+msgctxt "accounts.my_results_page"
+msgid "tab_all"
+msgstr "All"
+
+#: apps/accounts/templates/accounts/my_results.html:30
+#| msgctxt "profile.results"
+#| msgid "tab_exams"
+msgctxt "accounts.my_results_page"
+msgid "tab_exams"
+msgstr "Exams"
+
+#: apps/accounts/templates/accounts/my_results.html:34
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_courses"
+msgctxt "accounts.my_results_page"
+msgid "tab_courses"
+msgstr "Courses"
+
+#: apps/accounts/templates/accounts/my_results.html:38
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_labs"
+msgctxt "accounts.my_results_page"
+msgid "tab_labs"
+msgstr "Labs"
+
+#: apps/accounts/templates/accounts/my_results.html:42
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_independent"
+msgctxt "accounts.my_results_page"
+msgid "tab_independent"
+msgstr "Independent work"
+
+#: apps/accounts/templates/accounts/my_results.html:63
+#| msgctxt "assignment.detail"
+#| msgid "status_graded"
+msgctxt "accounts.my_results_page"
+msgid "status_graded"
+msgstr "Graded"
+
+#: apps/accounts/templates/accounts/my_results.html:65
+#| msgctxt "profile.pending_review"
+#| msgid "status_pending"
+msgctxt "accounts.my_results_page"
+msgid "status_pending"
+msgstr "Pending"
+
+#: apps/accounts/templates/accounts/my_results.html:67
+#| msgctxt "profile.pending_review"
+#| msgid "status_submitted"
+msgctxt "accounts.my_results_page"
+msgid "status_submitted"
+msgstr "Submitted"
+
+#: apps/accounts/templates/accounts/my_results.html:71
+#| msgctxt "assignment.detail"
+#| msgid "error_prefix"
+msgctxt "accounts.my_results_page"
+msgid "score_prefix"
+msgstr "Score"
+
+#: apps/accounts/templates/accounts/my_results.html:82
+#| msgctxt "profile.superadmin_orgs"
+#| msgid "table_details"
+msgctxt "accounts.my_results_page"
+msgid "view_details"
+msgstr "View answer/details"
+
+#: apps/accounts/templates/accounts/my_results.html:91
+#| msgctxt "profile.assigned_courses"
+#| msgid "empty_title"
+msgctxt "accounts.my_results_page"
+msgid "empty_state"
+msgstr "No items found."
+
+#: apps/accounts/templates/accounts/partials/_checkbox_multi_select.html:6
+msgctxt "profile.checkbox_select"
+msgid "select_all"
+msgstr "Select all"
+
+#: apps/accounts/templates/accounts/partials/_checkbox_multi_select.html:7
+msgctxt "profile.checkbox_select"
+msgid "clear_selected"
+msgstr "Clear selected"
+
+#: apps/accounts/templates/accounts/partials/_checkbox_multi_select.html:24
+msgctxt "profile.checkbox_select"
+msgid "selected_count"
+msgstr "Selected count"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:2
+msgctxt "profile.groups"
+msgid "label_assigned_teachers"
+msgstr "Label assigned teachers"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:3
+msgctxt "profile.groups"
+msgid "placeholder_search_teacher"
+msgstr "Placeholder search teacher"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:4
+msgctxt "profile.groups"
+msgid "help_assigned_teachers"
+msgstr "Help assigned teachers"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:5
+msgctxt "profile.groups"
+msgid "label_group_students"
+msgstr "Label group students"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:6
+msgctxt "profile.groups"
+msgid "placeholder_search_student"
+msgstr "Placeholder search student"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:10
+msgctxt "profile.groups"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:16
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:20
+msgctxt "profile.groups"
+msgid "create_group"
+msgstr "Create group"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:36
+msgctxt "profile.groups"
+msgid "primary_teacher"
+msgstr "Primary teacher"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:37
+msgctxt "profile.groups"
+msgid "students"
+msgstr "Students"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:38
+msgctxt "profile.groups"
+msgid "teachers"
+msgstr "Teachers"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:52
+msgctxt "profile.groups"
+msgid "edit_group"
+msgstr "Edit group"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:66
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:170
+msgctxt "profile.groups"
+msgid "delete_group"
+msgstr "Delete group"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:78
+msgctxt "profile.groups"
+msgid "empty_visible_groups"
+msgstr "Empty visible groups"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:94
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:104
+msgctxt "profile.groups"
+msgid "modal_create_title"
+msgstr "Modal create title"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:95
+msgctxt "profile.groups"
+msgid "modal_edit_title"
+msgstr "Modal edit title"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:96
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:156
+msgctxt "profile.groups"
+msgid "submit_create"
+msgstr "Submit create"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:97
+msgctxt "profile.groups"
+msgid "submit_save_changes"
+msgstr "Submit save changes"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:98
+msgctxt "profile.groups"
+msgid "search_no_results"
+msgstr "Search no results"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:99
+msgctxt "profile.groups"
+msgid "fallback_this"
+msgstr "Fallback this"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:105
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:171
+msgctxt "profile.groups"
+msgid "close"
+msgstr "Close"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:114
+msgctxt "profile.groups"
+msgid "label_group_name"
+msgstr "Label group name"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:122
+msgctxt "profile.groups"
+msgid "label_primary_teacher"
+msgstr "Label primary teacher"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:128
+msgctxt "profile.groups"
+msgid "placeholder_search_primary_teacher"
+msgstr "Placeholder search primary teacher"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:154
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:180
+msgctxt "profile.groups"
+msgid "cancel"
+msgstr "Cancel"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:175
+msgctxt "profile.groups"
+msgid "delete_confirm_prefix"
+msgstr "Delete confirm prefix"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:175
+msgctxt "profile.groups"
+msgid "delete_confirm_suffix"
+msgstr "Delete confirm suffix"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:176
+msgctxt "profile.groups"
+msgid "delete_confirm_warning"
+msgstr "Delete confirm warning"
+
+#: apps/accounts/templates/accounts/partials/_groups_overview_content.html:181
+msgctxt "profile.groups"
+msgid "delete"
+msgstr "Delete"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:4
+msgctxt "profile.manage_roles"
+msgid "info_title"
+msgstr "Info title"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:7
+msgctxt "profile.manage_roles"
+msgid "summary_line_1"
+msgstr "Summary line 1"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:8
+msgctxt "profile.manage_roles"
+msgid "summary_line_2"
+msgstr "Summary line 2"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:9
+msgctxt "profile.manage_roles"
+msgid "summary_line_3"
+msgstr "Summary line 3"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:10
+msgctxt "profile.manage_roles"
+msgid "organization_label"
+msgstr "Organization label"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:12
+msgctxt "profile.manage_roles"
+msgid "diff_aria_label"
+msgstr "Diff aria label"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:15
+msgctxt "profile.manage_roles"
+msgid "diff_assign_role_title"
+msgstr "Diff assign role title"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:17
+msgctxt "profile.manage_roles"
+msgid "diff_assign_role_description"
+msgstr "Diff assign role description"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:21
+msgctxt "profile.manage_roles"
+msgid "diff_manage_roles_title"
+msgstr "Diff manage roles title"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:23
+msgctxt "profile.manage_roles"
+msgid "diff_manage_roles_description"
+msgstr "Diff manage roles description"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:48
+msgctxt "profile.manage_roles"
+msgid "search_user_placeholder"
+msgstr "Search user placeholder"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:62
+msgctxt "profile.manage_roles"
+msgid "table_user"
+msgstr "Table user"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:63
+msgctxt "profile.manage_roles"
+msgid "table_current_roles"
+msgstr "Table current roles"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:64
+msgctxt "profile.manage_roles"
+msgid "table_change_roles"
+msgstr "Table change roles"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:117
+msgctxt "profile.manage_roles"
+msgid "save"
+msgstr "Save"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:120
+msgctxt "profile.manage_roles"
+msgid "level_limit"
+msgstr "Level limit"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:133
+msgctxt "profile.manage_roles"
+msgid "empty_users_title"
+msgstr "Empty users title"
+
+#: apps/accounts/templates/accounts/partials/_manage_roles_content.html:134
+msgctxt "profile.manage_roles"
+msgid "empty_users_description"
+msgstr "Empty users description"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:12
+msgctxt "profile.pending_review"
+msgid "search_placeholder"
+msgstr "Search placeholder"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:17
+msgctxt "profile.pending_review"
+msgid "type_all"
+msgstr "Type all"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:18
+msgctxt "profile.pending_review"
+msgid "type_exam"
+msgstr "Type exam"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:19
+msgctxt "profile.pending_review"
+msgid "type_assignment"
+msgstr "Type assignment"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:20
+msgctxt "profile.pending_review"
+msgid "type_project"
+msgstr "Type project"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:21
+msgctxt "profile.pending_review"
+msgid "type_lab"
+msgstr "Type lab"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:25
+msgctxt "profile.pending_review"
+msgid "status_all"
+msgstr "Status all"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:26
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:60
+msgctxt "profile.pending_review"
+msgid "status_submitted"
+msgstr "Status submitted"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:27
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:62
+msgctxt "profile.pending_review"
+msgid "status_expired"
+msgstr "Status expired"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:28
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:64
+msgctxt "profile.pending_review"
+msgid "status_pending"
+msgstr "Status pending"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:29
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:66
+msgctxt "profile.pending_review"
+msgid "status_late"
+msgstr "Status late"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:33
+msgctxt "profile.pending_review"
+msgid "filter_button"
+msgstr "Filter button"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:42
+msgctxt "profile.pending_review"
+msgid "list_title"
+msgstr "List title"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:56
+msgctxt "profile.pending_review"
+msgid "group_prefix"
+msgstr "Group prefix"
+
+#: apps/accounts/templates/accounts/partials/_pending_review_content.html:85
+msgctxt "profile.pending_review"
+msgid "empty_not_found"
+msgstr "Empty not found"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:2
+msgctxt "profile.permission_editor"
+msgid "organization_not_found"
+msgstr "Organization not found"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:17
+msgctxt "profile.permission_editor"
+msgid "select_role"
+msgstr "Select role"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:37
+msgctxt "profile.permission_editor"
+msgid "role_click_note"
+msgstr "Role click note"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:45
+msgctxt "profile.permission_editor"
+msgid "permissions_suffix"
+msgstr "Permissions suffix"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:49
+msgctxt "profile.permission_editor"
+msgid "active_permissions_label"
+msgstr "Active permissions label"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:54
+msgctxt "profile.permission_editor"
+msgid "permissions_not_found"
+msgstr "Permissions not found"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:77
+msgctxt "profile.permission_editor"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:78
+msgctxt "profile.permission_editor"
+msgid "remove"
+msgstr "Remove"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:86
+msgctxt "profile.permission_editor"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/accounts/templates/accounts/partials/_permission_editor_content.html:87
+msgctxt "profile.permission_editor"
+msgid "add"
+msgstr "Add"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:2
+msgctxt "profile.role_assignment"
+msgid "organization_not_found_choose_in_profile"
+msgstr "Organization not found choose in profile"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:15
+msgctxt "profile.role_assignment"
+msgid "search_user_placeholder"
+msgstr "Search user placeholder"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:30
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:91
+msgctxt "profile.role_assignment"
+msgid "table_user"
+msgstr "Table user"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:31
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:92
+msgctxt "profile.role_assignment"
+msgid "table_email"
+msgstr "Table email"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:32
+msgctxt "profile.role_assignment"
+msgid "table_current_role"
+msgstr "Table current role"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:33
+msgctxt "profile.role_assignment"
+msgid "table_level"
+msgstr "Table level"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:34
+msgctxt "profile.role_assignment"
+msgid "table_new_role"
+msgstr "Table new role"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:56
+msgctxt "profile.role_assignment"
+msgid "update"
+msgstr "Update"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:62
+msgctxt "profile.role_assignment"
+msgid "members_not_found"
+msgstr "Members not found"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:72
+msgctxt "profile.role_assignment"
+msgid "pending_users_title"
+msgstr "Pending users title"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:75
+msgctxt "profile.role_assignment"
+msgid "pending_users_description"
+msgstr "Pending users description"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:84
+msgctxt "profile.role_assignment"
+msgid "search_unassigned_user_placeholder"
+msgstr "Search unassigned user placeholder"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:93
+msgctxt "profile.role_assignment"
+msgid "table_requested_organization"
+msgstr "Table requested organization"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:94
+msgctxt "profile.role_assignment"
+msgid "table_role_add"
+msgstr "Table role add"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:121
+msgctxt "profile.role_assignment"
+msgid "add"
+msgstr "Add"
+
+#: apps/accounts/templates/accounts/partials/_role_assignment_content.html:127
+msgctxt "profile.role_assignment"
+msgid "pending_users_not_found"
+msgstr "Pending users not found"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:4
+msgctxt "profile.superadmin_orgs"
+msgid "all_modules_title"
+msgstr "All modules title"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:15
+msgctxt "profile.superadmin_orgs"
+msgid "all_organizations_title"
+msgstr "All organizations title"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:21
+msgctxt "profile.superadmin_orgs"
+msgid "table_organization"
+msgstr "Table organization"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:22
+msgctxt "profile.superadmin_orgs"
+msgid "table_type"
+msgstr "Table type"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:23
+msgctxt "profile.superadmin_orgs"
+msgid "table_owner"
+msgstr "Table owner"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:24
+msgctxt "profile.superadmin_orgs"
+msgid "table_status"
+msgstr "Table status"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:25
+msgctxt "profile.superadmin_orgs"
+msgid "table_active_members"
+msgstr "Table active members"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:26
+msgctxt "profile.superadmin_orgs"
+msgid "table_details"
+msgstr "Table details"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:27
+msgctxt "profile.superadmin_orgs"
+msgid "table_manage"
+msgstr "Table manage"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:38
+msgctxt "profile.superadmin_orgs"
+msgid "status_suspended"
+msgstr "Status suspended"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:40
+msgctxt "profile.superadmin_orgs"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:42
+msgctxt "profile.superadmin_orgs"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:47
+msgctxt "profile.superadmin_orgs"
+msgid "detail_code"
+msgstr "Detail code"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:48
+msgctxt "profile.superadmin_orgs"
+msgid "detail_license"
+msgstr "Detail license"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:50
+msgctxt "profile.superadmin_orgs"
+msgid "detail_suspend_reason"
+msgstr "Detail suspend reason"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:59
+msgctxt "profile.superadmin_orgs"
+msgid "unsuspend"
+msgstr "Unsuspend"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:62
+msgctxt "profile.superadmin_orgs"
+msgid "suspend_reason_placeholder"
+msgstr "Suspend reason placeholder"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:63
+msgctxt "profile.superadmin_orgs"
+msgid "suspend"
+msgstr "Suspend"
+
+#: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:70
+msgctxt "profile.superadmin_orgs"
+msgid "organizations_not_found"
+msgstr "Organizations not found"
+
+#: apps/accounts/templates/accounts/password_reset.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.password_reset_page"
+msgid "title"
+msgstr "Reset password"
+
+#: apps/accounts/templates/accounts/password_reset.html:13
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.password_reset_page"
+msgid "heading"
+msgstr "Forgot password?"
+
+#: apps/accounts/templates/accounts/password_reset.html:14
+msgctxt "accounts.password_reset_page"
+msgid "subheading"
+msgstr "Enter your email and we will send you a password reset link."
+
+#: apps/accounts/templates/accounts/password_reset.html:26
+#| msgctxt "assignment.detail"
+#| msgid "submit"
+msgctxt "accounts.password_reset_page"
+msgid "submit"
+msgstr "Send link"
+
+#: apps/accounts/templates/accounts/password_reset_complete.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.password_reset_complete_page"
+msgid "title"
+msgstr "Completed"
+
+#: apps/accounts/templates/accounts/password_reset_complete.html:20
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.password_reset_complete_page"
+msgid "heading"
+msgstr "Password changed successfully!"
+
+#: apps/accounts/templates/accounts/password_reset_complete.html:23
+msgctxt "accounts.password_reset_complete_page"
+msgid "subheading"
+msgstr ""
+"Your account security has been restored. You can now log in with your new "
+"password."
+
+#: apps/accounts/templates/accounts/password_reset_complete.html:27
+#| msgctxt "nav"
+#| msgid "login"
+msgctxt "accounts.password_reset_complete_page"
+msgid "login_now"
+msgstr "Login now"
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.password_reset_confirm_page"
+msgid "title"
+msgstr "New password"
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:19
+#| msgctxt "assignment.legacy.review"
+#| msgid "heading_suffix"
+msgctxt "accounts.password_reset_confirm_page"
+msgid "heading_valid"
+msgstr "Set new password"
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:20
+msgctxt "accounts.password_reset_confirm_page"
+msgid "subheading_valid"
+msgstr "Please enter a new strong password for your account."
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:50
+#| msgctxt "assignment.detail"
+#| msgid "submit"
+msgctxt "accounts.password_reset_confirm_page"
+msgid "submit"
+msgstr "Change password"
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:58
+#| msgctxt "assignment.legacy.review"
+#| msgid "heading_suffix"
+msgctxt "accounts.password_reset_confirm_page"
+msgid "heading_invalid"
+msgstr "Invalid link"
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:60
+msgctxt "accounts.password_reset_confirm_page"
+msgid "subheading_invalid"
+msgstr ""
+"This link has already been used or expired. For security reasons links are "
+"one-time only."
+
+#: apps/accounts/templates/accounts/password_reset_confirm.html:64
+msgctxt "accounts.password_reset_confirm_page"
+msgid "retry"
+msgstr "Request password reset again"
+
+#: apps/accounts/templates/accounts/password_reset_done.html:3
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.password_reset_done_page"
+msgid "title"
+msgstr "Email sent"
+
+#: apps/accounts/templates/accounts/password_reset_done.html:17
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.password_reset_done_page"
+msgid "heading"
+msgstr "Email sent!"
+
+#: apps/accounts/templates/accounts/password_reset_done.html:20
+#| msgctxt "assignment.notification.field"
+#| msgid "message"
+msgctxt "accounts.password_reset_done_page"
+msgid "message_line_1"
+msgstr ""
+"If this email exists in our system, we sent password reset instructions."
+
+#: apps/accounts/templates/accounts/password_reset_done.html:21
+#| msgctxt "assignment.notification.field"
+#| msgid "message"
+msgctxt "accounts.password_reset_done_page"
+msgid "message_line_2"
+msgstr "Do not forget to check your spam folder."
+
+#: apps/accounts/templates/accounts/password_reset_done.html:25
+msgctxt "accounts.password_reset_done_page"
+msgid "back_to_login"
+msgstr "Back to login page"
+
+#: apps/accounts/templates/accounts/pending_review.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.pending_review_page"
+msgid "title"
+msgstr "Pending review"
+
+#: apps/accounts/templates/accounts/pending_review.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.pending_review_page"
+msgid "heading"
+msgstr "Pending review"
+
+#: apps/accounts/templates/accounts/pending_review.html:21
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.pending_review_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/permission_editor.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.permission_editor_page"
+msgid "title"
+msgstr "Permission management"
+
+#: apps/accounts/templates/accounts/permission_editor.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.permission_editor_page"
+msgid "heading"
+msgstr "Permission management"
+
+#: apps/accounts/templates/accounts/permission_editor.html:18
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.permission_editor_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/profile.html:4
+#: apps/accounts/templates/accounts/profile.html:19
+#: apps/accounts/templates/accounts/profile/_sidebar.html:4
+#: apps/accounts/views.py:1728
+msgctxt "profile.sidebar"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/_header.html:8
+#: apps/accounts/templates/accounts/profile/_sidebar.html:9
+msgctxt "profile.sidebar"
+msgid "toggle_open"
+msgstr "Toggle open"
+
+#: apps/accounts/templates/accounts/profile/_header.html:9
+msgctxt "profile.sidebar"
+msgid "toggle_open_or_close"
+msgstr "Toggle open or close"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:8
+#: apps/accounts/templates/accounts/profile/_sidebar.html:10
+msgctxt "profile.sidebar"
+msgid "toggle_close"
+msgstr "Toggle close"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:16
+msgctxt "profile.sidebar"
+msgid "group_general"
+msgstr "Group general"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:20
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:68
+#: apps/accounts/views.py:1683
+msgctxt "profile.section"
+msgid "profile_info"
+msgstr "Profile info"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:24
+msgctxt "profile.sidebar"
+msgid "profile_info"
+msgstr "Profile info"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:28
+msgctxt "profile.sidebar"
+msgid "group_education"
+msgstr "Group education"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:33
+#: apps/accounts/views.py:1684
+msgctxt "profile.section"
+msgid "posts"
+msgstr "Posts"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:37
+msgctxt "profile.sidebar"
+msgid "posts"
+msgstr "Posts"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:47
+#: apps/accounts/views.py:1685
+msgctxt "profile.section"
+msgid "create_post"
+msgstr "Create post"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:51
+msgctxt "profile.sidebar"
+msgid "create_post"
+msgstr "Create post"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:60
+#: apps/accounts/views.py:1687
+msgctxt "profile.section"
+msgid "my_exams"
+msgstr "My exams"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:64
+msgctxt "profile.sidebar"
+msgid "my_exams"
+msgstr "My exams"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:74
+#: apps/accounts/views.py:1688
+msgctxt "profile.section"
+msgid "my_created_courses"
+msgstr "My created courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:78
+msgctxt "profile.sidebar"
+msgid "my_created_courses"
+msgstr "My created courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:88
+#: apps/accounts/views.py:1686
+msgctxt "profile.section"
+msgid "my_courses"
+msgstr "My courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:92
+#: apps/accounts/templates/accounts/profile/_sidebar.html:118
+msgctxt "profile.sidebar"
+msgid "my_courses"
+msgstr "My courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:99
+msgctxt "profile.sidebar"
+msgid "group_assigned"
+msgstr "Group assigned"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:103
+#: apps/accounts/views.py:1689
+msgctxt "profile.section"
+msgid "assigned_tasks"
+msgstr "Assigned tasks"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:107
+msgctxt "profile.sidebar"
+msgid "assigned_tasks"
+msgstr "Assigned tasks"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:114
+#: apps/accounts/views.py:1690
+msgctxt "profile.section"
+msgid "assigned_courses"
+msgstr "Assigned courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:118
+msgctxt "profile.sidebar"
+msgid "assigned_courses"
+msgstr "Assigned courses"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:125
+#: apps/accounts/views.py:1691
+msgctxt "profile.section"
+msgid "my_results"
+msgstr "My results"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:129
+msgctxt "profile.sidebar"
+msgid "my_results"
+msgstr "My results"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:136
+msgctxt "profile.sidebar"
+msgid "group_teacher"
+msgstr "Group teacher"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:143
+#: apps/accounts/views.py:1692
+msgctxt "profile.section"
+msgid "groups"
+msgstr "Groups"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:147
+msgctxt "profile.sidebar"
+msgid "groups"
+msgstr "Groups"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:156
+#: apps/accounts/views.py:1693
+msgctxt "profile.section"
+msgid "pending_review"
+msgstr "Pending review"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:160
+msgctxt "profile.sidebar"
+msgid "pending_review"
+msgstr "Pending review"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:169
+msgctxt "profile.sidebar"
+msgid "group_management"
+msgstr "Group management"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:175
+#: apps/accounts/views.py:1694
+msgctxt "profile.section"
+msgid "role_assignment"
+msgstr "Role assignment"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:179
+msgctxt "profile.sidebar"
+msgid "role_assignment"
+msgstr "Role assignment"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:188
+#: apps/accounts/views.py:1695
+msgctxt "profile.section"
+msgid "permissions"
+msgstr "Permissions"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:192
+msgctxt "profile.sidebar"
+msgid "permissions"
+msgstr "Permissions"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:201
+#: apps/accounts/views.py:1696
+msgctxt "profile.section"
+msgid "manage_roles"
+msgstr "Manage roles"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:205
+msgctxt "profile.sidebar"
+msgid "manage_roles"
+msgstr "Manage roles"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:214
+#: apps/accounts/views.py:1697
+msgctxt "profile.section"
+msgid "superadmin_control"
+msgstr "Superadmin control"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:218
+msgctxt "profile.sidebar"
+msgid "superadmin_control"
+msgstr "Superadmin control"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:225
+msgctxt "profile.sidebar"
+msgid "group_blog"
+msgstr "Group blog"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:229
+#: apps/accounts/views.py:1698
+msgctxt "profile.section"
+msgid "blog"
+msgstr "Blog"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:233
+msgctxt "profile.sidebar"
+msgid "blog"
+msgstr "Blog"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:238
+msgctxt "profile.sidebar"
+msgid "group_language"
+msgstr "Group language"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:243
+msgctxt "profile.sidebar"
+msgid "group_account"
+msgstr "Group account"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:247
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:7
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:106
+#: apps/accounts/views.py:1699
+msgctxt "profile.section"
+msgid "edit_profile"
+msgstr "Edit profile"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:251
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:107
+msgctxt "profile.sidebar"
+msgid "edit_profile"
+msgstr "Edit profile"
+
+#: apps/accounts/templates/accounts/profile/_sidebar.html:257
+msgctxt "profile.sidebar"
+msgid "logout"
+msgstr "Logout"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:10
+msgctxt "profile.assigned_courses"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:16
+msgctxt "profile.assigned_courses"
+msgid "uncategorized"
+msgstr "Uncategorized"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:33
+msgctxt "profile.assigned_courses"
+msgid "enter_course"
+msgstr "Enter course"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:46
+msgctxt "profile.assigned_courses"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:47
+msgctxt "profile.assigned_courses"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:9
+msgctxt "profile.assigned_tasks"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:17
+msgctxt "profile.assigned_tasks"
+msgid "tab_all"
+msgstr "Tab all"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
+msgctxt "profile.assigned_tasks"
+msgid "tab_courses"
+msgstr "Tab courses"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
+msgctxt "profile.assigned_tasks"
+msgid "tab_assignments"
+msgstr "Tab assignments"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
+msgctxt "profile.assigned_tasks"
+msgid "tab_labs"
+msgstr "Tab labs"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
+msgctxt "profile.assigned_tasks"
+msgid "tab_independent"
+msgstr "Tab independent"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
+msgctxt "profile.assigned_tasks"
+msgid "deadline_prefix"
+msgstr "Deadline prefix"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:74
+msgctxt "profile.assigned_tasks"
+msgid "open_task"
+msgstr "Open task"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:87
+msgctxt "profile.assigned_tasks"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:88
+msgctxt "profile.assigned_tasks"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_courses.html:10
+msgctxt "profile.courses"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_courses.html:17
+msgctxt "profile.courses"
+msgid "uncategorized"
+msgstr "Uncategorized"
+
+#: apps/accounts/templates/accounts/profile/sections/_courses.html:42
+msgctxt "profile.courses"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_courses.html:43
+msgctxt "profile.courses"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_courses.html:46
+msgctxt "profile.courses"
+msgid "explore_courses"
+msgstr "Explore courses"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:17
+msgctxt "profile.edit"
+msgid "first_name"
+msgstr "First name"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:22
+msgctxt "profile.edit"
+msgid "last_name"
+msgstr "Last name"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:27
+msgctxt "profile.edit"
+msgid "email"
+msgstr "Email"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:32
+msgctxt "profile.edit"
+msgid "phone"
+msgstr "Phone"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:34
+msgctxt "profile.edit"
+msgid "placeholder_phone"
+msgstr "Placeholder phone"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:37
+msgctxt "profile.edit"
+msgid "location"
+msgstr "Location"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:39
+msgctxt "profile.edit"
+msgid "placeholder_location"
+msgstr "Placeholder location"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:42
+msgctxt "profile.edit"
+msgid "avatar"
+msgstr "Avatar"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:46
+msgctxt "profile.edit"
+msgid "institution_name"
+msgstr "Institution name"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:48
+msgctxt "profile.edit"
+msgid "placeholder_institution"
+msgstr "Placeholder institution"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:51
+msgctxt "profile.edit"
+msgid "school_code"
+msgstr "School code"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:53
+msgctxt "profile.edit"
+msgid "placeholder_school_code"
+msgstr "Placeholder school code"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:58
+msgctxt "profile.edit"
+msgid "about"
+msgstr "About"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:60
+msgctxt "profile.edit"
+msgid "placeholder_about"
+msgstr "Placeholder about"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:65
+msgctxt "profile.edit"
+msgid "save"
+msgstr "Save"
+
+#: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:69
+msgctxt "profile.edit"
+msgid "cancel"
+msgstr "Cancel"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_courses.html:10
+msgctxt "profile.my_courses"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_courses.html:19
+msgctxt "profile.my_courses"
+msgid "new_course"
+msgstr "New course"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_courses.html:50
+msgctxt "profile.my_courses"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_courses.html:51
+msgctxt "profile.my_courses"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_courses.html:56
+msgctxt "profile.my_courses"
+msgid "create_first_course"
+msgstr "Create first course"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:10
+msgctxt "profile.my_exams"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:18
+msgctxt "profile.my_exams"
+msgid "new_exam"
+msgstr "New exam"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:23
+msgctxt "profile.my_exams"
+msgid "exam"
+msgstr "Exam"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:50
+msgctxt "profile.my_exams"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:51
+msgctxt "profile.my_exams"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_exams.html:53
+msgctxt "profile.my_exams"
+msgid "create_first_exam"
+msgstr "Create first exam"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:10
+msgctxt "profile.results"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:18
+msgctxt "profile.results"
+msgid "tab_all"
+msgstr "Tab all"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:22
+msgctxt "profile.results"
+msgid "tab_exams"
+msgstr "Tab exams"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:26
+msgctxt "profile.results"
+msgid "tab_assignments"
+msgstr "Tab assignments"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:30
+msgctxt "profile.results"
+msgid "tab_labs"
+msgstr "Tab labs"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:34
+msgctxt "profile.results"
+msgid "tab_independent"
+msgstr "Tab independent"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:65
+msgctxt "profile.results"
+msgid "score_label"
+msgstr "Score label"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:82
+msgctxt "profile.results"
+msgid "pending_submitted"
+msgstr "Pending submitted"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:84
+msgctxt "profile.results"
+msgid "pending_processing"
+msgstr "Pending processing"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:86
+msgctxt "profile.results"
+msgid "pending_default"
+msgstr "Pending default"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:95
+msgctxt "profile.results"
+msgid "view_result"
+msgstr "View result"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:108
+msgctxt "profile.results"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/accounts/templates/accounts/profile/sections/_my_results.html:109
+msgctxt "profile.results"
+msgid "empty_description"
+msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:7
+msgctxt "profile.posts"
+msgid "title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:19
+msgctxt "profile.posts"
+msgid "published"
+msgstr "Published"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:21
+msgctxt "profile.posts"
+msgid "draft"
+msgstr "Draft"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:38
+msgctxt "profile.posts"
+msgid "edit_title"
+msgstr "Edit title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:45
+msgctxt "profile.posts"
+msgid "delete_title"
+msgstr "Delete title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:62
+msgctxt "profile.posts"
+msgid "empty_message"
+msgstr "Empty message"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:66
+msgctxt "profile.posts"
+msgid "create_first_post"
+msgstr "Create first post"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:75
+msgctxt "profile.posts"
+msgid "modal_create_title"
+msgstr "Modal create title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:86
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:159
+msgctxt "profile.posts"
+msgid "label_title"
+msgstr "Label title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:91
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:164
+msgctxt "profile.posts"
+msgid "label_category"
+msgstr "Label category"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:93
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:166
+msgctxt "profile.posts"
+msgid "option_select_category"
+msgstr "Option select category"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:101
+msgctxt "profile.posts"
+msgid "label_new_category"
+msgstr "Label new category"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:103
+msgctxt "profile.posts"
+msgid "placeholder_new_category"
+msgstr "Placeholder new category"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:107
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:174
+msgctxt "profile.posts"
+msgid "label_excerpt"
+msgstr "Label excerpt"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:112
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:179
+msgctxt "profile.posts"
+msgid "label_content"
+msgstr "Label content"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:117
+msgctxt "profile.posts"
+msgid "label_image_url"
+msgstr "Label image url"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:122
+msgctxt "profile.posts"
+msgid "label_upload_image"
+msgstr "Label upload image"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:129
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:204
+msgctxt "profile.posts"
+msgid "publish_article"
+msgstr "Publish article"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:134
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:209
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:221
+msgctxt "profile.posts"
+msgid "cancel"
+msgstr "Cancel"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:135
+msgctxt "profile.posts"
+msgid "create"
+msgstr "Create"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:144
+msgctxt "profile.posts"
+msgid "modal_edit_title"
+msgstr "Modal edit title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:151
+msgctxt "profile.posts"
+msgid "meta_slug"
+msgstr "Meta slug"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:152
+msgctxt "profile.posts"
+msgid "meta_created"
+msgstr "Meta created"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:153
+msgctxt "profile.posts"
+msgid "meta_updated"
+msgstr "Meta updated"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:184
+msgctxt "profile.posts"
+msgid "label_current_image"
+msgstr "Label current image"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:186
+msgctxt "profile.posts"
+msgid "post_image_alt"
+msgstr "Post image alt"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:187
+msgctxt "profile.posts"
+msgid "no_image"
+msgstr "No image"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:192
+msgctxt "profile.posts"
+msgid "label_upload_new_image"
+msgstr "Label upload new image"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:197
+msgctxt "profile.posts"
+msgid "label_image_url_if_no_file"
+msgstr "Label image url if no file"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:210
+msgctxt "profile.posts"
+msgid "save"
+msgstr "Save"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:218
+msgctxt "profile.posts"
+msgid "confirm_delete_title"
+msgstr "Confirm delete title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:219
+msgctxt "profile.posts"
+msgid "confirm_delete_prefix"
+msgstr "Confirm delete prefix"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:219
+msgctxt "profile.posts"
+msgid "confirm_delete_suffix"
+msgstr "Confirm delete suffix"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:222
+msgctxt "profile.posts"
+msgid "delete"
+msgstr "Delete"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:229
+msgctxt "profile.posts"
+msgid "unsaved_title"
+msgstr "Unsaved title"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:230
+msgctxt "profile.posts"
+msgid "unsaved_message"
+msgstr "Unsaved message"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:232
+msgctxt "profile.posts"
+msgid "stay"
+msgstr "Stay"
+
+#: apps/accounts/templates/accounts/profile/sections/_posts.html:233
+msgctxt "profile.posts"
+msgid "discard_changes"
+msgstr "Discard changes"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:2
+msgctxt "profile.info"
+msgid "not_set"
+msgstr "Not set"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:3
+msgctxt "profile.info"
+msgid "default_role"
+msgstr "Default role"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:4
+msgctxt "profile.info"
+msgid "default_org"
+msgstr "Default org"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:31
+msgctxt "profile.info"
+msgid "user"
+msgstr "User"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:40
+msgctxt "profile.info"
+msgid "personal_info"
+msgstr "Personal info"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:45
+msgctxt "profile.info"
+msgid "username"
+msgstr "Username"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:49
+msgctxt "profile.info"
+msgid "first_name"
+msgstr "First name"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:53
+msgctxt "profile.info"
+msgid "last_name"
+msgstr "Last name"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:57
+msgctxt "profile.info"
+msgid "email"
+msgstr "Email"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:61
+msgctxt "profile.info"
+msgid "phone"
+msgstr "Phone"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:65
+msgctxt "profile.info"
+msgid "location"
+msgstr "Location"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:69
+msgctxt "profile.info"
+msgid "role"
+msgstr "Role"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:73
+msgctxt "profile.info"
+msgid "organization"
+msgstr "Organization"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:77
+msgctxt "profile.info"
+msgid "institution_name"
+msgstr "Institution name"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:81
+msgctxt "profile.info"
+msgid "school_code"
+msgstr "School code"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:85
+msgctxt "profile.info"
+msgid "joined_date"
+msgstr "Joined date"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:92
+msgctxt "profile.info"
+msgid "about"
+msgstr "About"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:99
+msgctxt "profile.info"
+msgid "supervisor_code"
+msgstr "Supervisor code"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:8
+msgctxt "profile.stats"
+msgid "my_exams"
+msgstr "My exams"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:15
+msgctxt "profile.stats"
+msgid "my_created_courses"
+msgstr "My created courses"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:25
+msgctxt "profile.stats"
+msgid "assigned_tasks"
+msgstr "Assigned tasks"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:35
+msgctxt "profile.stats"
+msgid "assigned_courses"
+msgstr "Assigned courses"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:45
+msgctxt "profile.stats"
+msgid "posts"
+msgstr "Posts"
+
+#: apps/accounts/templates/accounts/profile/sections/_profile_info_stats.html:55
+msgctxt "profile.stats"
+msgid "pending_reviews"
+msgstr "Pending reviews"
+
+#: apps/accounts/templates/accounts/public_profile.html:4
+#| msgctxt "profile.results"
+#| msgid "score_label"
+msgctxt "accounts.public_profile_page"
+msgid "profile_label"
+msgstr "Profile"
+
+#: apps/accounts/templates/accounts/public_profile.html:21
+#| msgctxt "assignment.review_submissions"
+#| msgid "title_suffix"
+msgctxt "accounts.public_profile_page"
+msgid "profile_suffix"
+msgstr "Profile"
+
+#: apps/accounts/templates/accounts/public_profile.html:22
+msgctxt "accounts.public_profile_page"
+msgid "subheading_posts"
+msgstr "Subheading posts"
+
+#: apps/accounts/templates/accounts/public_profile.html:30
+#| msgctxt "profile.section"
+#| msgid "create_post"
+msgctxt "accounts.public_profile_page"
+msgid "create_post"
+msgstr "Create post"
+
+#: apps/accounts/templates/accounts/public_profile.html:35
+#| msgctxt "profile.section"
+#| msgid "assigned_tasks"
+msgctxt "accounts.public_profile_page"
+msgid "assigned_exams"
+msgstr "Assigned exams"
+
+#: apps/accounts/templates/accounts/public_profile.html:41
+#| msgctxt "profile.section"
+#| msgid "my_results"
+msgctxt "accounts.public_profile_page"
+msgid "my_exam_results"
+msgstr "My exam results"
+
+#: apps/accounts/templates/accounts/public_profile.html:46
+#: apps/accounts/templates/accounts/public_profile.html:74
+#| msgctxt "profile.section"
+#| msgid "my_courses"
+msgctxt "accounts.public_profile_page"
+msgid "my_courses"
+msgstr "My courses"
+
+#: apps/accounts/templates/accounts/public_profile.html:55
+#| msgctxt "profile.section"
+#| msgid "my_exams"
+msgctxt "accounts.public_profile_page"
+msgid "my_exams"
+msgstr "My exams"
+
+#: apps/accounts/templates/accounts/public_profile.html:60
+#| msgctxt "profile.section"
+#| msgid "pending_review"
+msgctxt "accounts.public_profile_page"
+msgid "pending_review"
+msgstr "Pending review"
+
+#: apps/accounts/templates/accounts/public_profile.html:66
+#| msgctxt "profile.my_exams"
+#| msgid "new_exam"
+msgctxt "accounts.public_profile_page"
+msgid "new_exam"
+msgstr "New exam"
+
+#: apps/accounts/templates/accounts/public_profile.html:70
+#| msgctxt "profile.section"
+#| msgid "groups"
+msgctxt "accounts.public_profile_page"
+msgid "my_groups"
+msgstr "My groups"
+
+#: apps/accounts/templates/accounts/public_profile.html:78
+#| msgctxt "profile.my_courses"
+#| msgid "new_course"
+msgctxt "accounts.public_profile_page"
+msgid "new_course"
+msgstr "New course"
+
+#: apps/accounts/templates/accounts/public_profile.html:98
+#| msgctxt "assignment.legacy.review"
+#| msgid "status_closed"
+msgctxt "accounts.public_profile_page"
+msgid "status_published"
+msgstr "Status published"
+
+#: apps/accounts/templates/accounts/public_profile.html:100
+#| msgctxt "profile.pending_review"
+#| msgid "status_late"
+msgctxt "accounts.public_profile_page"
+msgid "status_draft"
+msgstr "Status draft"
+
+#: apps/accounts/templates/accounts/public_profile.html:118
+#| msgctxt "profile.posts"
+#| msgid "edit_title"
+msgctxt "accounts.public_profile_page"
+msgid "edit_action_title"
+msgstr "Edit action"
+
+#: apps/accounts/templates/accounts/public_profile.html:125
+#| msgctxt "profile.posts"
+#| msgid "delete_title"
+msgctxt "accounts.public_profile_page"
+msgid "delete_action_title"
+msgstr "Delete action"
+
+#: apps/accounts/templates/accounts/public_profile.html:143
+#| msgctxt "profile.posts"
+#| msgid "empty_message"
+msgctxt "accounts.public_profile_page"
+msgid "empty_posts"
+msgstr "Empty posts"
+
+#: apps/accounts/templates/accounts/public_profile.html:152
+#| msgctxt "profile.groups"
+#| msgid "modal_edit_title"
+msgctxt "accounts.public_profile_page"
+msgid "modal_edit_title"
+msgstr "Modal edit"
+
+#: apps/accounts/templates/accounts/public_profile.html:160
+#| msgctxt "profile.posts"
+#| msgid "meta_slug"
+msgctxt "accounts.public_profile_page"
+msgid "meta_slug"
+msgstr "Meta slug"
+
+#: apps/accounts/templates/accounts/public_profile.html:161
+#| msgctxt "profile.posts"
+#| msgid "meta_created"
+msgctxt "accounts.public_profile_page"
+msgid "meta_created_at"
+msgstr "Meta created at"
+
+#: apps/accounts/templates/accounts/public_profile.html:162
+#| msgctxt "profile.posts"
+#| msgid "meta_updated"
+msgctxt "accounts.public_profile_page"
+msgid "meta_updated_at"
+msgstr "Meta updated at"
+
+#: apps/accounts/templates/accounts/public_profile.html:168
+#| msgctxt "profile.posts"
+#| msgid "edit_title"
+msgctxt "accounts.public_profile_page"
+msgid "field_title"
+msgstr "Title"
+
+#: apps/accounts/templates/accounts/public_profile.html:173
+#| msgctxt "profile.posts"
+#| msgid "label_category"
+msgctxt "accounts.public_profile_page"
+msgid "field_category"
+msgstr "Category"
+
+#: apps/accounts/templates/accounts/public_profile.html:175
+#| msgctxt "profile.checkbox_select"
+#| msgid "clear_selected"
+msgctxt "accounts.public_profile_page"
+msgid "category_select"
+msgstr "Category select"
+
+#: apps/accounts/templates/accounts/public_profile.html:183
+#| msgctxt "profile.posts"
+#| msgid "label_excerpt"
+msgctxt "accounts.public_profile_page"
+msgid "field_excerpt"
+msgstr "Excerpt"
+
+#: apps/accounts/templates/accounts/public_profile.html:188
+#| msgctxt "profile.posts"
+#| msgid "label_content"
+msgctxt "accounts.public_profile_page"
+msgid "field_content"
+msgstr "Content"
+
+#: apps/accounts/templates/accounts/public_profile.html:194
+#| msgctxt "profile.posts"
+#| msgid "label_current_image"
+msgctxt "accounts.public_profile_page"
+msgid "field_current_image"
+msgstr "Current image"
+
+#: apps/accounts/templates/accounts/public_profile.html:196
+#| msgctxt "profile.posts"
+#| msgid "post_image_alt"
+msgctxt "accounts.public_profile_page"
+msgid "image_alt"
+msgstr "Image alt"
+
+#: apps/accounts/templates/accounts/public_profile.html:197
+#| msgctxt "profile.posts"
+#| msgid "no_image"
+msgctxt "accounts.public_profile_page"
+msgid "no_image"
+msgstr "No image"
+
+#: apps/accounts/templates/accounts/public_profile.html:202
+msgctxt "accounts.public_profile_page"
+msgid "field_new_image_optional"
+msgstr "New image optional"
+
+#: apps/accounts/templates/accounts/public_profile.html:207
+#| msgctxt "profile.posts"
+#| msgid "label_image_url"
+msgctxt "accounts.public_profile_page"
+msgid "field_image_url"
+msgstr "Image url"
+
+#: apps/accounts/templates/accounts/public_profile.html:214
+#| msgctxt "profile.posts"
+#| msgid "publish_article"
+msgctxt "accounts.public_profile_page"
+msgid "publish_checkbox"
+msgstr "Publish checkbox"
+
+#: apps/accounts/templates/accounts/public_profile.html:219
+#: apps/accounts/templates/accounts/public_profile.html:233
+#| msgctxt "profile.groups"
+#| msgid "cancel"
+msgctxt "accounts.public_profile_page"
+msgid "cancel"
+msgstr "Cancel"
+
+#: apps/accounts/templates/accounts/public_profile.html:220
+#| msgctxt "profile.manage_roles"
+#| msgid "save"
+msgctxt "accounts.public_profile_page"
+msgid "save"
+msgstr "Save"
+
+#: apps/accounts/templates/accounts/public_profile.html:230
+#| msgctxt "profile.groups"
+#| msgid "modal_create_title"
+msgctxt "accounts.public_profile_page"
+msgid "modal_delete_title"
+msgstr "Modal delete"
+
+#: apps/accounts/templates/accounts/public_profile.html:231
+#| msgctxt "profile.posts"
+#| msgid "confirm_delete_prefix"
+msgctxt "accounts.public_profile_page"
+msgid "modal_delete_message_prefix"
+msgstr "Modal delete message prefix"
+
+#: apps/accounts/templates/accounts/public_profile.html:231
+#| msgctxt "profile.posts"
+#| msgid "confirm_delete_suffix"
+msgctxt "accounts.public_profile_page"
+msgid "modal_delete_message_suffix"
+msgstr "Modal delete message"
+
+#: apps/accounts/templates/accounts/public_profile.html:235
+#| msgctxt "language"
+#| msgid "selection"
+msgctxt "accounts.public_profile_page"
+msgid "delete_action"
+msgstr "Delete action"
+
+#: apps/accounts/templates/accounts/public_profile.html:243
+#| msgctxt "assignment.legacy.modals"
+#| msgid "modal_add_title"
+msgctxt "accounts.public_profile_page"
+msgid "modal_unsaved_title"
+msgstr "Modal unsaved"
+
+#: apps/accounts/templates/accounts/public_profile.html:244
+#| msgctxt "profile.posts"
+#| msgid "unsaved_message"
+msgctxt "accounts.public_profile_page"
+msgid "modal_unsaved_message"
+msgstr "Modal unsaved message"
+
+#: apps/accounts/templates/accounts/public_profile.html:246
+#| msgctxt "profile.posts"
+#| msgid "stay"
+msgctxt "accounts.public_profile_page"
+msgid "stay"
+msgstr "Stay"
+
+#: apps/accounts/templates/accounts/public_profile.html:247
+#| msgctxt "profile.posts"
+#| msgid "discard_changes"
+msgctxt "accounts.public_profile_page"
+msgid "discard_changes"
+msgstr "Discard changes"
+
+#: apps/accounts/templates/accounts/register.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.register"
+msgid "title"
+msgstr "Register"
+
+#: apps/accounts/templates/accounts/register.html:13
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.register"
+msgid "heading"
+msgstr "Create account"
+
+#: apps/accounts/templates/accounts/register.html:14
+msgctxt "accounts.register"
+msgid "subheading"
+msgstr ""
+"Create a multi-tenant account and join the platform by selecting your role."
+
+#: apps/accounts/templates/accounts/register.html:20
+#| msgctxt "profile.checkbox_select"
+#| msgid "selected_count"
+msgctxt "accounts.register"
+msgid "step_country"
+msgstr "Country"
+
+#: apps/accounts/templates/accounts/register.html:24
+msgctxt "accounts.register"
+msgid "step_account_type"
+msgstr "Account type"
+
+#: apps/accounts/templates/accounts/register.html:28
+#| msgctxt "profile.superadmin_orgs"
+#| msgid "table_details"
+msgctxt "accounts.register"
+msgid "step_details"
+msgstr "Details"
+
+#: apps/accounts/templates/accounts/register.html:45
+msgctxt "accounts.register"
+msgid "choose_country"
+msgstr "Choose your country"
+
+#: apps/accounts/templates/accounts/register.html:55
+#: apps/accounts/templates/accounts/register.html:135
+#| msgctxt "assignment.submission.field"
+#| msgid "content"
+msgctxt "accounts.register"
+msgid "continue"
+msgstr "Continue"
+
+#: apps/accounts/templates/accounts/register.html:62
+msgctxt "accounts.register"
+msgid "choose_registration_type"
+msgstr "Choose registration type"
+
+#: apps/accounts/templates/accounts/register.html:79
+msgctxt "accounts.register"
+msgid "individual_org_required_help"
+msgstr ""
+"When selecting Individual, organization selection is required. Role will be "
+"set automatically as student."
+
+#: apps/accounts/templates/accounts/register.html:86
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.register"
+msgid "institution_search_label"
+msgstr "Search institution"
+
+#: apps/accounts/templates/accounts/register.html:87
+#| msgctxt "profile.pending_review"
+#| msgid "search_placeholder"
+msgctxt "accounts.register"
+msgid "institution_search_placeholder"
+msgstr "Search institution..."
+
+#: apps/accounts/templates/accounts/register.html:106
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.register"
+msgid "institution_not_listed_help"
+msgstr ""
+"If it is not listed, select “Not listed / Other” and enter institution name "
+"manually."
+
+#: apps/accounts/templates/accounts/register.html:117
+msgctxt "accounts.register"
+msgid "org_identifier_help_university"
+msgstr "This field is required for university."
+
+#: apps/accounts/templates/accounts/register.html:132
+#: apps/accounts/templates/accounts/register.html:208
+#| msgctxt "assignment.detail"
+#| msgid "back"
+msgctxt "accounts.register"
+msgid "back"
+msgstr "Back"
+
+#: apps/accounts/templates/accounts/register.html:142
+#| msgctxt "profile.info"
+#| msgid "personal_info"
+msgctxt "accounts.register"
+msgid "personal_info"
+msgstr "Personal information"
+
+#: apps/accounts/templates/accounts/register.html:186
+msgctxt "accounts.register"
+msgid "auto_student_role_info"
+msgstr ""
+"For the selected individual organization, status will be set automatically "
+"as student."
+
+#: apps/accounts/templates/accounts/register.html:210
+#| msgctxt "assignment.detail"
+#| msgid "submit"
+msgctxt "accounts.register"
+msgid "submit"
+msgstr "Submit"
+
+#: apps/accounts/templates/accounts/register.html:216
+msgctxt "accounts.register"
+msgid "already_have_account"
+msgstr "Already have an account?"
+
+#: apps/accounts/templates/accounts/register.html:216
+#| msgctxt "nav"
+#| msgid "login"
+msgctxt "accounts.register"
+msgid "login_now"
+msgstr "Login"
+
+#: apps/accounts/templates/accounts/register.html:228
+#| msgctxt "assignment.modals"
+#| msgid "select_group_first"
+msgctxt "accounts.register.js"
+msgid "select_empty_university"
+msgstr "Select empty university"
+
+#: apps/accounts/templates/accounts/register.html:229
+#| msgctxt "profile.checkbox_select"
+#| msgid "selected_count"
+msgctxt "accounts.register.js"
+msgid "select_empty_school"
+msgstr "Select empty school"
+
+#: apps/accounts/templates/accounts/register.html:230
+#| msgctxt "profile.checkbox_select"
+#| msgid "selected_count"
+msgctxt "accounts.register.js"
+msgid "select_empty_course_center"
+msgstr "Select empty course center"
+
+#: apps/accounts/templates/accounts/register.html:231
+msgctxt "accounts.register.js"
+msgid "select_empty_default"
+msgstr "Select empty default"
+
+#: apps/accounts/templates/accounts/register.html:232
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_student"
+msgctxt "accounts.register.js"
+msgid "label_search_university"
+msgstr "Search university"
+
+#: apps/accounts/templates/accounts/register.html:233
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_student"
+msgctxt "accounts.register.js"
+msgid "placeholder_search_university"
+msgstr "Search university..."
+
+#: apps/accounts/templates/accounts/register.html:234
+#| msgctxt "assignment.legacy.detail"
+#| msgid "label_files"
+msgctxt "accounts.register.js"
+msgid "label_university"
+msgstr "University"
+
+#: apps/accounts/templates/accounts/register.html:235
+msgctxt "accounts.register.js"
+msgid "label_university_manual"
+msgstr "University manual"
+
+#: apps/accounts/templates/accounts/register.html:236
+#| msgctxt "profile.edit"
+#| msgid "placeholder_institution"
+msgctxt "accounts.register.js"
+msgid "placeholder_university_manual"
+msgstr "University manual..."
+
+#: apps/accounts/templates/accounts/register.html:237
+msgctxt "accounts.register.js"
+msgid "label_university_identifier"
+msgstr "University identifier"
+
+#: apps/accounts/templates/accounts/register.html:238
+msgctxt "accounts.register.js"
+msgid "hint_university_az"
+msgstr "Hint university az"
+
+#: apps/accounts/templates/accounts/register.html:239
+msgctxt "accounts.register.js"
+msgid "hint_university_global"
+msgstr "Hint university global"
+
+#: apps/accounts/templates/accounts/register.html:240
+#| msgctxt "assignment.legacy.modals"
+#| msgid "label_max_score"
+msgctxt "accounts.register.js"
+msgid "label_search_school"
+msgstr "Search school"
+
+#: apps/accounts/templates/accounts/register.html:241
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_teacher"
+msgctxt "accounts.register.js"
+msgid "placeholder_search_school"
+msgstr "Search school..."
+
+#: apps/accounts/templates/accounts/register.html:242
+#| msgctxt "assignment.legacy.modals"
+#| msgid "label_description"
+msgctxt "accounts.register.js"
+msgid "label_school_optional"
+msgstr "School optional"
+
+#: apps/accounts/templates/accounts/register.html:243
+msgctxt "accounts.register.js"
+msgid "label_school_manual"
+msgstr "School manual"
+
+#: apps/accounts/templates/accounts/register.html:244
+#| msgctxt "profile.edit"
+#| msgid "placeholder_school_code"
+msgctxt "accounts.register.js"
+msgid "placeholder_school_manual"
+msgstr "School manual..."
+
+#: apps/accounts/templates/accounts/register.html:245
+#| msgctxt "profile.posts"
+#| msgid "label_content"
+msgctxt "accounts.register.js"
+msgid "label_school_identifier"
+msgstr "School identifier"
+
+#: apps/accounts/templates/accounts/register.html:246
+msgctxt "accounts.register.js"
+msgid "hint_school"
+msgstr "Hint school"
+
+#: apps/accounts/templates/accounts/register.html:247
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_teacher"
+msgctxt "accounts.register.js"
+msgid "label_search_course_center"
+msgstr "Search course center"
+
+#: apps/accounts/templates/accounts/register.html:248
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_teacher"
+msgctxt "accounts.register.js"
+msgid "placeholder_search_course_center"
+msgstr "Search course center..."
+
+#: apps/accounts/templates/accounts/register.html:249
+#| msgctxt "profile.posts"
+#| msgid "label_current_image"
+msgctxt "accounts.register.js"
+msgid "label_course_center_optional"
+msgstr "Course center optional"
+
+#: apps/accounts/templates/accounts/register.html:250
+#| msgctxt "profile.posts"
+#| msgid "label_current_image"
+msgctxt "accounts.register.js"
+msgid "label_course_center_manual"
+msgstr "Course center manual"
+
+#: apps/accounts/templates/accounts/register.html:251
+#| msgctxt "profile.posts"
+#| msgid "placeholder_new_category"
+msgctxt "accounts.register.js"
+msgid "placeholder_course_center_manual"
+msgstr "Course center manual..."
+
+#: apps/accounts/templates/accounts/register.html:252
+#| msgctxt "profile.posts"
+#| msgid "label_current_image"
+msgctxt "accounts.register.js"
+msgid "label_course_center_identifier"
+msgstr "Course center identifier"
+
+#: apps/accounts/templates/accounts/register.html:253
+msgctxt "accounts.register.js"
+msgid "hint_course_center"
+msgstr "Hint course center"
+
+#: apps/accounts/templates/accounts/register.html:254
+#| msgctxt "assignment.legacy.modals"
+#| msgid "label_start_date"
+msgctxt "accounts.register.js"
+msgid "label_search_default"
+msgstr "Search default"
+
+#: apps/accounts/templates/accounts/register.html:255
+#| msgctxt "profile.groups"
+#| msgid "placeholder_search_student"
+msgctxt "accounts.register.js"
+msgid "placeholder_search_default"
+msgstr "Search default..."
+
+#: apps/accounts/templates/accounts/register.html:256
+#| msgctxt "profile.edit"
+#| msgid "placeholder_institution"
+msgctxt "accounts.register.js"
+msgid "label_institution_default"
+msgstr "Institution default"
+
+#: apps/accounts/templates/accounts/register.html:257
+#| msgctxt "profile.edit"
+#| msgid "institution_name"
+msgctxt "accounts.register.js"
+msgid "label_institution_manual_default"
+msgstr "Institution manual default"
+
+#: apps/accounts/templates/accounts/register.html:258
+#| msgctxt "assignment.legacy.modals"
+#| msgid "label_due_date"
+msgctxt "accounts.register.js"
+msgid "label_identifier_default"
+msgstr "Identifier default"
+
+#: apps/accounts/templates/accounts/register.html:259
+#| msgctxt "assignment.legacy.detail"
+#| msgid "label_answer_required"
+msgctxt "accounts.register.js"
+msgid "help_identifier_required"
+msgstr "Help identifier required"
+
+#: apps/accounts/templates/accounts/register.html:260
+msgctxt "accounts.register.js"
+msgid "help_identifier_optional"
+msgstr "Help identifier optional"
+
+#: apps/accounts/templates/accounts/role_assignment.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.role_assignment_page"
+msgid "title"
+msgstr "Assign role"
+
+#: apps/accounts/templates/accounts/role_assignment.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.role_assignment_page"
+msgid "heading"
+msgstr "Assign role"
+
+#: apps/accounts/templates/accounts/role_assignment.html:18
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.role_assignment_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.student_dashboard"
+msgid "title"
+msgstr "Student dashboard"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.student_dashboard"
+msgid "heading"
+msgstr "Heading"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:16
+msgctxt "accounts.student_dashboard"
+msgid "welcome"
+msgstr "Welcome"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:19
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.student_dashboard"
+msgid "btn_profile"
+msgstr "Profile"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:22
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_courses"
+msgctxt "accounts.student_dashboard"
+msgid "btn_courses"
+msgstr "Courses"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:25
+#| msgctxt "profile.results"
+#| msgid "tab_exams"
+msgctxt "accounts.student_dashboard"
+msgid "btn_exams"
+msgstr "Exams"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:39
+#| msgctxt "profile.manage_roles"
+#| msgid "empty_users_title"
+msgctxt "accounts.student_dashboard"
+msgid "widget_courses_title"
+msgstr "Courses"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:40
+#| msgctxt "assignment.model.field"
+#| msgid "course"
+msgctxt "accounts.student_dashboard"
+msgid "course_unit"
+msgstr "Course unit"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:59
+#| msgctxt "assignment.my_submissions"
+#| msgid "view"
+msgctxt "accounts.student_dashboard"
+msgid "view_all"
+msgstr "View all"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:64
+#| msgctxt "profile.section"
+#| msgid "my_courses"
+msgctxt "accounts.student_dashboard"
+msgid "empty_courses"
+msgstr "Empty courses"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:76
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_assignments"
+msgctxt "accounts.student_dashboard"
+msgid "widget_assignments_title"
+msgstr "Assignments"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:77
+#| msgctxt "profile.results"
+#| msgid "pending_submitted"
+msgctxt "accounts.student_dashboard"
+msgid "pending_unit"
+msgstr "Pending unit"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:106
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_assignments"
+msgctxt "accounts.student_dashboard"
+msgid "empty_assignments"
+msgstr "Empty assignments"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:118
+msgctxt "accounts.student_dashboard"
+msgid "widget_upcoming_exams_title"
+msgstr "Upcoming exams"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:119
+#| msgctxt "profile.my_exams"
+#| msgid "exam"
+msgctxt "accounts.student_dashboard"
+msgid "exam_unit"
+msgstr "Exam unit"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:134
+#| msgctxt "profile.results"
+#| msgid "tab_exams"
+msgctxt "accounts.student_dashboard"
+msgid "start_exam"
+msgstr "Start exam"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:142
+msgctxt "accounts.student_dashboard"
+msgid "empty_upcoming_exams"
+msgstr "Empty upcoming exams"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:154
+msgctxt "accounts.student_dashboard"
+msgid "widget_recent_grades_title"
+msgstr "Recent grades"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:155
+#| msgctxt "assignment.review_submissions"
+#| msgid "answer_text"
+msgctxt "accounts.student_dashboard"
+msgid "answer_unit"
+msgstr "Answer unit"
+
+#: apps/accounts/templates/accounts/student_dashboard.html:186
+#| msgctxt "assignment.section"
+#| msgid "empty_teacher"
+msgctxt "accounts.student_dashboard"
+msgid "empty_recent_grades"
+msgstr "Empty recent grades"
+
+#: apps/accounts/templates/accounts/superadmin_organizations.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.superadmin_orgs_page"
+msgid "title"
+msgstr "Superadmin control"
+
+#: apps/accounts/templates/accounts/superadmin_organizations.html:15
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.superadmin_orgs_page"
+msgid "heading"
+msgstr "Superadmin control"
+
+#: apps/accounts/templates/accounts/superadmin_organizations.html:18
+#| msgctxt "profile.section"
+#| msgid "edit_profile"
+msgctxt "accounts.superadmin_orgs_page"
+msgid "back_to_profile"
+msgstr "Back to profile"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:4
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.teacher_dashboard"
+msgid "title"
+msgstr "Teacher dashboard"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:15
+#| msgctxt "profile.posts"
+#| msgid "label_title"
+msgctxt "accounts.teacher_dashboard"
+msgid "panel_title"
+msgstr "Panel"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:21
+#| msgctxt "nav"
+#| msgid "home"
+msgctxt "accounts.teacher_dashboard"
+msgid "home"
+msgstr "Home"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:25
+#| msgctxt "assignment.model.field"
+#| msgid "course"
+msgctxt "accounts.teacher_dashboard"
+msgid "courses"
+msgstr "Courses"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:29
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.teacher_dashboard"
+msgid "grading_queue"
+msgstr "Grading queue"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:33
+#| msgctxt "nav"
+#| msgid "exams"
+msgctxt "accounts.teacher_dashboard"
+msgid "exams"
+msgstr "Exams"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:37
+#| msgctxt "profile.groups"
+#| msgid "students"
+msgctxt "accounts.teacher_dashboard"
+msgid "students"
+msgstr "Students"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:41
+msgctxt "accounts.teacher_dashboard"
+msgid "reports"
+msgstr "Reports"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:45
+#| msgctxt "nav"
+#| msgid "my_profile"
+msgctxt "accounts.teacher_dashboard"
+msgid "profile"
+msgstr "Profile"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:49
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "settings"
+msgctxt "accounts.teacher_dashboard"
+msgid "settings"
+msgstr "Settings"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:57
+#| msgctxt "assignment.legacy.modals"
+#| msgid "modal_add_title"
+msgctxt "accounts.teacher_dashboard"
+msgid "dashboard_title"
+msgstr "Dashboard"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:68
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_courses"
+msgctxt "accounts.teacher_dashboard"
+msgid "stat_total_courses"
+msgstr "Total courses"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:80
+#| msgctxt "assignment.legacy.modals"
+#| msgid "tab_students"
+msgctxt "accounts.teacher_dashboard"
+msgid "stat_total_students"
+msgstr "Total students"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:92
+#| msgctxt "profile.pending_review"
+#| msgid "status_pending"
+msgctxt "accounts.teacher_dashboard"
+msgid "stat_pending_grading"
+msgstr "Pending grading"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:104
+#| msgctxt "profile.permission_editor"
+#| msgid "status_active"
+msgctxt "accounts.teacher_dashboard"
+msgid "stat_at_risk"
+msgstr "At risk"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:121
+#| msgctxt "profile.role_assignment"
+#| msgid "pending_users_title"
+msgctxt "accounts.teacher_dashboard"
+msgid "widget_pending_grading_title"
+msgstr "Pending grading"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:124
+#: apps/accounts/templates/accounts/teacher_dashboard.html:157
+#: apps/accounts/templates/accounts/teacher_dashboard.html:190
+#: apps/accounts/templates/accounts/teacher_dashboard.html:223
+#| msgctxt "assignment.my_submissions"
+#| msgid "view"
+msgctxt "accounts.teacher_dashboard"
+msgid "view_all"
+msgstr "View all"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:144
+#| msgctxt "assignment.legacy.review"
+#| msgid "pending_waiting"
+msgctxt "accounts.teacher_dashboard"
+msgid "empty_pending_grading"
+msgstr "Empty pending grading"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:154
+msgctxt "accounts.teacher_dashboard"
+msgid "widget_upcoming_exams_title"
+msgstr "Upcoming exams"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:177
+msgctxt "accounts.teacher_dashboard"
+msgid "empty_upcoming_exams"
+msgstr "Empty upcoming exams"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:187
+msgctxt "accounts.teacher_dashboard"
+msgid "widget_active_courses_title"
+msgstr "Active courses"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:200
+#| msgctxt "assignment.submission.field"
+#| msgid "student"
+msgctxt "accounts.teacher_dashboard"
+msgid "student_unit"
+msgstr "Student unit"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:210
+#| msgctxt "profile.section"
+#| msgid "my_created_courses"
+msgctxt "accounts.teacher_dashboard"
+msgid "empty_active_courses"
+msgstr "Empty active courses"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:220
+msgctxt "accounts.teacher_dashboard"
+msgid "widget_at_risk_students_title"
+msgstr "At risk students"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:233
+#| msgctxt "assignment.detail"
+#| msgid "error_prefix"
+msgctxt "accounts.teacher_dashboard"
+msgid "average_score_prefix"
+msgstr "Average score prefix"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:235
+msgctxt "accounts.teacher_dashboard"
+msgid "attention_badge"
+msgstr "Attention badge"
+
+#: apps/accounts/templates/accounts/teacher_dashboard.html:243
+#| msgctxt "assignment.section"
+#| msgid "empty_student"
+msgctxt "accounts.teacher_dashboard"
+msgid "empty_at_risk_students"
+msgstr "Empty at risk students"
+
+#: apps/accounts/templates/accounts/verify_code.html:3
+#| msgctxt "profile.groups"
+#| msgid "title"
+msgctxt "accounts.verify_code"
+msgid "title"
+msgstr "Email verification"
+
+#: apps/accounts/templates/accounts/verify_code.html:8
+#| msgctxt "assignment.admin.fieldset"
+#| msgid "grading"
+msgctxt "accounts.verify_code"
+msgid "heading"
+msgstr "Email verification"
+
+#: apps/accounts/templates/accounts/verify_code.html:9
+#| msgctxt "profile.posts"
+#| msgid "confirm_delete_suffix"
+msgctxt "accounts.verify_code"
+msgid "code_sent_suffix"
+msgstr "address received a code."
+
+#: apps/accounts/templates/accounts/verify_code.html:14
+#| msgctxt "profile.results"
+#| msgid "score_label"
+msgctxt "accounts.verify_code"
+msgid "code_label"
+msgstr "Verification code"
+
+#: apps/accounts/templates/accounts/verify_code.html:15
+#| msgctxt "assignment.review_submissions"
+#| msgid "grade_placeholder"
+msgctxt "accounts.verify_code"
+msgid "code_placeholder"
+msgstr "6-digit code..."
+
+#: apps/accounts/templates/accounts/verify_code.html:17
+#| msgctxt "assignment.detail"
+#| msgid "submit_answer"
+msgctxt "accounts.verify_code"
+msgid "submit_verify"
+msgstr "Verify"
+
+#: apps/accounts/templates/accounts/verify_code.html:22
+msgctxt "accounts.verify_code"
+msgid "resend_code"
+msgstr "Resend code"
+
+#: apps/accounts/views.py:764
+#| msgctxt "profile.my_exams"
+#| msgid "exam"
+msgctxt "accounts.my_results.kind"
+msgid "exam"
+msgstr "Exam"
+
+#: apps/accounts/views.py:972
+msgctxt "profile.pending_review.action"
+msgid "review"
+msgstr "Review"
+
+#: apps/accounts/views.py:1004
+msgctxt "profile.pending_review.action"
+msgid "open_assignment"
+msgstr "Open assignment"
+
+#: apps/accounts/views.py:1036
+msgctxt "profile.pending_review.action"
+msgid "open_project"
+msgstr "Open project"
+
+#: apps/accounts/views.py:1069
+msgctxt "profile.pending_review.action"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/accounts/views.py:1088 apps/accounts/views.py:1927
+msgctxt "accounts.grading_queue.message"
+msgid "teacher_only"
+msgstr "Teacher only"
+
+#: apps/accounts/views.py:1211
+msgctxt "accounts.profile_edit.message"
+msgid "required_fields_missing"
+msgstr "Required fields missing"
+
+#: apps/accounts/views.py:1215
+msgctxt "accounts.profile_edit.message"
+msgid "email_already_in_use"
+msgstr "Email already in use"
+
+#: apps/accounts/views.py:1244
+msgctxt "accounts.profile_edit.message"
+msgid "student_university_or_school_required"
+msgstr "Student university or school required"
+
+#: apps/accounts/views.py:1250
+msgctxt "accounts.profile_edit.message"
+msgid "profile_updated_successfully"
+msgstr "Profile updated successfully"
+
+#: apps/accounts/views.py:1711
+msgctxt "profile.shortcut"
+msgid "create_post_description"
+msgstr "Create post description"
+
+#: apps/accounts/views.py:1712
+msgctxt "profile.shortcut"
+msgid "create_post_action"
+msgstr "Create post action"
+
+#: apps/accounts/views.py:1723
+msgctxt "profile.shortcut"
+msgid "open_blog_description"
+msgstr "Open blog description"
+
+#: apps/accounts/views.py:1724
+msgctxt "profile.shortcut"
+msgid "open_blog_action"
+msgstr "Open blog action"
+
+#: apps/accounts/views.py:1798
+msgctxt "accounts.manage_roles.message"
+msgid "admin_only"
+msgstr "Admin only"
+
+#: apps/accounts/views.py:1804
+msgctxt "accounts.manage_roles.message"
+msgid "active_organization_not_found"
+msgstr "Active organization not found"
+
+#: apps/accounts/views.py:1817
+msgctxt "accounts.manage_roles.message"
+msgid "user_not_selected"
+msgstr "User not selected"
+
+#: apps/accounts/views.py:1825
+msgctxt "accounts.manage_roles.message"
+msgid "manage_only_own_org_users"
+msgstr "Manage only own org users"
+
+#: apps/accounts/views.py:1830
+msgctxt "accounts.manage_roles.message"
+msgid "insufficient_level_for_target_user"
+msgstr "Insufficient level for target user"
+
+#: apps/accounts/views.py:1845
+msgctxt "accounts.manage_roles.message"
+msgid "invalid_roles_selected"
+msgstr "Invalid roles selected"
+
+#: apps/accounts/views.py:1850
+msgctxt "accounts.manage_roles.message"
+msgid "not_allowed_to_assign_some_roles"
+msgstr "Not allowed to assign some roles"
+
+#: apps/accounts/views.py:1877
+msgctxt "accounts.manage_roles.message"
+msgid "roles_updated_for_user"
+msgstr "Roles updated for user"
+
+#: apps/accounts/views.py:1970 apps/accounts/views.py:2002
+#: apps/accounts/views.py:2024 apps/accounts/views.py:2042
+msgctxt "accounts.student_assignments.message"
+msgid "student_or_member_only"
+msgstr "Student or member only"
+
+#: apps/accounts/views.py:2073
+#| msgctxt "assignment.model.field"
+#| msgid "course"
+msgctxt "accounts.my_result_detail.type"
+msgid "course"
+msgstr "Course"
+
+#: apps/accounts/views.py:2096
+#| msgctxt "assignment.choice.type"
+#| msgid "lab"
+msgctxt "accounts.my_result_detail.type"
+msgid "lab"
+msgstr "Lab"
+
+#: apps/accounts/views.py:2120
+#| msgctxt "profile.assigned_tasks"
+#| msgid "tab_independent"
+msgctxt "accounts.my_result_detail.type"
+msgid "independent_work"
+msgstr "Independent work"
+
+#: apps/accounts/views.py:2134
+msgctxt "accounts.my_results.message"
+msgid "unknown_result_type"
+msgstr "Unknown result type"
+
+#: apps/accounts/views.py:2144
+msgctxt "accounts.pending_review.message"
+msgid "teacher_only"
+msgstr "Teacher only"
+
+#: apps/accounts/views.py:2168
+msgctxt "accounts.role_assignment.message"
+msgid "active_organization_not_found"
+msgstr "Active organization not found"
+
+#: apps/accounts/views.py:2181
+msgctxt "accounts.role_assignment.message"
+msgid "teacher_or_higher_only"
+msgstr "Teacher or higher only"
+
+#: apps/accounts/views.py:2190
+msgctxt "accounts.role_assignment.message"
+msgid "assign_lower_roles_only"
+msgstr "Assign lower roles only"
+
+#: apps/accounts/views.py:2197
+msgctxt "accounts.role_assignment.message"
+msgid "missing_role_assign_permission"
+msgstr "Missing role assign permission"
+
+#: apps/accounts/views.py:2206
+msgctxt "accounts.role_assignment.message"
+msgid "user_bound_to_other_org"
+msgstr "User bound to other org"
+
+#: apps/accounts/views.py:2218
+msgctxt "accounts.role_assignment.message"
+msgid "user_did_not_select_this_org_on_signup"
+msgstr "User did not select this org on signup"
+
+#: apps/accounts/views.py:2236
+msgctxt "accounts.role_assignment.message"
+msgid "not_allowed_to_change_user_role"
+msgstr "Not allowed to change user role"
+
+#: apps/accounts/views.py:2274
+msgctxt "accounts.role_assignment.message"
+msgid "user_added_to_org_with_role"
+msgstr "User added to org with role"
+
+#: apps/accounts/views.py:2289
+msgctxt "accounts.role_assignment.message"
+msgid "change_lower_level_users_only"
+msgstr "Change lower level users only"
+
+#: apps/accounts/views.py:2328
+msgctxt "accounts.role_assignment.message"
+msgid "role_updated_for_user"
+msgstr "Role updated for user"
+
+#: apps/accounts/views.py:2414
+msgctxt "accounts.permission_editor.message"
+msgid "active_organization_not_found"
+msgstr "Active organization not found"
+
+#: apps/accounts/views.py:2425
+msgctxt "accounts.permission_editor.message"
+msgid "role_assign_permission_required"
+msgstr "Role assign permission required"
+
+#: apps/accounts/views.py:2441
+msgctxt "accounts.permission_editor.message"
+msgid "manage_lower_role_permissions_only"
+msgstr "Manage lower role permissions only"
+
+#: apps/accounts/views.py:2446
+msgctxt "accounts.permission_editor.message"
+msgid "invalid_permission_selection"
+msgstr "Invalid permission selection"
+
+#: apps/accounts/views.py:2460
+msgctxt "accounts.permission_editor.message"
+msgid "grant_only_owned_or_grantable_permissions"
+msgstr "Grant only owned or grantable permissions"
+
+#: apps/accounts/views.py:2465
+msgctxt "accounts.permission_editor.message"
+msgid "permission_added"
+msgstr "Permission added"
+
+#: apps/accounts/views.py:2471
+msgctxt "accounts.permission_editor.message"
+msgid "permission_removed"
+msgstr "Permission removed"
+
+#: apps/accounts/views.py:2475
+msgctxt "accounts.permission_editor.message"
+msgid "unknown_action"
+msgstr "Unknown action"
+
+#: apps/accounts/views.py:2520
+msgctxt "accounts.superadmin_orgs.message"
+msgid "superadmin_only"
+msgstr "Superadmin only"
+
+#: apps/accounts/views.py:2538
+msgctxt "accounts.superadmin_orgs.message"
+msgid "organization_suspended"
+msgstr "Organization suspended"
+
+#: apps/accounts/views.py:2549
+msgctxt "accounts.superadmin_orgs.message"
+msgid "organization_unsuspended"
+msgstr "Organization unsuspended"
+
+#: apps/accounts/views.py:2553
+msgctxt "accounts.superadmin_orgs.message"
+msgid "unknown_action"
+msgstr "Unknown action"
+
+#: apps/accounts/views.py:2714
+msgctxt "accounts.auth.message"
+msgid "registration_completed_request_recorded"
+msgstr "Registration completed request recorded"
+
+#: apps/accounts/views.py:2719
+msgctxt "accounts.auth.message"
+msgid "registration_completed_you_can_login_now"
+msgstr "Registration completed you can login now"
+
+#: apps/accounts/views.py:2739
+msgctxt "accounts.auth.message"
+msgid "verification_email_not_found_register_again"
+msgstr "Verification email not found register again"
+
+#: apps/accounts/views.py:2747 apps/accounts/views.py:2791
+msgctxt "accounts.auth.message"
+msgid "user_not_found"
+msgstr "User not found"
+
+#: apps/accounts/views.py:2752
+msgctxt "accounts.auth.message"
+msgid "code_invalid_or_expired"
+msgstr "Code invalid or expired"
+
+#: apps/accounts/views.py:2761 apps/accounts/views.py:2775
+msgctxt "accounts.auth.message"
+msgid "email_verified_you_can_login_now"
+msgstr "Email verified you can login now"
+
+#: apps/accounts/views.py:2778
+msgctxt "accounts.auth.message"
+msgid "link_invalid_or_expired"
+msgstr "Link invalid or expired"
+
+#: apps/accounts/views.py:2786
+msgctxt "accounts.auth.message"
+msgid "email_not_found"
+msgstr "Email not found"
+
+#: apps/accounts/views.py:2798
+msgctxt "accounts.auth.message"
+msgid "new_code_sent"
+msgstr "New code sent"
+
+#: apps/accounts/views.py:2805
+msgctxt "accounts.auth.message"
+msgid "logout_success"
+msgstr "Logout success"
+
+#: apps/assignments/admin.py:23
+msgctxt "assignment.admin.fieldset"
+msgid "basic_information"
+msgstr "Basic information"
+
+#: apps/assignments/admin.py:26
+msgctxt "assignment.admin.fieldset"
+msgid "grading"
+msgstr "Grading"
+
+#: apps/assignments/admin.py:28
+msgctxt "assignment.admin.fieldset"
+msgid "timing"
+msgstr "Timing"
+
+#: apps/assignments/admin.py:38
+msgctxt "assignment.admin.fieldset"
+msgid "settings"
+msgstr "Settings"
+
+#: apps/assignments/admin.py:39
+msgctxt "assignment.admin.fieldset"
+msgid "students"
+msgstr "Students"
+
+#: apps/assignments/admin.py:73
+msgctxt "assignment.submission.admin.fieldset"
+msgid "submission_information"
+msgstr "Submission information"
+
+#: apps/assignments/admin.py:86
+msgctxt "assignment.submission.admin.fieldset"
+msgid "late_information"
+msgstr "Late information"
+
+#: apps/assignments/admin.py:90
+msgctxt "assignment.submission.admin.fieldset"
+msgid "grading"
+msgstr "Grading"
+
+#: apps/assignments/admin.py:110
+msgctxt "assignment.notification.admin.fieldset"
+msgid "notification_information"
+msgstr "Notification information"
+
+#: apps/assignments/admin.py:114
+msgctxt "assignment.notification.admin.fieldset"
+msgid "status"
+msgstr "Status"
+
+#: apps/assignments/apps.py:8
+msgctxt "assignment.app"
+msgid "title"
+msgstr "Assignments"
+
+#: apps/assignments/forms.py:17
+msgctxt "assignment.form.placeholder"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/forms.py:24
+msgctxt "assignment.form.placeholder"
+msgid "description"
+msgstr "Description"
+
+#: apps/assignments/forms.py:33
+msgctxt "assignment.form.label"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/forms.py:34
+msgctxt "assignment.form.label"
+msgid "description"
+msgstr "Description"
+
+#: apps/assignments/forms.py:35
+msgctxt "assignment.form.label"
+msgid "start_date"
+msgstr "Start date"
+
+#: apps/assignments/forms.py:36
+msgctxt "assignment.form.label"
+msgid "due_date"
+msgstr "Due date"
+
+#: apps/assignments/forms.py:37
+msgctxt "assignment.form.label"
+msgid "max_attempts"
+msgstr "Max attempts"
+
+#: apps/assignments/forms.py:38 apps/assignments/forms.py:93
+msgctxt "assignment.form.label"
+msgid "status"
+msgstr "Status"
+
+#: apps/assignments/forms.py:53
+msgctxt "assignment.form.placeholder"
+msgid "submission_content"
+msgstr "Submission content"
+
+#: apps/assignments/forms.py:60
+msgctxt "assignment.form.label"
+msgid "submission_content"
+msgstr "Submission content"
+
+#: apps/assignments/forms.py:61
+msgctxt "assignment.form.label"
+msgid "submission_file_optional"
+msgstr "Submission file optional"
+
+#: apps/assignments/forms.py:78
+msgctxt "assignment.form.placeholder"
+msgid "grade_range"
+msgstr "Grade range"
+
+#: apps/assignments/forms.py:85
+msgctxt "assignment.form.placeholder"
+msgid "feedback"
+msgstr "Feedback"
+
+#: apps/assignments/forms.py:91
+msgctxt "assignment.form.label"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/assignments/forms.py:92
+msgctxt "assignment.form.label"
+msgid "feedback"
+msgstr "Feedback"
+
+#: apps/assignments/models.py:14
+msgctxt "assignment.choice.type"
+msgid "homework"
+msgstr "Homework"
+
+#: apps/assignments/models.py:15
+msgctxt "assignment.choice.type"
+msgid "quiz"
+msgstr "Quiz"
+
+#: apps/assignments/models.py:16
+msgctxt "assignment.choice.type"
+msgid "lab"
+msgstr "Lab"
+
+#: apps/assignments/models.py:17
+msgctxt "assignment.choice.type"
+msgid "midterm"
+msgstr "Midterm"
+
+#: apps/assignments/models.py:18
+msgctxt "assignment.choice.type"
+msgid "final"
+msgstr "Final"
+
+#: apps/assignments/models.py:19
+msgctxt "assignment.choice.type"
+msgid "project"
+msgstr "Project"
+
+#: apps/assignments/models.py:23
+msgctxt "assignment.choice.status"
+msgid "draft"
+msgstr "Draft"
+
+#: apps/assignments/models.py:24
+msgctxt "assignment.choice.status"
+msgid "published"
+msgstr "Published"
+
+#: apps/assignments/models.py:26
+msgctxt "assignment.choice.status"
+msgid "active"
+msgstr "Active"
+
+#: apps/assignments/models.py:27
+msgctxt "assignment.choice.status"
+msgid "inactive"
+msgstr "Inactive"
+
+#: apps/assignments/models.py:28
+msgctxt "assignment.choice.status"
+msgid "archived"
+msgstr "Archived"
+
+#: apps/assignments/models.py:35
+msgctxt "assignment.model.field"
+msgid "course"
+msgstr "Course"
+
+#: apps/assignments/models.py:42
+msgctxt "assignment.model.field"
+msgid "assignment_type"
+msgstr "Assignment type"
+
+#: apps/assignments/models.py:45
+msgctxt "assignment.model.field"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/models.py:46
+msgctxt "assignment.model.field"
+msgid "description"
+msgstr "Description"
+
+#: apps/assignments/models.py:48
+msgctxt "assignment.model.field"
+msgid "instructions"
+msgstr "Instructions"
+
+#: apps/assignments/models.py:55
+msgctxt "assignment.model.field"
+msgid "max_score"
+msgstr "Max score"
+
+#: apps/assignments/models.py:62
+msgctxt "assignment.model.field"
+msgid "weight"
+msgstr "Weight"
+
+#: apps/assignments/models.py:63
+msgctxt "assignment.model.help"
+msgid "weight_ratio"
+msgstr "Weight ratio"
+
+#: apps/assignments/models.py:67
+msgctxt "assignment.model.field"
+msgid "start_date"
+msgstr "Start date"
+
+#: apps/assignments/models.py:68
+msgctxt "assignment.model.help"
+msgid "start_date_for_submission"
+msgstr "Start date for submission"
+
+#: apps/assignments/models.py:72
+msgctxt "assignment.model.field"
+msgid "due_date"
+msgstr "Due date"
+
+#: apps/assignments/models.py:79
+msgctxt "assignment.model.field"
+msgid "allow_late_submission"
+msgstr "Allow late submission"
+
+#: apps/assignments/models.py:86
+msgctxt "assignment.model.field"
+msgid "late_penalty_per_day"
+msgstr "Late penalty per day"
+
+#: apps/assignments/models.py:87
+msgctxt "assignment.model.help"
+msgid "late_penalty_description"
+msgstr "Late penalty description"
+
+#: apps/assignments/models.py:91
+msgctxt "assignment.model.field"
+msgid "max_attempts"
+msgstr "Max attempts"
+
+#: apps/assignments/models.py:98
+msgctxt "assignment.model.field"
+msgid "created_by"
+msgstr "Created by"
+
+#: apps/assignments/models.py:107
+msgctxt "assignment.model.field"
+msgid "status"
+msgstr "Status"
+
+#: apps/assignments/models.py:115
+msgctxt "assignment.model.field"
+msgid "students"
+msgstr "Students"
+
+#: apps/assignments/models.py:131
+msgctxt "assignment.model.meta"
+msgid "verbose_name"
+msgstr "Verbose name"
+
+#: apps/assignments/models.py:132
+msgctxt "assignment.model.meta"
+msgid "verbose_name_plural"
+msgstr "Verbose name plural"
+
+#: apps/assignments/models.py:186
+msgctxt "assignment.submission.choice.status"
+msgid "submitted"
+msgstr "Submitted"
+
+#: apps/assignments/models.py:187
+msgctxt "assignment.submission.choice.status"
+msgid "grading"
+msgstr "Grading"
+
+#: apps/assignments/models.py:188
+msgctxt "assignment.submission.choice.status"
+msgid "graded"
+msgstr "Graded"
+
+#: apps/assignments/models.py:189
+msgctxt "assignment.submission.choice.status"
+msgid "returned"
+msgstr "Returned"
+
+#: apps/assignments/models.py:196
+msgctxt "assignment.submission.field"
+msgid "assignment"
+msgstr "Assignment"
+
+#: apps/assignments/models.py:203
+msgctxt "assignment.submission.field"
+msgid "student"
+msgstr "Student"
+
+#: apps/assignments/models.py:208
+msgctxt "assignment.submission.field"
+msgid "attempt_number"
+msgstr "Attempt number"
+
+#: apps/assignments/models.py:211
+msgctxt "assignment.submission.field"
+msgid "content"
+msgstr "Content"
+
+#: apps/assignments/models.py:216
+msgctxt "assignment.submission.field"
+msgid "uploaded_files"
+msgstr "Uploaded files"
+
+#: apps/assignments/models.py:217
+msgctxt "assignment.submission.help"
+msgid "files_json_format"
+msgstr "Files json format"
+
+#: apps/assignments/models.py:221
+msgctxt "assignment.submission.field"
+msgid "submitted_at"
+msgstr "Submitted at"
+
+#: apps/assignments/models.py:226
+msgctxt "assignment.submission.field"
+msgid "is_late"
+msgstr "Is late"
+
+#: apps/assignments/models.py:231
+msgctxt "assignment.submission.field"
+msgid "late_days"
+msgstr "Late days"
+
+#: apps/assignments/models.py:238
+msgctxt "assignment.submission.field"
+msgid "status"
+msgstr "Status"
+
+#: apps/assignments/models.py:246
+msgctxt "assignment.submission.field"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/assignments/models.py:249
+msgctxt "assignment.submission.field"
+msgid "feedback"
+msgstr "Feedback"
+
+#: apps/assignments/models.py:257
+msgctxt "assignment.submission.field"
+msgid "graded_by"
+msgstr "Graded by"
+
+#: apps/assignments/models.py:263
+msgctxt "assignment.submission.field"
+msgid "graded_at"
+msgstr "Graded at"
+
+#: apps/assignments/models.py:268
+msgctxt "assignment.submission.meta"
+msgid "verbose_name"
+msgstr "Verbose name"
+
+#: apps/assignments/models.py:269
+msgctxt "assignment.submission.meta"
+msgid "verbose_name_plural"
+msgstr "Verbose name plural"
+
+#: apps/assignments/models.py:298
+msgctxt "assignment.notification.choice.type"
+msgid "deadline"
+msgstr "Deadline"
+
+#: apps/assignments/models.py:299
+msgctxt "assignment.notification.choice.type"
+msgid "submission"
+msgstr "Submission"
+
+#: apps/assignments/models.py:300
+msgctxt "assignment.notification.choice.type"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/assignments/models.py:301
+msgctxt "assignment.notification.choice.type"
+msgid "system"
+msgstr "System"
+
+#: apps/assignments/models.py:308
+msgctxt "assignment.notification.field"
+msgid "user"
+msgstr "User"
+
+#: apps/assignments/models.py:311
+msgctxt "assignment.notification.field"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/models.py:312
+msgctxt "assignment.notification.field"
+msgid "message"
+msgstr "Message"
+
+#: apps/assignments/models.py:318
+msgctxt "assignment.notification.field"
+msgid "notification_type"
+msgstr "Notification type"
+
+#: apps/assignments/models.py:321
+msgctxt "assignment.notification.field"
+msgid "is_read"
+msgstr "Is read"
+
+#: apps/assignments/models.py:324
+msgctxt "assignment.notification.field"
+msgid "created_at"
+msgstr "Created at"
+
+#: apps/assignments/models.py:327
+msgctxt "assignment.notification.field"
+msgid "link"
+msgstr "Link"
+
+#: apps/assignments/models.py:331
+msgctxt "assignment.notification.meta"
+msgid "verbose_name"
+msgstr "Verbose name"
+
+#: apps/assignments/models.py:332
+msgctxt "assignment.notification.meta"
+msgid "verbose_name_plural"
+msgstr "Verbose name plural"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:24
+msgctxt "assignment.detail"
+msgid "back"
+msgstr "Back"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:38
+msgctxt "assignment.detail"
+msgid "due_date"
+msgstr "Due date"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:42
+#: apps/assignments/templates/assignments/assignment_detail.html:152
+msgctxt "assignment.detail"
+msgid "attempts_left"
+msgstr "Attempts left"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:55
+msgctxt "assignment.detail"
+msgid "status_deadline_passed"
+msgstr "Status deadline passed"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:57
+msgctxt "assignment.detail"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:59
+msgctxt "assignment.detail"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:69
+msgctxt "assignment.detail"
+msgid "previous_submissions"
+msgstr "Previous submissions"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:77
+msgctxt "assignment.detail"
+msgid "table_date"
+msgstr "Table date"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:78
+msgctxt "assignment.detail"
+msgid "table_file"
+msgstr "Table file"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:79
+msgctxt "assignment.detail"
+msgid "table_status"
+msgstr "Table status"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:80
+msgctxt "assignment.detail"
+msgid "table_grade"
+msgstr "Table grade"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:99
+msgctxt "assignment.detail"
+msgid "status_pending"
+msgstr "Status pending"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:101
+msgctxt "assignment.detail"
+msgid "status_graded"
+msgstr "Status graded"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:125
+msgctxt "assignment.detail"
+msgid "submit_answer"
+msgstr "Submit answer"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:132
+msgctxt "assignment.detail"
+msgid "text_answer"
+msgstr "Text answer"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:134
+msgctxt "assignment.detail"
+msgid "placeholder_answer"
+msgstr "Placeholder answer"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:138
+msgctxt "assignment.detail"
+msgid "upload_file"
+msgstr "Upload file"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:144
+msgctxt "assignment.detail"
+msgid "clear"
+msgstr "Clear"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:155
+#: apps/assignments/templates/assignments/assignment_detail.html:185
+msgctxt "assignment.detail"
+msgid "submit"
+msgstr "Submit"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:165
+msgctxt "assignment.detail"
+msgid "cannot_submit_deadline"
+msgstr "Cannot submit deadline"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:167
+msgctxt "assignment.detail"
+msgid "cannot_submit_attempts_finished"
+msgstr "Cannot submit attempts finished"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:169
+msgctxt "assignment.detail"
+msgid "cannot_submit_inactive"
+msgstr "Cannot submit inactive"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:171
+msgctxt "assignment.detail"
+msgid "cannot_submit_generic"
+msgstr "Cannot submit generic"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:181
+msgctxt "assignment.detail"
+msgid "submitting"
+msgstr "Submitting"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:182
+msgctxt "assignment.detail"
+msgid "error_prefix"
+msgstr "Error prefix"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:183
+msgctxt "assignment.detail"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+#: apps/assignments/templates/assignments/assignment_detail.html:184
+msgctxt "assignment.detail"
+msgid "server_error"
+msgstr "Server error"
+
+#: apps/assignments/templates/assignments/assignment_section.html:7
+msgctxt "assignment.section"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/templates/assignments/assignment_section.html:24
+msgctxt "assignment.section"
+msgid "add_new"
+msgstr "Add new"
+
+#: apps/assignments/templates/assignments/assignment_section.html:39
+msgctxt "assignment.section"
+msgid "submissions"
+msgstr "Submissions"
+
+#: apps/assignments/templates/assignments/assignment_section.html:41
+msgctxt "assignment.section"
+msgid "pending"
+msgstr "Pending"
+
+#: apps/assignments/templates/assignments/assignment_section.html:57
+#: apps/assignments/templates/assignments/assignment_section.html:120
+msgctxt "assignment.section"
+msgid "deadline_passed"
+msgstr "Deadline passed"
+
+#: apps/assignments/templates/assignments/assignment_section.html:59
+#: apps/assignments/templates/assignments/assignment_section.html:122
+msgctxt "assignment.section"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/assignments/templates/assignments/assignment_section.html:62
+#: apps/assignments/templates/assignments/assignment_section.html:125
+#: apps/assignments/templates/assignments/assignment_section.html:163
+msgctxt "assignment.section"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/assignments/templates/assignments/assignment_section.html:66
+msgctxt "assignment.section"
+msgid "max_attempts"
+msgstr "Max attempts"
+
+#: apps/assignments/templates/assignments/assignment_section.html:73
+msgctxt "assignment.section"
+msgid "review_answers"
+msgstr "Review answers"
+
+#: apps/assignments/templates/assignments/assignment_section.html:77
+msgctxt "assignment.section"
+msgid "edit"
+msgstr "Edit"
+
+#: apps/assignments/templates/assignments/assignment_section.html:81
+msgctxt "assignment.section"
+msgid "delete"
+msgstr "Delete"
+
+#: apps/assignments/templates/assignments/assignment_section.html:90
+msgctxt "assignment.section"
+msgid "empty_teacher"
+msgstr "Empty teacher"
+
+#: apps/assignments/templates/assignments/assignment_section.html:92
+msgctxt "assignment.section"
+msgid "add_first"
+msgstr "Add first"
+
+#: apps/assignments/templates/assignments/assignment_section.html:131
+msgctxt "assignment.section"
+msgid "attempts"
+msgstr "Attempts"
+
+#: apps/assignments/templates/assignments/assignment_section.html:136
+msgctxt "assignment.section"
+msgid "attempts_left"
+msgstr "Attempts left"
+
+#: apps/assignments/templates/assignments/assignment_section.html:138
+msgctxt "assignment.section"
+msgid "attempts_finished"
+msgstr "Attempts finished"
+
+#: apps/assignments/templates/assignments/assignment_section.html:147
+msgctxt "assignment.section"
+msgid "my_answers"
+msgstr "My answers"
+
+#: apps/assignments/templates/assignments/assignment_section.html:154
+msgctxt "assignment.section"
+msgid "submit_answer"
+msgstr "Submit answer"
+
+#: apps/assignments/templates/assignments/assignment_section.html:159
+msgctxt "assignment.section"
+msgid "deadline_passed_locked"
+msgstr "Deadline passed locked"
+
+#: apps/assignments/templates/assignments/assignment_section.html:175
+msgctxt "assignment.section"
+msgid "empty_student"
+msgstr "Empty student"
+
+#: apps/assignments/templates/assignments/assignment_section.html:182
+msgctxt "assignment.section"
+msgid "empty_generic"
+msgstr "Empty generic"
+
+#: apps/assignments/templates/assignments/detail.html:23
+msgctxt "assignment.legacy.detail"
+msgid "label_duration"
+msgstr "Duration"
+
+#: apps/assignments/templates/assignments/detail.html:26
+msgctxt "assignment.legacy.detail"
+msgid "status_deadline_passed"
+msgstr "Time has passed"
+
+#: apps/assignments/templates/assignments/detail.html:33
+msgctxt "assignment.legacy.detail"
+msgid "label_attempts"
+msgstr "Attempts"
+
+#: apps/assignments/templates/assignments/detail.html:45
+msgctxt "assignment.legacy.detail"
+msgid "draft_answer_title"
+msgstr "Answer (draft)"
+
+#: apps/assignments/templates/assignments/detail.html:51
+msgctxt "assignment.legacy.detail"
+msgid "label_answer_required"
+msgstr "Answer *"
+
+#: apps/assignments/templates/assignments/detail.html:58
+msgctxt "assignment.legacy.detail"
+msgid "label_files"
+msgstr "Files"
+
+#: apps/assignments/templates/assignments/detail.html:60
+msgctxt "assignment.legacy.detail"
+msgid "files_help"
+msgstr "You can select multiple files (PDF, DOC, IMG, etc.)"
+
+#: apps/assignments/templates/assignments/detail.html:66
+msgctxt "assignment.legacy.detail"
+msgid "send"
+msgstr "Send"
+
+#: apps/assignments/templates/assignments/detail.html:72
+msgctxt "assignment.legacy.detail"
+msgid "start_new_attempt_info"
+msgstr "Fill out the form to start a new attempt"
+
+#: apps/assignments/templates/assignments/detail.html:74
+msgctxt "assignment.legacy.detail"
+msgid "attempt_limit_exceeded"
+msgstr "You have exceeded the number of attempts"
+
+#: apps/assignments/templates/assignments/detail.html:81
+msgctxt "assignment.legacy.detail"
+msgid "previous_answers_title"
+msgstr "Previous answers"
+
+#: apps/assignments/templates/assignments/detail.html:88
+msgctxt "assignment.legacy.detail"
+msgid "attempt_label"
+msgstr "Attempt"
+
+#: apps/assignments/templates/assignments/detail.html:90
+msgctxt "assignment.legacy.detail"
+msgid "submitted_at_label"
+msgstr "Sent"
+
+#: apps/assignments/templates/assignments/detail.html:107
+msgctxt "assignment.legacy.detail"
+msgid "feedback_label"
+msgstr "Opinion"
+
+#: apps/assignments/templates/assignments/detail.html:121
+msgctxt "assignment.legacy.detail"
+msgid "current_score"
+msgstr "Your current score"
+
+#: apps/assignments/templates/assignments/detail.html:127
+msgctxt "assignment.legacy.detail"
+msgid "waiting"
+msgstr "Awaiting..."
+
+#: apps/assignments/templates/assignments/detail.html:156
+msgctxt "assignment.legacy.detail"
+msgid "error_prefix"
+msgstr "Error"
+
+#: apps/assignments/templates/assignments/modals.html:6
+msgctxt "assignment.legacy.modals"
+msgid "modal_add_title"
+msgstr "Add a new freelance job"
+
+#: apps/assignments/templates/assignments/modals.html:7
+msgctxt "assignment.legacy.modals"
+msgid "close_aria"
+msgstr "Close it"
+
+#: apps/assignments/templates/assignments/modals.html:15
+msgctxt "assignment.legacy.modals"
+msgid "basic_information"
+msgstr "Basic information"
+
+#: apps/assignments/templates/assignments/modals.html:18
+msgctxt "assignment.legacy.modals"
+msgid "label_title"
+msgstr "Title"
+
+#: apps/assignments/templates/assignments/modals.html:19
+msgctxt "assignment.legacy.modals"
+msgid "placeholder_title"
+msgstr "Ex: Lab 1"
+
+#: apps/assignments/templates/assignments/modals.html:23
+msgctxt "assignment.legacy.modals"
+msgid "label_description"
+msgstr "Description"
+
+#: apps/assignments/templates/assignments/modals.html:29
+msgctxt "assignment.legacy.modals"
+msgid "label_start_date"
+msgstr "Start date"
+
+#: apps/assignments/templates/assignments/modals.html:33
+msgctxt "assignment.legacy.modals"
+msgid "label_due_date"
+msgstr "End date"
+
+#: apps/assignments/templates/assignments/modals.html:40
+msgctxt "assignment.legacy.modals"
+msgid "label_attempt_limit"
+msgstr "Attempt limit"
+
+#: apps/assignments/templates/assignments/modals.html:44
+msgctxt "assignment.legacy.modals"
+msgid "label_max_score"
+msgstr "Max. Honey"
+
+#: apps/assignments/templates/assignments/modals.html:51
+msgctxt "assignment.legacy.modals"
+msgid "assign_to"
+msgstr "To whom should it be assigned?"
+
+#: apps/assignments/templates/assignments/modals.html:62
+msgctxt "assignment.legacy.modals"
+msgid "tab_groups"
+msgstr "Groups"
+
+#: apps/assignments/templates/assignments/modals.html:65
+msgctxt "assignment.legacy.modals"
+msgid "tab_students"
+msgstr "Students"
+
+#: apps/assignments/templates/assignments/modals.html:72
+msgctxt "assignment.legacy.modals"
+msgid "placeholder_search_group"
+msgstr "Search group..."
+
+#: apps/assignments/templates/assignments/modals.html:84
+msgctxt "assignment.legacy.modals"
+msgid "placeholder_search_student"
+msgstr "Search for students..."
+
+#: apps/assignments/templates/assignments/modals.html:103
+msgctxt "assignment.legacy.modals"
+msgid "selected_items"
+msgstr "Selected ones"
+
+#: apps/assignments/templates/assignments/modals.html:107
+msgctxt "assignment.legacy.modals"
+msgid "nothing_selected"
+msgstr "Nothing selected"
+
+#: apps/assignments/templates/assignments/modals.html:118
+msgctxt "assignment.legacy.modals"
+msgid "cancel"
+msgstr "Cancel"
+
+#: apps/assignments/templates/assignments/modals.html:119
+msgctxt "assignment.legacy.modals"
+msgid "save"
+msgstr "Save"
+
+#: apps/assignments/templates/assignments/my_submissions.html:4
+msgctxt "assignment.my_submissions"
+msgid "page_title_suffix"
+msgstr "Page title suffix"
+
+#: apps/assignments/templates/assignments/my_submissions.html:20
+msgctxt "assignment.my_submissions"
+msgid "title"
+msgstr "Title"
+
+#: apps/assignments/templates/assignments/my_submissions.html:26
+msgctxt "assignment.my_submissions"
+msgid "new_submission"
+msgstr "New submission"
+
+#: apps/assignments/templates/assignments/my_submissions.html:30
+msgctxt "assignment.my_submissions"
+msgid "back"
+msgstr "Back"
+
+#: apps/assignments/templates/assignments/my_submissions.html:40
+msgctxt "assignment.my_submissions"
+msgid "attempts_used"
+msgstr "Attempts used"
+
+#: apps/assignments/templates/assignments/my_submissions.html:50
+msgctxt "assignment.my_submissions"
+msgid "attempts_left"
+msgstr "Attempts left"
+
+#: apps/assignments/templates/assignments/my_submissions.html:58
+msgctxt "assignment.my_submissions"
+msgid "status_deadline_passed"
+msgstr "Status deadline passed"
+
+#: apps/assignments/templates/assignments/my_submissions.html:60
+msgctxt "assignment.my_submissions"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/assignments/templates/assignments/my_submissions.html:62
+msgctxt "assignment.my_submissions"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/assignments/templates/assignments/my_submissions.html:74
+msgctxt "assignment.my_submissions"
+msgid "submitted_answers"
+msgstr "Submitted answers"
+
+#: apps/assignments/templates/assignments/my_submissions.html:82
+msgctxt "assignment.my_submissions"
+msgid "table_submitted_at"
+msgstr "Table submitted at"
+
+#: apps/assignments/templates/assignments/my_submissions.html:83
+msgctxt "assignment.my_submissions"
+msgid "table_status"
+msgstr "Table status"
+
+#: apps/assignments/templates/assignments/my_submissions.html:84
+msgctxt "assignment.my_submissions"
+msgid "table_grade"
+msgstr "Table grade"
+
+#: apps/assignments/templates/assignments/my_submissions.html:85
+msgctxt "assignment.my_submissions"
+msgid "table_action"
+msgstr "Table action"
+
+#: apps/assignments/templates/assignments/my_submissions.html:96
+msgctxt "assignment.my_submissions"
+msgid "status_pending"
+msgstr "Status pending"
+
+#: apps/assignments/templates/assignments/my_submissions.html:98
+msgctxt "assignment.my_submissions"
+msgid "status_graded"
+msgstr "Status graded"
+
+#: apps/assignments/templates/assignments/my_submissions.html:114
+msgctxt "assignment.my_submissions"
+msgid "view"
+msgstr "View"
+
+#: apps/assignments/templates/assignments/my_submissions.html:130
+msgctxt "assignment.my_submissions"
+msgid "submission_number"
+msgstr "Submission number"
+
+#: apps/assignments/templates/assignments/my_submissions.html:135
+msgctxt "assignment.my_submissions"
+msgid "submitted_at"
+msgstr "Submitted at"
+
+#: apps/assignments/templates/assignments/my_submissions.html:140
+msgctxt "assignment.my_submissions"
+msgid "text_answer"
+msgstr "Text answer"
+
+#: apps/assignments/templates/assignments/my_submissions.html:147
+msgctxt "assignment.my_submissions"
+msgid "file"
+msgstr "File"
+
+#: apps/assignments/templates/assignments/my_submissions.html:157
+msgctxt "assignment.my_submissions"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/assignments/templates/assignments/my_submissions.html:163
+msgctxt "assignment.my_submissions"
+msgid "teacher_feedback"
+msgstr "Teacher feedback"
+
+#: apps/assignments/templates/assignments/my_submissions.html:172
+msgctxt "assignment.my_submissions"
+msgid "close"
+msgstr "Close"
+
+#: apps/assignments/templates/assignments/my_submissions.html:182
+msgctxt "assignment.my_submissions"
+msgid "empty_title"
+msgstr "Empty title"
+
+#: apps/assignments/templates/assignments/my_submissions.html:185
+msgctxt "assignment.my_submissions"
+msgid "submit_first"
+msgstr "Submit first"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:18
+msgctxt "assignment.legacy.item"
+msgid "duration"
+msgstr "Duration"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:20
+msgctxt "assignment.legacy.item"
+msgid "deadline_passed"
+msgstr "Time has passed"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:22
+msgctxt "assignment.legacy.item"
+msgid "status_active"
+msgstr "Active"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:31
+msgctxt "assignment.legacy.item"
+msgid "attempts"
+msgstr "Attempts"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:41
+msgctxt "assignment.legacy.item"
+msgid "answers"
+msgstr "Answer"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:46
+msgctxt "assignment.legacy.item"
+msgid "pending"
+msgstr "Waiting"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:57
+msgctxt "assignment.legacy.item"
+msgid "view_answers"
+msgstr "See the answers"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:62
+msgctxt "assignment.legacy.item"
+msgid "edit"
+msgstr "Edit"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:67
+msgctxt "assignment.legacy.item"
+msgid "delete"
+msgstr "Delete"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:78
+msgctxt "assignment.legacy.item"
+msgid "my_answers"
+msgstr "My answers"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:86
+msgctxt "assignment.legacy.item"
+msgid "answer"
+msgstr "Answer"
+
+#: apps/assignments/templates/assignments/partials/_assignment_item.html:90
+msgctxt "assignment.legacy.item"
+msgid "attempts_finished"
+msgstr "The attempt is over"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:8
+msgctxt "assignment.modals"
+msgid "modal_add_title"
+msgstr "Modal add title"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:16
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:88
+msgctxt "assignment.modals"
+msgid "label_title"
+msgstr "Label title"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:20
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:92
+msgctxt "assignment.modals"
+msgid "label_status"
+msgstr "Label status"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:22
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:94
+msgctxt "assignment.modals"
+msgid "status_active"
+msgstr "Status active"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:23
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:95
+msgctxt "assignment.modals"
+msgid "status_inactive"
+msgstr "Status inactive"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:24
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:96
+msgctxt "assignment.modals"
+msgid "status_archived"
+msgstr "Status archived"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:29
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:101
+msgctxt "assignment.modals"
+msgid "label_description"
+msgstr "Label description"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:34
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:106
+msgctxt "assignment.modals"
+msgid "label_start"
+msgstr "Label start"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:38
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:110
+msgctxt "assignment.modals"
+msgid "label_deadline"
+msgstr "Label deadline"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:42
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:114
+msgctxt "assignment.modals"
+msgid "label_max_attempts"
+msgstr "Label max attempts"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:51
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:123
+msgctxt "assignment.modals"
+msgid "label_allowed_groups"
+msgstr "Label allowed groups"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:52
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:124
+msgctxt "assignment.modals"
+msgid "placeholder_group_search"
+msgstr "Placeholder group search"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:54
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:62
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:126
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:134
+msgctxt "assignment.modals"
+msgid "selected_count"
+msgstr "Selected count"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:57
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:129
+msgctxt "assignment.modals"
+msgid "label_allowed_students"
+msgstr "Label allowed students"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:58
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:130
+msgctxt "assignment.modals"
+msgid "placeholder_student_search"
+msgstr "Placeholder student search"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:60
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:132
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:167
+msgctxt "assignment.modals"
+msgid "select_group_first"
+msgstr "Select group first"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:67
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:139
+msgctxt "assignment.modals"
+msgid "close"
+msgstr "Close"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:68
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:172
+msgctxt "assignment.modals"
+msgid "add"
+msgstr "Add"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:79
+msgctxt "assignment.modals"
+msgid "modal_edit_title"
+msgstr "Modal edit title"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:140
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:173
+msgctxt "assignment.modals"
+msgid "save"
+msgstr "Save"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:164
+msgctxt "assignment.modals"
+msgid "loading"
+msgstr "Loading"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:165
+msgctxt "assignment.modals"
+msgid "no_group"
+msgstr "No group"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:166
+msgctxt "assignment.modals"
+msgid "error"
+msgstr "Error"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:168
+msgctxt "assignment.modals"
+msgid "no_student"
+msgstr "No student"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:169
+msgctxt "assignment.modals"
+msgid "data_not_received"
+msgstr "Data not received"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:170
+msgctxt "assignment.modals"
+msgid "server_error"
+msgstr "Server error"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:171
+msgctxt "assignment.modals"
+msgid "error_prefix"
+msgstr "Error prefix"
+
+#: apps/assignments/templates/assignments/partials/_assignment_modals.html:174
+msgctxt "assignment.modals"
+msgid "confirm_delete"
+msgstr "Confirm delete"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:15
+msgctxt "assignment.legacy.edit_form"
+msgid "assignment_name"
+msgstr "Task name"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:20
+msgctxt "assignment.legacy.edit_form"
+msgid "description"
+msgstr "Description"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:26
+msgctxt "assignment.legacy.edit_form"
+msgid "start_date"
+msgstr "Start date"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:30
+msgctxt "assignment.legacy.edit_form"
+msgid "due_date"
+msgstr "Deadline"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:37
+msgctxt "assignment.legacy.edit_form"
+msgid "max_attempts"
+msgstr "Maximum effort"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:41
+msgctxt "assignment.legacy.edit_form"
+msgid "status"
+msgstr "Status"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:51
+msgctxt "assignment.legacy.edit_form"
+msgid "target_selection"
+msgstr "Target selection"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:54
+msgctxt "assignment.legacy.edit_form"
+msgid "search_group"
+msgstr "Search group..."
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:72
+msgctxt "assignment.legacy.edit_form"
+msgid "search_student"
+msgstr "Search for students..."
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:96
+msgctxt "assignment.legacy.edit_form"
+msgid "close"
+msgstr "Close"
+
+#: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:97
+msgctxt "assignment.legacy.edit_form"
+msgid "save"
+msgstr "Save"
+
+#: apps/assignments/templates/assignments/review.html:5
+msgctxt "assignment.legacy.review"
+msgid "page_title_suffix"
+msgstr "Freelance Jobs"
+
+#: apps/assignments/templates/assignments/review.html:10
+msgctxt "assignment.legacy.review"
+msgid "heading_suffix"
+msgstr "Freelance Jobs"
+
+#: apps/assignments/templates/assignments/review.html:12
+msgctxt "assignment.legacy.review"
+msgid "add"
+msgstr "Add"
+
+#: apps/assignments/templates/assignments/review.html:20
+msgctxt "assignment.legacy.review"
+msgid "placeholder_search_group"
+msgstr "Search with group..."
+
+#: apps/assignments/templates/assignments/review.html:33
+msgctxt "assignment.legacy.review"
+msgid "table_name"
+msgstr "Name"
+
+#: apps/assignments/templates/assignments/review.html:34
+msgctxt "assignment.legacy.review"
+msgid "table_status"
+msgstr "Status"
+
+#: apps/assignments/templates/assignments/review.html:35
+msgctxt "assignment.legacy.review"
+msgid "table_due_date"
+msgstr "Deadline"
+
+#: apps/assignments/templates/assignments/review.html:36
+msgctxt "assignment.legacy.review"
+msgid "table_answers"
+msgstr "Answers"
+
+#: apps/assignments/templates/assignments/review.html:37
+msgctxt "assignment.legacy.review"
+msgid "table_target_groups"
+msgstr "Target groups"
+
+#: apps/assignments/templates/assignments/review.html:38
+msgctxt "assignment.legacy.review"
+msgid "table_actions"
+msgstr "Operations"
+
+#: apps/assignments/templates/assignments/review.html:51
+msgctxt "assignment.legacy.review"
+msgid "status_active"
+msgstr "Active"
+
+#: apps/assignments/templates/assignments/review.html:53
+msgctxt "assignment.legacy.review"
+msgid "status_closed"
+msgstr "Closed"
+
+#: apps/assignments/templates/assignments/review.html:55
+msgctxt "assignment.legacy.review"
+msgid "status_archived"
+msgstr "Archive"
+
+#: apps/assignments/templates/assignments/review.html:61
+msgctxt "assignment.legacy.review"
+msgid "deadline_passed"
+msgstr "Passed"
+
+#: apps/assignments/templates/assignments/review.html:67
+msgctxt "assignment.legacy.review"
+msgid "pending_waiting"
+msgstr "is waiting"
+
+#: apps/assignments/templates/assignments/review.html:76
+msgctxt "assignment.legacy.review"
+msgid "all_groups"
+msgstr "All of them"
+
+#: apps/assignments/templates/assignments/review.html:90
+msgctxt "assignment.legacy.review"
+msgid "view"
+msgstr "Look"
+
+#: apps/assignments/templates/assignments/review.html:97
+msgctxt "assignment.legacy.review"
+msgid "empty_not_found"
+msgstr "No vacancies found"
+
+#: apps/assignments/templates/assignments/review_submissions.html:4
+msgctxt "assignment.review_submissions"
+msgid "page_title_suffix"
+msgstr "Page title suffix"
+
+#: apps/assignments/templates/assignments/review_submissions.html:13
+msgctxt "assignment.review_submissions"
+msgid "title_suffix"
+msgstr "Title suffix"
+
+#: apps/assignments/templates/assignments/review_submissions.html:16
+msgctxt "assignment.review_submissions"
+msgid "course_label"
+msgstr "Course label"
+
+#: apps/assignments/templates/assignments/review_submissions.html:20
+msgctxt "assignment.review_submissions"
+msgid "back"
+msgstr "Back"
+
+#: apps/assignments/templates/assignments/review_submissions.html:32
+msgctxt "assignment.review_submissions"
+msgid "table_student"
+msgstr "Table student"
+
+#: apps/assignments/templates/assignments/review_submissions.html:33
+msgctxt "assignment.review_submissions"
+msgid "table_submitted_at"
+msgstr "Table submitted at"
+
+#: apps/assignments/templates/assignments/review_submissions.html:34
+msgctxt "assignment.review_submissions"
+msgid "table_status"
+msgstr "Table status"
+
+#: apps/assignments/templates/assignments/review_submissions.html:35
+msgctxt "assignment.review_submissions"
+msgid "table_grade"
+msgstr "Table grade"
+
+#: apps/assignments/templates/assignments/review_submissions.html:36
+msgctxt "assignment.review_submissions"
+msgid "table_actions"
+msgstr "Table actions"
+
+#: apps/assignments/templates/assignments/review_submissions.html:49
+msgctxt "assignment.review_submissions"
+msgid "status_pending"
+msgstr "Status pending"
+
+#: apps/assignments/templates/assignments/review_submissions.html:51
+msgctxt "assignment.review_submissions"
+msgid "status_graded"
+msgstr "Status graded"
+
+#: apps/assignments/templates/assignments/review_submissions.html:74
+msgctxt "assignment.review_submissions"
+msgid "view"
+msgstr "View"
+
+#: apps/assignments/templates/assignments/review_submissions.html:85
+msgctxt "assignment.review_submissions"
+msgid "empty_submissions"
+msgstr "Empty submissions"
+
+#: apps/assignments/templates/assignments/review_submissions.html:100
+msgctxt "assignment.review_submissions"
+msgid "modal_title"
+msgstr "Modal title"
+
+#: apps/assignments/templates/assignments/review_submissions.html:108
+msgctxt "assignment.review_submissions"
+msgid "student"
+msgstr "Student"
+
+#: apps/assignments/templates/assignments/review_submissions.html:113
+msgctxt "assignment.review_submissions"
+msgid "answer_text"
+msgstr "Answer text"
+
+#: apps/assignments/templates/assignments/review_submissions.html:120
+msgctxt "assignment.review_submissions"
+msgid "file"
+msgstr "File"
+
+#: apps/assignments/templates/assignments/review_submissions.html:124
+#: apps/assignments/templates/assignments/review_submissions.html:161
+msgctxt "assignment.review_submissions"
+msgid "download"
+msgstr "Download"
+
+#: apps/assignments/templates/assignments/review_submissions.html:136
+msgctxt "assignment.review_submissions"
+msgid "grade"
+msgstr "Grade"
+
+#: apps/assignments/templates/assignments/review_submissions.html:138
+msgctxt "assignment.review_submissions"
+msgid "grade_placeholder"
+msgstr "Grade placeholder"
+
+#: apps/assignments/templates/assignments/review_submissions.html:142
+msgctxt "assignment.review_submissions"
+msgid "feedback"
+msgstr "Feedback"
+
+#: apps/assignments/templates/assignments/review_submissions.html:144
+msgctxt "assignment.review_submissions"
+msgid "feedback_placeholder"
+msgstr "Feedback placeholder"
+
+#: apps/assignments/templates/assignments/review_submissions.html:148
+#: apps/assignments/templates/assignments/review_submissions.html:166
+msgctxt "assignment.review_submissions"
+msgid "grade_submit"
+msgstr "Grade submit"
+
+#: apps/assignments/templates/assignments/review_submissions.html:160
+msgctxt "assignment.review_submissions"
+msgid "no_text"
+msgstr "No text"
+
+#: apps/assignments/templates/assignments/review_submissions.html:162
+msgctxt "assignment.review_submissions"
+msgid "submitting"
+msgstr "Submitting"
+
+#: apps/assignments/templates/assignments/review_submissions.html:163
+msgctxt "assignment.review_submissions"
+msgid "error_prefix"
+msgstr "Error prefix"
+
+#: apps/assignments/templates/assignments/review_submissions.html:164
+msgctxt "assignment.review_submissions"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+#: apps/assignments/templates/assignments/review_submissions.html:165
+msgctxt "assignment.review_submissions"
+msgid "server_error"
+msgstr "Server error"
+
+#: apps/assignments/views.py:69 apps/assignments/views.py:128
+#: apps/assignments/views.py:227 apps/assignments/views.py:394
+#: apps/assignments/views.py:423
+msgctxt "assignment.message"
+msgid "permission_denied"
+msgstr "Permission denied"
+
+#: apps/assignments/views.py:106
+msgctxt "assignment.message"
+msgid "assignment_created_successfully"
+msgstr "Assignment created successfully"
+
+#: apps/assignments/views.py:205 apps/assignments/views.py:207
+msgctxt "assignment.message"
+msgid "assignment_updated_successfully"
+msgstr "Assignment updated successfully"
+
+#: apps/assignments/views.py:233
+msgctxt "assignment.message"
+msgid "assignment_deleted_successfully"
+msgstr "Assignment deleted successfully"
+
+#: apps/assignments/views.py:235
+msgctxt "assignment.message"
+msgid "deleted"
+msgstr "Deleted"
+
+#: apps/assignments/views.py:267 apps/assignments/views.py:354
+msgctxt "assignment.message"
+msgid "access_denied_for_assignment"
+msgstr "Access denied for assignment"
+
+#: apps/assignments/views.py:304
+msgctxt "assignment.message"
+msgid "submission_not_allowed_attempts_or_deadline"
+msgstr "Submission not allowed attempts or deadline"
+
+#: apps/assignments/views.py:321
+msgctxt "assignment.message"
+msgid "submission_sent_successfully"
+msgstr "Submission sent successfully"
+
+#: apps/assignments/views.py:325
+msgctxt "assignment.message"
+msgid "submission_sent"
+msgstr "Submission sent"
+
+#: apps/assignments/views.py:435
+msgctxt "assignment.message"
+msgid "grade_given_successfully"
+msgstr "Grade given successfully"
+
+#: apps/assignments/views.py:437
+msgctxt "assignment.message"
+msgid "graded"
+msgstr "Graded"
+
+#: apps/assignments/views.py:112
+msgctxt "assignment.message"
+msgid "assignment_create_failed"
+msgstr "Could not create assignment."
+
+#: apps/assignments/views.py:220
+msgctxt "assignment.message"
+msgid "assignment_update_failed"
+msgstr "Could not update assignment."
+
+#: apps/assignments/views.py:250
+msgctxt "assignment.message"
+msgid "assignment_delete_failed"
+msgstr "Could not delete assignment."
+
+#: apps/assignments/views.py:349
+msgctxt "assignment.message"
+msgid "submission_send_failed"
+msgstr "Could not send submission."
+
+#: apps/assignments/views.py:462
+msgctxt "assignment.message"
+msgid "grade_save_failed"
+msgstr "Could not save grade."
+
+#: templates/partials/_language_switcher.html:9
+msgctxt "language"
+msgid "label"
+msgstr "Language"
+
+#: templates/partials/_language_switcher.html:26
+msgctxt "language"
+msgid "selection"
+msgstr "Language selection"
+
+#: templates/partials/_language_switcher.html:33
+msgctxt "language"
+msgid "name_az"
+msgstr "Azerbaijani"
+
+#: templates/partials/_language_switcher.html:44
+msgctxt "language"
+msgid "name_en"
+msgstr "English"
+
+#: templates/partials/_language_switcher.html:55
+msgctxt "language"
+msgid "name_ru"
+msgstr "Russian"
+
+#: templates/partials/_language_switcher.html:66
+msgctxt "language"
+msgid "name_tr"
+msgstr "Turkish"
+
+#: templates/partials/_navbar.html:11 templates/partials/_navbar.html:95
+msgctxt "nav"
+msgid "home"
+msgstr "Home"
+
+#: templates/partials/_navbar.html:17 templates/partials/_navbar.html:101
+msgctxt "nav"
+msgid "technology"
+msgstr "Technology"
+
+#: templates/partials/_navbar.html:23 templates/partials/_navbar.html:107
+msgctxt "nav"
+msgid "about"
+msgstr "About"
+
+#: templates/partials/_navbar.html:29 templates/partials/_navbar.html:113
+msgctxt "nav"
+msgid "exams"
+msgstr "Exams"
+
+#: templates/partials/_navbar.html:35 templates/partials/_navbar.html:149
+msgctxt "nav"
+msgid "subscribe"
+msgstr "Subscribe"
+
+#: templates/partials/_navbar.html:62 templates/partials/_navbar.html:120
+msgctxt "nav"
+msgid "my_profile"
+msgstr "My profile"
+
+#: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
+msgctxt "nav"
+msgid "logout"
+msgstr "Logout"
+
+#: templates/partials/_navbar.html:72 templates/partials/_navbar.html:132
+msgctxt "nav"
+msgid "login"
+msgstr "Login"
+
+#: templates/partials/_navbar.html:75 templates/partials/_navbar.html:137
+msgctxt "nav"
+msgid "signup"
+msgstr "Sign up"
+
+#: templates/partials/_navbar.html:80
+msgctxt "nav"
+msgid "menu_toggle"
+msgstr "Open or close menu"
+
+msgctxt "blog.home_page"
+msgid "title"
+msgstr "Minimal Blog | Home"
+
+msgctxt "blog.home_page"
+msgid "hero_title"
+msgstr "Thoughts and Stories"
+
+msgctxt "blog.home_page"
+msgid "hero_subtitle"
+msgstr "Latest posts about technology, programming, and lifestyle."
+
+msgctxt "blog.home_page"
+msgid "search_placeholder"
+msgstr "Search articles..."
+
+msgctxt "blog.home_page"
+msgid "no_posts"
+msgstr "There are no posts yet."
+
+msgctxt "blog.home_page"
+msgid "pagination_prev"
+msgstr "Previous"
+
+msgctxt "blog.home_page"
+msgid "pagination_next"
+msgstr "Next"
+
+msgctxt "blog.technology_page"
+msgid "title"
+msgstr "Technology News and Updates"
+
+msgctxt "blog.technology_page"
+msgid "heading"
+msgstr "Technology World"
+
+msgctxt "blog.technology_page"
+msgid "subtitle"
+msgstr "Latest analyses on AI, programming, new gadgets, and the digital world."
+
+msgctxt "blog.technology_page"
+msgid "read_more"
+msgstr "Read"
+
+msgctxt "blog.technology_page"
+msgid "empty_title"
+msgstr "There are no articles in this category yet."
+
+msgctxt "blog.technology_page"
+msgid "empty_description"
+msgstr "New articles will be added soon. Stay tuned!"
+
+msgctxt "blog.about_page"
+msgid "title"
+msgstr "About EMSArena | Education Platform"
+
+msgctxt "blog.about_page"
+msgid "hero_title"
+msgstr "Education Management and Student Assessment Platform"
+
+msgctxt "blog.about_page"
+msgid "hero_description"
+msgstr "EMSArena is a unified, scalable, and multifunctional digital education ecosystem designed for universities, schools, training centers, and individual instructors. We digitize the learning process and simplify management."
+
+msgctxt "blog.about_page"
+msgid "section_title"
+msgstr "Platform Advantages and Capabilities"
+
+msgctxt "blog.about_page"
+msgid "feature_1_title"
+msgstr "Unified Content Management"
+
+msgctxt "blog.about_page"
+msgid "feature_1_text"
+msgstr "Share and manage academic and teaching materials (lecture notes, presentations, files, useful links, etc.) from a single central platform."
+
+msgctxt "blog.about_page"
+msgid "feature_2_title"
+msgstr "Digitized Teaching"
+
+msgctxt "blog.about_page"
+msgid "feature_2_text"
+msgstr "Organize courses, topics, resources, and assignments in a unified, structured way. Move the teaching process fully into a digital environment."
+
+msgctxt "blog.about_page"
+msgid "feature_3_title"
+msgstr "Personalized Portals and Dashboards"
+
+msgctxt "blog.about_page"
+msgid "feature_3_text"
+msgstr "Dedicated dashboards for teachers, students, and administrators. Includes e-journal, grading, attendance, and analytics-based performance monitoring."
+
+msgctxt "blog.about_page"
+msgid "feature_4_title"
+msgstr "Multi-format Assessment"
+
+msgctxt "blog.about_page"
+msgid "feature_4_text"
+msgstr "Conduct tests, written, practical, and real-time (live) exams. Build extensive question banks and mock exams."
+
+msgctxt "blog.about_page"
+msgid "feature_5_title"
+msgstr "Multi-tenant Structure"
+
+msgctxt "blog.about_page"
+msgid "feature_5_text"
+msgstr "Multiple organizations can operate on the same platform. Each organization has separate role and management rules with fully isolated data security."
+
+msgctxt "blog.about_page"
+msgid "cta_text"
+msgstr "Discover the future of education with EMSArena."
+
+msgctxt "blog.about_page"
+msgid "cta_button"
+msgstr "Go to platform"
+
+#~ msgid "Sidebar-ı aç"
+#~ msgstr "Open sidebar"
+
+#~ msgid "Sidebar-ı aç və ya bağla"
+#~ msgstr "Open or close sidebar"
+
+#~ msgid "Sidebar-ı bağla"
+#~ msgstr "Close sidebar"
+
+#~ msgid "Ümumi"
+#~ msgstr "General"
+
+#~ msgid "Profil məlumatları"
+#~ msgstr "Profile information"
+
+#~ msgid "Təhsil"
+#~ msgstr "Education"
+
+#~ msgid "Postlarım"
+#~ msgstr "My posts"
+
+#~ msgid "Yeni post yarat"
+#~ msgstr "Create new post"
+
+#~ msgid "İmtahanlarım"
+#~ msgstr "My exams"
+
+#~ msgid "Yaratdığım kurslar"
+#~ msgstr "Courses I created"
+
+#~ msgid "Kurslarım"
+#~ msgstr "My courses"
+
+#~ msgid "Təyin olunmuş"
+#~ msgstr "Assigned"
+
+#~ msgid "Təyin olunmuş tapşırıqlar"
+#~ msgstr "Assigned tasks"
+
+#~ msgid "Təyin olunmuş kurslar"
+#~ msgstr "Assigned courses"
+
+#~ msgid "Nəticələrim"
+#~ msgstr "My results"
+
+#~ msgid "Müəllim"
+#~ msgstr "Teacher"
+
+#~ msgid "Qruplar"
+#~ msgstr "Groups"
+
+#~ msgid "Yoxlanılacaq"
+#~ msgstr "To review"
+
+#~ msgid "İdarəetmə"
+#~ msgstr "Management"
+
+#~ msgid "Rol təyin et"
+#~ msgstr "Assign role"
+
+#~ msgid "İcazələr"
+#~ msgstr "Permissions"
+
+#~ msgid "Rolları idarə et"
+#~ msgstr "Manage roles"
+
+#~ msgid "Superadmin nəzarəti"
+#~ msgstr "Superadmin oversight"
+
+#~ msgid "Blog"
+#~ msgstr "Blog"
+
+#~ msgid "Dil"
+#~ msgstr "Language"
+
+#~ msgid "Hesab"
+#~ msgstr "Account"
+
+#~ msgid "Profili redaktə et"
+#~ msgstr "Edit profile"
+
+#~ msgid "Çıxış"
+#~ msgstr "Logout"
+
+#~ msgid ""
+#~ "Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə "
+#~ "edin."
+#~ msgstr "Use the button below to create a new post in the standard editor."
+
+#~ msgid "Post yarat"
+#~ msgstr "Create post"
+
+#~ msgid "Blog lentinə keçmək üçün aşağıdakı düyməyə klik edin."
+#~ msgstr "Click the button below to go to the blog feed."
+
+#~ msgid "Blogu aç"
+#~ msgstr "Open blog"
+
+#~ msgid "Dil seçimi"
+#~ msgstr "Language selection"
+
+#~ msgid "Ana səhifə"
+#~ msgstr "Home"
+
+#~ msgid "Haqqımızda"
+#~ msgstr "About us"
+
+#~ msgid "İmtahanlar"
+#~ msgstr "Exams"
+
+#~ msgid "Abunə ol"
+#~ msgstr "Subscribe"
+
+#~ msgid "Çıxış et"
+#~ msgstr "Log out"
+
+#~ msgid "Daxil ol"
+#~ msgstr "Log in"
+
+#~ msgid "Qeydiyyat"
+#~ msgstr "Sign up"
+
+#~ msgid "Menyunu aç və ya bağla"
+#~ msgstr "Open or close menu"
+
+#, python-format
+#~ msgid "Profilim (%(username)s)"
+#~ msgstr "My profile (%(username)s)"

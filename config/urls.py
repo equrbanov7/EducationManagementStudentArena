@@ -8,6 +8,7 @@ from core.views import health_check, ping, test_error
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("i18n/", include("django.conf.urls.i18n")),
     path("blog/", include("apps.blog.urls")),
     path("", include("apps.blog.urls")),
     path("", include("apps.live_exam.urls")),

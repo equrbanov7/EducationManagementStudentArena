@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Təyin olunmuş imtahanlarım - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.assigned_exams_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -13,16 +13,16 @@
     <div class="profile-main" style="max-width: 1000px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">
-                <i class="fas fa-file-alt"></i> Təyin olunmuş imtahanlarım
+                <i class="fas fa-file-alt"></i> {% trans "heading" context "accounts.assigned_exams_page" %}
             </h1>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Profilə qayıt
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.assigned_exams_page" %}
             </a>
         </div>
 
         <div class="section-card">
             <form method="get" class="search-form">
-                <input type="text" name="search" value="{{ search_query }}" placeholder="İmtahan axtar..." class="form-control">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}" class="form-control">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>
         </div>
@@ -49,11 +49,11 @@
                             data-exam-slug="{{ exam.slug }}"
                             data-exam-title="{{ exam.title }}"
                             onclick="openExamCodeModal(this)">
-                        <i class="fas fa-lock me-1"></i>Kodla başla
+                        <i class="fas fa-lock me-1"></i>{% trans "start_with_code" context "accounts.assigned_exams_page" %}
                     </button>
                     {% else %}
                     <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-play me-1"></i>Başla
+                        <i class="fas fa-play me-1"></i>{% trans "start" context "accounts.assigned_exams_page" %}
                     </a>
                     {% endif %}
                 </div>
@@ -64,7 +64,7 @@
         {% else %}
         <div class="empty-state">
             <i class="fas fa-file-alt"></i>
-            <p>Təyin olunmuş imtahan tapılmadı.</p>
+            <p>{% trans "empty_state" context "accounts.assigned_exams_page" %}</p>
         </div>
         {% endif %}
     </div>
@@ -77,8 +77,8 @@
         </button>
 
         <div class="exam-code-icon"><i class="fas fa-lock"></i></div>
-        <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
-        <p id="exam-code-text" class="exam-code-text">Kod daxil edin.</p>
+        <h3 id="exam-code-title" class="exam-code-title">{% trans "modal_title" context "accounts.assigned_exams_page" %}</h3>
+        <p id="exam-code-text" class="exam-code-text">{% trans "modal_text" context "accounts.assigned_exams_page" %}</p>
 
         <form id="exam-code-form" method="post" action="{% url 'exams:exam_code_check' %}">
             {% csrf_token %}
@@ -89,14 +89,14 @@
                        id="exam-code-input"
                        class="exam-code-input"
                        maxlength="6"
-                       placeholder="• • • • • •"
+                       placeholder="{% trans 'modal_code_placeholder' context 'accounts.assigned_exams_page' %}"
                        autocomplete="off"
                        inputmode="numeric"
                        required>
             </div>
             <div class="exam-code-actions">
-                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">Ləğv et</button>
-                <button type="submit" class="btn-modal btn-confirm">Təsdiqlə</button>
+                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">{% trans "modal_cancel" context "accounts.assigned_exams_page" %}</button>
+                <button type="submit" class="btn-modal btn-confirm">{% trans "modal_confirm" context "accounts.assigned_exams_page" %}</button>
             </div>
         </form>
     </div>
@@ -108,14 +108,28 @@
     const textEl = document.getElementById("exam-code-text");
     const slugInput = document.getElementById("exam-code-exam-slug");
     const codeInput = document.getElementById("exam-code-input");
+    const codeModalTitle = "{% trans 'modal_title' context 'accounts.assigned_exams_page' %}";
+    const codeModalPromptTemplate = "{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}";
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
 
     function openExamCodeModal(button) {
         const slug = button.getAttribute("data-exam-slug");
         const title = button.getAttribute("data-exam-title");
 
         slugInput.value = slug;
-        titleEl.textContent = "Giriş Kodu";
-        textEl.innerHTML = `<strong>"${title}"</strong> imtahanına keçid üçün kodu yazın.`;
+        titleEl.textContent = codeModalTitle;
+        textEl.innerHTML = codeModalPromptTemplate.replace(
+            "{title}",
+            `<strong>"${escapeHtml(title)}"</strong>`
+        );
         codeInput.value = "";
 
         backdrop.style.display = "flex";

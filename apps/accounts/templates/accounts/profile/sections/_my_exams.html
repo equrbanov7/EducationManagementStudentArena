@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if can_view_owned_learning %}
 <section class="profile-section-panel profile-section--my-exams {% if active_section == 'my-exams' %}is-active{% endif %}" data-profile-section-panel="my-exams">
     <div class="section-card">
@@ -6,7 +7,7 @@
             <div class="section-title mb-0">
                 <div class="title-left">
                     <i class="fas fa-file-signature text-primary"></i>
-                    <span>İmtahanlarım</span>
+                    <span>{% trans "title" context "profile.my_exams" %}</span>
                     <span class="count-badge">{{ my_exams_count }}</span>
                 </div>
             </div>
@@ -14,11 +15,12 @@
             <a href="{% url 'exams:create_exam' %}"
                class="btn-create-new js-open-create-exam"
                data-create-exam-url="{% url 'exams:create_exam' %}">
-                <i class="fas fa-plus"></i> Yeni İmtahan
+                <i class="fas fa-plus"></i> {% trans "new_exam" context "profile.my_exams" %}
             </a>
         </div>
 
         {% if my_exams %}
+        {% trans "exam" context "profile.my_exams" as profile_exam_default %}
         <div class="exam-cards-grid">
             {% for exam in my_exams %}
             <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams" class="modern-exam-card">
@@ -30,7 +32,7 @@
                     <div class="exam-card-meta">
                         <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d M Y" }}</span>
                         <span class="meta-divider">•</span>
-                        <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:"İmtahan" }}</span>
+                        <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:profile_exam_default }}</span>
                     </div>
                 </div>
                 <div class="exam-card-action">
@@ -45,10 +47,10 @@
             <div class="empty-icon-wrapper">
                 <i class="fas fa-file-medical"></i>
             </div>
-            <h3>Siyahı boşdur</h3>
-            <p>Hələ heç bir imtahan yaratmamısınız. Tələbələriniz üçün ilk imtahanınızı indi yaradın.</p>
+            <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
+            <p>{% trans "empty_description" context "profile.my_exams" %}</p>
             <button type="button" class="btn-create-new mt-3 js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
-                <i class="fas fa-plus"></i> Yeni İmtahan Yarat
+                <i class="fas fa-plus"></i> {% trans "create_first_exam" context "profile.my_exams" %}
             </button>
         </div>
         {% endif %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Müəllim Paneli - EMSArena{% endblock %}
+{% block title %}{% trans "title" context "accounts.teacher_dashboard" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/teacher_dashboard.css' %}">
@@ -12,41 +12,41 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h4><i class="fas fa-chalkboard-teacher"></i> Müəllim Paneli</h4>
+            <h4><i class="fas fa-chalkboard-teacher"></i> {% trans "panel_title" context "accounts.teacher_dashboard" %}</h4>
             <p>{{ request.user.get_full_name|default:request.user.username }}</p>
         </div>
         <nav class="sidebar-nav">
             <a href="{% url 'accounts:teacher_dashboard' %}" class="sidebar-nav-item active">
                 <i class="fas fa-home"></i>
-                <span>Ana Səhifə</span>
+                <span>{% trans "home" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-book"></i>
-                <span>Kurslar</span>
+                <span>{% trans "courses" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="{% url 'accounts:grading_queue' %}" class="sidebar-nav-item">
                 <i class="fas fa-tasks"></i>
-                <span>Qiymətləndirmə Növbəsi</span>
+                <span>{% trans "grading_queue" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-file-alt"></i>
-                <span>İmtahanlar</span>
+                <span>{% trans "exams" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-users"></i>
-                <span>Tələbələr</span>
+                <span>{% trans "students" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-chart-line"></i>
-                <span>Hesabatlar</span>
+                <span>{% trans "reports" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="{% url 'accounts:profile' %}" class="sidebar-nav-item">
                 <i class="fas fa-user"></i>
-                <span>Profil</span>
+                <span>{% trans "profile" context "accounts.teacher_dashboard" %}</span>
             </a>
             <a href="#" class="sidebar-nav-item">
                 <i class="fas fa-cog"></i>
-                <span>Tənzimləmələr</span>
+                <span>{% trans "settings" context "accounts.teacher_dashboard" %}</span>
             </a>
         </nav>
     </aside>
@@ -54,7 +54,7 @@
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
         <div class="dashboard-header">
-            <h1 class="dashboard-title">İdarəetmə Paneli</h1>
+            <h1 class="dashboard-title">{% trans "dashboard_title" context "accounts.teacher_dashboard" %}</h1>
             <button class="toggle-sidebar-btn" id="toggleSidebar">
                 <i class="fas fa-bars"></i>
             </button>
@@ -65,7 +65,7 @@
             <div class="stat-card blue">
                 <div class="stat-card-header">
                     <div>
-                        <div class="stat-label">Ümumi Kurslar</div>
+                        <div class="stat-label">{% trans "stat_total_courses" context "accounts.teacher_dashboard" %}</div>
                         <div class="stat-value">{{ total_courses|default:0 }}</div>
                     </div>
                     <div class="stat-icon">
@@ -77,7 +77,7 @@
             <div class="stat-card green">
                 <div class="stat-card-header">
                     <div>
-                        <div class="stat-label">Ümumi Tələbələr</div>
+                        <div class="stat-label">{% trans "stat_total_students" context "accounts.teacher_dashboard" %}</div>
                         <div class="stat-value">{{ total_students|default:0 }}</div>
                     </div>
                     <div class="stat-icon">
@@ -89,7 +89,7 @@
             <div class="stat-card orange">
                 <div class="stat-card-header">
                     <div>
-                        <div class="stat-label">Gözləyən Qiymətləndirmə</div>
+                        <div class="stat-label">{% trans "stat_pending_grading" context "accounts.teacher_dashboard" %}</div>
                         <div class="stat-value">{{ pending_grading|default:0 }}</div>
                     </div>
                     <div class="stat-icon">
@@ -101,7 +101,7 @@
             <div class="stat-card red">
                 <div class="stat-card-header">
                     <div>
-                        <div class="stat-label">Risk Altında</div>
+                        <div class="stat-label">{% trans "stat_at_risk" context "accounts.teacher_dashboard" %}</div>
                         <div class="stat-value">{{ at_risk_students|default:0 }}</div>
                     </div>
                     <div class="stat-icon">
@@ -118,10 +118,10 @@
                 <div class="widget-header">
                     <h3 class="widget-title">
                         <i class="fas fa-tasks text-primary"></i>
-                        Gözləyən Qiymətləndirmələr
+                        {% trans "widget_pending_grading_title" context "accounts.teacher_dashboard" %}
                     </h3>
                     <a href="{% url 'accounts:grading_queue' %}" class="widget-link">
-                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 {% if pending_submissions %}
@@ -141,7 +141,7 @@
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-check-circle"></i>
-                    <p>Gözləyən qiymətləndirmə yoxdur</p>
+                    <p>{% trans "empty_pending_grading" context "accounts.teacher_dashboard" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -151,10 +151,10 @@
                 <div class="widget-header">
                     <h3 class="widget-title">
                         <i class="fas fa-calendar-alt text-success"></i>
-                        Gələcək İmtahanlar
+                        {% trans "widget_upcoming_exams_title" context "accounts.teacher_dashboard" %}
                     </h3>
                     <a href="#" class="widget-link">
-                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 {% if upcoming_exams %}
@@ -174,7 +174,7 @@
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-calendar-check"></i>
-                    <p>Gələcək imtahan planlanmayıb</p>
+                    <p>{% trans "empty_upcoming_exams" context "accounts.teacher_dashboard" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -184,10 +184,10 @@
                 <div class="widget-header">
                     <h3 class="widget-title">
                         <i class="fas fa-book text-info"></i>
-                        Aktiv Kurslar
+                        {% trans "widget_active_courses_title" context "accounts.teacher_dashboard" %}
                     </h3>
                     <a href="#" class="widget-link">
-                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 {% if recent_courses %}
@@ -197,7 +197,7 @@
                         <a href="#">
                             <span>
                                 <strong>{{ course.title }}</strong><br>
-                                <small class="text-muted">{{ course.memberships.count }} tələbə</small>
+                                <small class="text-muted">{{ course.memberships.count }} {% trans "student_unit" context "accounts.teacher_dashboard" %}</small>
                             </span>
                             <span class="widget-badge info">{{ course.status }}</span>
                         </a>
@@ -207,7 +207,7 @@
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-book-open"></i>
-                    <p>Hələ kurs yaradılmayıb</p>
+                    <p>{% trans "empty_active_courses" context "accounts.teacher_dashboard" %}</p>
                 </div>
                 {% endif %}
             </div>
@@ -217,10 +217,10 @@
                 <div class="widget-header">
                     <h3 class="widget-title">
                         <i class="fas fa-exclamation-triangle text-danger"></i>
-                        Risk Altında Olan Tələbələr
+                        {% trans "widget_at_risk_students_title" context "accounts.teacher_dashboard" %}
                     </h3>
                     <a href="#" class="widget-link">
-                        Hamısına bax <i class="fas fa-arrow-right"></i>
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 {% if at_risk_list %}
@@ -230,9 +230,9 @@
                         <a href="#">
                             <span>
                                 <strong>{{ student.user.get_full_name }}</strong><br>
-                                <small class="text-muted">Orta bal: {{ student.average_grade|floatformat:1 }}</small>
+                                <small class="text-muted">{% trans "average_score_prefix" context "accounts.teacher_dashboard" %}: {{ student.average_grade|floatformat:1 }}</small>
                             </span>
-                            <span class="widget-badge urgent">Diqqət</span>
+                            <span class="widget-badge urgent">{% trans "attention_badge" context "accounts.teacher_dashboard" %}</span>
                         </a>
                     </li>
                     {% endfor %}
@@ -240,7 +240,7 @@
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-smile"></i>
-                    <p>Bütün tələbələr yaxşı gedir</p>
+                    <p>{% trans "empty_at_risk_students" context "accounts.teacher_dashboard" %}</p>
                 </div>
                 {% endif %}
             </div>
