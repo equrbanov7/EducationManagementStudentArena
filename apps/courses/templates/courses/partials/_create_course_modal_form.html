@@ -1,0 +1,54 @@
+<form id="createCourseModalForm"
+      method="post"
+      action="{% url 'courses:create_course' %}?modal=1"
+      enctype="multipart/form-data"
+      novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="create-course-form-errors">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="create-course-form-grid">
+        <div class="create-course-field create-course-field--full">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}<div class="create-course-field-error">{{ form.title.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="create-course-field create-course-field--full">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}<div class="create-course-field-error">{{ form.description.errors.0 }}</div>{% endif %}
+            <small class="create-course-help-text">
+                Kursun məqsədi və bu kursdan kimlərin faydalanacağını qısa yazın.
+            </small>
+        </div>
+
+        <div class="create-course-field create-course-field--full">
+            {{ form.cover_image.label_tag }}
+            {{ form.cover_image }}
+            {% if form.cover_image.errors %}<div class="create-course-field-error">{{ form.cover_image.errors.0 }}</div>{% endif %}
+            <small class="create-course-help-text">
+                Şəkil yükləməsəniz, sistem default cover istifadə edəcək.
+            </small>
+
+            <div id="createCourseImagePreviewWrap" class="create-course-image-preview-wrap" hidden>
+                <img id="createCourseImagePreview" class="create-course-image-preview" src="" alt="Course cover preview">
+            </div>
+        </div>
+
+        <div class="create-course-field">
+            {{ form.status.label_tag }}
+            {{ form.status }}
+            {% if form.status.errors %}<div class="create-course-field-error">{{ form.status.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+
+    <div class="course-modal-actions">
+        <button type="button" class="course-modal-cancel-btn js-close-create-course">Ləğv et</button>
+        <button type="submit" class="course-modal-confirm-btn">Kursu yarat</button>
+    </div>
+</form>

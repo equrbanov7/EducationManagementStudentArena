@@ -169,19 +169,20 @@ class MyGroupsTenantIsolationTest(TestCase):
         )
         self.assertEqual(self.client.post(reverse("exams:teacher_delete_group", args=[group.id])).status_code, 403)
 
-    def test_teacher_cannot_multi_assign_teachers(self):
+    def test_teacher_can_multi_assign_teachers(self):
         self._login_as(self.teacher)
         self._set_active_org(self.org_a)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
             self._group_payload(
-                name="Teacher Multi Block",
+                name="Teacher Multi Allowed",
                 primary_teacher=str(self.teacher.id),
                 assigned_teachers=[str(self.teacher.id), str(self.teacher_a2.id)],
             ),
         )
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(StudentGroup.objects.filter(name="Teacher Multi Block").exists())
+        self.assertEqual(response.status_code, 302)
+        group = StudentGroup.objects.get(name="Teacher Multi Allowed")
+        self.assertSetEqual(set(group.teachers.values_list("id", flat=True)), {self.teacher.id, self.teacher_a2.id})
 
     def test_org_admin_can_access_teacher_groups_url_and_multi_assign(self):
         self._login_as(self.org_admin_a)

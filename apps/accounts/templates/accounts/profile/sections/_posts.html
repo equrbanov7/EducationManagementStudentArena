@@ -4,6 +4,7 @@
         <div class="section-title">
             <i class="fas fa-newspaper"></i>
             Postlarım ({{ posts_count }})
+
         </div>
 
         <section class="profile-posts-section">
@@ -51,11 +52,7 @@
                     {% endfor %}
                 </div>
 
-                <div class="profile-edit-link">
-                    <button type="button" class="btn btn-primary js-open-create-post">
-                        <i class="fas fa-plus"></i> Yeni Post Yarat
-                    </button>
-                </div>
+                
                 {% if user_posts.has_other_pages %}
                     {% include "partials/_pagination.html" with page_obj=user_posts extra_query="section=posts" %}
                 {% endif %}

@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
@@ -48,7 +49,7 @@ def createAndEditExamView(request, slug=None):
     else:
         exam = None
         is_editing = False
-    is_modal_request = request.GET.get("modal") == "1"
+    is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
     if request.method == "POST":
         if is_editing:
@@ -128,6 +129,11 @@ def teacher_exam_detail(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
+    requested_profile_section = (request.GET.get("from_section") or "").strip()
+    valid_profile_sections = {"my-exams", "assigned-exams", "profile-info"}
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = "my-exams"
+    profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
 
     return render(
         request,
@@ -135,6 +141,7 @@ def teacher_exam_detail(request, slug):
         {
             "exam": exam,
             "questions": questions,
+            "profile_return_url": profile_return_url,
         },
     )
 

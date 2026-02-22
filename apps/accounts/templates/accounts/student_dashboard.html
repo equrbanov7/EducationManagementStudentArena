@@ -18,7 +18,7 @@
                 <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-action">
                     <i class="fas fa-user me-2"></i>Profil
                 </a>
-                <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary btn-action">
+                <a href="{% url 'courses:student_courses' %}" class="btn btn-outline-primary btn-action">
                     <i class="fas fa-book me-2"></i>Kurslar
                 </a>
                 <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-primary btn-action">
@@ -45,7 +45,7 @@
                         {% for course in enrolled_courses %}
                         <div class="course-item">
                             <div class="item-title">
-                                <a href="{% url 'courses:course_dashboard' course.id %}" class="text-decoration-none">
+                                <a href="{% url 'courses:course_dashboard' course.id %}?from_section=assigned-courses" class="text-decoration-none">
                                     {{ course.title }}
                                 </a>
                             </div>
@@ -55,7 +55,7 @@
                         </div>
                         {% endfor %}
                     </div>
-                    <a href="{% url 'courses:course_list' %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                    <a href="{% url 'courses:student_courses' %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
                         Hamısına bax
                     </a>
                 {% else %}

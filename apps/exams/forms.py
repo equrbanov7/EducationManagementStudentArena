@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
@@ -447,8 +448,14 @@ class StudentGroupForm(forms.ModelForm):
         elif not self.is_superadmin:
             users_qs = users_qs.none()
 
-        students_qs = users_qs.filter(profile__role=ProfileRole.STUDENT).distinct()
-        teachers_qs = users_qs.filter(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).distinct()
+        students_qs = users_qs.filter(
+            Q(profile__role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
+            | Q(groups__name__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
+        ).distinct()
+        teachers_qs = users_qs.filter(
+            Q(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER])
+            | Q(groups__name__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER])
+        ).distinct()
 
         self.fields["students"].queryset = students_qs
         self.fields["primary_teacher"].queryset = teachers_qs
@@ -461,7 +468,19 @@ class StudentGroupForm(forms.ModelForm):
                 initial_assigned.append(self.instance.teacher_id)
             self.fields["assigned_teachers"].initial = initial_assigned
 
-        actor_is_teacher = self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = (
+            self.actor is not None
+            and (
+                (
+                    hasattr(self.actor, "has_role")
+                    and (
+                        self.actor.has_role(ProfileRole.TEACHER)
+                        or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER)
+                    )
+                )
+                or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+            )
+        )
         if self.actor is not None and actor_is_teacher and not self.can_multi_assign_teachers:
             self.fields["primary_teacher"].queryset = teachers_qs.filter(id=self.actor.id)
             self.fields["assigned_teachers"].queryset = teachers_qs.filter(id=self.actor.id)
@@ -484,6 +503,8 @@ class StudentGroupForm(forms.ModelForm):
     def _is_teacher_profile(self, user):
         if user is None:
             return False
+        if hasattr(user, "has_role"):
+            return user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
         try:
             profile = user.profile
         except Exception:
@@ -537,7 +558,19 @@ class StudentGroupForm(forms.ModelForm):
         assigned_ids = {teacher.id for teacher in assigned_list}
         assigned_ids.add(primary_teacher.id)
 
-        actor_is_teacher = self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = (
+            self.actor is not None
+            and (
+                (
+                    hasattr(self.actor, "has_role")
+                    and (
+                        self.actor.has_role(ProfileRole.TEACHER)
+                        or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER)
+                    )
+                )
+                or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+            )
+        )
 
         if self.can_multi_assign_teachers:
             if len(assigned_ids) > self.MAX_MULTI_TEACHERS:

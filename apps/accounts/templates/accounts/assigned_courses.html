@@ -29,7 +29,7 @@
         {% if courses %}
         <div class="posts-grid">
             {% for course in courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}" class="post-item">
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=assigned-courses" class="post-item">
                 <div class="post-icon post-icon--course">
                     <i class="fas fa-graduation-cap"></i>
                 </div>

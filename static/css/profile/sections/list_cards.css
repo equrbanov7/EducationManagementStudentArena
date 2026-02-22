@@ -61,3 +61,13 @@
     font-size: 0.85rem;
     color: var(--text-muted);
 }
+
+.post-item--group {
+    align-items: center;
+}
+
+.group-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}

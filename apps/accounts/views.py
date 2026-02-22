@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
+from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.paginator import Paginator
@@ -15,15 +16,17 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
 from apps.blog.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
-from apps.courses.models import Course
-from apps.exams.models import Exam, ExamAttempt
-from apps.labs.models import LabSubmission
-from apps.projects.models import ProjectSubmission
+from apps.courses.models import Course, CourseMembership
+from apps.exams.forms import StudentGroupForm
+from apps.exams.models import Exam, ExamAttempt, StudentGroup
+from apps.labs.models import Lab, LabSubmission
+from apps.projects.models import Project, ProjectSubmission
 from core.constants import OrganizationType
 from core.tenancy import get_request_organization, scoped_by_organization_id
 
@@ -33,6 +36,11 @@ from .models import ProfileRole, UserProfile
 User = get_user_model()
 signer = TimestampSigner()
 RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
+PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
+PROFILE_ROLE_LABELS = dict(ProfileRole.CHOICES)
+PROFILE_ROLE_NAMES = set(PROFILE_ROLE_LABELS.keys())
 
 
 def _is_superadmin_user(user):
@@ -99,17 +107,121 @@ def _normalized_org_name(value):
     return " ".join((value or "").strip().lower().split())
 
 
+def _user_has_any_role(user, role_names):
+    if not user:
+        return False
+
+    normalized = set(role_names or [])
+    if not normalized:
+        return False
+
+    if hasattr(user, "has_role"):
+        return any(user.has_role(role_name) for role_name in normalized)
+
+    profile = getattr(user, "profile", None)
+    current_role = getattr(profile, "role", None)
+    return current_role in normalized
+
+
+def _extract_profile_roles_for_user(user):
+    if not user:
+        return [ProfileRole.MEMBER]
+
+    roles = []
+    if hasattr(user, "get_all_roles"):
+        candidates = user.get_all_roles()
+    else:
+        profile = getattr(user, "profile", None)
+        candidates = [getattr(profile, "role", None)]
+
+    for role_name in candidates:
+        if role_name in PROFILE_ROLE_NAMES and role_name not in roles:
+            roles.append(role_name)
+
+    if not roles:
+        roles = [ProfileRole.MEMBER]
+    return roles
+
+
+def _assignable_profile_roles_for_user(user):
+    if _is_superadmin_user(user):
+        return [(name, display) for name, display in ProfileRole.CHOICES if name != ProfileRole.SUPERADMIN]
+
+    user_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else 0
+    return [
+        (name, display)
+        for name, display in ProfileRole.CHOICES
+        if ProfileRole.LEVELS.get(name, 0) < user_level
+    ]
+
+
+def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin):
+    for profile in profiles:
+        current_roles = _extract_profile_roles_for_user(profile.user)
+        profile.current_roles = current_roles
+        profile.current_role_items = [
+            {
+                "name": role_name,
+                "label": PROFILE_ROLE_LABELS.get(role_name, role_name),
+            }
+            for role_name in current_roles
+        ]
+
+        target_level = profile.user._highest_role_level() if hasattr(profile.user, "_highest_role_level") else 0
+        profile.can_edit_roles = is_superadmin or actor_level > target_level
+
+
+def _sync_user_role_groups(user, desired_role_names, *, editable_role_names=None):
+    desired = set(desired_role_names or []) & PROFILE_ROLE_NAMES
+    editable = set(editable_role_names or PROFILE_ROLE_NAMES) & PROFILE_ROLE_NAMES
+
+    current_role_group_names = set(user.groups.filter(name__in=PROFILE_ROLE_NAMES).values_list("name", flat=True))
+    removable_role_group_names = current_role_group_names & editable
+
+    role_names_to_remove = removable_role_group_names - desired
+    role_names_to_add = desired - current_role_group_names
+
+    if role_names_to_remove:
+        groups_to_remove = list(Group.objects.filter(name__in=role_names_to_remove))
+        if groups_to_remove:
+            user.groups.remove(*groups_to_remove)
+
+    if role_names_to_add:
+        existing_role_groups = set(Group.objects.filter(name__in=role_names_to_add).values_list("name", flat=True))
+        missing_role_names = [role_name for role_name in role_names_to_add if role_name not in existing_role_groups]
+        if missing_role_names:
+            Group.objects.bulk_create([Group(name=role_name) for role_name in missing_role_names], ignore_conflicts=True)
+
+        groups_to_add = list(Group.objects.filter(name__in=role_names_to_add))
+        if groups_to_add:
+            user.groups.add(*groups_to_add)
+
+
+def _resolve_next_url(request, fallback_url):
+    next_url = (request.POST.get("next") or request.GET.get("next") or "").strip()
+    if not next_url:
+        return fallback_url
+
+    if url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return fallback_url
+
+
 def _role_capabilities(user, profile):
     role = profile.role if profile and profile.role else ProfileRole.MEMBER
     is_superadmin = _is_superadmin_user(user)
-    is_student = role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
-    is_teacher = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
-    is_org_admin = role in {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR}
+    is_student = _user_has_any_role(user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
+    is_teacher = _user_has_any_role(user, {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER})
+    is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR})
 
     can_manage_org = is_superadmin or is_org_admin
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin
     can_review_submissions = is_superadmin or is_teacher
-    can_view_student_assignments = is_student or role == ProfileRole.MEMBER
+    can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
     can_manage_blog = getattr(user, "is_authenticated", False)
 
     if is_superadmin:
@@ -131,54 +243,35 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
         }
-    elif is_org_admin:
-        allowed_sections = {
-            "profile-info",
-            "posts",
-            "my-results",
-            "my-exams",
-            "my-courses",
-            "groups",
-            "role-assignment",
-            "permission-editor",
-            "manage-roles",
-            "blog",
-            "edit-profile",
-        }
-    elif is_teacher:
-        allowed_sections = {
-            "profile-info",
-            "posts",
-            "my-results",
-            "my-exams",
-            "my-courses",
-            "groups",
-            "pending-review",
-            "blog",
-            "edit-profile",
-        }
-    elif is_student:
-        allowed_sections = {
-            "profile-info",
-            "posts",
-            "my-results",
-            "assigned-exams",
-            "assigned-courses",
-            "blog",
-            "edit-profile",
-        }
     else:
         allowed_sections = {
             "profile-info",
             "posts",
-            "my-results",
-            "courses",
-            "assigned-exams",
-            "assigned-courses",
-            "groups",
             "blog",
             "edit-profile",
         }
+        allowed_sections.add("my-results")
+
+        if is_org_admin:
+            allowed_sections.update(
+                {
+                    "my-exams",
+                    "my-courses",
+                    "groups",
+                    "role-assignment",
+                    "permission-editor",
+                    "manage-roles",
+                }
+            )
+
+        if is_teacher:
+            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review"})
+
+        if is_student:
+            allowed_sections.update({"assigned-exams", "assigned-courses"})
+
+        if not (is_student or is_teacher or is_org_admin):
+            allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
 
     if can_manage_blog:
         allowed_sections.add("create-post")
@@ -396,6 +489,240 @@ def _append_query_params(url, **params):
     return f"{url}{separator}{urlencode(clean_params)}"
 
 
+def _query_string(**params):
+    clean_params = {key: value for key, value in params.items() if value not in (None, "")}
+    return urlencode(clean_params)
+
+
+def _normalize_assigned_tasks_filter(value):
+    normalized = (value or "all").lower()
+    if normalized in ASSIGNED_TASK_FILTER_CHOICES:
+        return normalized
+    return "all"
+
+
+def _csv_to_int_set(raw_value):
+    values = set()
+    for chunk in (raw_value or "").split(","):
+        token = chunk.strip()
+        if token.isdigit():
+            values.add(int(token))
+    return values
+
+
+def _csv_to_lower_token_set(raw_value):
+    return {chunk.strip().lower() for chunk in (raw_value or "").split(",") if chunk.strip()}
+
+
+def _task_state_badge_data(state):
+    normalized_state = (state or "open").lower()
+    if normalized_state == "upcoming":
+        return "Gözləyir", "upcoming"
+    if normalized_state == "closed":
+        return "Bağlı", "closed"
+    return "Aktiv", "open"
+
+
+def _collect_assigned_tasks(request, filter_type=None):
+    """
+    Build a unified assigned task list across courses, assignments, labs, and projects.
+    """
+    user = request.user
+    selected_filter = filter_type if filter_type is not None else request.GET.get("assigned_type")
+    filter_type = _normalize_assigned_tasks_filter(selected_filter)
+    now = timezone.now()
+
+    assigned_courses_qs = _assigned_courses_queryset(request, user).select_related("owner").order_by("-created_at")
+    course_ids = list(assigned_courses_qs.values_list("id", flat=True))
+
+    memberships = CourseMembership.objects.filter(
+        course_id__in=course_ids,
+        user=user,
+        role="student",
+    ).values_list("course_id", "group_name")
+    course_groups = {}
+    for course_id, group_name in memberships:
+        normalized_group = (group_name or "").strip().lower()
+        if not normalized_group:
+            continue
+        course_groups.setdefault(course_id, set()).add(normalized_group)
+
+    items = []
+    counts = {"courses": 0, "assignments": 0, "labs": 0, "independent": 0}
+
+    def append_item(
+        *,
+        category,
+        title,
+        kind,
+        icon,
+        detail_url,
+        assigned_at=None,
+        deadline=None,
+        state="open",
+        description="",
+    ):
+        state_label, state_badge = _task_state_badge_data(state)
+        items.append(
+            {
+                "category": category,
+                "title": title,
+                "kind": kind,
+                "icon": icon,
+                "detail_url": detail_url,
+                "assigned_at": assigned_at,
+                "deadline": deadline,
+                "state_label": state_label,
+                "state_badge": state_badge,
+                "description": description,
+                "sort_at": assigned_at or deadline or now,
+            }
+        )
+
+    counts["courses"] = assigned_courses_qs.count()
+    if filter_type in {"all", "courses"}:
+        for course in assigned_courses_qs:
+            append_item(
+                category="courses",
+                title=course.title,
+                kind="Kurs",
+                icon="fas fa-graduation-cap",
+                detail_url=_append_query_params(
+                    reverse("courses:course_dashboard", kwargs={"course_id": course.id}),
+                    from_section="assigned-exams",
+                    assigned_type=filter_type,
+                ),
+                assigned_at=course.created_at,
+                state="open" if course.status == "published" else "closed",
+                description=course.description,
+            )
+
+    assignments_qs = (
+        Assignment.objects.filter(
+            course_id__in=course_ids,
+            assigned_students=user,
+        )
+        .exclude(status__in=["inactive", "archived"])
+        .select_related("course")
+        .distinct()
+        .order_by("-created_at")
+    )
+    counts["assignments"] = assignments_qs.count()
+    if filter_type in {"all", "assignments"}:
+        for assignment in assignments_qs:
+            if assignment.start_date and assignment.start_date > now:
+                state = "upcoming"
+            elif assignment.due_date and now > assignment.due_date and not assignment.allow_late:
+                state = "closed"
+            elif assignment.status not in {"published", "active"}:
+                state = "closed"
+            else:
+                state = "open"
+
+            append_item(
+                category="assignments",
+                title=assignment.title,
+                kind=f"Sərbəst İş • {assignment.course.title}",
+                icon="fas fa-file-signature",
+                detail_url=_append_query_params(
+                    reverse("assignments:assignment_detail", kwargs={"pk": assignment.id}),
+                    from_section="assigned-exams",
+                    assigned_type=filter_type,
+                ),
+                assigned_at=assignment.start_date or assignment.created_at,
+                deadline=assignment.due_date,
+                state=state,
+                description=assignment.description,
+            )
+
+    labs_qs = Lab.objects.filter(course_id__in=course_ids, status="published").select_related("course").order_by("-created_at")
+    assigned_labs = []
+    for lab in labs_qs:
+        allowed_student_ids = _csv_to_int_set(lab.allowed_students)
+        allowed_group_names = _csv_to_lower_token_set(lab.allowed_groups)
+        if not allowed_student_ids and not allowed_group_names:
+            continue
+
+        is_assigned = user.id in allowed_student_ids
+        if not is_assigned and allowed_group_names:
+            student_groups = course_groups.get(lab.course_id, set())
+            is_assigned = bool(student_groups.intersection(allowed_group_names))
+
+        if is_assigned:
+            assigned_labs.append(lab)
+
+    counts["labs"] = len(assigned_labs)
+    if filter_type in {"all", "labs"}:
+        for lab in assigned_labs:
+            if lab.start_datetime and now < lab.start_datetime:
+                state = "upcoming"
+            elif lab.end_datetime and now > lab.end_datetime and not lab.allow_late_submission:
+                state = "closed"
+            else:
+                state = "open"
+
+            append_item(
+                category="labs",
+                title=lab.title,
+                kind=f"Lab işi • {lab.course.title}",
+                icon="fas fa-flask",
+                detail_url=_append_query_params(
+                    reverse("labs:lab_detail", kwargs={"pk": lab.id}),
+                    from_section="assigned-exams",
+                    assigned_type=filter_type,
+                ),
+                assigned_at=lab.start_datetime or lab.created_at,
+                deadline=lab.end_datetime,
+                state=state,
+                description=lab.description,
+            )
+
+    projects_qs = (
+        Project.objects.filter(
+            course_id__in=course_ids,
+            assigned_students=user,
+        )
+        .exclude(status="archived")
+        .select_related("course")
+        .distinct()
+        .order_by("-created_at")
+    )
+    counts["independent"] = projects_qs.count()
+    if filter_type in {"all", "independent"}:
+        for project in projects_qs:
+            if project.start_date and project.start_date > now:
+                state = "upcoming"
+            elif project.deadline and now > project.deadline:
+                state = "closed"
+            elif project.status != "active":
+                state = "closed"
+            else:
+                state = "open"
+
+            append_item(
+                category="independent",
+                title=project.title,
+                kind=f"Kurs işi • {project.course.title}",
+                icon="fas fa-project-diagram",
+                detail_url=_append_query_params(
+                    reverse("projects:project_detail", kwargs={"pk": project.id}),
+                    from_section="assigned-exams",
+                    assigned_type=filter_type,
+                ),
+                assigned_at=project.start_date or project.created_at,
+                deadline=project.deadline,
+                state=state,
+                description=project.description,
+            )
+
+    items.sort(key=lambda item: item["sort_at"] or now, reverse=True)
+    for item in items:
+        item.pop("sort_at", None)
+
+    counts["all"] = counts["courses"] + counts["assignments"] + counts["labs"] + counts["independent"]
+    return items, counts, filter_type
+
+
 def _collect_my_results(request, filter_type=None):
     """
     Build a unified result list for current user across exams, assignments, labs, and projects.
@@ -568,6 +895,186 @@ def _collect_my_results(request, filter_type=None):
     return items, counts, filter_type
 
 
+def _normalize_pending_review_type(value):
+    normalized = (value or "all").lower()
+    if normalized in PENDING_REVIEW_TYPE_CHOICES:
+        return normalized
+    return "all"
+
+
+def _normalize_pending_review_status(value):
+    normalized = (value or "all").lower()
+    if normalized in PENDING_REVIEW_STATUS_CHOICES:
+        return normalized
+    return "all"
+
+
+def _collect_pending_review_items(request, search=None, filter_type=None, filter_status=None):
+    search_query = (search if search is not None else request.GET.get("search", "")).strip()
+    normalized_type = _normalize_pending_review_type(
+        filter_type if filter_type is not None else request.GET.get("type", "all")
+    )
+    normalized_status = _normalize_pending_review_status(
+        filter_status if filter_status is not None else request.GET.get("status", "all")
+    )
+
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+
+    student_memberships = []
+    if teacher_courses.exists():
+        student_memberships = CourseMembership.objects.filter(
+            course__in=teacher_courses,
+            role="student",
+        ).values("course_id", "user_id", "group_name")
+
+    group_map = {
+        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
+        for membership in student_memberships
+    }
+
+    items = []
+
+    if normalized_type in {"all", "exams"}:
+        attempts = (
+            ExamAttempt.objects.filter(
+                exam__in=teacher_exams,
+                status__in=["submitted", "expired"],
+                checked_by_teacher=False,
+            )
+            .exclude(exam__exam_type="test")
+            .select_related("exam", "user", "exam__course")
+        )
+        if search_query:
+            attempts = attempts.filter(
+                Q(user__username__icontains=search_query)
+                | Q(user__first_name__icontains=search_query)
+                | Q(user__last_name__icontains=search_query)
+                | Q(exam__title__icontains=search_query)
+            )
+        for attempt in attempts:
+            course = attempt.exam.course
+            items.append(
+                {
+                    "type": "exam",
+                    "student": attempt.user,
+                    "title": attempt.exam.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
+                    "status": attempt.status,
+                    "date": attempt.started_at,
+                    "action_url": reverse(
+                        "exams:teacher_check_attempt",
+                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                    ),
+                    "action_label": "Yoxla",
+                }
+            )
+
+    if normalized_type in {"all", "assignments"}:
+        submissions = Submission.objects.filter(
+            assignment__course__in=teacher_courses,
+            status="submitted",
+        ).select_related("assignment", "user", "assignment__course")
+        if search_query:
+            submissions = submissions.filter(
+                Q(user__username__icontains=search_query)
+                | Q(user__first_name__icontains=search_query)
+                | Q(user__last_name__icontains=search_query)
+                | Q(assignment__title__icontains=search_query)
+                | Q(assignment__course__title__icontains=search_query)
+            )
+        for submission in submissions:
+            course = submission.assignment.course
+            items.append(
+                {
+                    "type": "assignment",
+                    "student": submission.user,
+                    "title": submission.assignment.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, submission.user_id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "assignments:review_assignment_submissions",
+                        kwargs={"pk": submission.assignment_id},
+                    ),
+                    "action_label": "Tapşırığa keç",
+                }
+            )
+
+    if normalized_type in {"all", "projects"}:
+        project_submissions = ProjectSubmission.objects.filter(
+            project__course__in=teacher_courses,
+            status="pending",
+        ).select_related("project", "project__course", "student")
+        if search_query:
+            project_submissions = project_submissions.filter(
+                Q(student__username__icontains=search_query)
+                | Q(student__first_name__icontains=search_query)
+                | Q(student__last_name__icontains=search_query)
+                | Q(project__title__icontains=search_query)
+                | Q(project__course__title__icontains=search_query)
+            )
+        for submission in project_submissions:
+            course = submission.project.course
+            items.append(
+                {
+                    "type": "project",
+                    "student": submission.student,
+                    "title": submission.project.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, submission.student_id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "projects:review_project_submissions",
+                        kwargs={"pk": submission.project_id},
+                    ),
+                    "action_label": "Layihəyə keç",
+                }
+            )
+
+    if normalized_type in {"all", "labs"}:
+        lab_submissions = LabSubmission.objects.filter(
+            assignment__lab__course__in=teacher_courses,
+            status__in=["submitted", "late"],
+        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        if search_query:
+            lab_submissions = lab_submissions.filter(
+                Q(assignment__student__username__icontains=search_query)
+                | Q(assignment__student__first_name__icontains=search_query)
+                | Q(assignment__student__last_name__icontains=search_query)
+                | Q(assignment__lab__title__icontains=search_query)
+                | Q(assignment__lab__course__title__icontains=search_query)
+            )
+        for submission in lab_submissions:
+            student = submission.assignment.student
+            course = submission.assignment.lab.course
+            items.append(
+                {
+                    "type": "lab",
+                    "student": student,
+                    "title": submission.assignment.lab.title,
+                    "course_title": course.title,
+                    "group_name": group_map.get((course.id, student.id), ""),
+                    "status": submission.status,
+                    "date": submission.submitted_at,
+                    "action_url": reverse(
+                        "labs:grade_submission_page",
+                        kwargs={"pk": submission.id},
+                    ),
+                    "action_label": "Qiymətləndir",
+                }
+            )
+
+    if normalized_status != "all":
+        items = [item for item in items if item["status"] == normalized_status]
+
+    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
+    return items, search_query, normalized_type, normalized_status
+
+
 @login_required
 def teacher_dashboard(request):
     """
@@ -727,7 +1234,7 @@ def user_profile(request):
         if getattr(request.user, "is_admin_level", False):
             profile.supervisor_code = request.POST.get("supervisor_code", "")
 
-        if profile.role == ProfileRole.STUDENT and not (
+        if _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}) and not (
             profile.student_university_name or profile.student_school_identifier
         ):
             messages.error(
@@ -778,8 +1285,17 @@ def user_profile(request):
 
     assigned_exams_count = 0
     assigned_courses_count = 0
+    assigned_tasks_count = 0
     my_results_count = 0
-    assigned_exam_items = []
+    assigned_task_items = []
+    assigned_task_counts = {
+        "all": 0,
+        "courses": 0,
+        "assignments": 0,
+        "labs": 0,
+        "independent": 0,
+    }
+    assigned_tasks_active_filter = "all"
     assigned_courses = []
     my_result_items = []
     my_result_counts = {
@@ -796,16 +1312,13 @@ def user_profile(request):
             "-created_at",
         )
         assigned_exams_count = assigned_exams_qs.count()
-        assigned_courses_count = enrolled_courses_qs.count()
+        assigned_task_items, assigned_task_counts, assigned_tasks_active_filter = _collect_assigned_tasks(
+            request,
+            filter_type=request.GET.get("assigned_type"),
+        )
+        assigned_tasks_count = assigned_task_counts.get("all", 0)
+        assigned_courses_count = assigned_task_counts.get("courses", 0)
         assigned_courses = list(enrolled_courses_qs[:20])
-        for exam in assigned_exams_qs[:20]:
-            can_start_without_code, _ = exam.can_user_start(request.user, code=None)
-            assigned_exam_items.append(
-                {
-                    "exam": exam,
-                    "requires_code": bool(exam.access_code and not can_start_without_code),
-                }
-            )
 
         my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
             request,
@@ -837,6 +1350,333 @@ def user_profile(request):
             status__in=["submitted", "late"],
         ).count()
 
+    teacher_groups = []
+    teacher_groups_count = 0
+    teacher_groups_payload = {}
+    group_form = None
+    can_multi_assign_group_teachers = False
+    groups_section_return_url = f"{reverse('accounts:profile')}?section=groups"
+    if "groups" in allowed_sections:
+        active_organization = _get_active_organization(request)
+        if active_organization is not None:
+            current_role_level = (
+                request.user._highest_role_level()
+                if hasattr(request.user, "_highest_role_level")
+                else ProfileRole.LEVELS.get(getattr(profile, "role", ProfileRole.MEMBER), 0)
+            )
+            can_multi_assign_group_teachers = capabilities["is_superadmin"] or (
+                current_role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
+            )
+            group_form = StudentGroupForm(
+                actor=request.user,
+                organization=active_organization,
+                can_multi_assign_teachers=can_multi_assign_group_teachers,
+                is_superadmin=capabilities["is_superadmin"],
+                auto_id="group_%s",
+            )
+
+            teacher_groups_qs = (
+                StudentGroup.objects.filter(organization=active_organization)
+                .select_related("teacher")
+                .prefetch_related("students", "teachers")
+                .order_by("name")
+            )
+            can_view_all_groups = capabilities["is_superadmin"] or capabilities["can_manage_org"]
+            if not can_view_all_groups:
+                teacher_groups_qs = teacher_groups_qs.filter(Q(teacher=request.user) | Q(teachers=request.user)).distinct()
+
+            teacher_groups_count = teacher_groups_qs.count()
+            teacher_groups = list(teacher_groups_qs[:20])
+
+            for group in teacher_groups:
+                student_ids = [student.id for student in group.students.all()]
+                teacher_ids = [teacher.id for teacher in group.teachers.all()]
+                if group.teacher_id and group.teacher_id not in teacher_ids:
+                    teacher_ids.append(group.teacher_id)
+
+                teacher_groups_payload[str(group.id)] = {
+                    "name": group.name,
+                    "primary_teacher": group.teacher_id,
+                    "students": student_ids,
+                    "teachers": teacher_ids,
+                }
+
+    pending_review_items = []
+    pending_review_search_query = ""
+    pending_review_filter_type = "all"
+    pending_review_filter_status = "all"
+    if "pending-review" in allowed_sections:
+        (
+            pending_review_items,
+            pending_review_search_query,
+            pending_review_filter_type,
+            pending_review_filter_status,
+        ) = _collect_pending_review_items(request)
+
+    role_assignment_section = {
+        "organization": None,
+        "members": [],
+        "assignable_roles": [],
+        "search_query": "",
+        "unassigned_search_query": "",
+        "unassigned_users": [],
+        "can_assign_roles": False,
+        "access_denied_message": "",
+        "members_page_param": "role_members_page",
+        "members_pagination_query": "",
+        "unassigned_page_param": "role_pending_page",
+        "unassigned_pagination_query": "",
+    }
+    permission_editor_section = {
+        "organization": None,
+        "roles": [],
+        "selected_role": None,
+        "permission_categories": {},
+        "actor_permissions": [],
+        "grantable_permissions": [],
+        "can_manage_permissions": False,
+        "access_denied_message": "",
+    }
+    manage_roles_section = {
+        "profiles": [],
+        "assignable_roles": [],
+        "search_query": "",
+        "organization": None,
+        "access_denied_message": "",
+        "profiles_page_param": "manage_roles_page",
+        "profiles_pagination_query": "",
+    }
+    superadmin_organizations_section = {
+        "organizations": [],
+        "all_modules": [],
+        "organizations_page_param": "superadmin_org_page",
+        "organizations_pagination_query": "",
+    }
+
+    management_org = None
+    management_user_level = 0
+    management_actor_permissions = set()
+    management_grantable_permissions = set()
+    management_can_assign_roles = False
+    management_min_level_ok = False
+    if "role-assignment" in allowed_sections or "permission-editor" in allowed_sections:
+        from apps.organizations.permissions import has_permission
+        from apps.organizations.services import get_user_org_role_level
+
+        management_org = _get_active_organization(request)
+        if management_org:
+            _ensure_profile_admin_membership(request.user, management_org)
+            management_user_level = (
+                999 if capabilities["is_superadmin"] else get_user_org_role_level(request.user, management_org)
+            )
+            management_actor_permissions, management_grantable_permissions = _collect_actor_permissions(
+                request.user,
+                management_org,
+            )
+            management_can_assign_roles = capabilities["is_superadmin"] or has_permission(
+                list(management_actor_permissions),
+                "role.assign",
+            )
+            management_min_level_ok = capabilities["is_superadmin"] or management_user_level >= 50
+
+    if "role-assignment" in allowed_sections:
+        from apps.organizations.models import Membership, Role
+
+        role_assignment_search = request.GET.get("search", "")
+        role_assignment_unassigned_search = request.GET.get("unassigned_search", "")
+        role_assignment_section.update(
+            {
+                "organization": management_org,
+                "search_query": role_assignment_search,
+                "unassigned_search_query": role_assignment_unassigned_search,
+                "can_assign_roles": management_can_assign_roles or management_user_level >= 50,
+            }
+        )
+
+        if management_org is None:
+            role_assignment_section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
+        elif not management_min_level_ok:
+            role_assignment_section["access_denied_message"] = (
+                "Bu bölmə üçün minimum müəllim və ya daha yüksək səviyyə tələb olunur."
+            )
+        else:
+            members = (
+                Membership.objects.filter(organization=management_org, is_active=True)
+                .select_related("user", "role")
+                .order_by("-role__level", "user__username")
+            )
+            if not capabilities["is_superadmin"]:
+                members = members.filter(role__level__lt=management_user_level)
+
+            assignable_roles = Role.objects.filter(organization=management_org, is_active=True).order_by("-level")
+            if not capabilities["is_superadmin"]:
+                assignable_roles = assignable_roles.filter(level__lt=management_user_level)
+
+            if role_assignment_search:
+                members = members.filter(
+                    Q(user__username__icontains=role_assignment_search)
+                    | Q(user__email__icontains=role_assignment_search)
+                    | Q(user__first_name__icontains=role_assignment_search)
+                    | Q(user__last_name__icontains=role_assignment_search)
+                )
+
+            unassigned_users = UserProfile.objects.filter(user__is_active=True, organization__isnull=True).select_related(
+                "user",
+                "requested_organization",
+            )
+            if not capabilities["is_superadmin"]:
+                unassigned_users = unassigned_users.filter(
+                    Q(requested_organization=management_org)
+                    | Q(
+                        requested_organization__isnull=True,
+                        requested_organization_name__iexact=management_org.name,
+                    )
+                )
+            if role_assignment_unassigned_search:
+                unassigned_users = unassigned_users.filter(
+                    Q(user__username__icontains=role_assignment_unassigned_search)
+                    | Q(user__email__icontains=role_assignment_unassigned_search)
+                    | Q(user__first_name__icontains=role_assignment_unassigned_search)
+                    | Q(user__last_name__icontains=role_assignment_unassigned_search)
+                )
+
+            role_assignment_members_page = request.GET.get("role_members_page")
+            role_assignment_members_page_obj = Paginator(members, 12).get_page(role_assignment_members_page)
+
+            role_assignment_pending_page = request.GET.get("role_pending_page")
+            role_assignment_pending_page_obj = Paginator(unassigned_users.order_by("user__username"), 12).get_page(
+                role_assignment_pending_page
+            )
+
+            role_assignment_section["members"] = role_assignment_members_page_obj
+            role_assignment_section["assignable_roles"] = assignable_roles
+            role_assignment_section["unassigned_users"] = role_assignment_pending_page_obj
+            role_assignment_section["members_pagination_query"] = _query_string(
+                section="role-assignment",
+                search=role_assignment_search,
+                unassigned_search=role_assignment_unassigned_search,
+            )
+            role_assignment_section["unassigned_pagination_query"] = _query_string(
+                section="role-assignment",
+                search=role_assignment_search,
+                unassigned_search=role_assignment_unassigned_search,
+            )
+
+    if "permission-editor" in allowed_sections:
+        from apps.organizations.models import Role
+        from apps.organizations.permissions import PERMISSION_CATEGORIES
+
+        selected_permission_role_id = request.GET.get("role")
+        permission_editor_section.update(
+            {
+                "organization": management_org,
+                "permission_categories": PERMISSION_CATEGORIES,
+                "actor_permissions": sorted(management_actor_permissions),
+                "grantable_permissions": sorted(management_grantable_permissions),
+                "can_manage_permissions": management_can_assign_roles,
+            }
+        )
+
+        if management_org is None:
+            permission_editor_section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
+        elif not capabilities["is_superadmin"] and not management_can_assign_roles:
+            permission_editor_section["access_denied_message"] = (
+                "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur."
+            )
+        else:
+            roles = Role.objects.filter(organization=management_org, is_active=True).order_by("-level")
+            if not capabilities["is_superadmin"]:
+                roles = roles.filter(level__lt=management_user_level)
+
+            selected_permission_role = None
+            if selected_permission_role_id:
+                selected_permission_role = roles.filter(id=selected_permission_role_id).first()
+            if selected_permission_role is None:
+                selected_permission_role = roles.first()
+
+            permission_editor_section["roles"] = roles
+            permission_editor_section["selected_role"] = selected_permission_role
+
+    if "manage-roles" in allowed_sections:
+        manage_roles_search = request.GET.get("manage_roles_search", "")
+        manage_roles_org = _get_active_organization(request)
+        manage_roles_user_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
+        assignable_roles = _assignable_profile_roles_for_user(request.user)
+        manage_roles_section.update(
+            {
+                "search_query": manage_roles_search,
+                "organization": manage_roles_org,
+                "assignable_roles": assignable_roles,
+                "post_next_url": _append_query_params(
+                    reverse("accounts:profile"),
+                    section="manage-roles",
+                    manage_roles_search=manage_roles_search,
+                ),
+            }
+        )
+
+        if capabilities["is_superadmin"]:
+            manage_role_profiles = UserProfile.objects.all().select_related("user").prefetch_related("user__groups")
+        elif manage_roles_org is None:
+            manage_roles_section["access_denied_message"] = "Rol idarəetməsi üçün aktiv təşkilat tapılmadı."
+            manage_role_profiles = UserProfile.objects.none()
+        else:
+            manage_role_profiles = (
+                UserProfile.objects.filter(organization=manage_roles_org)
+                .select_related("user")
+                .prefetch_related("user__groups")
+            )
+
+        if manage_roles_search:
+            manage_role_profiles = manage_role_profiles.filter(
+                Q(user__username__icontains=manage_roles_search)
+                | Q(user__email__icontains=manage_roles_search)
+                | Q(user__first_name__icontains=manage_roles_search)
+                | Q(user__last_name__icontains=manage_roles_search)
+            )
+
+        manage_roles_page = request.GET.get("manage_roles_page")
+        manage_roles_page_obj = Paginator(manage_role_profiles.order_by("user__username"), 12).get_page(manage_roles_page)
+        _decorate_manage_role_profiles(
+            manage_roles_page_obj.object_list,
+            actor_level=manage_roles_user_level,
+            is_superadmin=capabilities["is_superadmin"],
+        )
+
+        manage_roles_section["profiles"] = manage_roles_page_obj
+        manage_roles_section["profiles_pagination_query"] = _query_string(
+            section="manage-roles",
+            manage_roles_search=manage_roles_search,
+        )
+
+    if "superadmin-organizations" in allowed_sections:
+        from apps.organizations.models import Organization
+
+        superadmin_organizations_queryset = (
+            Organization.objects.select_related("owner")
+            .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
+            .order_by("name")
+        )
+        superadmin_org_page = request.GET.get("superadmin_org_page")
+        superadmin_organizations_section["organizations"] = Paginator(superadmin_organizations_queryset, 12).get_page(
+            superadmin_org_page
+        )
+        superadmin_organizations_section["all_modules"] = [
+            "accounts",
+            "organizations",
+            "courses",
+            "exams",
+            "assignments",
+            "projects",
+            "labs",
+            "live_exam",
+            "blog",
+            "audit",
+        ]
+        superadmin_organizations_section["organizations_pagination_query"] = _query_string(
+            section="superadmin-organizations"
+        )
+
     section_titles = {
         "profile-info": "Profil Məlumatları",
         "posts": "Postlarım",
@@ -844,7 +1684,7 @@ def user_profile(request):
         "courses": "Kurslarım",
         "my-exams": "İmtahanlarım",
         "my-courses": "Yaratdığım Kurslar",
-        "assigned-exams": "Təyin olunmuş imtahanlar",
+        "assigned-exams": "Təyin olunmuş tapşırıqlar",
         "assigned-courses": "Təyin olunmuş kurslar",
         "my-results": "My Results",
         "groups": "Qruplar",
@@ -868,78 +1708,6 @@ def user_profile(request):
                 "source_url": reverse("create_post"),
                 "description": "Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin.",
                 "action_label": "Post yarat",
-            }
-        )
-    if "groups" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "groups",
-                "title": section_titles["groups"],
-                "url": reverse("exams:teacher_group_list"),
-                "icon": "fas fa-users",
-                "source_url": reverse("exams:teacher_group_list"),
-                "description": "Qrup idarəetməsini açmaq üçün aşağıdakı düyməyə keçin.",
-                "action_label": "Qrupları aç",
-            }
-        )
-    if "pending-review" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "pending-review",
-                "title": section_titles["pending-review"],
-                "url": reverse("accounts:pending_review"),
-                "icon": "fas fa-tasks",
-                "source_url": reverse("accounts:pending_review"),
-                "description": "Yoxlanılacaq işlərin tam siyahısını açmaq üçün düymədən istifadə edin.",
-                "action_label": "Yoxlama səhifəsini aç",
-            }
-        )
-    if "role-assignment" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "role-assignment",
-                "title": section_titles["role-assignment"],
-                "url": reverse("accounts:role_assignment"),
-                "icon": "fas fa-user-shield",
-                "source_url": reverse("accounts:role_assignment"),
-                "description": "Rol təyinatı üçün idarəetmə səhifəsi ayrıca açılır.",
-                "action_label": "Role təyin et",
-            }
-        )
-    if "permission-editor" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "permission-editor",
-                "title": section_titles["permission-editor"],
-                "url": reverse("accounts:permission_editor"),
-                "icon": "fas fa-key",
-                "source_url": reverse("accounts:permission_editor"),
-                "description": "Permission redaktəsi üçün idarəetmə səhifəsi ayrıca açılır.",
-                "action_label": "Permission-ları aç",
-            }
-        )
-    if "manage-roles" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "manage-roles",
-                "title": section_titles["manage-roles"],
-                "url": reverse("accounts:manage_roles"),
-                "icon": "fas fa-user-cog",
-                "source_url": reverse("accounts:manage_roles"),
-                "description": "Klassik rol idarəetmə səhifəsini açmaq üçün düymədən istifadə edin.",
-                "action_label": "Rolları idarə et",
-            }
-        )
-    if "superadmin-organizations" in allowed_sections:
-        shortcut_sections.append(
-            {
-                "section": "superadmin-organizations",
-                "title": section_titles["superadmin-organizations"],
-                "url": reverse("accounts:superadmin_organizations"),
-                "icon": "fas fa-building",
-                "source_url": reverse("accounts:superadmin_organizations"),
-                "description": "Superadmin təşkilat nəzarəti ayrıca səhifədədir.",
-                "action_label": "Nəzarət səhifəsini aç",
             }
         )
     if capabilities["can_view_blog"]:
@@ -977,13 +1745,31 @@ def user_profile(request):
         "my_created_courses_count": my_created_courses_count,
         "assigned_exams_count": assigned_exams_count,
         "assigned_courses_count": assigned_courses_count,
-        "assigned_exam_items": assigned_exam_items,
+        "assigned_tasks_count": assigned_tasks_count,
+        "assigned_task_items": assigned_task_items,
+        "assigned_task_counts": assigned_task_counts,
+        "assigned_tasks_active_filter": assigned_tasks_active_filter,
         "assigned_courses": assigned_courses,
         "my_results_count": my_results_count,
         "my_result_items": my_result_items,
         "my_result_counts": my_result_counts,
         "my_results_active_filter": my_results_active_filter,
         "pending_review_count": pending_review_count,
+        "teacher_groups": teacher_groups,
+        "teacher_groups_count": teacher_groups_count,
+        "teacher_groups_payload": teacher_groups_payload,
+        "group_form": group_form,
+        "can_multi_assign_group_teachers": can_multi_assign_group_teachers,
+        "groups_section_return_url": groups_section_return_url,
+        "pending_review_items": pending_review_items,
+        "pending_review_search_query": pending_review_search_query,
+        "pending_review_filter_type": pending_review_filter_type,
+        "pending_review_filter_status": pending_review_filter_status,
+        "pending_review_total_count": len(pending_review_items),
+        "role_assignment_section": role_assignment_section,
+        "permission_editor_section": permission_editor_section,
+        "manage_roles_section": manage_roles_section,
+        "superadmin_organizations_section": superadmin_organizations_section,
         "is_teacher": capabilities["is_teacher"],
         "is_admin": capabilities["can_manage_org"],
         "is_superadmin": capabilities["is_superadmin"],
@@ -1001,8 +1787,8 @@ def user_profile(request):
 @login_required
 def manage_roles(request):
     """
-    Role assignment view for admin-level users.
-    Uses UserProfile.role (RBAC) instead of Django Groups.
+    Multi-role assignment view for admin-level users.
+    Primary role is stored in UserProfile.role; additional roles are synced via Django groups.
     Organization-scoped: only shows users from the same org.
     """
     is_superadmin = _is_superadmin_user(request.user)
@@ -1010,18 +1796,24 @@ def manage_roles(request):
         messages.error(request, "Bu səhifəyə yalnız administratorlar daxil ola bilər.")
         return redirect("home")
 
-    from apps.accounts.models import ProfileRole
-
     # Get user's active organization for scoping
     user_org = _get_active_organization(request)
     if not is_superadmin and not user_org:
         messages.error(request, "Rol idarəetməsi üçün aktiv təşkilat tapılmadı.")
         return redirect("accounts:profile")
 
+    actor_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
+    assignable_roles = _assignable_profile_roles_for_user(request.user)
+    assignable_role_names = {name for name, _ in assignable_roles}
+
     if request.method == "POST":
         user_id = request.POST.get("user_id")
-        role_name = request.POST.get("role_name")
         action = request.POST.get("action")  # "assign" or "remove"
+        next_url = _resolve_next_url(request, reverse("accounts:manage_roles"))
+
+        if not user_id:
+            messages.error(request, "İstifadəçi seçilməyib.")
+            return redirect(next_url)
 
         target_user = get_object_or_404(User, id=user_id)
 
@@ -1029,38 +1821,66 @@ def manage_roles(request):
         target_org = getattr(getattr(target_user, "profile", None), "organization", None)
         if not is_superadmin and target_org != user_org:
             messages.error(request, "Yalnız öz təşkilatınızdakı istifadəçiləri idarə edə bilərsiniz.")
-            return redirect("accounts:manage_roles")
+            return redirect(next_url)
 
-        # Check hierarchy: can't assign role >= own level
-        if not request.user.can_assign_role(role_name):
-            messages.error(request, "Bu rolu təyin etmək icazəniz yoxdur.")
-            return redirect("accounts:manage_roles")
+        target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
+        if not is_superadmin and target_user != request.user and target_level >= actor_level:
+            messages.error(request, "Bu istifadəçinin rolunu idarə etmək üçün səviyyəniz kifayət etmir.")
+            return redirect(next_url)
+
+        selected_role_names = set(request.POST.getlist("role_names"))
+        single_role_name = (request.POST.get("role_name") or "").strip()
+        if single_role_name:
+            selected_role_names.add(single_role_name)
+
+        if action == "remove":
+            selected_role_names = {ProfileRole.MEMBER}
+        if not selected_role_names:
+            selected_role_names = {ProfileRole.MEMBER}
+
+        invalid_roles = selected_role_names - PROFILE_ROLE_NAMES
+        if invalid_roles:
+            messages.error(request, "Seçilən rollar etibarlı deyil.")
+            return redirect(next_url)
+
+        disallowed_roles = selected_role_names - assignable_role_names
+        if disallowed_roles:
+            messages.error(request, "Seçilən rollardan bəzilərini təyin etmək icazəniz yoxdur.")
+            return redirect(next_url)
+
+        current_roles = set(_extract_profile_roles_for_user(target_user))
+        protected_roles = current_roles - assignable_role_names
+        effective_roles = protected_roles | selected_role_names
+
+        if not effective_roles:
+            effective_roles = {ProfileRole.MEMBER}
+
+        primary_role = max(effective_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
+        additional_roles = effective_roles - {primary_role}
 
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
-        valid_roles = {choice[0] for choice in ProfileRole.CHOICES}
-        if action == "assign" and role_name:
-            if role_name not in valid_roles:
-                messages.error(request, "Seçilən rol etibarlı deyil.")
-                return redirect("accounts:manage_roles")
-            target_profile.role = role_name
-            target_profile.save()
-            messages.success(
-                request,
-                f"{target_profile.get_role_display()} rolu {target_user.username} istifadəçisinə təyin edildi.",
+        with transaction.atomic():
+            target_profile.role = primary_role
+            target_profile.save(update_fields=["role", "updated_at"])
+            _sync_user_role_groups(
+                target_user,
+                additional_roles,
+                editable_role_names=assignable_role_names,
             )
-        elif action == "remove":
-            target_profile.role = ProfileRole.MEMBER
-            target_profile.save()
-            messages.success(request, f"{target_user.username} istifadəçisinin rolu sıfırlandı.")
 
-        return redirect("accounts:manage_roles")
+        assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
+        messages.success(
+            request,
+            f"{target_user.username} üçün rollar yeniləndi: {', '.join(assigned_labels)}.",
+        )
+        return redirect(next_url)
 
     # Get org-scoped users
     if is_superadmin:
-        profiles = UserProfile.objects.all().select_related("user")
+        profiles = UserProfile.objects.all().select_related("user").prefetch_related("user__groups")
     else:
-        profiles = UserProfile.objects.filter(organization=user_org).select_related("user")
+        profiles = UserProfile.objects.filter(organization=user_org).select_related("user").prefetch_related("user__groups")
 
     # Search
     search = request.GET.get("search", "")
@@ -1072,17 +1892,22 @@ def manage_roles(request):
             | Q(user__last_name__icontains=search)
         )
 
-    # Filter assignable roles: only roles with level lower than current user
-    user_level = request.user._highest_role_level()
-    assignable_roles = [
-        (name, display) for name, display in ProfileRole.CHOICES if ProfileRole.LEVELS.get(name, 0) < user_level
-    ]
+    profiles_page = request.GET.get("manage_roles_page")
+    profiles_page_obj = Paginator(profiles.order_by("user__username"), 12).get_page(profiles_page)
+    _decorate_manage_role_profiles(
+        profiles_page_obj.object_list,
+        actor_level=actor_level,
+        is_superadmin=is_superadmin,
+    )
 
     context = {
-        "profiles": profiles.order_by("-role"),
+        "profiles": profiles_page_obj,
         "assignable_roles": assignable_roles,
         "search_query": search,
         "organization": user_org,
+        "profiles_page_param": "manage_roles_page",
+        "profiles_pagination_query": _query_string(search=search),
+        "post_next_url": _append_query_params(reverse("accounts:manage_roles"), search=search),
     }
 
     return render(request, "accounts/manage_roles.html", context)
@@ -1313,166 +2138,7 @@ def pending_review(request):
         messages.error(request, "Bu səhifəyə yalnız müəllimlər daxil ola bilər.")
         return redirect("accounts:profile")
 
-    search = request.GET.get("search", "")
-    filter_type = request.GET.get("type", "all")
-    filter_status = request.GET.get("status", "all")
-
-    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
-    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
-
-    student_memberships = []
-    if teacher_courses.exists():
-        from apps.courses.models import CourseMembership
-
-        student_memberships = CourseMembership.objects.filter(
-            course__in=teacher_courses,
-            role="student",
-        ).values("course_id", "user_id", "group_name")
-
-    group_map = {
-        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
-        for membership in student_memberships
-    }
-
-    items = []
-
-    if filter_type in {"all", "exams"}:
-        attempts = (
-            ExamAttempt.objects.filter(
-                exam__in=teacher_exams,
-                status__in=["submitted", "expired"],
-                checked_by_teacher=False,
-            )
-            .exclude(exam__exam_type="test")
-            .select_related("exam", "user", "exam__course")
-        )
-        if search:
-            attempts = attempts.filter(
-                Q(user__username__icontains=search)
-                | Q(user__first_name__icontains=search)
-                | Q(user__last_name__icontains=search)
-                | Q(exam__title__icontains=search)
-            )
-        for attempt in attempts:
-            course = attempt.exam.course
-            items.append(
-                {
-                    "type": "exam",
-                    "student": attempt.user,
-                    "title": attempt.exam.title,
-                    "course_title": course.title if course else "-",
-                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
-                    "status": attempt.status,
-                    "date": attempt.started_at,
-                    "action_url": reverse(
-                        "exams:teacher_check_attempt",
-                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
-                    ),
-                    "action_label": "Yoxla",
-                }
-            )
-
-    if filter_type in {"all", "assignments"}:
-        submissions = Submission.objects.filter(
-            assignment__course__in=teacher_courses,
-            status="submitted",
-        ).select_related("assignment", "user", "assignment__course")
-        if search:
-            submissions = submissions.filter(
-                Q(user__username__icontains=search)
-                | Q(user__first_name__icontains=search)
-                | Q(user__last_name__icontains=search)
-                | Q(assignment__title__icontains=search)
-                | Q(assignment__course__title__icontains=search)
-            )
-        for submission in submissions:
-            course = submission.assignment.course
-            items.append(
-                {
-                    "type": "assignment",
-                    "student": submission.user,
-                    "title": submission.assignment.title,
-                    "course_title": course.title,
-                    "group_name": group_map.get((course.id, submission.user_id), ""),
-                    "status": submission.status,
-                    "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "assignments:review_assignment_submissions",
-                        kwargs={"pk": submission.assignment_id},
-                    ),
-                    "action_label": "Tapşırığa keç",
-                }
-            )
-
-    if filter_type in {"all", "projects"}:
-        project_submissions = ProjectSubmission.objects.filter(
-            project__course__in=teacher_courses,
-            status="pending",
-        ).select_related("project", "project__course", "student")
-        if search:
-            project_submissions = project_submissions.filter(
-                Q(student__username__icontains=search)
-                | Q(student__first_name__icontains=search)
-                | Q(student__last_name__icontains=search)
-                | Q(project__title__icontains=search)
-                | Q(project__course__title__icontains=search)
-            )
-        for submission in project_submissions:
-            course = submission.project.course
-            items.append(
-                {
-                    "type": "project",
-                    "student": submission.student,
-                    "title": submission.project.title,
-                    "course_title": course.title,
-                    "group_name": group_map.get((course.id, submission.student_id), ""),
-                    "status": submission.status,
-                    "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "projects:review_project_submissions",
-                        kwargs={"pk": submission.project_id},
-                    ),
-                    "action_label": "Layihəyə keç",
-                }
-            )
-
-    if filter_type in {"all", "labs"}:
-        lab_submissions = LabSubmission.objects.filter(
-            assignment__lab__course__in=teacher_courses,
-            status__in=["submitted", "late"],
-        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
-        if search:
-            lab_submissions = lab_submissions.filter(
-                Q(assignment__student__username__icontains=search)
-                | Q(assignment__student__first_name__icontains=search)
-                | Q(assignment__student__last_name__icontains=search)
-                | Q(assignment__lab__title__icontains=search)
-                | Q(assignment__lab__course__title__icontains=search)
-            )
-        for submission in lab_submissions:
-            student = submission.assignment.student
-            course = submission.assignment.lab.course
-            items.append(
-                {
-                    "type": "lab",
-                    "student": student,
-                    "title": submission.assignment.lab.title,
-                    "course_title": course.title,
-                    "group_name": group_map.get((course.id, student.id), ""),
-                    "status": submission.status,
-                    "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "labs:grade_submission_page",
-                        kwargs={"pk": submission.id},
-                    ),
-                    "action_label": "Qiymətləndir",
-                }
-            )
-
-    if filter_status != "all":
-        items = [item for item in items if item["status"] == filter_status]
-
-    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
+    items, search, filter_type, filter_status = _collect_pending_review_items(request)
 
     context = {
         "review_items": items,
@@ -1693,16 +2359,32 @@ def role_assignment(request):
             | Q(user__last_name__icontains=unassigned_search)
         )
 
+    members_page = request.GET.get("role_members_page")
+    members_page_obj = Paginator(members, 12).get_page(members_page)
+
+    pending_page = request.GET.get("role_pending_page")
+    unassigned_users_page_obj = Paginator(unassigned_users.order_by("user__username"), 12).get_page(pending_page)
+
     context = {
         "organization": org,
-        "members": members,
+        "members": members_page_obj,
         "assignable_roles": assignable_roles,
         "user_level": user_level,
         "search_query": search,
         "unassigned_search_query": unassigned_search,
-        "unassigned_users": unassigned_users.order_by("user__username")[:100],
+        "unassigned_users": unassigned_users_page_obj,
         "is_superadmin": is_superadmin,
         "can_assign_roles": can_assign_roles or user_level >= 50,
+        "members_page_param": "role_members_page",
+        "members_pagination_query": _query_string(
+            search=search,
+            unassigned_search=unassigned_search,
+        ),
+        "unassigned_page_param": "role_pending_page",
+        "unassigned_pagination_query": _query_string(
+            search=search,
+            unassigned_search=unassigned_search,
+        ),
     }
     return render(request, "accounts/role_assignment.html", context)
 
@@ -1791,6 +2473,8 @@ def permission_editor(request):
 
     if selected_role_id:
         selected_role = roles.filter(id=selected_role_id).first()
+    if selected_role is None:
+        selected_role = roles.first()
 
     context = {
         "organization": org,
@@ -1845,6 +2529,8 @@ def superadmin_organizations(request):
         .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
         .order_by("name")
     )
+    organizations_page = request.GET.get("superadmin_org_page")
+    organizations_page_obj = Paginator(organizations, 12).get_page(organizations_page)
 
     all_modules = [
         "accounts",
@@ -1860,8 +2546,10 @@ def superadmin_organizations(request):
     ]
 
     context = {
-        "organizations": organizations,
+        "organizations": organizations_page_obj,
         "all_modules": all_modules,
+        "organizations_page_param": "superadmin_org_page",
+        "organizations_pagination_query": "",
     }
     return render(request, "accounts/superadmin_organizations.html", context)
 

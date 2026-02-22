@@ -11,10 +11,9 @@
                 </div>
             </div>
             
-            {% comment %} <button type="button" class="btn-create-new js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
-                <i class="fas fa-plus"></i> Yeni İmtahan
-            </button> {% endcomment %}
-            <a href="{% url 'exams:create_exam' %}" class="btn-create-new">
+            <a href="{% url 'exams:create_exam' %}"
+               class="btn-create-new js-open-create-exam"
+               data-create-exam-url="{% url 'exams:create_exam' %}">
                 <i class="fas fa-plus"></i> Yeni İmtahan
             </a>
         </div>
@@ -22,7 +21,7 @@
         {% if my_exams %}
         <div class="exam-cards-grid">
             {% for exam in my_exams %}
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="modern-exam-card">
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams" class="modern-exam-card">
                 <div class="exam-card-icon">
                     <i class="fas fa-file-alt"></i>
                 </div>
@@ -55,7 +54,6 @@
         {% endif %}
         
     </div>
-{% comment %} 
-    {% include "exams/teacher/partials/_create_exam_modal.html" %} {% endcomment %}
+    {% include "exams/teacher/partials/_create_exam_modal.html" %}
 </section>
 {% endif %}

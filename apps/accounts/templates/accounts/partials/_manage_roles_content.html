@@ -1,0 +1,137 @@
+<div class="info-card section-card">
+    <div class="section-title">
+        <i class="fas fa-info-circle"></i> Rol İdarəetməsi Haqqında
+    </div>
+    <p class="manage-roles-summary mb-0">
+        Bu bölmədə istifadəçilərə birdən çox rol təyin edə bilərsiniz.
+        İstifadəçinin əsas rolu avtomatik ən yüksək səviyyəli rol kimi saxlanılır.
+        Yalnız öz səviyyənizdən aşağı rolları idarə edə bilərsiniz.
+        {% if organization %}Təşkilat: <strong>{{ organization.name }}</strong>{% endif %}
+    </p>
+    <div class="manage-roles-diff" aria-label="Role təyin et və Rolları idarə et fərqi">
+        <div class="manage-roles-diff-item">
+            <span class="manage-roles-diff-pill manage-roles-diff-pill--blue">
+                <i class="fas fa-user-shield"></i> Role təyin et
+            </span>
+            <span>Təşkilatdaxili üzvlük rolunu (membership) idarə edir.</span>
+        </div>
+        <div class="manage-roles-diff-item">
+            <span class="manage-roles-diff-pill manage-roles-diff-pill--green">
+                <i class="fas fa-user-cog"></i> Rolları idarə et
+            </span>
+            <span>İstifadəçiyə bir neçə profil rolu verə bilir (əsas + əlavə rollar).</span>
+        </div>
+    </div>
+</div>
+
+{% if access_denied_message %}
+<div class="empty-state">
+    <i class="fas fa-user-lock"></i>
+    <p>{{ access_denied_message }}</p>
+</div>
+{% else %}
+<div class="users-card section-card">
+    <div class="search-section">
+        <form method="get"
+              class="search-box d-flex gap-2"
+              action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:manage_roles' %}{% endif %}">
+            {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="manage-roles">
+            {% endif %}
+            <i class="fas fa-search search-icon"></i>
+            <input
+                type="text"
+                class="search-input"
+                id="searchInput"
+                name="{% if embedded_in_profile %}manage_roles_search{% else %}search{% endif %}"
+                placeholder="İstifadəçi axtar..."
+                value="{{ search_query }}"
+            >
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+
+    {% if profiles %}
+    <div class="table-responsive">
+        <table class="users-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>İstifadəçi</th>
+                    <th>Cari Rollar</th>
+                    <th>Rolları Dəyiş</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in profiles %}
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {{ p.user.first_name|first|default:p.user.username|first|upper }}{{ p.user.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ p.user.get_full_name|default:p.user.username }}</div>
+                                <div class="user-email">{{ p.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="role-badge-list">
+                            {% for role_item in p.current_role_items %}
+                            <span class="role-badge-manage role-{{ role_item.name }}">
+                                <i class="fas fa-shield-alt"></i>
+                                {{ role_item.label }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'accounts:manage_roles' %}" class="role-actions">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ p.user.id }}">
+                            <input type="hidden" name="next" value="{{ post_next_url }}">
+                            <div class="role-checkbox-grid">
+                                {% for role_val, role_label in assignable_roles %}
+                                <label class="role-check-option">
+                                    <input
+                                        type="checkbox"
+                                        name="role_names"
+                                        value="{{ role_val }}"
+                                        {% if role_val in p.current_roles %}checked{% endif %}
+                                        {% if not p.can_edit_roles %}disabled{% endif %}
+                                    >
+                                    <span>{{ role_label }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <button
+                                type="submit"
+                                name="action"
+                                value="assign"
+                                class="role-btn role-btn-assign"
+                                {% if not p.can_edit_roles %}disabled{% endif %}
+                            >
+                                <i class="fas fa-check"></i> Yadda saxla
+                            </button>
+                            {% if not p.can_edit_roles %}
+                            <span class="role-edit-locked">Səviyyə limiti</span>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=profiles extra_query=profiles_pagination_query page_param=profiles_page_param %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users-slash"></i>
+        <h3>İstifadəçi tapılmadı</h3>
+        <p>Sistemdə hələ idarə ediləcək istifadəçi yoxdur</p>
+    </div>
+    {% endif %}
+</div>
+{% endif %}

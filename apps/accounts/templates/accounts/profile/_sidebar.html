@@ -94,12 +94,12 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=assigned-exams"
                data-section="assigned-exams"
-               data-title="Təyin olunmuş imtahanlar"
+               data-title="Təyin olunmuş tapşırıqlar"
                data-source-url="{% url 'accounts:assigned_exams' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
-                <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Təyin olunmuş imtahanlar</span>
-                {% if assigned_exams_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_exams_count }}</span>{% endif %}
+                <i class="fas fa-tasks sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Təyin olunmuş tapşırıqlar</span>
+                {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_tasks_count }}</span>{% endif %}
             </a>
         </li>
         <li class="sidebar-menu-item">

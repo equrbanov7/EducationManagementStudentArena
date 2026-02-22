@@ -13,9 +13,15 @@ def _ensure_teacher(user):
     if user.is_superuser or getattr(user, "is_superadmin", False):
         return
 
-    profile = getattr(user, "profile", None)
-    role = getattr(profile, "role", None)
-    if role not in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
+    has_teacher_role = False
+    if hasattr(user, "has_role"):
+        has_teacher_role = user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
+    if not has_teacher_role:
+        profile = getattr(user, "profile", None)
+        role = getattr(profile, "role", None)
+        has_teacher_role = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+
+    if not has_teacher_role:
         raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
 
 

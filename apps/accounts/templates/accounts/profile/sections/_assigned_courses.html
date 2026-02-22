@@ -14,7 +14,7 @@
         {% if assigned_courses %}
         <div class="assigned-course-cards-grid">
             {% for course in assigned_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}" class="modern-assigned-course-card">
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=assigned-courses" class="modern-assigned-course-card">
                 
                 <div class="assigned-course-icon">
                     <i class="fas fa-graduation-cap"></i>

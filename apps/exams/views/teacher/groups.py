@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import ProfileRole
@@ -23,7 +24,29 @@ def _is_superadmin(user):
 def _ensure_group_manager(user):
     if _is_superadmin(user):
         return
-    if _user_role(user) == ProfileRole.STUDENT:
+    has_student_role = False
+    has_teacher_like_role = False
+    if hasattr(user, "has_role"):
+        has_student_role = user.has_role(ProfileRole.STUDENT) or user.has_role(ProfileRole.LEAD_STUDENT)
+        has_teacher_like_role = (
+            user.has_role(ProfileRole.TEACHER)
+            or user.has_role(ProfileRole.ASSISTANT_TEACHER)
+            or user.has_role(ProfileRole.ORG_ADMIN)
+            or user.has_role(ProfileRole.ORG_OWNER)
+            or user.has_role(ProfileRole.HR)
+        )
+    else:
+        role = _user_role(user)
+        has_student_role = role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
+        has_teacher_like_role = role in {
+            ProfileRole.TEACHER,
+            ProfileRole.ASSISTANT_TEACHER,
+            ProfileRole.ORG_ADMIN,
+            ProfileRole.ORG_OWNER,
+            ProfileRole.HR,
+        }
+
+    if has_student_role and not has_teacher_like_role:
         raise PermissionDenied("Bu səhifəyə giriş icazəniz yoxdur.")
 
 
@@ -31,9 +54,23 @@ def _can_multi_assign_teachers(user):
     if _is_superadmin(user):
         return True
 
-    role = _user_role(user)
-    role_level = ProfileRole.LEVELS.get(role, 0)
-    return role_level > ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
+    role_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else ProfileRole.LEVELS.get(
+        _user_role(user), 0
+    )
+    return role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
+
+
+def _resolve_next_url(request):
+    next_url = (request.POST.get("next") or request.GET.get("next") or "").strip()
+    if not next_url:
+        return ""
+    if url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return ""
 
 
 def _get_required_organization(request):
@@ -116,7 +153,15 @@ def teacher_create_group(request):
     if form.is_valid():
         form.save()
         messages.success(request, "Qrup uğurla yaradıldı.")
+        next_url = _resolve_next_url(request)
+        if next_url:
+            return redirect(next_url)
         return redirect("exams:teacher_group_list")
+
+    next_url = _resolve_next_url(request)
+    if next_url:
+        messages.error(request, "Qrup yaradılmadı. Form məlumatlarını yoxlayın.")
+        return redirect(next_url)
 
     return render(
         request,
@@ -140,7 +185,15 @@ def teacher_update_group(request, group_id):
     if form.is_valid():
         form.save()
         messages.success(request, "Qrup yeniləndi.")
+        next_url = _resolve_next_url(request)
+        if next_url:
+            return redirect(next_url)
         return redirect("exams:teacher_group_list")
+
+    next_url = _resolve_next_url(request)
+    if next_url:
+        messages.error(request, "Qrup yenilənmədi. Form məlumatlarını yoxlayın.")
+        return redirect(next_url)
 
     groups = _group_queryset_for_actor(request, organization)
     return render(
@@ -168,6 +221,9 @@ def teacher_delete_group(request, group_id):
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
     group.delete()
     messages.success(request, "Qrup silindi.")
+    next_url = _resolve_next_url(request)
+    if next_url:
+        return redirect(next_url)
     return redirect("exams:teacher_group_list")
 
 

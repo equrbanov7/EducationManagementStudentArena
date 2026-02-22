@@ -138,6 +138,120 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function initCreateExamSearchableSelect(form, config) {
+        if (!form || !config) {
+            return;
+        }
+
+        var hiddenSelect = form.querySelector('select[name="' + config.selectName + '"]');
+        var listContainer = form.querySelector(config.listSelector);
+        var searchInput = form.querySelector(config.searchSelector);
+        var counter = form.querySelector(config.counterSelector);
+
+        if (!hiddenSelect || !listContainer) {
+            return;
+        }
+
+        function updateCounter() {
+            if (counter) {
+                counter.textContent = String(hiddenSelect.selectedOptions.length);
+            }
+        }
+
+        function renderList() {
+            var options = Array.from(hiddenSelect.options || []);
+            listContainer.innerHTML = "";
+
+            if (!options.length) {
+                listContainer.innerHTML = '<div class="create-exam-list-empty">Məlumat tapılmadı.</div>';
+                updateCounter();
+                return;
+            }
+
+            options.forEach(function (option) {
+                var row = document.createElement("div");
+                row.className = "create-exam-list-item";
+                row.setAttribute("data-search", (option.textContent || "").toLowerCase());
+
+                var checkboxId = "create_exam_" + config.selectName + "_" + option.value;
+
+                row.innerHTML = '' +
+                    '<input type="checkbox" class="create-exam-item-checkbox" id="' + checkboxId + '"' +
+                    (option.selected ? " checked" : "") + ">" +
+                    '<label class="create-exam-item-label" for="' + checkboxId + '"></label>';
+
+                var checkbox = row.querySelector(".create-exam-item-checkbox");
+                var label = row.querySelector(".create-exam-item-label");
+
+                if (label) {
+                    label.textContent = option.textContent || "";
+                }
+
+                if (checkbox) {
+                    checkbox.addEventListener("change", function () {
+                        option.selected = checkbox.checked;
+                        updateCounter();
+                    });
+                }
+
+                row.addEventListener("click", function (event) {
+                    if (!checkbox) {
+                        return;
+                    }
+                    if (event.target === checkbox || event.target === label) {
+                        return;
+                    }
+                    checkbox.checked = !checkbox.checked;
+                    option.selected = checkbox.checked;
+                    updateCounter();
+                });
+
+                listContainer.appendChild(row);
+            });
+
+            updateCounter();
+        }
+
+        function filterList(query) {
+            var normalizedQuery = (query || "").toLowerCase();
+            var rows = listContainer.querySelectorAll(".create-exam-list-item");
+            rows.forEach(function (row) {
+                var haystack = row.getAttribute("data-search") || "";
+                row.style.display = haystack.indexOf(normalizedQuery) !== -1 ? "flex" : "none";
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                filterList(searchInput.value);
+            });
+        }
+
+        renderList();
+        if (searchInput && searchInput.value) {
+            filterList(searchInput.value);
+        }
+    }
+
+    function initCreateExamAccessToggle(form) {
+        if (!form) {
+            return;
+        }
+
+        var isPublicCheckbox = form.querySelector('input[name="is_public"]');
+        var accessBlock = form.querySelector("#createExamAccessRestrictions");
+        if (!isPublicCheckbox || !accessBlock) {
+            return;
+        }
+
+        function syncAccessBlock() {
+            accessBlock.classList.toggle("is-hidden", isPublicCheckbox.checked);
+        }
+
+        syncAccessBlock();
+        isPublicCheckbox.addEventListener("change", syncAccessBlock);
+    }
+
     function bindCreateExamModalForm() {
         if (!createExamModalBody) {
             return;
@@ -154,6 +268,20 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!form) {
             return;
         }
+
+        initCreateExamAccessToggle(form);
+        initCreateExamSearchableSelect(form, {
+            selectName: "allowed_groups",
+            listSelector: "#createExamGroupsList",
+            searchSelector: "#createExamGroupsSearch",
+            counterSelector: "#createExamGroupsCount"
+        });
+        initCreateExamSearchableSelect(form, {
+            selectName: "allowed_users",
+            listSelector: "#createExamUsersList",
+            searchSelector: "#createExamUsersSearch",
+            counterSelector: "#createExamUsersCount"
+        });
 
         form.addEventListener("submit", async function (event) {
             event.preventDefault();
@@ -179,15 +307,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 var contentType = response.headers.get("content-type") || "";
+                var redirectTarget = response.url || "";
                 if (response.ok && contentType.indexOf("application/json") !== -1) {
                     var data = await response.json();
                     if (data.success) {
                         closeCreateExamModal(true);
                         var nextUrl = new URL(profileBaseUrl, window.location.origin);
                         nextUrl.searchParams.set("section", "my-exams");
-                        window.location.href = nextUrl.pathname + nextUrl.search;
+                        window.setTimeout(function () {
+                            window.location.href = nextUrl.pathname + nextUrl.search;
+                        }, 60);
                         return;
                     }
+                }
+
+                if (response.ok && response.redirected && redirectTarget) {
+                    closeCreateExamModal(true);
+                    var redirectedUrl = new URL(profileBaseUrl, window.location.origin);
+                    redirectedUrl.searchParams.set("section", "my-exams");
+                    window.setTimeout(function () {
+                        window.location.href = redirectedUrl.pathname + redirectedUrl.search;
+                    }, 60);
+                    return;
                 }
 
                 if (contentType.indexOf("application/json") !== -1) {
