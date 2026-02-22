@@ -1,0 +1,291 @@
+/* --- İndiqo (Bənövşəyi/Mavi) Rəng Dəyişənləri --- */
+:root {
+    --indigo-primary: #6366f1;
+    --indigo-hover: #4f46e5;
+    --indigo-light: #e0e7ff;
+    --indigo-border: #c7d2fe;
+}
+
+.text-indigo { color: var(--indigo-primary) !important; }
+.icon-indigo-light { background: var(--indigo-light) !important; color: var(--indigo-primary) !important; }
+.badge-indigo { background: var(--indigo-light); color: var(--indigo-primary); }
+
+/* --- Təyin Olunmuş İmtahanlar Siyahısı --- */
+.assigned-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.modern-assigned-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.modern-assigned-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1);
+    border-color: var(--indigo-border);
+}
+
+/* İkon Qutusu */
+.assigned-card-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    background: var(--indigo-light);
+    color: var(--indigo-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-right: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.modern-assigned-card:hover .assigned-card-icon {
+    background: var(--indigo-primary);
+    color: #ffffff;
+}
+
+/* Məzmun Hissəsi */
+.assigned-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.assigned-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.4rem 0;
+}
+
+.assigned-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Aksiyalar və Düymələr */
+.assigned-card-action {
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-indigo {
+    background: var(--indigo-primary);
+    color: #ffffff;
+    border: none;
+}
+
+.btn-indigo:hover {
+    background: var(--indigo-hover);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-outline-indigo {
+    background: transparent;
+    color: var(--indigo-primary);
+    border: 1px solid var(--indigo-border);
+}
+
+.btn-outline-indigo:hover {
+    background: var(--indigo-light);
+    border-color: var(--indigo-primary);
+}
+
+/* =========================================
+   MÜASİR GİRİŞ KODU MODALI (PIN MODAL)
+   ========================================= */
+.modern-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1060;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-code {
+    background: #ffffff;
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 420px;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    animation: modalPopUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPopUp {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.modern-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modern-modal-close:hover {
+    background: #e2e8f0;
+    color: var(--text-main);
+}
+
+.modal-icon-shield {
+    width: 70px;
+    height: 70px;
+    background: var(--indigo-light);
+    color: var(--indigo-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+}
+
+.modal-code-header h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.modal-code-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+/* Müasir PIN Inputu */
+.code-input-field {
+    width: 100%;
+    padding: 1rem;
+    font-size: 2rem;
+    letter-spacing: 0.5rem; /* Rəqəmlər arasındakı boşluq */
+    text-align: center;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-weight: 800;
+    font-family: monospace;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+    background: #f8fafc;
+}
+
+.code-input-field:focus {
+    border-color: var(--indigo-primary);
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.code-input-field::placeholder {
+    letter-spacing: 0.3rem;
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+.gap-3 { gap: 1rem; }
+
+.modern-modal-actions {
+    display: flex;
+}
+
+.btn-modal-action {
+    flex: 1;
+    padding: 0.85rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-cancel-light {
+    background: #f1f5f9;
+    color: var(--text-main);
+}
+
+.btn-cancel-light:hover { background: #e2e8f0; }
+
+.btn-confirm-indigo {
+    background: var(--indigo-primary);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.btn-confirm-indigo:hover {
+    background: var(--indigo-hover);
+    transform: translateY(-1px);
+}
+
+/* Mobil Cihazlar Üçün Responsivlik */
+@media (max-width: 640px) {
+    .modern-assigned-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .assigned-card-icon {
+        margin-bottom: 0.5rem;
+    }
+    .assigned-card-action {
+        margin-left: 0;
+        margin-top: 1rem;
+        width: 100%;
+    }
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+    .modal-code {
+        padding: 2rem 1.5rem;
+    }
+    .code-input-field {
+        font-size: 1.5rem;
+    }
+    .modern-modal-actions {
+        flex-direction: column-reverse;
+    }
+}

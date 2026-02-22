@@ -58,7 +58,7 @@
                 <div class="card-body text-center">
                     {% if assignment.is_deadline_passed %}
                         <span class="badge bg-danger fs-6">Müddət Keçib</span>
-                    {% elif assignment.status != 'active' %}
+                    {% elif not assignment.is_open_status %}
                         <span class="badge bg-warning fs-6">Deaktiv</span>
                     {% else %}
                         <span class="badge bg-success fs-6">Aktiv</span>

@@ -1,0 +1,61 @@
+{% if can_view_owned_learning %}
+<section class="profile-section-panel profile-section--my-exams {% if active_section == 'my-exams' %}is-active{% endif %}" data-profile-section-panel="my-exams">
+    <div class="section-card">
+        
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-file-signature text-primary"></i>
+                    <span>İmtahanlarım</span>
+                    <span class="count-badge">{{ my_exams_count }}</span>
+                </div>
+            </div>
+            
+            {% comment %} <button type="button" class="btn-create-new js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
+                <i class="fas fa-plus"></i> Yeni İmtahan
+            </button> {% endcomment %}
+            <a href="{% url 'exams:create_exam' %}" class="btn-create-new">
+                <i class="fas fa-plus"></i> Yeni İmtahan
+            </a>
+        </div>
+
+        {% if my_exams %}
+        <div class="exam-cards-grid">
+            {% for exam in my_exams %}
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="modern-exam-card">
+                <div class="exam-card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="exam-card-content">
+                    <h4 class="exam-card-title">{{ exam.title }}</h4>
+                    <div class="exam-card-meta">
+                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ exam.created_at|date:"d M Y" }}</span>
+                        <span class="meta-divider">•</span>
+                        <span class="meta-item badge-type">{{ exam.get_exam_type_display|default:"İmtahan" }}</span>
+                    </div>
+                </div>
+                <div class="exam-card-action">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="modern-empty-state">
+            <div class="empty-icon-wrapper">
+                <i class="fas fa-file-medical"></i>
+            </div>
+            <h3>Siyahı boşdur</h3>
+            <p>Hələ heç bir imtahan yaratmamısınız. Tələbələriniz üçün ilk imtahanınızı indi yaradın.</p>
+            <button type="button" class="btn-create-new mt-3 js-open-create-exam" data-create-exam-url="{% url 'exams:create_exam' %}">
+                <i class="fas fa-plus"></i> Yeni İmtahan Yarat
+            </button>
+        </div>
+        {% endif %}
+        
+    </div>
+{% comment %} 
+    {% include "exams/teacher/partials/_create_exam_modal.html" %} {% endcomment %}
+</section>
+{% endif %}

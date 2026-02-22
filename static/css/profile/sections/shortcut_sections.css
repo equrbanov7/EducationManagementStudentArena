@@ -1,0 +1,14 @@
+.settings-note {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--light-blue);
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius-md);
+    color: #1e40af;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.settings-note i {
+    margin-right: 0.5rem;
+}

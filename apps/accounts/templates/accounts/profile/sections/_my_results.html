@@ -1,0 +1,99 @@
+{% if can_view_student_assignments %}
+<section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
+    <div class="section-card">
+        
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-chart-pie text-teal"></i>
+                    <span>Nəticələrim</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modern-results-tabs">
+            <a href="{{ profile_base_url }}?section=my-results&results_type=all"
+               class="modern-tab {% if my_results_active_filter == 'all' %}active{% endif %}">
+                Hamısı <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=exams"
+               class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
+                İmtahanlar <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=courses"
+               class="modern-tab {% if my_results_active_filter == 'courses' %}active{% endif %}">
+                  Sərbəst İşlər <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=labs"
+               class="modern-tab {% if my_results_active_filter == 'labs' %}active{% endif %}">
+                Laboratoriyalar <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=independent"
+               class="modern-tab {% if my_results_active_filter == 'independent' %}active{% endif %}">
+               Kurs İşləri <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
+            </a>
+        </div>
+
+        {% if my_result_items %}
+        <div class="results-cards-grid">
+            {% for item in my_result_items %}
+            <div class="modern-result-card">
+                
+                <div class="result-card-header">
+                    <div class="result-icon-wrapper">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="result-title-group">
+                        <h4 class="result-title">{{ item.title }}</h4>
+                        <div class="result-meta-info">
+                            <span class="kind-badge">{{ item.kind }}</span>
+                            {% if item.submitted_at %}
+                            <span class="meta-divider">•</span>
+                            <span><i class="far fa-clock"></i> {{ item.submitted_at|date:"d M Y H:i" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="result-status-wrap">
+                        <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                    </div>
+                </div>
+
+                <div class="result-card-body">
+                    {% if item.score != None %}
+                    <div class="result-score-box">
+                        <span class="score-label">Toplanılan Xal:</span>
+                        <span class="score-value">{{ item.score }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if item.feedback %}
+                    <div class="result-feedback-box">
+                        <div class="feedback-icon"><i class="fas fa-comment-dots"></i></div>
+                        <p>{{ item.feedback|truncatechars:180 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="result-card-footer">
+                    <a href="{{ item.detail_url }}" class="btn-action btn-teal">
+                        <i class="fas fa-eye"></i> Nəticəyə Bax
+                    </a>
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="modern-empty-state">
+            <div class="empty-icon-wrapper icon-teal-light">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>Nəticə tapılmadı</h3>
+            <p>Seçdiyiniz filtrə uyğun hələ heç bir nəticə və ya cavab yoxdur.</p>
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endif %}

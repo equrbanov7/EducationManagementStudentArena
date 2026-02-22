@@ -68,6 +68,19 @@
                     {% endif %}
                 </div>
 
+                <div id="individualOrgFields" hidden>
+                    <div class="register-form-field">
+                        {{ form.join_organization.label_tag }}
+                        {{ form.join_organization }}
+                        {% if form.join_organization.errors %}
+                            <div class="register-field-error">{{ form.join_organization.errors.0 }}</div>
+                        {% endif %}
+                        <small class="register-help-text">
+                            Individual seçimi zamanı qurum seçimi məcburidir. Rol avtomatik tələbə olacaq.
+                        </small>
+                    </div>
+                </div>
+
                 <div id="orgFields" hidden>
                     <div class="register-form-field">
                         <label for="institutionSearchInput" id="institutionSearchLabel">Müəssisə axtar</label>
@@ -160,12 +173,18 @@
                     {% endif %}
                 </div>
 
-                <div class="register-form-field">
+                <div class="register-form-field" id="initialRoleField">
                     {{ form.initial_role.label_tag }}
                     {{ form.initial_role }}
                     {% if form.initial_role.errors %}
                         <div class="register-field-error">{{ form.initial_role.errors.0 }}</div>
                     {% endif %}
+                </div>
+
+                <div class="register-form-field" id="autoStudentRoleInfo" hidden>
+                    <small class="register-help-text">
+                        Seçilmiş individual qurum üçün status avtomatik tələbə kimi təyin ediləcək.
+                    </small>
                 </div>
 
                 <div class="register-form-field">

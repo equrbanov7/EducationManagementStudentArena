@@ -12,7 +12,7 @@
     <div class="profile-main" style="max-width: 900px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">{{ item_title }}</h1>
-            <a href="{% url 'accounts:my_results' %}" class="btn btn-secondary">
+            <a href="{{ back_url }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> My Results
             </a>
         </div>

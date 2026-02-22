@@ -222,6 +222,7 @@ def create_post(request):
         raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
 
     if request.method == "POST":
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
@@ -247,13 +248,35 @@ def create_post(request):
                 # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
                 pass
 
+            # AJAX modalı üçün qaralama/dərc statusu idarəsi.
+            if "is_published" in request.POST:
+                post.is_published = bool(request.POST.get("is_published"))
+
             # --- SLUG MƏNTİQİ SİLİNDİ ---
             # Sənin Post modelinin save() metodu slug-ı və unikallığı
             # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
 
             post.save()
+            if is_ajax:
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "post_id": post.id,
+                        "slug": post.slug,
+                    }
+                )
             messages.success(request, "Post uğurla yaradıldı.")
             return redirect("post_detail", slug=post.slug)
+        if is_ajax:
+            errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": errors,
+                    "message": "Form məlumatlarında xəta var.",
+                },
+                status=400,
+            )
     else:
         form = PostForm()
 
@@ -319,19 +342,19 @@ def post_edit_ajax(request, pk):
 
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
 @login_required
+@require_POST
 def delete_post(request, post_id):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
 
     post = get_object_or_404(Post, pk=post_id, author=request.user)
+    post_title = post.title
+    post.delete()
 
-    if request.method == "POST":
-        # Yalnız POST gələndə silməni icra et (silmə düyməsi POST göndərməlidir)
-        post.delete()
-        # Və ya sadəcə redirect edirik (çünki JS modalı bağlayıb səhifəni yeniləyir)
-        return redirect("user_profile", username=request.user.username)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    if is_ajax:
+        return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
 
-    # Əgər GET gələrsə, xəta veririk və ya sadəcə silməni icra etmədən geri göndəririk
     return redirect("user_profile", username=request.user.username)
 
 

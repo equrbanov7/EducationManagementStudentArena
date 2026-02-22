@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const editModal = document.getElementById("editModal");
   const deleteModal = document.getElementById("deleteModal");
   const warningModal = document.getElementById("warningModal");
+  const createModal = document.getElementById("createModal");
 
   // Edit modal elementləri
   const editForm = document.getElementById("editForm");
@@ -39,11 +40,125 @@ document.addEventListener("DOMContentLoaded", function () {
   const stayOnModalBtn = document.getElementById("stayOnModal");
   const discardChangesBtn = document.getElementById("discardChanges");
 
+  // Create modal elementləri
+  const createForm = document.getElementById("createForm");
+  const createTitle = document.getElementById("createTitle");
+  const createCategory = document.getElementById("createCategory");
+  const createNewCategory = document.getElementById("createNewCategory");
+  const createExcerpt = document.getElementById("createExcerpt");
+  const createContent = document.getElementById("createContent");
+  const createImageUrl = document.getElementById("createImageUrl");
+  const createImage = document.getElementById("createImage");
+  const createIsPublished = document.getElementById("createIsPublished");
+  const createFormError = document.getElementById("createFormError");
+  const closeCreateModalBtn = document.getElementById("closeCreateModal");
+  const cancelCreateBtn = document.getElementById("cancelCreate");
+
   // State idarəetməsi
   let currentPostId = null;
   let originalFormData = {};
   let hasUnsavedChanges = false;
   let pendingClose = false;
+
+  // ============= CREATE FUNKSIONALLARI =============
+  function showCreateError(message) {
+    if (!createFormError) return;
+    createFormError.hidden = false;
+    createFormError.textContent = message || "Xəta baş verdi.";
+  }
+
+  function hideCreateError() {
+    if (!createFormError) return;
+    createFormError.hidden = true;
+    createFormError.textContent = "";
+  }
+
+  function resetCreateForm() {
+    if (!createForm) return;
+    createForm.reset();
+    if (createIsPublished) {
+      createIsPublished.checked = true;
+    }
+    hideCreateError();
+  }
+
+  function openCreateModal() {
+    resetCreateForm();
+    showModal(createModal);
+    if (createTitle) {
+      createTitle.focus();
+    }
+  }
+
+  if (createModal && createForm) {
+    if (createModal.parentElement !== document.body) {
+      document.body.appendChild(createModal);
+    }
+
+    document.querySelectorAll(".js-open-create-post").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openCreateModal();
+      });
+    });
+
+    createForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      hideCreateError();
+
+      const formData = new FormData(createForm);
+      formData.set("is_published", createIsPublished && createIsPublished.checked ? "on" : "");
+
+      try {
+        const response = await fetch("/blog/posts/create/", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          hideModal(createModal);
+          location.reload();
+          return;
+        }
+
+        const errorText =
+          (data.errors &&
+            Object.values(data.errors)
+              .flat()
+              .join(" ")) ||
+          data.message ||
+          "Post yaradılmadı.";
+        showCreateError(errorText);
+      } catch (error) {
+        console.error("Error:", error);
+        showCreateError("Əlaqə xətası baş verdi.");
+      }
+    });
+
+    if (cancelCreateBtn) {
+      cancelCreateBtn.addEventListener("click", function () {
+        hideModal(createModal);
+      });
+    }
+
+    if (closeCreateModalBtn) {
+      closeCreateModalBtn.addEventListener("click", function () {
+        hideModal(createModal);
+      });
+    }
+
+    createModal.addEventListener("click", function (e) {
+      if (e.target === createModal) {
+        hideModal(createModal);
+      }
+    });
+
+    window.openCreatePostModal = openCreateModal;
+  }
 
   // ============= EDIT FUNKSIONALLARI =============
 
@@ -212,13 +327,8 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
       }
     } catch (error) {
-      if (data.success) {
-        hasUnsavedChanges = false;
-        hideModal(editModal);
-        location.reload();
-      } else {
-        alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
-      }
+      console.error("Error:", error);
+      alert("Əlaqə xətası baş verdi");
     }
   });
 
@@ -340,6 +450,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "Escape") {
       if (warningModal && warningModal.classList.contains("active")) {
         hideModal(warningModal);
+      } else if (createModal && createModal.classList.contains("active")) {
+        hideModal(createModal);
       } else if (editModal && editModal.classList.contains("active")) {
         attemptCloseEditModal();
       } else if (deleteModal && deleteModal.classList.contains("active")) {

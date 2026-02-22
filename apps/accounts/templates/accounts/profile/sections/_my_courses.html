@@ -1,0 +1,56 @@
+{% if can_view_owned_learning %}
+<section class="profile-section-panel profile-section--my-courses {% if active_section == 'my-courses' %}is-active{% endif %}" data-profile-section-panel="my-courses">
+    <div class="section-card">
+        
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-book text-orange"></i>
+                    <span>Yaratdığım Kurslar</span>
+                    <span class="count-badge badge-orange">{{ my_created_courses_count }}</span>
+                </div>
+            </div>
+            
+            <a href="{% url 'courses:create_course' %}" class="btn-create-new btn-orange">
+                <i class="fas fa-plus"></i> Yeni Kurs Yarat
+            </a>
+        </div>
+
+        {% if my_created_courses %}
+        <div class="course-cards-grid">
+            {% for course in my_created_courses %}
+            <a href="{% url 'courses:course_dashboard' course.pk %}" class="modern-course-card">
+                <div class="course-card-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="course-card-content">
+                    <h4 class="course-card-title">{{ course.title }}</h4>
+                    <div class="course-card-meta">
+                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ course.created_at|date:"d M Y" }}</span>
+                        <span class="meta-divider">•</span>
+                        <span class="meta-item badge-status">{{ course.get_status_display }}</span>
+                    </div>
+                </div>
+                <div class="course-card-action">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="modern-empty-state">
+            <div class="empty-icon-wrapper icon-orange-light">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3>Kurs siyahısı boşdur</h3>
+            <p>Hələ heç bir kurs yaratmamısınız. Biliklərinizi paylaşmaq üçün ilk kursunuzu indi yaradın.</p>
+            <a href="{% url 'courses:create_course' %}" class="btn-create-new btn-orange mt-3">
+                <i class="fas fa-plus"></i> Yeni Kurs Yarat
+            </a>
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endif %}
