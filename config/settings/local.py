@@ -3,18 +3,27 @@ Local settings for EMS Arena project.
 Development environment configuration.
 """
 
+from __future__ import annotations
+
 import os
+from pathlib import Path
 
 import dj_database_url
 from dotenv import load_dotenv
 
-from .base import *  # noqa
+from .base import BASE_DIR, INSTALLED_APPS, MIDDLEWARE, STATICFILES_DIRS
+
+# Ensure mutable copy (base-də tuple ola bilər)
+STATICFILES_DIRS = list(STATICFILES_DIRS)
 
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&)+@mug5+!j8%58dv2nt-#8xs")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&)+@mug5+!j8%58dv2nt-#8xs",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
@@ -53,20 +62,18 @@ CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 # Site URL for development
 SITE_URL = os.getenv("SITE_URL", "http://172.20.10.11:8000")
 
-
-# Add django-extensions for development if installed
+# Add django-extensions for development (əgər paket qurulubsa)
 try:
-    import django_extensions  # noqa
+    import django_extensions  # noqa: F401
 
     INSTALLED_APPS.append("django_extensions")
 except ImportError:
     pass
 
-
-# Django Debug Toolbar (varsa)
+# Django Debug Toolbar (əgər paket qurulubsa)
 if DEBUG:
     try:
-        import debug_toolbar
+        import debug_toolbar  # noqa: F401
 
         INSTALLED_APPS += ["debug_toolbar"]
         MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
@@ -74,55 +81,13 @@ if DEBUG:
     except ImportError:
         pass
 
-
-# ==============================================================================
-# LOGGING CONFIGURATION
-# ==============================================================================
 # ==============================================================================
 # LOGGING CONFIGURATION
 # ==============================================================================
 
-# Logs directory
 LOGS_DIR = BASE_DIR / "logs"
 
 # Create logs directory if it doesn't exist
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
+Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
 
-# # SUPER SADƏ - yalnız console, heç bir fayl
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": True,  # Köhnə logger-ları söndür
-#     "formatters": {
-#         "simple": {
-#             "format": "{levelname}: {message}",
-#             "style": "{",
-#         },
-#     },
-#     "handlers": {
-#         "console": {
-#             "class": "logging.StreamHandler",
-#             "formatter": "simple",
-#         },
-#     },
-#     "root": {
-#         "handlers": ["console"],
-#         "level": "WARNING",  # Yalnız warning və error
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["console"],
-#             "level": "INFO",
-#             "propagate": False,
-#         },
-#         # Autoreload noise-ı tamamilə söndür
-#         "django.utils.autoreload": {
-#             "handlers": [],
-#             "propagate": False,
-#         },
-#     },
-# }
-
-# # Logging - development üçün sadə
-# LOGGING["handlers"]["console"]["level"] = "DEBUG"
-# LOGGING["loggers"]["django"]["level"] = "DEBUG"
+# (Səndə logging block kommentdədir — istəsən elə saxla)

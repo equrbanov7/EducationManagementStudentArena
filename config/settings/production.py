@@ -3,13 +3,18 @@ Production settings for EMS Arena project.
 Security-hardened configuration for production deployment.
 """
 
+from __future__ import annotations
+
 import os
 
 import dj_database_url
 import sentry_sdk
 from dotenv import load_dotenv
 
-from .base import *  # noqa
+from .base import BASE_DIR, STATICFILES_DIRS
+
+# STATICFILES_DIRS base-də tuple ola bilər, append üçün list edirik
+STATICFILES_DIRS = list(STATICFILES_DIRS)
 
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
@@ -21,7 +26,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = False
 
 # ALLOWED_HOSTS must be properly configured
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 # Database - PostgreSQL required for production
 DATABASES = {
@@ -52,8 +57,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # Email settings for production
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.az")
 
 # LAN host
@@ -89,8 +94,6 @@ LOGGING = {
 }
 
 sentry_sdk.init(
-    dsn="https://0acc4eea5c9437143169e1ab327eb7ed@o4510875228438528.ingest.de.sentry.io/4510875340767312",
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    dsn=os.getenv("SENTRY_DSN", ""),
     send_default_pii=True,
 )

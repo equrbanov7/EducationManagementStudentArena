@@ -3,7 +3,6 @@ Base settings for EMS Arena project.
 Common settings shared across all environments.
 """
 
-import os
 import ssl
 from pathlib import Path
 
