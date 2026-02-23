@@ -347,12 +347,13 @@ class ProfileViewTest(TestCase):
     def test_assigned_tasks_section_lists_course_assignment_lab_and_project(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment
         from apps.courses.models import Course, CourseMembership
         from apps.labs.models import Lab
         from apps.projects.models import Project
-        from django.utils import timezone
 
         teacher = User.objects.create_user(
             username="tasks_teacher",
@@ -433,7 +434,9 @@ class ProfileViewTest(TestCase):
         )
         course_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "courses")
         lab_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "labs")
-        project_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "independent")
+        project_item = next(
+            item for item in response.context["assigned_task_items"] if item["category"] == "independent"
+        )
 
         self.assertIn("from_section=assigned-exams", course_item["detail_url"])
         self.assertIn("assigned_type=all", course_item["detail_url"])
@@ -582,13 +585,14 @@ class MyResultsViewTest(TestCase):
     def setUp(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from apps.exams.models import Exam, ExamAttempt
         from apps.labs.models import Lab, LabAssignment, LabSubmission
         from apps.projects.models import Project, ProjectSubmission
-        from django.utils import timezone
 
         self.client = Client()
         self.teacher = User.objects.create_user(

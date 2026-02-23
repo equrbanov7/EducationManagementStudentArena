@@ -19,8 +19,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
@@ -275,9 +275,7 @@ def delete_assignment(request, pk):
     try:
         assignment.delete()
         messages.success(request, pgettext_lazy("assignment.message", "assignment_deleted_successfully"))
-        return JsonResponse(
-            {"success": True, "message": pgettext_lazy("assignment.message", "deleted")}
-        )
+        return JsonResponse({"success": True, "message": pgettext_lazy("assignment.message", "deleted")})
     except Exception:
         return JsonResponse(
             {"success": False, "error": pgettext_lazy("assignment.message", "assignment_delete_failed")},
@@ -488,9 +486,7 @@ def grade_submission(request, pk):
         submission.save()
 
         messages.success(request, pgettext_lazy("assignment.message", "grade_given_successfully"))
-        return JsonResponse(
-            {"success": True, "message": pgettext_lazy("assignment.message", "graded")}
-        )
+        return JsonResponse({"success": True, "message": pgettext_lazy("assignment.message", "graded")})
 
     except Exception:
         return JsonResponse(

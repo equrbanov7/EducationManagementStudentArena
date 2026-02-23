@@ -23,9 +23,7 @@ def _ensure_teacher(user):
         has_teacher_role = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
 
     if not has_teacher_role:
-        raise PermissionDenied(
-            pgettext("exams.service.attempt.permission", "teachers_only_page")
-        )
+        raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
 
 
 # / Bu funksiya yalnız tələbələrin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
@@ -63,9 +61,7 @@ def _start_or_resume_attempt(request, exam: Exam):
         if last:
             messages.info(
                 request,
-                pgettext("exams.service.attempt.message", "max_attempts_reached").format(
-                    max_attempts=max_attempts
-                ),
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
             )
             return redirect("exams:exam_result", slug=exam.slug, attempt_id=last.id)
         return redirect("exams:student_exam_list")
@@ -92,8 +88,6 @@ def _start_or_resume_attempt(request, exam: Exam):
 
     messages.success(
         request,
-        pgettext("exams.service.attempt.message", "exam_started").format(
-            attempt_number=next_attempt_number
-        ),
+        pgettext("exams.service.attempt.message", "exam_started").format(attempt_number=next_attempt_number),
     )
     return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)

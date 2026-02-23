@@ -227,9 +227,7 @@ def delete_exam(request, slug):
     if exam.attempts.exists():
         # sadə variant: hazırda cəhd varsa silməyə icazə vermirik
         # istəsən bunu sonradan dəyişərik
-        raise PermissionDenied(
-            pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts")
-        )
+        raise PermissionDenied(pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
 
     if request.method == "POST":
         exam.delete()

@@ -26,7 +26,9 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.student_b = User.objects.create_user("student_b", "student_b@example.com", "StrongPass123!")
         self.member_a = User.objects.create_user("member_a", "member_a@example.com", "StrongPass123!")
         self.org_admin_a = User.objects.create_user("org_admin_a", "org_admin_a@example.com", "StrongPass123!")
-        self.superadmin = User.objects.create_superuser("superadmin_groups", "superadmin_groups@example.com", "StrongPass123!")
+        self.superadmin = User.objects.create_superuser(
+            "superadmin_groups", "superadmin_groups@example.com", "StrongPass123!"
+        )
 
         self.org_a = Organization.objects.create(
             name="Org A",
@@ -97,7 +99,9 @@ class MyGroupsTenantIsolationTest(TestCase):
         self._set_active_org(self.org_a)
         response = self.client.post(
             reverse("exams:teacher_create_group"),
-            self._group_payload(name="A Group", primary_teacher=str(self.teacher.id), assigned_teachers=[str(self.teacher.id)]),
+            self._group_payload(
+                name="A Group", primary_teacher=str(self.teacher.id), assigned_teachers=[str(self.teacher.id)]
+            ),
         )
         self.assertEqual(response.status_code, 302)
         group_a = StudentGroup.objects.get(name="A Group")
@@ -162,9 +166,14 @@ class MyGroupsTenantIsolationTest(TestCase):
 
         self.assertEqual(self.client.get(reverse("exams:teacher_group_list")).status_code, 403)
         self.assertEqual(self.client.get(reverse("exams:create_student_group")).status_code, 403)
-        self.assertEqual(self.client.post(reverse("exams:teacher_create_group"), self._group_payload(name="Blocked")).status_code, 403)
         self.assertEqual(
-            self.client.post(reverse("exams:teacher_update_group", args=[group.id]), self._group_payload(name="Blocked Update")).status_code,
+            self.client.post(reverse("exams:teacher_create_group"), self._group_payload(name="Blocked")).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.post(
+                reverse("exams:teacher_update_group", args=[group.id]), self._group_payload(name="Blocked Update")
+            ).status_code,
             403,
         )
         self.assertEqual(self.client.post(reverse("exams:teacher_delete_group", args=[group.id])).status_code, 403)

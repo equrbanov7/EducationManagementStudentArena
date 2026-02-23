@@ -99,7 +99,14 @@ class Command(BaseCommand):
             return roles.order_by("-level").first()
 
         if profile_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
-            for role_name in ["teacher", "instructor", "assistant_teacher", "assistant", "professor", "associate_professor"]:
+            for role_name in [
+                "teacher",
+                "instructor",
+                "assistant_teacher",
+                "assistant",
+                "professor",
+                "associate_professor",
+            ]:
                 role = roles.filter(name=role_name).first()
                 if role:
                     return role
@@ -109,7 +116,11 @@ class Command(BaseCommand):
             return roles.filter(name="student").first() or roles.order_by("level").first()
 
         if profile_role == ProfileRole.MEMBER:
-            return roles.filter(name="member").first() or roles.filter(name="student").first() or roles.order_by("level").first()
+            return (
+                roles.filter(name="member").first()
+                or roles.filter(name="student").first()
+                or roles.order_by("level").first()
+            )
 
         return roles.order_by("level").first()
 

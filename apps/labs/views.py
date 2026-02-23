@@ -34,6 +34,7 @@ def _lab_back_url(request, lab):
 
     return reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
 
+
 # ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -47,7 +48,9 @@ def create_lab(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     if course.owner != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         # Seçilmiş qruplar və tələbələr
@@ -96,7 +99,9 @@ def edit_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         # Mövcud qrupları al
@@ -179,7 +184,9 @@ def delete_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     course_id = lab.course.id
     lab.delete()
@@ -199,7 +206,9 @@ def publish_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     lab.status = "published"
     lab.save()
@@ -238,7 +247,9 @@ def create_block(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         block = LabBlock.objects.create(
@@ -261,7 +272,9 @@ def edit_block(request, pk):
     block = get_object_or_404(LabBlock, id=pk)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         data = {
@@ -289,7 +302,9 @@ def delete_block(request, pk):
     block = get_object_or_404(LabBlock, id=pk)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     block.delete()
     return JsonResponse({"success": True})
@@ -307,7 +322,9 @@ def create_question(request, block_id):
     block = get_object_or_404(LabBlock, id=block_id)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         question = LabQuestion.objects.create(
@@ -334,7 +351,9 @@ def edit_question(request, pk):
     question = get_object_or_404(LabQuestion, id=pk)
 
     if question.block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         data = {
@@ -362,7 +381,9 @@ def delete_question(request, pk):
     question = get_object_or_404(LabQuestion, id=pk)
 
     if question.block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     question.delete()
     return JsonResponse({"success": True})
@@ -385,13 +406,17 @@ def import_questions(request, block_id):
     block = get_object_or_404(LabBlock, id=block_id)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         questions_text = request.POST.get("questions_text", "")
 
         if not questions_text.strip():
-            return JsonResponse({"success": False, "error": pgettext("labs.view.error", "empty_text_submitted")}, status=400)
+            return JsonResponse(
+                {"success": False, "error": pgettext("labs.view.error", "empty_text_submitted")}, status=400
+            )
 
         # Regex pattern: başda rəqəm + nöqtə və ya mötərizə
         # Məs: "1. " və ya "2) " və ya "10. "
@@ -885,7 +910,9 @@ def submission_answers(request, pk):
     submission = get_object_or_404(LabSubmission, id=pk)
 
     if submission.assignment.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     # Bu submission-a aid cavabları al
     answers = (
@@ -954,7 +981,9 @@ def my_lab_answers(request, pk):
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
                 if hours > 0:
-                    duration = pgettext("labs.view.message", "duration_hours_minutes").format(hours=hours, minutes=minutes)
+                    duration = pgettext("labs.view.message", "duration_hours_minutes").format(
+                        hours=hours, minutes=minutes
+                    )
                 else:
                     duration = pgettext("labs.view.message", "duration_minutes").format(minutes=minutes)
 
