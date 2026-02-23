@@ -4,6 +4,7 @@ ASGI config for EMS Arena project.
 HTTP request-lər üçün Django ASGI app,
 WebSocket (real-time) üçün isə Django Channels routing istifadə olunur.
 """
+
 import os
 
 from django.core.asgi import get_asgi_application
