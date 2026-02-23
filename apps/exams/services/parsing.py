@@ -3,8 +3,9 @@ import re
 from collections import defaultdict
 from importlib.readers import ZipReader
 
-from docx import Document
 from django.utils.translation import pgettext
+
+from docx import Document
 
 try:
     from pypdf import PdfReader
@@ -78,9 +79,7 @@ def extract_text_from_upload(uploaded_file) -> str:
 
     if ext == ".pdf":
         if ZipReader is None:
-            raise ValueError(
-                pgettext("exams.service.parsing.error", "pdf_dependency_missing")
-            )
+            raise ValueError(pgettext("exams.service.parsing.error", "pdf_dependency_missing"))
 
         reader = PdfReader(uploaded_file)
         parts = []

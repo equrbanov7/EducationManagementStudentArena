@@ -44,9 +44,7 @@ class Assignment(models.Model):
 
     title = models.CharField(max_length=255, verbose_name=pgettext_lazy("assignment.model.field", "title"))
     description = models.TextField(blank=True, verbose_name=pgettext_lazy("assignment.model.field", "description"))
-    instructions = models.TextField(
-        blank=True, verbose_name=pgettext_lazy("assignment.model.field", "instructions")
-    )
+    instructions = models.TextField(blank=True, verbose_name=pgettext_lazy("assignment.model.field", "instructions"))
 
     max_score = models.DecimalField(
         max_digits=6,

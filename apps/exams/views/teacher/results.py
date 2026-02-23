@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamAnswer, ExamAttempt
@@ -163,9 +163,7 @@ def teacher_exam_results(request, slug):
         # Anonim ad (deterministic)
         hash_input = f"{att.id}-{att.user.id}-{exam.id}"
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(
-            code=hash_digest[:6].upper()
-        )
+        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
 
         # Vaxt hesablamaları
         seconds_remaining = None
@@ -395,9 +393,7 @@ def teacher_pending_attempts(request):
         # Anonim ad (deterministic)
         hash_input = f"{att.id}-{att.user.id}-{att.exam.id}"
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(
-            code=hash_digest[:6].upper()
-        )
+        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
 
         # Vaxt hesablamaları
         seconds_remaining = None

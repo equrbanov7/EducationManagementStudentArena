@@ -79,7 +79,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertEqual(profile.requested_organization, self.signup_target_org)
         self.assertEqual(profile.requested_organization_name, self.signup_target_org.name)
         self.assertEqual(profile.organization_type, self.signup_target_org.org_type)
-        self.assertTrue(Membership.objects.filter(user=user, organization=self.signup_target_org, is_primary=True).exists())
+        self.assertTrue(
+            Membership.objects.filter(user=user, organization=self.signup_target_org, is_primary=True).exists()
+        )
 
     def test_individual_signup_requires_organization_selection(self):
         response = self.client.post(self.register_url, self._register_payload(join_organization=""))

@@ -266,9 +266,9 @@ class RegisterForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         countries = Country.objects.filter(is_active=True).order_by("name")
-        self.fields["country"].choices = [
-            ("", pgettext_lazy("accounts.form.register.choice", "country_select"))
-        ] + [(country.code, country.name) for country in countries]
+        self.fields["country"].choices = [("", pgettext_lazy("accounts.form.register.choice", "country_select"))] + [
+            (country.code, country.name) for country in countries
+        ]
 
         selected_country = (self.data.get("country") or self.initial.get("country") or "").upper()
         selected_org_type = self.data.get("organization_type") or self.initial.get("organization_type")

@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.translation import pgettext, pgettext_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.accounts.models import ProfileRole
@@ -55,8 +55,10 @@ def _can_multi_assign_teachers(user):
     if _is_superadmin(user):
         return True
 
-    role_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else ProfileRole.LEVELS.get(
-        _user_role(user), 0
+    role_level = (
+        user._highest_role_level()
+        if hasattr(user, "_highest_role_level")
+        else ProfileRole.LEVELS.get(_user_role(user), 0)
     )
     return role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 

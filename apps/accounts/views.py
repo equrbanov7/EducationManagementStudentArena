@@ -7,8 +7,8 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
-from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView
 from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
@@ -16,8 +16,8 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Assignment, Submission
@@ -149,11 +149,7 @@ def _assignable_profile_roles_for_user(user):
         return [(name, display) for name, display in ProfileRole.CHOICES if name != ProfileRole.SUPERADMIN]
 
     user_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else 0
-    return [
-        (name, display)
-        for name, display in ProfileRole.CHOICES
-        if ProfileRole.LEVELS.get(name, 0) < user_level
-    ]
+    return [(name, display) for name, display in ProfileRole.CHOICES if ProfileRole.LEVELS.get(name, 0) < user_level]
 
 
 def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin):
@@ -191,7 +187,9 @@ def _sync_user_role_groups(user, desired_role_names, *, editable_role_names=None
         existing_role_groups = set(Group.objects.filter(name__in=role_names_to_add).values_list("name", flat=True))
         missing_role_names = [role_name for role_name in role_names_to_add if role_name not in existing_role_groups]
         if missing_role_names:
-            Group.objects.bulk_create([Group(name=role_name) for role_name in missing_role_names], ignore_conflicts=True)
+            Group.objects.bulk_create(
+                [Group(name=role_name) for role_name in missing_role_names], ignore_conflicts=True
+            )
 
         groups_to_add = list(Group.objects.filter(name__in=role_names_to_add))
         if groups_to_add:
@@ -637,7 +635,11 @@ def _collect_assigned_tasks(request, filter_type=None):
                 description=assignment.description,
             )
 
-    labs_qs = Lab.objects.filter(course_id__in=course_ids, status="published").select_related("course").order_by("-created_at")
+    labs_qs = (
+        Lab.objects.filter(course_id__in=course_ids, status="published")
+        .select_related("course")
+        .order_by("-created_at")
+    )
     assigned_labs = []
     for lab in labs_qs:
         allowed_student_ids = _csv_to_int_set(lab.allowed_students)
@@ -761,8 +763,7 @@ def _collect_my_results(request, filter_type=None):
                 {
                     "category": "exams",
                     "title": attempt.exam.title,
-                    "kind": attempt.exam.get_exam_type_display()
-                    or pgettext_lazy("accounts.my_results.kind", "exam"),
+                    "kind": attempt.exam.get_exam_type_display() or pgettext_lazy("accounts.my_results.kind", "exam"),
                     "submitted_at": attempt.finished_at or attempt.started_at,
                     "status": _result_status_badge(
                         attempt.status,
@@ -1152,10 +1153,14 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
     items = []
 
     if normalized_type in {"all", "exams"}:
-        attempts = ExamAttempt.objects.filter(
-            exam__in=teacher_exams,
-            status__in=["submitted", "expired"],
-        ).filter(Q(checked_by_teacher=True) | Q(exam__exam_type="test")).select_related("exam", "user", "exam__course")
+        attempts = (
+            ExamAttempt.objects.filter(
+                exam__in=teacher_exams,
+                status__in=["submitted", "expired"],
+            )
+            .filter(Q(checked_by_teacher=True) | Q(exam__exam_type="test"))
+            .select_related("exam", "user", "exam__course")
+        )
         if search_query:
             attempts = attempts.filter(
                 Q(user__username__icontains=search_query)
@@ -1603,7 +1608,9 @@ def user_profile(request):
             )
             can_view_all_groups = capabilities["is_superadmin"] or capabilities["can_manage_org"]
             if not can_view_all_groups:
-                teacher_groups_qs = teacher_groups_qs.filter(Q(teacher=request.user) | Q(teachers=request.user)).distinct()
+                teacher_groups_qs = teacher_groups_qs.filter(
+                    Q(teacher=request.user) | Q(teachers=request.user)
+                ).distinct()
 
             teacher_groups_count = teacher_groups_qs.count()
             teacher_groups = list(teacher_groups_qs[:20])
@@ -1752,7 +1759,9 @@ def user_profile(request):
                     | Q(user__last_name__icontains=role_assignment_search)
                 )
 
-            unassigned_users = UserProfile.objects.filter(user__is_active=True, organization__isnull=True).select_related(
+            unassigned_users = UserProfile.objects.filter(
+                user__is_active=True, organization__isnull=True
+            ).select_related(
                 "user",
                 "requested_organization",
             )
@@ -1832,7 +1841,9 @@ def user_profile(request):
     if "manage-roles" in allowed_sections:
         manage_roles_search = request.GET.get("manage_roles_search", "")
         manage_roles_org = _get_active_organization(request)
-        manage_roles_user_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
+        manage_roles_user_level = (
+            request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
+        )
         assignable_roles = _assignable_profile_roles_for_user(request.user)
         manage_roles_section.update(
             {
@@ -1868,7 +1879,9 @@ def user_profile(request):
             )
 
         manage_roles_page = request.GET.get("manage_roles_page")
-        manage_roles_page_obj = Paginator(manage_role_profiles.order_by("user__username"), 12).get_page(manage_roles_page)
+        manage_roles_page_obj = Paginator(manage_role_profiles.order_by("user__username"), 12).get_page(
+            manage_roles_page
+        )
         _decorate_manage_role_profiles(
             manage_roles_page_obj.object_list,
             actor_level=manage_roles_user_level,
@@ -2063,7 +2076,9 @@ def manage_roles(request):
 
         target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
         if not is_superadmin and target_user != request.user and target_level >= actor_level:
-            messages.error(request, pgettext_lazy("accounts.manage_roles.message", "insufficient_level_for_target_user"))
+            messages.error(
+                request, pgettext_lazy("accounts.manage_roles.message", "insufficient_level_for_target_user")
+            )
             return redirect(next_url)
 
         selected_role_names = set(request.POST.getlist("role_names"))
@@ -2119,7 +2134,9 @@ def manage_roles(request):
     if is_superadmin:
         profiles = UserProfile.objects.all().select_related("user").prefetch_related("user__groups")
     else:
-        profiles = UserProfile.objects.filter(organization=user_org).select_related("user").prefetch_related("user__groups")
+        profiles = (
+            UserProfile.objects.filter(organization=user_org).select_related("user").prefetch_related("user__groups")
+        )
 
     # Search
     search = request.GET.get("search", "")
@@ -2687,7 +2704,9 @@ def permission_editor(request):
         selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
 
         if not is_superadmin and selected_role.level >= user_level:
-            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "manage_lower_role_permissions_only"))
+            messages.error(
+                request, pgettext_lazy("accounts.permission_editor.message", "manage_lower_role_permissions_only")
+            )
             return redirect(f"{request.path}?role={selected_role.id}")
 
         all_permissions = set(get_all_permissions())
@@ -2710,16 +2729,14 @@ def permission_editor(request):
                 )
                 return redirect(f"{request.path}?role={selected_role.id}")
             role_permissions_set.add(selected_permission)
-            result_message = (
-                pgettext_lazy("accounts.permission_editor.message", "permission_added")
-                % {"permission": selected_permission}
-            )
+            result_message = pgettext_lazy("accounts.permission_editor.message", "permission_added") % {
+                "permission": selected_permission
+            }
         elif action == "remove":
             role_permissions_set.discard(selected_permission)
-            result_message = (
-                pgettext_lazy("accounts.permission_editor.message", "permission_removed")
-                % {"permission": selected_permission}
-            )
+            result_message = pgettext_lazy("accounts.permission_editor.message", "permission_removed") % {
+                "permission": selected_permission
+            }
         else:
             messages.error(request, pgettext_lazy("accounts.permission_editor.message", "unknown_action"))
             return redirect(f"{request.path}?role={selected_role.id}")

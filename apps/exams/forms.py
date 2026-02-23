@@ -160,9 +160,7 @@ class ExamForm(forms.ModelForm):
             return ""  # boş buraxmaq olar
 
         if not code.isdigit() or len(code) != 6:
-            raise forms.ValidationError(
-                pgettext_lazy("exams.form.exam.error", "access_code_invalid")
-            )
+            raise forms.ValidationError(pgettext_lazy("exams.form.exam.error", "access_code_invalid"))
 
         return code
 
@@ -177,16 +175,12 @@ class ExamForm(forms.ModelForm):
         exam_type = cleaned_data.get("exam_type")
 
         if exam_type == "test" and enable_paint:
-            raise ValidationError(
-                pgettext_lazy("exams.form.exam.error", "enable_paint_written_only")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.exam.error", "enable_paint_written_only"))
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:
             if start_dt >= end_dt:
-                raise forms.ValidationError(
-                    pgettext_lazy("exams.form.exam.error", "end_after_start")
-                )
+                raise forms.ValidationError(pgettext_lazy("exams.form.exam.error", "end_after_start"))
 
         return cleaned_data
 
@@ -349,20 +343,14 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 opts.append((text, is_correct))
 
         if answer_mode in ("single", "multiple") and not opts:
-            raise forms.ValidationError(
-                pgettext_lazy("exams.form.question.error", "options_required")
-            )
+            raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "options_required"))
 
         if answer_mode == "single":
             correct_count = sum(1 for (_, is_corr) in opts if is_corr)
             if correct_count == 0:
-                raise forms.ValidationError(
-                    pgettext_lazy("exams.form.question.error", "single_requires_one_correct")
-                )
+                raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "single_requires_one_correct"))
             if correct_count > 1:
-                raise forms.ValidationError(
-                    pgettext_lazy("exams.form.question.error", "single_only_one_correct")
-                )
+                raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "single_only_one_correct"))
 
         return cleaned_data
 
@@ -484,18 +472,12 @@ class StudentGroupForm(forms.ModelForm):
                 initial_assigned.append(self.instance.teacher_id)
             self.fields["assigned_teachers"].initial = initial_assigned
 
-        actor_is_teacher = (
-            self.actor is not None
-            and (
-                (
-                    hasattr(self.actor, "has_role")
-                    and (
-                        self.actor.has_role(ProfileRole.TEACHER)
-                        or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER)
-                    )
-                )
-                or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = self.actor is not None and (
+            (
+                hasattr(self.actor, "has_role")
+                and (self.actor.has_role(ProfileRole.TEACHER) or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER))
             )
+            or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
         )
         if self.actor is not None and actor_is_teacher and not self.can_multi_assign_teachers:
             self.fields["primary_teacher"].queryset = teachers_qs.filter(id=self.actor.id)
@@ -540,26 +522,18 @@ class StudentGroupForm(forms.ModelForm):
         assigned_teachers = cleaned_data.get("assigned_teachers")
 
         if self.organization is None:
-            raise ValidationError(
-                pgettext_lazy("exams.form.group.error", "org_required")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.group.error", "org_required"))
 
         if students is not None:
             invalid_students = students.exclude(profile__organization=self.organization)
             if invalid_students.exists():
-                raise ValidationError(
-                    pgettext_lazy("exams.form.group.error", "tenant_students_only")
-                )
+                raise ValidationError(pgettext_lazy("exams.form.group.error", "tenant_students_only"))
 
         if primary_teacher is None:
-            raise ValidationError(
-                pgettext_lazy("exams.form.group.error", "primary_teacher_required")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_required"))
 
         if not self._is_teacher_profile(primary_teacher):
-            raise ValidationError(
-                pgettext_lazy("exams.form.group.error", "primary_teacher_role_required")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_role_required"))
 
         try:
             primary_teacher_profile = primary_teacher.profile
@@ -568,9 +542,7 @@ class StudentGroupForm(forms.ModelForm):
 
         primary_teacher_org = getattr(primary_teacher_profile, "organization", None)
         if primary_teacher_org != self.organization:
-            raise ValidationError(
-                pgettext_lazy("exams.form.group.error", "primary_teacher_tenant_mismatch")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_tenant_mismatch"))
 
         assigned_list = list(assigned_teachers) if assigned_teachers is not None else []
 
@@ -585,45 +557,31 @@ class StudentGroupForm(forms.ModelForm):
             if not self._is_teacher_profile(teacher) or teacher_org != self.organization:
                 invalid_assigned.append(teacher)
         if invalid_assigned:
-            raise ValidationError(
-                pgettext_lazy("exams.form.group.error", "assigned_teachers_invalid")
-            )
+            raise ValidationError(pgettext_lazy("exams.form.group.error", "assigned_teachers_invalid"))
 
         assigned_ids = {teacher.id for teacher in assigned_list}
         assigned_ids.add(primary_teacher.id)
 
-        actor_is_teacher = (
-            self.actor is not None
-            and (
-                (
-                    hasattr(self.actor, "has_role")
-                    and (
-                        self.actor.has_role(ProfileRole.TEACHER)
-                        or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER)
-                    )
-                )
-                or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = self.actor is not None and (
+            (
+                hasattr(self.actor, "has_role")
+                and (self.actor.has_role(ProfileRole.TEACHER) or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER))
             )
+            or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
         )
 
         if self.can_multi_assign_teachers:
             if len(assigned_ids) > self.MAX_MULTI_TEACHERS:
                 raise ValidationError(
-                    pgettext("exams.form.group.error", "max_multi_teachers").format(
-                        count=self.MAX_MULTI_TEACHERS
-                    )
+                    pgettext("exams.form.group.error", "max_multi_teachers").format(count=self.MAX_MULTI_TEACHERS)
                 )
         elif actor_is_teacher and self.actor is not None:
             if primary_teacher.id != self.actor.id:
-                raise ValidationError(
-                    pgettext_lazy("exams.form.group.error", "teacher_primary_self_only")
-                )
+                raise ValidationError(pgettext_lazy("exams.form.group.error", "teacher_primary_self_only"))
 
             non_actor_ids = {teacher_id for teacher_id in assigned_ids if teacher_id != self.actor.id}
             if non_actor_ids:
-                raise ValidationError(
-                    pgettext_lazy("exams.form.group.error", "teacher_assign_forbidden")
-                )
+                raise ValidationError(pgettext_lazy("exams.form.group.error", "teacher_assign_forbidden"))
 
             assigned_ids = {self.actor.id}
         else:

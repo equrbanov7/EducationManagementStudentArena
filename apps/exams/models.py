@@ -24,9 +24,7 @@ def validate_video_size(f):
     # 30MB limit nümunə (istəsən dəyiş)
     max_mb = 30
     if f.size > max_mb * 1024 * 1024:
-        raise ValidationError(
-            pgettext("exams.model.error", "video_size_exceeded").format(max_mb=max_mb)
-        )
+        raise ValidationError(pgettext("exams.model.error", "video_size_exceeded").format(max_mb=max_mb))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

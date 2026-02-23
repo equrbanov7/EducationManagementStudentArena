@@ -13,9 +13,9 @@ from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
-from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
@@ -192,7 +192,9 @@ def subscribe_page(request):
                     )
 
                 else:
-                    messages.warning(request, pgettext("blog.subscribe.message", "already_subscribed").format(email=email))
+                    messages.warning(
+                        request, pgettext("blog.subscribe.message", "already_subscribed").format(email=email)
+                    )
 
             except Exception as e:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa

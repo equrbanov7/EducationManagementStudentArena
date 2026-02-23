@@ -36,7 +36,10 @@ class AssignmentAdmin(admin.ModelAdmin):
             },
         ),
         (pgettext_lazy("assignment.admin.fieldset", "settings"), {"fields": ("max_attempts", "status", "created_by")}),
-        (pgettext_lazy("assignment.admin.fieldset", "students"), {"fields": ("assigned_students",), "classes": ("collapse",)}),
+        (
+            pgettext_lazy("assignment.admin.fieldset", "students"),
+            {"fields": ("assigned_students",), "classes": ("collapse",)},
+        ),
     )
 
     filter_horizontal = ["assigned_students"]
