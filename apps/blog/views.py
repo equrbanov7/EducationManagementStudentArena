@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, JsonResponse
@@ -15,10 +15,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import pgettext
+from django.urls import reverse
 from django.views.decorators.http import require_POST
-
-from apps.courses.models import Course
-from apps.exams.models import Exam, ExamAttempt
 
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
 from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
@@ -360,7 +358,7 @@ def delete_post(request, post_id):
             }
         )
 
-    return redirect("user_profile", username=request.user.username)
+    return redirect(f"{reverse('accounts:profile')}?section=posts")
 
 
 def list_posts(request):
@@ -493,100 +491,22 @@ def resend_code_view(request):
 
 def user_profile(request, username):
     """
-    İstifadəçi profili.
+    Legacy route redirect:
+    - Own profile -> accounts profile
+    - Other users -> accounts public profile
     """
-
-    profile_user = get_object_or_404(User, username=username)
-
-    # 1. Postların Filterlənməsi
-    if request.user == profile_user:
-        user_posts_list = Post.objects.filter(author=profile_user).select_related("category").order_by("-created_at")
+    if request.user.is_authenticated and request.user.username == username:
+        target_url = reverse("accounts:profile")
     else:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user, is_published=True)
-            .select_related("category")
-            .order_by("-created_at")
-        )
+        # Keep existing 404 behavior when username does not exist.
+        profile_user = get_object_or_404(User, username=username)
+        target_url = reverse("accounts:public_profile", kwargs={"username": profile_user.username})
 
-    # 2. Pagination
-    paginator = Paginator(user_posts_list, 6)
-    page_number = request.GET.get("page")
-    try:
-        posts = paginator.page(page_number)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
+    query_string = request.GET.urlencode()
+    if query_string:
+        target_url = f"{target_url}?{query_string}"
 
-    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
-    pending_count = 0
-    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, "is_teacher", False):
-        pending_count = (
-            ExamAttempt.objects.filter(
-                exam__author=request.user,
-                status__in=["submitted", "expired"],
-                checked_by_teacher=False,
-            )
-            .exclude(exam__exam_type="test")
-            .count()
-        )
-
-    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI
-    assigned_count = 0
-    if request.user.is_authenticated and request.user == profile_user:
-        assigned_count = (
-            Exam.objects.filter(
-                is_active=True,
-                is_public=False,
-            )
-            .filter(
-                Q(allowed_users=request.user)
-                | Q(allowed_groups__students=request.user)
-                | Q(
-                    course__memberships__user=request.user,
-                    course__memberships__role="student",
-                    course__status="published",
-                )
-            )
-            .distinct()
-            .count()
-        )
-
-    # ══════════════════════════════════════��════════════════════════
-    # 5. TƏLƏBƏNİN KURSLARI (YENİ)
-    # ═══════════════════════════════════════════════════════════════
-    student_courses = []
-    student_courses_count = 0
-
-    if request.user.is_authenticated and request.user == profile_user:
-        # Tələbə öz profilinə baxır
-        if getattr(request.user, "is_student", False):
-            # CourseMembership vasitəsilə tələbənin üzv olduğu kurslar
-            student_courses = (
-                Course.objects.filter(
-                    memberships__user=request.user,
-                    memberships__role="student",
-                    status="published",  # Yalnız published kurslar
-                )
-                .distinct()
-                .order_by("-created_at")
-            )
-
-            student_courses_count = student_courses.count()
-
-    # 6. Kateqoriyalar
-    categories = Category.objects.all().order_by("name")
-
-    context = {
-        "profile_user": profile_user,
-        "posts": posts,
-        "categories": categories,
-        "pending_count": pending_count,
-        "assigned_count": assigned_count,
-        "student_courses": student_courses,  # YENİ
-        "student_courses_count": student_courses_count,  # YENİ
-    }
-    return render(request, "blog/user_profile.html", context)
+    return redirect(target_url)
 
 
 def logout_view(request):

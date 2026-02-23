@@ -108,3 +108,32 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             response.context["profile_return_url"],
             f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=labs",
         )
+
+    def test_course_dashboard_prefers_explicit_return_to_url(self):
+        self.client.force_login(self.student)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        return_to = f"{reverse('accounts:profile')}?section=courses"
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+            {"from_section": "assigned-courses", "return_to": return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], return_to)
+
+    def test_delete_course_redirects_to_new_profile_page(self):
+        self.client.force_login(self.owner)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.post(
+            reverse("courses:delete_course", kwargs={"course_id": self.course_a.id}),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-courses")
+        self.assertFalse(Course.objects.filter(id=self.course_a.id).exists())

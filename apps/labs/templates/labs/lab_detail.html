@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 {% load lab_filters %}
 
 {% block title %}{{ lab.title }}{% endblock %}
@@ -10,8 +11,6 @@
 
 {% block content %}
 <div class="container py-4">
-    
-    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -33,19 +32,18 @@
         </div>
         <div class="text-end d-flex flex-column align-items-end gap-2">
             {% if lab.is_open %}
-                <span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check-circle me-1"></i> Açıq</span>
+                <span class="badge bg-success fs-6 px-3 py-2"><i class="fas fa-check-circle me-1"></i> {% trans "status_open" context "labs.template.lab_detail" %}</span>
             {% elif lab.is_upcoming %}
-                <span class="badge bg-info fs-6 px-3 py-2"><i class="fas fa-clock me-1"></i> Tezliklə</span>
+                <span class="badge bg-info fs-6 px-3 py-2"><i class="fas fa-clock me-1"></i> {% trans "status_upcoming" context "labs.template.lab_detail" %}</span>
             {% else %}
-                <span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-lock me-1"></i> Bağlı</span>
+                <span class="badge bg-danger fs-6 px-3 py-2"><i class="fas fa-lock me-1"></i> {% trans "status_closed" context "labs.template.lab_detail" %}</span>
             {% endif %}
             <a href="{{ back_url }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i> Geri
+                <i class="fas fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.lab_detail" %}
             </a>
         </div>
     </div>
     
-    <!-- ARTIQ GÖNDƏRİLİB VƏ CƏHD BİTİB -->
     {% if has_submitted and not can_retry %}
     <div class="card border-success mb-4">
         <div class="card-body bg-success bg-opacity-10">
@@ -53,27 +51,25 @@
                 <div class="d-flex align-items-center gap-3">
                     <i class="fas fa-check-circle text-success fs-3"></i>
                     <div>
-                        <strong class="text-success">Bu labı artıq göndərmisiniz!</strong>
+                        <strong class="text-success">{% trans "notice_already_submitted" context "labs.template.lab_detail" %}</strong>
                         <div class="text-muted small">
-                            {{ submission.submitted_at|date:"d.m.Y H:i" }} · 
-                            Cəhd: {{ attempt_count }} / {{ lab.max_attempts }}
+                            {% blocktrans trimmed context "labs.template.lab_detail" with submitted_at=submission.submitted_at|date:"d.m.Y H:i" attempt_count=attempt_count max_attempts=lab.max_attempts %}label_submission_info {{ submitted_at }} · {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
                         </div>
                     </div>
                     {% if submission.status == 'graded' %}
                         <span class="badge bg-primary fs-6">{{ submission.score }}/{{ lab.max_score }}</span>
                     {% else %}
-                        <span class="badge bg-warning">Qiymətləndirilməyib</span>
+                        <span class="badge bg-warning">{% trans "status_not_graded" context "labs.template.lab_detail" %}</span>
                     {% endif %}
                 </div>
                 <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-success">
-                    <i class="fas fa-eye me-1"></i> Cavablarıma Bax
+                    <i class="fas fa-eye me-1"></i> {% trans "action_view_my_answers" context "labs.template.lab_detail" %}
                 </a>
             </div>
         </div>
     </div>
     {% endif %}
     
-    <!-- PROGRESS BAR -->
     {% if lab.is_open and questions and can_retry %}
     <div class="card mb-4">
         <div class="card-body">
@@ -81,7 +77,7 @@
                 <div class="col-md-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fas fa-list-check text-primary fs-5"></i>
-                        <span>Cavablandırılan:</span>
+                        <span>{% trans "label_answered" context "labs.template.lab_detail" %}</span>
                         <strong class="text-primary fs-5" id="answeredCount">0</strong>
                         <span>/ {{ questions|length }}</span>
                     </div>
@@ -89,11 +85,11 @@
                 <div class="col-md-5">
                     <div class="d-flex justify-content-center gap-4">
                         <div class="text-center">
-                            <small class="text-muted d-block">Keçən vaxt</small>
+                            <small class="text-muted d-block">{% trans "label_elapsed_time" context "labs.template.lab_detail" %}</small>
                             <div class="fs-5 fw-bold text-primary font-monospace" id="elapsedTimer">00:00:00</div>
                         </div>
                         <div class="text-center">
-                            <small class="text-muted d-block">Qalan vaxt</small>
+                            <small class="text-muted d-block">{% trans "label_remaining_time" context "labs.template.lab_detail" %}</small>
                             <div class="fs-5 fw-bold text-danger font-monospace" id="remainingTimer">--:--:--</div>
                         </div>
                     </div>
@@ -109,73 +105,68 @@
     {% endif %}
     
     <div class="row">
-        
-        <!-- SOL PANEL -->
         <div class="col-lg-4 mb-4">
-            
-            <!-- Lab Info -->
             <div class="card mb-3 border-0 shadow-sm lab-info-card">
                 <div class="card-header text-white">
-                    <i class="fas fa-info-circle me-2"></i> <strong>Lab Məlumatı</strong>
+                    <i class="fas fa-info-circle me-2"></i> <strong>{% trans "card_lab_info" context "labs.template.lab_detail" %}</strong>
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-calendar-alt text-muted me-3 icon-fixed"></i>
                         <div>
-                            <small class="text-muted d-block">Başlanğıc</small>
+                            <small class="text-muted d-block">{% trans "label_start" context "labs.template.lab_detail" %}</small>
                             <strong>{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong>
                         </div>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-clock text-muted me-3 icon-fixed"></i>
                         <div>
-                            <small class="text-muted d-block">Son Tarix</small>
+                            <small class="text-muted d-block">{% trans "label_deadline" context "labs.template.lab_detail" %}</small>
                             <strong>{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong>
                         </div>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-star text-warning me-3 icon-fixed"></i>
                         <div>
-                            <small class="text-muted d-block">Maksimum Bal</small>
+                            <small class="text-muted d-block">{% trans "label_max_score" context "labs.template.lab_detail" %}</small>
                             <strong>{{ lab.max_score }}</strong>
                         </div>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <i class="fas fa-redo text-info me-3 icon-fixed"></i>
                         <div>
-                            <small class="text-muted d-block">Cəhd</small>
+                            <small class="text-muted d-block">{% trans "label_attempt" context "labs.template.lab_detail" %}</small>
                             <strong>{{ attempt_count|default:0 }} / {{ lab.max_attempts }}</strong>
                         </div>
                     </div>
                     <div class="d-flex align-items-center">
                         <i class="fas fa-question-circle text-primary me-3 icon-fixed"></i>
                         <div>
-                            <small class="text-muted d-block">Sual Sayı</small>
-                            <strong>{{ questions|length }} ədəd</strong>
+                            <small class="text-muted d-block">{% trans "label_question_count" context "labs.template.lab_detail" %}</small>
+                            <strong>{% blocktrans trimmed context "labs.template.lab_detail" with question_count=questions|length %}label_questions_count_value {{ question_count }}{% endblocktrans %}</strong>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Materials -->
             {% if lab.teacher_files or lab.teacher_instructions %}
             <div class="card border-0 shadow-sm materials-card">
                 <div class="card-header text-white">
-                    <i class="fas fa-file-alt me-2"></i> <strong>Materiallar</strong>
+                    <i class="fas fa-file-alt me-2"></i> <strong>{% trans "card_materials" context "labs.template.lab_detail" %}</strong>
                 </div>
                 <div class="card-body">
                     {% if lab.teacher_files %}
                     <div class="mb-3">
-                        <small class="text-muted d-block mb-2">Müəllim Faylı:</small>
+                        <small class="text-muted d-block mb-2">{% trans "label_teacher_file" context "labs.template.lab_detail" %}</small>
                         <a href="{{ lab.teacher_files.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-download me-1"></i> Yüklə
+                            <i class="fas fa-download me-1"></i> {% trans "action_download" context "labs.template.lab_detail" %}
                         </a>
                     </div>
                     {% endif %}
                     
                     {% if lab.teacher_instructions %}
                     <div>
-                        <small class="text-muted d-block mb-2">Təlimatlar:</small>
+                        <small class="text-muted d-block mb-2">{% trans "label_instructions" context "labs.template.lab_detail" %}</small>
                         <div class="bg-light p-3 rounded small">
                             {{ lab.teacher_instructions|linebreaks }}
                         </div>
@@ -187,9 +178,7 @@
             
         </div>
         
-        <!-- SAĞ PANEL - SUALLAR -->
         <div class="col-lg-8">
-            
             {% if lab.is_open and can_retry %}
                 {% if questions %}
                 <form id="labForm" method="POST" enctype="multipart/form-data">
@@ -199,14 +188,13 @@
                     <div class="card mb-3 border-0 shadow-sm question-card" 
                          id="question-{{ question.id }}" 
                          data-question-id="{{ question.id }}">
-                        
                         <div class="card-header d-flex align-items-center gap-3 text-white question-header">
                             <span class="badge bg-white text-primary rounded-circle question-number">
                                 {{ forloop.counter }}
                             </span>
                             <span class="flex-grow-1">{{ question.question_text }}</span>
                             {% if question.points > 0 %}
-                            <span class="badge bg-warning text-dark">{{ question.points }} bal</span>
+                            <span class="badge bg-warning text-dark">{% blocktrans trimmed context "labs.template.lab_detail" with points=question.points %}label_points {{ points }}{% endblocktrans %}</span>
                             {% endif %}
                         </div>
                         
@@ -214,7 +202,7 @@
                             {% if question.attachment %}
                             <div class="mb-3">
                                 <a href="{{ question.attachment.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fas fa-paperclip me-1"></i> Əlavə fayl
+                                    <i class="fas fa-paperclip me-1"></i> {% trans "label_attachment" context "labs.template.lab_detail" %}
                                 </a>
                             </div>
                             {% endif %}
@@ -223,16 +211,15 @@
                             <textarea class="form-control answer-textarea mb-3" 
                                       name="answer_{{ question.id }}" 
                                       rows="4" 
-                                      placeholder="Cavabınızı buraya yazın...">{{ saved_answer }}</textarea>
+                                      placeholder="{% trans 'placeholder_answer' context 'labs.template.lab_detail' %}">{{ saved_answer }}</textarea>
                             {% endwith %}
                             
-                            <!-- Fayl Yükləmə -->
                             <div class="file-upload-area p-3 border rounded text-center mb-2" 
                                  onclick="document.getElementById('file-{{ question.id }}').click()">
                                 <input type="file" name="file_{{ question.id }}" id="file-{{ question.id }}" 
                                        class="d-none file-input" accept="image/*,.pdf,.doc,.docx,.zip,.py,.java,.cpp,.txt">
                                 <i class="fas fa-cloud-upload-alt text-muted me-2"></i>
-                                <span class="text-muted file-label">Fayl əlavə et (şəkil, PDF, DOC...)</span>
+                                <span class="text-muted file-label">{% trans "action_add_file" context "labs.template.lab_detail" %}</span>
                             </div>
                             <div class="file-preview d-none mb-2" id="preview-{{ question.id }}">
                                 <span class="badge bg-primary p-2">
@@ -245,25 +232,25 @@
                             
                             <div class="save-status small" id="status-{{ question.id }}">
                                 {% if saved_answers|get_item:question.id %}
-                                <i class="fas fa-check-circle text-success"></i> Saxlanıldı
+                                <i class="fas fa-check-circle text-success"></i> {% trans "status_saved" context "labs.template.lab_detail" %}
                                 {% else %}
-                                <i class="fas fa-circle text-muted"></i> Cavab gözləyir
+                                <i class="fas fa-circle text-muted"></i> {% trans "status_waiting_for_answer" context "labs.template.lab_detail" %}
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                     
-                    <!-- Submit -->
                     <div class="card border-0 shadow-sm submit-card">
                         <div class="card-body text-white">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Diqqət:</strong> Göndərdikdən sonra dəyişiklik edə bilməzsiniz!
+                                    <strong>{% trans "warning_label" context "labs.template.lab_detail" %}</strong>
+                                    {% trans "warning_submit_locked" context "labs.template.lab_detail" %}
                                 </div>
                                 <button type="submit" class="btn btn-light btn-lg px-4 fw-bold" id="submitBtn">
-                                    <i class="fas fa-paper-plane me-2"></i> Labı Bitir
+                                    <i class="fas fa-paper-plane me-2"></i> {% trans "action_finish_lab" context "labs.template.lab_detail" %}
                                 </button>
                             </div>
                         </div>
@@ -273,32 +260,32 @@
                 {% else %}
                 <div class="alert alert-warning text-center py-5">
                     <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
-                    <h5>Bu lab üçün sual yoxdur</h5>
-                    <p class="text-muted">Müəllim hələ sual əlavə etməyib</p>
+                    <h5>{% trans "empty_no_questions" context "labs.template.lab_detail" %}</h5>
+                    <p class="text-muted">{% trans "empty_teacher_has_not_added_questions" context "labs.template.lab_detail" %}</p>
                 </div>
                 {% endif %}
                 
             {% elif has_submitted and not can_retry %}
                 <div class="alert alert-info text-center py-5">
                     <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
-                    <h5>Bu labı uğurla göndərmisiniz!</h5>
-                    <p class="mb-3">Cəhd sayınız bitib ({{ attempt_count }} / {{ lab.max_attempts }})</p>
+                    <h5>{% trans "notice_submission_successful" context "labs.template.lab_detail" %}</h5>
+                    <p class="mb-3">{% blocktrans trimmed context "labs.template.lab_detail" with attempt_count=attempt_count max_attempts=lab.max_attempts %}notice_attempts_exhausted {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}</p>
                     <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-success">
-                        <i class="fas fa-eye me-1"></i> Cavablarıma Bax
+                        <i class="fas fa-eye me-1"></i> {% trans "action_view_my_answers" context "labs.template.lab_detail" %}
                     </a>
                 </div>
                 
             {% elif lab.is_upcoming %}
                 <div class="alert alert-info text-center py-5">
                     <i class="fas fa-clock fa-3x mb-3"></i>
-                    <h5>Lab hələ başlamayıb</h5>
-                    <p class="mb-0">Başlanğıc: <strong>{{ lab.start_datetime|date:"d.m.Y H:i" }}</strong></p>
+                    <h5>{% trans "notice_lab_not_started" context "labs.template.lab_detail" %}</h5>
+                    <p class="mb-0">{% blocktrans trimmed context "labs.template.lab_detail" with start_at=lab.start_datetime|date:"d.m.Y H:i" %}label_start_at {{ start_at }}{% endblocktrans %}</p>
                 </div>
             {% else %}
                 <div class="alert alert-danger text-center py-5">
                     <i class="fas fa-lock fa-3x mb-3"></i>
-                    <h5>Lab bağlıdır</h5>
-                    <p class="mb-0">Son tarix: <strong>{{ lab.end_datetime|date:"d.m.Y H:i" }}</strong></p>
+                    <h5>{% trans "notice_lab_closed" context "labs.template.lab_detail" %}</h5>
+                    <p class="mb-0">{% blocktrans trimmed context "labs.template.lab_detail" with deadline=lab.end_datetime|date:"d.m.Y H:i" %}label_deadline_at {{ deadline }}{% endblocktrans %}</p>
                 </div>
             {% endif %}
             
@@ -313,6 +300,18 @@
         csrf: '{{ csrf_token }}',
         endTime: '{{ lab.end_datetime|date:"c" }}',
         totalQuestions: {{ questions|length }}
+    };
+
+    window.LAB_I18N = {
+        statusSaved: '{% trans "status_saved" context "labs.js.lab_detail" %}',
+        statusSaving: '{% trans "status_saving" context "labs.js.lab_detail" %}',
+        statusError: '{% trans "status_error" context "labs.js.lab_detail" %}',
+        confirmUnanswered: '{% trans "confirm_unanswered" context "labs.js.lab_detail" %}',
+        actionSubmitting: '{% trans "action_submitting" context "labs.js.lab_detail" %}',
+        errorPrefix: '{% trans "error_prefix" context "labs.js.lab_detail" %}',
+        errorUnknown: '{% trans "error_unknown" context "labs.js.lab_detail" %}',
+        errorServer: '{% trans "error_server" context "labs.js.lab_detail" %}',
+        actionFinishLab: '{% trans "action_finish_lab" context "labs.js.lab_detail" %}'
     };
 </script>
 <script src="{% static 'labs/js/lab_detail.js' %}"></script>

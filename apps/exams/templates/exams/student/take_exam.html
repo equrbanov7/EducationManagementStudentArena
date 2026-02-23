@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load get_item %}
+{% load get_item i18n %}
 {% load static %}
 
-{% block title %}{{ exam.title }} - İmtahan{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "title_exam" context "exams.template.take_exam" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/take_exam.css' %}">
@@ -34,21 +34,21 @@
                 {# Sual timeri #}
                 <div class="question-timer-badge" id="question-timer-container" style="display: none;">
                     <i class="fas fa-hourglass-half"></i> 
-                    Sual vaxtı: <span id="question-timer-value">--:--</span>
+                    {% trans "label_question_time" context "exams.template.take_exam" %}: <span id="question-timer-value">--:--</span>
                 </div>
 
                 {# Ümumi imtahan timeri #}
                 <div class="timer-badge" id="exam-timer-container">
                     <i class="fas fa-clock"></i> 
-                    Ümumi: <span id="timer-value">--:--</span>
+                    {% trans "label_total_time" context "exams.template.take_exam" %}: <span id="timer-value">--:--</span>
                 </div>
             </div>
         </div>
         
         <div class="progress-area">
             <div class="progress-info">
-                <span>Sual: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
-                <span class="answered-status">Cavablanıb: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
+                <span>{% trans "label_question" context "exams.template.take_exam" %}: <strong id="current-question-num">1</strong> / {{ q_payload|length }}</span>
+                <span class="answered-status">{% trans "label_answered" context "exams.template.take_exam" %}: <strong id="answered-count">0</strong> / {{ q_payload|length }}</span>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
@@ -74,12 +74,12 @@
                      data-time-limit="{{ q.effective_time_limit|default:0 }}">
                     
                     <div class="question-content">
-                        <span class="q-number">Sual {{ forloop.counter }}</span>
+                        <span class="q-number">{% trans "label_question" context "exams.template.take_exam" %} {{ forloop.counter }}</span>
                         <p class="q-text">{{ q.text|linebreaks }}</p>
 
                         {% if q.image %}
                             <div class="question-media">
-                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            <img src="{{ q.image.url }}" alt="{% trans 'alt_question_image' context 'exams.template.take_exam' %}">
                             </div>
                         {% endif %}
                       
@@ -87,7 +87,7 @@
                             <div class="question-media">
                             <video controls preload="metadata" playsinline>
                                 <source src="{{ q.video.url }}">
-                                Brauzeriniz video göstərmir.
+                                {% trans "video_not_supported" context "exams.template.take_exam" %}
                             </video>
                             </div>
                         {% endif %}
@@ -131,7 +131,7 @@
                         {% else %}
                             <textarea name="q_{{ q.id }}" 
                                       class="written-answer" 
-                                      placeholder="Cavabınızı bura yazın...">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
+                                      placeholder="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
                             <br>
                                 
                             {# --- PAINT CAVABI --- #}
@@ -148,7 +148,7 @@
                                  ondragover="event.preventDefault(); this.classList.add('hover');"
                                  ondragleave="this.classList.remove('hover');">
 
-                                <p>Faylları buraya atın və ya klikləyin</p>
+                                <p>{% trans "drop_files_here_or_click" context "exams.template.take_exam" %}</p>
 
                                 <input type="file" 
                                        name="file_{{ q.id }}[]" 
@@ -161,7 +161,7 @@
                             <button type="button"
                                     class="add-file-btn"
                                     onclick="triggerFileInput({{ q.id }})">
-                                + Əlavə fayl əlavə et
+                                + {% trans "action_add_file" context "exams.template.take_exam" %}
                             </button>
 
                             <div id="file-preview-{{ q.id }}" class="file-preview-area">
@@ -186,21 +186,21 @@
 
         <div class="exam-footer">
             <button type="button" id="prev-btn" class="nav-btn btn-outline">
-                <i class="fas fa-arrow-left"></i> Əvvəlki
+                <i class="fas fa-arrow-left"></i> {% trans "action_previous" context "exams.template.take_exam" %}
             </button>
         
             <button type="button" id="next-btn" class="nav-btn btn-primary">
-                Növbəti <i class="fas fa-arrow-right"></i>
+                {% trans "action_next" context "exams.template.take_exam" %} <i class="fas fa-arrow-right"></i>
             </button>
         
             {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
             <button style = "display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
-                <i class="fas fa-save"></i> Draft kimi saxla
+                <i class="fas fa-save"></i> {% trans "action_save_as_draft" context "exams.template.take_exam" %}
             </button>
             
             <button type="button" name="submit_action" value="finish" 
                     id="finish-btn" class="nav-btn btn-success" style="display: none;">
-                İmtahanı Bitir <i class="fas fa-check"></i>
+                {% trans "action_finish_exam" context "exams.template.take_exam" %} <i class="fas fa-check"></i>
             </button>
         </div>
     </form>
@@ -209,20 +209,32 @@
 {# ---- Bitirmə təsdiq modali ---- #}
 <div class="confirm-modal-backdrop" id="finishConfirmBackdrop">
     <div class="confirm-modal-box">
-        <h3>İmtahanı bitirmək istəyirsiniz?</h3>
-        <p>İmtahanı bitirdikdən sonra cavablarınızı dəyişə bilməyəcəksiniz.</p>
+        <h3>{% trans "confirm_finish_title" context "exams.template.take_exam" %}</h3>
+        <p>{% trans "confirm_finish_description" context "exams.template.take_exam" %}</p>
         <div class="confirm-actions">
             <button type="button" class="nav-btn btn-outline-secondary" id="cancelFinishBtn">
-                Xeyr, geri qayıt
+                {% trans "confirm_finish_no_back" context "exams.template.take_exam" %}
             </button>
             <button type="button" class="nav-btn btn-danger" id="confirmFinishBtn">
-                Bəli, imtahanı bitir
+                {% trans "confirm_finish_yes" context "exams.template.take_exam" %}
             </button>
         </div>
     </div>
 </div>
 
 <script>
+const I18N_TAKE_EXAM = {
+    autosaveSaving: "{% trans 'autosave_saving' context 'exams.template.take_exam' %}",
+    autosaveSaved: "{% trans 'autosave_saved' context 'exams.template.take_exam' %}",
+    draftSaved: "{% trans 'draft_saved' context 'exams.template.take_exam' %}",
+    draftSavedWithCheck: "{% trans 'draft_saved_with_check' context 'exams.template.take_exam' %}",
+    saveError: "{% trans 'save_error' context 'exams.template.take_exam' %}",
+    saveErrorRetry: "{% trans 'save_error_retry' context 'exams.template.take_exam' %}",
+    btnSaving: "{% trans 'btn_saving' context 'exams.template.take_exam' %}",
+    btnSaved: "{% trans 'btn_saved' context 'exams.template.take_exam' %}",
+    btnDraftSaved: "{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}"
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const slides = document.querySelectorAll('.question-slide');
     const prevBtn = document.getElementById('prev-btn');
@@ -589,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // ✅ ƏLAVƏ: Vizual feedback - kiçik bildiriş göstər
         let notification = null;
         if (action === "autosave") {
-            notification = showNotification("Saxlanılır...", "info");
+            notification = showNotification(I18N_TAKE_EXAM.autosaveSaving, "info");
         }
 
         fetch(window.location.href, {
@@ -609,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideNotification(notification);
             }
             if (action === "autosave") {
-                showNotification("✓ Saxlanıldı", "success", 2000);
+                showNotification(I18N_TAKE_EXAM.autosaveSaved, "success", 2000);
             }
 
             if (data.finished && data.redirect_url) {
@@ -620,7 +632,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (action === "save_draft") {
                 const originalText = saveDraftBtn.innerHTML;
-                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Draft saxlanıldı';
+                saveDraftBtn.innerHTML = `<i class="fas fa-check"></i> ${I18N_TAKE_EXAM.draftSaved}`;
                 saveDraftBtn.disabled = true;
                 setTimeout(() => {
                     saveDraftBtn.innerHTML = originalText;
@@ -629,14 +641,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(err => {
-            console.error("Draft saxlanarkən xəta:", err);
+            console.error("Draft save error:", err);
             if (notification) {
                 hideNotification(notification);
             }
-            showNotification("Xəta baş verdi", "error", 3000);
+            showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
             
             if (action === "save_draft") {
-                alert("Draft saxlanarkən xəta baş verdi. Yenidən cəhd edin.");
+                alert(I18N_TAKE_EXAM.saveErrorRetry);
             }
         });
     }
@@ -648,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Düyməni disable et
             const originalText = saveDraftBtn.innerHTML;
-            saveDraftBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saxlanılır...';
+            saveDraftBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${I18N_TAKE_EXAM.btnSaving}`;
             saveDraftBtn.disabled = true;
             
             // Draft saxla
@@ -674,8 +686,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 // Uğur mesajı
-                saveDraftBtn.innerHTML = '<i class="fas fa-check"></i> Saxlanıldı!';
-                showNotification("✓ Draft saxlanıldı", "success", 2000);
+                saveDraftBtn.innerHTML = `<i class="fas fa-check"></i> ${I18N_TAKE_EXAM.btnSaved}`;
+                showNotification(I18N_TAKE_EXAM.draftSavedWithCheck, "success", 2000);
                 
                 setTimeout(() => {
                     saveDraftBtn.innerHTML = originalText;
@@ -683,10 +695,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 2000);
             })
             .catch(err => {
-                console.error("Draft saxlanarkən xəta:", err);
+                console.error("Draft save error:", err);
                 saveDraftBtn.innerHTML = originalText;
                 saveDraftBtn.disabled = false;
-                showNotification("Xəta baş verdi", "error", 3000);
+                showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
             });
         });
     }

@@ -237,6 +237,7 @@ def _role_capabilities(user, profile):
             "assigned-courses",
             "groups",
             "pending-review",
+            "review-results",
             "role-assignment",
             "permission-editor",
             "manage-roles",
@@ -266,7 +267,7 @@ def _role_capabilities(user, profile):
             )
 
         if is_teacher:
-            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review"})
+            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review", "review-results"})
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
@@ -919,6 +920,16 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     normalized_status = _normalize_pending_review_status(
         filter_status if filter_status is not None else request.GET.get("status", "all")
     )
+    profile_return_url = _append_query_params(
+        reverse("accounts:profile"),
+        section="pending-review",
+        search=search_query,
+        type=normalized_type,
+        status=normalized_status,
+        evaluated_search=request.GET.get("evaluated_search", ""),
+        evaluated_type=request.GET.get("evaluated_type", "all"),
+        evaluated_group=request.GET.get("evaluated_group", ""),
+    )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
@@ -965,9 +976,13 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
                     "status": attempt.status,
                     "date": attempt.started_at,
-                    "action_url": reverse(
-                        "exams:teacher_check_attempt",
-                        kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                    "action_url": _append_query_params(
+                        reverse(
+                            "exams:teacher_check_attempt",
+                            kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                        ),
+                        from_section="pending-review",
+                        return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "review"),
                 }
@@ -997,9 +1012,14 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "group_name": group_map.get((course.id, submission.user_id), ""),
                     "status": submission.status,
                     "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "assignments:review_assignment_submissions",
-                        kwargs={"pk": submission.assignment_id},
+                    "action_url": _append_query_params(
+                        reverse(
+                            "assignments:review_assignment_submissions",
+                            kwargs={"pk": submission.assignment_id},
+                        ),
+                        submission=submission.id,
+                        from_section="pending-review",
+                        return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
                 }
@@ -1029,9 +1049,14 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "group_name": group_map.get((course.id, submission.student_id), ""),
                     "status": submission.status,
                     "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "projects:review_project_submissions",
-                        kwargs={"pk": submission.project_id},
+                    "action_url": _append_query_params(
+                        reverse(
+                            "projects:review_project_submissions",
+                            kwargs={"pk": submission.project_id},
+                        ),
+                        submission=submission.id,
+                        from_section="pending-review",
+                        return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
                 }
@@ -1062,9 +1087,13 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "group_name": group_map.get((course.id, student.id), ""),
                     "status": submission.status,
                     "date": submission.submitted_at,
-                    "action_url": reverse(
-                        "labs:grade_submission_page",
-                        kwargs={"pk": submission.id},
+                    "action_url": _append_query_params(
+                        reverse(
+                            "labs:grade_submission_page",
+                            kwargs={"pk": submission.id},
+                        ),
+                        from_section="pending-review",
+                        return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
                 }
@@ -1075,6 +1104,195 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
 
     items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
     return items, search_query, normalized_type, normalized_status
+
+
+def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None):
+    search_query = (search if search is not None else request.GET.get("evaluated_search", "")).strip()
+    normalized_type = _normalize_pending_review_type(
+        filter_type if filter_type is not None else request.GET.get("evaluated_type", "all")
+    )
+    selected_group = (filter_group if filter_group is not None else request.GET.get("evaluated_group", "")).strip()
+
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+    teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+
+    student_memberships = []
+    if teacher_courses.exists():
+        student_memberships = CourseMembership.objects.filter(
+            course__in=teacher_courses,
+            role="student",
+        ).values("course_id", "user_id", "group_name")
+
+    group_map = {
+        (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
+        for membership in student_memberships
+    }
+    available_groups = sorted(
+        {
+            membership["group_name"].strip()
+            for membership in student_memberships
+            if (membership.get("group_name") or "").strip()
+        },
+        key=str.lower,
+    )
+    if selected_group and selected_group not in available_groups:
+        selected_group = ""
+
+    profile_return_url = _append_query_params(
+        reverse("accounts:profile"),
+        section="pending-review",
+        search=request.GET.get("search", ""),
+        type=request.GET.get("type", "all"),
+        status=request.GET.get("status", "all"),
+        evaluated_search=search_query,
+        evaluated_type=normalized_type,
+        evaluated_group=selected_group,
+    )
+
+    items = []
+
+    if normalized_type in {"all", "exams"}:
+        attempts = ExamAttempt.objects.filter(
+            exam__in=teacher_exams,
+            status__in=["submitted", "expired"],
+        ).filter(Q(checked_by_teacher=True) | Q(exam__exam_type="test")).select_related("exam", "user", "exam__course")
+        if search_query:
+            attempts = attempts.filter(
+                Q(user__username__icontains=search_query)
+                | Q(user__first_name__icontains=search_query)
+                | Q(user__last_name__icontains=search_query)
+                | Q(exam__title__icontains=search_query)
+                | Q(exam__course__title__icontains=search_query)
+            )
+        for attempt in attempts:
+            course = attempt.exam.course
+            score_value = attempt.teacher_score if attempt.teacher_score is not None else attempt.score_percent
+            items.append(
+                {
+                    "type": "exam",
+                    "student": attempt.user,
+                    "title": attempt.exam.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
+                    "score_display": f"{score_value}%" if score_value is not None else "-",
+                    "date": attempt.teacher_checked_at or attempt.finished_at or attempt.started_at,
+                    "action_url": _append_query_params(
+                        reverse("exams:teacher_exam_results", kwargs={"slug": attempt.exam.slug}),
+                        attempt=attempt.id,
+                        from_section="pending-review",
+                        return_to=profile_return_url,
+                    ),
+                    "action_label": pgettext_lazy("profile.pending_review.action", "review"),
+                }
+            )
+
+    if normalized_type in {"all", "assignments"}:
+        submissions = Submission.objects.filter(
+            assignment__course__in=teacher_courses,
+            status="graded",
+        ).select_related("assignment", "assignment__course", "user")
+        if search_query:
+            submissions = submissions.filter(
+                Q(user__username__icontains=search_query)
+                | Q(user__first_name__icontains=search_query)
+                | Q(user__last_name__icontains=search_query)
+                | Q(assignment__title__icontains=search_query)
+                | Q(assignment__course__title__icontains=search_query)
+            )
+        for submission in submissions:
+            course = submission.assignment.course
+            items.append(
+                {
+                    "type": "assignment",
+                    "student": submission.user,
+                    "title": submission.assignment.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, submission.user_id), "") if course else "",
+                    "score_display": submission.grade if submission.grade is not None else "-",
+                    "date": submission.graded_at or submission.submitted_at,
+                    "action_url": _append_query_params(
+                        reverse("assignments:review_assignment_submissions", kwargs={"pk": submission.assignment_id}),
+                        submission=submission.id,
+                        from_section="pending-review",
+                        return_to=profile_return_url,
+                    ),
+                    "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
+                }
+            )
+
+    if normalized_type in {"all", "projects"}:
+        project_submissions = ProjectSubmission.objects.filter(
+            project__course__in=teacher_courses,
+            status="graded",
+        ).select_related("project", "project__course", "student")
+        if search_query:
+            project_submissions = project_submissions.filter(
+                Q(student__username__icontains=search_query)
+                | Q(student__first_name__icontains=search_query)
+                | Q(student__last_name__icontains=search_query)
+                | Q(project__title__icontains=search_query)
+                | Q(project__course__title__icontains=search_query)
+            )
+        for submission in project_submissions:
+            course = submission.project.course
+            items.append(
+                {
+                    "type": "project",
+                    "student": submission.student,
+                    "title": submission.project.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, submission.student_id), "") if course else "",
+                    "score_display": submission.grade if submission.grade is not None else "-",
+                    "date": submission.graded_at or submission.submitted_at,
+                    "action_url": _append_query_params(
+                        reverse("projects:review_project_submissions", kwargs={"pk": submission.project_id}),
+                        submission=submission.id,
+                        from_section="pending-review",
+                        return_to=profile_return_url,
+                    ),
+                    "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
+                }
+            )
+
+    if normalized_type in {"all", "labs"}:
+        lab_submissions = LabSubmission.objects.filter(
+            assignment__lab__course__in=teacher_courses,
+            status="graded",
+        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        if search_query:
+            lab_submissions = lab_submissions.filter(
+                Q(assignment__student__username__icontains=search_query)
+                | Q(assignment__student__first_name__icontains=search_query)
+                | Q(assignment__student__last_name__icontains=search_query)
+                | Q(assignment__lab__title__icontains=search_query)
+                | Q(assignment__lab__course__title__icontains=search_query)
+            )
+        for submission in lab_submissions:
+            student = submission.assignment.student
+            course = submission.assignment.lab.course
+            items.append(
+                {
+                    "type": "lab",
+                    "student": student,
+                    "title": submission.assignment.lab.title,
+                    "course_title": course.title if course else "-",
+                    "group_name": group_map.get((course.id, student.id), "") if course else "",
+                    "score_display": submission.score if submission.score is not None else "-",
+                    "date": submission.graded_at or submission.submitted_at,
+                    "action_url": _append_query_params(
+                        reverse("labs:grade_submission_page", kwargs={"pk": submission.id}),
+                        from_section="pending-review",
+                        return_to=profile_return_url,
+                    ),
+                    "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
+                }
+            )
+
+    if selected_group:
+        items = [item for item in items if item.get("group_name") == selected_group]
+
+    items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
+    return items, search_query, normalized_type, selected_group, available_groups
 
 
 @login_required
@@ -1407,6 +1625,11 @@ def user_profile(request):
     pending_review_search_query = ""
     pending_review_filter_type = "all"
     pending_review_filter_status = "all"
+    evaluated_review_items = []
+    evaluated_review_search_query = ""
+    evaluated_review_filter_type = "all"
+    evaluated_review_filter_group = ""
+    evaluated_review_available_groups = []
     if "pending-review" in allowed_sections:
         (
             pending_review_items,
@@ -1414,6 +1637,13 @@ def user_profile(request):
             pending_review_filter_type,
             pending_review_filter_status,
         ) = _collect_pending_review_items(request)
+        (
+            evaluated_review_items,
+            evaluated_review_search_query,
+            evaluated_review_filter_type,
+            evaluated_review_filter_group,
+            evaluated_review_available_groups,
+        ) = _collect_evaluated_review_items(request)
 
     role_assignment_section = {
         "organization": None,
@@ -1768,6 +1998,12 @@ def user_profile(request):
         "pending_review_filter_type": pending_review_filter_type,
         "pending_review_filter_status": pending_review_filter_status,
         "pending_review_total_count": len(pending_review_items),
+        "evaluated_review_items": evaluated_review_items,
+        "evaluated_review_search_query": evaluated_review_search_query,
+        "evaluated_review_filter_type": evaluated_review_filter_type,
+        "evaluated_review_filter_group": evaluated_review_filter_group,
+        "evaluated_review_available_groups": evaluated_review_available_groups,
+        "evaluated_review_total_count": len(evaluated_review_items),
         "role_assignment_section": role_assignment_section,
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
@@ -2145,6 +2381,13 @@ def pending_review(request):
         return redirect("accounts:profile")
 
     items, search, filter_type, filter_status = _collect_pending_review_items(request)
+    (
+        evaluated_items,
+        evaluated_search,
+        evaluated_filter_type,
+        evaluated_filter_group,
+        evaluated_available_groups,
+    ) = _collect_evaluated_review_items(request)
 
     context = {
         "review_items": items,
@@ -2152,6 +2395,12 @@ def pending_review(request):
         "filter_type": filter_type,
         "filter_status": filter_status,
         "total_count": len(items),
+        "evaluated_review_items": evaluated_items,
+        "evaluated_review_search_query": evaluated_search,
+        "evaluated_review_filter_type": evaluated_filter_type,
+        "evaluated_review_filter_group": evaluated_filter_group,
+        "evaluated_review_available_groups": evaluated_available_groups,
+        "evaluated_review_total_count": len(evaluated_items),
     }
     return render(request, "accounts/pending_review.html", context)
 

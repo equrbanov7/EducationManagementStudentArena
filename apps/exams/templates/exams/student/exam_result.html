@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static get_item %}
+{% load static get_item i18n %}
 
-{% block title %}{{ exam.title }} - Nəticə{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "title_result" context "exams.template.student_exam_result" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_result.css' %}">
@@ -11,18 +11,18 @@
 <div class="result-container container">
     
     <div class="text-center mb-5">
-        <h1 class="page-title">{{ exam.title }} - Nəticəniz</h1>
+        <h1 class="page-title">{{ exam.title }} - {% trans "heading_your_result" context "exams.template.student_exam_result" %}</h1>
     </div>
 
     <div class="summary-card">
         
         <div class="summary-header">
-            <span class="text-uppercase tracking-wider text-muted small fw-bold">İmtahan Statusu</span>
+            <span class="text-uppercase tracking-wider text-muted small fw-bold">{% trans "exam_status" context "exams.template.student_exam_result" %}</span>
             <div class="mt-2">
                 {% if attempt.status == "submitted" %}
-                    <span class="status-badge badge-success">Təslim edilib</span>
+                    <span class="status-badge badge-success">{% trans "status_submitted" context "exams.template.student_exam_result" %}</span>
                 {% elif attempt.status == "expired" %}
-                    <span class="status-badge badge-danger">Vaxt bitib</span>
+                    <span class="status-badge badge-danger">{% trans "status_expired" context "exams.template.student_exam_result" %}</span>
                 {% else %}
                     <span class="status-badge badge-secondary">{{ attempt.get_status_display }}</span>
                 {% endif %}
@@ -33,17 +33,17 @@
             {% if exam.exam_type == 'test' %}
                 
                 <div class="stat-item main-score w-100 mb-4">
-                    <span class="stat-label">Bal</span>
+                    <span class="stat-label">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
                     <span class="stat-value text-primary">{{ attempt.score_percent }}%</span>
                 </div>
 
                 <div class="test-stats-grid">
                     <div class="stat-item">
-                        <span class="stat-label">Düzgün</span>
+                        <span class="stat-label">{% trans "label_correct" context "exams.template.student_exam_result" %}</span>
                         <span class="stat-value text-success">{{ attempt.correct_count }}</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Səhv</span>
+                        <span class="stat-label">{% trans "label_wrong" context "exams.template.student_exam_result" %}</span>
                         <span class="stat-value text-danger">{{ attempt.wrong_count }}</span>
                     </div>
                 </div>
@@ -51,26 +51,26 @@
             {% else %}
                 <div class="final-score-area w-100">
                     {% if attempt.checked_by_teacher %}
-                        <span class="stat-label">Yekun Bal</span>
+                        <span class="stat-label">{% trans "label_final_score" context "exams.template.student_exam_result" %}</span>
                         <span class="stat-value text-primary">{{ attempt.teacher_score }}</span>
-                        <small class="text-muted d-block mt-1">Müəllim tərəfindən qiymətləndirilib</small>
+                        <small class="text-muted d-block mt-1">{% trans "label_graded_by_teacher" context "exams.template.student_exam_result" %}</small>
                     {% else %}
                         <span class="stat-value">
-                            <span class="badge bg-warning text-dark px-3 py-2">Müəllim yoxlaması gözlənilir...</span>
+                            <span class="badge bg-warning text-dark px-3 py-2">{% trans "status_waiting_teacher_review" context "exams.template.student_exam_result" %}</span>
                         </span>
                     {% endif %}
                 </div>
             {% endif %}
 
             {% if attempt.duration_seconds %}
-                <span class="duration-info"><i class="far fa-clock"></i> Müddət: {{ attempt.duration_seconds }} saniyə</span>
+                <span class="duration-info"><i class="far fa-clock"></i> {% trans "label_duration" context "exams.template.student_exam_result" %}: {{ attempt.duration_seconds }} {% trans "unit_seconds" context "exams.template.student_exam_result" %}</span>
             {% endif %}
         </div>
     </div>
 
     <div class="section-divider"></div>
 
-    <h3 class="section-title">Sual - Nəticə Təhlili</h3>
+    <h3 class="section-title">{% trans "heading_question_result_analysis" context "exams.template.student_exam_result" %}</h3>
     
     <div class="questions-list">
         {% for q in questions %}
@@ -85,7 +85,7 @@
                         </div>
                         {% if q.image %}
                             <div class="question-media">
-                            <img src="{{ q.image.url }}" alt="Sual şəkli">
+                            <img src="{{ q.image.url }}" alt="{% trans 'alt_question_image' context 'exams.template.student_exam_result' %}">
                             </div>
                         {% endif %}
                       
@@ -93,7 +93,7 @@
                             <div class="question-media">
                             <video controls preload="metadata" playsinline>
                                 <source src="{{ q.video.url }}">
-                                Brauzeriniz video göstərə bilmir.
+                                {% trans "video_not_supported" context "exams.template.student_exam_result" %}
                             </video>
                             </div>
                         {% endif %}
@@ -123,7 +123,7 @@
                                     </div>
                                     
                                     {% if ans and opt in ans.selected_options.all %}
-                                        <span class="badge bg-light text-dark border">Sizin seçim</span>
+                                        <span class="badge bg-light text-dark border">{% trans "your_selection" context "exams.template.student_exam_result" %}</span>
                                     {% endif %}
                                 </li>
                             {% endfor %}
@@ -132,12 +132,12 @@
                         <div class="feedback-status mt-3 text-end">
                             {% if ans %}
                                 {% if ans.is_correct %}
-                                    <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> Düzgün</span>
+                                    <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> {% trans "answer_correct" context "exams.template.student_exam_result" %}</span>
                                 {% else %}
-                                    <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> Səhv</span>
+                                    <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> {% trans "answer_wrong" context "exams.template.student_exam_result" %}</span>
                                 {% endif %}
                             {% else %}
-                                <span class="badge bg-warning text-dark feedback-badge">Cavab verməmisən</span>
+                                <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
                             {% endif %}
                         </div>
 
@@ -145,7 +145,7 @@
                         <div class="written-response-area">
                             <div class="mb-3">
                                 <label class="response-label text-primary mb-2">
-                                    <i class="fas fa-pen-alt"></i> Sənin cavabın:
+                                    <i class="fas fa-pen-alt"></i> {% trans "label_your_answer" context "exams.template.student_exam_result" %}:
                                 </label>
                           
                                 {% if ans and ans.text_answer %}
@@ -153,12 +153,12 @@
                              
                                 {% elif ans and ans.paint_image %}
                                     <div class="alert alert-info">
-                                        <i class="fas fa-paint-brush"></i> Paint ilə cavab verilib
+                                        <i class="fas fa-paint-brush"></i> {% trans "message_paint_answer_provided" context "exams.template.student_exam_result" %}
                                     </div>
                             
                                 {% else %}
                                     <div class="alert alert-warning">
-                                        <i class="fas fa-exclamation-triangle"></i> Cavab verməmisən
+                                        <i class="fas fa-exclamation-triangle"></i> {% trans "answer_not_provided" context "exams.template.student_exam_result" %}
                                     </div>
                                 {% endif %}
                             
@@ -169,7 +169,7 @@
                             {% if ans and ans.files.all %}
                                 <div class="answer-files mb-3">
                                     <label class="response-label text-secondary mb-2">
-                                        <i class="fas fa-paperclip"></i> Yüklənmiş fayllar:
+                                        <i class="fas fa-paperclip"></i> {% trans "label_uploaded_files" context "exams.template.student_exam_result" %}:
                                     </label>
                                     <ul class="file-list">
                                         {% for f in ans.files.all %}
@@ -211,14 +211,14 @@
                             {% if ans and ans.paint_image %}
                                 <div class="paint-answer-box mb-3">
                                     <label class="response-label text-secondary mb-2">
-                                        <i class="fas fa-paint-brush"></i> Paint cavabı:
+                                        <i class="fas fa-paint-brush"></i> {% trans "label_paint_answer" context "exams.template.student_exam_result" %}:
                                         {% if ans.paint_updated_at %}
                                             <small class="text-muted">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
                                         {% endif %}
                                     </label>
 
                                     <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
-                                        <img src="{{ ans.paint_image.url }}" alt="Paint cavabı" class="paint-answer-img">
+                                        <img src="{{ ans.paint_image.url }}" alt="{% trans 'alt_paint_answer' context 'exams.template.student_exam_result' %}" class="paint-answer-img">
                                     </a>
                                 </div>
                             {% endif %}
@@ -233,21 +233,22 @@
                                             <div class="tf-avatar">
                                                 <i class="fas fa-chalkboard-teacher"></i>
                                             </div>
-                                            <span class="tf-title">Müəllim Rəyi</span>
+                                            <span class="tf-title">{% trans "teacher_feedback_title" context "exams.template.student_exam_result" %}</span>
                                         </div>
                                         <div class="tf-score">
-                                            Bal: <strong>{{ ans.teacher_score|default:"0" }}</strong>
+                                            {% trans "label_score" context "exams.template.student_exam_result" %}: <strong>{{ ans.teacher_score|default:"0" }}</strong>
                                         </div>
                                     </div>
                                     <div class="tf-body">
-                                        {{ ans.teacher_feedback|default:"Rəy qeyd olunmayıb."|linebreaks }}
+                                        {% trans "teacher_feedback_empty" context "exams.template.student_exam_result" as teacher_feedback_empty %}
+                                        {{ ans.teacher_feedback|default:teacher_feedback_empty|linebreaks }}
                                     </div>
                                 </div>
                             {% else %}
                                 {% if q.correct_answer %}
                                     <div class="mt-4">
                                         <label class="response-label text-success mb-2">
-                                            <i class="fas fa-check-double"></i> İdeal cavab nümunəsi:
+                                            <i class="fas fa-check-double"></i> {% trans "label_ideal_answer_example" context "exams.template.student_exam_result" %}:
                                         </label>
                                         <pre class="code-block correct-answer">{{ q.correct_answer }}</pre>
                                     </div>
@@ -263,11 +264,11 @@
 
     <div class="action-footer">
         <a href="{% url 'exams:student_exam_list' %}" class="btn custom-blue-btn">
-            <i class="fas fa-arrow-left me-2"></i> İmtahanlara qayıt
+            <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_exams" context "exams.template.student_exam_result" %}
         </a>
 
         <a href="{% url 'exams:student_exam_history' %}" class="btn custom-blue-btn">
-             Tarixçəyə Qayıt  <i class="fas fa-history ms-2"></i>
+             {% trans "action_back_to_history" context "exams.template.student_exam_result" %}  <i class="fas fa-history ms-2"></i>
         </a>
     </div>
 

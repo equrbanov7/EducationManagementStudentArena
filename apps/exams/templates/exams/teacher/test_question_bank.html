@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ exam.title }} - Sual Bankı{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "title_question_bank" context "exams.template.test_question_bank" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}">
@@ -14,7 +14,7 @@
     <header class="page-header">
         <div class="title-section">
             <h1 class="page-title">{{ exam.title }}</h1>
-            <p class="page-subtitle">Sual Bankı İdarəetmə Paneli</p>
+            <p class="page-subtitle">{% trans "subtitle_management_panel" context "exams.template.test_question_bank" %}</p>
         </div>
     
         <div class="stats-container">
@@ -23,17 +23,17 @@
                 <div class="card-content-wrapper">
                     <div class="quick-settings">
                         <div class="qs-item">
-                            <label for="rqInput">Sual sayı</label>
+                            <label for="rqInput">{% trans "label_question_count" context "exams.template.test_question_bank" %}</label>
                             <input id="rqInput" type="number" min="1" value="{{ rq_value }}">
                         </div>
                         <div class="qs-item">
-                            <label for="dpInput">Default bal</label>
+                            <label for="dpInput">{% trans "label_default_points" context "exams.template.test_question_bank" %}</label>
                             <input id="dpInput" type="number" min="1" value="{{ dp_value }}">
                         </div>
                     </div>
                     <div class="stat-divider"></div>
                     <div class="stat-info">
-                        <span class="stat-label">Toplam Sual</span>
+                        <span class="stat-label">{% trans "stat_total_questions" context "exams.template.test_question_bank" %}</span>
                         <span class="stat-value">{{ parsed|length }}</span>
                     </div>
                 </div>
@@ -42,7 +42,7 @@
             <div class="stat-card">
                 <div class="stat-icon yellow"><i class="bi bi-exclamation-triangle"></i></div>
                 <div class="stat-info">
-                    <span class="stat-label">Xəbərdarlıq</span>
+                    <span class="stat-label">{% trans "stat_warnings" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalWarnings">{{ warning_count|default:0 }}</span>
                 </div>
             </div>
@@ -50,7 +50,7 @@
             <div class="stat-card">
                 <div class="stat-icon red"><i class="bi bi-layers"></i></div>
                 <div class="stat-info">
-                    <span class="stat-label">Təkrar</span>
+                    <span class="stat-label">{% trans "stat_duplicates" context "exams.template.test_question_bank" %}</span>
                     <span class="stat-value" id="totalDuplicates">{{ duplicate_count|default:0 }}</span>
                 </div>
             </div>
@@ -69,8 +69,8 @@
             <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
             
             <aside class="upload-sidebar">
-                <h5 class="section-title"><i class="bi bi-file-earmark-arrow-up"></i> Fayldan Yüklə</h5>
-                <p class="section-desc">DOCX, PDF və ya TXT faylları.</p>
+                <h5 class="section-title"><i class="bi bi-file-earmark-arrow-up"></i> {% trans "section_upload_file" context "exams.template.test_question_bank" %}</h5>
+                <p class="section-desc">{% trans "section_upload_file_desc" context "exams.template.test_question_bank" %}</p>
                 
                 <div class="upload-zone-wrapper">
                     <input class="file-input-hidden"
@@ -81,8 +81,8 @@
                     onchange="fileSelected(this)">
                                  <label for="fileInput" class="upload-zone" id="dropZone">
                         <i class="bi bi-cloud-arrow-up-fill"></i>
-                        <strong>Faylı seçin</strong>
-                        <span>və ya bura sürüşdürün</span>
+                        <strong>{% trans "upload_choose_file" context "exams.template.test_question_bank" %}</strong>
+                        <span>{% trans "upload_or_drag_here" context "exams.template.test_question_bank" %}</span>
                         <div id="fileNameDisplay" class="file-name-tag"></div>
                     </label>
                 </div>
@@ -98,17 +98,17 @@
         
             <main class="editor-main">
                 <div class="editor-toolbar">
-                    <h5 class="section-title"><i class="bi bi-code-square"></i> Editor</h5>
+                    <h5 class="section-title"><i class="bi bi-code-square"></i> {% trans "section_editor" context "exams.template.test_question_bank" %}</h5>
 
                     <div class="toolbar-actions">
 
                         <button class="clear-btn" type="button" id="clearBtn">
-                            Təmizlə <i class="bi bi-trash3"></i>
+                            {% trans "action_clear" context "exams.template.test_question_bank" %} <i class="bi bi-trash3"></i>
                         </button>
                           
 
                         <button class="preview-btn" type="submit">
-                            Preview (Baxış) <i class="bi bi-eye-fill"></i>
+                            {% trans "action_preview" context "exams.template.test_question_bank" %} <i class="bi bi-eye-fill"></i>
                         </button>
                 
                         
@@ -119,70 +119,34 @@
 
                 <div class="textarea-container">
                     <div class="textarea-header compact-guide">
-                        <span class="guide-label"><i class="bi bi-info-circle-fill"></i> Qaydalar:</span>
+                        <span class="guide-label"><i class="bi bi-info-circle-fill"></i> {% trans "guide_rules" context "exams.template.test_question_bank" %}:</span>
                         
                         <div class="rule-group">
-                            <span class="rule-item" title="Heç nə yazılmasa A doğru sayılır">
-                                <span class="code">Standart</span> &rarr; <b>A</b>
+                            <span class="rule-item" title="{% trans 'rule_title_default_a' context 'exams.template.test_question_bank' %}">
+                                <span class="code">{% trans "rule_sample_default" context "exams.template.test_question_bank" %}</span> &rarr; <b>A</b>
                             </span>
                             
                             <span class="separator">•</span>
                             
-                            <span class="rule-item" title="Variantın qabağına * qoy">
-                                <span class="code">*B)</span> &rarr; Doğru
+                            <span class="rule-item" title="{% trans 'rule_title_star_prefix' context 'exams.template.test_question_bank' %}">
+                                <span class="code">*B)</span> &rarr; {% trans "label_correct" context "exams.template.test_question_bank" %}
                             </span>
                             
                             <span class="separator">•</span>
                             
-                            <span class="rule-item" title="Sonda Cavab: yaz">
-                                <span class="code">Cavab: D</span>
+                            <span class="rule-item" title="{% trans 'rule_title_answer_at_end' context 'exams.template.test_question_bank' %}">
+                                <span class="code">{% trans "rule_sample_answer_d" context "exams.template.test_question_bank" %}</span>
                             </span>
                     
                             <span class="separator">•</span>
                     
-                            <span class="rule-item" title="Çoxseçimli üçün">
-                                <span class="code">*A) *C)</span> və ya <span class="code">Cavab: A,C</span>
+                            <span class="rule-item" title="{% trans 'rule_title_multiple_choice' context 'exams.template.test_question_bank' %}">
+                                <span class="code">*A) *C)</span> {% trans "label_or" context "exams.template.test_question_bank" %} <span class="code">{% trans "rule_sample_answer_a_c" context "exams.template.test_question_bank" %}</span>
                             </span>
                         </div>
                     </div>
                     <textarea name="raw_text" class="custom-editor" 
-                    placeholder="Sualları buraya yapışdırın...
-1) Python-da dəyişən elan etmək üçün hansı açar söz istifadə olunur?
-A) Heç biri
-B) var
-C) define
-D) dim
-E) let
-
-2) Python-da ekrana mətn çıxarmaq üçün hansı funksiya istifadə olunur?
-A) print()
-*B) echo()
-*C) console.log()
-D) write()
-E) log()
-
-3) Aşağıdakılardan hansı Python-da düzgün list (siyahı) nümunəsidir?
-A) [1, 2, 3]
-B) (1, 2, 3)
-C) {1, 2, 3}
-D) <1, 2, 3>
-E) 1, 2, 3
-Cavab: D
-
-4) Python-da şərt operatoru hansı açar sözlə başlayır?
-A) if
-B) when
-C) switch
-D) case
-E) where
-Cavab: B,E
-5) Python-da dövr qurmaq üçün aşağıdakılardan hansısı istifadə olunur?
-A) for
-B) repeat
-*C) loop
-D) foreach
-E) iterate
-                    ">{{ raw_text }}</textarea>
+                    placeholder="{% trans 'placeholder_editor_sample' context 'exams.template.test_question_bank' %}">{{ raw_text }}</textarea>
                 </div>
             </main>
         </form>
@@ -193,15 +157,15 @@ E) iterate
     <div class="results-container animate-up">
         <div class="results-header">
             <div class="results-title">
-                <h4>Nəticəni Yoxlayın</h4>
-                <p>Sualları seçərək bazaya əlavə edin.</p>
+                <h4>{% trans "heading_review_result" context "exams.template.test_question_bank" %}</h4>
+                <p>{% trans "heading_review_result_desc" context "exams.template.test_question_bank" %}</p>
             </div>
             <div class="action-btns">
                 <button type="button" class="btn-action select-all" onclick="toggleAll(true)">
-                    <i class="bi bi-check2-all"></i> Hamısını Seç
+                    <i class="bi bi-check2-all"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}
                 </button>
                 <button type="button" class="btn-action deselect-all" onclick="toggleAll(false)">
-                    <i class="bi bi-x-circle"></i> Seçimi Ləğv Et
+                    <i class="bi bi-x-circle"></i> {% trans "action_deselect_all" context "exams.template.test_question_bank" %}
                 </button>
             </div>
         </div>
@@ -224,7 +188,7 @@ E) iterate
                     </div>
 
                     <div class="points-mini">
-                        <label>Bal:</label>
+                        <label>{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
                         <input
                             type="number"
                             name="points_{{ forloop.counter }}"
@@ -265,7 +229,7 @@ E) iterate
               
             <div class="sticky-footer">
                 <button class="save-btn" type="submit">
-                    <i class="bi bi-cloud-check"></i> Seçilənləri Yadda Saxla
+                    <i class="bi bi-cloud-check"></i> {% trans "action_save_selected" context "exams.template.test_question_bank" %}
                 </button>
             </div>
         </form>

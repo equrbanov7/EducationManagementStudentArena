@@ -16,7 +16,7 @@
                 {% trans "course_label" context "assignment.review_submissions" %}: <strong>{{ assignment.course.title }}</strong>
             </p>
         </div>
-        <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
+        <a href="{{ back_url }}" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "assignment.review_submissions" %}
         </a>
     </div>
@@ -168,29 +168,49 @@ const reviewI18n = {
 
 document.querySelectorAll('.view-submission-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-        const submissionId = this.dataset.id;
-        const student = this.dataset.student;
-        const content = this.dataset.content;
-        const file = this.dataset.file;
-        const filename = this.dataset.filename;
-        const grade = this.dataset.grade;
-        const feedback = this.dataset.feedback;
-
-        document.getElementById('submission-id').value = submissionId;
-        document.getElementById('modal-student').textContent = student;
-        document.getElementById('modal-content').textContent = content || '(' + reviewI18n.noText + ')';
-        document.getElementById('grade-input').value = grade;
-        document.getElementById('feedback-input').value = feedback;
-
-        if (file) {
-            document.getElementById('modal-file-container').style.display = 'block';
-            document.getElementById('modal-file-link').href = file;
-            document.getElementById('modal-file-name').textContent = filename || reviewI18n.download;
-        } else {
-            document.getElementById('modal-file-container').style.display = 'none';
-        }
+        openSubmission(this);
     });
 });
+
+function openSubmission(button) {
+    if (!button) return;
+
+    const submissionId = button.dataset.id;
+    const student = button.dataset.student;
+    const content = button.dataset.content;
+    const file = button.dataset.file;
+    const filename = button.dataset.filename;
+    const grade = button.dataset.grade;
+    const feedback = button.dataset.feedback;
+
+    document.getElementById('submission-id').value = submissionId;
+    document.getElementById('modal-student').textContent = student;
+    document.getElementById('modal-content').textContent = content || '(' + reviewI18n.noText + ')';
+    document.getElementById('grade-input').value = grade;
+    document.getElementById('feedback-input').value = feedback;
+
+    if (file) {
+        document.getElementById('modal-file-container').style.display = 'block';
+        document.getElementById('modal-file-link').href = file;
+        document.getElementById('modal-file-name').textContent = filename || reviewI18n.download;
+    } else {
+        document.getElementById('modal-file-container').style.display = 'none';
+    }
+}
+
+const selectedSubmissionId = "{{ selected_submission_id }}";
+if (selectedSubmissionId) {
+    const targetButton = document.querySelector('.view-submission-btn[data-id="' + selectedSubmissionId + '"]');
+    if (targetButton) {
+        openSubmission(targetButton);
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const modal = window.bootstrap.Modal.getOrCreateInstance(document.getElementById('submissionModal'));
+            modal.show();
+        } else {
+            targetButton.click();
+        }
+    }
+}
 
 document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
     e.preventDefault();

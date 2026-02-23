@@ -23,7 +23,7 @@
         {% if my_created_courses %}
         <div class="course-cards-grid">
             {% for course in my_created_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=my-courses" class="modern-course-card">
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=my-courses&return_to={{ request.get_full_path|urlencode }}" class="modern-course-card">
                 <div class="course-card-icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>

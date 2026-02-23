@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 {% load lab_filters %}
 
-{% block title %}Qiymətləndir - {{ submission.assignment.student.username }}{% endblock %}
+{% block title %}{% trans "title_prefix_grade" context "labs.template.grade_submission" %} - {{ submission.assignment.student.username }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
     
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -18,28 +18,26 @@
                     <li class="breadcrumb-item">
                         <a href="{% url 'labs:lab_submissions' lab.id %}">{{ lab.title }}</a>
                     </li>
-                    <li class="breadcrumb-item active">Qiymətləndir</li>
+                    <li class="breadcrumb-item active">{% trans "breadcrumb_grade" context "labs.template.grade_submission" %}</li>
                 </ol>
             </nav>
             <h3 class="mb-0">
                 <i class="fas fa-user-graduate text-primary me-2"></i> 
                 {{ submission.assignment.student.get_full_name|default:submission.assignment.student.username }}
             </h3>
-            <small class="text-muted">Cəhd {{ submission.attempt_number }} · {{ submission.submitted_at|date:"d.m.Y H:i" }}</small>
+            <small class="text-muted">{% blocktrans trimmed context "labs.template.grade_submission" with attempt_number=submission.attempt_number submitted_at=submission.submitted_at|date:"d.m.Y H:i" %}label_attempt_info {{ attempt_number }} · {{ submitted_at }}{% endblocktrans %}</small>
         </div>
         <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Geri
+            <i class="fas fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.grade_submission" %}
         </a>
     </div>
     
     <div class="row">
-        
-        <!-- Sol - Cavablar -->
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <i class="fas fa-list-ol me-2"></i> <strong>Tələbənin Cavabları</strong>
-                    <span class="badge bg-white text-primary float-end">{{ answers|length }} sual</span>
+                    <i class="fas fa-list-ol me-2"></i> <strong>{% trans "heading_student_answers" context "labs.template.grade_submission" %}</strong>
+                    <span class="badge bg-white text-primary float-end">{% blocktrans trimmed context "labs.template.grade_submission" with answer_count=answers|length %}label_question_count {{ answer_count }}{% endblocktrans %}</span>
                 </div>
                 <div class="card-body p-0">
                     {% for answer in answers %}
@@ -54,7 +52,7 @@
                                 
                                 {% if answer.answer %}
                                 <div class="bg-light p-3 rounded mb-3">
-                                    <small class="text-muted"><i class="fas fa-pen me-1"></i> Mətn cavabı:</small>
+                                    <small class="text-muted"><i class="fas fa-pen me-1"></i> {% trans "label_text_answer" context "labs.template.grade_submission" %}</small>
                                     <div class="mt-2">{{ answer.answer|linebreaks }}</div>
                                 </div>
                                 {% endif %}
@@ -69,7 +67,7 @@
                                 
                                 {% if not answer.answer and not answer.answer_file %}
                                 <div class="text-muted fst-italic bg-light p-3 rounded">
-                                    <i class="fas fa-minus-circle me-1"></i> Cavab verilməyib
+                                    <i class="fas fa-minus-circle me-1"></i> {% trans "empty_no_answer" context "labs.template.grade_submission" %}
                                 </div>
                                 {% endif %}
                             </div>
@@ -78,25 +76,24 @@
                     {% empty %}
                     <div class="text-center py-5 text-muted">
                         <i class="fas fa-inbox fa-3x mb-3"></i>
-                        <p>Cavab tapılmadı</p>
+                        <p>{% trans "empty_no_answers_found" context "labs.template.grade_submission" %}</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
         
-        <!-- Sağ - Qiymət formu -->
         <div class="col-lg-4">
             <div class="card shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-header bg-success text-white">
-                    <i class="fas fa-star me-2"></i> <strong>Qiymətləndirmə</strong>
+                    <i class="fas fa-star me-2"></i> <strong>{% trans "heading_grading" context "labs.template.grade_submission" %}</strong>
                 </div>
                 <div class="card-body">
                     <form method="POST" id="gradeForm">
                         {% csrf_token %}
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Qiymət</label>
+                            <label class="form-label fw-bold">{% trans "label_score" context "labs.template.grade_submission" %}</label>
                             <div class="input-group input-group-lg">
                                 <input type="number" name="score" class="form-control text-center fs-3" 
                                        value="{{ submission.score|default:'' }}"
@@ -107,17 +104,17 @@
                         </div>
                         
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Rəy / Feedback</label>
+                            <label class="form-label fw-bold">{% trans "label_feedback" context "labs.template.grade_submission" %}</label>
                             <textarea name="feedback" class="form-control" rows="5" 
-                                      placeholder="Tələbəyə göstəriləcək rəy...">{{ submission.feedback|default:'' }}</textarea>
+                                      placeholder="{% trans 'placeholder_feedback' context 'labs.template.grade_submission' %}">{{ submission.feedback|default:'' }}</textarea>
                         </div>
                         
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-check me-2"></i> Yadda Saxla
+                                <i class="fas fa-check me-2"></i> {% trans "action_save" context "labs.template.grade_submission" %}
                             </button>
                             <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary">
-                                Ləğv et
+                                {% trans "action_cancel" context "labs.template.grade_submission" %}
                             </a>
                         </div>
                     </form>
@@ -127,7 +124,7 @@
                 <div class="card-footer bg-light">
                     <small class="text-muted">
                         <i class="fas fa-check-circle text-success me-1"></i>
-                        {{ submission.graded_at|date:"d.m.Y H:i" }} tarixində qiymətləndirilib
+                        {% blocktrans trimmed context "labs.template.grade_submission" with graded_at=submission.graded_at|date:"d.m.Y H:i" %}label_graded_at {{ graded_at }}{% endblocktrans %}
                     </small>
                 </div>
                 {% endif %}

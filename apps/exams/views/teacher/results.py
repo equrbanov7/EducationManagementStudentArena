@@ -1,8 +1,11 @@
 import hashlib
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
@@ -10,6 +13,64 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
+
+
+def _append_query_params(url, **params):
+    clean_params = {key: value for key, value in params.items() if value not in (None, "")}
+    if not clean_params:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode(clean_params)}"
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _resolve_profile_navigation(request, *, default_section="my-exams"):
+    requested_profile_section = (request.GET.get("from_section") or "").strip()
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+    }
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = default_section
+
+    fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    profile_return_url = explicit_return_url or fallback_profile_return_url
+
+    navigation_params = {
+        "from_section": requested_profile_section,
+        "return_to": profile_return_url,
+    }
+    return profile_return_url, navigation_params
 
 
 @login_required
@@ -21,6 +82,12 @@ def teacher_exam_results(request, slug):
     """
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    exam_navigation_query = urlencode(navigation_params)
+    exam_detail_url = _append_query_params(
+        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+        **navigation_params,
+    )
 
     attempts = exam.attempts.select_related("user").order_by("-started_at")
 
@@ -46,8 +113,13 @@ def teacher_exam_results(request, slug):
                     selected_attempt.teacher_feedback = feedback
                     selected_attempt.mark_checked()
                     messages.success(request, pgettext_lazy("exams.view.results.message", "score_feedback_saved"))
-                    # yenidən eyni attempt seçilmiş halda geri dön
-                    return redirect(f"{request.path}?attempt={selected_attempt.id}")
+                    return redirect(
+                        _append_query_params(
+                            request.path,
+                            attempt=selected_attempt.id,
+                            **navigation_params,
+                        )
+                    )
                 else:
                     messages.error(request, pgettext_lazy("exams.view.results.message", "score_range_0_100"))
         else:
@@ -63,7 +135,13 @@ def teacher_exam_results(request, slug):
                 ]
             )
             messages.success(request, pgettext_lazy("exams.view.results.message", "feedback_saved"))
-            return redirect(f"{request.path}?attempt={selected_attempt.id}")
+            return redirect(
+                _append_query_params(
+                    request.path,
+                    attempt=selected_attempt.id,
+                    **navigation_params,
+                )
+            )
 
     # ---------- GET: hansı attempt seçilib? ----------
     if selected_attempt is None:
@@ -132,6 +210,9 @@ def teacher_exam_results(request, slug):
             "hardest_questions": hardest_questions,
             "selected_attempt": selected_attempt,
             "selected_answers": selected_answers,
+            "profile_return_url": profile_return_url,
+            "exam_detail_url": exam_detail_url,
+            "exam_navigation_query": exam_navigation_query,
         },
     )
 
@@ -146,6 +227,11 @@ def teacher_view_attempt(request, slug, attempt_id):
 
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+    profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    results_return_url = _append_query_params(
+        reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
+        **navigation_params,
+    )
 
     # Cavabları al
     answers_qs = (
@@ -169,6 +255,8 @@ def teacher_view_attempt(request, slug, attempt_id):
         "attempt": attempt,
         "qa_list": qa_list,
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
+        "profile_return_url": profile_return_url,
+        "results_return_url": results_return_url,
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)
@@ -185,6 +273,15 @@ def teacher_check_attempt(request, slug, attempt_id):
 
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+    profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    results_return_url = _append_query_params(
+        reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
+        **navigation_params,
+    )
+    view_attempt_url = _append_query_params(
+        reverse("exams:teacher_view_attempt", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+        **navigation_params,
+    )
 
     # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
     if attempt.checked_by_teacher and attempt.teacher_checked_at:
@@ -196,7 +293,7 @@ def teacher_check_attempt(request, slug, attempt_id):
                 request,
                 pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
             )
-            return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
+            return redirect(view_attempt_url)
 
     # YALNIZ bu attempt-ə düşən suallar
     answers_qs = (
@@ -225,7 +322,7 @@ def teacher_check_attempt(request, slug, attempt_id):
                     request,
                     pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
                 )
-                return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
+                return redirect(view_attempt_url)
 
         total_score = 0
         any_score = False
@@ -257,12 +354,14 @@ def teacher_check_attempt(request, slug, attempt_id):
         attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
-        return redirect("exams:teacher_exam_results", slug=exam.slug)
+        return redirect(results_return_url)
 
     context = {
         "exam": exam,
         "attempt": attempt,
         "qa_list": qa_list,
+        "profile_return_url": profile_return_url,
+        "results_return_url": results_return_url,
     }
     return render(request, "exams/teacher/teacher_check_attempt.html", context)
 

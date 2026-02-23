@@ -1,14 +1,16 @@
+{% load i18n %}
+
 <div id="createExamModal" class="modal-overlay">
     <div class="modal-content modal-create-exam">
         <div class="modal-header">
-            <h3>Yeni İmtahan Yarat</h3>
-            <button class="modal-close-btn" id="closeCreateExamModal" type="button" aria-label="Bağla">
+            <h3>{% trans "heading_create_exam" context "exams.template.create_exam_modal" %}</h3>
+            <button class="modal-close-btn" id="closeCreateExamModal" type="button" aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
         <div id="createExamModalBody" class="create-exam-modal-body">
-            <div class="create-exam-modal-loading">Form yüklənir...</div>
+            <div class="create-exam-modal-loading">{% trans "loading_form" context "exams.template.create_exam_modal" %}</div>
         </div>
     </div>
 </div>

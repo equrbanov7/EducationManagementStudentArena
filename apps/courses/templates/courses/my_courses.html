@@ -158,7 +158,7 @@
             </div>
 
             {# ✅ YALNIZ DASHBOARD DÜYMƏSI #}
-            <a class="btn-dashboard" href="{% url 'courses:course_dashboard' course.id %}?from_section=my-courses">
+            <a class="btn-dashboard" href="{% url 'courses:course_dashboard' course.id %}?from_section=my-courses&return_to={{ request.get_full_path|urlencode }}">
               <i class="fas fa-rocket me-2"></i>{% trans "action_go_dashboard" context "courses.my_courses" %}
             </a>
           </div>

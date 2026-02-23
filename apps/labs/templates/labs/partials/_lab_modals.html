@@ -1,11 +1,12 @@
+{% load i18n %}
+
 {% if is_owner %}
 
-<!-- ADD LAB MODAL -->
 <div class="modal fade" id="addLabModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="fas fa-flask me-2"></i> Yeni Lab İşi</h5>
+                <h5 class="modal-title"><i class="fas fa-flask me-2"></i> {% trans "modal_new_lab" context "labs.template.lab_modals" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="createLabForm" enctype="multipart/form-data">
@@ -15,85 +16,83 @@
                     <ul class="nav nav-tabs mb-4" role="tablist">
                         <li class="nav-item">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#addLabTabInfo" type="button">
-                                <i class="fas fa-info-circle me-1"></i> Əsas Məlumat
+                                <i class="fas fa-info-circle me-1"></i> {% trans "tab_basic_info" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addLabTabSettings" type="button">
-                                <i class="fas fa-cog me-1"></i> Ayarlar
+                                <i class="fas fa-cog me-1"></i> {% trans "tab_settings" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addLabTabMaterials" type="button">
-                                <i class="fas fa-file-alt me-1"></i> Materiallar
+                                <i class="fas fa-file-alt me-1"></i> {% trans "tab_materials" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                     </ul>
                     
                     <div class="tab-content">
-                        <!-- TAB 1 -->
                         <div class="tab-pane fade show active" id="addLabTabInfo">
                             <div class="mb-3">
-                                <label class="form-label">Lab Adı <span class="text-danger">*</span></label>
+                                <label class="form-label">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                 <input type="text" name="title" class="form-control" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Maksimum Bal</label>
+                                    <label class="form-label">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
                                     <input type="number" name="max_score" class="form-control" value="100" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Cəhd Sayı</label>
+                                    <label class="form-label">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
                                     <input type="number" name="max_attempts" class="form-control" value="1" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Status</label>
+                                    <label class="form-label">{% trans "label_status" context "labs.template.lab_modals" %}</label>
                                     <select name="status" class="form-select">
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Yayımla</option>
+                                        <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
+                                        <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Təsvir</label>
+                                <label class="form-label">{% trans "label_description" context "labs.template.lab_modals" %}</label>
                                 <textarea name="description" class="form-control" rows="2"></textarea>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                                    <label class="form-label">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                     <input type="datetime-local" name="start_datetime" class="form-control" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Son Tarix <span class="text-danger">*</span></label>
+                                    <label class="form-label">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                     <input type="datetime-local" name="end_datetime" class="form-control" required>
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">İcazəli Qruplar</label>
-                                    <input type="text" class="form-control mb-2" id="addLabGroupSearch" placeholder="Qrup axtar...">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="addLabGroupSearch" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
                                     <div id="addLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
-                                    <small class="text-muted">Seçilib: <span id="addLabGroupCount">0</span></small>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="addLabGroupCount">0</span></small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                                    <input type="text" class="form-control mb-2" id="addLabStudentSearch" placeholder="Tələbə axtar...">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="addLabStudentSearch" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
                                     <div id="addLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
-                                        <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                        <p class="text-muted text-center py-3">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
                                     </div>
-                                    <small class="text-muted">Seçilib: <span id="addLabStudentCount">0</span></small>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="addLabStudentCount">0</span></small>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- TAB 2 -->
                         <div class="tab-pane fade" id="addLabTabSettings">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Hər Tələbəyə Düşən Sual Sayı</label>
+                                    <label class="form-label">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
                                     <input type="number" name="questions_per_student" class="form-control" value="0" min="0">
-                                    <small class="text-muted">0 = bütün suallar</small>
+                                    <small class="text-muted">{% trans "hint_zero_all_questions" context "labs.template.lab_modals" %}</small>
                                 </div>
                             </div>
                             <hr>
@@ -101,11 +100,11 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="allow_late_submission" id="addAllowLate">
-                                        <label class="form-check-label" for="addAllowLate">Gecikmiş göndərişə icazə</label>
+                                        <label class="form-check-label" for="addAllowLate">{% trans "label_allow_late_submission" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Gecikmə Cəzası (%)</label>
+                                    <label class="form-label">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
                                     <input type="number" name="late_penalty_percent" class="form-control" value="0" min="0" max="100">
                                 </div>
                             </div>
@@ -114,34 +113,33 @@
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="allow_file_upload" checked>
-                                        <label class="form-check-label">Fayl yükləmə</label>
+                                        <label class="form-check-label">{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="allow_link_submission" checked>
-                                        <label class="form-check-label">Link göndərmə</label>
+                                        <label class="form-check-label">{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Maks Fayl (MB)</label>
+                                    <label class="form-label">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
                                     <input type="number" name="max_file_size_mb" class="form-control" value="50" min="1">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">İcazəli Fayl Tipləri</label>
+                                <label class="form-label">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
                                 <input type="text" name="allowed_extensions" class="form-control" value="zip,pdf,docx,png,jpg,txt,py,java,cpp">
                             </div>
                         </div>
                         
-                        <!-- TAB 3 -->
                         <div class="tab-pane fade" id="addLabTabMaterials">
                             <div class="mb-3">
-                                <label class="form-label">Müəllim Faylı</label>
+                                <label class="form-label">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
                                 <input type="file" name="teacher_files" class="form-control">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Müəllim Təlimatları</label>
+                                <label class="form-label">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
                                 <textarea name="teacher_instructions" class="form-control" rows="6"></textarea>
                             </div>
                         </div>
@@ -149,20 +147,19 @@
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-danger"><i class="fas fa-check me-1"></i> Yarat</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.lab_modals" %}</button>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-check me-1"></i> {% trans "action_create" context "labs.template.lab_modals" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- EDIT LAB MODAL -->
 <div class="modal fade" id="editLabModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Lab Redaktə Et</h5>
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> {% trans "modal_edit_lab" context "labs.template.lab_modals" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editLabForm" enctype="multipart/form-data">
@@ -173,83 +170,81 @@
                     <ul class="nav nav-tabs mb-4" role="tablist">
                         <li class="nav-item">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#editLabTabInfo" type="button">
-                                <i class="fas fa-info-circle me-1"></i> Əsas Məlumat
+                                <i class="fas fa-info-circle me-1"></i> {% trans "tab_basic_info" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabSettings" type="button">
-                                <i class="fas fa-cog me-1"></i> Ayarlar
+                                <i class="fas fa-cog me-1"></i> {% trans "tab_settings" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#editLabTabMaterials" type="button">
-                                <i class="fas fa-file-alt me-1"></i> Materiallar
+                                <i class="fas fa-file-alt me-1"></i> {% trans "tab_materials" context "labs.template.lab_modals" %}
                             </button>
                         </li>
                     </ul>
                     
                     <div class="tab-content">
-                        <!-- TAB 1 -->
                         <div class="tab-pane fade show active" id="editLabTabInfo">
                             <div class="mb-3">
-                                <label class="form-label">Lab Adı <span class="text-danger">*</span></label>
+                                <label class="form-label">{% trans "label_lab_title" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                 <input type="text" id="editLabTitle" name="title" class="form-control" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Maksimum Bal</label>
+                                    <label class="form-label">{% trans "label_max_score" context "labs.template.lab_modals" %}</label>
                                     <input type="number" id="editLabMaxScore" name="max_score" class="form-control" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Cəhd Sayı</label>
+                                    <label class="form-label">{% trans "label_attempt_count" context "labs.template.lab_modals" %}</label>
                                     <input type="number" id="editLabMaxAttempts" name="max_attempts" class="form-control" min="1">
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Status</label>
+                                    <label class="form-label">{% trans "label_status" context "labs.template.lab_modals" %}</label>
                                     <select id="editLabStatus" name="status" class="form-select">
-                                        <option value="draft">Draft</option>
-                                        <option value="published">Yayımla</option>
+                                        <option value="draft">{% trans "status_draft" context "labs.template.lab_modals" %}</option>
+                                        <option value="published">{% trans "status_publish" context "labs.template.lab_modals" %}</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Təsvir</label>
+                                <label class="form-label">{% trans "label_description" context "labs.template.lab_modals" %}</label>
                                 <textarea id="editLabDescription" name="description" class="form-control" rows="2"></textarea>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                                    <label class="form-label">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                     <input type="datetime-local" id="editLabStart" name="start_datetime" class="form-control" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Son Tarix <span class="text-danger">*</span></label>
+                                    <label class="form-label">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
                                     <input type="datetime-local" id="editLabEnd" name="end_datetime" class="form-control" required>
                                 </div>
                             </div>
                             <hr>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">İcazəli Qruplar</label>
-                                    <input type="text" class="form-control mb-2" id="editLabGroupSearch" placeholder="Qrup axtar...">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_groups" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="editLabGroupSearch" placeholder="{% trans 'placeholder_search_group' context 'labs.template.lab_modals' %}">
                                     <div id="editLabGroupList" class="border rounded" style="max-height:200px;overflow-y:auto;"></div>
-                                    <small class="text-muted">Seçilib: <span id="editLabGroupCount">0</span></small>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabGroupCount">0</span></small>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                                    <input type="text" class="form-control mb-2" id="editLabStudentSearch" placeholder="Tələbə axtar...">
+                                    <label class="form-label fw-bold">{% trans "label_allowed_students" context "labs.template.lab_modals" %}</label>
+                                    <input type="text" class="form-control mb-2" id="editLabStudentSearch" placeholder="{% trans 'placeholder_search_student' context 'labs.template.lab_modals' %}">
                                     <div id="editLabStudentList" class="border rounded" style="max-height:200px;overflow-y:auto;">
-                                        <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                        <p class="text-muted text-center py-3">{% trans "hint_select_group_first" context "labs.template.lab_modals" %}</p>
                                     </div>
-                                    <small class="text-muted">Seçilib: <span id="editLabStudentCount">0</span></small>
+                                    <small class="text-muted">{% trans "label_selected_count" context "labs.template.lab_modals" %}: <span id="editLabStudentCount">0</span></small>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- TAB 2 -->
                         <div class="tab-pane fade" id="editLabTabSettings">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Hər Tələbəyə Düşən Sual Sayı</label>
+                                    <label class="form-label">{% trans "label_questions_per_student" context "labs.template.lab_modals" %}</label>
                                     <input type="number" id="editLabQPS" name="questions_per_student" class="form-control" min="0">
                                 </div>
                             </div>
@@ -258,11 +253,11 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="editAllowLate" name="allow_late_submission">
-                                        <label class="form-check-label" for="editAllowLate">Gecikmiş göndərişə icazə</label>
+                                        <label class="form-check-label" for="editAllowLate">{% trans "label_allow_late_submission" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Gecikmə Cəzası (%)</label>
+                                    <label class="form-label">{% trans "label_late_penalty_percent" context "labs.template.lab_modals" %}</label>
                                     <input type="number" id="editLatePenalty" name="late_penalty_percent" class="form-control" min="0" max="100">
                                 </div>
                             </div>
@@ -271,35 +266,34 @@
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="editAllowFile" name="allow_file_upload">
-                                        <label class="form-check-label" for="editAllowFile">Fayl yükləmə</label>
+                                        <label class="form-check-label" for="editAllowFile">{% trans "label_allow_file_upload" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" id="editAllowLink" name="allow_link_submission">
-                                        <label class="form-check-label" for="editAllowLink">Link göndərmə</label>
+                                        <label class="form-check-label" for="editAllowLink">{% trans "label_allow_link_submission" context "labs.template.lab_modals" %}</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Maks Fayl (MB)</label>
+                                    <label class="form-label">{% trans "label_max_file_size_mb" context "labs.template.lab_modals" %}</label>
                                     <input type="number" id="editMaxFileSize" name="max_file_size_mb" class="form-control" min="1">
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">İcazəli Fayl Tipləri</label>
+                                <label class="form-label">{% trans "label_allowed_file_types" context "labs.template.lab_modals" %}</label>
                                 <input type="text" id="editAllowedExt" name="allowed_extensions" class="form-control">
                             </div>
                         </div>
                         
-                        <!-- TAB 3 -->
                         <div class="tab-pane fade" id="editLabTabMaterials">
                             <div class="mb-3">
-                                <label class="form-label">Müəllim Faylı</label>
+                                <label class="form-label">{% trans "label_teacher_file" context "labs.template.lab_modals" %}</label>
                                 <input type="file" name="teacher_files" class="form-control">
                                 <div id="editCurrentFile" class="mt-2"></div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Müəllim Təlimatları</label>
+                                <label class="form-label">{% trans "label_teacher_instructions" context "labs.template.lab_modals" %}</label>
                                 <textarea id="editLabInstructions" name="teacher_instructions" class="form-control" rows="6"></textarea>
                             </div>
                         </div>
@@ -307,8 +301,8 @@
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Yadda Saxla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.lab_modals" %}</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> {% trans "action_save" context "labs.template.lab_modals" %}</button>
                 </div>
             </form>
         </div>
@@ -329,40 +323,50 @@
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     const $ = id => document.getElementById(id);
+
+    const I18N = {
+        modalNotFound: '{% trans "modal_not_found" context "labs.js.lab_modals" %}',
+        loading: '{% trans "loading" context "labs.js.lab_modals" %}',
+        errorDataNotLoaded: '{% trans "error_data_not_loaded" context "labs.js.lab_modals" %}',
+        errorUnknown: '{% trans "error_unknown" context "labs.js.lab_modals" %}',
+        errorGeneric: '{% trans "error_generic" context "labs.js.lab_modals" %}',
+        confirmDeleteLab: '{% trans "confirm_delete_lab" context "labs.js.lab_modals" %}',
+        errorPrefix: '{% trans "error_prefix" context "labs.js.lab_modals" %}',
+        errorServer: '{% trans "error_server" context "labs.js.lab_modals" %}',
+        noGroups: '{% trans "no_groups" context "labs.js.lab_modals" %}',
+        selectGroupFirst: '{% trans "select_group_first" context "labs.js.lab_modals" %}',
+        noStudents: '{% trans "no_students" context "labs.js.lab_modals" %}',
+        existingFile: '{% trans "existing_file" context "labs.js.lab_modals" %}',
+        buttonCreate: '{% trans "button_create" context "labs.js.lab_modals" %}',
+        buttonSave: '{% trans "button_save" context "labs.js.lab_modals" %}',
+        stateError: '{% trans "state_error" context "labs.js.lab_modals" %}'
+    };
     
     let editSavedStudentIds = new Set();
-    
-    // ═══════════════════════════════════════════════════════════════
-    // GLOBAL FUNCTIONS
-    // ═══════════════════════════════════════════════════════════════
-    
+
     window.openEditLabModal = function(url) {
-        console.log('Opening edit modal:', url);
-        
         const modalEl = $('editLabModal');
         if (!modalEl) {
-            console.error('editLabModal not found!');
-            alert('Modal tapılmadı!');
+            alert(I18N.modalNotFound);
             return;
         }
-        
-        $('editLabGroupList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        $('editLabStudentList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        
+
+        $('editLabGroupList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+        $('editLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
-        
+
         fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.json())
         .then(res => {
-            console.log('Edit lab data:', res);
             if (!res.success) {
-                alert('Məlumat alınmadı: ' + (res.error || ''));
+                alert(I18N.errorDataNotLoaded + ': ' + (res.error || I18N.errorUnknown));
                 return;
             }
-            
+
             const d = res.data;
-            
+
             if ($('editLabId')) $('editLabId').value = d.id;
             if ($('editLabTitle')) $('editLabTitle').value = d.title || '';
             if ($('editLabDescription')) $('editLabDescription').value = d.description || '';
@@ -379,25 +383,24 @@
             if ($('editMaxFileSize')) $('editMaxFileSize').value = d.max_file_size_mb || 50;
             if ($('editAllowedExt')) $('editAllowedExt').value = d.allowed_extensions || '';
             if ($('editLabInstructions')) $('editLabInstructions').value = d.teacher_instructions || '';
-            
+
             if (d.teacher_files_url && $('editCurrentFile')) {
-                $('editCurrentFile').innerHTML = '<a href="' + d.teacher_files_url + '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> Mövcud fayl</a>';
+                $('editCurrentFile').innerHTML = '<a href="' + d.teacher_files_url + '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> ' + I18N.existingFile + '</a>';
             } else if ($('editCurrentFile')) {
                 $('editCurrentFile').innerHTML = '';
             }
-            
+
             editSavedStudentIds = new Set(d.student_ids || []);
             loadGroups('edit', d.group_names || []);
         })
-        .catch(function(err) {
-            console.error('Error:', err);
-            alert('Xəta baş verdi');
+        .catch(function() {
+            alert(I18N.errorGeneric);
         });
     };
-    
+
     window.deleteLabConfirm = function(url) {
-        if (!confirm('Bu lab işini silmək istədiyinizə əminsiniz?')) return;
-        
+        if (!confirm(I18N.confirmDeleteLab)) return;
+
         fetch(url, {
             method: 'POST',
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
@@ -405,31 +408,27 @@
         .then(r => r.json())
         .then(function(d) {
             if (d.success) location.reload();
-            else alert('Xəta: ' + (d.error || 'Naməlum xəta'));
+            else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
         })
-        .catch(function() { alert('Server xətası'); });
+        .catch(function() { alert(I18N.errorServer); });
     };
-    
-    // ═══════════════════════════════════════════════════════════════
-    // LOAD GROUPS
-    // ═══════════════════════════════════════════════════════════════
-    
+
     function loadGroups(mode, checkedGroups) {
         checkedGroups = checkedGroups || [];
         const container = $(mode + 'LabGroupList');
         if (!container) return;
-        
-        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        
+
+        container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+
         fetch('/labs/api/groups/' + COURSE_ID + '/')
         .then(r => r.json())
         .then(function(data) {
             const groups = data.groups || [];
             if (!groups.length) {
-                container.innerHTML = '<p class="text-muted text-center py-3">Qrup yoxdur</p>';
+                container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.noGroups + '</p>';
                 return;
             }
-            
+
             var html = '';
             for (var i = 0; i < groups.length; i++) {
                 var g = groups[i];
@@ -440,52 +439,48 @@
                     '</div>';
             }
             container.innerHTML = html;
-            
+
             container.querySelectorAll('input').forEach(function(cb) {
                 cb.addEventListener('change', function() {
                     updateCount(mode);
                     loadStudents(mode);
                 });
             });
-            
+
             updateCount(mode);
             if (checkedGroups.length) loadStudents(mode);
         })
         .catch(function() {
-            container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+            container.innerHTML = '<p class="text-danger text-center py-3">' + I18N.stateError + '</p>';
         });
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // LOAD STUDENTS
-    // ═══════════════════════════════════════════════════════════════
-    
+
     function loadStudents(mode) {
         const container = $(mode + 'LabStudentList');
         if (!container) return;
-        
+
         var groupInputs = document.querySelectorAll('#' + mode + 'LabGroupList input:checked');
         var groups = [];
         groupInputs.forEach(function(cb) { groups.push(cb.dataset.group); });
-        
+
         if (!groups.length) {
-            container.innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+            container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
             updateCount(mode);
             return;
         }
-        
-        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        
+
+        container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
+
         fetch('/labs/api/students/' + COURSE_ID + '/?groups=' + encodeURIComponent(groups.join(',')))
         .then(r => r.json())
         .then(function(data) {
             const students = data.students || [];
             if (!students.length) {
-                container.innerHTML = '<p class="text-muted text-center py-3">Tələbə yoxdur</p>';
+                container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.noStudents + '</p>';
                 updateCount(mode);
                 return;
             }
-            
+
             var html = '';
             for (var i = 0; i < students.length; i++) {
                 var s = students[i];
@@ -497,41 +492,37 @@
                     '</div>';
             }
             container.innerHTML = html;
-            
+
             container.querySelectorAll('input').forEach(function(cb) {
                 cb.addEventListener('change', function() { updateCount(mode); });
             });
-            
+
             updateCount(mode);
         })
         .catch(function() {
-            container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+            container.innerHTML = '<p class="text-danger text-center py-3">' + I18N.stateError + '</p>';
         });
     }
-    
+
     function updateCount(mode) {
         var gc = document.querySelectorAll('#' + mode + 'LabGroupList input:checked').length;
         var sc = document.querySelectorAll('#' + mode + 'LabStudentList input:checked').length;
         if ($(mode + 'LabGroupCount')) $(mode + 'LabGroupCount').textContent = gc;
         if ($(mode + 'LabStudentCount')) $(mode + 'LabStudentCount').textContent = sc;
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // ADD MODAL
-    // ═══════════════════════════════════════════════════════════════
-    
+
     var addModal = $('addLabModal');
     if (addModal) {
         addModal.addEventListener('shown.bs.modal', function() {
-            $('addLabStudentList').innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+            $('addLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
             loadGroups('add');
         });
-        
+
         addModal.addEventListener('hidden.bs.modal', function() {
             $('createLabForm').reset();
         });
     }
-    
+
     var createForm = $('createLabForm');
     if (createForm) {
         createForm.addEventListener('submit', function(e) {
@@ -539,7 +530,7 @@
             var btn = this.querySelector('[type=submit]');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-            
+
             fetch('/labs/create/' + COURSE_ID + '/', {
                 method: 'POST',
                 body: new FormData(this),
@@ -548,31 +539,27 @@
             .then(r => r.json())
             .then(function(d) {
                 if (d.success) location.reload();
-                else alert('Xəta: ' + (d.error || ''));
+                else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
             })
-            .catch(function() { alert('Server xətası'); })
+            .catch(function() { alert(I18N.errorServer); })
             .finally(function() {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check me-1"></i> Yarat';
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> ' + I18N.buttonCreate;
             });
         });
     }
-    
-    // ═══════════════════════════════════════════════════════════════
-    // EDIT FORM SUBMIT
-    // ═══════════════════════════════════════════════════════════════
-    
+
     var editForm = $('editLabForm');
     if (editForm) {
         editForm.addEventListener('submit', function(e) {
             e.preventDefault();
             var labId = $('editLabId').value;
             if (!labId) return;
-            
+
             var btn = this.querySelector('[type=submit]');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-            
+
             fetch('/labs/' + labId + '/edit/', {
                 method: 'POST',
                 body: new FormData(this),
@@ -581,17 +568,16 @@
             .then(r => r.json())
             .then(function(d) {
                 if (d.success) location.reload();
-                else alert('Xəta: ' + (d.error || ''));
+                else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
             })
-            .catch(function() { alert('Server xətası'); })
+            .catch(function() { alert(I18N.errorServer); })
             .finally(function() {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save me-1"></i> Yadda Saxla';
+                btn.innerHTML = '<i class="fas fa-save me-1"></i> ' + I18N.buttonSave;
             });
         });
     }
-    
-    // Search
+
     var addGSearch = $('addLabGroupSearch');
     if (addGSearch) {
         addGSearch.addEventListener('input', function(e) {
@@ -601,7 +587,7 @@
             });
         });
     }
-    
+
     var editGSearch = $('editLabGroupSearch');
     if (editGSearch) {
         editGSearch.addEventListener('input', function(e) {
@@ -611,7 +597,6 @@
             });
         });
     }
-    
 })();
 </script>
 

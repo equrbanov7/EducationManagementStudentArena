@@ -10,7 +10,7 @@ Sərbəst işlər üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_http_methods
@@ -29,6 +30,43 @@ from .models import Assignment, AssignmentSubmission
 
 User = get_user_model()
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _teacher_review_back_url(request, assignment):
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if explicit_return_url:
+        return explicit_return_url
+
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "pending-review":
+        return f"{reverse('accounts:profile')}?section=pending-review"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
 
 
 def _assignment_back_url(request, assignment):
@@ -408,9 +446,14 @@ def review_submissions(request, pk):
 
     submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
 
+    selected_submission_raw = (request.GET.get("submission") or "").strip()
+    selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
+
     context = {
         "assignment": assignment,
         "submissions": submissions,
+        "selected_submission_id": selected_submission_id,
+        "back_url": _teacher_review_back_url(request, assignment),
     }
 
     return render(request, "assignments/review_submissions.html", context)

@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", function () {
   var updateTemplate = modalElement.getAttribute("data-update-url-template") || "";
   var nextUrl = modalElement.getAttribute("data-next-url") || "";
   var defaultPrimaryTeacher = modalElement.getAttribute("data-default-primary-teacher") || "";
-  var modalTitleCreate = modalElement.getAttribute("data-title-create") || "Yeni qrup yarat";
-  var modalTitleEdit = modalElement.getAttribute("data-title-edit") || "Qrupu redaktə et";
-  var submitLabelCreate = modalElement.getAttribute("data-submit-create") || "Qrupu yarat";
-  var submitLabelEdit = modalElement.getAttribute("data-submit-edit") || "Dəyişiklikləri saxla";
-  var searchNoResultsLabel = modalElement.getAttribute("data-empty-search-result") || "Məlumat tapılmadı.";
-  var fallbackThisLabel = modalElement.getAttribute("data-fallback-this") || "Bu";
+  var modalTitleCreate = modalElement.getAttribute("data-title-create") || "title_create_group";
+  var modalTitleEdit = modalElement.getAttribute("data-title-edit") || "title_edit_group";
+  var submitLabelCreate = modalElement.getAttribute("data-submit-create") || "action_create_group";
+  var submitLabelEdit = modalElement.getAttribute("data-submit-edit") || "action_save_changes";
+  var searchNoResultsLabel = modalElement.getAttribute("data-empty-search-result") || "empty_search_result";
+  var fallbackThisLabel = modalElement.getAttribute("data-fallback-this") || "label_this";
 
   var nameInput = form.querySelector('input[name="name"]');
   var primaryTeacherSelect = form.querySelector('select[name="primary_teacher"]');
