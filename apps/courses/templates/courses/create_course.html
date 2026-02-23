@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Yeni Kurs Yaratma - EMSArena{% endblock %}
+{% block title %}{% trans "page_title" context "courses.create_page" %} - EMSArena{% endblock %}
 
 {% block content %}
 <div class="container mt-5 mb-5">
@@ -11,7 +12,7 @@
             <div class="card shadow-lg border-0 mb-4">
                 <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <h2 class="mb-0 text-white">
-                        <i class="fas fa-graduation-cap"></i> Yeni Kurs Yaratma
+                        <i class="fas fa-graduation-cap"></i> {% trans "page_title" context "courses.create_page" %}
                     </h2>
                 </div>
                 
@@ -25,7 +26,7 @@
                         <div class="mb-4">
                             <label for="{{ form.title.id_for_label }}" class="form-label">
                                 <strong>
-                                    <i class="fas fa-book"></i> Kurs Adı
+                                    <i class="fas fa-book"></i> {% trans "field_course_name" context "courses.create_page" %}
                                 </strong>
                                 <span class="text-danger">*</span>
                             </label>
@@ -42,13 +43,13 @@
                         <div class="mb-4">
                             <label for="{{ form.description.id_for_label }}" class="form-label">
                                 <strong>
-                                    <i class="fas fa-pen-fancy"></i> Kurs Təsviri
+                                    <i class="fas fa-pen-fancy"></i> {% trans "field_course_description" context "courses.create_page" %}
                                 </strong>
                             </label>
                             {{ form.description }}
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-info-circle"></i>
-                                Kursun məqsədi, mərəkləri və hansı tələbələr üçün olduğunu yazın.
+                                {% trans "help_course_description" context "courses.create_page" %}
                             </small>
                             {% if form.description.errors %}
                                 <div class="alert alert-danger mt-2 small">
@@ -61,13 +62,13 @@
                         <div class="mb-4">
                             <label for="{{ form.cover_image.id_for_label }}" class="form-label">
                                 <strong>
-                                    <i class="fas fa-image"></i> Kurs Şəkli (Cover Image)
+                                    <i class="fas fa-image"></i> {% trans "field_course_cover" context "courses.create_page" %}
                                 </strong>
                             </label>
                             
                             <!-- Image Preview -->
                             <div id="imagePreview" class="mb-3" style="display: none;">
-                                <img id="previewImg" src="#" alt="Preview" 
+                                <img id="previewImg" src="#" alt="{% trans 'alt_preview' context 'courses.create_page' %}" 
                                      style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                             </div>
                             
@@ -75,14 +76,14 @@
                             <div class="input-group">
                                 {{ form.cover_image }}
                                 <label class="input-group-text" for="{{ form.cover_image.id_for_label }}">
-                                    <i class="fas fa-upload" style="padding:6px"></i> Şəkil Seç
+                                    <i class="fas fa-upload" style="padding:6px"></i> {% trans "action_choose_image" context "courses.create_page" %}
                                 </label>
                             </div>
                             
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-lightbulb"></i>
-                                Şəkil yüklənməsə, sistem default şəkil istifadə edəcək.
-                                Optimal ölçü: 1200x600px
+                                {% trans "help_cover_default" context "courses.create_page" %}
+                                {% trans "help_cover_optimal_size" context "courses.create_page" %}
                             </small>
                             
                             {% if form.cover_image.errors %}
@@ -96,14 +97,14 @@
                         <div class="mb-4">
                             <label for="{{ form.status.id_for_label }}" class="form-label">
                                 <strong>
-                                    <i class="fas fa-toggle-on"></i> Status
+                                    <i class="fas fa-toggle-on"></i> {% trans "field_status" context "courses.create_page" %}
                                 </strong>
                             </label>
                             {{ form.status }}
                             <small class="text-muted d-block mt-2">
                                 <i class="fas fa-info-circle"></i>
-                                <strong>Draft:</strong> Tələbələr görmə (hazırlıq) |
-                                <strong>Published:</strong> Tələbələr görə (canlı)
+                                <strong>{% trans "status_draft" context "courses.create_page" %}:</strong> {% trans "help_status_draft" context "courses.create_page" %} |
+                                <strong>{% trans "status_published" context "courses.create_page" %}:</strong> {% trans "help_status_published" context "courses.create_page" %}
                             </small>
                         </div>
                         
@@ -111,10 +112,10 @@
                         <div class="d-flex gap-3 mt-5">
                             <a href="{% url 'user_profile' username=request.user.username %}" 
                                class="btn btn-secondary btn-lg flex-grow-1">
-                                <i class="fas fa-arrow-left"></i> Geri
+                                <i class="fas fa-arrow-left"></i> {% trans "action_back" context "courses.create_page" %}
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
-                                <i class="fas fa-check-circle"></i> Kurs Yaratma
+                                <i class="fas fa-check-circle"></i> {% trans "action_create_course" context "courses.create_page" %}
                             </button>
                         </div>
                     </form>
@@ -124,13 +125,13 @@
             <!-- INFO CARD -->
             <div class="alert alert-info border-0 shadow-sm">
                 <h5 class="mb-3">
-                    <i class="fas fa-lightbulb"></i> Kurs Yaratdıqdan Sonra
+                    <i class="fas fa-lightbulb"></i> {% trans "after_create_title" context "courses.create_page" %}
                 </h5>
                 <ul class="mb-0">
-                    <li>Kurs yaradıldıqdan sonra <strong>dashboard səhifəsinə</strong> yönləndirilirsiniz</li>
-                    <li>Dashboard-da <strong>Mövzular, İşlər, Resurslar</strong> əlavə edə bilərsiniz</li>
-                    <li>Kursunuzu <strong>Draft</strong> halında saxlayıb dəfələr-dəfələ redaktə edə bilərsiniz</li>
-                    <li>Tələbələrə açmaq üçün status-u <strong>Published</strong> edin</li>
+                    <li>{% trans "after_create_item_1" context "courses.create_page" %}</li>
+                    <li>{% trans "after_create_item_2" context "courses.create_page" %}</li>
+                    <li>{% trans "after_create_item_3" context "courses.create_page" %}</li>
+                    <li>{% trans "after_create_item_4" context "courses.create_page" %}</li>
                 </ul>
             </div>
         </div>

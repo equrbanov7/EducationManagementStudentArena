@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
@@ -38,17 +39,17 @@ def teacher_exam_results(request, slug):
             try:
                 score_val = int(score_raw)
             except ValueError:
-                messages.error(request, "Bal tam ədəd olmalıdır.")
+                messages.error(request, pgettext_lazy("exams.view.results.message", "score_must_be_integer"))
             else:
                 if 0 <= score_val <= 100:
                     selected_attempt.teacher_score = score_val
                     selected_attempt.teacher_feedback = feedback
                     selected_attempt.mark_checked()
-                    messages.success(request, "Bal və rəy yadda saxlanıldı.")
+                    messages.success(request, pgettext_lazy("exams.view.results.message", "score_feedback_saved"))
                     # yenidən eyni attempt seçilmiş halda geri dön
                     return redirect(f"{request.path}?attempt={selected_attempt.id}")
                 else:
-                    messages.error(request, "Bal 0–100 aralığında olmalıdır.")
+                    messages.error(request, pgettext_lazy("exams.view.results.message", "score_range_0_100"))
         else:
             # yalnız feedback saxlanılır
             selected_attempt.teacher_score = None
@@ -61,7 +62,7 @@ def teacher_exam_results(request, slug):
                     "checked_by_teacher",
                 ]
             )
-            messages.success(request, "Rəy yadda saxlanıldı.")
+            messages.success(request, pgettext_lazy("exams.view.results.message", "feedback_saved"))
             return redirect(f"{request.path}?attempt={selected_attempt.id}")
 
     # ---------- GET: hansı attempt seçilib? ----------
@@ -84,7 +85,9 @@ def teacher_exam_results(request, slug):
         # Anonim ad (deterministic)
         hash_input = f"{att.id}-{att.user.id}-{exam.id}"
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = f"Tələbə #{hash_digest[:6].upper()}"
+        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(
+            code=hash_digest[:6].upper()
+        )
 
         # Vaxt hesablamaları
         seconds_remaining = None
@@ -189,7 +192,10 @@ def teacher_check_attempt(request, slug, attempt_id):
         minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
 
         if minutes_passed >= 5:
-            messages.warning(request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.")
+            messages.warning(
+                request,
+                pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+            )
             return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
 
     # YALNIZ bu attempt-ə düşən suallar
@@ -215,7 +221,10 @@ def teacher_check_attempt(request, slug, attempt_id):
             minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)
 
             if minutes_passed >= 5:
-                messages.error(request, "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz.")
+                messages.error(
+                    request,
+                    pgettext_lazy("exams.view.results.message", "cannot_edit_after_five_minutes"),
+                )
                 return redirect("exams:teacher_view_attempt", slug=exam.slug, attempt_id=attempt.id)
 
         total_score = 0
@@ -247,7 +256,7 @@ def teacher_check_attempt(request, slug, attempt_id):
         attempt.teacher_checked_at = timezone.now()  # ✅ Hər dəyişiklikdə yenilənir
         attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
-        messages.success(request, "İmtahan cəhdi uğurla yoxlanıldı.")
+        messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
         return redirect("exams:teacher_exam_results", slug=exam.slug)
 
     context = {
@@ -287,7 +296,9 @@ def teacher_pending_attempts(request):
         # Anonim ad (deterministic)
         hash_input = f"{att.id}-{att.user.id}-{att.exam.id}"
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = f"Tələbə #{hash_digest[:6].upper()}"
+        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(
+            code=hash_digest[:6].upper()
+        )
 
         # Vaxt hesablamaları
         seconds_remaining = None

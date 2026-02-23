@@ -16,11 +16,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function modalLoadingMarkup() {
-        return '<div class="create-course-modal-loading">Form yüklənir...</div>';
+        var loadingText = modal.getAttribute("data-loading-text") || "Loading form...";
+        return '<div class="create-course-modal-loading">' + loadingText + "</div>";
     }
 
     function modalErrorMarkup() {
-        return '<div class="create-course-modal-error">Form yüklənmədi. Yenidən cəhd edin.</div>';
+        var errorText = modal.getAttribute("data-load-error-text") || "Form failed to load. Please try again.";
+        return '<div class="create-course-modal-error">' + errorText + "</div>";
     }
 
     function buildModalUrl(baseUrl) {
@@ -118,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var originalSubmitText = submitButton ? submitButton.innerHTML : "";
             if (submitButton) {
                 submitButton.disabled = true;
-                submitButton.textContent = "Yaradılır...";
+                submitButton.textContent = modal.getAttribute("data-submitting-text") || "Creating...";
             }
 
             try {

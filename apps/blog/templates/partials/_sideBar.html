@@ -1,25 +1,24 @@
+{% load i18n %}
 <aside class="sidebar">
   <div class="widget">
-      <h3>Kateqoriyalar</h3>
+      <h3>{% trans "categories" context "blog.partial.sidebar" %}</h3>
       <ul class="category-list">
           {% for category in categories %}
               <li>
-                  {# Category detail səhifəsinin URL-i olmalıdır. Məsələn: {% url 'category_detail' category.slug %} #}
-                  <a href="{% url 'category_detail' category.slug %}"> 
-                      {{ category.name }} 
+                  <a href="{% url 'category_detail' category.slug %}">
+                      {{ category.name }}
                       <span class="category-count">({{ category.post_count }})</span>
                   </a>
               </li>
           {% empty %}
-              <li><a href="#">Heç bir kateqoriya tapılmadı.</a></li>
+              <li><a href="#">{% trans "empty_categories" context "blog.partial.sidebar" %}</a></li>
           {% endfor %}
       </ul>
   </div>
 
   <div class="widget">
-      <h3>Populyar Etiketlər</h3>
+      <h3>{% trans "popular_tags" context "blog.partial.sidebar" %}</h3>
       <div class="tags-container">
-          {# Etiket modelin hazır olduqda bura əlavə edəcəksən #}
           <span class="tag-item">Javascript</span>
           <span class="tag-item">CSS</span>
           <span class="tag-item">Python</span>

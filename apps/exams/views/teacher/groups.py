@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import pgettext, pgettext_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -47,7 +48,7 @@ def _ensure_group_manager(user):
         }
 
     if has_student_role and not has_teacher_like_role:
-        raise PermissionDenied("Bu səhifəyə giriş icazəniz yoxdur.")
+        raise PermissionDenied(pgettext("exams.view.groups.message", "no_page_permission"))
 
 
 def _can_multi_assign_teachers(user):
@@ -76,13 +77,13 @@ def _resolve_next_url(request):
 def _get_required_organization(request):
     organization = get_active_organization(request)
     if organization is None:
-        messages.error(request, "Aktiv təşkilat tapılmadı.")
+        messages.error(request, pgettext_lazy("exams.view.groups.message", "active_org_not_found"))
         return None
 
     if not _is_superadmin(request.user):
         user_org = getattr(getattr(request.user, "profile", None), "organization", None)
         if user_org != organization:
-            raise PermissionDenied("Aktiv tenant sizin təşkilatınızla uyğun deyil.")
+            raise PermissionDenied(pgettext("exams.view.groups.message", "active_tenant_mismatch"))
 
     return organization
 
@@ -152,7 +153,7 @@ def teacher_create_group(request):
     form = _group_form_for_request(request, organization, data=request.POST)
     if form.is_valid():
         form.save()
-        messages.success(request, "Qrup uğurla yaradıldı.")
+        messages.success(request, pgettext_lazy("exams.view.groups.message", "group_created"))
         next_url = _resolve_next_url(request)
         if next_url:
             return redirect(next_url)
@@ -160,7 +161,7 @@ def teacher_create_group(request):
 
     next_url = _resolve_next_url(request)
     if next_url:
-        messages.error(request, "Qrup yaradılmadı. Form məlumatlarını yoxlayın.")
+        messages.error(request, pgettext_lazy("exams.view.groups.message", "group_create_failed"))
         return redirect(next_url)
 
     return render(
@@ -184,7 +185,7 @@ def teacher_update_group(request, group_id):
 
     if form.is_valid():
         form.save()
-        messages.success(request, "Qrup yeniləndi.")
+        messages.success(request, pgettext_lazy("exams.view.groups.message", "group_updated"))
         next_url = _resolve_next_url(request)
         if next_url:
             return redirect(next_url)
@@ -192,7 +193,7 @@ def teacher_update_group(request, group_id):
 
     next_url = _resolve_next_url(request)
     if next_url:
-        messages.error(request, "Qrup yenilənmədi. Form məlumatlarını yoxlayın.")
+        messages.error(request, pgettext_lazy("exams.view.groups.message", "group_update_failed"))
         return redirect(next_url)
 
     groups = _group_queryset_for_actor(request, organization)
@@ -220,7 +221,7 @@ def teacher_delete_group(request, group_id):
 
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
     group.delete()
-    messages.success(request, "Qrup silindi.")
+    messages.success(request, pgettext_lazy("exams.view.groups.message", "group_deleted"))
     next_url = _resolve_next_url(request)
     if next_url:
         return redirect(next_url)

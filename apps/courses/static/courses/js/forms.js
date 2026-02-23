@@ -9,6 +9,11 @@
  * - Form validation
  */
 
+const COURSES_I18N = window.COURSES_I18N || {};
+const ERRORS_LABEL = COURSES_I18N.errorsLabel || "Errors";
+const PLEASE_WAIT = COURSES_I18N.pleaseWait || "Please wait...";
+const RETRY_ERROR = COURSES_I18N.retryError || "An error occurred. Please try again.";
+
 /**
  * Form error-larını göstər
  * 
@@ -19,7 +24,7 @@ function showFormErrors(containerId, errors) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
-    let errorHtml = '<strong>Xətalar:</strong><ul class="mb-0">';
+    let errorHtml = '<strong>' + ERRORS_LABEL + ':</strong><ul class="mb-0">';
     
     Object.keys(errors).forEach(field => {
         const messages = errors[field];
@@ -90,7 +95,7 @@ function handleFormSubmit(form, successCallback, errorCallback) {
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn ? submitBtn.innerHTML : '';
         if (submitBtn) {
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gözləyin...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + PLEASE_WAIT;
         }
         
         fetch(actionUrl, {
@@ -114,7 +119,7 @@ function handleFormSubmit(form, successCallback, errorCallback) {
         })
         .catch(error => {
             console.error('Form submission error:', error);
-            notify('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+            notify(RETRY_ERROR, 'error');
         })
         .finally(() => {
             // Enable inputs

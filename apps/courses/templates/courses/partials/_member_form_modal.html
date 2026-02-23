@@ -1,5 +1,6 @@
 {% load static %}
 {% load custom_filters %}
+{% load i18n %}
 
 <style>
     /* Custom Selector Styles */
@@ -97,7 +98,7 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-user-plus"></i> Tələbə Əlavə Et
+                    <i class="fas fa-user-plus"></i> {% trans "student_modal_title" context "courses.partial.member_modal" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" 
                         data-bs-dismiss="modal" aria-label="Close"></button>
@@ -110,22 +111,22 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="groupNameInput" class="form-label">
-                            <i class="fas fa-users"></i> Qrup Adı (istəyə bağlı)
+                            <i class="fas fa-users"></i> {% trans "field_group_name_optional" context "courses.partial.member_modal" %}
                         </label>
                         <input type="text" 
                                class="form-control" 
                                id="groupNameInput" 
                                name="group_name"
-                               placeholder="Məs: 940, 950, 842A1...">
+                               placeholder="{% trans 'placeholder_group_name' context 'courses.partial.member_modal' %}">
                     </div>
 
                     <div class="custom-selector-wrapper">
-                        <label class="form-label fw-bold mb-2">Tələbələr</label>
+                        <label class="form-label fw-bold mb-2">{% trans "label_students" context "courses.partial.member_modal" %}</label>
                         
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
                             <input type="text" id="student_search_input" class="custom-search-input" 
-                                   placeholder="Tələbə axtar (ad, username)...">
+                                   placeholder="{% trans 'placeholder_search_students' context 'courses.partial.member_modal' %}">
                         </div>
 
                         <div id="student_list_container" class="custom-list-container">
@@ -146,29 +147,29 @@
                                 </div>
                                 {% endfor %}
                             {% else %}
-                                <div class="p-3 text-center text-muted">İstifadəçi tapılmadı.</div>
+                                <div class="p-3 text-center text-muted">{% trans "empty_user_not_found" context "courses.partial.member_modal" %}</div>
                             {% endif %}
                         </div>
 
                         <div class="selection-counter">
-                            Seçilib: <span id="student_counter">0</span>
+                            {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="student_counter">0</span>
                         </div>
                     </div>
                     
                     <div id="studentLoadingIndicator" class="text-center mt-3" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Yüklənir...</span>
+                            <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
                         </div>
-                        <p class="text-muted mt-2">Tələbələr əlavə olunur...</p>
+                        <p class="text-muted mt-2">{% trans "students_adding" context "courses.partial.member_modal" %}</p>
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Ləğv et
+                        <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Əlavə Et
+                        <i class="fas fa-check"></i> {% trans "action_add" context "courses.partial.member_modal" %}
                     </button>
                 </div>
             </form>
@@ -181,7 +182,7 @@
         <div class="modal-content">
             <div class="modal-header bg-secondary text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-users-cog"></i> Qrup Əlavə Et
+                    <i class="fas fa-users-cog"></i> {% trans "group_modal_title" context "courses.partial.member_modal" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" 
                         data-bs-dismiss="modal" aria-label="Close"></button>
@@ -194,12 +195,12 @@
                 <div class="modal-body">
                     
                     <div class="custom-selector-wrapper">
-                        <label class="form-label fw-bold mb-2">Qruplar</label>
+                        <label class="form-label fw-bold mb-2">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
                         
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
                             <input type="text" id="group_search_input" class="custom-search-input" 
-                                   placeholder="Qrup axtar...">
+                                   placeholder="{% trans 'placeholder_search_groups' context 'courses.partial.member_modal' %}">
                         </div>
 
                         <div id="group_list_container" class="custom-list-container">
@@ -217,33 +218,33 @@
                                 </div>
                                 {% endfor %}
                             {% else %}
-                                <div class="p-3 text-center text-muted">Qrup tapılmadı.</div>
+                                <div class="p-3 text-center text-muted">{% trans "empty_group_not_found" context "courses.partial.member_modal" %}</div>
                             {% endif %}
                         </div>
 
                         <div class="selection-counter">
-                            Seçilib: <span id="group_counter">0</span>
+                            {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="group_counter">0</span>
                         </div>
                     </div>
                     <div class="alert alert-info mt-3">
                         <i class="fas fa-info-circle"></i>
-                        Seçilən qruplardakı <strong>bütün tələbələr</strong> kursa əlavə ediləcək.
+                        {% trans "groups_info_text" context "courses.partial.member_modal" %}
                     </div>
 
                     <div id="groupLoadingIndicator" class="text-center mt-3" style="display: none;">
                         <div class="spinner-border text-secondary" role="status">
-                            <span class="visually-hidden">Yüklənir...</span>
+                            <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
                         </div>
-                        <p class="text-muted mt-2">Qruplar əlavə olunur...</p>
+                        <p class="text-muted mt-2">{% trans "groups_adding" context "courses.partial.member_modal" %}</p>
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> Ləğv et
+                        <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
                     <button type="submit" class="btn btn-secondary">
-                        <i class="fas fa-check"></i> Qrupları Əlavə Et
+                        <i class="fas fa-check"></i> {% trans "action_add_groups" context "courses.partial.member_modal" %}
                     </button>
                 </div>
             </form>
@@ -253,6 +254,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const MSG_MIN_ONE_STUDENT = "{% trans 'msg_min_one_student' context 'courses.partial.member_modal' %}";
+        const MSG_MIN_ONE_GROUP = "{% trans 'msg_min_one_group' context 'courses.partial.member_modal' %}";
+        const MSG_ADDING = "{% trans 'msg_adding' context 'courses.partial.member_modal' %}";
+        const MSG_ERROR_PREFIX = "{% trans 'msg_error_prefix' context 'courses.partial.member_modal' %}";
+        const MSG_UNKNOWN_ERROR = "{% trans 'msg_unknown_error' context 'courses.partial.member_modal' %}";
+        const MSG_SERVER_ERROR = "{% trans 'msg_server_error' context 'courses.partial.member_modal' %}";
+        const MSG_DELETE_MEMBER_CONFIRM_SUFFIX = "{% trans 'msg_delete_member_confirm_suffix' context 'courses.partial.member_modal' %}";
+        const MSG_DELETE_FAILED_PREFIX = "{% trans 'msg_delete_failed_prefix' context 'courses.partial.member_modal' %}";
+        const MSG_ERROR = "{% trans 'msg_error' context 'courses.partial.member_modal' %}";
     
         // ==========================================================
         // 1. SELECTOR LOGIC (Axtarış, Seçim və Sayğac)
@@ -334,13 +344,13 @@
                 const userIds = formData.getAll('user_ids'); // Bütün seçimləri al
     
                 if (userIds.length === 0) {
-                    alert('Ən azı bir tələbə seçin!');
+                    alert(MSG_MIN_ONE_STUDENT);
                     return;
                 }
     
                 // Düyməni deaktiv et
                 const originalText = btn.innerText;
-                btn.innerText = 'Əlavə edilir...';
+                btn.innerText = MSG_ADDING;
                 btn.disabled = true;
     
                 fetch(this.action, {
@@ -354,14 +364,14 @@
                         // Uğurludursa, SƏHİFƏNİ YENİLƏ (Bu vacibdir!)
                         location.reload(); 
                     } else {
-                        alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                        alert(MSG_ERROR_PREFIX + (data.error || MSG_UNKNOWN_ERROR));
                         btn.innerText = originalText;
                         btn.disabled = false;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Server xətası baş verdi.');
+                    alert(MSG_SERVER_ERROR);
                     btn.innerText = originalText;
                     btn.disabled = false;
                 });
@@ -381,12 +391,12 @@
                 const groupIds = formData.getAll('group_ids');
     
                 if (groupIds.length === 0) {
-                    alert('Ən azı bir qrup seçin!');
+                    alert(MSG_MIN_ONE_GROUP);
                     return;
                 }
     
                 const originalText = btn.innerText;
-                btn.innerText = 'Əlavə edilir...';
+                btn.innerText = MSG_ADDING;
                 btn.disabled = true;
     
                 fetch(this.action, {
@@ -399,7 +409,7 @@
                     if (data.success) {
                         location.reload(); // Səhifəni yenilə
                     } else {
-                        alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+                        alert(MSG_ERROR_PREFIX + (data.error || MSG_UNKNOWN_ERROR));
                         btn.innerText = originalText;
                         btn.disabled = false;
                     }
@@ -417,7 +427,7 @@
         // ==========================================================
         // Bu funksiyanı qlobal edirik ki, HTML-dəki onclick="..." görə bilsin
         window.deleteMember = function(memberId, name) {
-            if(!confirm(name + " adlı tələbəni kursdan silmək istəyirsiniz?")) return;
+            if(!confirm(name + MSG_DELETE_MEMBER_CONFIRM_SUFFIX)) return;
     
             // CSRF Tokeni tap
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -439,12 +449,12 @@
                     // Beləliklə, silinən tələbə avtomatik olaraq "Tələbə Əlavə Et" modalına düşəcək.
                     location.reload();
                 } else {
-                    alert("Silinmədi: " + (data.error || 'Xəta'));
+                    alert(MSG_DELETE_FAILED_PREFIX + (data.error || MSG_ERROR));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Server xətası.');
+                alert(MSG_SERVER_ERROR);
             });
         };
     });

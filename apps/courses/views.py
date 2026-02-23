@@ -19,6 +19,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
@@ -69,7 +70,7 @@ class IsTeacherMixin(UserPassesTestMixin):
         return getattr(self.request.user, "is_teacher_or_above", False)
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu əməliyyat yalnız müəllimlər üçün mümkündür.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "teachers_only_action"))
         return redirect("home")
 
 
@@ -81,7 +82,7 @@ class IsCourseOwnerMixin(UserPassesTestMixin):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu kursu redaktə etməyə icazəniz yoxdur.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "no_permission_edit_course"))
         return redirect("home")
 
 
@@ -120,7 +121,10 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         organization = get_request_organization(self.request)
         form.instance.organization_id = get_organization_int_id(organization)
         super().form_valid(form)
-        messages.success(self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!')
+        messages.success(
+            self.request,
+            pgettext("courses.view.message", "course_created_successfully").format(title=form.instance.title),
+        )
         if self._is_modal_request():
             return JsonResponse(
                 {
@@ -177,7 +181,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         is_owner = course.owner_id == self.request.user.id
 
         if not is_owner and membership is None:
-            raise PermissionDenied("Bu kursa giriş icazəniz yoxdur.")
+            raise PermissionDenied(pgettext("courses.view.permission", "no_access_this_course"))
 
         self._membership = membership
         return course
@@ -561,12 +565,13 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
         form.instance.order = max_order + 1
 
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "topic_added").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" mövzusu əlavə olundu',
+                    "message": success_message,
                     "topic": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -575,13 +580,13 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" mövzusu əlavə olundu')
+        messages.success(self.request, success_message)
         return response
 
     def form_invalid(self, form):
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": False, "errors": form.errors}, status=400)
-        messages.error(self.request, "Mövzu əlavə olunarkən xəta baş verdi.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "topic_add_failed"))
         return redirect("courses:course_dashboard", course_id=self.course.id)
 
     def get_success_url(self):
@@ -608,17 +613,18 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
         self.topic = self.get_object()
         self.course = self.topic.course
         if not _owner_courses_queryset(request).filter(id=self.course.id).exists():
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+            return HttpResponseForbidden(pgettext("courses.view.message", "no_permission_edit_course"))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "topic_updated").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" mövzusu yeniləndi',
+                    "message": success_message,
                     "topic": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -628,14 +634,14 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" mövzusu yeniləndi')
+        messages.success(self.request, success_message)
         return response
 
     def form_invalid(self, form):
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": False, "errors": form.errors}, status=400)
 
-        messages.error(self.request, "Mövzu yenilənərkən xəta baş verdi.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "topic_update_failed"))
         return redirect("courses:course_dashboard", course_id=self.course.id)
 
     def get_success_url(self):
@@ -660,7 +666,10 @@ class DeleteTopicView(IsCourseOwnerMixin, View):
         topic_title = topic.title
         topic.delete()
 
-        messages.success(request, f'✅ "{topic_title}" mövzusu silindi.')
+        messages.success(
+            request,
+            pgettext("courses.view.message", "topic_deleted").format(title=topic_title),
+        )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": True})
@@ -686,12 +695,13 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
     def form_valid(self, form):
         form.instance.course = self.course
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "resource_added").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" resursu əlavə olundu',
+                    "message": success_message,
                     "resource": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -700,7 +710,7 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" resursu əlavə olundu')
+        messages.success(self.request, success_message)
         return response
 
     def get_success_url(self):
@@ -725,7 +735,10 @@ class DeleteResourceView(IsCourseOwnerMixin, View):
         resource_title = resource.title
         resource.delete()
 
-        messages.success(request, f'✅ "{resource_title}" resursu silindi.')
+        messages.success(
+            request,
+            pgettext("courses.view.message", "resource_deleted").format(title=resource_title),
+        )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": True})
@@ -746,7 +759,7 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu səhifəyə giriş icazəniz yoxdur.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "no_permission_access_page"))
         return redirect("home")
 
     def get(self, request, *args, **kwargs):
@@ -832,7 +845,10 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+            status=403,
+        )
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -842,7 +858,10 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         group_name = request.POST.get("group_name", "").strip()
 
         if not user_ids:
-            return JsonResponse({"success": False, "error": "Heç bir tələbə seçilməyib."}, status=400)
+            return JsonResponse(
+                {"success": False, "error": pgettext("courses.view.message", "no_student_selected")},
+                status=400,
+            )
 
         added_count = 0
 
@@ -865,7 +884,12 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
             except User.DoesNotExist:
                 continue
 
-        return JsonResponse({"success": True, "message": f"{added_count} tələbə kursa əlavə olundu."})
+        return JsonResponse(
+            {
+                "success": True,
+                "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
+            }
+        )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -881,7 +905,7 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur."}, status=403)
+        return JsonResponse({"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -890,7 +914,10 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
         group_ids = request.POST.getlist("group_ids")
 
         if not group_ids:
-            return JsonResponse({"success": False, "error": "Qrup seçilməyib."}, status=400)
+            return JsonResponse(
+                {"success": False, "error": pgettext("courses.view.message", "no_group_selected")},
+                status=400,
+            )
 
         try:
             user_org = get_request_organization(request)
@@ -919,14 +946,14 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f"{added_count} tələbə kursa əlavə olundu.",
+                    "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
                     "added_count": added_count,
                 }
             )
 
         except ImportError:
             return JsonResponse(
-                {"success": False, "error": "StudentGroup modeli tapılmadı."},
+                {"success": False, "error": pgettext("courses.view.message", "studentgroup_model_not_found")},
                 status=500,
             )
         except Exception as e:
@@ -946,7 +973,10 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        return JsonResponse({"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+            status=403,
+        )
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
@@ -957,11 +987,12 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         username = membership.user.username
         membership.delete()
+        success_message = pgettext("courses.view.message", "member_deleted").format(username=username)
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "message": f"{username} silindi."})
+            return JsonResponse({"success": True, "message": success_message})
 
-        messages.success(request, f"✅ {username} silindi.")
+        messages.success(request, success_message)
         return redirect("courses:course_members", course_id=course_id)
 
 
@@ -982,7 +1013,7 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
         group_name = request.POST.get("group_name")
 
         if not group_name:
-            messages.error(request, "Qrup adı tapılmadı.")
+            messages.error(request, pgettext_lazy("courses.view.message", "group_name_missing"))
             return redirect("courses:course_members", course_id=course_id)
 
         course = _get_owner_course_or_404(request, course_id)
@@ -991,7 +1022,10 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         messages.success(
             request,
-            f'✅ "{group_name}" qrupundan {deleted_count} tələbə kursdan çıxarıldı.',
+            pgettext("courses.view.message", "group_removed_from_course").format(
+                group_name=group_name,
+                count=deleted_count,
+            ),
         )
         return redirect("courses:course_members", course_id=course_id)
 
@@ -1011,7 +1045,10 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
     pk_url_kwarg = "course_id"
 
     def form_valid(self, form):
-        messages.success(self.request, f'✅ "{form.instance.title}" kursu yeniləndi.')
+        messages.success(
+            self.request,
+            pgettext("courses.view.message", "course_updated").format(title=form.instance.title),
+        )
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -1033,7 +1070,10 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
         course_title = course.title
         course.delete()
 
-        messages.success(request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.')
+        messages.success(
+            request,
+            pgettext("courses.view.message", "course_deleted").format(title=course_title),
+        )
         return redirect("user_profile", username=request.user.username)
 
 

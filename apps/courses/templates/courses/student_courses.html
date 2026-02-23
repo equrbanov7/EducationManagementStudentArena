@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Kurslarım{% endblock %}
+{% block title %}{% trans "page_title" context "courses.student_courses" %}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -10,12 +11,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1">
-                <i class="fas fa-graduation-cap text-success me-2"></i> Kurslarım
+                <i class="fas fa-graduation-cap text-success me-2"></i> {% trans "header_title" context "courses.student_courses" %}
             </h2>
-            <p class="text-muted mb-0">Sizə təyin olunmuş bütün kurslar</p>
+            <p class="text-muted mb-0">{% trans "header_subtitle" context "courses.student_courses" %}</p>
         </div>
         <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Profilə Qayıt
+            <i class="fas fa-arrow-left me-1"></i> {% trans "action_back_profile" context "courses.student_courses" %}
         </a>
     </div>
     
@@ -41,13 +42,13 @@
                     
                     <p class="text-muted small mb-2">
                         <i class="fas fa-user me-1"></i> 
-                        Müəllim: <strong>{{ item.course.owner.get_full_name|default:item.course.owner.username }}</strong>
+                        {% trans "label_teacher" context "courses.student_courses" %}: <strong>{{ item.course.owner.get_full_name|default:item.course.owner.username }}</strong>
                     </p>
                     
                     {% if item.group_name %}
                     <p class="text-muted small mb-2">
                         <i class="fas fa-users me-1"></i> 
-                        Qrup: <span class="badge bg-secondary">{{ item.group_name }}</span>
+                        {% trans "label_group" context "courses.student_courses" %}: <span class="badge bg-secondary">{{ item.group_name }}</span>
                     </p>
                     {% endif %}
                     
@@ -67,7 +68,7 @@
                             {% endif %}
                         </small>
                         <a href="{% url 'courses:course_dashboard' item.course.id %}?from_section=assigned-courses" class="btn btn-success btn-sm">
-                            <i class="fas fa-arrow-right me-1"></i> Kursa Keç
+                            <i class="fas fa-arrow-right me-1"></i> {% trans "action_enter_course" context "courses.student_courses" %}
                         </a>
                     </div>
                 </div>
@@ -78,7 +79,7 @@
     
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-    <nav aria-label="Page navigation" class="mt-4">
+    <nav aria-label="{% trans 'pagination_aria' context 'courses.student_courses' %}" class="mt-4">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
             <li class="page-item">
@@ -110,8 +111,8 @@
     {% else %}
     <div class="text-center py-5">
         <i class="fas fa-graduation-cap fa-4x text-muted mb-4"></i>
-        <h4 class="text-muted">Hələ heç bir kursa təyin olunmamısınız</h4>
-        <p class="text-muted">Müəlliminiz sizi kursa əlavə etdikdə burada görəcəksiniz.</p>
+        <h4 class="text-muted">{% trans "empty_title" context "courses.student_courses" %}</h4>
+        <p class="text-muted">{% trans "empty_description" context "courses.student_courses" %}</p>
     </div>
     {% endif %}
     

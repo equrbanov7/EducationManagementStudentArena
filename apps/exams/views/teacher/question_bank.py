@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.shortcuts import redirect, render
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.attempts import _ensure_teacher
@@ -71,7 +72,9 @@ def process_question_bank(request, slug):
                 if block_name.lower() in used_names:
                     messages.error(
                         request,
-                        f"Diqqət: '{block_name}' adlı blok artıq mövcuddur. Zəhmət olmasa fərqli adlardan istifadə edin.",
+                        pgettext("exams.view.question_bank.message", "duplicate_block_name_request").format(
+                            block_name=block_name
+                        ),
                     )
                     return redirect("exams:create_question_bank", slug=exam.slug)
                 used_names.add(block_name.lower())
@@ -89,7 +92,12 @@ def process_question_bank(request, slug):
                     existing_check = existing_check.exclude(id=db_id)
 
                 if existing_check.exists():
-                    messages.error(request, f"'{block_name}' adlı blok artıq bazada mövcuddur.")
+                    messages.error(
+                        request,
+                        pgettext("exams.view.question_bank.message", "block_name_exists_db").format(
+                            block_name=block_name
+                        ),
+                    )
                     return redirect("exams:create_question_bank", slug=exam.slug)
 
                 if block_name:
@@ -133,7 +141,7 @@ def process_question_bank(request, slug):
                                 answer_mode="single",
                             )
 
-        messages.success(request, "Sual bankı uğurla yadda saxlanıldı!")
+        messages.success(request, pgettext_lazy("exams.view.question_bank.message", "bank_saved"))
         return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
     return redirect("exams:create_question_bank", slug=exam.slug)
@@ -223,7 +231,10 @@ def test_question_bank(request, slug):
             raw_text = extract_text_from_upload(uploaded)
         except Exception as e:
             # burada fallback: textarea-dakı raw_text qalsın
-            messages.error(request, f"Fayl oxunmadı: {e}")
+            messages.error(
+                request,
+                pgettext("exams.view.question_bank.message", "file_read_failed").format(error=e),
+            )
 
     # 3) preview/save üçün parse et
     if action in ("preview", "save"):
@@ -241,7 +252,10 @@ def test_question_bank(request, slug):
                 q["warnings"].append(
                     {
                         "type": "duplicate_in_import",
-                        "msg": f"Təkrar sual: #{idx} sualı əvvəlki #{fp_first[fp]} ilə eynidir.",
+                        "msg": pgettext("exams.view.question_bank.warning", "duplicate_in_import").format(
+                            index=idx,
+                            previous_index=fp_first[fp],
+                        ),
                         "ref": fp_first[fp],
                     }
                 )
@@ -258,7 +272,7 @@ def test_question_bank(request, slug):
                 q["warnings"].append(
                     {
                         "type": "already_in_exam",
-                        "msg": f"Bu sual artıq imtahanda mövcuddur (import # {idx}).",
+                        "msg": pgettext("exams.view.question_bank.warning", "already_in_exam").format(index=idx),
                     }
                 )
 
@@ -358,7 +372,10 @@ def test_question_bank(request, slug):
 
         messages.success(
             request,
-            f"{created_count} sual əlavə olundu. ({skipped_count} sual keçildi)",
+            pgettext("exams.view.question_bank.message", "questions_added_summary").format(
+                created_count=created_count,
+                skipped_count=skipped_count,
+            ),
         )
         return redirect("exams:test_question_bank", slug=exam.slug)
 

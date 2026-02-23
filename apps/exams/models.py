@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.text import slugify
+from django.utils.translation import pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
@@ -23,7 +24,9 @@ def validate_video_size(f):
     # 30MB limit nümunə (istəsən dəyiş)
     max_mb = 30
     if f.size > max_mb * 1024 * 1024:
-        raise ValidationError(f"Video faylı {max_mb}MB-dan böyük ola bilməz.")
+        raise ValidationError(
+            pgettext("exams.model.error", "video_size_exceeded").format(max_mb=max_mb)
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -87,7 +90,7 @@ class StudentGroup(models.Model):
         errors = {}
 
         if self.organization_id is None:
-            errors["organization"] = "Qrup mütləq bir təşkilata aid olmalıdır."
+            errors["organization"] = pgettext("exams.model.error", "group_organization_required")
 
         if self.teacher_id:
             try:
@@ -105,10 +108,10 @@ class StudentGroup(models.Model):
                 teacher_is_allowed = teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
 
             if not teacher_is_allowed:
-                errors["teacher"] = "Primary müəllim müəllim rolunda olmalıdır."
+                errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_role_required")
 
             if self.organization_id and teacher_org != self.organization:
-                errors["teacher"] = "Primary müəllim qrupun təşkilatı ilə eyni tenant-da olmalıdır."
+                errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_tenant_mismatch")
 
         if errors:
             raise ValidationError(errors)
@@ -414,21 +417,21 @@ class Exam(models.Model):
         """
         # 1) Aktiv deyil
         if not self.is_active:
-            return False, "Bu imtahan hazırda aktiv deyil."
+            return False, pgettext("exams.model.access", "exam_not_active")
 
         # ✅ YENİ: Tarix yoxlaması
         if self.is_before_start():
 
             start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
-            return False, f"İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"
+            return False, pgettext("exams.model.access", "exam_not_started").format(start_str=start_str)
 
         if self.is_after_end():
-            return False, "İmtahan müddəti bitib."
+            return False, pgettext("exams.model.access", "exam_ended")
 
         # 2) Cəhd limiti
         left = self.attempts_left_for(user)
         if left is not None and left <= 0:
-            return False, "Artıq bütün icazə verilən cəhdlərinizi istifadə etmisiniz."
+            return False, pgettext("exams.model.access", "attempt_limit_reached")
 
         # 3) Müəllif
         if user == self.author:
@@ -446,16 +449,16 @@ class Exam(models.Model):
                 return True, None
             if in_allowed_any:
                 return True, None
-            return False, "Bu imtahan üçün giriş icazəniz yoxdur."
+            return False, pgettext("exams.model.access", "no_exam_access")
 
         # 5) Kod varsa: əvvəlcə visibility/assignment icazəsi olmalıdır.
         if not self.is_public and not in_allowed_any:
-            return False, "Bu imtahan üçün giriş icazəniz yoxdur."
+            return False, pgettext("exams.model.access", "no_exam_access")
 
         if not code:
-            return False, "İmtahan kodu tələb olunur."
+            return False, pgettext("exams.model.access", "access_code_required")
         if code != self.access_code:
-            return False, "İmtahan kodu yanlışdır."
+            return False, pgettext("exams.model.access", "access_code_invalid")
 
         return True, None
 

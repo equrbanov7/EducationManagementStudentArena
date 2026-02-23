@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
@@ -30,14 +31,14 @@ class ExamForm(forms.ModelForm):
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: Şərt operatorları – Test 1",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "title_example"),
                 }
             ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "İmtahan haqqında qısa izah...",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "description_short"),
                 }
             ),
             "exam_type": forms.Select(
@@ -55,7 +56,7 @@ class ExamForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "type": "datetime-local",
-                    "placeholder": "Başlama tarixi və vaxtı",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "start_datetime"),
                 },
                 format="%Y-%m-%dT%H:%M",
             ),
@@ -63,7 +64,7 @@ class ExamForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "type": "datetime-local",
-                    "placeholder": "Bitmə tarixi və vaxtı",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "end_datetime"),
                 },
                 format="%Y-%m-%dT%H:%M",
             ),
@@ -85,43 +86,43 @@ class ExamForm(forms.ModelForm):
             "access_code": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 123456 (6 rəqəm)",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "access_code"),
                     "maxlength": "6",
                 }
             ),
             "total_duration_minutes": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 30 (dəqiqə)",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "total_duration_minutes"),
                 }
             ),
             "default_question_time_seconds": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 60 (saniyə)",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "default_question_time_seconds"),
                 }
             ),
             "max_attempts_per_user": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 1, 2, 3...",
+                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "max_attempts_per_user"),
                 }
             ),
         }
         labels = {
-            "title": "İmtahan adı",
-            "description": "Qısa izah",
-            "exam_type": "İmtahan tipi",
-            "is_active": "Aktiv olsun?",
-            "start_datetime": "Başlama tarixi və vaxtı",  # ✅ YENİ
-            "end_datetime": "Bitmə tarixi və vaxtı",  # ✅ YENİ
-            "is_public": "Hamı üçün açıqdır?",
-            "allowed_users": "Fərdi icazəli istifadəçilər",
-            "allowed_groups": "İcazəli qruplar",
-            "access_code": "İmtahan kodu (6 rəqəm)",
-            "total_duration_minutes": "Ümumi müddət (dəqiqə)",
-            "default_question_time_seconds": "Hər sual üçün default vaxt (saniyə)",
-            "max_attempts_per_user": "Bir istifadəçi üçün maksimum cəhd sayı",
+            "title": pgettext_lazy("exams.form.exam.label", "title"),
+            "description": pgettext_lazy("exams.form.exam.label", "description"),
+            "exam_type": pgettext_lazy("exams.form.exam.label", "exam_type"),
+            "is_active": pgettext_lazy("exams.form.exam.label", "is_active"),
+            "start_datetime": pgettext_lazy("exams.form.exam.label", "start_datetime"),
+            "end_datetime": pgettext_lazy("exams.form.exam.label", "end_datetime"),
+            "is_public": pgettext_lazy("exams.form.exam.label", "is_public"),
+            "allowed_users": pgettext_lazy("exams.form.exam.label", "allowed_users"),
+            "allowed_groups": pgettext_lazy("exams.form.exam.label", "allowed_groups"),
+            "access_code": pgettext_lazy("exams.form.exam.label", "access_code"),
+            "total_duration_minutes": pgettext_lazy("exams.form.exam.label", "total_duration_minutes"),
+            "default_question_time_seconds": pgettext_lazy("exams.form.exam.label", "default_question_time_seconds"),
+            "max_attempts_per_user": pgettext_lazy("exams.form.exam.label", "max_attempts_per_user"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -159,7 +160,9 @@ class ExamForm(forms.ModelForm):
             return ""  # boş buraxmaq olar
 
         if not code.isdigit() or len(code) != 6:
-            raise forms.ValidationError("Kod 6 rəqəmli və yalnız rəqəmlərdən ibarət olmalıdır (məs: 123456).")
+            raise forms.ValidationError(
+                pgettext_lazy("exams.form.exam.error", "access_code_invalid")
+            )
 
         return code
 
@@ -174,12 +177,16 @@ class ExamForm(forms.ModelForm):
         exam_type = cleaned_data.get("exam_type")
 
         if exam_type == "test" and enable_paint:
-            raise ValidationError("Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bilər.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.exam.error", "enable_paint_written_only")
+            )
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:
             if start_dt >= end_dt:
-                raise forms.ValidationError("Bitmə tarixi başlama tarixindən sonra olmalıdır.")
+                raise forms.ValidationError(
+                    pgettext_lazy("exams.form.exam.error", "end_after_start")
+                )
 
         return cleaned_data
 
@@ -191,45 +198,45 @@ class ExamQuestionCreateForm(forms.ModelForm):
 
     # ---- Variant field-ləri ----
     option1_text = forms.CharField(
-        label="1-ci variant",
+        label=pgettext_lazy("exams.form.question.label", "option_1"),
         required=False,
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option1_is_correct = forms.BooleanField(
-        label="Düzgün?",
+        label=pgettext_lazy("exams.form.question.label", "option_correct"),
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option2_text = forms.CharField(
-        label="2-ci variant",
+        label=pgettext_lazy("exams.form.question.label", "option_2"),
         required=False,
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option2_is_correct = forms.BooleanField(
-        label="Düzgün?",
+        label=pgettext_lazy("exams.form.question.label", "option_correct"),
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option3_text = forms.CharField(
-        label="3-cü variant",
+        label=pgettext_lazy("exams.form.question.label", "option_3"),
         required=False,
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option3_is_correct = forms.BooleanField(
-        label="Düzgün?",
+        label=pgettext_lazy("exams.form.question.label", "option_correct"),
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     option4_text = forms.CharField(
-        label="4-cü variant",
+        label=pgettext_lazy("exams.form.question.label", "option_4"),
         required=False,
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     option4_is_correct = forms.BooleanField(
-        label="Düzgün?",
+        label=pgettext_lazy("exams.form.question.label", "option_correct"),
         required=False,
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
@@ -251,7 +258,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Sual mətni...",
+                    "placeholder": pgettext_lazy("exams.form.question.placeholder", "text"),
                 }
             ),
             "block": forms.Select(attrs={"class": "form-control"}),
@@ -263,14 +270,17 @@ class ExamQuestionCreateForm(forms.ModelForm):
             "time_limit_seconds": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 60 (saniyə). Boş qalsa default istifadə olunur.",
+                    "placeholder": pgettext_lazy(
+                        "exams.form.question.placeholder",
+                        "time_limit_seconds",
+                    ),
                 }
             ),
             "correct_answer": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Yazılı/praktiki üçün ideal cavab (istəyə görə)...",
+                    "placeholder": pgettext_lazy("exams.form.question.placeholder", "correct_answer"),
                 }
             ),
             # ✅ DƏYİŞİKLİK: ClearableFileInput ilə clear funksionallığı
@@ -283,13 +293,13 @@ class ExamQuestionCreateForm(forms.ModelForm):
             ),
         }
         labels = {
-            "text": "Sual",
-            "block": "Mövzu Bloku",
-            "answer_mode": "Cavab rejimi",
-            "time_limit_seconds": "Bu sual üçün vaxt limiti",
-            "correct_answer": "Yazılı/praktiki üçün ideal cavab",
-            "image": "Sual şəkli (optional)",
-            "video": "Sual videosu (optional)",
+            "text": pgettext_lazy("exams.form.question.label", "text"),
+            "block": pgettext_lazy("exams.form.question.label", "block"),
+            "answer_mode": pgettext_lazy("exams.form.question.label", "answer_mode"),
+            "time_limit_seconds": pgettext_lazy("exams.form.question.label", "time_limit_seconds"),
+            "correct_answer": pgettext_lazy("exams.form.question.label", "correct_answer"),
+            "image": pgettext_lazy("exams.form.question.label", "image"),
+            "video": pgettext_lazy("exams.form.question.label", "video"),
         }
 
     def __init__(self, *args, exam_type=None, subject_blocks=None, **kwargs):
@@ -306,7 +316,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
         # Blokları dropdown-a doldururuq
         if subject_blocks is not None:
             self.fields["block"].queryset = subject_blocks
-            self.fields["block"].empty_label = "Ümumi (Heç bir bloka aid deyil)"
+            self.fields["block"].empty_label = pgettext_lazy("exams.form.question.select", "block_empty")
         else:
             self.fields["block"].queryset = QuestionBlock.objects.none()
 
@@ -339,14 +349,20 @@ class ExamQuestionCreateForm(forms.ModelForm):
                 opts.append((text, is_correct))
 
         if answer_mode in ("single", "multiple") and not opts:
-            raise forms.ValidationError("Heç bir variant daxil edilməyib.")
+            raise forms.ValidationError(
+                pgettext_lazy("exams.form.question.error", "options_required")
+            )
 
         if answer_mode == "single":
             correct_count = sum(1 for (_, is_corr) in opts if is_corr)
             if correct_count == 0:
-                raise forms.ValidationError("Tək cavab rejimində ən azı 1 düzgün variant seçilməlidir.")
+                raise forms.ValidationError(
+                    pgettext_lazy("exams.form.question.error", "single_requires_one_correct")
+                )
             if correct_count > 1:
-                raise forms.ValidationError("Tək cavab rejimində yalnız 1 düzgün variant ola bilər.")
+                raise forms.ValidationError(
+                    pgettext_lazy("exams.form.question.error", "single_only_one_correct")
+                )
 
         return cleaned_data
 
@@ -378,7 +394,7 @@ class StudentGroupForm(forms.ModelForm):
     primary_teacher = forms.ModelChoiceField(
         queryset=User.objects.none(),
         required=True,
-        label="Primary müəllim",
+        label=pgettext_lazy("exams.form.group.label", "primary_teacher"),
         widget=forms.Select(
             attrs={
                 "class": "form-select",
@@ -388,13 +404,13 @@ class StudentGroupForm(forms.ModelForm):
     assigned_teachers = forms.ModelMultipleChoiceField(
         queryset=User.objects.none(),
         required=False,
-        label="Təyin olunmuş müəllimlər",
+        label=pgettext_lazy("exams.form.group.label", "assigned_teachers"),
         widget=forms.SelectMultiple(
             attrs={
                 "class": "form-select",
             }
         ),
-        help_text="Bu qrupu idarə edə bilən əlavə müəllimlər.",
+        help_text=pgettext_lazy("exams.form.group.help", "assigned_teachers"),
     )
 
     class Meta:
@@ -404,7 +420,7 @@ class StudentGroupForm(forms.ModelForm):
             "name": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məs: 875i, 842A1 və s.",
+                    "placeholder": pgettext_lazy("exams.form.group.placeholder", "name"),
                 }
             ),
             "students": forms.SelectMultiple(
@@ -414,11 +430,11 @@ class StudentGroupForm(forms.ModelForm):
             ),
         }
         labels = {
-            "name": "Qrup adı / nömrəsi",
-            "students": "Qrupdakı tələbələr",
+            "name": pgettext_lazy("exams.form.group.label", "name"),
+            "students": pgettext_lazy("exams.form.group.label", "students"),
         }
         help_texts = {
-            "students": "Yalnız aktiv tenant-a aid tələbələr görünür.",
+            "students": pgettext_lazy("exams.form.group.help", "students"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -486,9 +502,15 @@ class StudentGroupForm(forms.ModelForm):
             self.fields["assigned_teachers"].queryset = teachers_qs.filter(id=self.actor.id)
             self.fields["primary_teacher"].initial = self.actor.id
             self.fields["assigned_teachers"].initial = [self.actor.id]
-            self.fields["assigned_teachers"].help_text = "Müəllim rolunda yalnız özünü təyin edə bilərsən."
+            self.fields["assigned_teachers"].help_text = pgettext_lazy(
+                "exams.form.group.help",
+                "teacher_self_only",
+            )
         elif self.actor is not None and not self.can_multi_assign_teachers:
-            self.fields["assigned_teachers"].help_text = "Bu rol üçün yalnız bir müəllim təyin edilə bilər."
+            self.fields["assigned_teachers"].help_text = pgettext_lazy(
+                "exams.form.group.help",
+                "role_single_teacher",
+            )
 
         self.fields["students"].label_from_instance = self._user_option_label
         self.fields["primary_teacher"].label_from_instance = self._user_option_label
@@ -518,18 +540,26 @@ class StudentGroupForm(forms.ModelForm):
         assigned_teachers = cleaned_data.get("assigned_teachers")
 
         if self.organization is None:
-            raise ValidationError("Aktiv təşkilat olmadan qrup yaratmaq/yeniləmək olmaz.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.group.error", "org_required")
+            )
 
         if students is not None:
             invalid_students = students.exclude(profile__organization=self.organization)
             if invalid_students.exists():
-                raise ValidationError("Qrupa yalnız eyni tenant-dakı tələbələr əlavə edilə bilər.")
+                raise ValidationError(
+                    pgettext_lazy("exams.form.group.error", "tenant_students_only")
+                )
 
         if primary_teacher is None:
-            raise ValidationError("Qrup üçün primary müəllim seçilməlidir.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.group.error", "primary_teacher_required")
+            )
 
         if not self._is_teacher_profile(primary_teacher):
-            raise ValidationError("Primary müəllim mütləq teacher rolunda olmalıdır.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.group.error", "primary_teacher_role_required")
+            )
 
         try:
             primary_teacher_profile = primary_teacher.profile
@@ -538,7 +568,9 @@ class StudentGroupForm(forms.ModelForm):
 
         primary_teacher_org = getattr(primary_teacher_profile, "organization", None)
         if primary_teacher_org != self.organization:
-            raise ValidationError("Primary müəllim qrupla eyni tenant-da olmalıdır.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.group.error", "primary_teacher_tenant_mismatch")
+            )
 
         assigned_list = list(assigned_teachers) if assigned_teachers is not None else []
 
@@ -553,7 +585,9 @@ class StudentGroupForm(forms.ModelForm):
             if not self._is_teacher_profile(teacher) or teacher_org != self.organization:
                 invalid_assigned.append(teacher)
         if invalid_assigned:
-            raise ValidationError("Təyin olunan müəllimlərin hamısı eyni tenant-da teacher olmalıdır.")
+            raise ValidationError(
+                pgettext_lazy("exams.form.group.error", "assigned_teachers_invalid")
+            )
 
         assigned_ids = {teacher.id for teacher in assigned_list}
         assigned_ids.add(primary_teacher.id)
@@ -575,15 +609,21 @@ class StudentGroupForm(forms.ModelForm):
         if self.can_multi_assign_teachers:
             if len(assigned_ids) > self.MAX_MULTI_TEACHERS:
                 raise ValidationError(
-                    f"Müəllimdən yuxarı rollar bir qrupa maksimum {self.MAX_MULTI_TEACHERS} müəllim təyin edə bilər."
+                    pgettext("exams.form.group.error", "max_multi_teachers").format(
+                        count=self.MAX_MULTI_TEACHERS
+                    )
                 )
         elif actor_is_teacher and self.actor is not None:
             if primary_teacher.id != self.actor.id:
-                raise ValidationError("Müəllim rolunda yalnız özünü primary müəllim kimi təyin edə bilərsən.")
+                raise ValidationError(
+                    pgettext_lazy("exams.form.group.error", "teacher_primary_self_only")
+                )
 
             non_actor_ids = {teacher_id for teacher_id in assigned_ids if teacher_id != self.actor.id}
             if non_actor_ids:
-                raise ValidationError("Müəllim rolunda əlavə müəllim təyin etmək qadağandır.")
+                raise ValidationError(
+                    pgettext_lazy("exams.form.group.error", "teacher_assign_forbidden")
+                )
 
             assigned_ids = {self.actor.id}
         else:
