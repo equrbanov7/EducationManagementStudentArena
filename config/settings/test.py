@@ -3,9 +3,10 @@ Test settings for EMS Arena project.
 Fast, isolated configuration for running tests.
 """
 
-import os
+from .base import BASE_DIR, STATICFILES_DIRS  # lazım olanları explicit import et
 
-from .base import *  # noqa
+# STATICFILES_DIRS bəzən tuple olur; append üçün list-ə çeviririk
+STATICFILES_DIRS = list(STATICFILES_DIRS)
 
 # Use a fast secret key for tests
 SECRET_KEY = "test-secret-key-for-testing-only-not-for-production-use"
