@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Kurslarım{% endblock %}
+{% block title %}{% trans "page_title" context "courses.my_courses" %}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
@@ -107,8 +108,8 @@
 <div class="container my-courses-wrap">
   <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-      <h1 class="mb-2" style="font-weight:800; color:#0f172a;">Kurslarım</h1>
-      <div class="text-muted" style="font-size: 15px;">Yaratdığın bütün kurslar burada görünür.</div>
+      <h1 class="mb-2" style="font-weight:800; color:#0f172a;">{% trans "page_title" context "courses.my_courses" %}</h1>
+      <div class="text-muted" style="font-size: 15px;">{% trans "page_subtitle" context "courses.my_courses" %}</div>
     </div>
 
     <a class="btn-dashboard js-open-create-course"
@@ -116,7 +117,7 @@
        data-create-course-url="{% url 'courses:create_course' %}"
        data-success-url="{{ request.get_full_path }}"
        style="width: auto; padding: 12px 24px;">
-      <i class="fas fa-plus me-2"></i>Yeni Kurs
+      <i class="fas fa-plus me-2"></i>{% trans "action_new_course" context "courses.my_courses" %}
     </a>
   </div>
 
@@ -140,7 +141,7 @@
               {% if course.description %}
                 {{ course.description|truncatechars:100 }}
               {% else %}
-                Təsvir əlavə edilməyib.
+                {% trans "description_missing" context "courses.my_courses" %}
               {% endif %}
             </p>
 
@@ -149,16 +150,16 @@
                 <i class="fas fa-circle me-1"></i>{{ course.get_status_display }}
               </span>
               <span class="pill">
-                <i class="fas fa-layer-group me-1"></i>{{ course.topic_count }} mövzu
+                <i class="fas fa-layer-group me-1"></i>{{ course.topic_count }} {% trans "suffix_topics" context "courses.my_courses" %}
               </span>
               <span class="pill">
-                <i class="fas fa-user-graduate me-1"></i>{{ course.student_count }} tələbə
+                <i class="fas fa-user-graduate me-1"></i>{{ course.student_count }} {% trans "suffix_students" context "courses.my_courses" %}
               </span>
             </div>
 
             {# ✅ YALNIZ DASHBOARD DÜYMƏSI #}
             <a class="btn-dashboard" href="{% url 'courses:course_dashboard' course.id %}?from_section=my-courses">
-              <i class="fas fa-rocket me-2"></i>Dashboard-a Get
+              <i class="fas fa-rocket me-2"></i>{% trans "action_go_dashboard" context "courses.my_courses" %}
             </a>
           </div>
         </div>
@@ -172,7 +173,7 @@
             {% if page_obj.has_previous %}
               <li class="page-item">
                 <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                  <i class="fas fa-chevron-left me-1"></i>Əvvəl
+                  <i class="fas fa-chevron-left me-1"></i>{% trans "pagination_previous" context "courses.my_courses" %}
                 </a>
               </li>
             {% endif %}
@@ -184,7 +185,7 @@
             {% if page_obj.has_next %}
               <li class="page-item">
                 <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                  Sonra<i class="fas fa-chevron-right ms-1"></i>
+                  {% trans "pagination_next" context "courses.my_courses" %}<i class="fas fa-chevron-right ms-1"></i>
                 </a>
               </li>
             {% endif %}
@@ -199,17 +200,17 @@
         <i class="fas fa-graduation-cap"></i>
       </div>
       <h3 style="font-weight:800; color:#0f172a; margin-bottom: 12px;">
-        Hələ kurs yaratmamısan
+        {% trans "empty_title" context "courses.my_courses" %}
       </h3>
       <p style="color: #64748b; max-width: 480px; margin: 0 auto 24px;">
-        İlk kursunu yarat və dashboard-da mövzular, sərbəst işlər, lab işləri əlavə et.
+        {% trans "empty_description" context "courses.my_courses" %}
       </p>
       <a class="btn-dashboard js-open-create-course"
          href="{% url 'courses:create_course' %}"
          data-create-course-url="{% url 'courses:create_course' %}"
          data-success-url="{{ request.get_full_path }}"
          style="width: auto; padding: 14px 28px; display: inline-block;">
-        <i class="fas fa-plus me-2"></i>Yeni Kurs Yarat
+        <i class="fas fa-plus me-2"></i>{% trans "action_create_first_course" context "courses.my_courses" %}
       </a>
     </div>
   {% endif %}

@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
@@ -72,7 +73,11 @@ def createAndEditExamView(request, slug=None):
 
             messages.success(
                 request,
-                ("İmtahan uğurla yeniləndi!" if is_editing else "İmtahan uğurla yaradıldı!"),
+                (
+                    pgettext_lazy("exams.view.exams.message", "exam_updated")
+                    if is_editing
+                    else pgettext_lazy("exams.view.exams.message", "exam_created")
+                ),
             )
             if is_modal_request:
                 return JsonResponse({"success": True, "slug": exam_instance.slug})
@@ -172,7 +177,9 @@ def delete_exam(request, slug):
     if exam.attempts.exists():
         # sadə variant: hazırda cəhd varsa silməyə icazə vermirik
         # istəsən bunu sonradan dəyişərik
-        raise PermissionDenied("Bu imtahan üzrə artıq cəhdlər var, silə bilməzsiniz.")
+        raise PermissionDenied(
+            pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts")
+        )
 
     if request.method == "POST":
         exam.delete()

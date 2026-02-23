@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}{{ course.title }} - Üzvlər{% endblock %}
+{% block title %}{{ course.title }} - {% trans "page_suffix_members" context "courses.members_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'courses/css/course_members.css' %}">
@@ -14,10 +15,10 @@
         <div class="members-header">
             <div class="header-left">
                 <a href="{% url 'courses:course_dashboard' course.id %}" class="back-btn">
-                    <i class="fas fa-arrow-left me-1"></i> Dashboard
+                    <i class="fas fa-arrow-left me-1"></i> {% trans "back_dashboard" context "courses.members_page" %}
                 </a>
                 <div class="mt-2">
-                    <h1>Üzvlər</h1>
+                    <h1>{% trans "title_members" context "courses.members_page" %}</h1>
                     <p>{{ course.title }}</p>
                 </div>
             </div>
@@ -25,10 +26,10 @@
             {% if is_owner %}
             <div class="header-actions">
                 <button class="btn-custom btn-primary-custom" onclick="openModal('addStudentModal')">
-                    <i class="fas fa-user-plus"></i> Tələbə Əlavə Et
+                    <i class="fas fa-user-plus"></i> {% trans "add_student" context "courses.members_page" %}
                 </button>
                 <button class="btn-custom btn-secondary-custom" onclick="openModal('addGroupModal')">
-                    <i class="fas fa-users-cog"></i> Qrup Əlavə Et
+                    <i class="fas fa-users-cog"></i> {% trans "add_group" context "courses.members_page" %}
                 </button>
             </div>
             {% endif %}
@@ -37,7 +38,7 @@
         {% if teacher %}
         <div class="section-card">
             <div class="section-header">
-                <h3><i class="fas fa-chalkboard-teacher me-2"></i> Müəllim</h3>
+                <h3><i class="fas fa-chalkboard-teacher me-2"></i> {% trans "section_teacher" context "courses.members_page" %}</h3>
             </div>
             <div class="member-list">
                 <div class="member-item">
@@ -48,7 +49,7 @@
                         <strong>{{ teacher.user.get_full_name|default:teacher.user.username }}</strong>
                         <small>@{{ teacher.user.username }}</small>
                     </div>
-                    <span class="badge-role badge-teacher">Kurs Sahibi</span>
+                    <span class="badge-role badge-teacher">{% trans "badge_course_owner" context "courses.members_page" %}</span>
                 </div>
             </div>
         </div>
@@ -57,8 +58,8 @@
         {% if students %}
         <div class="section-card">
             <div class="section-header">
-                <h3><i class="fas fa-user-friends me-2"></i> Tələbələr</h3>
-                <span class="count-badge">{{ students.count }} nəfər</span>
+                <h3><i class="fas fa-user-friends me-2"></i> {% trans "section_students" context "courses.members_page" %}</h3>
+                <span class="count-badge">{{ students.count }} {% trans "count_people_suffix" context "courses.members_page" %}</span>
             </div>
             
             {% regroup students by group_name as grouped_students %}
@@ -69,19 +70,19 @@
                     <div class="group-title">
                         <i class="fas fa-layer-group text-primary"></i>
                         {% if group.grouper %}
-                            Qrup: {{ group.grouper }}
+                            {% trans "label_group" context "courses.members_page" %}: {{ group.grouper }}
                         {% else %}
-                            Qrupsuz Tələbələr
+                            {% trans "grouped_unassigned_students" context "courses.members_page" %}
                         {% endif %}
                         <span class="text-muted small">({{ group.list|length }})</span>
                     </div>
 
                     {% if is_owner and group.grouper %}
-                    <form method="POST" action="{% url 'courses:delete_group_from_course' course.id %}" onsubmit="return confirm('BU QRUPU SİLMƏK İSTƏYİRSİNİZ?\n\n{{ group.grouper }} qrupundakı bütün tələbələr kursdan çıxarılacaq!')">
+                    <form method="POST" action="{% url 'courses:delete_group_from_course' course.id %}" onsubmit="return confirm('{% blocktrans with group_name=group.grouper context 'courses.members_page' %}Do you want to delete this group?\n\nAll students in {{ group_name }} group will be removed from the course!{% endblocktrans %}')">
                         {% csrf_token %}
                         <input type="hidden" name="group_name" value="{{ group.grouper }}">
                         <button type="submit" class="btn-delete-group">
-                            <i class="fas fa-trash-alt me-1"></i> Qrupu Sil
+                            <i class="fas fa-trash-alt me-1"></i> {% trans "delete_group" context "courses.members_page" %}
                         </button>
                     </form>
                     {% endif %}
@@ -112,7 +113,7 @@
         </div>
         {% else %}
             <div class="alert alert-info text-center m-4">
-                <i class="fas fa-info-circle me-2"></i> Kursa hələ tələbə əlavə olunmayıb.
+                <i class="fas fa-info-circle me-2"></i> {% trans "no_students_added_yet" context "courses.members_page" %}
             </div>
         {% endif %}
 

@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.utils.translation import pgettext
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAttempt
@@ -22,7 +23,9 @@ def _ensure_teacher(user):
         has_teacher_role = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
 
     if not has_teacher_role:
-        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+        raise PermissionDenied(
+            pgettext("exams.service.attempt.permission", "teachers_only_page")
+        )
 
 
 # / Bu funksiya yalnız tələbələrin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
@@ -60,7 +63,9 @@ def _start_or_resume_attempt(request, exam: Exam):
         if last:
             messages.info(
                 request,
-                f"Siz bu imtahana maksimum {max_attempts} dəfə cəhd edə bilərsiniz.",
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(
+                    max_attempts=max_attempts
+                ),
             )
             return redirect("exams:exam_result", slug=exam.slug, attempt_id=last.id)
         return redirect("exams:student_exam_list")
@@ -85,5 +90,10 @@ def _start_or_resume_attempt(request, exam: Exam):
     # Sualları generate et
     generate_random_questions_for_attempt(attempt)
 
-    messages.success(request, f"İmtahan başladı! (Cəhd #{next_attempt_number})")
+    messages.success(
+        request,
+        pgettext("exams.service.attempt.message", "exam_started").format(
+            attempt_number=next_attempt_number
+        ),
+    )
     return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)

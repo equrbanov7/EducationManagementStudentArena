@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ post.title }} | My Blog{% endblock %}
+{% block title %}{{ post.title }} | {% trans "title_suffix" context "blog.post_detail_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/postDetail.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="article-page-wrapper"> {# Ümumi səhifə konteyneri #}
+<div class="article-page-wrapper">
     <article class="article-container">
-        
+
         <header class="article-header">
             {% if post.category %}
                 <a href="#" class="article-category">
                     <i class="fas fa-tag"></i> {{ post.category.name }}
-                </a> {# Kateqoriyaya link və ikon #}
+                </a>
             {% endif %}
-            
+
             <h1 class="article-title">{{ post.title }}</h1>
-            
+
             <div class="article-meta">
                 <span><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}</span>
                 {% if post.author %}
@@ -31,74 +31,70 @@
             </div>
         </header>
 
-        <img 
-        src="{{ post.get_image }}" 
-        alt="{{ post.title }}" 
+        <img
+        src="{{ post.get_image }}"
+        alt="{{ post.title }}"
         class="article-featured-image"
         onerror="this.onerror=null; this.src='{% static 'images/tech-placeholder.svg' %}';"
     >
 
         <div class="article-content">
-            {# Əgər excerpt göstərmək istəyirsənsə, əvvəlcə qısa təsviri verə bilərsən #}
             {% if post.excerpt %}
                 <p class="article-excerpt">
-                    **{{ post.excerpt|linebreaks }}** {# Qısa təsviri bold etdim #}
+                    **{{ post.excerpt|linebreaks }}**
                 </p>
                 <hr>
             {% endif %}
 
-            {{ post.content|linebreaks }} 
+            {{ post.content|linebreaks }}
         </div>
-
-       
 
     </article>
 
-    {# ------- RATING & COMMENTS BÖLMƏSİ ------- #}
-    <section class="article-extra-section"> {# Yeni konteyner #}
+    <section class="article-extra-section">
         <div class="article-rating-block">
             {% if post.average_rating %}
-                <p>Məqalənin orta reytinqi: <strong>{{ post.average_rating|floatformat:1 }}</strong> <i class="fas fa-star"></i> / 5</p>
+                <p>{% trans "avg_rating_label" context "blog.post_detail_page" %} <strong>{{ post.average_rating|floatformat:1 }}</strong> <i class="fas fa-star"></i> / 5</p>
             {% else %}
-                <p>Bu məqalə üçün hələ reytinq yoxdur.</p>
+                <p>{% trans "no_rating" context "blog.post_detail_page" %}</p>
             {% endif %}
         </div>
 
-        <div class="comments-section"> {# article-comments -> comments-section #}
-            <h2 class="comments-title">Şərhlər ({{ comments.count }})</h2>
+        <div class="comments-section">
+            <h2 class="comments-title">{% trans "comments_title" context "blog.post_detail_page" %} ({{ comments.count }})</h2>
 
             {% for comment in comments %}
                 <article class="comment-item">
                     <header class="comment-header">
                         <strong class="comment-author">{{ comment.user.username }}</strong>
                         <span class="comment-meta">
-                            {{ comment.created_at|date:"d M Y H:i" }} • 
+                            {{ comment.created_at|date:"d M Y H:i" }} •
                             <span class="star-rating">
-                                {% for _ in ""|ljust:comment.rating %} <i class="fas fa-star"></i> {% endfor %} {# Reytinq ulduzları #}
+                                {% for _ in ""|ljust:comment.rating %} <i class="fas fa-star"></i> {% endfor %}
                             </span>
                         </span>
                     </header>
                     <p class="comment-text">{{ comment.text|linebreaks }}</p>
                 </article>
             {% empty %}
-                <p>Hələ şərh yoxdur. İlk şərh yazan sən ol 😊</p>
+                <p>{% trans "no_comments" context "blog.post_detail_page" %}</p>
             {% endfor %}
         </div>
 
-        <div class="add-comment-section"> {# article-add-comment -> add-comment-section #}
-            <h3>Şərh yaz</h3>
+        <div class="add-comment-section">
+            <h3>{% trans "add_comment_heading" context "blog.post_detail_page" %}</h3>
 
             {% if not request.user.is_authenticated %}
                 <p class="comment-auth-message">
-                    Şərh yazmaq üçün
-                    <a href="{% url 'login' %}?next={{ request.path }}">daxil ol</a>
-                    və ya
-                    <a href="{% url 'register' %}">qeydiyyatdan keç</a>.
+                    {% trans "auth_prompt_prefix" context "blog.post_detail_page" %}
+                    <a href="{% url 'login' %}?next={{ request.path }}">{% trans "auth_login_link" context "blog.post_detail_page" %}</a>
+                    {% trans "auth_prompt_middle" context "blog.post_detail_page" %}
+                    <a href="{% url 'register' %}">{% trans "auth_register_link" context "blog.post_detail_page" %}</a>{% trans "auth_prompt_suffix" context "blog.post_detail_page" %}
                 </p>
             {% else %}
                 <form method="post" class="comment-form">
                     {% csrf_token %}
-                    
+
                     <div class="form-group">
                         {{ comment_form.text.label_tag }}
                         {{ comment_form.text }}
@@ -109,7 +105,6 @@
                         {% endif %}
                     </div>
 
-                  
                     <div class="form-group">
                         {{ comment_form.rating.label_tag }}
                         {{ comment_form.rating }}
@@ -119,17 +114,14 @@
                             </div>
                         {% endif %}
                     </div>
-           
-                
 
                     <button type="submit" class="comment-submit-btn">
-                        Şərhi Göndər
+                        {% trans "submit_comment" context "blog.post_detail_page" %}
                     </button>
                 </form>
             {% endif %}
         </div>
     </section>
 </div>
-
 
 {% endblock %}

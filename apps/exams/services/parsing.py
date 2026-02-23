@@ -4,6 +4,7 @@ from collections import defaultdict
 from importlib.readers import ZipReader
 
 from docx import Document
+from django.utils.translation import pgettext
 
 try:
     from pypdf import PdfReader
@@ -60,7 +61,7 @@ def extract_text_from_upload(uploaded_file) -> str:
 
     # təhlükəsizlik: böyük fayl limiti (məs: 5MB)
     if uploaded_file.size > 5 * 1024 * 1024:
-        raise ValueError("Fayl çox böyükdür (max 5MB).")
+        raise ValueError(pgettext("exams.service.parsing.error", "file_too_large"))
 
     if ext == ".txt":
         return uploaded_file.read().decode("utf-8", errors="ignore")
@@ -77,7 +78,9 @@ def extract_text_from_upload(uploaded_file) -> str:
 
     if ext == ".pdf":
         if ZipReader is None:
-            raise ValueError("PDF oxuma üçün 'pypdf' quraşdırılmayıb. `pip install pypdf` edin.")
+            raise ValueError(
+                pgettext("exams.service.parsing.error", "pdf_dependency_missing")
+            )
 
         reader = PdfReader(uploaded_file)
         parts = []
@@ -92,7 +95,7 @@ def extract_text_from_upload(uploaded_file) -> str:
         # ✅ əsas fix burada
         return normalize_pdf_extracted_text(raw)
 
-    raise ValueError("Yalnız .docx, .pdf, .txt qəbul olunur.")
+    raise ValueError(pgettext("exams.service.parsing.error", "unsupported_file_type"))
 
 
 # PDF-dən çıxan və ya digər mənbədən alınan raw mətni parser üçün strukturlaşdırılmış sual formatına çevirir
@@ -251,11 +254,21 @@ def parse_bulk_mcq(raw_text: str):
         # missing A-D
         for must in ["A", "B", "C", "D"]:
             if must not in q["options"]:
-                q["warnings"].append({"type": "missing_option", "msg": f"{must} variantı tapılmadı."})
+                q["warnings"].append(
+                    {
+                        "type": "missing_option",
+                        "msg": pgettext("exams.service.parsing.warning", "missing_option").format(option=must),
+                    }
+                )
 
         # E optional warning
         if "E" not in q["options"]:
-            q["warnings"].append({"type": "missing_option_e", "msg": "E variantı yoxdur (opsional)."})
+            q["warnings"].append(
+                {
+                    "type": "missing_option_e",
+                    "msg": pgettext("exams.service.parsing.warning", "missing_option_e"),
+                }
+            )
 
         # duplicate options text warning
         norm_map = defaultdict(list)
@@ -267,7 +280,9 @@ def parse_bulk_mcq(raw_text: str):
             q["warnings"].append(
                 {
                     "type": "duplicate_option_text",
-                    "msg": f"Təkrar variant mətni: {', '.join(labs)} eynidir.",
+                    "msg": pgettext("exams.service.parsing.warning", "duplicate_option_text").format(
+                        labels=", ".join(labs)
+                    ),
                 }
             )
 
@@ -277,7 +292,7 @@ def parse_bulk_mcq(raw_text: str):
                 q["warnings"].append(
                     {
                         "type": "correct_missing",
-                        "msg": f"Düz cavab kimi işarələnən {c} variantı yoxdur.",
+                        "msg": pgettext("exams.service.parsing.warning", "correct_missing").format(option=c),
                     }
                 )
 

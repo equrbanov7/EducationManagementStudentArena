@@ -3,6 +3,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import Exam
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -65,11 +66,11 @@ def assigned_student_exam_list(request):
 
         # ekrandakı status yazısı
         if exam.access_code:
-            access_label = "Kod tələb olunur"
+            access_label = pgettext("exams.view.student.list.label", "access_code_required")
         elif exam.is_public:
-            access_label = "Hamı üçün açıq"
+            access_label = pgettext("exams.view.student.list.label", "access_public")
         else:
-            access_label = "Yalnız icazəli istifadəçilər"
+            access_label = pgettext("exams.view.student.list.label", "access_allowed_only")
 
         exam_items.append(
             {
@@ -94,7 +95,7 @@ def assigned_student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
-        "page_title": "Təyin olunmuş imtahanlarım",
+        "page_title": pgettext_lazy("exams.view.student.list.title", "assigned_exams"),
         "current_url_name": "assigned_exam_list",
     }
 
@@ -156,11 +157,11 @@ def student_exam_list(request):
         requires_code = bool(exam.access_code and not can_without_code)
 
         if exam.access_code:
-            access_label = "Kod tələb olunur"
+            access_label = pgettext("exams.view.student.list.label", "access_code_required")
         elif exam.is_public:
-            access_label = "Hamı üçün açıq"
+            access_label = pgettext("exams.view.student.list.label", "access_public")
         else:
-            access_label = "Yalnız icazəli istifadəçilər"
+            access_label = pgettext("exams.view.student.list.label", "access_allowed_only")
 
         exam_items.append(
             {
@@ -184,7 +185,7 @@ def student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
-        "page_title": "Mövcud imtahanlar",
+        "page_title": pgettext_lazy("exams.view.student.list.title", "available_exams"),
         "current_url_name": "student_exam_list",
     }
 

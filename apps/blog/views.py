@@ -14,6 +14,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.courses.models import Course
@@ -122,7 +123,7 @@ def post_detail(request, slug):
 
     if request.method == "POST":
         if not request.user.is_authenticated:
-            messages.error(request, "Şərh yazmaq üçün əvvəlcə daxil olun.")
+            messages.error(request, pgettext("blog.post_detail.message", "login_required"))
             return redirect("login")
 
         form = CommentForm(request.POST)
@@ -134,7 +135,7 @@ def post_detail(request, slug):
                 comment.post = post
                 comment.user = request.user
                 comment.save()
-                messages.success(request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐")
+                messages.success(request, pgettext("blog.post_detail.message", "comment_added_with_rating"))
             else:
                 # Artıq bu posta şərhi var → yeni şərh, eyni rating
                 comment = Comment(
@@ -144,7 +145,7 @@ def post_detail(request, slug):
                     rating=user_first_comment.rating,
                 )
                 comment.save()
-                messages.success(request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂")
+                messages.success(request, pgettext("blog.post_detail.message", "comment_added_without_rating"))
 
             return redirect("post_detail", slug=post.slug)
     else:
@@ -179,9 +180,8 @@ def subscribe_page(request):
 
                     # 3. Email göndər
                     send_mail(
-                        "Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]",
-                        # Text versiyası (html-i dəstəkləməyən proqramlar üçün)
-                        f"Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.",
+                        pgettext("blog.subscribe.email", "subject"),
+                        pgettext("blog.subscribe.email", "plain_text_body").format(email=email),
                         settings.DEFAULT_FROM_EMAIL,
                         [email],
                         html_message=html_message,
@@ -190,23 +190,23 @@ def subscribe_page(request):
 
                     messages.success(
                         request,
-                        f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.",
+                        pgettext("blog.subscribe.message", "confirmation_email_sent").format(email=email),
                     )
 
                 else:
-                    messages.warning(request, f"'{email}' ünvanı artıq abunəçilərimizdədir.")
+                    messages.warning(request, pgettext("blog.subscribe.message", "already_subscribed").format(email=email))
 
             except Exception as e:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
                 messages.error(
                     request,
-                    "Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
+                    pgettext("blog.subscribe.message", "send_error"),
                 )
                 print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
 
             return redirect("subscribe")
         else:
-            messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
+            messages.error(request, pgettext("blog.subscribe.message", "invalid_email"))
     else:
         form = SubscriptionForm()
 
@@ -219,7 +219,7 @@ def subscribe_page(request):
 @login_required
 def create_post(request):
     if not _can_manage_blog_content(request.user):
-        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
     if request.method == "POST":
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
@@ -237,7 +237,7 @@ def create_post(request):
                 post.category = category
 
                 if created:
-                    messages.info(request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı.")
+                    messages.info(request, pgettext("blog.post.message", "category_created").format(name=new_cat_name))
 
             elif selected_cat:
                 # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
@@ -265,7 +265,7 @@ def create_post(request):
                         "slug": post.slug,
                     }
                 )
-            messages.success(request, "Post uğurla yaradıldı.")
+            messages.success(request, pgettext("blog.post.message", "created"))
             return redirect("post_detail", slug=post.slug)
         if is_ajax:
             errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
@@ -273,7 +273,7 @@ def create_post(request):
                 {
                     "success": False,
                     "errors": errors,
-                    "message": "Form məlumatlarında xəta var.",
+                    "message": pgettext("blog.post.message", "form_invalid"),
                 },
                 status=400,
             )
@@ -290,7 +290,7 @@ def create_post(request):
 @require_POST
 def post_edit_ajax(request, pk):
     if not _can_manage_blog_content(request.user):
-        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
     # Yalnız öz postunu düzəldə bilsin
     post = get_object_or_404(Post, pk=pk, author=request.user)
@@ -305,7 +305,7 @@ def post_edit_ajax(request, pk):
     # Sadə validasiya (istəsən form ilə də edə bilərsən)
     if not title or not content:
         return JsonResponse(
-            {"success": False, "message": "Başlıq və məzmun tələb olunur."},
+            {"success": False, "message": pgettext("blog.post.message", "title_and_content_required")},
             status=400,
         )
 
@@ -345,7 +345,7 @@ def post_edit_ajax(request, pk):
 @require_POST
 def delete_post(request, post_id):
     if not _can_manage_blog_content(request.user):
-        raise PermissionDenied("Bu əməliyyat üçün icazəniz yoxdur.")
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
     post = get_object_or_404(Post, pk=post_id, author=request.user)
     post_title = post.title
@@ -353,7 +353,12 @@ def delete_post(request, post_id):
 
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     if is_ajax:
-        return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
+        return JsonResponse(
+            {
+                "success": True,
+                "message": pgettext("blog.post.message", "deleted").format(title=post_title),
+            }
+        )
 
     return redirect("user_profile", username=request.user.username)
 
@@ -414,7 +419,7 @@ def register_view(request):
             send_verify_email(user, code)
 
             request.session["pending_verify_email"] = user.email
-            messages.success(request, "Email-ə təsdiq kodu göndərildi.")
+            messages.success(request, pgettext("blog.verify.message", "code_sent"))
             return redirect("verify_code")
     else:
         form = RegisterForm()
@@ -425,7 +430,7 @@ def register_view(request):
 def verify_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç.")
+        messages.error(request, pgettext("blog.verify.message", "pending_email_missing"))
         return redirect("register")
 
     if request.method == "POST":
@@ -433,12 +438,12 @@ def verify_code_view(request):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            messages.error(request, "User tapılmadı.")
+            messages.error(request, pgettext("blog.verify.message", "user_not_found"))
             return redirect("register")
 
         otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
         if not otp or otp.is_expired():
-            messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
+            messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_code"))
             return render(request, "blog/verify_code.html", {"email": email})
 
         otp.is_used = True
@@ -447,7 +452,7 @@ def verify_code_view(request):
         user.is_active = True
         user.save()
 
-        messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
+        messages.success(request, pgettext("blog.verify.message", "email_verified"))
         return redirect("login")
 
     return render(request, "blog/verify_code.html", {"email": email})
@@ -460,29 +465,29 @@ def verify_email_link_view(request):
         user = User.objects.get(pk=user_id)
         user.is_active = True
         user.save()
-        messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
+        messages.success(request, pgettext("blog.verify.message", "email_verified"))
         return redirect("login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
-        messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
+        messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_link"))
         return redirect("register")
 
 
 def resend_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Email tapılmadı.")
+        messages.error(request, pgettext("blog.verify.message", "email_missing"))
         return redirect("register")
 
     user = User.objects.filter(email=email).first()
     if not user:
-        messages.error(request, "User tapılmadı.")
+        messages.error(request, pgettext("blog.verify.message", "user_not_found"))
         return redirect("register")
 
     code = generate_otp()
     EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
     send_verify_email(user, code)
 
-    messages.success(request, "Yeni kod göndərildi.")
+    messages.success(request, pgettext("blog.verify.message", "new_code_sent"))
     return redirect("verify_code")
 
 
@@ -625,7 +630,7 @@ def category_detail(request, slug):
 def create_question(request):
     # Yalnız teacher qrupu olanlar sual yarada bilsin
     if not request.user.is_teacher_or_above:
-        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+        raise PermissionDenied(pgettext("blog.permission", "teacher_only"))
 
     if request.method == "POST":
         form = QuestionForm(request.POST)

@@ -62,6 +62,14 @@
     <script src="{% static 'js/burgerMenu.js' %}"></script>
     <script src="{% static 'js/pagination.js' %}"></script>
 
+    <script>
+        window.COURSES_I18N = {
+            errorsLabel: "{% trans 'errors_label' context 'courses.common.js' %}",
+            pleaseWait: "{% trans 'please_wait' context 'courses.common.js' %}",
+            retryError: "{% trans 'retry_error' context 'courses.common.js' %}"
+        };
+    </script>
+
     <!-- Courses app JS -->
     <script src="{% static 'courses/js/accordion.js' %}"></script>
     <script src="{% static 'courses/js/modal.js' %}"></script>

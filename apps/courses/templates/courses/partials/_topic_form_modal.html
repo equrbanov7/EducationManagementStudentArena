@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!-- MODAL: Mövzu Əlavə Etmə -->
 <!-- courses/templates/courses/partials/_topic_form_modal.html -->
 
@@ -7,9 +9,9 @@
             <!-- Header -->
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-plus-circle"></i> Yeni Mövzu Əlavə Et
+                    <i class="fas fa-plus-circle"></i> {% trans "title_add_topic" context "courses.partial.topic_modal" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'aria_close' context 'courses.partial.topic_modal' %}"></button>
             </div>
             
             <!-- Body -->
@@ -20,27 +22,27 @@
                     <!-- Title Field -->
                     <div class="mb-3">
                         <label for="topicTitle" class="form-label">
-                            <strong>Mövzu Adı</strong>
+                            <strong>{% trans "field_topic_name" context "courses.partial.topic_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text" class="form-control" id="topicTitle" 
-                               name="title" placeholder="Məs: Həftə 1: Giriş"
+                               name="title" placeholder="{% trans 'placeholder_topic_name' context 'courses.partial.topic_modal' %}"
                                required>
                         <small class="text-muted">
-                            Məs: "Həftə 1", "Bölmə 1: Əsas Konseptlər"
+                            {% trans "help_topic_name" context "courses.partial.topic_modal" %}
                         </small>
                     </div>
                     
                     <!-- Description Field -->
                     <div class="mb-3">
                         <label for="topicDescription" class="form-label">
-                            <strong>Mövzu Təsviri</strong>
+                            <strong>{% trans "field_topic_description" context "courses.partial.topic_modal" %}</strong>
                         </label>
                         <textarea class="form-control" id="topicDescription" 
                                   name="description" rows="3" 
-                                  placeholder="Bu mövzuda nə öyrənilir?"></textarea>
+                                  placeholder="{% trans 'placeholder_topic_description' context 'courses.partial.topic_modal' %}"></textarea>
                         <small class="text-muted">
-                            Tələbələr üçün bu mövzunun məqsədini yazın
+                            {% trans "help_topic_goal" context "courses.partial.topic_modal" %}
                         </small>
                     </div>
                     
@@ -50,10 +52,10 @@
                     <!-- Submit Button -->
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-save"></i> Mövzu Əlavə Et
+                            <i class="fas fa-save"></i> {% trans "action_add_topic" context "courses.partial.topic_modal" %}
                         </button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Ləğv Et
+                            <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.topic_modal" %}
                         </button>
                     </div>
                 </form>
@@ -64,6 +66,10 @@
 
 <!-- Topic Form AJAX Handler -->
 <script>
+const MSG_ADDING = "{% trans 'msg_adding' context 'courses.partial.topic_modal' %}";
+const MSG_ERROR_RETRY = "{% trans 'msg_error_retry' context 'courses.partial.topic_modal' %}";
+const MSG_ERRORS_HEADER = "{% trans 'msg_errors_header' context 'courses.partial.topic_modal' %}";
+
 document.getElementById('topicForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -74,7 +80,7 @@ document.getElementById('topicForm').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Əlavə olunur...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + MSG_ADDING;
     
     fetch(actionUrl, {
         method: 'POST',
@@ -106,7 +112,7 @@ document.getElementById('topicForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        showNotification('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+        showNotification(MSG_ERROR_RETRY, 'error');
     })
     .finally(() => {
         // Reset button
@@ -118,7 +124,7 @@ document.getElementById('topicForm').addEventListener('submit', function(e) {
 // Helper functions (in shared forms.js)
 function showFormErrors(containerId, errors) {
     const container = document.getElementById(containerId);
-    let errorHtml = '<strong>Xətalar:</strong><ul class="mb-0">';
+    let errorHtml = '<strong>' + MSG_ERRORS_HEADER + ':</strong><ul class="mb-0">';
     
     for (const [field, messages] of Object.entries(errors)) {
         errorHtml += `<li>${messages[0]}</li>`;

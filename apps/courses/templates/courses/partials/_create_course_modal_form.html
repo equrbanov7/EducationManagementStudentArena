@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <form id="createCourseModalForm"
       method="post"
       action="{% url 'courses:create_course' %}?modal=1"
@@ -23,7 +25,7 @@
             {{ form.description }}
             {% if form.description.errors %}<div class="create-course-field-error">{{ form.description.errors.0 }}</div>{% endif %}
             <small class="create-course-help-text">
-                Kursun məqsədi və bu kursdan kimlərin faydalanacağını qısa yazın.
+                {% trans "help_description" context "courses.partial.create_modal_form" %}
             </small>
         </div>
 
@@ -32,11 +34,11 @@
             {{ form.cover_image }}
             {% if form.cover_image.errors %}<div class="create-course-field-error">{{ form.cover_image.errors.0 }}</div>{% endif %}
             <small class="create-course-help-text">
-                Şəkil yükləməsəniz, sistem default cover istifadə edəcək.
+                {% trans "help_cover" context "courses.partial.create_modal_form" %}
             </small>
 
             <div id="createCourseImagePreviewWrap" class="create-course-image-preview-wrap" hidden>
-                <img id="createCourseImagePreview" class="create-course-image-preview" src="" alt="Course cover preview">
+                <img id="createCourseImagePreview" class="create-course-image-preview" src="" alt="{% trans 'alt_cover_preview' context 'courses.partial.create_modal_form' %}">
             </div>
         </div>
 
@@ -48,7 +50,7 @@
     </div>
 
     <div class="course-modal-actions">
-        <button type="button" class="course-modal-cancel-btn js-close-create-course">Ləğv et</button>
-        <button type="submit" class="course-modal-confirm-btn">Kursu yarat</button>
+        <button type="button" class="course-modal-cancel-btn js-close-create-course">{% trans "action_cancel" context "courses.partial.create_modal_form" %}</button>
+        <button type="submit" class="course-modal-confirm-btn">{% trans "action_create_course" context "courses.partial.create_modal_form" %}</button>
     </div>
 </form>

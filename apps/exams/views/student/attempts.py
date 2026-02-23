@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
 from apps.exams.services.attempts import _start_or_resume_attempt, generate_random_questions_for_attempt
@@ -21,13 +22,13 @@ def start_exam(request, slug):
     """
     exam = get_object_or_404(Exam, slug=slug, is_active=True)
     if not exam_in_active_tenant(request, exam):
-        messages.error(request, "Bu imtahana giriş icazəniz yoxdur.")
+        messages.error(request, pgettext_lazy("exams.view.access.message", "no_exam_access"))
         return redirect("exams:student_exam_list")
 
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
     if not can_start:
-        messages.error(request, reason or "Bu imtahana başlaya bilmirsiniz.")
+        messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
         return redirect("exams:student_exam_list")
 
     return _start_or_resume_attempt(request, exam)
@@ -43,7 +44,7 @@ def take_exam(request, slug, attempt_id):
     )
     exam = attempt.exam
     if not exam_in_active_tenant(request, exam):
-        messages.error(request, "Bu imtahana giriş icazəniz yoxdur.")
+        messages.error(request, pgettext_lazy("exams.view.access.message", "no_exam_access"))
         return redirect("exams:student_exam_list")
 
     if attempt.is_finished:
