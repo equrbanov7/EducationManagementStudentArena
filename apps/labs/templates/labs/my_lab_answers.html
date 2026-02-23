@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 {% load lab_filters %}
 
-{% block title %}{{ lab.title }} - Cavablarım{% endblock %}
+{% block title %}{{ lab.title }} - {% trans "title_suffix_my_answers" context "labs.template.my_lab_answers" %}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -18,14 +17,13 @@
                     <li class="breadcrumb-item active">{{ lab.title }}</li>
                 </ol>
             </nav>
-            <h3 class="mb-0"><i class="fas fa-flask text-danger me-2"></i> Mənim Cavablarım</h3>
+            <h3 class="mb-0"><i class="fas fa-flask text-danger me-2"></i> {% trans "heading_my_answers" context "labs.template.my_lab_answers" %}</h3>
         </div>
         <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Geri
+            <i class="fas fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.my_lab_answers" %}
         </a>
     </div>
     
-    <!-- Cəhd Seçimi -->
     <div class="text-center mb-4">
         <div class="d-inline-flex align-items-center gap-3 bg-light rounded-pill px-4 py-2">
             {% if total_attempts > 1 and attempt_number > 1 %}
@@ -40,7 +38,7 @@
             
             <span class="fs-5">
                 <i class="fas fa-redo text-primary me-2"></i>
-                <strong>Cəhd {{ attempt_number }}</strong> 
+                <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with attempt_number=attempt_number %}label_attempt {{ attempt_number }}{% endblocktrans %}</strong> 
                 <span class="text-muted">/ {{ total_attempts }}</span>
             </span>
             
@@ -56,40 +54,39 @@
         </div>
     </div>
     
-    <!-- Submission Info -->
     {% if submission %}
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
             <div class="row text-center">
                 <div class="col-md-3 mb-3 mb-md-0">
                     <i class="fas fa-calendar-check text-primary fs-3 mb-2 d-block"></i>
-                    <small class="text-muted d-block">Göndərilmə tarixi</small>
+                    <small class="text-muted d-block">{% trans "label_submission_date" context "labs.template.my_lab_answers" %}</small>
                     <strong>{{ submission.submitted_at|date:"d.m.Y H:i" }}</strong>
                 </div>
                 <div class="col-md-3 mb-3 mb-md-0">
                     <i class="fas fa-stopwatch text-info fs-3 mb-2 d-block"></i>
-                    <small class="text-muted d-block">Tamamlama müddəti</small>
+                    <small class="text-muted d-block">{% trans "label_completion_time" context "labs.template.my_lab_answers" %}</small>
                     <strong>{{ duration|default:"--" }}</strong>
                 </div>
                 <div class="col-md-3 mb-3 mb-md-0">
                     <i class="fas fa-info-circle text-warning fs-3 mb-2 d-block"></i>
-                    <small class="text-muted d-block">Status</small>
+                    <small class="text-muted d-block">{% trans "label_status" context "labs.template.my_lab_answers" %}</small>
                     {% if submission.status == 'graded' %}
-                        <span class="badge bg-success fs-6">Qiymətləndirildi</span>
+                        <span class="badge bg-success fs-6">{% trans "status_graded" context "labs.template.my_lab_answers" %}</span>
                     {% elif submission.status == 'late' %}
-                        <span class="badge bg-warning fs-6">Gecikmiş</span>
+                        <span class="badge bg-warning fs-6">{% trans "status_late" context "labs.template.my_lab_answers" %}</span>
                     {% else %}
-                        <span class="badge bg-info fs-6">Gözləyir</span>
+                        <span class="badge bg-info fs-6">{% trans "status_pending" context "labs.template.my_lab_answers" %}</span>
                     {% endif %}
                 </div>
                 <div class="col-md-3">
                     <i class="fas fa-star text-warning fs-3 mb-2 d-block"></i>
-                    <small class="text-muted d-block">Qiymət</small>
+                    <small class="text-muted d-block">{% trans "label_score" context "labs.template.my_lab_answers" %}</small>
                     {% if submission.score is not None %}
                         <span class="fs-4 fw-bold text-success">{{ submission.score }}</span>
                         <span class="text-muted">/ {{ lab.max_score }}</span>
                     {% else %}
-                        <span class="text-muted">Gözləyir</span>
+                        <span class="text-muted">{% trans "status_pending" context "labs.template.my_lab_answers" %}</span>
                     {% endif %}
                 </div>
             </div>
@@ -97,7 +94,7 @@
             {% if submission.feedback %}
             <hr class="my-3">
             <div class="text-start">
-                <strong><i class="fas fa-comment-alt text-primary me-2"></i> Müəllim rəyi:</strong>
+                <strong><i class="fas fa-comment-alt text-primary me-2"></i> {% trans "label_teacher_feedback" context "labs.template.my_lab_answers" %}</strong>
                 <div class="bg-light p-3 rounded mt-2">{{ submission.feedback|linebreaks }}</div>
             </div>
             {% endif %}
@@ -105,12 +102,11 @@
     </div>
     {% endif %}
     
-    <!-- Answers -->
     <div class="card border-0 shadow-sm">
         <div class="card-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <div class="d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-list-ol me-2"></i> <strong>Cavablarım</strong></span>
-                <span class="badge bg-white text-primary">{{ answers.count }} sual</span>
+                <span><i class="fas fa-list-ol me-2"></i> <strong>{% trans "heading_my_answers" context "labs.template.my_lab_answers" %}</strong></span>
+                <span class="badge bg-white text-primary">{% blocktrans trimmed context "labs.template.my_lab_answers" with answer_count=answers.count %}label_question_count {{ answer_count }}{% endblocktrans %}</span>
             </div>
         </div>
         <div class="card-body p-0">
@@ -124,21 +120,19 @@
                     <div class="flex-grow-1">
                         <h6 class="mb-3 fw-bold">{{ answer.question.question_text }}</h6>
                         
-                        <!-- Mətn cavabı -->
                         {% if answer.answer %}
                         <div class="bg-light p-3 rounded mb-3">
                             <small class="text-muted d-block mb-2">
-                                <i class="fas fa-pen me-1"></i> Mətn cavabı:
+                                <i class="fas fa-pen me-1"></i> {% trans "label_text_answer" context "labs.template.my_lab_answers" %}
                             </small>
                             <div>{{ answer.answer|linebreaks }}</div>
                         </div>
                         {% endif %}
                         
-                        <!-- Fayl cavabı -->
                         {% if answer.answer_file %}
                         <div class="bg-primary bg-opacity-10 p-3 rounded mb-3">
                             <small class="text-muted d-block mb-2">
-                                <i class="fas fa-file me-1"></i> Yüklənmiş fayl:
+                                <i class="fas fa-file me-1"></i> {% trans "label_uploaded_file" context "labs.template.my_lab_answers" %}
                             </small>
                             <a href="{{ answer.answer_file.url }}" target="_blank" class="btn btn-primary btn-sm">
                                 <i class="fas fa-download me-2"></i>
@@ -147,18 +141,16 @@
                         </div>
                         {% endif %}
                         
-                        <!-- Cavab yoxdursa -->
                         {% if not answer.answer and not answer.answer_file %}
                         <div class="text-muted fst-italic bg-light p-3 rounded">
-                            <i class="fas fa-minus-circle me-1"></i> Bu suala cavab verilməyib
+                            <i class="fas fa-minus-circle me-1"></i> {% trans "empty_no_answer_for_question" context "labs.template.my_lab_answers" %}
                         </div>
                         {% endif %}
                         
-                        <!-- Qiymət -->
                         {% if answer.score is not None %}
                         <div class="mt-3">
                             <span class="badge bg-success px-3 py-2">
-                                <i class="fas fa-check-circle me-1"></i> {{ answer.score }} bal
+                                <i class="fas fa-check-circle me-1"></i> {% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}
                             </span>
                         </div>
                         {% endif %}
@@ -168,7 +160,7 @@
             {% empty %}
             <div class="text-center text-muted py-5">
                 <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
-                <p class="mb-0">Bu cəhd üçün cavab tapılmadı</p>
+                <p class="mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
             </div>
             {% endfor %}
         </div>

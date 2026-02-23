@@ -57,7 +57,7 @@
                     <div class="card-footer">
                         <div class="author-info">
                             <span class="author-avatar">👤</span> 
-                            <a href="{% url 'user_profile' post.author.username %}">  
+                            <a href="{% url 'accounts:public_profile' post.author.username %}">  
                                 <span class="author-name">{{ post.author.username|title }}</span> 
                             </a>
                         </div>

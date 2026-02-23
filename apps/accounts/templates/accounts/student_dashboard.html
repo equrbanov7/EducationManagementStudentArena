@@ -45,7 +45,7 @@
                         {% for course in enrolled_courses %}
                         <div class="course-item">
                             <div class="item-title">
-                                <a href="{% url 'courses:course_dashboard' course.id %}?from_section=assigned-courses" class="text-decoration-none">
+                                <a href="{% url 'courses:course_dashboard' course.id %}?from_section=assigned-courses&return_to={{ request.get_full_path|urlencode }}" class="text-decoration-none">
                                     {{ course.title }}
                                 </a>
                             </div>

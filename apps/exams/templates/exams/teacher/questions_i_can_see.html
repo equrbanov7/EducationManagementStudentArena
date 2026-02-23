@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Mənim görə bildiyim suallar{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.questions_i_can_see" %}{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <h1>Mənim görə bildiyim suallar</h1>
+    <h1>{% trans "heading_questions_i_can_see" context "exams.template.questions_i_can_see" %}</h1>
 
     {% if questions %}
         <ul class="list-group">
@@ -12,17 +13,17 @@
                 <li class="list-group-item">
                     <strong>{{ q.question_text }}</strong><br>
                     {% if q.answer_text %}
-                        <small>Cavab:</small> {{ q.answer_text }}<br>
+                        <small>{% trans "label_answer" context "exams.template.questions_i_can_see" %}:</small> {{ q.answer_text }}<br>
                     {% endif %}
                     <small class="text-muted">
-                        Müəllif: {{ q.author.username }} —
+                        {% trans "label_author" context "exams.template.questions_i_can_see" %}: {{ q.author.username }} —
                         {{ q.created_at|date:"d.m.Y H:i" }}
                     </small>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>Görə bildiyiniz sual yoxdur.</p>
+        <p>{% trans "empty_no_visible_question" context "exams.template.questions_i_can_see" %}</p>
     {% endif %}
 </div>
 {% endblock %}

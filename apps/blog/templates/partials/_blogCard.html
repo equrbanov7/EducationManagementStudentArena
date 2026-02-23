@@ -11,7 +11,7 @@
         <div class="card-footer">
             <div class="card-meta">
                 {% if post.author %}
-                <a href="{% url 'user_profile' post.author.username %}" class="card-author">
+                <a href="{% url 'accounts:public_profile' post.author.username %}" class="card-author">
                     <i class="fas fa-user-circle"></i> {{ post.author.username }}
                 </a>
                 {% endif %}

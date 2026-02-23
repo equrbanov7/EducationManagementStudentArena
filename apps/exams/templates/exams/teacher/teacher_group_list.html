@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Tələbə qruplarım{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.teacher_group_list" %}{% endblock %}
 
 {% block extraCss %}
   <link rel="stylesheet" href="{% static 'exams/css/teacher_group_list.css' %}">
@@ -13,21 +13,21 @@
 
   <div class="page-header-wrapper mb-4">
     <div class="header-text">
-      <h1 class="page-title">Tələbə qrupları</h1>
+      <h1 class="page-title">{% trans "heading_student_groups" context "exams.template.teacher_group_list" %}</h1>
       <p class="page-subtitle text-muted mb-0">
-        Tenant daxilində qrupları idarə et və imtahanlar üçün tələbə siyahıları yarat.
+        {% trans "subtitle_manage_groups" context "exams.template.teacher_group_list" %}
       </p>
     </div>
 
     <div class="header-actions-toolbar">
       <div class="group-search-box">
         <i class="fas fa-search search-icon-main"></i>
-        <input type="text" id="groupListSearch" placeholder="Qrup adı axtar..." class="group-search-input">
+        <input type="text" id="groupListSearch" placeholder="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}" class="group-search-input">
       </div>
 
       <a href="{% url 'exams:create_student_group' %}" class="btn-create-new">
         <i class="fas fa-plus"></i>
-        <span>Yeni qrup yarat</span>
+        <span>{% trans "action_create_new_group" context "exams.template.teacher_group_list" %}</span>
       </a>
     </div>
   </div>
@@ -40,7 +40,7 @@
             <div>
               <h2 class="group-name">{{ group.name }}</h2>
               <p class="group-meta text-muted mb-0">{{ group.created_at|date:"d.m.Y H:i" }}</p>
-              <p class="group-meta text-muted mb-0">Primary müəllim: <strong>{{ group.teacher.username }}</strong></p>
+              <p class="group-meta text-muted mb-0">{% trans "label_primary_teacher" context "exams.template.teacher_group_list" %}: <strong>{{ group.teacher.username }}</strong></p>
             </div>
 
             <div class="d-flex align-items-center gap-2">
@@ -73,8 +73,8 @@
                 {% csrf_token %}
                 <button
                   type="submit"
-                  class="btn btn-sm btn-outline-danger"
-                  onclick="return confirm('Bu qrupu silmək istədiyinizə əminsiniz?');"
+                  class="btn btn-sm btn-outline-danger jsConfirmDeleteGroup"
+                  data-confirm-message="{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list' %}"
                 >
                   <i class="fas fa-trash"></i>
                 </button>
@@ -83,7 +83,7 @@
           </div>
 
           <div class="group-card-body">
-            <h6 class="students-title text-muted">Qrupun tələbələri:</h6>
+            <h6 class="students-title text-muted">{% trans "heading_group_students" context "exams.template.teacher_group_list" %}:</h6>
             {% if group.students.all %}
               <div class="students-badge-list">
                 {% for student in group.students.all %}
@@ -93,24 +93,24 @@
                 {% endfor %}
               </div>
             {% else %}
-              <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
+              <span class="text-muted small">{% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}</span>
             {% endif %}
           </div>
         </div>
       {% endfor %}
 
       <div id="noGroupFound" style="display:none; text-align:center; padding:20px; color:#64748b;">
-        <i class="fas fa-search me-2"></i> Heç bir qrup tapılmadı.
+        <i class="fas fa-search me-2"></i> {% trans "empty_no_group_found" context "exams.template.teacher_group_list" %}
       </div>
     </div>
   {% else %}
     <div class="empty-state">
       <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
-      <h3>Hələ qrup yoxdur</h3>
-      <p class="text-muted">Başlamaq üçün yeni qrup yarat.</p>
+      <h3>{% trans "empty_no_group_yet_title" context "exams.template.teacher_group_list" %}</h3>
+      <p class="text-muted">{% trans "empty_no_group_yet_desc" context "exams.template.teacher_group_list" %}</p>
 
       <a href="{% url 'exams:create_student_group' %}" class="btn-create-new mt-3">
-        İlk qrupunu yarat
+        {% trans "action_create_first_group" context "exams.template.teacher_group_list" %}
       </a>
     </div>
   {% endif %}
@@ -126,7 +126,7 @@
   <div class="custom-modal-content">
 
     <div class="modal-header-custom">
-      <h3 id="modalTitle">Qrupu redaktə et</h3>
+      <h3 id="modalTitle">{% trans "modal_title_edit_group" context "exams.template.teacher_group_list" %}</h3>
       <button type="button" class="close-modal-btn" id="btnCloseGroupModal">&times;</button>
     </div>
 
@@ -141,7 +141,7 @@
         {% endif %}
 
         <div class="mb-4">
-          <label for="id_name" class="form-label-custom">Qrup adı</label>
+          <label for="id_name" class="form-label-custom">{% trans "label_group_name" context "exams.template.teacher_group_list" %}</label>
           {{ form.name }}
           {% for error in form.name.errors %}
             <div class="invalid-feedback d-block">{{ error }}</div>
@@ -149,14 +149,14 @@
         </div>
 
         <div class="mb-4">
-          <label for="{{ form.primary_teacher.id_for_label }}" class="form-label-custom">Primary müəllim</label>
+          <label for="{{ form.primary_teacher.id_for_label }}" class="form-label-custom">{% trans "label_primary_teacher" context "exams.template.teacher_group_list" %}</label>
           {% if can_multi_assign_teachers %}
             <div class="search-wrapper mb-2">
               <i class="fas fa-search search-icon"></i>
-              <input type="text" id="teacherSearchInput" class="custom-search-input" placeholder="Müəllim axtar...">
+              <input type="text" id="teacherSearchInput" class="custom-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
             </div>
           {% else %}
-            <div class="form-text mb-2">Bu rol üçün yalnız bir primary müəllim seçilə bilər.</div>
+            <div class="form-text mb-2">{% trans "help_only_one_primary_teacher" context "exams.template.teacher_group_list" %}</div>
           {% endif %}
           {{ form.primary_teacher }}
           {% for error in form.primary_teacher.errors %}
@@ -165,19 +165,19 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label-custom">Tələbələri seç</label>
+          <label class="form-label-custom">{% trans "label_select_students" context "exams.template.teacher_group_list" %}</label>
 
           <div class="student-search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="Ad və ya username axtar...">
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}">
           </div>
 
           <div id="studentListContainer" class="student-list-container">
-            <div class="text-center text-muted p-3">Yüklənir...</div>
+            <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
           </div>
 
           <div class="selection-counter">
-            Seçilib: <span id="selectedStudentCount">0</span> tələbə
+            {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedStudentCount">0</span> {% trans "label_student" context "exams.template.teacher_group_list" %}
           </div>
 
           <div style="display:none;">
@@ -190,19 +190,19 @@
 
         {% if can_multi_assign_teachers %}
           <div class="mb-3">
-            <label class="form-label-custom">Əlavə müəllimlər (multi)</label>
+            <label class="form-label-custom">{% trans "label_additional_teachers_multi" context "exams.template.teacher_group_list" %}</label>
 
             <div class="student-search-wrapper">
               <i class="fas fa-search search-icon"></i>
-              <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="Müəllim axtar...">
+              <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
             </div>
 
             <div id="assignedTeacherListContainer" class="student-list-container">
-              <div class="text-center text-muted p-3">Yüklənir...</div>
+              <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
             </div>
 
             <div class="selection-counter">
-              Seçilib: <span id="selectedTeacherCount">0</span> müəllim
+              {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedTeacherCount">0</span> {% trans "label_teacher" context "exams.template.teacher_group_list" %}
             </div>
 
             <div style="display:none;">
@@ -226,10 +226,10 @@
 
         <div class="action-buttons">
           <button type="button" class="btn-action btn-cancel" id="btnCancelGroupModal">
-            Ləğv et
+            {% trans "action_cancel" context "exams.template.teacher_group_list" %}
           </button>
           <button type="submit" class="btn-action btn-save">
-            Yadda saxla
+            {% trans "action_save" context "exams.template.teacher_group_list" %}
           </button>
         </div>
       </div>
@@ -244,12 +244,12 @@
 <div id="warningModal" class="custom-modal-overlay" style="z-index:10000; display:none;">
   <div class="warning-modal-box">
     <div class="warning-icon"><i class="fas fa-exclamation"></i></div>
-    <h3>Dəyişikliklər var!</h3>
-    <p>Yadda saxlanmamış dəyişiklikləriniz var. Pəncərəni bağlasanız, bütün dəyişikliklər itəcək.</p>
+    <h3>{% trans "warning_unsaved_changes_title" context "exams.template.teacher_group_list" %}</h3>
+    <p>{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_group_list" %}</p>
 
     <div class="warning-actions">
-      <button class="btn-warning-action btn-stay" id="btnWarningStay">Geri qayıt</button>
-      <button class="btn-warning-action btn-discard" id="btnWarningDiscard">Bağla və İtirmək</button>
+      <button class="btn-warning-action btn-stay" id="btnWarningStay">{% trans "action_go_back" context "exams.template.teacher_group_list" %}</button>
+      <button class="btn-warning-action btn-discard" id="btnWarningDiscard">{% trans "action_close_and_discard" context "exams.template.teacher_group_list" %}</button>
     </div>
   </div>
 </div>
@@ -258,6 +258,12 @@
 {% block extraJs %}
 <script>
 (function () {
+  const I18N_TEACHER_GROUP_LIST = {
+    noDataFound: "{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list'|escapejs %}",
+    modalTitleEditGroup: "{% trans 'modal_title_edit_group' context 'exams.template.teacher_group_list'|escapejs %}",
+    confirmDeleteGroup: "{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list'|escapejs %}"
+  };
+
   const groupModal = document.getElementById("groupModal");
   const warningModal = document.getElementById("warningModal");
   const groupForm = document.getElementById("groupForm");
@@ -299,7 +305,7 @@
       const options = Array.from(hiddenSelect.options);
 
       if (options.length === 0) {
-        container.innerHTML = '<div class="p-3 text-muted">Məlumat tapılmadı.</div>';
+        container.innerHTML = `<div class="p-3 text-muted">${I18N_TEACHER_GROUP_LIST.noDataFound}</div>`;
         return;
       }
 
@@ -408,7 +414,7 @@
 
   function openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId) {
     groupForm.reset();
-    modalTitle.innerText = "Qrupu redaktə et";
+    modalTitle.innerText = I18N_TEACHER_GROUP_LIST.modalTitleEditGroup;
     if (nameInput) nameInput.value = groupName || "";
 
     const updateTpl = groupModal.dataset.updateUrlTemplate || "{% url 'exams:teacher_update_group' 0 %}";
@@ -494,10 +500,19 @@
     });
   });
 
+  document.querySelectorAll(".jsConfirmDeleteGroup").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const msg = btn.dataset.confirmMessage || I18N_TEACHER_GROUP_LIST.confirmDeleteGroup;
+      if (!window.confirm(msg)) {
+        e.preventDefault();
+      }
+    });
+  });
+
   if (deleteBtn) {
     deleteBtn.addEventListener("click", function () {
       if (!groupDeleteForm?.action) return;
-      if (window.confirm("Bu qrupu silmək istədiyinizə əminsiniz?")) {
+      if (window.confirm(I18N_TEACHER_GROUP_LIST.confirmDeleteGroup)) {
         groupDeleteForm.submit();
       }
     });

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 {% load exam_filters %}
 
-{% block title %}{{ exam.title }} - Nəticələr{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "title_results" context "exams.template.teacher_exam_results" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
@@ -21,36 +21,36 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="h3 mb-3">{{ exam.title }} - Nəticələr</h1>
+    <h1 class="h3 mb-3">{{ exam.title }} - {% trans "heading_results" context "exams.template.teacher_exam_results" %}</h1>
 
     <p>
-        Tip: <strong>{{ exam.get_exam_type_display }}</strong><br>
-        Status:
+        {% trans "label_type" context "exams.template.teacher_exam_results" %}: <strong>{{ exam.get_exam_type_display }}</strong><br>
+        {% trans "label_status" context "exams.template.teacher_exam_results" %}:
         {% if exam.is_active %}
-            <span class="badge bg-success">AKTIV</span>
+            <span class="badge bg-success">{% trans "status_active_upper" context "exams.template.teacher_exam_results" %}</span>
         {% else %}
-            <span class="badge bg-secondary">Deaktiv</span>
+            <span class="badge bg-secondary">{% trans "status_inactive" context "exams.template.teacher_exam_results" %}</span>
         {% endif %}
     </p>
 
     <hr>
 
-    <h3>İştirakçıların nəticələri</h3>
+    <h3>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
     {% if attempts_data %}
         <div class="table-responsive">
             <table class="table table-striped table-sm align-middle">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>İstifadəçi</th>
-                        <th>Status</th>
-                        <th>Düzgün</th>
-                        <th>Səhv</th>
-                        <th>Bal (%)</th>
-                        <th>Başlama</th>
-                        <th>Bitmə</th>
-                        <th>Müddət (san)</th>
-                        <th>Əməliyyat</th>
+                        <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_correct" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_wrong" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_score_percent" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_started_at" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_finished_at" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_duration_sec" context "exams.template.teacher_exam_results" %}</th>
+                        <th>{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +74,7 @@
                             <td>
                                 {{ att.get_status_display }}
                                 {% if att.checked_by_teacher %}
-                                    <span class="badge bg-info text-dark ms-1">Yoxlanıb</span>
+                                    <span class="badge bg-info text-dark ms-1">{% trans "status_checked" context "exams.template.teacher_exam_results" %}</span>
                                 {% endif %}
                             </td>
                             <td>{{ att.correct_count }}</td>
@@ -106,9 +106,9 @@
                                 {# TEST İMTAHANI - həmişə "Bax"                #}
                                 {# ═══════════════════════════════════════════ #}
                                 {% if exam.exam_type == 'test' %}
-                                    <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}" 
+                                    <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}" 
                                        class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-eye"></i> Bax
+                                        <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.teacher_exam_results" %}
                                     </a>
                                 
                                 {# ═══════════════════════════════════════════ #}
@@ -118,9 +118,9 @@
                                     {% if att.checked_by_teacher %}
                                         {% if item.seconds_remaining %}
                                             {# 0-5 dəqiqə: Yenidən yoxlaya bilər + Timer #}
-                                            <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}" 
+                                            <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}" 
                                                class="btn btn-outline-warning btn-sm">
-                                                <i class="fas fa-edit"></i> Yenidən yoxla
+                                                <i class="fas fa-edit"></i> {% trans "action_recheck" context "exams.template.teacher_exam_results" %}
                                             </a>
                                             <div class="countdown-timer mt-1">
                                                 <i class="fas fa-clock"></i>
@@ -128,19 +128,19 @@
                                             </div>
                                         {% else %}
                                             {# 5+ dəqiqə: Artıq yalnız baxa bilər #}
-                                            <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}" 
+                                            <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}" 
                                                class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-eye"></i> Bax
+                                                <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.teacher_exam_results" %}
                                             </a>
                                             <small class="d-block text-muted mt-1">
-                                                <i class="fas fa-lock"></i> Kilidlənib
+                                                <i class="fas fa-lock"></i> {% trans "status_locked" context "exams.template.teacher_exam_results" %}
                                             </small>
                                         {% endif %}
                                     {% else %}
                                         {# Hələ yoxlanmayıb #}
-                                        <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}" 
+                                        <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}" 
                                            class="btn btn-outline-warning btn-sm">
-                                            <i class="fas fa-clipboard-check"></i> Yoxla
+                                            <i class="fas fa-clipboard-check"></i> {% trans "action_check" context "exams.template.teacher_exam_results" %}
                                         </a>
                                     {% endif %}
                                 {% endif %}
@@ -154,13 +154,18 @@
     {% else %}
         <p class="text-muted text-center py-4">
             <i class="fas fa-inbox fa-3x d-block mb-2"></i>
-            Hələ heç kim bu imtahanı verməyib.
+            {% trans "empty_no_attempt" context "exams.template.teacher_exam_results" %}
         </p>
     {% endif %}
 
-    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-secondary mt-3">
-        <i class="fas fa-arrow-left"></i> İmtahana qayıt
-    </a>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        <a href="{{ exam_detail_url }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> {% trans "action_back_to_exam" context "exams.template.teacher_exam_results" %}
+        </a>
+        <a href="{{ profile_return_url }}" class="btn btn-outline-secondary">
+            <i class="fas fa-user"></i> Profile geri dön
+        </a>
+    </div>
 </div>
 {% endblock %}
 

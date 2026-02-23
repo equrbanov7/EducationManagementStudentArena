@@ -69,7 +69,10 @@
                     {% endif %}
 
                     <div class="mt-3">
-                        <a href="{{ profile_return_url }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <a href="{{ profile_return_url }}"
+                           class="btn btn-sm btn-outline-secondary w-100"
+                           id="courseDashboardBackLink"
+                           data-fallback-url="{{ profile_return_url }}">
                             <i class="fas fa-arrow-left"></i> {% trans "action_back_profile" context "courses.dashboard" %}
                         </a>
                     </div>
@@ -148,6 +151,7 @@
     const MSG_GENERIC_ERROR = "{% trans 'generic_error' context 'courses.dashboard' %}";
     const COURSE_ID = {{ course.id }};
     const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    const PROFILE_RETURN_URL = "{{ profile_return_url|escapejs }}";
 
     function deleteCourse(courseId) {
         if (confirm(MSG_COURSE_DELETE_CONFIRM)) {
@@ -159,6 +163,15 @@
             csrfInput.name = 'csrfmiddlewaretoken';
             csrfInput.value = CSRF_TOKEN;
             form.appendChild(csrfInput);
+
+            if (PROFILE_RETURN_URL) {
+                const returnToInput = document.createElement('input');
+                returnToInput.type = 'hidden';
+                returnToInput.name = 'return_to';
+                returnToInput.value = PROFILE_RETURN_URL;
+                form.appendChild(returnToInput);
+            }
+
             document.body.appendChild(form);
             form.submit();
         }

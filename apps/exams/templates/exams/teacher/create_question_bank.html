@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Sual Bankı - {{ exam.title }}{% endblock %}
+{% block title %}{% trans "title_question_bank" context "exams.template.create_question_bank" %} - {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -226,7 +226,7 @@
     {% endif %}
 
     <div class="bank-header" style="text-align: center; margin-bottom: 30px;">
-        <h2>{{ exam.title }} <span style="color:#6c5ce7">Sual Bankı</span></h2>
+        <h2>{{ exam.title }} <span style="color:#6c5ce7">{% trans "heading_question_bank" context "exams.template.create_question_bank" %}</span></h2>
     </div>
 
     <form method="post" action="{% url 'exams:process_question_bank' exam.slug %}" id="bankForm">
@@ -235,14 +235,14 @@
         <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
 
         <div class="settings-card">
-            <label><i class="fas fa-random"></i> Tələbəyə göstəriləcək ümumi sual sayı:</label>
+            <label><i class="fas fa-random"></i> {% trans "label_total_question_count" context "exams.template.create_question_bank" %}:</label>
             <input type="number"
                    name="random_question_count"
                    class="form-control-custom"
                    value="{{ exam.random_question_count|default:0 }}"
-                   placeholder="0 = Bütün suallar">
+                   placeholder="{% trans 'placeholder_all_questions' context 'exams.template.create_question_bank' %}">
             <small style="color:grey">
-                0 yazsanız, bütün suallar düşəcək. Rəqəm yazsanız (məs: 20), bloklardan ümumi 20 sual seçiləcək.
+                {% trans "help_total_question_count" context "exams.template.create_question_bank" %}
             </small>
         </div>
 
@@ -251,18 +251,18 @@
                 {% for item in blocks_data %}
                 <div class="block-card block-item" id="block-card-{{ forloop.counter }}">
                     <div class="block-header">
-                        <h5 class="block-title"><i class="fas fa-cube"></i> Blok (Mövcud)</h5>
+                        <h5 class="block-title"><i class="fas fa-cube"></i> {% trans "block_existing" context "exams.template.create_question_bank" %}</h5>
 
                         <input type="hidden" class="block-db-id" name="block_db_id_{{ forloop.counter }}" value="{{ item.obj.id }}">
 
                         <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
-                            <i class="fas fa-trash"></i> Sil
+                            <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.create_question_bank" %}
                         </button>
                     </div>
 
                     <div class="block-body">
                         <div class="form-group">
-                            <label>Blok Adı:</label>
+                            <label>{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
                             <input type="text"
                                    name="block_name_{{ forloop.counter }}"
                                    value="{{ item.obj.name }}"
@@ -271,16 +271,16 @@
                         </div>
 
                         <div class="form-group time-input-group">
-                            <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
+                            <label><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
                             <input type="number"
                                    name="block_time_{{ forloop.counter }}"
                                    value="{{ item.obj.time_limit_minutes|default:'' }}"
                                    class="form-control-custom"
-                                   placeholder="Limitsiz">
+                                   placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
                         </div>
 
                         <div class="form-group">
-                            <label>Suallar:</label>
+                            <label>{% trans "label_questions" context "exams.template.create_question_bank" %}:</label>
                             <textarea name="block_content_{{ forloop.counter }}" class="form-control-custom">{{ item.text_content }}</textarea>
                         </div>
                     </div>
@@ -289,27 +289,27 @@
             {% else %}
                 <div class="block-card block-item" id="block-card-1">
                     <div class="block-header">
-                        <h5 class="block-title"><i class="fas fa-cube"></i> Blok 1</h5>
+                        <h5 class="block-title"><i class="fas fa-cube"></i> {% trans "block_default" context "exams.template.create_question_bank" %} 1</h5>
                         <input type="hidden" class="block-db-id" name="block_db_id_1" value="">
                         <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
-                            <i class="fas fa-trash"></i> Sil
+                            <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.create_question_bank" %}
                         </button>
                     </div>
 
                     <div class="block-body">
                         <div class="form-group">
-                            <label>Blok Adı:</label>
-                            <input type="text" name="block_name_1" value="Blok 1" class="form-control-custom block-name-input" required>
+                            <label>{% trans "label_block_name" context "exams.template.create_question_bank" %}:</label>
+                            <input type="text" name="block_name_1" value="{% trans 'block_default' context 'exams.template.create_question_bank' %} 1" class="form-control-custom block-name-input" required>
                         </div>
 
                         <div class="form-group time-input-group">
-                            <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
-                            <input type="number" name="block_time_1" class="form-control-custom" placeholder="Limitsiz">
+                            <label><i class="far fa-clock"></i> {% trans "label_block_time_minutes" context "exams.template.create_question_bank" %}:</label>
+                            <input type="number" name="block_time_1" class="form-control-custom" placeholder="{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}">
                         </div>
 
                         <div class="form-group">
-                            <label>Suallar:</label>
-                            <textarea name="block_content_1" class="form-control-custom" placeholder="1. Sual..."></textarea>
+                            <label>{% trans "label_questions" context "exams.template.create_question_bank" %}:</label>
+                            <textarea name="block_content_1" class="form-control-custom" placeholder="{% trans 'placeholder_question_line' context 'exams.template.create_question_bank' %}"></textarea>
                         </div>
                     </div>
                 </div>
@@ -317,16 +317,16 @@
         </div>
 
         <button type="button" id="add-new-block-btn" class="btn-add-block">
-            <i class="fas fa-plus-circle"></i> Yeni Blok Əlavə Et
+            <i class="fas fa-plus-circle"></i> {% trans "action_add_new_block" context "exams.template.create_question_bank" %}
         </button>
 
         <div class="action-bar">
             <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel-main">
-                <i class="fas fa-times"></i> Ləğv et
+                <i class="fas fa-times"></i> {% trans "action_cancel" context "exams.template.create_question_bank" %}
             </a>
 
             <button type="submit" class="btn-save-main" id="saveBtn">
-                <i class="fas fa-save"></i> Yadda Saxla
+                <i class="fas fa-save"></i> {% trans "action_save" context "exams.template.create_question_bank" %}
             </button>
         </div>
     </form>
@@ -337,18 +337,30 @@
         <div style="font-size: 40px; color: #ff7675; margin-bottom: 10px;">
             <i class="fas fa-exclamation-circle"></i>
         </div>
-        <h3>Əminsiniz?</h3>
+        <h3>{% trans "confirm_title" context "exams.template.create_question_bank" %}</h3>
         <p style="color: #636e72;">
-            Bu sual blokunu silmək istədiyinizə əminsiniz? Bu əməliyyat "Yadda Saxla" dedikdən sonra geri qaytarıla bilməz.
+            {% trans "confirm_delete_block_message" context "exams.template.create_question_bank" %}
         </p>
         <div class="modal-buttons">
-            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Xeyr, Ləğv et</button>
-            <button type="button" class="btn-confirm" onclick="confirmDelete()">Bəli, Sil</button>
+            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">{% trans "confirm_no_cancel" context "exams.template.create_question_bank" %}</button>
+            <button type="button" class="btn-confirm" onclick="confirmDelete()">{% trans "confirm_yes_delete" context "exams.template.create_question_bank" %}</button>
         </div>
     </div>
 </div>
 
 <script>
+const I18N_QBANK = {
+    blockNew: "{% trans 'block_new' context 'exams.template.create_question_bank' %}",
+    actionDelete: "{% trans 'action_delete' context 'exams.template.create_question_bank' %}",
+    labelBlockName: "{% trans 'label_block_name' context 'exams.template.create_question_bank' %}",
+    labelBlockTimeMinutes: "{% trans 'label_block_time_minutes' context 'exams.template.create_question_bank' %}",
+    placeholderUnlimited: "{% trans 'placeholder_unlimited' context 'exams.template.create_question_bank' %}",
+    labelQuestionsCopyPaste: "{% trans 'label_questions_copy_paste' context 'exams.template.create_question_bank' %}",
+    placeholderQuestionText: "{% trans 'placeholder_question_text' context 'exams.template.create_question_bank' %}",
+    alertDuplicateBlockName: "{% trans 'alert_duplicate_block_name' context 'exams.template.create_question_bank' %}",
+    blockDefault: "{% trans 'block_default' context 'exams.template.create_question_bank' %}"
+};
+
 let blockToDelete = null;
 let blockCounter = {{ blocks_data|length|default:1 }};
 if (blockCounter === 0) blockCounter = 1;
@@ -364,26 +376,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const newBlockHTML = `
             <div class="block-card block-item" id="block-card-${uniqueID}">
                 <div class="block-header">
-                    <h5 class="block-title"><i class="fas fa-cube"></i> Yeni Blok</h5>
+                    <h5 class="block-title"><i class="fas fa-cube"></i> ${I18N_QBANK.blockNew}</h5>
                     <input type="hidden" class="block-db-id" name="block_db_id_${uniqueID}" value="">
                     <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
-                        <i class="fas fa-trash"></i> Sil
+                        <i class="fas fa-trash"></i> ${I18N_QBANK.actionDelete}
                     </button>
                 </div>
                 <div class="block-body">
                     <div class="form-group">
-                        <label>Blok Adı:</label>
-                        <input type="text" name="block_name_${uniqueID}" value="Blok ${blockCounter}"
+                        <label>${I18N_QBANK.labelBlockName}:</label>
+                        <input type="text" name="block_name_${uniqueID}" value="${I18N_QBANK.blockDefault} ${blockCounter}"
                                class="form-control-custom block-name-input" required>
                     </div>
                     <div class="form-group time-input-group">
-                        <label><i class="far fa-clock"></i> Blok Vaxtı (dəqiqə):</label>
-                        <input type="number" name="block_time_${uniqueID}" class="form-control-custom" placeholder="Limitsiz">
+                        <label><i class="far fa-clock"></i> ${I18N_QBANK.labelBlockTimeMinutes}:</label>
+                        <input type="number" name="block_time_${uniqueID}" class="form-control-custom" placeholder="${I18N_QBANK.placeholderUnlimited}">
                     </div>
                     <div class="form-group">
-                        <label>Suallar (Copy/Paste):</label>
+                        <label>${I18N_QBANK.labelQuestionsCopyPaste}:</label>
                         <textarea name="block_content_${uniqueID}" class="form-control-custom"
-                                  placeholder="1. Sualın mətni..."></textarea>
+                                  placeholder="${I18N_QBANK.placeholderQuestionText}"></textarea>
                     </div>
                 </div>
             </div>
@@ -411,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (names.includes(val)) {
                 hasDuplicate = true;
                 input.style.borderColor = 'red';
-                alert(`Diqqət: "${input.value}" adlı blok artıq mövcuddur. Zəhmət olmasa adları fərqli edin.`);
+                alert(I18N_QBANK.alertDuplicateBlockName.replace("{name}", input.value));
             } else {
                 input.style.borderColor = '#dfe6e9';
                 names.push(val);

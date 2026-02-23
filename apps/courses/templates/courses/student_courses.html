@@ -15,7 +15,7 @@
             </h2>
             <p class="text-muted mb-0">{% trans "header_subtitle" context "courses.student_courses" %}</p>
         </div>
-        <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-secondary">
+        <a href="{% url 'accounts:profile' %}?section=assigned-courses" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> {% trans "action_back_profile" context "courses.student_courses" %}
         </a>
     </div>
@@ -67,7 +67,7 @@
                                 {{ item.joined_at|date:"d.m.Y" }}
                             {% endif %}
                         </small>
-                        <a href="{% url 'courses:course_dashboard' item.course.id %}?from_section=assigned-courses" class="btn btn-success btn-sm">
+                        <a href="{% url 'courses:course_dashboard' item.course.id %}?from_section=assigned-courses&return_to={{ request.get_full_path|urlencode }}" class="btn btn-success btn-sm">
                             <i class="fas fa-arrow-right me-1"></i> {% trans "action_enter_course" context "courses.student_courses" %}
                         </a>
                     </div>

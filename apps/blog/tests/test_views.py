@@ -71,7 +71,9 @@ class BlogRoleAccessTest(TestCase):
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertJSONEqual(response.content, {"success": True, "message": '"Teacher Post" postu silindi.'})
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertIn("Teacher Post", payload["message"])
         self.assertFalse(Post.objects.filter(id=self.teacher_post.id).exists())
 
     def test_other_user_cannot_delete_post(self):
@@ -82,6 +84,26 @@ class BlogRoleAccessTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
         self.assertTrue(Post.objects.filter(id=self.teacher_post.id).exists())
+
+    def test_author_delete_post_non_ajax_redirects_to_new_profile(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("delete_post", args=[self.teacher_post.id]),
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=posts")
+
+    def test_legacy_user_profile_redirects_own_username_to_accounts_profile(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("user_profile", args=[self.teacher.username]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile"))
+
+    def test_legacy_user_profile_redirects_other_username_to_accounts_public_profile(self):
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("user_profile", args=[self.student.username]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:public_profile", args=[self.student.username]))
 
     def test_author_can_create_post_via_ajax(self):
         self.client.force_login(self.teacher)

@@ -17,7 +17,7 @@
         {% trans "uncategorized" context "profile.courses" as uncategorized_label %}
         <div class="course-cards-grid">
             {% for course in my_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=courses" class="modern-course-card">
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=courses&return_to={{ request.get_full_path|urlencode }}" class="modern-course-card">
                 <div class="course-card-icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
@@ -42,9 +42,12 @@
             <h3>{% trans "empty_title" context "profile.courses" %}</h3>
             <p>{% trans "empty_description" context "profile.courses" %}</p>
             
+            {# TODO: Gələcəkdə yenidən aktiv ediləcək. #}
+            {% comment %} {#
             <a href="{% url 'courses:student_courses' %}" class="btn-create-new btn-orange mt-3">
                 <i class="fas fa-search"></i> {% trans "explore_courses" context "profile.courses" %}
             </a>
+            #} {% endcomment %}
         </div>
         {% endif %}
         

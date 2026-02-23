@@ -1,3 +1,5 @@
+from urllib.parse import urlencode, urlsplit
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -5,6 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.forms import ExamForm
@@ -12,6 +15,56 @@ from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
 from core.tenancy import get_organization_int_id
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _resolve_profile_navigation(request, *, default_section="my-exams"):
+    requested_profile_section = (request.GET.get("from_section") or "").strip()
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+    }
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = default_section
+
+    fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+
+    profile_return_url = explicit_return_url or fallback_profile_return_url
+    nav_params = {"from_section": requested_profile_section}
+    if profile_return_url:
+        nav_params["return_to"] = profile_return_url
+
+    return profile_return_url, requested_profile_section, urlencode(nav_params)
 
 
 @login_required
@@ -134,11 +187,7 @@ def teacher_exam_detail(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
-    requested_profile_section = (request.GET.get("from_section") or "").strip()
-    valid_profile_sections = {"my-exams", "assigned-exams", "profile-info"}
-    if requested_profile_section not in valid_profile_sections:
-        requested_profile_section = "my-exams"
-    profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
 
     return render(
         request,
@@ -147,6 +196,7 @@ def teacher_exam_detail(request, slug):
             "exam": exam,
             "questions": questions,
             "profile_return_url": profile_return_url,
+            "exam_navigation_query": nav_query,
         },
     )
 

@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const i18n = window.TEACHER_CHECK_I18N || {};
+    const t = {
+        modalTitleDetails: i18n.modalTitleDetails || "label_question",
+        noAnswer: i18n.noAnswer || "label_no_answer",
+        pointsUnit: i18n.pointsUnit || "unit_points",
+        statusNotChecked: i18n.statusNotChecked || "status_not_checked",
+        saveButtonDirty: i18n.saveButtonDirty || "action_save_changes",
+    };
+
     // Elementlər
     const modal = document.getElementById('questionModal');
     const backdrop = document.getElementById('modalBackdrop');
@@ -28,11 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.querySelector(`.question-card[data-question-id="${qId}"]`);
         const dataStore = card.querySelector('.data-store');
         
-        document.getElementById('modalTitle').textContent = `Sual #${qId} Təfərrüatları`;
+        document.getElementById('modalTitle').textContent = `${t.modalTitleDetails} #${qId}`;
         document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
         
         const ansText = dataStore.getAttribute('data-ans-text');
-        document.getElementById('modalAnswerText').innerHTML = ansText ? ansText : '<i class="text-danger">Cavab yoxdur</i>';
+        document.getElementById('modalAnswerText').innerHTML = ansText ? ansText : `<i class="text-danger">${t.noAnswer}</i>`;
         
         document.getElementById('modalScoreInput').value = currentScore;
         document.getElementById('modalFeedbackInput').value = currentFeedback;
@@ -129,10 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const badge = document.getElementById(`badge_${qId}`);
         if (newScore) {
             badge.className = 'status-badge status-scored';
-            badge.textContent = `${newScore} Bal`;
+            badge.textContent = `${newScore} ${t.pointsUnit}`;
         } else {
             badge.className = 'status-badge status-not-checked';
-            badge.textContent = 'Yoxlanmayıb';
+            badge.textContent = t.statusNotChecked;
         }
 
         markFormAsDirty();
@@ -145,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isFormDirty) {
             isFormDirty = true;
             mainSaveBtn.disabled = false;
-            mainSaveBtn.innerHTML = '<i class="fas fa-save"></i> Yadda Saxla (Dəyişiklik var)';
+            mainSaveBtn.innerHTML = `<i class="fas fa-save"></i> ${t.saveButtonDirty}`;
             mainSaveBtn.classList.remove('btn-success');
             mainSaveBtn.classList.add('btn-warning');
             mainSaveBtn.style.color = '#000';

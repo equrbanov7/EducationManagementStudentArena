@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}
     {% if is_editing %}
-        {{ exam.title }} - Redaktə
+        {{ exam.title }} - {% trans "title_edit" context "exams.template.create_edit_exam" %}
     {% else %}
-        Yeni imtahan
+        {% trans "title_create" context "exams.template.create_edit_exam" %}
     {% endif %}
 {% endblock %}
 
@@ -19,11 +19,11 @@
         <div class="create-exam-card">
             <div class="card-header">
                 {% if is_editing %}
-                    <h1><i class="fas fa-edit"></i> İmtahanı redaktə et</h1>
-                    <p>"{{ exam.title }}" imtahanını yeniləyin.</p>
+                    <h1><i class="fas fa-edit"></i> {% trans "heading_edit_exam" context "exams.template.create_edit_exam" %}</h1>
+                    <p>{% blocktrans trimmed context "exams.template.create_edit_exam" with exam_title=exam.title %}subtitle_edit_exam_with_title {{ exam_title }}{% endblocktrans %}</p>
                 {% else %}
-                    <h1><i class="fas fa-plus-circle"></i> Yeni imtahan yarat</h1>
-                    <p>Tələbələr üçün yeni bir bilik yoxlaması hazırlayın.</p>
+                    <h1><i class="fas fa-plus-circle"></i> {% trans "heading_create_exam" context "exams.template.create_edit_exam" %}</h1>
+                    <p>{% trans "subtitle_create_exam" context "exams.template.create_edit_exam" %}</p>
                 {% endif %}
             </div>
 
@@ -51,7 +51,7 @@
                         {{ form.description.label_tag }}
                         {{ form.description }}
                         <small class="form-text text-muted">
-                            İmtahan haqqında qısa məlumat.
+                            {% trans "description_help" context "exams.template.create_edit_exam" %}
                         </small>
                         {% if form.description.errors %}
                             <div class="field-error">{{ form.description.errors.0 }}</div>
@@ -72,10 +72,10 @@
                             <div class="form-check mt-2">
                                 {{ form.enable_paint }}
                                 <label class="form-check-label" for="{{ form.enable_paint.id_for_label }}">
-                                    Paint cavabı aktiv olsun
+                                    {% trans "enable_paint" context "exams.template.create_edit_exam" %}
                                 </label>
                                 <small class="form-text text-muted">
-                                    Aktiv edilsə, tələbələr cavabı çəkmə (paint) ilə göndərə biləcək.
+                                    {% trans "enable_paint_help" context "exams.template.create_edit_exam" %}
                                 </small>
                                 {% if form.enable_paint.errors %}
                                     <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
@@ -97,8 +97,8 @@
 
                     {# ================= TARIX BLOKU ================= #}
                     <div class="form-section-title span-full">
-                        <h2><i class="far fa-clock text-primary"></i> Tarix məhdudiyyətləri</h2>
-                        <p>İmtahanın aktiv qalacağı müddəti təyin edin.</p>
+                        <h2><i class="far fa-clock text-primary"></i> {% trans "section_date_limits" context "exams.template.create_edit_exam" %}</h2>
+                        <p>{% trans "section_date_limits_help" context "exams.template.create_edit_exam" %}</p>
                     </div>
 
                     <div class="date-range-wrapper span-full">
@@ -106,15 +106,15 @@
                         {# --- START DATE --- #}
                         <div class="date-card">
                             <div class="date-card-header">
-                                <span class="badge-start">Başlama</span>
+                                <span class="badge-start">{% trans "badge_start" context "exams.template.create_edit_exam" %}</span>
                                 <i class="far fa-calendar-alt icon-faded"></i>
                             </div>
                             <div class="date-input-container">
                                 {{ form.start_datetime }}
                             </div>
                             <div class="date-footer">
-                                <small>Bu tarixdən tez başlamaq olmaz.</small>
-                                <small>Boş buraxsan, hər zaman başlamaq olar.</small>
+                                <small>{% trans "start_help_1" context "exams.template.create_edit_exam" %}</small>
+                                <small>{% trans "start_help_2" context "exams.template.create_edit_exam" %}</small>
                             </div>
                             {% if form.start_datetime.errors %}
                                 <div class="field-error-floating">{{ form.start_datetime.errors.0 }}</div>
@@ -129,15 +129,15 @@
                         {# --- END DATE --- #}
                         <div class="date-card">
                             <div class="date-card-header">
-                                <span class="badge-end">Bitmə</span>
+                                <span class="badge-end">{% trans "badge_end" context "exams.template.create_edit_exam" %}</span>
                                 <i class="far fa-calendar-times icon-faded"></i>
                             </div>
                             <div class="date-input-container">
                                 {{ form.end_datetime }}
                             </div>
                             <div class="date-footer">
-                                <small>Bu tarixdən sonra deaktiv olur.</small>
-                                <small>Boş buraxsan, heç vaxt bitməz.</small>
+                                <small>{% trans "end_help_1" context "exams.template.create_edit_exam" %}</small>
+                                <small>{% trans "end_help_2" context "exams.template.create_edit_exam" %}</small>
                             </div>
                             {% if form.end_datetime.errors %}
                                 <div class="field-error-floating">{{ form.end_datetime.errors.0 }}</div>
@@ -148,8 +148,8 @@
 
                     {# ================= VAXT PARAMETRLƏRİ ================= #}
                     <div class="form-section-title span-full">
-                        <h2><i class="fas fa-stopwatch text-info"></i> Vaxt parametrləri</h2>
-                        <p>İmtahan müddəti və sual vaxtlarını təyin edin.</p>
+                        <h2><i class="fas fa-stopwatch text-info"></i> {% trans "section_time_settings" context "exams.template.create_edit_exam" %}</h2>
+                        <p>{% trans "section_time_settings_help" context "exams.template.create_edit_exam" %}</p>
                     </div>
 
                     <div class="form-group">
@@ -159,7 +159,7 @@
                             <i class="far fa-clock icon"></i>
                         </div>
                         <small class="form-text text-muted">
-                            Ümumi imtahan müddəti (dəqiqə). Boş buraxsan, ümumi limit olmayacaq.
+                            {% trans "total_duration_help" context "exams.template.create_edit_exam" %}
                         </small>
                         {% if form.total_duration_minutes.errors %}
                             <div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>
@@ -173,7 +173,7 @@
                             <i class="fas fa-stopwatch icon"></i>
                         </div>
                         <small class="form-text text-muted">
-                            Hər sual üçün varsayılan vaxt (saniyə). Boş buraxsan, sual-sual limit olmayacaq.
+                            {% trans "default_question_time_help" context "exams.template.create_edit_exam" %}
                         </small>
                         {% if form.default_question_time_seconds.errors %}
                             <div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>
@@ -187,7 +187,7 @@
                             <i class="fas fa-redo icon"></i>
                         </div>
                         <small class="form-text text-muted">
-                            Bir istifadəçi üçün maksimum cəhd sayı. Boş buraxsan, limitsiz olacaq.
+                            {% trans "max_attempt_help" context "exams.template.create_edit_exam" %}
                         </small>
                         {% if form.max_attempts_per_user.errors %}
                             <div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>
@@ -196,8 +196,8 @@
 
                     {# ================= GİRİŞ HÜQUQLARI BLOKU ================= #}
                     <div class="form-section-title span-full">
-                        <h2><i class="fas fa-users text-success"></i> Giriş hüquqları</h2>
-                        <p>İmtahanı kimlərin görə biləcəyini burada idarə et.</p>
+                        <h2><i class="fas fa-users text-success"></i> {% trans "section_access_rights" context "exams.template.create_edit_exam" %}</h2>
+                        <p>{% trans "section_access_rights_help" context "exams.template.create_edit_exam" %}</p>
                     </div>
 
                     {# --- Hamı üçün açıq? --- #}
@@ -206,10 +206,9 @@
                             {{ form.is_public }}
                             <span class="custom-checkbox-box"></span>
                             <span>
-                                Hamı üçün açıqdır?
+                                {% trans "is_public" context "exams.template.create_edit_exam" %}
                                 <small class="checkbox-help">
-                                    İşarələsən, bütün tələbələr imtahanı görə biləcək. 
-                                    İşarəni götürsən, yalnız seçdiyin qrup və istifadəçilər görə bilər.
+                                    {% trans "is_public_help" context "exams.template.create_edit_exam" %}
                                 </small>
                             </span>
                         </label>
@@ -223,16 +222,20 @@
                         <div class="access-section-grid">
                             
                             {# PARTIAL 1: Qruplar üçün #}
-                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_groups label="İcazəli Qruplar" search_placeholder="Qrup axtar..." container_id="groupSelector" %}
+                            {% trans "allowed_groups" context "exams.template.create_edit_exam" as allowed_groups_label %}
+                            {% trans "search_group" context "exams.template.create_edit_exam" as search_group_placeholder %}
+                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_groups label=allowed_groups_label search_placeholder=search_group_placeholder container_id="groupSelector" %}
 
                             {# PARTIAL 2: Tələbələr üçün #}
-                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_users label="İcazəli Tələbələr (Fərdi)" search_placeholder="Tələbə axtar (ad, username)..." container_id="userSelector" %}
+                            {% trans "allowed_users_individual" context "exams.template.create_edit_exam" as allowed_users_label %}
+                            {% trans "search_student_name_or_username" context "exams.template.create_edit_exam" as search_student_placeholder %}
+                            {% include "partials/_searchable_multi_select.html" with field=form.allowed_users label=allowed_users_label search_placeholder=search_student_placeholder container_id="userSelector" %}
 
                         </div>
 
                         <p class="access-help mt-3">
                             <i class="fas fa-info-circle me-1"></i>
-                            Əgər heç kim seçilməsə və "Hamı üçün açıq" deyilsə, imtahanı yalnız siz görə biləcəksiniz.
+                            {% trans "access_help_when_none_selected" context "exams.template.create_edit_exam" %}
                         </p>
                     </div>
 
@@ -244,8 +247,7 @@
                             <i class="fas fa-key icon"></i>
                         </div>
                         <small class="form-text text-muted">
-                            Optional: 6 rəqəmli kod yazsan, imtahana girməzdən əvvəl tələbədən bu kod tələb olunacaq.
-                            Boş buraxsan, kod tələb olunmayacaq.
+                            {% trans "access_code_help" context "exams.template.create_edit_exam" %}
                         </small>
                         {% if form.access_code.errors %}
                             <div class="field-error">{{ form.access_code.errors.0 }}</div>
@@ -256,17 +258,17 @@
                 <div class="form-actions">
                     {% if is_editing %}
                         <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel">
-                            <i class="fas fa-times"></i> Ləğv et
+                            <i class="fas fa-times"></i> {% trans "action_cancel" context "exams.template.create_edit_exam" %}
                         </a>
                         <button type="submit" class="btn-submit">
-                            <i class="fas fa-save"></i> Dəyişiklikləri saxla
+                            <i class="fas fa-save"></i> {% trans "action_save_changes" context "exams.template.create_edit_exam" %}
                         </button>
                     {% else %}
                         <a href="javascript:history.back()" class="btn-cancel">
-                            <i class="fas fa-times"></i> Ləğv et
+                            <i class="fas fa-times"></i> {% trans "action_cancel" context "exams.template.create_edit_exam" %}
                         </a>
                         <button type="submit" class="btn-submit">
-                            <i class="fas fa-check"></i> Yarat
+                            <i class="fas fa-check"></i> {% trans "action_create" context "exams.template.create_edit_exam" %}
                         </button>
                     {% endif %}
                 </div>

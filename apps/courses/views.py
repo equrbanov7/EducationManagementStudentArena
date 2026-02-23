@@ -7,7 +7,7 @@ Labs app inteqrasiyası əlavə edilib.
 """
 
 import json
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -19,6 +19,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
@@ -56,6 +57,31 @@ def _student_users_queryset(queryset):
     return queryset.filter(
         Q(profile__role__in=["student", "lead_student"]) | Q(groups__name__in=["student", "lead_student"])
     ).distinct()
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    """
+    Return a safe same-origin relative path (with query/fragment) or empty string.
+    """
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -220,8 +246,21 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
                 profile_return_params["assigned_type"] = assigned_type
 
+        fallback_profile_return_url = f"{reverse('accounts:profile')}?{urlencode(profile_return_params)}"
+        explicit_return_url = _safe_same_origin_redirect_path(
+            self.request,
+            self.request.GET.get("return_to") or self.request.GET.get("next"),
+        )
+        if not explicit_return_url:
+            explicit_return_url = _safe_same_origin_redirect_path(
+                self.request,
+                self.request.META.get("HTTP_REFERER"),
+            )
+        if explicit_return_url == self.request.get_full_path():
+            explicit_return_url = ""
+
         context["profile_return_section"] = requested_profile_section
-        context["profile_return_url"] = f"{reverse('accounts:profile')}?{urlencode(profile_return_params)}"
+        context["profile_return_url"] = explicit_return_url or fallback_profile_return_url
 
         # ═══════════════════════════════════════════════════════════════════
         # 2. MÖVZULAR & RESURSLAR (Hamı görür)
@@ -1074,7 +1113,14 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
             request,
             pgettext("courses.view.message", "course_deleted").format(title=course_title),
         )
-        return redirect("user_profile", username=request.user.username)
+        return_to = _safe_same_origin_redirect_path(
+            request,
+            request.POST.get("return_to") or request.GET.get("return_to"),
+        )
+        if return_to:
+            return redirect(return_to)
+
+        return redirect(f"{reverse('accounts:profile')}?section=my-courses")
 
 
 # ════════════════════════════════════════════════════════════════════════════

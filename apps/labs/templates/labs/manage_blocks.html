@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}{{ lab.title }} - Bloklar & Suallar{% endblock %}
+{% block title %}{{ lab.title }} - {% trans "title_suffix_blocks_questions" context "labs.template.manage_blocks" %}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'labs/css/manage_blocks.css' %}">
@@ -9,8 +10,6 @@
 
 {% block content %}
 <div class="container py-4">
-    
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <nav aria-label="breadcrumb">
@@ -19,25 +18,24 @@
                     <li class="breadcrumb-item active">{{ lab.title }}</li>
                 </ol>
             </nav>
-            <h3 class="mb-0"><i class="fas fa-cubes text-danger me-2"></i> Bloklar & Suallar</h3>
+            <h3 class="mb-0"><i class="fas fa-cubes text-danger me-2"></i> {% trans "heading_blocks_questions" context "labs.template.manage_blocks" %}</h3>
         </div>
         <div>
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBlockModal">
-                <i class="fas fa-plus me-1"></i> Yeni Blok
+                <i class="fas fa-plus me-1"></i> {% trans "action_new_block" context "labs.template.manage_blocks" %}
             </button>
             <a href="{% url 'labs:preview_randomization' lab.id %}" class="btn btn-outline-info">
-                <i class="fas fa-eye me-1"></i> Random Preview
+                <i class="fas fa-eye me-1"></i> {% trans "action_random_preview" context "labs.template.manage_blocks" %}
             </a>
         </div>
     </div>
     
-    <!-- Stats -->
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <h4 class="mb-0">{{ blocks|length }}</h4>
-                    <small class="text-muted">Blok</small>
+                    <small class="text-muted">{% trans "stat_blocks" context "labs.template.manage_blocks" %}</small>
                 </div>
             </div>
         </div>
@@ -45,15 +43,15 @@
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <h4 class="mb-0">{{ lab.total_questions }}</h4>
-                    <small class="text-muted">Ümumi Sual</small>
+                    <small class="text-muted">{% trans "stat_total_questions" context "labs.template.manage_blocks" %}</small>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h4 class="mb-0">{% if lab.questions_per_student > 0 %}{{ lab.questions_per_student }}{% else %}Hamısı{% endif %}</h4>
-                    <small class="text-muted">Tələbəyə düşən</small>
+                    <h4 class="mb-0">{% if lab.questions_per_student > 0 %}{{ lab.questions_per_student }}{% else %}{% trans "label_all" context "labs.template.manage_blocks" %}{% endif %}</h4>
+                    <small class="text-muted">{% trans "stat_per_student" context "labs.template.manage_blocks" %}</small>
                 </div>
             </div>
         </div>
@@ -61,14 +59,19 @@
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <span class="badge {% if lab.status == 'published' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
-                        {{ lab.get_status_display }}
+                        {% if lab.status == 'published' %}
+                            {% trans "status_published" context "labs.template.manage_blocks" %}
+                        {% elif lab.status == 'archived' %}
+                            {% trans "status_archived" context "labs.template.manage_blocks" %}
+                        {% else %}
+                            {% trans "status_draft" context "labs.template.manage_blocks" %}
+                        {% endif %}
                     </span>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Blocks Accordion -->
     {% if blocks %}
     <div class="accordion" id="blocksAccordion">
         {% for block in blocks %}
@@ -82,9 +85,9 @@
                             <strong>{{ block.title }}</strong>
                         </span>
                         <div>
-                            <span class="badge bg-primary me-2">{{ block.question_count }} sual</span>
+                            <span class="badge bg-primary me-2">{% blocktrans trimmed context "labs.template.manage_blocks" with question_count=block.question_count %}label_questions_badge {{ question_count }}{% endblocktrans %}</span>
                             {% if block.questions_to_pick > 0 %}
-                            <span class="badge bg-info">{{ block.questions_to_pick }} seçiləcək</span>
+                            <span class="badge bg-info">{% blocktrans trimmed context "labs.template.manage_blocks" with questions_to_pick=block.questions_to_pick %}label_questions_to_pick_badge {{ questions_to_pick }}{% endblocktrans %}</span>
                             {% endif %}
                         </div>
                     </div>
@@ -93,8 +96,6 @@
             <div id="blockCollapse{{ block.id }}" class="accordion-collapse collapse" 
                  data-bs-parent="#blocksAccordion">
                 <div class="accordion-body">
-                    
-                    <!-- Block Actions -->
                     <div class="d-flex justify-content-between mb-3">
                         <div>
                             <button class="btn btn-sm btn-outline-primary js-edit-block" 
@@ -102,32 +103,31 @@
                                     data-title="{{ block.title }}"
                                     data-description="{{ block.description|default:'' }}"
                                     data-qtp="{{ block.questions_to_pick }}">
-                                <i class="fas fa-edit"></i> Redaktə
+                                <i class="fas fa-edit"></i> {% trans "action_edit" context "labs.template.manage_blocks" %}
                             </button>
                             <button class="btn btn-sm btn-outline-danger js-delete-block" data-id="{{ block.id }}">
-                                <i class="fas fa-trash"></i> Sil
+                                <i class="fas fa-trash"></i> {% trans "action_delete" context "labs.template.manage_blocks" %}
                             </button>
                         </div>
                         <div>
                             <button class="btn btn-sm btn-success js-add-question" data-block-id="{{ block.id }}">
-                                <i class="fas fa-plus"></i> Sual Əlavə Et
+                                <i class="fas fa-plus"></i> {% trans "action_add_question" context "labs.template.manage_blocks" %}
                             </button>
                             <button class="btn btn-sm btn-info js-import-questions" data-block-id="{{ block.id }}">
-                                <i class="fas fa-file-import"></i> Toplu Import
+                                <i class="fas fa-file-import"></i> {% trans "action_bulk_import" context "labs.template.manage_blocks" %}
                             </button>
                         </div>
                     </div>
                     
-                    <!-- Questions List -->
                     {% if block.questions.all %}
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th width="60">#</th>
-                                    <th>Sual</th>
-                                    <th width="80">Bal</th>
-                                    <th width="120">Əməliyyat</th>
+                                    <th>{% trans "table_question" context "labs.template.manage_blocks" %}</th>
+                                    <th width="80">{% trans "table_points" context "labs.template.manage_blocks" %}</th>
+                                    <th width="120">{% trans "table_action" context "labs.template.manage_blocks" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -163,7 +163,7 @@
                     {% else %}
                     <div class="alert alert-light text-center mb-0">
                         <i class="fas fa-inbox text-muted"></i>
-                        <p class="mb-0 text-muted">Bu blokda hələ sual yoxdur</p>
+                        <p class="mb-0 text-muted">{% trans "empty_block_no_questions" context "labs.template.manage_blocks" %}</p>
                     </div>
                     {% endif %}
                     
@@ -175,56 +175,54 @@
     {% else %}
     <div class="alert alert-light text-center py-5">
         <i class="fas fa-cubes fa-3x text-muted mb-3"></i>
-        <h5>Hələ blok yaradılmayıb</h5>
-        <p class="text-muted">Sualları əlavə etmək üçün əvvəlcə blok yaradın</p>
+        <h5>{% trans "empty_no_blocks_yet" context "labs.template.manage_blocks" %}</h5>
+        <p class="text-muted">{% trans "empty_create_block_first" context "labs.template.manage_blocks" %}</p>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBlockModal">
-            <i class="fas fa-plus me-1"></i> İlk Bloku Yarat
+            <i class="fas fa-plus me-1"></i> {% trans "action_create_first_block" context "labs.template.manage_blocks" %}
         </button>
     </div>
     {% endif %}
     
 </div>
 
-<!-- ADD BLOCK MODAL -->
 <div class="modal fade" id="addBlockModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="fas fa-layer-group me-2"></i> Yeni Blok</h5>
+                <h5 class="modal-title"><i class="fas fa-layer-group me-2"></i> {% trans "modal_new_block" context "labs.template.manage_blocks" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="addBlockForm">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                        <label class="form-label">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <input type="text" name="title" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Təsvir</label>
+                        <label class="form-label">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
                         <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Bu Blokdan Seçiləcək Sual Sayı</label>
+                        <label class="form-label">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
                         <input type="number" name="questions_to_pick" class="form-control" value="0" min="0">
-                        <small class="text-muted">0 = bütün suallar</small>
+                        <small class="text-muted">{% trans "help_zero_all_questions" context "labs.template.manage_blocks" %}</small>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-success">Yarat</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.manage_blocks" %}</button>
+                    <button type="submit" class="btn btn-success">{% trans "action_create" context "labs.template.manage_blocks" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- EDIT BLOCK MODAL -->
 <div class="modal fade" id="editBlockModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Blok Redaktə</h5>
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> {% trans "modal_edit_block" context "labs.template.manage_blocks" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editBlockForm">
@@ -232,34 +230,33 @@
                 <input type="hidden" id="editBlockId" name="block_id">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Blok Adı <span class="text-danger">*</span></label>
+                        <label class="form-label">{% trans "label_block_title" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <input type="text" id="editBlockTitle" name="title" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Təsvir</label>
+                        <label class="form-label">{% trans "label_description" context "labs.template.manage_blocks" %}</label>
                         <textarea id="editBlockDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Bu Blokdan Seçiləcək Sual Sayı</label>
+                        <label class="form-label">{% trans "label_questions_to_pick" context "labs.template.manage_blocks" %}</label>
                         <input type="number" id="editBlockQTP" name="questions_to_pick" class="form-control" min="0">
-                        <small class="text-muted">0 = bütün suallar</small>
+                        <small class="text-muted">{% trans "help_zero_all_questions" context "labs.template.manage_blocks" %}</small>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-primary">Yadda Saxla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.manage_blocks" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "action_save" context "labs.template.manage_blocks" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- ADD QUESTION MODAL -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i> Yeni Sual</h5>
+                <h5 class="modal-title"><i class="fas fa-question-circle me-2"></i> {% trans "modal_new_question" context "labs.template.manage_blocks" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="addQuestionForm" enctype="multipart/form-data">
@@ -267,35 +264,34 @@
                 <input type="hidden" id="addQuestionBlockId" name="block_id">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Sual Mətni <span class="text-danger">*</span></label>
+                        <label class="form-label">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <textarea name="question_text" class="form-control" rows="4" required></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Bal</label>
+                            <label class="form-label">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
                             <input type="number" name="points" class="form-control" value="0" min="0">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Əlavə Fayl</label>
+                            <label class="form-label">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
                             <input type="file" name="attachment" class="form-control">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-success">Əlavə Et</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.manage_blocks" %}</button>
+                    <button type="submit" class="btn btn-success">{% trans "action_add" context "labs.template.manage_blocks" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- EDIT QUESTION MODAL -->
 <div class="modal fade" id="editQuestionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> Sual Redaktə</h5>
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i> {% trans "modal_edit_question" context "labs.template.manage_blocks" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editQuestionForm" enctype="multipart/form-data">
@@ -303,36 +299,35 @@
                 <input type="hidden" id="editQuestionId" name="question_id">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Sual Mətni <span class="text-danger">*</span></label>
+                        <label class="form-label">{% trans "label_question_text" context "labs.template.manage_blocks" %} <span class="text-danger">*</span></label>
                         <textarea id="editQuestionText" name="question_text" class="form-control" rows="4" required></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Bal</label>
+                            <label class="form-label">{% trans "table_points" context "labs.template.manage_blocks" %}</label>
                             <input type="number" id="editQuestionPoints" name="points" class="form-control" min="0">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Əlavə Fayl</label>
+                            <label class="form-label">{% trans "label_attachment_file" context "labs.template.manage_blocks" %}</label>
                             <input type="file" name="attachment" class="form-control">
                             <div id="editQuestionCurrentFile" class="mt-2"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-primary">Yadda Saxla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.manage_blocks" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "action_save" context "labs.template.manage_blocks" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- IMPORT QUESTIONS MODAL -->
 <div class="modal fade" id="importQuestionsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i> Toplu Sual Import</h5>
+                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i> {% trans "modal_bulk_import" context "labs.template.manage_blocks" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="importQuestionsForm">
@@ -340,36 +335,50 @@
                 <input type="hidden" id="importBlockId" name="block_id">
                 <div class="modal-body">
                     <div class="alert alert-light">
-                        <strong><i class="fas fa-info-circle me-1"></i> Format:</strong>
+                        <strong><i class="fas fa-info-circle me-1"></i> {% trans "label_format" context "labs.template.manage_blocks" %}</strong>
                         <ul class="mb-0 mt-2">
-                            <li><code>1. Sual mətni</code> və ya <code>1) Sual mətni</code></li>
-                            <li><code>2. Başqa sual</code> və ya <code>2) Başqa sual</code></li>
-                            <li>Nömrəsiz sətir = əvvəlki sualın davamı</li>
+                            <li>{% trans "format_line_1" context "labs.template.manage_blocks" %}</li>
+                            <li>{% trans "format_line_2" context "labs.template.manage_blocks" %}</li>
+                            <li>{% trans "format_line_3" context "labs.template.manage_blocks" %}</li>
                         </ul>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Sualları Yapışdırın</label>
+                        <label class="form-label">{% trans "label_paste_questions" context "labs.template.manage_blocks" %}</label>
                         <textarea name="questions_text" class="form-control font-monospace" rows="12" required 
-                                  placeholder="1. İlk sual mətni burda
-Bu sətr də ilk sualın davamıdır
-2) İkinci sual başqa formatda
-3. Üçüncü sual..."></textarea>
+                                  placeholder="{% trans 'placeholder_import_questions' context 'labs.template.manage_blocks' %}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-info"><i class="fas fa-upload me-1"></i> Import Et</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "labs.template.manage_blocks" %}</button>
+                    <button type="submit" class="btn btn-info"><i class="fas fa-upload me-1"></i> {% trans "action_import" context "labs.template.manage_blocks" %}</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- CSRF Token for JS -->
 <script>
     window.LAB_CONFIG = {
         labId: {{ lab.id }},
         csrf: '{{ csrf_token }}'
+    };
+
+    window.LAB_I18N = {
+        fileExisting: '{% trans "file_existing" context "labs.js.manage_blocks" %}',
+        stateCreating: '{% trans "state_creating" context "labs.js.manage_blocks" %}',
+        stateSaving: '{% trans "state_saving" context "labs.js.manage_blocks" %}',
+        stateAdding: '{% trans "state_adding" context "labs.js.manage_blocks" %}',
+        stateImporting: '{% trans "state_importing" context "labs.js.manage_blocks" %}',
+        actionCreate: '{% trans "action_create" context "labs.js.manage_blocks" %}',
+        actionSave: '{% trans "action_save" context "labs.js.manage_blocks" %}',
+        actionAdd: '{% trans "action_add" context "labs.js.manage_blocks" %}',
+        actionImport: '{% trans "action_import" context "labs.js.manage_blocks" %}',
+        successImportDefault: '{% trans "success_import_default" context "labs.js.manage_blocks" %}',
+        errorPrefix: '{% trans "error_prefix" context "labs.js.manage_blocks" %}',
+        errorUnknown: '{% trans "error_unknown" context "labs.js.manage_blocks" %}',
+        errorServer: '{% trans "error_server" context "labs.js.manage_blocks" %}',
+        confirmDeleteBlock: '{% trans "confirm_delete_block" context "labs.js.manage_blocks" %}',
+        confirmDeleteQuestion: '{% trans "confirm_delete_question" context "labs.js.manage_blocks" %}'
     };
 </script>
 
