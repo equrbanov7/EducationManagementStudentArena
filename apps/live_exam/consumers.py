@@ -6,6 +6,7 @@ from typing import Any, Dict, Tuple
 
 from django.core import signing
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -107,17 +108,17 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         token = cookies.get(PLAYER_COOKIE_NAME)
 
         if not token:
-            await self.send_json({"type": "error", "message": "No token"})
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "no_token")})
             return
 
         try:
             payload = signing.loads(token, salt=PLAYER_TOKEN_SALT, max_age=60 * 60 * 6)
         except Exception:
-            await self.send_json({"type": "error", "message": "Bad token"})
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "bad_token")})
             return
 
         if str(payload.get("pin")) != str(self.pin):
-            await self.send_json({"type": "error", "message": "Pin mismatch"})
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "pin_mismatch")})
             return
 
         # 2) parse payload
@@ -172,11 +173,11 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
             # uniq + boş olmasın
             option_ids = list(dict.fromkeys(option_ids))
             if not option_ids:
-                return False, "No options selected"
+                return False, pgettext("live_exam.consumer.error", "no_options_selected")
 
             return True, (question_id, option_ids, answer_ms)
         except Exception:
-            return False, "Bad payload"
+            return False, pgettext("live_exam.consumer.error", "bad_payload")
 
     # -------------------- DB helpers --------------------
 
@@ -206,30 +207,30 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         try:
             session = LiveSession.objects.get(pin=pin)
         except LiveSession.DoesNotExist:
-            return False, "Session not found"
+            return False, pgettext("live_exam.consumer.error", "session_not_found")
 
         # player
         try:
             player = LivePlayer.objects.get(id=player_id, session=session, client_id=client_id)
         except LivePlayer.DoesNotExist:
-            return False, "Player not found"
+            return False, pgettext("live_exam.consumer.error", "player_not_found")
 
         # idempotent (1 sual = 1 cavab)
         if LiveAnswer.objects.filter(session=session, player=player, question_id=question_id).exists():
-            return True, {"message": "Already answered", "score": player.score}
+            return True, {"message": pgettext("live_exam.consumer.error", "already_answered"), "score": player.score}
 
         # question
         try:
             eq = ExamQuestion.objects.get(id=question_id)
         except ExamQuestion.DoesNotExist:
-            return False, "Question not found"
+            return False, pgettext("live_exam.consumer.error", "question_not_found")
 
         # correct ids
         correct_ids = list(
             ExamQuestionOption.objects.filter(question_id=question_id, is_correct=True).values_list("id", flat=True)
         )
         if not correct_ids:
-            return False, "No correct options marked for this question"
+            return False, pgettext("live_exam.consumer.error", "no_correct_options")
 
         correct_set = set(int(x) for x in correct_ids)
         selected_set = set(int(x) for x in option_ids)

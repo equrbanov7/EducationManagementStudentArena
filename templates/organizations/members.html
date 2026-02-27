@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - Members</title>
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.members" %}</title>
     <style>
         * {
             margin: 0;
@@ -180,28 +180,28 @@
         <div class="header-content">
             <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
             <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
-                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
             </nav>
         </div>
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem;">Members</h1>
+        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.members" %}</h1>
 
         <!-- Filters -->
         <form method="get" class="filters">
             <div class="filter-group">
-                <label>Search</label>
-                <input type="text" name="search" placeholder="Search by name or email..." value="{{ search_query }}">
+                <label>{% trans "search_label" context "organizations.members" %}</label>
+                <input type="text" name="search" placeholder="{% trans 'search_placeholder' context 'organizations.members' %}" value="{{ search_query }}">
             </div>
             <div class="filter-group">
-                <label>Role</label>
+                <label>{% trans "role_label" context "organizations.members" %}</label>
                 <select name="role">
-                    <option value="">All Roles</option>
+                    <option value="">{% trans "all_roles" context "organizations.members" %}</option>
                     {% for role in roles %}
                     <option value="{{ role.name }}" {% if current_role == role.name %}selected{% endif %}>
                         {{ role.display_name }}
@@ -210,7 +210,7 @@
                 </select>
             </div>
             <div class="filter-group" style="display: flex; align-items: flex-end;">
-                <button type="submit" class="btn">Filter</button>
+                <button type="submit" class="btn">{% trans "filter_button" context "organizations.members" %}</button>
             </div>
         </form>
 
@@ -220,10 +220,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Member</th>
-                        <th>Role</th>
-                        <th>Unit</th>
-                        <th>Joined</th>
+                        <th>{% trans "table_member" context "organizations.members" %}</th>
+                        <th>{% trans "table_role" context "organizations.members" %}</th>
+                        <th>{% trans "table_unit" context "organizations.members" %}</th>
+                        <th>{% trans "table_joined" context "organizations.members" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -245,16 +245,22 @@
                         <td>
                             <span class="role-badge">{{ membership.role.display_name }}</span>
                         </td>
-                        <td>{{ membership.scope_unit.name|default:"All" }}</td>
-                        <td>{{ membership.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if membership.scope_unit %}
+                                {{ membership.scope_unit.name }}
+                            {% else %}
+                                {% trans "all_units" context "organizations.members" %}
+                            {% endif %}
+                        </td>
+                        <td>{{ membership.created_at|date:"SHORT_DATE_FORMAT" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
             <div class="empty-state">
-                <h3>No members found</h3>
-                <p>Try adjusting your filters</p>
+                <h3>{% trans "empty_title" context "organizations.members" %}</h3>
+                <p>{% trans "empty_subtitle" context "organizations.members" %}</p>
             </div>
             {% endif %}
         </div>

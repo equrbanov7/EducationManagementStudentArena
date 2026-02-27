@@ -5,6 +5,7 @@ Views for the organizations app.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import pgettext
 
 from .models import Organization
 
@@ -48,12 +49,15 @@ def switch_organization(request, slug):
     has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
-        messages.error(request, "You don't have access to this organization.")
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Set active organization in session
     request.session["active_organization"] = organization.slug
-    messages.success(request, f"Switched to {organization.name}")
+    messages.success(
+        request,
+        pgettext("organizations.views.message", "switched_to_org").format(organization=organization.name),
+    )
 
     # Redirect to next or home
     next_url = request.GET.get("next", "/")
@@ -76,7 +80,7 @@ def organization_dashboard(request, slug):
     has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
-        messages.error(request, "You don't have access to this organization.")
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Set as active organization
@@ -118,7 +122,7 @@ def organization_structure(request, slug):
     has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
-        messages.error(request, "You don't have access to this organization.")
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Get all units in tree structure
@@ -145,7 +149,7 @@ def organization_members(request, slug):
     has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
-        messages.error(request, "You don't have access to this organization.")
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Get members with filters
@@ -191,7 +195,7 @@ def organization_roles(request, slug):
     has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
 
     if not has_membership:
-        messages.error(request, "You don't have access to this organization.")
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
     # Get all roles
@@ -226,7 +230,7 @@ def organization_settings(request, slug):
         ).exists()
 
         if not has_admin:
-            messages.error(request, "You don't have permission to access settings.")
+            messages.error(request, pgettext("organizations.views.message", "no_settings_access"))
             return redirect("organizations:dashboard", slug=slug)
 
     if request.method == "POST":
@@ -238,7 +242,7 @@ def organization_settings(request, slug):
         organization.website = request.POST.get("website", "")
         organization.save()
 
-        messages.success(request, "Settings updated successfully.")
+        messages.success(request, pgettext("organizations.views.message", "settings_updated"))
         return redirect("organizations:settings", slug=slug)
 
     context = {

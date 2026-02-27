@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Organization - EMS Arena</title>
+    <title>{% trans "page_title" context "organizations.select" %} - EMS Arena</title>
     <style>
         * {
             margin: 0;
@@ -172,8 +172,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Select Organization</h1>
-        <p class="subtitle">Choose an organization to continue</p>
+        <h1>{% trans "heading" context "organizations.select" %}</h1>
+        <p class="subtitle">{% trans "subtitle" context "organizations.select" %}</p>
 
         {% if messages %}
         <div class="messages">
@@ -195,14 +195,14 @@
                         <div class="org-name">
                             {{ org_data.organization.name }}
                             {% if org_data.organization == current_org %}
-                            <span class="current-badge">CURRENT</span>
+                            <span class="current-badge">{% trans "current_badge" context "organizations.select" %}</span>
                             {% endif %}
                         </div>
                     </div>
                     <span class="org-type">{{ org_data.organization.get_org_type_display }}</span>
                 </div>
                 <div class="org-roles">
-                    <strong>Your roles:</strong>
+                    <strong>{% trans "your_roles_label" context "organizations.select" %}</strong>
                     {% for membership in org_data.memberships %}
                     <span class="role-badge">{{ membership.role.display_name }}</span>
                     {% endfor %}
@@ -213,9 +213,9 @@
         {% else %}
         <div class="no-orgs">
             <div class="no-orgs-icon">📚</div>
-            <h2>No Organizations</h2>
-            <p>You are not a member of any organization yet.</p>
-            <p style="margin-top: 12px;">Contact your administrator to get access.</p>
+            <h2>{% trans "empty_title" context "organizations.select" %}</h2>
+            <p>{% trans "empty_subtitle" context "organizations.select" %}</p>
+            <p style="margin-top: 12px;">{% trans "empty_help" context "organizations.select" %}</p>
         </div>
         {% endif %}
     </div>

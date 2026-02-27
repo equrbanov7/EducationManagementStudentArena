@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - Structure</title>
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.structure" %}</title>
     <style>
         * {
             margin: 0;
@@ -122,17 +122,17 @@
         <div class="header-content">
             <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
             <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
-                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
             </nav>
         </div>
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem;">Organizational Structure</h1>
+        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.structure" %}</h1>
 
         <div class="tree-container">
             {% if units %}
@@ -177,8 +177,8 @@
                 {% endfor %}
             {% else %}
             <div class="empty-state">
-                <h3>No organizational units</h3>
-                <p>Create units to structure your organization</p>
+                <h3>{% trans "empty_title" context "organizations.structure" %}</h3>
+                <p>{% trans "empty_subtitle" context "organizations.structure" %}</p>
             </div>
             {% endif %}
         </div>

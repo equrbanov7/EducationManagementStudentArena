@@ -1,0 +1,141 @@
+{% load i18n %}
+<div class="section-card pending-answers-card">
+    <div class="section-title">
+        <i class="fas fa-hourglass-half"></i>
+        Pending cavablar ({{ pending_answers_total_count|default:pending_answer_counts.all|default:0 }})
+    </div>
+
+    <form method="get"
+          class="search-form js-auto-filter-form pending-answers-filters"
+          data-auto-filter-form>
+        {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="pending-answers">
+        {% endif %}
+
+        <input
+            type="text"
+            name="pending_search"
+            value="{{ pending_answers_search_query }}"
+            placeholder="Tapşırıq və kurs üzrə axtar"
+            class="form-control"
+        >
+
+        <select name="pending_type" class="form-control" style="max-width: 240px;">
+            <option value="all" {% if pending_answers_active_filter == 'all' %}selected{% endif %}>Bütün növlər</option>
+            <option value="exams" {% if pending_answers_active_filter == 'exams' %}selected{% endif %}>Yazılı imtahan</option>
+            <option value="courses" {% if pending_answers_active_filter == 'courses' %}selected{% endif %}>Sərbəst iş</option>
+            <option value="labs" {% if pending_answers_active_filter == 'labs' %}selected{% endif %}>Lab işi</option>
+            <option value="independent" {% if pending_answers_active_filter == 'independent' %}selected{% endif %}>Kurs işi</option>
+        </select>
+
+        <noscript>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> Axtar
+            </button>
+        </noscript>
+    </form>
+
+    {% if pending_answer_items %}
+        <div class="pending-answers-list">
+            {% for item in pending_answer_items %}
+                <article class="post-item pending-answer-item">
+                    <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--purple{% endif %}">
+                        <i class="fas {% if item.category == 'exams' %}fa-file-alt{% elif item.category == 'courses' %}fa-book-open{% elif item.category == 'labs' %}fa-flask{% else %}fa-diagram-project{% endif %}"></i>
+                    </div>
+                    <div class="post-info">
+                        <div class="post-title">{{ item.title }}</div>
+                        <div class="post-date">
+                            {{ item.kind }}
+                            {% if item.submitted_at %}· {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                            <span class="pending-answer-status pending-answer-status--{{ item.status_class }}">{{ item.status_label }}</span>
+                        </div>
+                        {% if item.review_window_seconds_left > 0 %}
+                            <div class="pending-item-review-window">
+                                <span class="pending-item-timer"
+                                      data-pending-answer-countdown
+                                      data-seconds="{{ item.review_window_seconds_left }}">
+                                    Qalan vaxt hesablanır...
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{ item.detail_url }}" class="btn btn-review-view btn-sm">Bax</a>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>Hazırda pending cavab yoxdur.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+(function () {
+    function setupAutoFilterForm(form) {
+        if (!form || form.dataset.autoFilterBound === "1") {
+            return;
+        }
+        form.dataset.autoFilterBound = "1";
+
+        var debounceHandle = null;
+        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
+        var selects = form.querySelectorAll("select");
+
+        function submitForm() {
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+                return;
+            }
+            form.submit();
+        }
+
+        textFields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                window.clearTimeout(debounceHandle);
+                debounceHandle = window.setTimeout(submitForm, 350);
+            });
+            field.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    window.clearTimeout(debounceHandle);
+                    submitForm();
+                }
+            });
+        });
+
+        selects.forEach(function (select) {
+            select.addEventListener("change", submitForm);
+        });
+    }
+
+    function setupPendingAnswerCountdowns() {
+        var nodes = document.querySelectorAll("[data-pending-answer-countdown]");
+        nodes.forEach(function (node) {
+            var secondsLeft = parseInt(node.getAttribute("data-seconds"), 10);
+            if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
+                node.textContent = "Yoxlama yekunlaşmaq üzrədir.";
+                return;
+            }
+
+            function render() {
+                var minutes = Math.floor(secondsLeft / 60);
+                var seconds = secondsLeft % 60;
+                node.textContent = "Nəticə " + minutes + " dəq " + seconds + " san sonra açılacaq.";
+            }
+
+            render();
+            window.setInterval(function () {
+                secondsLeft = Math.max(0, secondsLeft - 1);
+                render();
+            }, 1000);
+        });
+    }
+
+    document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
+    setupPendingAnswerCountdowns();
+})();
+</script>

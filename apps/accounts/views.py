@@ -3,6 +3,8 @@ Account views for user dashboards, profile management, authentication, and role 
 """
 
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+from pathlib import PurePosixPath
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -26,7 +28,7 @@ from apps.blog.utils import generate_otp, send_verify_email
 from apps.courses.models import Course, CourseMembership
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
-from apps.labs.models import Lab, LabSubmission
+from apps.labs.models import Lab, LabAnswer, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
 from core.constants import OrganizationType
 from core.tenancy import get_request_organization, scoped_by_organization_id
@@ -38,10 +40,13 @@ User = get_user_model()
 signer = TimestampSigner()
 RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES
 PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
 PROFILE_ROLE_LABELS = dict(ProfileRole.CHOICES)
 PROFILE_ROLE_NAMES = set(PROFILE_ROLE_LABELS.keys())
+REVIEW_EDIT_WINDOW_MINUTES = 5
+REVIEW_EDIT_WINDOW = timedelta(minutes=REVIEW_EDIT_WINDOW_MINUTES)
 
 
 def _is_superadmin_user(user):
@@ -210,6 +215,122 @@ def _resolve_next_url(request, fallback_url):
     return fallback_url
 
 
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        url=raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    return raw_url
+
+
+def _normalize_review_result_item_type(raw_type):
+    normalized = (raw_type or "").strip().lower()
+    if normalized in {"assignment", "assignments"}:
+        return "assignment"
+    if normalized in {"project", "projects"}:
+        return "project"
+    if normalized in {"lab", "labs"}:
+        return "lab"
+    return ""
+
+
+def _pending_review_type_label(raw_type):
+    normalized = (raw_type or "").strip().lower()
+    if normalized == "exam":
+        return "Yazılı imtahan"
+    if normalized == "assignment":
+        return "Sərbəst iş"
+    if normalized == "project":
+        return "Kurs işi"
+    if normalized == "lab":
+        return "Lab işi"
+    return "Tapşırıq"
+
+
+def _is_review_window_closed(reviewed_at, *, now=None):
+    if not reviewed_at:
+        return False
+    current_time = now or timezone.now()
+    return current_time >= reviewed_at + REVIEW_EDIT_WINDOW
+
+
+def _is_review_window_open(reviewed_at, *, now=None):
+    if not reviewed_at:
+        return False
+    return not _is_review_window_closed(reviewed_at, now=now)
+
+
+def _review_window_seconds_left(reviewed_at, *, now=None):
+    if not reviewed_at:
+        return 0
+    current_time = now or timezone.now()
+    remaining = int((reviewed_at + REVIEW_EDIT_WINDOW - current_time).total_seconds())
+    return max(0, remaining)
+
+
+def _is_result_visible_to_student(reviewed_at):
+    if not reviewed_at:
+        return False
+    return _is_review_window_closed(reviewed_at)
+
+
+def _parse_decimal_score(raw_value):
+    token = (raw_value or "").strip().replace(",", ".")
+    if not token:
+        raise InvalidOperation
+    return Decimal(token)
+
+
+def _extract_assignment_attachments(submission):
+    attachments = []
+    legacy_file = getattr(submission, "file", None)
+    if legacy_file:
+        attachments.append(
+            {
+                "name": PurePosixPath(getattr(legacy_file, "name", "fayl")).name,
+                "url": getattr(legacy_file, "url", ""),
+            }
+        )
+
+    files_payload = getattr(submission, "files", None)
+    if not isinstance(files_payload, list):
+        return attachments
+
+    def _normalize_url(candidate_url):
+        if candidate_url.startswith(("http://", "https://", "/")):
+            return candidate_url
+        return f"/media/{candidate_url.lstrip('/')}"
+
+    for item in files_payload:
+        if isinstance(item, str):
+            clean = item.strip()
+            if clean:
+                attachments.append({"name": PurePosixPath(clean).name, "url": _normalize_url(clean)})
+            continue
+        if not isinstance(item, dict):
+            continue
+
+        candidate_url = (item.get("url") or item.get("file") or item.get("path") or "").strip()
+        if not candidate_url:
+            continue
+        candidate_name = (item.get("name") or item.get("filename") or "").strip()
+        attachments.append(
+            {
+                "name": candidate_name or PurePosixPath(candidate_url).name,
+                "url": _normalize_url(candidate_url),
+            }
+        )
+
+    return attachments
+
+
 def _role_capabilities(user, profile):
     role = profile.role if profile and profile.role else ProfileRole.MEMBER
     is_superadmin = _is_superadmin_user(user)
@@ -251,6 +372,8 @@ def _role_capabilities(user, profile):
             "edit-profile",
         }
         allowed_sections.add("my-results")
+        if can_view_student_assignments:
+            allowed_sections.add("pending-answers")
 
         if is_org_admin:
             allowed_sections.update(
@@ -477,6 +600,13 @@ def _result_status_badge(status, is_graded=False):
 def _normalize_results_filter(value):
     normalized = (value or "all").lower()
     if normalized in RESULT_FILTER_CHOICES:
+        return normalized
+    return "all"
+
+
+def _normalize_pending_answers_filter(value):
+    normalized = (value or "all").lower()
+    if normalized in PENDING_ANSWER_FILTER_CHOICES:
         return normalized
     return "all"
 
@@ -734,6 +864,8 @@ def _collect_my_results(request, filter_type=None):
     user = request.user
     selected_filter = filter_type if filter_type is not None else request.GET.get("type")
     filter_type = _normalize_results_filter(selected_filter)
+    now = timezone.now()
+    review_cutoff = now - REVIEW_EDIT_WINDOW
 
     scoped_exams = _tenant_scoped_exams(request)
     scoped_courses = _tenant_scoped_courses(request)
@@ -755,10 +887,19 @@ def _collect_my_results(request, filter_type=None):
         )
         for attempt in attempts:
             is_auto_test = attempt.exam.exam_type == "test"
+            if (
+                not is_auto_test
+                and attempt.checked_by_teacher
+                and attempt.teacher_checked_at
+                and not _is_result_visible_to_student(attempt.teacher_checked_at)
+            ):
+                continue
+
             score_value = attempt.teacher_score
             if score_value is None and is_auto_test and (attempt.correct_count + attempt.wrong_count) > 0:
                 score_value = attempt.score_percent
 
+            is_graded_visible = attempt.checked_by_teacher or score_value is not None
             items.append(
                 {
                     "category": "exams",
@@ -767,11 +908,11 @@ def _collect_my_results(request, filter_type=None):
                     "submitted_at": attempt.finished_at or attempt.started_at,
                     "status": _result_status_badge(
                         attempt.status,
-                        is_graded=attempt.checked_by_teacher or score_value is not None,
+                        is_graded=is_graded_visible,
                     ),
                     "status_raw": attempt.get_status_display(),
-                    "score": score_value,
-                    "feedback": attempt.teacher_feedback,
+                    "score": score_value if is_graded_visible else None,
+                    "feedback": attempt.teacher_feedback if is_graded_visible else "",
                     "detail_url": reverse(
                         "exams:exam_result",
                         kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
@@ -790,16 +931,26 @@ def _collect_my_results(request, filter_type=None):
             .order_by("-submitted_at")
         )
         for submission in assignment_submissions:
+            if (
+                submission.status == "graded"
+                and submission.graded_at
+                and not _is_result_visible_to_student(submission.graded_at)
+            ):
+                continue
+
+            is_graded_visible = submission.status == "graded" and (
+                not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+            )
             items.append(
                 {
                     "category": "courses",
                     "title": submission.assignment.title,
                     "kind": submission.assignment.course.title,
                     "submitted_at": submission.submitted_at,
-                    "status": _result_status_badge(submission.status),
+                    "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
-                    "score": submission.grade,
-                    "feedback": submission.feedback,
+                    "score": submission.grade if is_graded_visible else None,
+                    "feedback": submission.feedback if is_graded_visible else "",
                     "detail_url": _append_query_params(
                         reverse(
                             "accounts:my_result_detail",
@@ -821,16 +972,26 @@ def _collect_my_results(request, filter_type=None):
             .order_by("-submitted_at")
         )
         for submission in lab_submissions:
+            if (
+                submission.status == "graded"
+                and submission.graded_at
+                and not _is_result_visible_to_student(submission.graded_at)
+            ):
+                continue
+
+            is_graded_visible = submission.status == "graded" and (
+                not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+            )
             items.append(
                 {
                     "category": "labs",
                     "title": submission.assignment.lab.title,
                     "kind": submission.assignment.lab.course.title,
                     "submitted_at": submission.submitted_at,
-                    "status": _result_status_badge(submission.status),
+                    "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
-                    "score": submission.score,
-                    "feedback": submission.feedback,
+                    "score": submission.score if is_graded_visible else None,
+                    "feedback": submission.feedback if is_graded_visible else "",
                     "detail_url": _append_query_params(
                         reverse(
                             "accounts:my_result_detail",
@@ -852,16 +1013,26 @@ def _collect_my_results(request, filter_type=None):
             .order_by("-submitted_at")
         )
         for submission in project_submissions:
+            if (
+                submission.status == "graded"
+                and submission.graded_at
+                and not _is_result_visible_to_student(submission.graded_at)
+            ):
+                continue
+
+            is_graded_visible = submission.status == "graded" and (
+                not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+            )
             items.append(
                 {
                     "category": "independent",
                     "title": submission.project.title,
                     "kind": submission.project.course.title,
                     "submitted_at": submission.submitted_at,
-                    "status": _result_status_badge(submission.status),
+                    "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
-                    "score": submission.grade,
-                    "feedback": submission.feedback,
+                    "score": submission.grade if is_graded_visible else None,
+                    "feedback": submission.feedback if is_graded_visible else "",
                     "detail_url": _append_query_params(
                         reverse(
                             "accounts:my_result_detail",
@@ -873,30 +1044,247 @@ def _collect_my_results(request, filter_type=None):
             )
             counts["independent"] += 1
 
-    items.sort(key=lambda item: item["submitted_at"] or timezone.now(), reverse=True)
+    items.sort(key=lambda item: item["submitted_at"] or now, reverse=True)
     if filter_type != "all":
         counts = {
             "exams": ExamAttempt.objects.filter(
                 user=user,
                 exam_id__in=scoped_exam_ids,
                 status__in=["submitted", "expired"],
-            ).count(),
+            )
+            .filter(
+                Q(exam__exam_type="test")
+                | Q(checked_by_teacher=False)
+                | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+            )
+            .count(),
             "courses": Submission.objects.filter(
                 user=user,
                 assignment__course_id__in=scoped_course_ids,
-            ).count(),
+            )
+            .exclude(status="graded", graded_at__gt=review_cutoff)
+            .count(),
             "labs": LabSubmission.objects.filter(
                 assignment__student=user,
                 assignment__lab__course_id__in=scoped_course_ids,
-            ).count(),
+            )
+            .exclude(status="graded", graded_at__gt=review_cutoff)
+            .count(),
             "independent": ProjectSubmission.objects.filter(
                 student=user,
                 project__course_id__in=scoped_course_ids,
-            ).count(),
+            )
+            .exclude(status="graded", graded_at__gt=review_cutoff)
+            .count(),
         }
     counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"]
 
     return items, counts, filter_type
+
+
+def _collect_pending_answer_items(request, search=None, filter_type=None):
+    """Build pending-answer list for students (not yet visible final results)."""
+    user = request.user
+    search_query = (search if search is not None else request.GET.get("pending_search", "")).strip()
+    selected_filter = filter_type if filter_type is not None else request.GET.get("pending_type")
+    filter_type = _normalize_pending_answers_filter(selected_filter)
+
+    now = timezone.now()
+    scoped_exams = _tenant_scoped_exams(request)
+    scoped_courses = _tenant_scoped_courses(request)
+    scoped_exam_ids = scoped_exams.values_list("id", flat=True)
+    scoped_course_ids = scoped_courses.values_list("id", flat=True)
+
+    items = []
+    counts = {"exams": 0, "courses": 0, "labs": 0, "independent": 0}
+    search_token = search_query.lower()
+
+    def matches_search(*values):
+        if not search_token:
+            return True
+        for value in values:
+            if search_token in (value or "").lower():
+                return True
+        return False
+
+    def add_item(*, category, title, kind, submitted_at, status_label, status_class, detail_url, countdown_seconds=0):
+        counts[category] += 1
+        if filter_type not in {"all", category}:
+            return
+        items.append(
+            {
+                "category": category,
+                "title": title,
+                "kind": kind,
+                "submitted_at": submitted_at,
+                "status_label": status_label,
+                "status_class": status_class,
+                "detail_url": detail_url,
+                "review_window_seconds_left": max(0, int(countdown_seconds or 0)),
+            }
+        )
+
+    attempts = (
+        ExamAttempt.objects.filter(
+            user=user,
+            exam_id__in=scoped_exam_ids,
+            status__in=["submitted", "expired"],
+        )
+        .exclude(exam__exam_type="test")
+        .select_related("exam", "exam__course")
+        .order_by("-finished_at", "-started_at")
+    )
+    for attempt in attempts:
+        in_recheck_window = (
+            attempt.checked_by_teacher
+            and attempt.teacher_checked_at
+            and not _is_result_visible_to_student(attempt.teacher_checked_at)
+        )
+        is_pending = not attempt.checked_by_teacher or in_recheck_window
+        if not is_pending:
+            continue
+        course_title = attempt.exam.course.title if attempt.exam.course else ""
+        if not matches_search(attempt.exam.title, course_title):
+            continue
+        if in_recheck_window:
+            status_label = "Yoxlanır"
+            status_class = "reviewing"
+            countdown_seconds = _review_window_seconds_left(attempt.teacher_checked_at)
+        else:
+            status_label = "Gözləmədə"
+            status_class = "pending"
+            countdown_seconds = 0
+        add_item(
+            category="exams",
+            title=attempt.exam.title,
+            kind=(attempt.exam.get_exam_type_display() or "Yazılı imtahan"),
+            submitted_at=attempt.finished_at or attempt.started_at,
+            status_label=status_label,
+            status_class=status_class,
+            detail_url=_append_query_params(
+                reverse("accounts:my_result_detail", kwargs={"item_type": "exams", "item_id": attempt.id}),
+                section="pending-answers",
+                pending_type=filter_type,
+                pending_search=search_query,
+            ),
+            countdown_seconds=countdown_seconds,
+        )
+
+    assignment_submissions = (
+        Submission.objects.filter(
+            user=user,
+            assignment__course_id__in=scoped_course_ids,
+        )
+        .select_related("assignment", "assignment__course")
+        .order_by("-submitted_at")
+    )
+    for submission in assignment_submissions:
+        in_recheck_window = (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        )
+        is_pending = submission.status != "graded" or in_recheck_window
+        if not is_pending:
+            continue
+        if not matches_search(submission.assignment.title, submission.assignment.course.title):
+            continue
+        status_label = "Yoxlanır" if in_recheck_window else "Gözləmədə"
+        status_class = "reviewing" if in_recheck_window else "pending"
+        add_item(
+            category="courses",
+            title=submission.assignment.title,
+            kind=submission.assignment.course.title,
+            submitted_at=submission.submitted_at,
+            status_label=status_label,
+            status_class=status_class,
+            detail_url=_append_query_params(
+                reverse("accounts:my_result_detail", kwargs={"item_type": "courses", "item_id": submission.id}),
+                section="pending-answers",
+                pending_type=filter_type,
+                pending_search=search_query,
+            ),
+            countdown_seconds=_review_window_seconds_left(submission.graded_at) if in_recheck_window else 0,
+        )
+
+    lab_submissions = (
+        LabSubmission.objects.filter(
+            assignment__student=user,
+            assignment__lab__course_id__in=scoped_course_ids,
+        )
+        .select_related("assignment", "assignment__lab", "assignment__lab__course")
+        .order_by("-submitted_at")
+    )
+    for submission in lab_submissions:
+        in_recheck_window = (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        )
+        is_pending = submission.status != "graded" or in_recheck_window
+        if not is_pending:
+            continue
+        if not matches_search(submission.assignment.lab.title, submission.assignment.lab.course.title):
+            continue
+        status_label = "Yoxlanır" if in_recheck_window else "Gözləmədə"
+        status_class = "reviewing" if in_recheck_window else "pending"
+        add_item(
+            category="labs",
+            title=submission.assignment.lab.title,
+            kind=submission.assignment.lab.course.title,
+            submitted_at=submission.submitted_at,
+            status_label=status_label,
+            status_class=status_class,
+            detail_url=_append_query_params(
+                reverse("accounts:my_result_detail", kwargs={"item_type": "labs", "item_id": submission.id}),
+                section="pending-answers",
+                pending_type=filter_type,
+                pending_search=search_query,
+            ),
+            countdown_seconds=_review_window_seconds_left(submission.graded_at) if in_recheck_window else 0,
+        )
+
+    project_submissions = (
+        ProjectSubmission.objects.filter(
+            student=user,
+            project__course_id__in=scoped_course_ids,
+        )
+        .select_related("project", "project__course")
+        .order_by("-submitted_at")
+    )
+    for submission in project_submissions:
+        in_recheck_window = (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        )
+        is_pending = submission.status != "graded" or in_recheck_window
+        if not is_pending:
+            continue
+        if not matches_search(submission.project.title, submission.project.course.title):
+            continue
+        status_label = "Yoxlanır" if in_recheck_window else "Gözləmədə"
+        status_class = "reviewing" if in_recheck_window else "pending"
+        add_item(
+            category="independent",
+            title=submission.project.title,
+            kind=submission.project.course.title,
+            submitted_at=submission.submitted_at,
+            status_label=status_label,
+            status_class=status_class,
+            detail_url=_append_query_params(
+                reverse("accounts:my_result_detail", kwargs={"item_type": "independent", "item_id": submission.id}),
+                section="pending-answers",
+                pending_type=filter_type,
+                pending_search=search_query,
+            ),
+            countdown_seconds=_review_window_seconds_left(submission.graded_at) if in_recheck_window else 0,
+        )
+
+    items.sort(key=lambda item: item["submitted_at"] or now, reverse=True)
+    counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"]
+    return items, counts, filter_type, search_query
 
 
 def _normalize_pending_review_type(value):
@@ -927,13 +1315,11 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         search=search_query,
         type=normalized_type,
         status=normalized_status,
-        evaluated_search=request.GET.get("evaluated_search", ""),
-        evaluated_type=request.GET.get("evaluated_type", "all"),
-        evaluated_group=request.GET.get("evaluated_group", ""),
     )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+    review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
 
     student_memberships = []
     if teacher_courses.exists():
@@ -946,6 +1332,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
         for membership in student_memberships
     }
+    anonymous_student_label = "Anonim tələbə"
 
     items = []
 
@@ -954,29 +1341,35 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             ExamAttempt.objects.filter(
                 exam__in=teacher_exams,
                 status__in=["submitted", "expired"],
-                checked_by_teacher=False,
+            )
+            .filter(
+                Q(checked_by_teacher=False)
+                | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff)
             )
             .exclude(exam__exam_type="test")
             .select_related("exam", "user", "exam__course")
         )
         if search_query:
             attempts = attempts.filter(
-                Q(user__username__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
-                | Q(user__last_name__icontains=search_query)
-                | Q(exam__title__icontains=search_query)
+                Q(exam__title__icontains=search_query)
+                | Q(exam__course__title__icontains=search_query)
             )
         for attempt in attempts:
             course = attempt.exam.course
+            review_window_seconds_left = _review_window_seconds_left(attempt.teacher_checked_at)
             items.append(
                 {
                     "type": "exam",
                     "student": attempt.user,
+                    "student_display": anonymous_student_label,
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
                     "status": attempt.status,
-                    "date": attempt.started_at,
+                    "date": attempt.teacher_checked_at or attempt.started_at,
+                    "type_label": _pending_review_type_label("exam"),
+                    "is_recheck": bool(attempt.checked_by_teacher),
+                    "review_window_seconds_left": review_window_seconds_left if attempt.checked_by_teacher else 0,
                     "action_url": _append_query_params(
                         reverse(
                             "exams:teacher_check_attempt",
@@ -992,34 +1385,37 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     if normalized_type in {"all", "assignments"}:
         submissions = Submission.objects.filter(
             assignment__course__in=teacher_courses,
-            status="submitted",
+        ).filter(
+            Q(status="submitted")
+            | Q(status="graded", graded_at__gte=review_cutoff)
         ).select_related("assignment", "user", "assignment__course")
         if search_query:
             submissions = submissions.filter(
-                Q(user__username__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
-                | Q(user__last_name__icontains=search_query)
-                | Q(assignment__title__icontains=search_query)
+                Q(assignment__title__icontains=search_query)
                 | Q(assignment__course__title__icontains=search_query)
             )
         for submission in submissions:
             course = submission.assignment.course
+            is_recheck = submission.status == "graded"
+            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
             items.append(
                 {
                     "type": "assignment",
                     "student": submission.user,
+                    "student_display": anonymous_student_label,
                     "title": submission.assignment.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.user_id), ""),
                     "status": submission.status,
-                    "date": submission.submitted_at,
+                    "date": submission.graded_at or submission.submitted_at,
+                    "type_label": _pending_review_type_label("assignment"),
+                    "is_recheck": is_recheck,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "action_url": _append_query_params(
                         reverse(
-                            "assignments:review_assignment_submissions",
-                            kwargs={"pk": submission.assignment_id},
+                            "accounts:pending_review_detail",
+                            kwargs={"item_type": "assignment", "item_id": submission.id},
                         ),
-                        submission=submission.id,
-                        from_section="pending-review",
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
@@ -1029,34 +1425,37 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
     if normalized_type in {"all", "projects"}:
         project_submissions = ProjectSubmission.objects.filter(
             project__course__in=teacher_courses,
-            status="pending",
+        ).filter(
+            Q(status="pending")
+            | Q(status="graded", graded_at__gte=review_cutoff)
         ).select_related("project", "project__course", "student")
         if search_query:
             project_submissions = project_submissions.filter(
-                Q(student__username__icontains=search_query)
-                | Q(student__first_name__icontains=search_query)
-                | Q(student__last_name__icontains=search_query)
-                | Q(project__title__icontains=search_query)
+                Q(project__title__icontains=search_query)
                 | Q(project__course__title__icontains=search_query)
             )
         for submission in project_submissions:
             course = submission.project.course
+            is_recheck = submission.status == "graded"
+            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
             items.append(
                 {
                     "type": "project",
                     "student": submission.student,
+                    "student_display": anonymous_student_label,
                     "title": submission.project.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.student_id), ""),
                     "status": submission.status,
-                    "date": submission.submitted_at,
+                    "date": submission.graded_at or submission.submitted_at,
+                    "type_label": _pending_review_type_label("project"),
+                    "is_recheck": is_recheck,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "action_url": _append_query_params(
                         reverse(
-                            "projects:review_project_submissions",
-                            kwargs={"pk": submission.project_id},
+                            "accounts:pending_review_detail",
+                            kwargs={"item_type": "project", "item_id": submission.id},
                         ),
-                        submission=submission.id,
-                        from_section="pending-review",
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
@@ -1064,36 +1463,44 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
 
     if normalized_type in {"all", "labs"}:
-        lab_submissions = LabSubmission.objects.filter(
-            assignment__lab__course__in=teacher_courses,
-            status__in=["submitted", "late"],
-        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        lab_submissions = (
+            LabSubmission.objects.filter(
+                assignment__lab__course__in=teacher_courses,
+            )
+            .filter(
+                Q(status__in=["submitted", "late"])
+                | Q(status="graded", graded_at__gte=review_cutoff)
+            )
+            .select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        )
         if search_query:
             lab_submissions = lab_submissions.filter(
-                Q(assignment__student__username__icontains=search_query)
-                | Q(assignment__student__first_name__icontains=search_query)
-                | Q(assignment__student__last_name__icontains=search_query)
-                | Q(assignment__lab__title__icontains=search_query)
+                Q(assignment__lab__title__icontains=search_query)
                 | Q(assignment__lab__course__title__icontains=search_query)
             )
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course
+            is_recheck = submission.status == "graded"
+            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
             items.append(
                 {
                     "type": "lab",
                     "student": student,
+                    "student_display": anonymous_student_label,
                     "title": submission.assignment.lab.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, student.id), ""),
                     "status": submission.status,
-                    "date": submission.submitted_at,
+                    "date": submission.graded_at or submission.submitted_at,
+                    "type_label": _pending_review_type_label("lab"),
+                    "is_recheck": is_recheck,
+                    "review_window_seconds_left": review_window_seconds_left,
                     "action_url": _append_query_params(
                         reverse(
-                            "labs:grade_submission_page",
-                            kwargs={"pk": submission.id},
+                            "accounts:pending_review_detail",
+                            kwargs={"item_type": "lab", "item_id": submission.id},
                         ),
-                        from_section="pending-review",
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
@@ -1116,6 +1523,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
+    review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
 
     student_memberships = []
     if teacher_courses.exists():
@@ -1141,10 +1549,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
 
     profile_return_url = _append_query_params(
         reverse("accounts:profile"),
-        section="pending-review",
-        search=request.GET.get("search", ""),
-        type=request.GET.get("type", "all"),
-        status=request.GET.get("status", "all"),
+        section="review-results",
         evaluated_search=search_query,
         evaluated_type=normalized_type,
         evaluated_group=selected_group,
@@ -1158,7 +1563,11 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 exam__in=teacher_exams,
                 status__in=["submitted", "expired"],
             )
-            .filter(Q(checked_by_teacher=True) | Q(exam__exam_type="test"))
+            .filter(
+                Q(exam__exam_type="test")
+                | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+            )
             .select_related("exam", "user", "exam__course")
         )
         if search_query:
@@ -1182,9 +1591,11 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "score_display": f"{score_value}%" if score_value is not None else "-",
                     "date": attempt.teacher_checked_at or attempt.finished_at or attempt.started_at,
                     "action_url": _append_query_params(
-                        reverse("exams:teacher_exam_results", kwargs={"slug": attempt.exam.slug}),
-                        attempt=attempt.id,
-                        from_section="pending-review",
+                        reverse(
+                            "exams:teacher_view_attempt",
+                            kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+                        ),
+                        from_section="review-results",
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "review"),
@@ -1192,10 +1603,14 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             )
 
     if normalized_type in {"all", "assignments"}:
-        submissions = Submission.objects.filter(
-            assignment__course__in=teacher_courses,
-            status="graded",
-        ).select_related("assignment", "assignment__course", "user")
+        submissions = (
+            Submission.objects.filter(
+                assignment__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .select_related("assignment", "assignment__course", "user")
+        )
         if search_query:
             submissions = submissions.filter(
                 Q(user__username__icontains=search_query)
@@ -1216,9 +1631,10 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "score_display": submission.grade if submission.grade is not None else "-",
                     "date": submission.graded_at or submission.submitted_at,
                     "action_url": _append_query_params(
-                        reverse("assignments:review_assignment_submissions", kwargs={"pk": submission.assignment_id}),
-                        submission=submission.id,
-                        from_section="pending-review",
+                        reverse(
+                            "accounts:review_result_detail",
+                            kwargs={"item_type": "assignment", "item_id": submission.id},
+                        ),
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
@@ -1226,10 +1642,14 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             )
 
     if normalized_type in {"all", "projects"}:
-        project_submissions = ProjectSubmission.objects.filter(
-            project__course__in=teacher_courses,
-            status="graded",
-        ).select_related("project", "project__course", "student")
+        project_submissions = (
+            ProjectSubmission.objects.filter(
+                project__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .select_related("project", "project__course", "student")
+        )
         if search_query:
             project_submissions = project_submissions.filter(
                 Q(student__username__icontains=search_query)
@@ -1250,9 +1670,10 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "score_display": submission.grade if submission.grade is not None else "-",
                     "date": submission.graded_at or submission.submitted_at,
                     "action_url": _append_query_params(
-                        reverse("projects:review_project_submissions", kwargs={"pk": submission.project_id}),
-                        submission=submission.id,
-                        from_section="pending-review",
+                        reverse(
+                            "accounts:review_result_detail",
+                            kwargs={"item_type": "project", "item_id": submission.id},
+                        ),
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
@@ -1260,10 +1681,14 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             )
 
     if normalized_type in {"all", "labs"}:
-        lab_submissions = LabSubmission.objects.filter(
-            assignment__lab__course__in=teacher_courses,
-            status="graded",
-        ).select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        lab_submissions = (
+            LabSubmission.objects.filter(
+                assignment__lab__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
+        )
         if search_query:
             lab_submissions = lab_submissions.filter(
                 Q(assignment__student__username__icontains=search_query)
@@ -1285,8 +1710,10 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                     "score_display": submission.score if submission.score is not None else "-",
                     "date": submission.graded_at or submission.submitted_at,
                     "action_url": _append_query_params(
-                        reverse("labs:grade_submission_page", kwargs={"pk": submission.id}),
-                        from_section="pending-review",
+                        reverse(
+                            "accounts:review_result_detail",
+                            kwargs={"item_type": "lab", "item_id": submission.id},
+                        ),
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
@@ -1531,6 +1958,17 @@ def user_profile(request):
         "independent": 0,
     }
     my_results_active_filter = "all"
+    pending_answer_items = []
+    pending_answer_counts = {
+        "all": 0,
+        "exams": 0,
+        "courses": 0,
+        "labs": 0,
+        "independent": 0,
+    }
+    pending_answers_active_filter = "all"
+    pending_answers_search_query = ""
+    pending_answers_count = 0
     if capabilities["can_view_student_assignments"]:
         assigned_exams_qs = _assigned_exams_queryset(request, request.user, active_only=True).order_by(
             "-start_datetime",
@@ -1550,30 +1988,86 @@ def user_profile(request):
             filter_type=request.GET.get("results_type"),
         )
         my_results_count = my_result_counts.get("all", 0)
+        (
+            pending_answer_items,
+            pending_answer_counts,
+            pending_answers_active_filter,
+            pending_answers_search_query,
+        ) = _collect_pending_answer_items(
+            request,
+            search=request.GET.get("pending_search"),
+            filter_type=request.GET.get("pending_type"),
+        )
+        pending_answers_count = pending_answer_counts.get("all", 0)
 
     pending_review_count = 0
+    evaluated_review_count = 0
     if capabilities["can_review_submissions"]:
+        review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
         pending_review_count = (
             ExamAttempt.objects.filter(
                 exam__in=my_exams_qs,
                 status__in=["submitted", "expired"],
-                checked_by_teacher=False,
+            )
+            .filter(
+                Q(checked_by_teacher=False)
+                | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff)
             )
             .exclude(exam__exam_type="test")
             .count()
         )
-        pending_review_count += Submission.objects.filter(
-            assignment__course__in=teacher_courses,
-            status="submitted",
-        ).count()
-        pending_review_count += ProjectSubmission.objects.filter(
-            project__course__in=teacher_courses,
-            status="pending",
-        ).count()
-        pending_review_count += LabSubmission.objects.filter(
-            assignment__lab__course__in=teacher_courses,
-            status__in=["submitted", "late"],
-        ).count()
+        pending_review_count += (
+            Submission.objects.filter(assignment__course__in=teacher_courses)
+            .filter(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff))
+            .count()
+        )
+        pending_review_count += (
+            ProjectSubmission.objects.filter(project__course__in=teacher_courses)
+            .filter(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff))
+            .count()
+        )
+        pending_review_count += (
+            LabSubmission.objects.filter(assignment__lab__course__in=teacher_courses)
+            .filter(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff))
+            .count()
+        )
+
+        evaluated_review_count = (
+            ExamAttempt.objects.filter(
+                exam__in=my_exams_qs,
+                status__in=["submitted", "expired"],
+            )
+            .filter(
+                Q(exam__exam_type="test")
+                | Q(checked_by_teacher=True, teacher_checked_at__isnull=True)
+                | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
+            )
+            .count()
+        )
+        evaluated_review_count += (
+            Submission.objects.filter(
+                assignment__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .count()
+        )
+        evaluated_review_count += (
+            ProjectSubmission.objects.filter(
+                project__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .count()
+        )
+        evaluated_review_count += (
+            LabSubmission.objects.filter(
+                assignment__lab__course__in=teacher_courses,
+                status="graded",
+            )
+            .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
+            .count()
+        )
 
     teacher_groups = []
     teacher_groups_count = 0
@@ -1637,7 +2131,7 @@ def user_profile(request):
     evaluated_review_filter_type = "all"
     evaluated_review_filter_group = ""
     evaluated_review_available_groups = []
-    if "pending-review" in allowed_sections:
+    if "pending-review" in allowed_sections or "review-results" in allowed_sections:
         (
             pending_review_items,
             pending_review_search_query,
@@ -1932,8 +2426,10 @@ def user_profile(request):
         "assigned-exams": pgettext_lazy("profile.section", "assigned_tasks"),
         "assigned-courses": pgettext_lazy("profile.section", "assigned_courses"),
         "my-results": pgettext_lazy("profile.section", "my_results"),
+        "pending-answers": "Pending cavablar",
         "groups": pgettext_lazy("profile.section", "groups"),
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
+        "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
@@ -1999,7 +2495,13 @@ def user_profile(request):
         "my_result_items": my_result_items,
         "my_result_counts": my_result_counts,
         "my_results_active_filter": my_results_active_filter,
+        "pending_answers_count": pending_answers_count,
+        "pending_answer_items": pending_answer_items,
+        "pending_answer_counts": pending_answer_counts,
+        "pending_answers_active_filter": pending_answers_active_filter,
+        "pending_answers_search_query": pending_answers_search_query,
         "pending_review_count": pending_review_count,
+        "evaluated_review_count": evaluated_review_count,
         "teacher_groups": teacher_groups,
         "teacher_groups_count": teacher_groups_count,
         "teacher_groups_payload": teacher_groups_payload,
@@ -2287,6 +2789,37 @@ def my_results(request):
 
 
 @login_required
+def pending_answers(request):
+    """Pending (not yet finalized) answer list for students."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_view_student_assignments"]:
+        messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
+        return redirect("accounts:profile")
+
+    pending_search = request.GET.get("pending_search")
+    if pending_search is None:
+        pending_search = request.GET.get("search")
+    pending_type = request.GET.get("pending_type")
+    if pending_type is None:
+        pending_type = request.GET.get("type")
+
+    items, counts, active_filter, search_query = _collect_pending_answer_items(
+        request,
+        search=pending_search,
+        filter_type=pending_type,
+    )
+    context = {
+        "pending_answer_items": items,
+        "pending_answer_counts": counts,
+        "pending_answers_active_filter": active_filter,
+        "pending_answers_search_query": search_query,
+        "pending_answers_total_count": counts.get("all", 0),
+    }
+    return render(request, "accounts/pending_answers.html", context)
+
+
+@login_required
 def my_result_detail(request, item_type, item_id):
     """Detail page for a single item from My Results."""
     profile = getattr(request.user, "profile", None)
@@ -2295,12 +2828,22 @@ def my_result_detail(request, item_type, item_id):
         messages.error(request, pgettext_lazy("accounts.student_assignments.message", "student_or_member_only"))
         return redirect("accounts:profile")
 
-    results_filter = _normalize_results_filter(request.GET.get("results_type") or request.GET.get("type"))
-    back_url = _append_query_params(
-        reverse("accounts:profile"),
-        section="my-results",
-        results_type=results_filter,
-    )
+    requested_section = (request.GET.get("section") or "").strip().lower()
+    if requested_section == "pending-answers":
+        pending_filter = _normalize_pending_answers_filter(request.GET.get("pending_type") or request.GET.get("type"))
+        back_url = _append_query_params(
+            reverse("accounts:profile"),
+            section="pending-answers",
+            pending_type=pending_filter,
+            pending_search=(request.GET.get("pending_search") or "").strip(),
+        )
+    else:
+        results_filter = _normalize_results_filter(request.GET.get("results_type") or request.GET.get("type"))
+        back_url = _append_query_params(
+            reverse("accounts:profile"),
+            section="my-results",
+            results_type=results_filter,
+        )
 
     normalized_type = (item_type or "").lower()
     tenant_course_ids = _tenant_scoped_courses(request).values_list("id", flat=True)
@@ -2312,6 +2855,17 @@ def my_result_detail(request, item_type, item_id):
             user=request.user,
             exam__in=_tenant_scoped_exams(request),
         )
+        if (
+            attempt.exam.exam_type != "test"
+            and attempt.checked_by_teacher
+            and attempt.teacher_checked_at
+            and not _is_result_visible_to_student(attempt.teacher_checked_at)
+        ):
+            messages.info(
+                request,
+                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+            )
+            return redirect(back_url)
         return redirect("exams:exam_result", slug=attempt.exam.slug, attempt_id=attempt.id)
 
     if normalized_type == "courses":
@@ -2321,16 +2875,30 @@ def my_result_detail(request, item_type, item_id):
             user=request.user,
             assignment__course_id__in=tenant_course_ids,
         )
+        if (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        ):
+            messages.info(
+                request,
+                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+            )
+            return redirect(back_url)
+
+        is_graded_visible = submission.status == "graded" and (
+            not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+        )
         context = {
             "item_type": "courses",
             "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "course"),
             "item_title": submission.assignment.title,
             "item_subtitle": submission.assignment.course.title,
             "submitted_at": submission.submitted_at,
-            "status": _result_status_badge(submission.status),
+            "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
             "status_raw": submission.get_status_display(),
-            "score": submission.grade,
-            "feedback": submission.feedback,
+            "score": submission.grade if is_graded_visible else None,
+            "feedback": submission.feedback if is_graded_visible else "",
             "content_text": submission.content,
             "files": submission.files or [],
             "back_url": back_url,
@@ -2344,16 +2912,30 @@ def my_result_detail(request, item_type, item_id):
             assignment__student=request.user,
             assignment__lab__course_id__in=tenant_course_ids,
         )
+        if (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        ):
+            messages.info(
+                request,
+                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+            )
+            return redirect(back_url)
+
+        is_graded_visible = submission.status == "graded" and (
+            not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+        )
         context = {
             "item_type": "labs",
             "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "lab"),
             "item_title": submission.assignment.lab.title,
             "item_subtitle": submission.assignment.lab.course.title,
             "submitted_at": submission.submitted_at,
-            "status": _result_status_badge(submission.status),
+            "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
             "status_raw": submission.get_status_display(),
-            "score": submission.score,
-            "feedback": submission.feedback,
+            "score": submission.score if is_graded_visible else None,
+            "feedback": submission.feedback if is_graded_visible else "",
             "content_text": submission.submission_text,
             "submission_link": submission.submission_link,
             "submission_file": submission.submission_file,
@@ -2368,16 +2950,30 @@ def my_result_detail(request, item_type, item_id):
             student=request.user,
             project__course_id__in=tenant_course_ids,
         )
+        if (
+            submission.status == "graded"
+            and submission.graded_at
+            and not _is_result_visible_to_student(submission.graded_at)
+        ):
+            messages.info(
+                request,
+                f"Nəticə hələ yekunlaşmayıb. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə tamam olduqdan sonra görünəcək.",
+            )
+            return redirect(back_url)
+
+        is_graded_visible = submission.status == "graded" and (
+            not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
+        )
         context = {
             "item_type": "independent",
             "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "independent_work"),
             "item_title": submission.project.title,
             "item_subtitle": submission.project.course.title,
             "submitted_at": submission.submitted_at,
-            "status": _result_status_badge(submission.status),
+            "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
             "status_raw": submission.get_status_display(),
-            "score": submission.grade,
-            "feedback": submission.feedback,
+            "score": submission.grade if is_graded_visible else None,
+            "feedback": submission.feedback if is_graded_visible else "",
             "content_text": submission.content,
             "submission_file": submission.file,
             "back_url": back_url,
@@ -2398,6 +2994,261 @@ def pending_review(request):
         return redirect("accounts:profile")
 
     items, search, filter_type, filter_status = _collect_pending_review_items(request)
+    context = {
+        "review_items": items,
+        "search_query": search,
+        "filter_type": filter_type,
+        "filter_status": filter_status,
+        "total_count": len(items),
+    }
+    return render(request, "accounts/pending_review.html", context)
+
+
+@login_required
+def pending_review_detail(request, item_type, item_id):
+    """Teacher-facing grading page for pending assignment/project/lab submissions."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
+        messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
+        return redirect("accounts:profile")
+
+    normalized_type = _normalize_review_result_item_type(item_type)
+    if not normalized_type:
+        return redirect(f"{reverse('accounts:profile')}?section=pending-review")
+
+    default_back_url = f"{reverse('accounts:profile')}?section=pending-review"
+    back_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if not back_url:
+        back_url = default_back_url
+
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+    redirect_url = request.get_full_path()
+
+    base_context = {
+        "item_type": normalized_type,
+        "item_type_label": _pending_review_type_label(normalized_type),
+        "back_url": back_url,
+        "review_window_minutes": REVIEW_EDIT_WINDOW_MINUTES,
+    }
+
+    if normalized_type == "assignment":
+        submission = get_object_or_404(
+            Submission.objects.select_related("assignment", "assignment__course", "user", "graded_by"),
+            id=item_id,
+            assignment__course__in=teacher_courses,
+        )
+        max_score = Decimal(str(submission.assignment.max_score or 100))
+        is_locked = _is_review_window_closed(submission.graded_at)
+
+        if request.method == "POST":
+            if is_locked:
+                messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+                return redirect(redirect_url)
+
+            feedback = (request.POST.get("feedback") or "").strip()
+            try:
+                score = _parse_decimal_score(request.POST.get("score"))
+            except InvalidOperation:
+                messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+                return redirect(redirect_url)
+
+            if score < 0 or score > max_score:
+                messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+                return redirect(redirect_url)
+
+            submission.grade = score
+            submission.feedback = feedback
+            submission.status = "graded"
+            submission.graded_by = request.user
+            if not submission.graded_at:
+                submission.graded_at = timezone.now()
+            submission.save(update_fields=["grade", "feedback", "status", "graded_by", "graded_at"])
+            messages.success(
+                request,
+                f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+            )
+            return redirect(redirect_url)
+
+        context = {
+            **base_context,
+            "item_title": submission.assignment.title,
+            "course_title": submission.assignment.course.title,
+            "student_display": "Anonim tələbə",
+            "status_display": submission.get_status_display(),
+            "submitted_at": submission.submitted_at,
+            "graded_at": submission.graded_at,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "attachments": _extract_assignment_attachments(submission),
+            "current_score": submission.grade,
+            "max_score": max_score,
+            "is_locked": is_locked,
+            "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+            "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
+        }
+        return render(request, "accounts/pending_review_detail.html", context)
+
+    if normalized_type == "project":
+        submission = get_object_or_404(
+            ProjectSubmission.objects.select_related("project", "project__course", "student", "graded_by"),
+            id=item_id,
+            project__course__in=teacher_courses,
+        )
+        max_score = Decimal(str(submission.project.max_score or 100))
+        is_locked = _is_review_window_closed(submission.graded_at)
+
+        if request.method == "POST":
+            if is_locked:
+                messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+                return redirect(redirect_url)
+
+            feedback = (request.POST.get("feedback") or "").strip()
+            try:
+                score = _parse_decimal_score(request.POST.get("score"))
+            except InvalidOperation:
+                messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+                return redirect(redirect_url)
+
+            if score < 0 or score > max_score:
+                messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+                return redirect(redirect_url)
+
+            submission.grade = score
+            submission.feedback = feedback
+            submission.status = "graded"
+            submission.graded_by = request.user
+            if not submission.graded_at:
+                submission.graded_at = timezone.now()
+            submission.save(update_fields=["grade", "feedback", "status", "graded_by", "graded_at"])
+            messages.success(
+                request,
+                f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+            )
+            return redirect(redirect_url)
+
+        attachments = []
+        if submission.file:
+            attachments.append({"name": PurePosixPath(submission.file.name).name, "url": submission.file.url})
+
+        context = {
+            **base_context,
+            "item_title": submission.project.title,
+            "course_title": submission.project.course.title,
+            "student_display": "Anonim tələbə",
+            "status_display": submission.get_status_display(),
+            "submitted_at": submission.submitted_at,
+            "graded_at": submission.graded_at,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "attachments": attachments,
+            "current_score": submission.grade,
+            "max_score": max_score,
+            "is_locked": is_locked,
+            "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+            "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
+        }
+        return render(request, "accounts/pending_review_detail.html", context)
+
+    submission = get_object_or_404(
+        LabSubmission.objects.select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student"),
+        id=item_id,
+        assignment__lab__course__in=teacher_courses,
+    )
+    max_score = Decimal(str(submission.assignment.lab.max_score or 100))
+    is_locked = _is_review_window_closed(submission.graded_at)
+
+    if request.method == "POST":
+        if is_locked:
+            messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+            return redirect(redirect_url)
+
+        feedback = (request.POST.get("feedback") or "").strip()
+        try:
+            score = _parse_decimal_score(request.POST.get("score"))
+        except InvalidOperation:
+            messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+            return redirect(redirect_url)
+
+        if score < 0 or score > max_score:
+            messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+            return redirect(redirect_url)
+
+        submission.score = score
+        submission.feedback = feedback
+        submission.status = "graded"
+        submission.graded_by = request.user
+        if not submission.graded_at:
+            submission.graded_at = timezone.now()
+        submission.save(update_fields=["score", "feedback", "status", "graded_by", "graded_at"])
+        messages.success(
+            request,
+            f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+        )
+        return redirect(redirect_url)
+
+    lab_answers = list(
+        submission.answers.select_related("question", "question__block").order_by(
+            "question__block__order",
+            "question__question_number",
+        )
+    )
+    if not lab_answers:
+        lab_answers = list(
+            LabAnswer.objects.filter(
+                lab=submission.assignment.lab,
+                student=submission.assignment.student,
+                attempt_number=submission.attempt_number,
+                is_draft=False,
+            )
+            .select_related("question", "question__block")
+            .order_by("question__block__order", "question__question_number")
+        )
+
+    attachments = []
+    if submission.submission_file:
+        attachments.append(
+            {
+                "name": PurePosixPath(submission.submission_file.name).name,
+                "url": submission.submission_file.url,
+            }
+        )
+    if submission.submission_link:
+        attachments.append({"name": submission.submission_link, "url": submission.submission_link})
+
+    context = {
+        **base_context,
+        "item_title": submission.assignment.lab.title,
+        "course_title": submission.assignment.lab.course.title,
+        "student_display": "Anonim tələbə",
+        "status_display": submission.get_status_display(),
+        "submitted_at": submission.submitted_at,
+        "graded_at": submission.graded_at,
+        "feedback": submission.feedback,
+        "content_text": submission.submission_text,
+        "attachments": attachments,
+        "lab_answers": lab_answers,
+        "current_score": submission.score,
+        "max_score": max_score,
+        "is_locked": is_locked,
+        "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+        "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
+    }
+    return render(request, "accounts/pending_review_detail.html", context)
+
+
+@login_required
+def review_results(request):
+    """Teacher evaluated results across exams, assignments, labs, and projects."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
+        messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
+        return redirect("accounts:profile")
+
     (
         evaluated_items,
         evaluated_search,
@@ -2407,11 +3258,6 @@ def pending_review(request):
     ) = _collect_evaluated_review_items(request)
 
     context = {
-        "review_items": items,
-        "search_query": search,
-        "filter_type": filter_type,
-        "filter_status": filter_status,
-        "total_count": len(items),
         "evaluated_review_items": evaluated_items,
         "evaluated_review_search_query": evaluated_search,
         "evaluated_review_filter_type": evaluated_filter_type,
@@ -2419,7 +3265,133 @@ def pending_review(request):
         "evaluated_review_available_groups": evaluated_available_groups,
         "evaluated_review_total_count": len(evaluated_items),
     }
-    return render(request, "accounts/pending_review.html", context)
+    return render(request, "accounts/review_results.html", context)
+
+
+@login_required
+def review_result_detail(request, item_type, item_id):
+    """Teacher-facing detail page for graded assignment/project/lab results."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if not capabilities["can_review_submissions"]:
+        messages.error(request, pgettext_lazy("accounts.pending_review.message", "teacher_only"))
+        return redirect("accounts:profile")
+
+    normalized_type = _normalize_review_result_item_type(item_type)
+    if not normalized_type:
+        return redirect(f"{reverse('accounts:profile')}?section=review-results")
+
+    default_back_url = f"{reverse('accounts:profile')}?section=review-results"
+    back_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if not back_url:
+        back_url = default_back_url
+
+    teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+
+    if normalized_type == "assignment":
+        submission = get_object_or_404(
+            Submission.objects.select_related("assignment", "assignment__course", "user", "graded_by"),
+            id=item_id,
+            assignment__course__in=teacher_courses,
+        )
+        context = {
+            "item_type": normalized_type,
+            "item_type_label": "Sərbəst iş",
+            "item_title": submission.assignment.title,
+            "course_title": submission.assignment.course.title,
+            "student": submission.user,
+            "status_display": submission.get_status_display(),
+            "score_display": submission.grade if submission.grade is not None else "-",
+            "submitted_at": submission.submitted_at,
+            "graded_at": submission.graded_at,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "attachments": _extract_assignment_attachments(submission),
+            "back_url": back_url,
+        }
+        return render(request, "accounts/review_result_detail.html", context)
+
+    if normalized_type == "project":
+        submission = get_object_or_404(
+            ProjectSubmission.objects.select_related("project", "project__course", "student", "graded_by"),
+            id=item_id,
+            project__course__in=teacher_courses,
+        )
+        attachments = []
+        if submission.file:
+            attachments.append({"name": PurePosixPath(submission.file.name).name, "url": submission.file.url})
+
+        context = {
+            "item_type": normalized_type,
+            "item_type_label": "Kurs işi",
+            "item_title": submission.project.title,
+            "course_title": submission.project.course.title,
+            "student": submission.student,
+            "status_display": submission.get_status_display(),
+            "score_display": submission.grade if submission.grade is not None else "-",
+            "submitted_at": submission.submitted_at,
+            "graded_at": submission.graded_at,
+            "feedback": submission.feedback,
+            "content_text": submission.content,
+            "attachments": attachments,
+            "back_url": back_url,
+        }
+        return render(request, "accounts/review_result_detail.html", context)
+
+    submission = get_object_or_404(
+        LabSubmission.objects.select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student"),
+        id=item_id,
+        assignment__lab__course__in=teacher_courses,
+    )
+    lab_answers = list(
+        submission.answers.select_related("question", "question__block").order_by(
+            "question__block__order",
+            "question__question_number",
+        )
+    )
+    if not lab_answers:
+        lab_answers = list(
+            LabAnswer.objects.filter(
+                lab=submission.assignment.lab,
+                student=submission.assignment.student,
+                attempt_number=submission.attempt_number,
+                is_draft=False,
+            )
+            .select_related("question", "question__block")
+            .order_by("question__block__order", "question__question_number")
+        )
+
+    attachments = []
+    if submission.submission_file:
+        attachments.append(
+            {
+                "name": PurePosixPath(submission.submission_file.name).name,
+                "url": submission.submission_file.url,
+            }
+        )
+    if submission.submission_link:
+        attachments.append({"name": submission.submission_link, "url": submission.submission_link})
+
+    context = {
+        "item_type": normalized_type,
+        "item_type_label": "Lab işi",
+        "item_title": submission.assignment.lab.title,
+        "course_title": submission.assignment.lab.course.title,
+        "student": submission.assignment.student,
+        "status_display": submission.get_status_display(),
+        "score_display": submission.score if submission.score is not None else "-",
+        "submitted_at": submission.submitted_at,
+        "graded_at": submission.graded_at,
+        "feedback": submission.feedback,
+        "content_text": submission.submission_text,
+        "attachments": attachments,
+        "lab_answers": lab_answers,
+        "back_url": back_url,
+    }
+    return render(request, "accounts/review_result_detail.html", context)
 
 
 @login_required

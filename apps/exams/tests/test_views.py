@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, StudentGroup
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -605,3 +605,154 @@ class StudentExamVisibilityFilteringTest(TestCase):
         superadmin_response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(superadmin_response.status_code, 200)
         self.assertContains(superadmin_response, self.unassigned_public_exam.title)
+
+
+class TeacherViewAttemptSearchPaginationTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="view_attempt_teacher",
+            email="view_attempt_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.student = User.objects.create_user(
+            username="view_attempt_student",
+            email="view_attempt_student@example.com",
+            password="StrongPass123!",
+        )
+
+        profile = self.teacher.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            title="View Attempt Search Exam",
+            exam_type="test",
+            is_active=True,
+        )
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            status="submitted",
+        )
+
+        for index in range(1, 8):
+            question = ExamQuestion.objects.create(
+                exam=self.exam,
+                text=f"Sual mətn test {index}",
+                order=index,
+                points=1,
+            )
+            correct_option = ExamQuestionOption.objects.create(
+                question=question,
+                text=f"Doğru cavab {index}",
+                is_correct=True,
+            )
+            ExamQuestionOption.objects.create(
+                question=question,
+                text=f"Səhv cavab {index}",
+                is_correct=False,
+            )
+            answer = ExamAnswer.objects.create(
+                attempt=self.attempt,
+                question=question,
+                is_correct=True,
+            )
+            answer.selected_options.add(correct_option)
+
+        self.client.force_login(self.teacher)
+
+    def test_teacher_view_attempt_supports_search_and_questions_pagination(self):
+        response = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam.slug, self.attempt.id]),
+            {
+                "q": "test 7",
+                "questions_page": 1,
+                "from_section": "review-results",
+                "return_to": "/accounts/profile/?section=review-results",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["qa_search_query"], "test 7")
+        self.assertEqual(len(response.context["qa_list"]), 1)
+        self.assertIn("q=test+7", response.context["qa_pagination_query"])
+        self.assertIn("from_section=review-results", response.context["qa_pagination_query"])
+        self.assertIn("section%3Dreview-results", response.context["qa_pagination_query"])
+        self.assertIn("from_section=review-results", response.context["qa_clear_search_url"])
+        self.assertIn("section=review-results", response.context["qa_clear_search_url"])
+        self.assertContains(response, 'class="attempt-search-group input-group"')
+
+        response_page_two = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam.slug, self.attempt.id]),
+            {"questions_page": 2},
+        )
+        self.assertEqual(response_page_two.status_code, 200)
+        self.assertEqual(response_page_two.context["qa_page"].number, 2)
+        self.assertEqual(len(response_page_two.context["qa_list"]), 1)
+
+    def test_teacher_view_attempt_search_matches_option_text(self):
+        response = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam.slug, self.attempt.id]),
+            {"q": "Doğru cavab 5"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["qa_list"]), 1)
+        self.assertContains(response, "Sual mətn test 5")
+
+
+class StudentExamResultVisibilityWindowTest(TestCase):
+    def setUp(self):
+        from django.utils import timezone
+
+        self.teacher = User.objects.create_user(
+            username="result_visibility_teacher",
+            email="result_visibility_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.student = User.objects.create_user(
+            username="result_visibility_student",
+            email="result_visibility_student@example.com",
+            password="StrongPass123!",
+        )
+
+        teacher_profile = self.teacher.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save(update_fields=["role", "updated_at"])
+
+        student_profile = self.student.profile
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.save(update_fields=["role", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            title="Visibility Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_score=82,
+            teacher_checked_at=timezone.now(),
+        )
+
+        self.client.force_login(self.student)
+
+    def test_exam_result_hidden_while_teacher_review_window_open(self):
+        response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("section=my-results", response.url)
+
+    def test_exam_result_visible_after_teacher_review_window_closes(self):
+        from datetime import timedelta
+        from django.utils import timezone
+
+        self.attempt.teacher_checked_at = timezone.now() - timedelta(minutes=6)
+        self.attempt.save(update_fields=["teacher_checked_at"])
+
+        response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
+        self.assertEqual(response.status_code, 200)

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
@@ -36,9 +37,12 @@ class Institution(models.Model):
     institution_type = models.CharField(
         max_length=30,
         choices=[
-            (OrganizationType.SCHOOL, "School"),
-            (OrganizationType.UNIVERSITY, "University"),
-            (OrganizationType.COURSE_CENTER, "Course Center"),
+            (OrganizationType.SCHOOL, pgettext_lazy("organizations.model.institution.choice", "school")),
+            (OrganizationType.UNIVERSITY, pgettext_lazy("organizations.model.institution.choice", "university")),
+            (
+                OrganizationType.COURSE_CENTER,
+                pgettext_lazy("organizations.model.institution.choice", "course_center"),
+            ),
         ],
     )
     name = models.CharField(max_length=255)
@@ -72,13 +76,13 @@ class Organization(UUIDModel, TimeStampedModel):
         max_length=120,
         blank=True,
         default="",
-        help_text="Rəsmi təşkilat kodu/nömrəsi (məktəb və universitet üçün)",
+        help_text=pgettext_lazy("organizations.model.organization.help", "organization_identifier"),
     )
     license_identifier = models.CharField(
         max_length=120,
         blank=True,
         default="",
-        help_text="Lisenziya/VÖEN və ya əlavə identifikator",
+        help_text=pgettext_lazy("organizations.model.organization.help", "license_identifier"),
     )
     logo = models.ImageField(upload_to="org_logos/", null=True, blank=True)
     description = models.TextField(blank=True)
@@ -96,7 +100,11 @@ class Organization(UUIDModel, TimeStampedModel):
     is_active = models.BooleanField(default=True, db_index=True)
     status = models.CharField(
         max_length=20,
-        choices=[("active", "Active"), ("pending", "Pending"), ("suspended", "Suspended")],
+        choices=[
+            ("active", pgettext_lazy("organizations.model.organization.choice.status", "active")),
+            ("pending", pgettext_lazy("organizations.model.organization.choice.status", "pending")),
+            ("suspended", pgettext_lazy("organizations.model.organization.choice.status", "suspended")),
+        ],
         default="active",
     )
     suspended_at = models.DateTimeField(null=True, blank=True)
@@ -107,8 +115,8 @@ class Organization(UUIDModel, TimeStampedModel):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "Organization"
-        verbose_name_plural = "Organizations"
+        verbose_name = pgettext_lazy("organizations.model.organization.meta", "singular")
+        verbose_name_plural = pgettext_lazy("organizations.model.organization.meta", "plural")
 
     def __str__(self):
         return self.name
@@ -167,8 +175,8 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
     class Meta:
         ordering = ["organization", "path", "order"]
         unique_together = [["organization", "slug"]]
-        verbose_name = "Organizational Unit"
-        verbose_name_plural = "Organizational Units"
+        verbose_name = pgettext_lazy("organizations.model.org_unit.meta", "singular")
+        verbose_name_plural = pgettext_lazy("organizations.model.org_unit.meta", "plural")
         indexes = [
             models.Index(fields=["organization", "unit_type"]),
             models.Index(fields=["organization", "parent"]),
@@ -242,8 +250,8 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
     class Meta:
         ordering = ["-start_date"]
         unique_together = [["organization", "name", "academic_year"]]
-        verbose_name = "Academic Period"
-        verbose_name_plural = "Academic Periods"
+        verbose_name = pgettext_lazy("organizations.model.academic_period.meta", "singular")
+        verbose_name_plural = pgettext_lazy("organizations.model.academic_period.meta", "plural")
         indexes = [
             models.Index(fields=["organization", "-start_date"]),
             models.Index(fields=["organization", "is_current"]),
@@ -266,7 +274,7 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
 
         if self.start_date and self.end_date:
             if self.start_date >= self.end_date:
-                raise ValidationError("Start date must be before end date.")
+                raise ValidationError(pgettext("organizations.model.academic_period.error", "start_before_end"))
 
             # Check for overlapping periods
             overlapping = AcademicPeriod.objects.filter(
@@ -276,7 +284,11 @@ class AcademicPeriod(UUIDModel, TimeStampedModel):
 
             for period in overlapping:
                 if self.start_date <= period.end_date and self.end_date >= period.start_date:
-                    raise ValidationError(f"This period overlaps with existing period: {period.name}")
+                    raise ValidationError(
+                        pgettext("organizations.model.academic_period.error", "overlaps_existing").format(
+                            period_name=period.name
+                        )
+                    )
 
 
 class Role(UUIDModel, TimeStampedModel):
@@ -300,8 +312,8 @@ class Role(UUIDModel, TimeStampedModel):
     class Meta:
         ordering = ["-level", "name"]
         unique_together = [["organization", "name"]]
-        verbose_name = "Role"
-        verbose_name_plural = "Roles"
+        verbose_name = pgettext_lazy("organizations.model.role.meta", "singular")
+        verbose_name_plural = pgettext_lazy("organizations.model.role.meta", "plural")
         indexes = [
             models.Index(fields=["organization", "-level"]),
             models.Index(fields=["organization", "is_active"]),
@@ -348,8 +360,8 @@ class Membership(UUIDModel, TimeStampedModel):
     class Meta:
         ordering = ["-is_primary", "role__level"]
         unique_together = [["user", "organization", "role", "scope_unit"]]
-        verbose_name = "Membership"
-        verbose_name_plural = "Memberships"
+        verbose_name = pgettext_lazy("organizations.model.membership.meta", "singular")
+        verbose_name_plural = pgettext_lazy("organizations.model.membership.meta", "plural")
         indexes = [
             models.Index(fields=["user", "organization"]),
             models.Index(fields=["organization", "role"]),
@@ -372,7 +384,7 @@ class Membership(UUIDModel, TimeStampedModel):
         from django.core.exceptions import ValidationError
 
         if self.scope_unit and self.scope_unit.organization != self.organization:
-            raise ValidationError("Scope unit must belong to the same organization as the membership.")
+            raise ValidationError(pgettext("organizations.model.membership.error", "scope_unit_must_match_org"))
 
     def can_manage(self, target_membership):
         """Check if this membership can manage another membership."""

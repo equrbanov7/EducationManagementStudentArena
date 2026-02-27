@@ -10,6 +10,7 @@ Sərbəst işlər üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+from datetime import timedelta
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
@@ -30,6 +31,7 @@ from .models import Assignment, AssignmentSubmission
 
 User = get_user_model()
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -63,8 +65,8 @@ def _teacher_review_back_url(request, assignment):
         return explicit_return_url
 
     source_section = (request.GET.get("from_section") or "").strip()
-    if source_section == "pending-review":
-        return f"{reverse('accounts:profile')}?section=pending-review"
+    if source_section in {"pending-review", "review-results"}:
+        return f"{reverse('accounts:profile')}?section={source_section}"
 
     return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
 
@@ -477,11 +479,22 @@ def grade_submission(request, pk):
             status=403,
         )
 
+    if (
+        submission.status == "graded"
+        and submission.graded_at
+        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    ):
+        return JsonResponse(
+            {"success": False, "error": "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil."},
+            status=400,
+        )
+
     try:
         submission.grade = request.POST.get("grade")
         submission.feedback = request.POST.get("feedback", "")
         submission.status = "graded"
-        submission.graded_at = timezone.now()
+        if not submission.graded_at:
+            submission.graded_at = timezone.now()
         submission.graded_by = request.user
         submission.save()
 

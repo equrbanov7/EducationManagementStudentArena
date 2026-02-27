@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     {# Yeni CSS faylını qoşuruq #}
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}">
 {% endblock %}
 
@@ -65,12 +66,38 @@
 
     <hr class="section-divider">
 
+    <div class="attempt-tools mb-4">
+        <form method="get" class="attempt-search-form" role="search">
+            <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            <div class="attempt-search-group input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text"
+                       class="form-control attempt-search-input"
+                       name="q"
+                       value="{{ qa_search_query }}"
+                       placeholder="Sual və ya cavab üzrə axtar"
+                       aria-label="Sual və ya cavab üzrə axtar">
+                <button type="submit" class="btn attempt-search-btn">Axtar</button>
+                {% if qa_search_query %}
+                <a href="{{ qa_clear_search_url }}" class="btn attempt-reset-btn">Təmizlə</a>
+                {% endif %}
+            </div>
+        </form>
+        <div class="attempt-search-meta">
+            Tapılan sual sayı: {{ qa_page.paginator.count }}
+        </div>
+    </div>
+
     <div class="questions-list">
+        {% if qa_list %}
         {% for item in qa_list %}
             <div class="question-card card shadow-sm mb-4">
                 <div class="card-header question-header">
                     <h5 class="mb-0">
-                        <span class="q-number">{% trans "question_label" context "exams.template.teacher_view_attempt" %} {{ forloop.counter }}:</span>
+                        <span class="q-number">{{ qa_page.start_index|add:forloop.counter0 }}</span>
                         <span class="q-text">{{ item.question.text }}</span>
                         <span class="q-points badge bg-light text-dark float-end">
                             {{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}
@@ -187,13 +214,18 @@
                 </div>
             </div>
         {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                Axtarışa uyğun sual tapılmadı.
+            </div>
+        {% endif %}
+    </div>
+    <div class="questions-pagination">
+        {% include "partials/_pagination.html" with page_obj=qa_page extra_query=qa_pagination_query page_param='questions_page' %}
     </div>
 
     <div class="mt-4 mb-5">
-        <a href="{{ results_return_url }}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_results" context "exams.template.teacher_view_attempt" %}
-        </a>
-        <a href="{{ profile_return_url }}" class="btn btn-outline-secondary btn-lg ms-2">
+        <a href="{{ profile_return_url }}" class="btn btn-outline-secondary btn-lg">
             <i class="fas fa-user me-2"></i> Profile geri dön
         </a>
     </div>

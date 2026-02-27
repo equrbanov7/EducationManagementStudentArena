@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // CONFIG artıq template-dən gəlir (global dəyişən)
+    const i18n = window.LIVE_EXAM_JOIN_I18N || {};
+    const tr = (key, fallback) => i18n[key] || fallback;
 
     // Avatar emoji-ləri
     const AVATAR_EMOJIS = {
@@ -59,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!selectedAvatar) {
-            alert('Avatar seç!');
+            alert(tr('alertSelectAvatar', 'Select an avatar!'));
             return;
         }
 
         joinBtn.disabled = true;
-        joinBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Qoşulur...';
+        joinBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> ${tr('buttonJoining', 'Joining...')}`;
 
         try {
             const formData = new FormData();
@@ -84,15 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.ok) {
                 window.location.href = data.redirect;
             } else {
-                alert(data.message || 'Xəta baş verdi');
+                alert(data.message || tr('errorUnknown', 'An error occurred'));
                 joinBtn.disabled = false;
-                joinBtn.innerHTML = '<i class="fas fa-play me-2"></i> Oyuna Qoşul!';
+                joinBtn.innerHTML = `<i class="fas fa-play me-2"></i> ${tr('buttonJoin', 'Join Game')}`;
             }
         } catch (err) {
             console.error(err);
-            alert('Bağlantı xətası');
+            alert(tr('errorConnection', 'Connection error'));
             joinBtn.disabled = false;
-            joinBtn.innerHTML = '<i class="fas fa-play me-2"></i> Oyuna Qoşul!';
+            joinBtn.innerHTML = `<i class="fas fa-play me-2"></i> ${tr('buttonJoin', 'Join Game')}`;
         }
     });
 

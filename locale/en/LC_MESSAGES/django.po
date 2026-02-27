@@ -12653,3 +12653,1924 @@ msgstr "Sign up"
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Open or close menu"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "title"
+msgstr "Join Game"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "game_pin_label"
+msgstr "Game PIN"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_label"
+msgstr "What is your name?"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_placeholder"
+msgstr "Example: SuperPlayer"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "avatar_label"
+msgstr "Choose your avatar"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "join_button"
+msgstr "Join Game!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_prefix"
+msgstr "Get ready,"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_highlight"
+msgstr "to have fun"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_suffix"
+msgstr "it's time!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "alert_select_avatar"
+msgstr "Choose an avatar!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_joining"
+msgstr "Joining..."
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_unknown"
+msgstr "An error occurred"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_join"
+msgstr "Join Game!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_connection"
+msgstr "Connection error"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "title"
+msgstr "Waiting Room"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "success_badge"
+msgstr "You are in!"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "default_player"
+msgstr "Player"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "status_waiting_host"
+msgstr "Teacher is starting the game"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "players_title"
+msgstr "Other players"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "pin_label"
+msgstr "PIN:"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "ws_connecting"
+msgstr "Connecting..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connecting"
+msgstr "Connecting..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_online"
+msgstr "Online"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_starting"
+msgstr "Game is starting..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_disconnected"
+msgstr "Connection lost"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_error"
+msgstr "Error"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connection_error"
+msgstr "Connection error"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "title"
+msgstr "Game Host"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_title"
+msgstr "Live Exam"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "join_info_label"
+msgstr "To join:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "start_button"
+msgstr "Start"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_label"
+msgstr "Question:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "reveal_button"
+msgstr "Reveal Answer"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "next_button"
+msgstr "Next"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "finish_button"
+msgstr "Finish"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "auto_label"
+msgstr "Auto"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "state_lobby"
+msgstr "Lobby"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_meta_placeholder"
+msgstr "Question 1 / 10"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_text_placeholder"
+msgstr "Question text..."
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "results_panel_title"
+msgstr "Results for this question"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "leaderboard_title"
+msgstr "Leaderboard"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "joined_players"
+msgstr "Joined:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "questions_available_suffix"
+msgstr "questions available"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "debug_button"
+msgstr "Debug"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_title"
+msgstr "Final Results"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_subtitle"
+msgstr "Congratulations to the winners!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "other_players"
+msgstr "Other players"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "qr_scan"
+msgstr "Scan!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "debug_label"
+msgstr "Debug"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_lobby"
+msgstr "Lobby"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_question"
+msgstr "Question"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_reveal"
+msgstr "Reveal"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_finished"
+msgstr "Finished"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_log"
+msgstr "State: {state}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "question_meta"
+msgstr "Question {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "no_answers_yet"
+msgstr "No one answered"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "points_suffix"
+msgstr "pts"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "host_ready"
+msgstr "Host ready"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_open"
+msgstr "Lobby WS open"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_closed"
+msgstr "Lobby WS closed"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_open"
+msgstr "Play WS open"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_closed"
+msgstr "Play WS closed"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "all_answered_auto_reveal"
+msgstr "All answered, auto reveal!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "lobby_message_error"
+msgstr "Lobby message error: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "play_message_error"
+msgstr "Play message error: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "post_error"
+msgstr "POST error: {message}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "title"
+msgstr "Live Player"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "connecting"
+msgstr "Connecting..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_title"
+msgstr "Get ready!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_subtitle"
+msgstr "Game starts soon..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "select_counter_placeholder"
+msgstr "Selected: 0 / 2"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "submit_button"
+msgstr "Confirm"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "leaderboard_title"
+msgstr "Leaderboard"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "results_title"
+msgstr "Results for this question"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_title"
+msgstr "Game Over!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_subtitle"
+msgstr "Congratulations to all participants!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_online"
+msgstr "Online"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_offline"
+msgstr "Offline"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_timeout"
+msgstr "Time is up!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "selected_counter"
+msgstr "Selected: {selected} / {max}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_meta"
+msgstr "Question {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_loading"
+msgstr "Loading question..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_sending"
+msgstr "Sending answer..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_correct"
+msgstr "Correct!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_wrong"
+msgstr "Wrong!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_not_answered"
+msgstr "No answer submitted"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "points_suffix"
+msgstr "pts"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_answer_saved"
+msgstr "Answer received!"
+
+#: apps/live_exam/views.py:297
+msgctxt "live_exam.view.option"
+msgid "option_fallback_text"
+msgstr "Option {label}"
+
+#: apps/live_exam/views.py:389
+msgctxt "live_exam.view.permission"
+msgid "host_teacher_only"
+msgstr "Only teachers can create live sessions."
+
+#: apps/live_exam/views.py:392
+msgctxt "live_exam.view.permission"
+msgid "host_author_only"
+msgstr "Only the exam author can host this live session."
+
+#: apps/live_exam/views.py:402
+msgctxt "live_exam.view.permission"
+msgid "not_allowed"
+msgstr "Not allowed."
+
+#: apps/live_exam/views.py:352
+msgctxt "live_exam.view.message"
+msgid "question_not_found"
+msgstr "Question not found."
+
+#: apps/live_exam/views.py:458
+msgctxt "live_exam.view.message"
+msgid "lobby_locked"
+msgstr "Lobby is locked."
+
+#: apps/live_exam/views.py:472
+msgctxt "live_exam.view.message"
+msgid "nickname_required"
+msgstr "Nickname cannot be empty."
+
+#: apps/live_exam/views.py:581
+msgctxt "live_exam.view.message"
+msgid "no_questions_in_exam"
+msgstr "There are no questions in this exam."
+
+#: apps/live_exam/views.py:591
+msgctxt "live_exam.view.message"
+msgid "invalid_question_count"
+msgstr "Question count is invalid."
+
+#: apps/live_exam/views.py:597
+msgctxt "live_exam.view.message"
+msgid "question_count_minimum"
+msgstr "Question count must be greater than 0."
+
+#: apps/live_exam/views.py:604
+msgctxt "live_exam.view.message"
+msgid "question_count_exceeds_total"
+msgstr "There are only {total_in_exam} questions in this exam. {desired} cannot be selected."
+
+#: apps/live_exam/views.py:643
+msgctxt "live_exam.view.message"
+msgid "active_question_not_found"
+msgstr "Active question not found."
+
+#: apps/live_exam/consumers.py:100
+msgctxt "live_exam.consumer.error"
+msgid "no_token"
+msgstr "No token"
+
+#: apps/live_exam/consumers.py:106
+msgctxt "live_exam.consumer.error"
+msgid "bad_token"
+msgstr "Bad token"
+
+#: apps/live_exam/consumers.py:110
+msgctxt "live_exam.consumer.error"
+msgid "pin_mismatch"
+msgstr "PIN mismatch"
+
+#: apps/live_exam/consumers.py:170
+msgctxt "live_exam.consumer.error"
+msgid "no_options_selected"
+msgstr "No options selected"
+
+#: apps/live_exam/consumers.py:174
+msgctxt "live_exam.consumer.error"
+msgid "bad_payload"
+msgstr "Bad payload"
+
+#: apps/live_exam/consumers.py:202
+msgctxt "live_exam.consumer.error"
+msgid "session_not_found"
+msgstr "Session not found"
+
+#: apps/live_exam/consumers.py:208
+msgctxt "live_exam.consumer.error"
+msgid "player_not_found"
+msgstr "Player not found"
+
+#: apps/live_exam/consumers.py:212
+msgctxt "live_exam.consumer.error"
+msgid "already_answered"
+msgstr "Already answered"
+
+#: apps/live_exam/consumers.py:218
+msgctxt "live_exam.consumer.error"
+msgid "question_not_found"
+msgstr "Question not found"
+
+#: apps/live_exam/consumers.py:224
+msgctxt "live_exam.consumer.error"
+msgid "no_correct_options"
+msgstr "No correct options are marked for this question"
+
+#: apps/live_exam/models.py:23
+msgctxt "live_exam.model.session.state"
+msgid "lobby"
+msgstr "Lobby"
+
+#: apps/live_exam/models.py:24
+msgctxt "live_exam.model.session.state"
+msgid "question"
+msgstr "Question"
+
+#: apps/live_exam/models.py:25
+msgctxt "live_exam.model.session.state"
+msgid "reveal"
+msgstr "Reveal"
+
+#: apps/live_exam/models.py:26
+msgctxt "live_exam.model.session.state"
+msgid "finished"
+msgstr "Finished"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "dashboard"
+msgstr "Dashboard"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.nav"
+msgid "structure"
+msgstr "Structure"
+
+#: templates/organizations/members.html
+msgctxt "organizations.nav"
+msgid "members"
+msgstr "Members"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.nav"
+msgid "roles"
+msgstr "Roles"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.nav"
+msgid "settings"
+msgstr "Settings"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "switch_org"
+msgstr "Switch Org"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "page_title"
+msgstr "Dashboard"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "heading"
+msgstr "Dashboard"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_members"
+msgstr "Total Members"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_units"
+msgstr "Organizational Units"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_roles"
+msgstr "Active Roles"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "quick_actions"
+msgstr "Quick Actions"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_invite_members"
+msgstr "Invite Members"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_manage_structure"
+msgstr "Manage Structure"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_view_roles"
+msgstr "View Roles"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "recent_activity"
+msgstr "Recent Activity"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "system_user"
+msgstr "System"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "ago"
+msgstr "ago"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_recent_activity"
+msgstr "No recent activity"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "your_roles"
+msgstr "Your Roles in This Organization"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_roles_assigned"
+msgstr "No roles assigned"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "page_title"
+msgstr "Structure"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "heading"
+msgstr "Organizational Structure"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_title"
+msgstr "No organizational units"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_subtitle"
+msgstr "Create units to structure your organization"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "page_title"
+msgstr "Members"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "heading"
+msgstr "Members"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_label"
+msgstr "Search"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_placeholder"
+msgstr "Search by name or email..."
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "role_label"
+msgstr "Role"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_roles"
+msgstr "All Roles"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "filter_button"
+msgstr "Filter"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_member"
+msgstr "Member"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_role"
+msgstr "Role"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_unit"
+msgstr "Unit"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_joined"
+msgstr "Joined"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_units"
+msgstr "All"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_title"
+msgstr "No members found"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_subtitle"
+msgstr "Try adjusting your filters"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "page_title"
+msgstr "Roles"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "heading"
+msgstr "Roles & Permissions"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "system_role"
+msgstr "System Role"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "level_prefix"
+msgstr "Level"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "permissions_label"
+msgstr "Permissions:"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_permissions"
+msgstr "No permissions"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_roles_found"
+msgstr "No roles found"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "page_title"
+msgstr "Settings"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "heading"
+msgstr "Organization Settings"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name"
+msgstr "Organization Name"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name_help"
+msgstr "Contact support to change organization name"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_type"
+msgstr "Organization Type"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "description"
+msgstr "Description"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "email"
+msgstr "Email"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "phone"
+msgstr "Phone"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "address"
+msgstr "Address"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "website"
+msgstr "Website"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "owner"
+msgstr "Owner"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "save_button"
+msgstr "Save Settings"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "page_title"
+msgstr "Select Organization"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "heading"
+msgstr "Select Organization"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "subtitle"
+msgstr "Choose an organization to continue"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "current_badge"
+msgstr "CURRENT"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "your_roles_label"
+msgstr "Your roles:"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_title"
+msgstr "No Organizations"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_subtitle"
+msgstr "You are not a member of any organization yet."
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_help"
+msgstr "Contact your administrator to get access."
+
+#: apps/organizations/views.py:57
+msgctxt "organizations.views.message"
+msgid "no_org_access"
+msgstr "You don't have access to this organization."
+
+#: apps/organizations/views.py:63
+msgctxt "organizations.views.message"
+msgid "switched_to_org"
+msgstr "Switched to {organization}"
+
+#: apps/organizations/views.py:235
+msgctxt "organizations.views.message"
+msgid "no_settings_access"
+msgstr "You don't have permission to access settings."
+
+#: apps/organizations/views.py:246
+msgctxt "organizations.views.message"
+msgid "settings_updated"
+msgstr "Settings updated successfully."
+
+#: apps/organizations/decorators.py:47
+msgctxt "organizations.decorators.error"
+msgid "missing_permission"
+msgstr "You do not have permission: {permission}"
+
+#: apps/organizations/decorators.py:74
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level"
+msgstr "Insufficient role level. Required: {required}, Your level: {current}"
+
+#: apps/organizations/decorators.py:102
+msgctxt "organizations.decorators.error"
+msgid "required_role"
+msgstr "Required role: {roles}"
+
+#: apps/organizations/decorators.py:188
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level_simple"
+msgstr "Insufficient role level. Required: {required}"
+
+#: apps/organizations/models.py:40
+msgctxt "organizations.model.institution.choice"
+msgid "school"
+msgstr "School"
+
+#: apps/organizations/models.py:41
+msgctxt "organizations.model.institution.choice"
+msgid "university"
+msgstr "University"
+
+#: apps/organizations/models.py:44
+msgctxt "organizations.model.institution.choice"
+msgid "course_center"
+msgstr "Course Center"
+
+#: core/constants.py:168
+msgctxt "organizations.model.organization_type.choice"
+msgid "university"
+msgstr "University"
+
+#: core/constants.py:169
+msgctxt "organizations.model.organization_type.choice"
+msgid "school"
+msgstr "School"
+
+#: core/constants.py:170
+msgctxt "organizations.model.organization_type.choice"
+msgid "course_center"
+msgstr "Course Center"
+
+#: core/constants.py:171
+msgctxt "organizations.model.organization_type.choice"
+msgid "individual"
+msgstr "Individual"
+
+#: apps/organizations/models.py:82
+msgctxt "organizations.model.organization.help"
+msgid "organization_identifier"
+msgstr "Official organization code/number (for schools and universities)"
+
+#: apps/organizations/models.py:88
+msgctxt "organizations.model.organization.help"
+msgid "license_identifier"
+msgstr "License/TIN or additional identifier"
+
+#: apps/organizations/models.py:105
+msgctxt "organizations.model.organization.choice.status"
+msgid "active"
+msgstr "Active"
+
+#: apps/organizations/models.py:106
+msgctxt "organizations.model.organization.choice.status"
+msgid "pending"
+msgstr "Pending"
+
+#: apps/organizations/models.py:107
+msgctxt "organizations.model.organization.choice.status"
+msgid "suspended"
+msgstr "Suspended"
+
+#: apps/organizations/models.py:116
+msgctxt "organizations.model.organization.meta"
+msgid "singular"
+msgstr "Organization"
+
+#: apps/organizations/models.py:117
+msgctxt "organizations.model.organization.meta"
+msgid "plural"
+msgstr "Organizations"
+
+#: apps/organizations/models.py:178
+msgctxt "organizations.model.org_unit.meta"
+msgid "singular"
+msgstr "Organizational Unit"
+
+#: apps/organizations/models.py:179
+msgctxt "organizations.model.org_unit.meta"
+msgid "plural"
+msgstr "Organizational Units"
+
+#: apps/organizations/models.py:251
+msgctxt "organizations.model.academic_period.meta"
+msgid "singular"
+msgstr "Academic Period"
+
+#: apps/organizations/models.py:252
+msgctxt "organizations.model.academic_period.meta"
+msgid "plural"
+msgstr "Academic Periods"
+
+#: apps/organizations/models.py:279
+msgctxt "organizations.model.academic_period.error"
+msgid "start_before_end"
+msgstr "Start date must be before end date."
+
+#: apps/organizations/models.py:288
+msgctxt "organizations.model.academic_period.error"
+msgid "overlaps_existing"
+msgstr "This period overlaps with existing period: {period_name}"
+
+#: apps/organizations/models.py:315
+msgctxt "organizations.model.role.meta"
+msgid "singular"
+msgstr "Role"
+
+#: apps/organizations/models.py:316
+msgctxt "organizations.model.role.meta"
+msgid "plural"
+msgstr "Roles"
+
+#: apps/organizations/models.py:363
+msgctxt "organizations.model.membership.meta"
+msgid "singular"
+msgstr "Membership"
+
+#: apps/organizations/models.py:364
+msgctxt "organizations.model.membership.meta"
+msgid "plural"
+msgstr "Memberships"
+
+#: apps/organizations/models.py:387
+msgctxt "organizations.model.membership.error"
+msgid "scope_unit_must_match_org"
+msgstr "Scope unit must belong to the same organization as the membership."
+
+#: apps/organizations/unit_types.py:11
+msgctxt "organizations.unit_type"
+msgid "rectorate"
+msgstr "Rectorate"
+
+#: apps/organizations/unit_types.py:12
+msgctxt "organizations.unit_type"
+msgid "vice_rectorate"
+msgstr "Vice Rectorate"
+
+#: apps/organizations/unit_types.py:13
+msgctxt "organizations.unit_type"
+msgid "faculty"
+msgstr "Faculty"
+
+#: apps/organizations/unit_types.py:14
+msgctxt "organizations.unit_type"
+msgid "deanery"
+msgstr "Deanery"
+
+#: apps/organizations/unit_types.py:15
+msgctxt "organizations.unit_type"
+msgid "chair"
+msgstr "Chair"
+
+#: apps/organizations/unit_types.py:16
+msgctxt "organizations.unit_type"
+msgid "department"
+msgstr "Department"
+
+#: apps/organizations/unit_types.py:17
+msgctxt "organizations.unit_type"
+msgid "laboratory"
+msgstr "Laboratory"
+
+#: apps/organizations/unit_types.py:18
+msgctxt "organizations.unit_type"
+msgid "institute"
+msgstr "Institute"
+
+#: apps/organizations/unit_types.py:19
+msgctxt "organizations.unit_type"
+msgid "center"
+msgstr "Center"
+
+#: apps/organizations/unit_types.py:22
+msgctxt "organizations.unit_type"
+msgid "directorate"
+msgstr "Directorate"
+
+#: apps/organizations/unit_types.py:23
+msgctxt "organizations.unit_type"
+msgid "section"
+msgstr "Section"
+
+#: apps/organizations/unit_types.py:24
+msgctxt "organizations.unit_type"
+msgid "parallel"
+msgstr "Parallel"
+
+#: apps/organizations/unit_types.py:25
+msgctxt "organizations.unit_type"
+msgid "class"
+msgstr "Class"
+
+#: apps/organizations/unit_types.py:26
+msgctxt "organizations.unit_type"
+msgid "grade_level"
+msgstr "Grade Level"
+
+#: apps/organizations/unit_types.py:29
+msgctxt "organizations.unit_type"
+msgid "branch"
+msgstr "Branch"
+
+#: apps/organizations/unit_types.py:30
+msgctxt "organizations.unit_type"
+msgid "division"
+msgstr "Division"
+
+#: apps/organizations/unit_types.py:31
+msgctxt "organizations.unit_type"
+msgid "group"
+msgstr "Group"
+
+#: apps/organizations/unit_types.py:32
+msgctxt "organizations.unit_type"
+msgid "classroom"
+msgstr "Classroom"
+
+#: apps/organizations/unit_types.py:35
+msgctxt "organizations.unit_type"
+msgid "unit"
+msgstr "Unit"
+
+#: apps/organizations/unit_types.py:82
+msgctxt "organizations.unit_type"
+msgid "fallback"
+msgstr "{name}"
+
+msgctxt "projects.views.message"
+msgid "permission_denied"
+msgstr "You do not have permission."
+
+msgctxt "projects.views.message"
+msgid "project_created"
+msgstr "Project created successfully."
+
+msgctxt "projects.views.message"
+msgid "project_updated"
+msgstr "Project updated successfully."
+
+msgctxt "projects.views.message"
+msgid "project_deleted"
+msgstr "Project deleted successfully."
+
+msgctxt "projects.views.message"
+msgid "no_project_access"
+msgstr "You do not have access to this project."
+
+msgctxt "projects.views.message"
+msgid "submit_not_allowed"
+msgstr "Submission is not allowed. Attempt limit reached or deadline passed."
+
+msgctxt "projects.views.message"
+msgid "project_submitted"
+msgstr "Your project has been submitted."
+
+msgctxt "projects.views.message"
+msgid "grade_given"
+msgstr "Grade submitted successfully."
+
+msgctxt "projects.model.project.choice.status"
+msgid "active"
+msgstr "Active"
+
+msgctxt "projects.model.project.choice.status"
+msgid "inactive"
+msgstr "Inactive"
+
+msgctxt "projects.model.project.choice.status"
+msgid "archived"
+msgstr "Archived"
+
+msgctxt "projects.model.project.field"
+msgid "course"
+msgstr "Course"
+
+msgctxt "projects.model.project.field"
+msgid "title"
+msgstr "Project Title"
+
+msgctxt "projects.model.project.field"
+msgid "description"
+msgstr "Description"
+
+msgctxt "projects.model.project.field"
+msgid "start_date"
+msgstr "Start Date"
+
+msgctxt "projects.model.project.field"
+msgid "deadline"
+msgstr "Deadline"
+
+msgctxt "projects.model.project.field"
+msgid "max_attempts"
+msgstr "Maximum Attempts"
+
+msgctxt "projects.model.project.field"
+msgid "max_score"
+msgstr "Maximum Score"
+
+msgctxt "projects.model.project.field"
+msgid "assigned_students"
+msgstr "Assigned Students"
+
+msgctxt "projects.model.project.meta"
+msgid "singular"
+msgstr "Project"
+
+msgctxt "projects.model.project.meta"
+msgid "plural"
+msgstr "Projects"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "pending"
+msgstr "Pending"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "graded"
+msgstr "Graded"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "rejected"
+msgstr "Rejected"
+
+msgctxt "projects.model.submission.field"
+msgid "content"
+msgstr "Answer / Explanation"
+
+msgctxt "projects.model.submission.meta"
+msgid "singular"
+msgstr "Project Submission"
+
+msgctxt "projects.model.submission.meta"
+msgid "plural"
+msgstr "Project Submissions"
+
+msgctxt "projects.form.project.placeholder"
+msgid "title"
+msgstr "Project title"
+
+msgctxt "projects.form.project.placeholder"
+msgid "description"
+msgstr "Describe the project..."
+
+msgctxt "projects.form.project.label"
+msgid "title"
+msgstr "Title"
+
+msgctxt "projects.form.project.label"
+msgid "description"
+msgstr "Description"
+
+msgctxt "projects.form.project.label"
+msgid "start_date"
+msgstr "Start Date"
+
+msgctxt "projects.form.project.label"
+msgid "deadline"
+msgstr "Deadline"
+
+msgctxt "projects.form.project.label"
+msgid "max_attempts"
+msgstr "Maximum Attempts"
+
+msgctxt "projects.form.project.label"
+msgid "max_score"
+msgstr "Maximum Score"
+
+msgctxt "projects.form.project.label"
+msgid "status"
+msgstr "Status"
+
+msgctxt "projects.form.submission.placeholder"
+msgid "content"
+msgstr "Explain your project, add links, etc."
+
+msgctxt "projects.form.submission.label"
+msgid "content"
+msgstr "Project Explanation"
+
+msgctxt "projects.form.submission.label"
+msgid "file"
+msgstr "Project File (ZIP, PDF)"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "grade"
+msgstr "0-100"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "feedback"
+msgstr "Write feedback for the student..."
+
+msgctxt "projects.form.grade.label"
+msgid "grade"
+msgstr "Grade"
+
+msgctxt "projects.form.grade.label"
+msgid "feedback"
+msgstr "Feedback"
+
+msgctxt "projects.form.grade.label"
+msgid "status"
+msgstr "Status"
+
+msgctxt "projects.section"
+msgid "section_title"
+msgstr "Projects"
+
+msgctxt "projects.section"
+msgid "add_project_button"
+msgstr "Add New Project"
+
+msgctxt "projects.section"
+msgid "answers_suffix"
+msgstr "answers"
+
+msgctxt "projects.section"
+msgid "pending_suffix"
+msgstr "pending"
+
+msgctxt "projects.section"
+msgid "status_overdue"
+msgstr "Deadline Passed"
+
+msgctxt "projects.section"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "projects.section"
+msgid "status_inactive"
+msgstr "Inactive"
+
+msgctxt "projects.section"
+msgid "status_archived"
+msgstr "Archived"
+
+msgctxt "projects.section"
+msgid "max_score_prefix"
+msgstr "Max score:"
+
+msgctxt "projects.section"
+msgid "max_attempts_prefix"
+msgstr "Max attempts:"
+
+msgctxt "projects.section"
+msgid "view_submissions"
+msgstr "View Submissions"
+
+msgctxt "projects.section"
+msgid "edit"
+msgstr "Edit"
+
+msgctxt "projects.section"
+msgid "delete"
+msgstr "Delete"
+
+msgctxt "projects.section"
+msgid "empty_teacher"
+msgstr "No project yet"
+
+msgctxt "projects.section"
+msgid "add_first_project"
+msgstr "Add First Project"
+
+msgctxt "projects.section"
+msgid "attempts_label"
+msgstr "Attempts:"
+
+msgctxt "projects.section"
+msgid "left_suffix"
+msgstr "left"
+
+msgctxt "projects.section"
+msgid "attempts_finished"
+msgstr "Attempts finished"
+
+msgctxt "projects.section"
+msgid "my_submissions"
+msgstr "My Submissions"
+
+msgctxt "projects.section"
+msgid "submit_project"
+msgstr "Submit Project"
+
+msgctxt "projects.section"
+msgid "disabled_overdue"
+msgstr "Deadline passed"
+
+msgctxt "projects.section"
+msgid "disabled_inactive"
+msgstr "Inactive"
+
+msgctxt "projects.section"
+msgid "empty_student"
+msgstr "No project assigned to you"
+
+msgctxt "projects.section"
+msgid "empty_generic"
+msgstr "No projects"
+
+msgctxt "projects.modals"
+msgid "add_modal_title"
+msgstr "New Project"
+
+msgctxt "projects.modals"
+msgid "edit_modal_title"
+msgstr "Edit Project"
+
+msgctxt "projects.modals"
+msgid "label_title"
+msgstr "Title"
+
+msgctxt "projects.modals"
+msgid "label_status"
+msgstr "Status"
+
+msgctxt "projects.modals"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "projects.modals"
+msgid "status_inactive"
+msgstr "Inactive"
+
+msgctxt "projects.modals"
+msgid "status_archived"
+msgstr "Archived"
+
+msgctxt "projects.modals"
+msgid "label_description"
+msgstr "Description"
+
+msgctxt "projects.modals"
+msgid "label_start_date"
+msgstr "Start Date"
+
+msgctxt "projects.modals"
+msgid "label_deadline"
+msgstr "Deadline"
+
+msgctxt "projects.modals"
+msgid "label_max_attempts"
+msgstr "Max Attempts"
+
+msgctxt "projects.modals"
+msgid "label_max_score"
+msgstr "Max Score"
+
+msgctxt "projects.modals"
+msgid "label_allowed_groups"
+msgstr "Allowed Groups"
+
+msgctxt "projects.modals"
+msgid "placeholder_group_search"
+msgstr "Search group..."
+
+msgctxt "projects.modals"
+msgid "selected_count"
+msgstr "Selected"
+
+msgctxt "projects.modals"
+msgid "label_allowed_students"
+msgstr "Allowed Students"
+
+msgctxt "projects.modals"
+msgid "placeholder_student_search"
+msgstr "Search student..."
+
+msgctxt "projects.modals"
+msgid "select_group_first"
+msgstr "Select a group first"
+
+msgctxt "projects.modals"
+msgid "close"
+msgstr "Close"
+
+msgctxt "projects.modals"
+msgid "add"
+msgstr "Add"
+
+msgctxt "projects.modals"
+msgid "save"
+msgstr "Save"
+
+msgctxt "projects.modals.js"
+msgid "loading"
+msgstr "Loading..."
+
+msgctxt "projects.modals.js"
+msgid "no_groups"
+msgstr "No groups"
+
+msgctxt "projects.modals.js"
+msgid "no_students"
+msgstr "No students"
+
+msgctxt "projects.modals.js"
+msgid "error"
+msgstr "Error"
+
+msgctxt "projects.modals.js"
+msgid "select_group_first"
+msgstr "Select a group first"
+
+msgctxt "projects.modals.js"
+msgid "fetch_failed"
+msgstr "Failed to fetch data"
+
+msgctxt "projects.modals.js"
+msgid "server_error"
+msgstr "Server error"
+
+msgctxt "projects.modals.js"
+msgid "create_error_prefix"
+msgstr "Error: "
+
+msgctxt "projects.modals.js"
+msgid "update_error_prefix"
+msgstr "Error: "
+
+msgctxt "projects.modals.js"
+msgid "submitting"
+msgstr "Submitting..."
+
+msgctxt "projects.modals.js"
+msgid "add"
+msgstr "Add"
+
+msgctxt "projects.modals.js"
+msgid "save"
+msgstr "Save"
+
+msgctxt "projects.modals.js"
+msgid "delete_confirm"
+msgstr "Are you sure you want to delete?"
+
+msgctxt "projects.detail"
+msgid "back"
+msgstr "Back"
+
+msgctxt "projects.detail"
+msgid "due_date"
+msgstr "Deadline:"
+
+msgctxt "projects.detail"
+msgid "max_score"
+msgstr "Maximum score:"
+
+msgctxt "projects.detail"
+msgid "attempts_left"
+msgstr "Attempts left:"
+
+msgctxt "projects.detail"
+msgid "status_overdue"
+msgstr "Deadline Passed"
+
+msgctxt "projects.detail"
+msgid "status_inactive"
+msgstr "Inactive"
+
+msgctxt "projects.detail"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "projects.detail"
+msgid "previous_submissions"
+msgstr "My Previous Submissions"
+
+msgctxt "projects.detail"
+msgid "table_date"
+msgstr "Date"
+
+msgctxt "projects.detail"
+msgid "table_file"
+msgstr "File"
+
+msgctxt "projects.detail"
+msgid "table_status"
+msgstr "Status"
+
+msgctxt "projects.detail"
+msgid "table_grade"
+msgstr "Grade"
+
+msgctxt "projects.detail"
+msgid "file_missing"
+msgstr "-"
+
+msgctxt "projects.detail"
+msgid "status_pending"
+msgstr "Pending"
+
+msgctxt "projects.detail"
+msgid "status_graded"
+msgstr "Graded"
+
+msgctxt "projects.detail"
+msgid "submit_project"
+msgstr "Submit Project"
+
+msgctxt "projects.detail"
+msgid "label_content"
+msgstr "Text / Explanation"
+
+msgctxt "projects.detail"
+msgid "placeholder_content"
+msgstr "Write a short note about your project..."
+
+msgctxt "projects.detail"
+msgid "label_file"
+msgstr "Upload File"
+
+msgctxt "projects.detail"
+msgid "clear_file"
+msgstr "Clear"
+
+msgctxt "projects.detail"
+msgid "attempts_left_info"
+msgstr "Remaining attempts:"
+
+msgctxt "projects.detail"
+msgid "submit"
+msgstr "Submit"
+
+msgctxt "projects.detail"
+msgid "warning_overdue"
+msgstr "Deadline passed. Submission is closed."
+
+msgctxt "projects.detail"
+msgid "warning_no_attempts"
+msgstr "You have used all your attempts."
+
+msgctxt "projects.detail"
+msgid "warning_inactive"
+msgstr "This project is currently inactive."
+
+msgctxt "projects.detail.js"
+msgid "sending"
+msgstr "Submitting..."
+
+msgctxt "projects.detail.js"
+msgid "submit"
+msgstr "Submit"
+
+msgctxt "projects.detail.js"
+msgid "error_prefix"
+msgstr "Error: "
+
+msgctxt "projects.detail.js"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+msgctxt "projects.detail.js"
+msgid "server_error"
+msgstr "Server error"
+
+msgctxt "projects.my_submissions"
+msgid "page_title"
+msgstr "My Submissions"
+
+msgctxt "projects.my_submissions"
+msgid "header_title"
+msgstr "My Submissions"
+
+msgctxt "projects.my_submissions"
+msgid "new_submission"
+msgstr "Submit New Project"
+
+msgctxt "projects.my_submissions"
+msgid "back"
+msgstr "Back"
+
+msgctxt "projects.my_submissions"
+msgid "used_attempts"
+msgstr "Used attempts"
+
+msgctxt "projects.my_submissions"
+msgid "attempts_left"
+msgstr "Attempts left"
+
+msgctxt "projects.my_submissions"
+msgid "max_score"
+msgstr "Maximum score"
+
+msgctxt "projects.my_submissions"
+msgid "status_overdue"
+msgstr "Deadline Passed"
+
+msgctxt "projects.my_submissions"
+msgid "status_active"
+msgstr "Active"
+
+msgctxt "projects.my_submissions"
+msgid "submissions_title"
+msgstr "Submitted Projects"
+
+msgctxt "projects.my_submissions"
+msgid "table_submitted_at"
+msgstr "Submitted At"
+
+msgctxt "projects.my_submissions"
+msgid "table_status"
+msgstr "Status"
+
+msgctxt "projects.my_submissions"
+msgid "table_grade"
+msgstr "Grade"
+
+msgctxt "projects.my_submissions"
+msgid "table_actions"
+msgstr "Actions"
+
+msgctxt "projects.my_submissions"
+msgid "status_pending"
+msgstr "Pending"
+
+msgctxt "projects.my_submissions"
+msgid "status_graded"
+msgstr "Graded"
+
+msgctxt "projects.my_submissions"
+msgid "status_rejected"
+msgstr "Rejected"
+
+msgctxt "projects.my_submissions"
+msgid "view"
+msgstr "View"
+
+msgctxt "projects.my_submissions"
+msgid "modal_title_prefix"
+msgstr "Submission"
+
+msgctxt "projects.my_submissions"
+msgid "submitted_at"
+msgstr "Submitted at:"
+
+msgctxt "projects.my_submissions"
+msgid "content"
+msgstr "Text:"
+
+msgctxt "projects.my_submissions"
+msgid "file"
+msgstr "File:"
+
+msgctxt "projects.my_submissions"
+msgid "grade"
+msgstr "Grade:"
+
+msgctxt "projects.my_submissions"
+msgid "teacher_feedback"
+msgstr "Teacher feedback:"
+
+msgctxt "projects.my_submissions"
+msgid "close"
+msgstr "Close"
+
+msgctxt "projects.my_submissions"
+msgid "empty_title"
+msgstr "You have not submitted any project yet"
+
+msgctxt "projects.my_submissions"
+msgid "first_submission"
+msgstr "Submit First Project"
+
+msgctxt "projects.review"
+msgid "page_title"
+msgstr "Submissions"
+
+msgctxt "projects.review"
+msgid "header_title"
+msgstr "Submitted Projects"
+
+msgctxt "projects.review"
+msgid "course_label"
+msgstr "Course:"
+
+msgctxt "projects.review"
+msgid "back"
+msgstr "Back"
+
+msgctxt "projects.review"
+msgid "table_student"
+msgstr "Student"
+
+msgctxt "projects.review"
+msgid "table_submitted_at"
+msgstr "Submitted At"
+
+msgctxt "projects.review"
+msgid "table_status"
+msgstr "Status"
+
+msgctxt "projects.review"
+msgid "table_grade"
+msgstr "Grade"
+
+msgctxt "projects.review"
+msgid "table_actions"
+msgstr "Actions"
+
+msgctxt "projects.review"
+msgid "status_pending"
+msgstr "Pending"
+
+msgctxt "projects.review"
+msgid "status_graded"
+msgstr "Graded"
+
+msgctxt "projects.review"
+msgid "status_rejected"
+msgstr "Rejected"
+
+msgctxt "projects.review"
+msgid "view"
+msgstr "View"
+
+msgctxt "projects.review"
+msgid "empty_title"
+msgstr "No project has been submitted yet"
+
+msgctxt "projects.review"
+msgid "modal_title"
+msgstr "Review Project"
+
+msgctxt "projects.review"
+msgid "student"
+msgstr "Student:"
+
+msgctxt "projects.review"
+msgid "explanation"
+msgstr "Project Explanation:"
+
+msgctxt "projects.review"
+msgid "file"
+msgstr "Project File:"
+
+msgctxt "projects.review"
+msgid "download"
+msgstr "Download"
+
+msgctxt "projects.review"
+msgid "grade_label"
+msgstr "Grade"
+
+msgctxt "projects.review"
+msgid "feedback_label"
+msgstr "Feedback:"
+
+msgctxt "projects.review"
+msgid "feedback_placeholder"
+msgstr "Write feedback for the student..."
+
+msgctxt "projects.review"
+msgid "grade_button"
+msgstr "Submit Grade"
+
+msgctxt "projects.review.js"
+msgid "no_content"
+msgstr "(No text)"
+
+msgctxt "projects.review.js"
+msgid "download"
+msgstr "Download"
+
+msgctxt "projects.review.js"
+msgid "sending"
+msgstr "Submitting..."
+
+msgctxt "projects.review.js"
+msgid "error_prefix"
+msgstr "Error: "
+
+msgctxt "projects.review.js"
+msgid "unknown_error"
+msgstr "Unknown error"
+
+msgctxt "projects.review.js"
+msgid "server_error"
+msgstr "Server error"
+
+msgctxt "projects.review.js"
+msgid "grade_button"
+msgstr "Submit Grade"

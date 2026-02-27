@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import pgettext_lazy
 
 from .models import Project, ProjectSubmission
 
@@ -18,12 +19,17 @@ class ProjectForm(forms.ModelForm):
             "status",
         ]
         widgets = {
-            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Kurs işinin adı"}),
+            "title": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": pgettext_lazy("projects.form.project.placeholder", "title"),
+                }
+            ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 4,
-                    "placeholder": "Layihə haqqında təsvir...",
+                    "placeholder": pgettext_lazy("projects.form.project.placeholder", "description"),
                 }
             ),
             "start_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
@@ -33,13 +39,13 @@ class ProjectForm(forms.ModelForm):
             "status": forms.Select(attrs={"class": "form-select"}),
         }
         labels = {
-            "title": "Layihə Adı",
-            "description": "Təsvir",
-            "start_date": "Başlanğıc tarixi",
-            "deadline": "Son tarix",
-            "max_attempts": "Maksimum cəhd",
-            "max_score": "Maksimum bal",
-            "status": "Status",
+            "title": pgettext_lazy("projects.form.project.label", "title"),
+            "description": pgettext_lazy("projects.form.project.label", "description"),
+            "start_date": pgettext_lazy("projects.form.project.label", "start_date"),
+            "deadline": pgettext_lazy("projects.form.project.label", "deadline"),
+            "max_attempts": pgettext_lazy("projects.form.project.label", "max_attempts"),
+            "max_score": pgettext_lazy("projects.form.project.label", "max_score"),
+            "status": pgettext_lazy("projects.form.project.label", "status"),
         }
 
 
@@ -54,13 +60,16 @@ class ProjectSubmissionForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 6,
-                    "placeholder": "Layihəniz haqqında izah, linkler və s.",
+                    "placeholder": pgettext_lazy("projects.form.submission.placeholder", "content"),
                     "required": True,
                 }
             ),
             "file": forms.FileInput(attrs={"class": "form-control", "accept": ".zip,.pdf,.rar"}),
         }
-        labels = {"content": "Layihə İzahatı", "file": "Layihə Faylı (ZIP, PDF)"}
+        labels = {
+            "content": pgettext_lazy("projects.form.submission.label", "content"),
+            "file": pgettext_lazy("projects.form.submission.label", "file"),
+        }
 
 
 class GradeProjectSubmissionForm(forms.ModelForm):
@@ -76,16 +85,20 @@ class GradeProjectSubmissionForm(forms.ModelForm):
                     "step": "0.01",
                     "min": 0,
                     "max": 100,
-                    "placeholder": "0-100",
+                    "placeholder": pgettext_lazy("projects.form.grade.placeholder", "grade"),
                 }
             ),
             "feedback": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 4,
-                    "placeholder": "Tələbəyə rəy yazın...",
+                    "placeholder": pgettext_lazy("projects.form.grade.placeholder", "feedback"),
                 }
             ),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
-        labels = {"grade": "Qiymət", "feedback": "Rəy", "status": "Status"}
+        labels = {
+            "grade": pgettext_lazy("projects.form.grade.label", "grade"),
+            "feedback": pgettext_lazy("projects.form.grade.label", "feedback"),
+            "status": pgettext_lazy("projects.form.grade.label", "status"),
+        }

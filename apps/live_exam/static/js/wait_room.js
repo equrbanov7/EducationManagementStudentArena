@@ -3,6 +3,8 @@
    ═══════════════════════════════════════════════════════════════ */
 
    document.addEventListener('DOMContentLoaded', () => {
+    const i18n = window.LIVE_EXAM_WAIT_ROOM_I18N || {};
+    const tr = (key, fallback) => i18n[key] || fallback;
     
     // Avatar Emojis
     const AVATARS = {
@@ -105,14 +107,14 @@
             reconnectTimer = null;
         }
 
-        updateWsStatus('', 'Bağlanır...');
+        updateWsStatus('', tr('wsConnecting', 'Connecting...'));
 
         try {
             socket = new WebSocket(getWsUrl());
 
             socket.onopen = () => {
                 console.log('WebSocket connected');
-                updateWsStatus('online', 'Onlayn');
+                updateWsStatus('online', tr('wsOnline', 'Online'));
                 reconnectAttempts = 0;
             };
 
@@ -123,7 +125,7 @@
 
                     // Game started - redirect to player screen
                     if (payload.type === 'game_started' && payload.redirect) {
-                        updateWsStatus('online', 'Oyun başlayır...');
+                        updateWsStatus('online', tr('wsStarting', 'Game is starting...'));
                         window.location.href = payload.redirect;
                         return;
                     }
@@ -140,7 +142,7 @@
 
             socket.onclose = (event) => {
                 console.log('WebSocket closed:', event.code);
-                updateWsStatus('offline', 'Bağlantı kəsildi');
+                updateWsStatus('offline', tr('wsDisconnected', 'Disconnected'));
 
                 // Reconnect logic
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
@@ -152,12 +154,12 @@
 
             socket.onerror = (error) => {
                 console.error('WebSocket error:', error);
-                updateWsStatus('offline', 'Xəta');
+                updateWsStatus('offline', tr('wsError', 'Error'));
             };
 
         } catch (e) {
             console.error('WebSocket connection error:', e);
-            updateWsStatus('offline', 'Bağlantı xətası');
+            updateWsStatus('offline', tr('wsConnectionError', 'Connection error'));
         }
     }
 

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ item_type_label }} nəticəsi - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/review_result_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="review-result-page">
+    <div class="review-result-shell">
+        <header class="review-result-header">
+            <div class="review-result-kicker">{{ item_type_label }}</div>
+            <h1>{{ item_title }}</h1>
+            <p>{{ student.get_full_name|default:student.username }} · {{ course_title }}</p>
+            <a href="{{ back_url }}" class="review-back-link">
+                <i class="fas fa-arrow-left"></i> Geri qayıt
+            </a>
+        </header>
+
+        <section class="review-summary-grid">
+            <article class="review-summary-card">
+                <span class="label">Status</span>
+                <span class="value">{{ status_display }}</span>
+            </article>
+            <article class="review-summary-card">
+                <span class="label">Nəticə</span>
+                <span class="value score">{{ score_display }}</span>
+            </article>
+            <article class="review-summary-card">
+                <span class="label">Göndərilib</span>
+                <span class="value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
+            </article>
+            <article class="review-summary-card">
+                <span class="label">Qiymətləndirilib</span>
+                <span class="value">{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</span>
+            </article>
+        </section>
+
+        {% if content_text %}
+        <section class="review-block">
+            <h2>Cavab mətni</h2>
+            <div class="review-content">{{ content_text|linebreaks }}</div>
+        </section>
+        {% endif %}
+
+        {% if attachments %}
+        <section class="review-block">
+            <h2>Əlavələr</h2>
+            <ul class="review-file-list">
+                {% for file_item in attachments %}
+                <li>
+                    <a href="{{ file_item.url }}" target="_blank" rel="noopener">
+                        <i class="fas fa-paperclip"></i>
+                        <span>{{ file_item.name }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if lab_answers %}
+        <section class="review-block">
+            <h2>Lab sual cavabları</h2>
+            <div class="review-answers">
+                {% for answer in lab_answers %}
+                <article class="review-answer-card">
+                    <h3>{{ forloop.counter }}. {{ answer.question.question_text }}</h3>
+                    <div class="review-answer-body">
+                        {% if answer.answer %}
+                        <div class="review-answer-text">{{ answer.answer|linebreaks }}</div>
+                        {% endif %}
+                        {% if answer.answer_file %}
+                        <a class="review-file-inline" href="{{ answer.answer_file.url }}" target="_blank" rel="noopener">
+                            <i class="fas fa-download"></i> Faylı aç
+                        </a>
+                        {% endif %}
+                        {% if not answer.answer and not answer.answer_file %}
+                        <p class="review-answer-empty">Bu sual üçün cavab yoxdur.</p>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="review-block review-feedback">
+            <h2>Müəllim rəyi</h2>
+            {% if feedback %}
+            <div class="feedback-text">{{ feedback|linebreaks }}</div>
+            {% else %}
+            <p class="feedback-empty">Rəy əlavə edilməyib.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

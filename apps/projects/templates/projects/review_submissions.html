@@ -1,41 +1,39 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ project.title }} - Layihələr{% endblock %}
+{% block title %}{{ project.title }} - {% trans "page_title" context "projects.review" %}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    
-    <!-- Header -->
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3>
                 <i class="bi bi-folder-check"></i>
-                {{ project.title }} - Təqdim Olunan Layihələr
+                {{ project.title }} - {% trans "header_title" context "projects.review" %}
             </h3>
             <p class="text-muted mb-0">
-                Kurs: <strong>{{ project.course.title }}</strong>
+                {% trans "course_label" context "projects.review" %} <strong>{{ project.course.title }}</strong>
             </p>
         </div>
-        <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Geriyə
+        <a href="{{ back_url }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> {% trans "back" context "projects.review" %}
         </a>
     </div>
-    
-    <!-- Submissions List -->
+
     <div class="card shadow-sm">
         <div class="card-body">
-            
+
             {% if submissions %}
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>Tələbə</th>
-                                <th>Təqdim Tarixi</th>
-                                <th>Status</th>
-                                <th>Qiymət</th>
-                                <th>Əməliyyatlar</th>
+                                <th>{% trans "table_student" context "projects.review" %}</th>
+                                <th>{% trans "table_submitted_at" context "projects.review" %}</th>
+                                <th>{% trans "table_status" context "projects.review" %}</th>
+                                <th>{% trans "table_grade" context "projects.review" %}</th>
+                                <th>{% trans "table_actions" context "projects.review" %}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,15 +42,15 @@
                                 <td>
                                     <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
                                 </td>
-                                <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
-                              
+                                <td>{{ submission.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+
                                 <td>
                                     {% if submission.status == 'pending' %}
-                                        <span class="badge bg-warning">Gözləyir</span>
+                                        <span class="badge bg-warning">{% trans "status_pending" context "projects.review" %}</span>
                                     {% elif submission.status == 'graded' %}
-                                        <span class="badge bg-success">Qiymətləndirilib</span>
+                                        <span class="badge bg-success">{% trans "status_graded" context "projects.review" %}</span>
                                     {% else %}
-                                        <span class="badge bg-danger">Rədd</span>
+                                        <span class="badge bg-danger">{% trans "status_rejected" context "projects.review" %}</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -73,7 +71,7 @@
                                             data-filename="{% if submission.file %}{{ submission.file.name|cut:'projects/submissions/' }}{% endif %}"
                                             data-grade="{{ submission.grade|default:'' }}"
                                             data-feedback="{{ submission.feedback }}">
-                                        <i class="bi bi-eye"></i> Bax
+                                        <i class="bi bi-eye"></i> {% trans "view" context "projects.review" %}
                                     </button>
                                 </td>
                             </tr>
@@ -84,76 +82,74 @@
             {% else %}
                 <div class="alert alert-light text-center py-5">
                     <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-                    <p class="text-muted mt-3 mb-0">Hələ ki layihə təqdim olunmayıb</p>
+                    <p class="text-muted mt-3 mb-0">{% trans "empty_title" context "projects.review" %}</p>
                 </div>
             {% endif %}
-            
+
         </div>
     </div>
-    
+
 </div>
 
 
-<!-- Submission Review Modal -->
 <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
                     <i class="bi bi-file-text"></i>
-                    Layihəyə Bax
+                    {% trans "modal_title" context "projects.review" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            
+
             <div class="modal-body">
-                
+
                 <div class="mb-3">
-                    <strong>Tələbə:</strong>
+                    <strong>{% trans "student" context "projects.review" %}</strong>
                     <p id="modal-student" class="mb-0"></p>
                 </div>
-                
+
                 <div class="mb-3">
-                    <strong>Layihə İzahatı:</strong>
+                    <strong>{% trans "explanation" context "projects.review" %}</strong>
                     <div class="border rounded p-3 bg-light">
                         <p id="modal-content" class="mb-0" style="white-space: pre-wrap;"></p>
                     </div>
                 </div>
-                
+
                 <div class="mb-3" id="modal-file-container" style="display: none;">
-                    <strong>Layihə Faylı:</strong>
+                    <strong>{% trans "file" context "projects.review" %}</strong>
                     <div class="mt-2">
                         <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-download me-1"></i> 
-                            <span id="modal-file-name">Yüklə</span>
+                            <i class="bi bi-download me-1"></i>
+                            <span id="modal-file-name">{% trans "download" context "projects.review" %}</span>
                         </a>
                     </div>
                 </div>
-                
+
                 <hr>
-                
-                <!-- Grading Form -->
+
                 <form id="gradeForm" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="submission-id" name="submission_id">
-                    
+
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Qiymət (0-{{ project.max_score }}):</label>
-                        <input type="number" id="grade-input" name="grade" class="form-control" 
+                        <label class="form-label fw-bold">{% trans "grade_label" context "projects.review" %} (0-{{ project.max_score }}):</label>
+                        <input type="number" id="grade-input" name="grade" class="form-control"
                                step="0.01" min="0" max="{{ project.max_score }}" placeholder="0-{{ project.max_score }}">
                     </div>
-                    
+
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Rəy:</label>
+                        <label class="form-label fw-bold">{% trans "feedback_label" context "projects.review" %}</label>
                         <textarea id="feedback-input" name="feedback" class="form-control" rows="4"
-                                  placeholder="Tələbəyə rəy yazın..."></textarea>
+                                  placeholder="{% trans 'feedback_placeholder' context 'projects.review' %}"></textarea>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle"></i> Qiymət Ver
+                        <i class="bi bi-check-circle"></i> {% trans "grade_button" context "projects.review" %}
                     </button>
                 </form>
-                
+
             </div>
         </div>
     </div>
@@ -161,45 +157,72 @@
 
 
 <script>
-// Open submission modal and populate data
+const REVIEW_I18N = {
+    noContent: `{% trans "no_content" context "projects.review.js" %}`,
+    download: `{% trans "download" context "projects.review.js" %}`,
+    sending: `{% trans "sending" context "projects.review.js" %}`,
+    errorPrefix: `{% trans "error_prefix" context "projects.review.js" %}`,
+    unknownError: `{% trans "unknown_error" context "projects.review.js" %}`,
+    serverError: `{% trans "server_error" context "projects.review.js" %}`,
+    gradeButton: `{% trans "grade_button" context "projects.review.js" %}`,
+};
+
 document.querySelectorAll('.view-submission-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-        const submissionId = this.dataset.id;
-        const student = this.dataset.student;
-        const content = this.dataset.content;
-        const file = this.dataset.file;
-        const filename = this.dataset.filename;  // Fayl adı
-        const grade = this.dataset.grade;
-        const feedback = this.dataset.feedback;
-        
-        document.getElementById('submission-id').value = submissionId;
-        document.getElementById('modal-student').textContent = student;
-        document.getElementById('modal-content').textContent = content || '(Mətn yoxdur)';
-        document.getElementById('grade-input').value = grade;
-        document.getElementById('feedback-input').value = feedback;
-        
-        // Handle file - fayl adını göstər
-        if (file) {
-            document.getElementById('modal-file-container').style.display = 'block';
-            document.getElementById('modal-file-link').href = file;
-            document.getElementById('modal-file-name').textContent = filename || 'Yüklə';
-        } else {
-            document.getElementById('modal-file-container').style.display = 'none';
-        }
+        openSubmission(this);
     });
 });
 
-// Submit grading
+function openSubmission(button) {
+    if (!button) return;
+
+    const submissionId = button.dataset.id;
+    const student = button.dataset.student;
+    const content = button.dataset.content;
+    const file = button.dataset.file;
+    const filename = button.dataset.filename;
+    const grade = button.dataset.grade;
+    const feedback = button.dataset.feedback;
+
+    document.getElementById('submission-id').value = submissionId;
+    document.getElementById('modal-student').textContent = student;
+    document.getElementById('modal-content').textContent = content || REVIEW_I18N.noContent;
+    document.getElementById('grade-input').value = grade;
+    document.getElementById('feedback-input').value = feedback;
+
+    if (file) {
+        document.getElementById('modal-file-container').style.display = 'block';
+        document.getElementById('modal-file-link').href = file;
+        document.getElementById('modal-file-name').textContent = filename || REVIEW_I18N.download;
+    } else {
+        document.getElementById('modal-file-container').style.display = 'none';
+    }
+}
+
+const selectedSubmissionId = "{{ selected_submission_id }}";
+if (selectedSubmissionId) {
+    const targetButton = document.querySelector('.view-submission-btn[data-id="' + selectedSubmissionId + '"]');
+    if (targetButton) {
+        openSubmission(targetButton);
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const modal = window.bootstrap.Modal.getOrCreateInstance(document.getElementById('submissionModal'));
+            modal.show();
+        } else {
+            targetButton.click();
+        }
+    }
+}
+
 document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const submissionId = document.getElementById('submission-id').value;
     const formData = new FormData(this);
     const btn = this.querySelector('[type=submit]');
-    
+
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Göndərilir...';
-    
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${REVIEW_I18N.sending}`;
+
     fetch(`/projects/submission/${submissionId}/grade/`, {
         method: 'POST',
         headers: {
@@ -213,16 +236,16 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
         if (data.success) {
             location.reload();
         } else {
-            alert('Xəta: ' + (data.error || 'Naməlum xəta'));
+            alert(`${REVIEW_I18N.errorPrefix}${data.error || REVIEW_I18N.unknownError}`);
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
+            btn.innerHTML = `<i class="bi bi-check-circle"></i> ${REVIEW_I18N.gradeButton}`;
         }
     })
     .catch(err => {
         console.error(err);
-        alert('Server xətası');
+        alert(REVIEW_I18N.serverError);
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-check-circle"></i> Qiymət Ver';
+        btn.innerHTML = `<i class="bi bi-check-circle"></i> ${REVIEW_I18N.gradeButton}`;
     });
 });
 </script>

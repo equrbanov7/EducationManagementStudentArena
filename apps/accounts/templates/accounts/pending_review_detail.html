@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ item_type_label }} - Yoxla{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/pending_review_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="pending-detail-page">
+    <div class="pending-detail-shell">
+        <header class="pending-detail-header">
+            <div class="pending-detail-kicker">{{ item_type_label }}</div>
+            <h1>{{ item_title }}</h1>
+            <p>{{ student_display }} · {{ course_title }}</p>
+            <a href="{{ back_url }}" class="pending-detail-back">
+                <i class="fas fa-arrow-left"></i> Pending review-a qayıt
+            </a>
+        </header>
+
+        <section class="pending-detail-meta">
+            <article class="meta-card">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ status_display }}</span>
+            </article>
+            <article class="meta-card">
+                <span class="meta-label">Göndərilib</span>
+                <span class="meta-value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
+            </article>
+            <article class="meta-card">
+                <span class="meta-label">Son yoxlama</span>
+                <span class="meta-value">{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</span>
+            </article>
+            <article class="meta-card meta-card-score">
+                <span class="meta-label">Cari bal</span>
+                <span class="meta-value">{% if current_score is not None %}{{ current_score }} / {{ max_score }}{% else %}-{% endif %}</span>
+            </article>
+        </section>
+
+        {% if graded_at and not is_locked %}
+        <div class="review-window-banner">
+            <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+            <span>
+                Tələbə nəticəni yalnız bu pəncərə bitdikdən sonra görəcək.
+                <span data-review-countdown data-seconds="{{ review_window_seconds_left }}"></span>
+            </span>
+        </div>
+        {% elif is_locked %}
+        <div class="review-window-banner review-window-banner--locked">
+            <strong>Yoxlama bağlanıb.</strong>
+            <span>{{ review_window_minutes }} dəqiqə tamamlandığı üçün bal və rəy artıq dəyişdirilə bilməz.</span>
+        </div>
+        {% endif %}
+
+        <section class="pending-detail-block">
+            <h2>Cavab mətni</h2>
+            <div class="pending-detail-content">
+                {% if content_text %}
+                    {{ content_text|linebreaks }}
+                {% else %}
+                    <p class="pending-empty">Mətn cavabı daxil edilməyib.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if attachments %}
+        <section class="pending-detail-block">
+            <h2>Əlavələr</h2>
+            <ul class="pending-file-list">
+                {% for file_item in attachments %}
+                <li>
+                    <a href="{{ file_item.url }}" target="_blank" rel="noopener">
+                        <i class="fas fa-paperclip"></i> {{ file_item.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if lab_answers %}
+        <section class="pending-detail-block">
+            <h2>Lab sual cavabları</h2>
+            <div class="lab-answer-list">
+                {% for answer in lab_answers %}
+                <article class="lab-answer-card">
+                    <h3>{{ forloop.counter }}. {{ answer.question.question_text }}</h3>
+                    {% if answer.answer %}
+                    <div class="lab-answer-text">{{ answer.answer|linebreaks }}</div>
+                    {% endif %}
+                    {% if answer.answer_file %}
+                    <a href="{{ answer.answer_file.url }}" target="_blank" rel="noopener" class="lab-answer-file">
+                        <i class="fas fa-download"></i> Faylı aç
+                    </a>
+                    {% endif %}
+                    {% if not answer.answer and not answer.answer_file %}
+                    <p class="pending-empty">Bu suala cavab daxil edilməyib.</p>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="pending-detail-block pending-grade-block">
+            <h2>{% if graded_at and not is_locked %}Yenidən yoxla{% else %}Yoxla{% endif %}</h2>
+            <form method="post" class="pending-grade-form">
+                {% csrf_token %}
+                <div class="grade-row">
+                    <label for="id_score">Bal (0 - {{ max_score }})</label>
+                    <input
+                        id="id_score"
+                        type="number"
+                        name="score"
+                        min="0"
+                        max="{{ max_score }}"
+                        step="0.01"
+                        value="{{ current_score|default:'' }}"
+                        {% if is_locked %}disabled{% endif %}
+                        required
+                    >
+                </div>
+                <div class="grade-row">
+                    <label for="id_feedback">Feedback</label>
+                    <textarea
+                        id="id_feedback"
+                        name="feedback"
+                        rows="5"
+                        {% if is_locked %}disabled{% endif %}
+                        placeholder="Tələbə üçün qısa və aydın rəy yazın"
+                    >{{ feedback|default:'' }}</textarea>
+                </div>
+                <div class="grade-actions">
+                    <button type="submit" class="btn-save" {% if is_locked %}disabled{% endif %}>
+                        {% if graded_at and not is_locked %}Yenidən yoxla və yadda saxla{% else %}Yoxla və yadda saxla{% endif %}
+                    </button>
+                    <a href="{{ back_url }}" class="btn-cancel">Geri qayıt</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+(function () {
+    var countdownEl = document.querySelector("[data-review-countdown]");
+    if (!countdownEl) {
+        return;
+    }
+
+    var secondsLeft = parseInt(countdownEl.getAttribute("data-seconds"), 10);
+    if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
+        countdownEl.textContent = "Yoxlama pəncərəsi bitmək üzrədir.";
+        return;
+    }
+
+    function renderCountdown() {
+        var min = Math.floor(secondsLeft / 60);
+        var sec = secondsLeft % 60;
+        countdownEl.textContent = "Qalan vaxt: " + min + " dəq " + sec + " san.";
+    }
+
+    renderCountdown();
+    window.setInterval(function () {
+        secondsLeft = Math.max(0, secondsLeft - 1);
+        renderCountdown();
+    }, 1000);
+})();
+</script>
+{% endblock %}
