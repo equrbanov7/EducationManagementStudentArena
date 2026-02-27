@@ -49,6 +49,7 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
         "assigned-courses",
         "courses",
         "pending-review",
+        "review-results",
     }
     if requested_profile_section not in valid_profile_sections:
         requested_profile_section = default_section

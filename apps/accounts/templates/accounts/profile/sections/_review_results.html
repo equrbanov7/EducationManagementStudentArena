@@ -1,0 +1,7 @@
+{% if 'review-results' in allowed_sections %}
+<section class="profile-section-panel profile-section--review-results {% if active_section == 'review-results' %}is-active{% endif %}"
+         data-profile-section-panel="review-results"
+         data-source-url="{% url 'accounts:review_results' %}">
+    {% include "accounts/partials/_review_results_content.html" with evaluated_review_items=evaluated_review_items evaluated_review_search_query=evaluated_review_search_query evaluated_review_filter_type=evaluated_review_filter_type evaluated_review_filter_group=evaluated_review_filter_group evaluated_review_available_groups=evaluated_review_available_groups evaluated_review_total_count=evaluated_review_total_count embedded_in_profile=True %}
+</section>
+{% endif %}

@@ -56,9 +56,21 @@ urlpatterns = [
     path("assigned-exams/", views.assigned_exams, name="assigned_exams"),
     path("assigned-courses/", views.assigned_courses, name="assigned_courses"),
     path("my-results/", views.my_results, name="my_results"),
+    path("pending-answers/", views.pending_answers, name="pending_answers"),
     path("my-results/<str:item_type>/<int:item_id>/", views.my_result_detail, name="my_result_detail"),
     # Pending review
     path("pending-review/", views.pending_review, name="pending_review"),
+    path(
+        "pending-review/<str:item_type>/<int:item_id>/",
+        views.pending_review_detail,
+        name="pending_review_detail",
+    ),
+    path("review-results/", views.review_results, name="review_results"),
+    path(
+        "review-results/<str:item_type>/<int:item_id>/",
+        views.review_result_detail,
+        name="review_result_detail",
+    ),
     # RBAC management
     path("role-assignment/", views.role_assignment, name="role_assignment"),
     path("permission-editor/", views.permission_editor, name="permission_editor"),

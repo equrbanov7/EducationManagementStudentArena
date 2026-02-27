@@ -36,6 +36,10 @@ let currentQuestion = null;
 let selectedIds = new Set();
 let answered = false;
 let timerInterval = null;
+const I18N = window.LIVE_EXAM_PLAYER_I18N || {};
+const tr = (key, fallback) => I18N[key] || fallback;
+const fmt = (template, values) =>
+    String(template || '').replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
 
 // Helpers
 const wsUrl = path => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${path}`;
@@ -48,7 +52,9 @@ const pad = n => String(n).padStart(2, '0');
 
 function setConnection(online) {
     UI.connStatus.className = 'connection-status ' + (online ? 'online' : 'offline');
-    UI.connStatus.querySelector('.text').textContent = online ? 'Onlayn' : 'Oflayn';
+    UI.connStatus.querySelector('.text').textContent = online
+        ? tr('connectionOnline', 'Online')
+        : tr('connectionOffline', 'Offline');
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -89,7 +95,7 @@ function startTimer(endsAt) {
             clearInterval(timerInterval);
             disableOptions();
             if (!answered) {
-                showStatus('timeout', '⏰ Vaxt bitdi!');
+                showStatus('timeout', tr('statusTimeout', 'Time is up!'));
             }
         }
     }
@@ -132,7 +138,10 @@ function maxSelect(q) {
 function updateCounter() {
     if (!isMulti(currentQuestion)) return;
     const max = maxSelect(currentQuestion);
-    UI.selectCounter.textContent = `Seçilib: ${selectedIds.size} / ${max}`;
+    UI.selectCounter.textContent = fmt(tr('selectedCounter', 'Selected: {selected} / {max}'), {
+        selected: selectedIds.size,
+        max: max,
+    });
     UI.submitBtn.disabled = selectedIds.size === 0;
 }
 
@@ -151,10 +160,12 @@ function renderQuestion(q) {
     hideStatus();
     
     // Meta
-    UI.questionMeta.textContent = q.index && q.total ? `Sual ${q.index} / ${q.total}` : '';
+    UI.questionMeta.textContent = q.index && q.total
+        ? fmt(tr('questionMeta', 'Question {index} / {total}'), { index: q.index, total: q.total })
+        : '';
     
     // Question text
-    UI.questionText.innerHTML = `<div class="q-text-content">${esc(q.text || 'Sual yüklənir...')}</div>`;
+    UI.questionText.innerHTML = `<div class="q-text-content">${esc(q.text || tr('questionLoading', 'Loading question...'))}</div>`;
     
     // Options
     UI.optionsContainer.innerHTML = '';
@@ -227,7 +238,7 @@ function submitAnswer() {
     
     answered = true;
     disableOptions();
-    showStatus('sending', '🚀 Cavab göndərilir...');
+    showStatus('sending', tr('statusSending', 'Sending answer...'));
     
     const startedAt = currentQuestion.started_at ? new Date(currentQuestion.started_at).getTime() : Date.now();
     const answerMs = Math.max(0, Date.now() - startedAt);
@@ -287,9 +298,12 @@ function renderReveal(msg) {
         } else {
             isCorrect = correctIds.has(Number(Array.from(selectedIds)[0]));
         }
-        showStatus(isCorrect ? 'correct' : 'wrong', isCorrect ? '🎉 Düzgün!' : '❌ Səhv!');
+        showStatus(
+            isCorrect ? 'correct' : 'wrong',
+            isCorrect ? tr('statusCorrect', 'Correct!') : tr('statusWrong', 'Wrong!')
+        );
     } else {
-        showStatus('timeout', '⚠️ Cavab verilmədi');
+        showStatus('timeout', tr('statusNotAnswered', 'No answer submitted'));
     }
     
     // Show leaderboard
@@ -382,7 +396,7 @@ function renderFinal(msg) {
                 <span class="final-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
                 <span class="final-name">${esc(p.nickname)}</span>
             </div>
-            <span class="final-score">${p.score || 0} xal</span>
+            <span class="final-score">${p.score || 0} ${tr('pointsSuffix', 'pts')}</span>
         `;
         UI.finalLeaderboard.appendChild(div);
     });
@@ -436,7 +450,7 @@ playWS.onmessage = (e) => {
                 break;
                 
             case 'answer_saved':
-                showStatus('sending', '✅ Cavab qəbul edildi!');
+                showStatus('sending', tr('statusAnswerSaved', 'Answer received!'));
                 break;
                 
             case 'reveal':

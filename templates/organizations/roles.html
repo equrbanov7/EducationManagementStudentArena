@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - Roles</title>
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.roles" %}</title>
     <style>
         * {
             margin: 0;
@@ -115,17 +115,17 @@
         <div class="header-content">
             <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
             <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
-                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
             </nav>
         </div>
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem;">Roles & Permissions</h1>
+        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.roles" %}</h1>
 
         {% for role in roles %}
         <div class="role-card">
@@ -133,10 +133,10 @@
                 <div>
                     <span class="role-name">{{ role.display_name }}</span>
                     {% if role.is_system %}
-                    <span class="system-badge">System Role</span>
+                    <span class="system-badge">{% trans "system_role" context "organizations.roles" %}</span>
                     {% endif %}
                 </div>
-                <span class="role-level">Level {{ role.level }}</span>
+                <span class="role-level">{% trans "level_prefix" context "organizations.roles" %} {{ role.level }}</span>
             </div>
             
             {% if role.description %}
@@ -144,19 +144,19 @@
             {% endif %}
 
             <div>
-                <strong style="color: #4a5568; font-size: 14px;">Permissions:</strong>
+                <strong style="color: #4a5568; font-size: 14px;">{% trans "permissions_label" context "organizations.roles" %}</strong>
                 <div class="permissions-grid">
                     {% for perm in role.permissions %}
                     <div class="permission-item">{{ perm }}</div>
                     {% empty %}
-                    <div class="permission-item" style="color: #a0aec0;">No permissions</div>
+                    <div class="permission-item" style="color: #a0aec0;">{% trans "no_permissions" context "organizations.roles" %}</div>
                     {% endfor %}
                 </div>
             </div>
         </div>
         {% empty %}
         <div style="text-align: center; padding: 3rem; color: #718096;">
-            No roles found
+            {% trans "no_roles_found" context "organizations.roles" %}
         </div>
         {% endfor %}
     </div>

@@ -3,7 +3,7 @@ Test settings for EMS Arena project.
 Fast, isolated configuration for running tests.
 """
 
-from .base import BASE_DIR, STATICFILES_DIRS  # lazım olanları explicit import et
+from .base import *
 
 # STATICFILES_DIRS bəzən tuple olur; append üçün list-ə çeviririk
 STATICFILES_DIRS = list(STATICFILES_DIRS)

@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - Settings</title>
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.settings" %}</title>
     <style>
         * {
             margin: 0;
@@ -129,17 +129,17 @@
         <div class="header-content">
             <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
             <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
-                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
             </nav>
         </div>
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem;">Organization Settings</h1>
+        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.settings" %}</h1>
 
         {% if messages %}
         <div class="messages">
@@ -156,48 +156,48 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label>Organization Name</label>
+                    <label>{% trans "organization_name" context "organizations.settings" %}</label>
                     <input type="text" value="{{ organization.name }}" disabled>
-                    <div class="info-text">Contact support to change organization name</div>
+                    <div class="info-text">{% trans "organization_name_help" context "organizations.settings" %}</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Organization Type</label>
+                    <label>{% trans "organization_type" context "organizations.settings" %}</label>
                     <input type="text" value="{{ organization.get_org_type_display }}" disabled>
                 </div>
 
                 <div class="form-group">
-                    <label>Description</label>
+                    <label>{% trans "description" context "organizations.settings" %}</label>
                     <textarea name="description">{{ organization.description }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Email</label>
+                    <label>{% trans "email" context "organizations.settings" %}</label>
                     <input type="email" name="email" value="{{ organization.email }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Phone</label>
+                    <label>{% trans "phone" context "organizations.settings" %}</label>
                     <input type="text" name="phone" value="{{ organization.phone }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Address</label>
+                    <label>{% trans "address" context "organizations.settings" %}</label>
                     <textarea name="address">{{ organization.address }}</textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Website</label>
+                    <label>{% trans "website" context "organizations.settings" %}</label>
                     <input type="url" name="website" value="{{ organization.website }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Owner</label>
+                    <label>{% trans "owner" context "organizations.settings" %}</label>
                     <input type="text" value="{{ organization.owner.get_full_name|default:organization.owner.username }}" disabled>
                     <div class="info-text">{{ organization.owner.email }}</div>
                 </div>
 
-                <button type="submit" class="btn">Save Settings</button>
+                <button type="submit" class="btn">{% trans "save_button" context "organizations.settings" %}</button>
             </form>
         </div>
     </div>

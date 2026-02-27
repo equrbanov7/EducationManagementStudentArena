@@ -11,7 +11,7 @@ import dj_database_url
 import sentry_sdk
 from dotenv import load_dotenv
 
-from .base import BASE_DIR, STATICFILES_DIRS
+from .base import *
 
 # STATICFILES_DIRS base-də tuple ola bilər, append üçün list edirik
 STATICFILES_DIRS = list(STATICFILES_DIRS)

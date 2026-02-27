@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Dəyərləndirilmiş nəticələr - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-table"></i> Dəyərləndirilmiş nəticələr
+                {% if evaluated_review_total_count > 0 %}
+                <span class="sidebar-menu-badge">{{ evaluated_review_total_count }}</span>
+                {% endif %}
+            </h1>
+            <a href="{% url 'accounts:profile' %}?section=review-results" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        {% include "accounts/partials/_review_results_content.html" with embedded_in_profile=False %}
+    </div>
+</div>
+{% endblock %}

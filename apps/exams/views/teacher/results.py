@@ -3,6 +3,7 @@ from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -55,6 +56,7 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
         "assigned-courses",
         "courses",
         "pending-review",
+        "review-results",
     }
     if requested_profile_section not in valid_profile_sections:
         requested_profile_section = default_section
@@ -226,10 +228,6 @@ def teacher_view_attempt(request, slug, attempt_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
-    results_return_url = _append_query_params(
-        reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
-        **navigation_params,
-    )
 
     # Cavabları al
     answers_qs = (
@@ -248,13 +246,43 @@ def teacher_view_attempt(request, slug, attempt_id):
 
     qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
 
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        search_token = search_query.lower()
+        filtered = []
+        for item in qa_list:
+            question = item["question"]
+            answer = item["answer"]
+            question_text = (question.text or "").lower()
+            answer_text = (getattr(answer, "text_answer", "") or "").lower()
+            options_text = " ".join(opt.text for opt in question.options.all()).lower()
+            if (
+                search_token in question_text
+                or search_token in answer_text
+                or search_token in options_text
+            ):
+                filtered.append(item)
+        qa_list = filtered
+
+    questions_page = Paginator(qa_list, 6).get_page(request.GET.get("questions_page"))
+    pagination_query = urlencode(
+        {
+            **navigation_params,
+            "q": search_query,
+        }
+    )
+    clear_search_url = _append_query_params(request.path, **navigation_params)
+
     context = {
         "exam": exam,
         "attempt": attempt,
-        "qa_list": qa_list,
+        "qa_list": questions_page.object_list,
+        "qa_page": questions_page,
+        "qa_search_query": search_query,
+        "qa_pagination_query": pagination_query,
+        "qa_clear_search_url": clear_search_url,
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
         "profile_return_url": profile_return_url,
-        "results_return_url": results_return_url,
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)
@@ -345,10 +373,11 @@ def teacher_check_attempt(request, slug, attempt_id):
             a.teacher_feedback = feedback
             a.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
 
-        # ✅ Tarix yenilənir (hər dəyişiklikdə)
+        # İlk yoxlama vaxtını saxla; 5 dəqiqəlik redaktə pəncərəsi bu vaxtdan hesablanır.
         attempt.teacher_score = total_score if any_score else None
         attempt.checked_by_teacher = True
-        attempt.teacher_checked_at = timezone.now()  # ✅ Hər dəyişiklikdə yenilənir
+        if not attempt.teacher_checked_at:
+            attempt.teacher_checked_at = timezone.now()
         attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
 
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))

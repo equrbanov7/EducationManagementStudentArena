@@ -1,11 +1,11 @@
-{% load static %}
+{% load static i18n %}
 {% load org_tags %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - Dashboard</title>
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.dashboard" %}</title>
     <style>
         * {
             margin: 0;
@@ -192,85 +192,89 @@
         <div class="header-content">
             <div class="org-name">{{ organization.name }}</div>
             <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">Dashboard</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">Structure</a>
-                <a href="{% url 'organizations:members' organization.slug %}">Members</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">Roles</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">Settings</a>
-                <a href="{% url 'organizations:select' %}">Switch Org</a>
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:select' %}">{% trans "switch_org" context "organizations.nav" %}</a>
             </nav>
         </div>
     </div>
 
     <div class="container">
-        <h1 style="margin-bottom: 2rem; font-size: 28px;">Dashboard</h1>
+        <h1 style="margin-bottom: 2rem; font-size: 28px;">{% trans "heading" context "organizations.dashboard" %}</h1>
 
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Members</div>
+                <div class="stat-label">{% trans "stat_total_members" context "organizations.dashboard" %}</div>
                 <div class="stat-value">{{ stats.total_members }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Organizational Units</div>
+                <div class="stat-label">{% trans "stat_total_units" context "organizations.dashboard" %}</div>
                 <div class="stat-value">{{ stats.total_units }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Active Roles</div>
+                <div class="stat-label">{% trans "stat_total_roles" context "organizations.dashboard" %}</div>
                 <div class="stat-value">{{ stats.total_roles }}</div>
             </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="section">
-            <div class="section-title">Quick Actions</div>
+            <div class="section-title">{% trans "quick_actions" context "organizations.dashboard" %}</div>
             <div class="quick-actions">
                 {% has_perm 'member.invite' as can_invite %}
                 {% if can_invite %}
-                <a href="{% url 'organizations:members' organization.slug %}" class="btn">Invite Members</a>
+                <a href="{% url 'organizations:members' organization.slug %}" class="btn">{% trans "action_invite_members" context "organizations.dashboard" %}</a>
                 {% endif %}
                 
                 {% has_perm 'unit.create' as can_create_unit %}
                 {% if can_create_unit %}
-                <a href="{% url 'organizations:structure' organization.slug %}" class="btn">Manage Structure</a>
+                <a href="{% url 'organizations:structure' organization.slug %}" class="btn">{% trans "action_manage_structure" context "organizations.dashboard" %}</a>
                 {% endif %}
                 
                 {% has_perm 'role.view' as can_view_roles %}
                 {% if can_view_roles %}
-                <a href="{% url 'organizations:roles' organization.slug %}" class="btn-secondary btn">View Roles</a>
+                <a href="{% url 'organizations:roles' organization.slug %}" class="btn-secondary btn">{% trans "action_view_roles" context "organizations.dashboard" %}</a>
                 {% endif %}
             </div>
         </div>
 
         <!-- Recent Activity -->
         <div class="section">
-            <div class="section-title">Recent Activity</div>
+            <div class="section-title">{% trans "recent_activity" context "organizations.dashboard" %}</div>
             {% if recent_activity %}
                 {% for activity in recent_activity %}
                 <div class="activity-item">
                     <div class="activity-info">
                         <div class="activity-user">
-                            {{ activity.user.username|default:"System" }}
+                            {% if activity.user and activity.user.username %}
+                                {{ activity.user.username }}
+                            {% else %}
+                                {% trans "system_user" context "organizations.dashboard" %}
+                            {% endif %}
                         </div>
                         <div class="activity-action">
                             {{ activity.get_action_display }} - {{ activity.get_resource_display }}
                         </div>
                     </div>
                     <div class="activity-time">
-                        {{ activity.created_at|timesince }} ago
+                        {{ activity.created_at|timesince }} {% trans "ago" context "organizations.dashboard" %}
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    No recent activity
+                    {% trans "no_recent_activity" context "organizations.dashboard" %}
                 </div>
             {% endif %}
         </div>
 
         <!-- User Roles -->
         <div class="section">
-            <div class="section-title">Your Roles in This Organization</div>
+            <div class="section-title">{% trans "your_roles" context "organizations.dashboard" %}</div>
             {% if user_memberships %}
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     {% for membership in user_memberships %}
@@ -284,7 +288,7 @@
                 </div>
             {% else %}
                 <div class="empty-state">
-                    No roles assigned
+                    {% trans "no_roles_assigned" context "organizations.dashboard" %}
                 </div>
             {% endif %}
         </div>

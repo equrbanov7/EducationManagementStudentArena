@@ -11,7 +11,7 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-from .base import BASE_DIR, INSTALLED_APPS, MIDDLEWARE, STATICFILES_DIRS
+from .base import *
 
 # Ensure mutable copy (base-də tuple ola bilər)
 STATICFILES_DIRS = list(STATICFILES_DIRS)

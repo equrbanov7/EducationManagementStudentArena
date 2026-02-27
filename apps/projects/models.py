@@ -5,6 +5,7 @@ projects/models.py
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 from apps.courses.models import Course
 
@@ -13,22 +14,36 @@ User = get_user_model()
 
 class Project(models.Model):
     STATUS_CHOICES = [
-        ("active", "Aktiv"),
-        ("inactive", "Deaktiv"),
-        ("archived", "Arxivləndi"),
+        ("active", pgettext_lazy("projects.model.project.choice.status", "active")),
+        ("inactive", pgettext_lazy("projects.model.project.choice.status", "inactive")),
+        ("archived", pgettext_lazy("projects.model.project.choice.status", "archived")),
     ]
 
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="projects", verbose_name="Kurs")
-    title = models.CharField(max_length=255, verbose_name="Kurs İşi Adı")
-    description = models.TextField(blank=True, verbose_name="Təsvir")
-    start_date = models.DateTimeField(verbose_name="Başlanğıc tarixi")
-    deadline = models.DateTimeField(verbose_name="Son tarix")
-    max_attempts = models.PositiveIntegerField(default=1, verbose_name="Maksimum cəhd")
-    max_score = models.PositiveIntegerField(default=100, verbose_name="Maksimum bal")
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="projects",
+        verbose_name=pgettext_lazy("projects.model.project.field", "course"),
+    )
+    title = models.CharField(max_length=255, verbose_name=pgettext_lazy("projects.model.project.field", "title"))
+    description = models.TextField(blank=True, verbose_name=pgettext_lazy("projects.model.project.field", "description"))
+    start_date = models.DateTimeField(verbose_name=pgettext_lazy("projects.model.project.field", "start_date"))
+    deadline = models.DateTimeField(verbose_name=pgettext_lazy("projects.model.project.field", "deadline"))
+    max_attempts = models.PositiveIntegerField(
+        default=1,
+        verbose_name=pgettext_lazy("projects.model.project.field", "max_attempts"),
+    )
+    max_score = models.PositiveIntegerField(
+        default=100,
+        verbose_name=pgettext_lazy("projects.model.project.field", "max_score"),
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
 
     assigned_students = models.ManyToManyField(
-        User, blank=True, related_name="student_projects", verbose_name="Tələbələr"
+        User,
+        blank=True,
+        related_name="student_projects",
+        verbose_name=pgettext_lazy("projects.model.project.field", "assigned_students"),
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -36,8 +51,8 @@ class Project(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        verbose_name = "Kurs İşi"
-        verbose_name_plural = "Kurs İşləri"
+        verbose_name = pgettext_lazy("projects.model.project.meta", "singular")
+        verbose_name_plural = pgettext_lazy("projects.model.project.meta", "plural")
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
@@ -65,14 +80,14 @@ class Project(models.Model):
 
 class ProjectSubmission(models.Model):
     STATUS_CHOICES = [
-        ("pending", "Gözləyir"),
-        ("graded", "Qiymətləndirilib"),
-        ("rejected", "Rədd edilib"),
+        ("pending", pgettext_lazy("projects.model.submission.choice.status", "pending")),
+        ("graded", pgettext_lazy("projects.model.submission.choice.status", "graded")),
+        ("rejected", pgettext_lazy("projects.model.submission.choice.status", "rejected")),
     ]
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="submissions")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_submissions")
-    content = models.TextField(verbose_name="Cavab / İzahat")
+    content = models.TextField(verbose_name=pgettext_lazy("projects.model.submission.field", "content"))
     file = models.FileField(upload_to="projects/submissions/", blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -89,3 +104,5 @@ class ProjectSubmission(models.Model):
 
     class Meta:
         ordering = ["-submitted_at"]
+        verbose_name = pgettext_lazy("projects.model.submission.meta", "singular")
+        verbose_name_plural = pgettext_lazy("projects.model.submission.meta", "plural")

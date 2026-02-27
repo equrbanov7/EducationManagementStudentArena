@@ -12690,3 +12690,1924 @@ msgstr "Регистрация"
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Открыть или закрыть меню"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "title"
+msgstr "Присоединение к игре"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "game_pin_label"
+msgstr "PIN игры"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_label"
+msgstr "Как тебя зовут?"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_placeholder"
+msgstr "Например: SuperPlayer"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "avatar_label"
+msgstr "Выбери аватар"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "join_button"
+msgstr "Присоединиться к игре!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_prefix"
+msgstr "Приготовься,"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_highlight"
+msgstr "веселиться"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_suffix"
+msgstr "самое время!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "alert_select_avatar"
+msgstr "Выбери аватар!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_joining"
+msgstr "Подключение..."
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_unknown"
+msgstr "Произошла ошибка"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_join"
+msgstr "Присоединиться к игре!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_connection"
+msgstr "Ошибка соединения"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "title"
+msgstr "Комната ожидания"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "success_badge"
+msgstr "Ты уже внутри!"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "default_player"
+msgstr "Игрок"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "status_waiting_host"
+msgstr "Учитель запускает игру"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "players_title"
+msgstr "Другие игроки"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "pin_label"
+msgstr "PIN:"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "ws_connecting"
+msgstr "Подключение..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connecting"
+msgstr "Подключение..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_online"
+msgstr "Онлайн"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_starting"
+msgstr "Игра начинается..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_disconnected"
+msgstr "Соединение потеряно"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_error"
+msgstr "Ошибка"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connection_error"
+msgstr "Ошибка соединения"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "title"
+msgstr "Ведущий игры"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_title"
+msgstr "Живой экзамен"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "join_info_label"
+msgstr "Чтобы присоединиться:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "start_button"
+msgstr "Старт"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_label"
+msgstr "Вопрос:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "reveal_button"
+msgstr "Показать ответ"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "next_button"
+msgstr "Следующий"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "finish_button"
+msgstr "Завершить"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "auto_label"
+msgstr "Авто"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "state_lobby"
+msgstr "Лобби"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_meta_placeholder"
+msgstr "Вопрос 1 / 10"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_text_placeholder"
+msgstr "Текст вопроса..."
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "results_panel_title"
+msgstr "Результаты по этому вопросу"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "leaderboard_title"
+msgstr "Таблица лидеров"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "joined_players"
+msgstr "Подключились:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "questions_available_suffix"
+msgstr "вопросов доступно"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "debug_button"
+msgstr "Отладка"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_title"
+msgstr "Итоговые результаты"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_subtitle"
+msgstr "Поздравляем победителей!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "other_players"
+msgstr "Другие игроки"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "qr_scan"
+msgstr "Сканируйте!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "debug_label"
+msgstr "Отладка"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_lobby"
+msgstr "Лобби"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_question"
+msgstr "Вопрос"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_reveal"
+msgstr "Показ"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_finished"
+msgstr "Завершено"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_log"
+msgstr "Состояние: {state}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "question_meta"
+msgstr "Вопрос {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "no_answers_yet"
+msgstr "Никто не ответил"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "points_suffix"
+msgstr "баллов"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "host_ready"
+msgstr "Ведущий готов"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_open"
+msgstr "WS лобби открыт"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_closed"
+msgstr "WS лобби закрыт"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_open"
+msgstr "WS игры открыт"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_closed"
+msgstr "WS игры закрыт"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "all_answered_auto_reveal"
+msgstr "Все ответили, авто-показ!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "lobby_message_error"
+msgstr "Ошибка сообщения лобби: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "play_message_error"
+msgstr "Ошибка сообщения игры: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "post_error"
+msgstr "Ошибка POST: {message}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "title"
+msgstr "Живой игрок"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "connecting"
+msgstr "Подключение..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_title"
+msgstr "Приготовься!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_subtitle"
+msgstr "Игра скоро начнется..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "select_counter_placeholder"
+msgstr "Выбрано: 0 / 2"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "submit_button"
+msgstr "Подтвердить"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "leaderboard_title"
+msgstr "Таблица лидеров"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "results_title"
+msgstr "Результаты по этому вопросу"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_title"
+msgstr "Игра завершена!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_subtitle"
+msgstr "Поздравляем всех участников!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_online"
+msgstr "Онлайн"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_offline"
+msgstr "Офлайн"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_timeout"
+msgstr "Время вышло!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "selected_counter"
+msgstr "Выбрано: {selected} / {max}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_meta"
+msgstr "Вопрос {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_loading"
+msgstr "Загрузка вопроса..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_sending"
+msgstr "Отправка ответа..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_correct"
+msgstr "Верно!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_wrong"
+msgstr "Неверно!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_not_answered"
+msgstr "Ответ не отправлен"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "points_suffix"
+msgstr "баллов"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_answer_saved"
+msgstr "Ответ принят!"
+
+#: apps/live_exam/views.py:297
+msgctxt "live_exam.view.option"
+msgid "option_fallback_text"
+msgstr "Вариант {label}"
+
+#: apps/live_exam/views.py:389
+msgctxt "live_exam.view.permission"
+msgid "host_teacher_only"
+msgstr "Только преподаватели могут создавать живые сессии."
+
+#: apps/live_exam/views.py:392
+msgctxt "live_exam.view.permission"
+msgid "host_author_only"
+msgstr "Только автор экзамена может вести эту живую сессию."
+
+#: apps/live_exam/views.py:402
+msgctxt "live_exam.view.permission"
+msgid "not_allowed"
+msgstr "Доступ запрещен."
+
+#: apps/live_exam/views.py:352
+msgctxt "live_exam.view.message"
+msgid "question_not_found"
+msgstr "Вопрос не найден."
+
+#: apps/live_exam/views.py:458
+msgctxt "live_exam.view.message"
+msgid "lobby_locked"
+msgstr "Лобби заблокировано."
+
+#: apps/live_exam/views.py:472
+msgctxt "live_exam.view.message"
+msgid "nickname_required"
+msgstr "Никнейм не может быть пустым."
+
+#: apps/live_exam/views.py:581
+msgctxt "live_exam.view.message"
+msgid "no_questions_in_exam"
+msgstr "В этом экзамене нет вопросов."
+
+#: apps/live_exam/views.py:591
+msgctxt "live_exam.view.message"
+msgid "invalid_question_count"
+msgstr "Некорректное количество вопросов."
+
+#: apps/live_exam/views.py:597
+msgctxt "live_exam.view.message"
+msgid "question_count_minimum"
+msgstr "Количество вопросов должно быть больше 0."
+
+#: apps/live_exam/views.py:604
+msgctxt "live_exam.view.message"
+msgid "question_count_exceeds_total"
+msgstr "В этом экзамене только {total_in_exam} вопросов. Нельзя выбрать {desired}."
+
+#: apps/live_exam/views.py:643
+msgctxt "live_exam.view.message"
+msgid "active_question_not_found"
+msgstr "Активный вопрос не найден."
+
+#: apps/live_exam/consumers.py:100
+msgctxt "live_exam.consumer.error"
+msgid "no_token"
+msgstr "Токен отсутствует"
+
+#: apps/live_exam/consumers.py:106
+msgctxt "live_exam.consumer.error"
+msgid "bad_token"
+msgstr "Некорректный токен"
+
+#: apps/live_exam/consumers.py:110
+msgctxt "live_exam.consumer.error"
+msgid "pin_mismatch"
+msgstr "PIN не совпадает"
+
+#: apps/live_exam/consumers.py:170
+msgctxt "live_exam.consumer.error"
+msgid "no_options_selected"
+msgstr "Варианты не выбраны"
+
+#: apps/live_exam/consumers.py:174
+msgctxt "live_exam.consumer.error"
+msgid "bad_payload"
+msgstr "Некорректные данные"
+
+#: apps/live_exam/consumers.py:202
+msgctxt "live_exam.consumer.error"
+msgid "session_not_found"
+msgstr "Сессия не найдена"
+
+#: apps/live_exam/consumers.py:208
+msgctxt "live_exam.consumer.error"
+msgid "player_not_found"
+msgstr "Игрок не найден"
+
+#: apps/live_exam/consumers.py:212
+msgctxt "live_exam.consumer.error"
+msgid "already_answered"
+msgstr "Ответ уже отправлен"
+
+#: apps/live_exam/consumers.py:218
+msgctxt "live_exam.consumer.error"
+msgid "question_not_found"
+msgstr "Вопрос не найден"
+
+#: apps/live_exam/consumers.py:224
+msgctxt "live_exam.consumer.error"
+msgid "no_correct_options"
+msgstr "Для этого вопроса не отмечены правильные варианты"
+
+#: apps/live_exam/models.py:23
+msgctxt "live_exam.model.session.state"
+msgid "lobby"
+msgstr "Лобби"
+
+#: apps/live_exam/models.py:24
+msgctxt "live_exam.model.session.state"
+msgid "question"
+msgstr "Вопрос"
+
+#: apps/live_exam/models.py:25
+msgctxt "live_exam.model.session.state"
+msgid "reveal"
+msgstr "Показ"
+
+#: apps/live_exam/models.py:26
+msgctxt "live_exam.model.session.state"
+msgid "finished"
+msgstr "Завершено"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "dashboard"
+msgstr "Панель"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.nav"
+msgid "structure"
+msgstr "Структура"
+
+#: templates/organizations/members.html
+msgctxt "organizations.nav"
+msgid "members"
+msgstr "Участники"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.nav"
+msgid "roles"
+msgstr "Роли"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.nav"
+msgid "settings"
+msgstr "Настройки"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "switch_org"
+msgstr "Сменить организацию"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "page_title"
+msgstr "Панель"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "heading"
+msgstr "Панель"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_members"
+msgstr "Всего участников"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_units"
+msgstr "Орг. подразделения"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_roles"
+msgstr "Активные роли"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "quick_actions"
+msgstr "Быстрые действия"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_invite_members"
+msgstr "Пригласить участников"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_manage_structure"
+msgstr "Управлять структурой"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_view_roles"
+msgstr "Просмотреть роли"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "recent_activity"
+msgstr "Последняя активность"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "system_user"
+msgstr "Система"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "ago"
+msgstr "назад"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_recent_activity"
+msgstr "Нет недавней активности"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "your_roles"
+msgstr "Ваши роли в этой организации"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_roles_assigned"
+msgstr "Роли не назначены"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "page_title"
+msgstr "Структура"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "heading"
+msgstr "Организационная структура"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_title"
+msgstr "Нет организационных подразделений"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_subtitle"
+msgstr "Создайте подразделения для структуры вашей организации"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "page_title"
+msgstr "Участники"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "heading"
+msgstr "Участники"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_label"
+msgstr "Поиск"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_placeholder"
+msgstr "Поиск по имени или email..."
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "role_label"
+msgstr "Роль"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_roles"
+msgstr "Все роли"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "filter_button"
+msgstr "Фильтр"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_member"
+msgstr "Участник"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_role"
+msgstr "Роль"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_unit"
+msgstr "Подразделение"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_joined"
+msgstr "Дата вступления"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_units"
+msgstr "Все"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_title"
+msgstr "Участники не найдены"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_subtitle"
+msgstr "Попробуйте изменить фильтры"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "page_title"
+msgstr "Роли"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "heading"
+msgstr "Роли и права"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "system_role"
+msgstr "Системная роль"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "level_prefix"
+msgstr "Уровень"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "permissions_label"
+msgstr "Права:"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_permissions"
+msgstr "Нет прав"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_roles_found"
+msgstr "Роли не найдены"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "page_title"
+msgstr "Настройки"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "heading"
+msgstr "Настройки организации"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name"
+msgstr "Название организации"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name_help"
+msgstr "Чтобы изменить название организации, свяжитесь с поддержкой"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_type"
+msgstr "Тип организации"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "description"
+msgstr "Описание"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "email"
+msgstr "Email"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "phone"
+msgstr "Телефон"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "address"
+msgstr "Адрес"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "website"
+msgstr "Сайт"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "owner"
+msgstr "Владелец"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "save_button"
+msgstr "Сохранить настройки"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "page_title"
+msgstr "Выбор организации"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "heading"
+msgstr "Выберите организацию"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "subtitle"
+msgstr "Выберите организацию для продолжения"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "current_badge"
+msgstr "ТЕКУЩАЯ"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "your_roles_label"
+msgstr "Ваши роли:"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_title"
+msgstr "Нет организаций"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_subtitle"
+msgstr "Вы пока не состоите ни в одной организации."
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_help"
+msgstr "Обратитесь к администратору для получения доступа."
+
+#: apps/organizations/views.py:57
+msgctxt "organizations.views.message"
+msgid "no_org_access"
+msgstr "У вас нет доступа к этой организации."
+
+#: apps/organizations/views.py:63
+msgctxt "organizations.views.message"
+msgid "switched_to_org"
+msgstr "Переключено на {organization}"
+
+#: apps/organizations/views.py:235
+msgctxt "organizations.views.message"
+msgid "no_settings_access"
+msgstr "У вас нет прав для доступа к настройкам."
+
+#: apps/organizations/views.py:246
+msgctxt "organizations.views.message"
+msgid "settings_updated"
+msgstr "Настройки успешно обновлены."
+
+#: apps/organizations/decorators.py:47
+msgctxt "organizations.decorators.error"
+msgid "missing_permission"
+msgstr "У вас нет разрешения: {permission}"
+
+#: apps/organizations/decorators.py:74
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level"
+msgstr "Недостаточный уровень роли. Требуется: {required}, Ваш уровень: {current}"
+
+#: apps/organizations/decorators.py:102
+msgctxt "organizations.decorators.error"
+msgid "required_role"
+msgstr "Требуемая роль: {roles}"
+
+#: apps/organizations/decorators.py:188
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level_simple"
+msgstr "Недостаточный уровень роли. Требуется: {required}"
+
+#: apps/organizations/models.py:40
+msgctxt "organizations.model.institution.choice"
+msgid "school"
+msgstr "Школа"
+
+#: apps/organizations/models.py:41
+msgctxt "organizations.model.institution.choice"
+msgid "university"
+msgstr "Университет"
+
+#: apps/organizations/models.py:44
+msgctxt "organizations.model.institution.choice"
+msgid "course_center"
+msgstr "Курс-центр"
+
+#: core/constants.py:168
+msgctxt "organizations.model.organization_type.choice"
+msgid "university"
+msgstr "Университет"
+
+#: core/constants.py:169
+msgctxt "organizations.model.organization_type.choice"
+msgid "school"
+msgstr "Школа"
+
+#: core/constants.py:170
+msgctxt "organizations.model.organization_type.choice"
+msgid "course_center"
+msgstr "Курс-центр"
+
+#: core/constants.py:171
+msgctxt "organizations.model.organization_type.choice"
+msgid "individual"
+msgstr "Индивидуальный"
+
+#: apps/organizations/models.py:82
+msgctxt "organizations.model.organization.help"
+msgid "organization_identifier"
+msgstr "Официальный код/номер организации (для школ и университетов)"
+
+#: apps/organizations/models.py:88
+msgctxt "organizations.model.organization.help"
+msgid "license_identifier"
+msgstr "Лицензия/ИНН или дополнительный идентификатор"
+
+#: apps/organizations/models.py:105
+msgctxt "organizations.model.organization.choice.status"
+msgid "active"
+msgstr "Активно"
+
+#: apps/organizations/models.py:106
+msgctxt "organizations.model.organization.choice.status"
+msgid "pending"
+msgstr "Ожидает"
+
+#: apps/organizations/models.py:107
+msgctxt "organizations.model.organization.choice.status"
+msgid "suspended"
+msgstr "Приостановлено"
+
+#: apps/organizations/models.py:116
+msgctxt "organizations.model.organization.meta"
+msgid "singular"
+msgstr "Организация"
+
+#: apps/organizations/models.py:117
+msgctxt "organizations.model.organization.meta"
+msgid "plural"
+msgstr "Организации"
+
+#: apps/organizations/models.py:178
+msgctxt "organizations.model.org_unit.meta"
+msgid "singular"
+msgstr "Организационное подразделение"
+
+#: apps/organizations/models.py:179
+msgctxt "organizations.model.org_unit.meta"
+msgid "plural"
+msgstr "Организационные подразделения"
+
+#: apps/organizations/models.py:251
+msgctxt "organizations.model.academic_period.meta"
+msgid "singular"
+msgstr "Академический период"
+
+#: apps/organizations/models.py:252
+msgctxt "organizations.model.academic_period.meta"
+msgid "plural"
+msgstr "Академические периоды"
+
+#: apps/organizations/models.py:279
+msgctxt "organizations.model.academic_period.error"
+msgid "start_before_end"
+msgstr "Дата начала должна быть раньше даты окончания."
+
+#: apps/organizations/models.py:288
+msgctxt "organizations.model.academic_period.error"
+msgid "overlaps_existing"
+msgstr "Этот период пересекается с существующим: {period_name}"
+
+#: apps/organizations/models.py:315
+msgctxt "organizations.model.role.meta"
+msgid "singular"
+msgstr "Роль"
+
+#: apps/organizations/models.py:316
+msgctxt "organizations.model.role.meta"
+msgid "plural"
+msgstr "Роли"
+
+#: apps/organizations/models.py:363
+msgctxt "organizations.model.membership.meta"
+msgid "singular"
+msgstr "Членство"
+
+#: apps/organizations/models.py:364
+msgctxt "organizations.model.membership.meta"
+msgid "plural"
+msgstr "Членства"
+
+#: apps/organizations/models.py:387
+msgctxt "organizations.model.membership.error"
+msgid "scope_unit_must_match_org"
+msgstr "Подразделение области должно принадлежать той же организации, что и членство."
+
+#: apps/organizations/unit_types.py:11
+msgctxt "organizations.unit_type"
+msgid "rectorate"
+msgstr "Ректорат"
+
+#: apps/organizations/unit_types.py:12
+msgctxt "organizations.unit_type"
+msgid "vice_rectorate"
+msgstr "Проректорат"
+
+#: apps/organizations/unit_types.py:13
+msgctxt "organizations.unit_type"
+msgid "faculty"
+msgstr "Факультет"
+
+#: apps/organizations/unit_types.py:14
+msgctxt "organizations.unit_type"
+msgid "deanery"
+msgstr "Деканат"
+
+#: apps/organizations/unit_types.py:15
+msgctxt "organizations.unit_type"
+msgid "chair"
+msgstr "Кафедра"
+
+#: apps/organizations/unit_types.py:16
+msgctxt "organizations.unit_type"
+msgid "department"
+msgstr "Отдел"
+
+#: apps/organizations/unit_types.py:17
+msgctxt "organizations.unit_type"
+msgid "laboratory"
+msgstr "Лаборатория"
+
+#: apps/organizations/unit_types.py:18
+msgctxt "organizations.unit_type"
+msgid "institute"
+msgstr "Институт"
+
+#: apps/organizations/unit_types.py:19
+msgctxt "organizations.unit_type"
+msgid "center"
+msgstr "Центр"
+
+#: apps/organizations/unit_types.py:22
+msgctxt "organizations.unit_type"
+msgid "directorate"
+msgstr "Дирекция"
+
+#: apps/organizations/unit_types.py:23
+msgctxt "organizations.unit_type"
+msgid "section"
+msgstr "Секция"
+
+#: apps/organizations/unit_types.py:24
+msgctxt "organizations.unit_type"
+msgid "parallel"
+msgstr "Параллель"
+
+#: apps/organizations/unit_types.py:25
+msgctxt "organizations.unit_type"
+msgid "class"
+msgstr "Класс"
+
+#: apps/organizations/unit_types.py:26
+msgctxt "organizations.unit_type"
+msgid "grade_level"
+msgstr "Уровень класса"
+
+#: apps/organizations/unit_types.py:29
+msgctxt "organizations.unit_type"
+msgid "branch"
+msgstr "Филиал"
+
+#: apps/organizations/unit_types.py:30
+msgctxt "organizations.unit_type"
+msgid "division"
+msgstr "Подразделение"
+
+#: apps/organizations/unit_types.py:31
+msgctxt "organizations.unit_type"
+msgid "group"
+msgstr "Группа"
+
+#: apps/organizations/unit_types.py:32
+msgctxt "organizations.unit_type"
+msgid "classroom"
+msgstr "Аудитория"
+
+#: apps/organizations/unit_types.py:35
+msgctxt "organizations.unit_type"
+msgid "unit"
+msgstr "Подразделение"
+
+#: apps/organizations/unit_types.py:82
+msgctxt "organizations.unit_type"
+msgid "fallback"
+msgstr "{name}"
+
+msgctxt "projects.views.message"
+msgid "permission_denied"
+msgstr "У вас нет разрешения."
+
+msgctxt "projects.views.message"
+msgid "project_created"
+msgstr "Проект успешно создан."
+
+msgctxt "projects.views.message"
+msgid "project_updated"
+msgstr "Проект успешно обновлен."
+
+msgctxt "projects.views.message"
+msgid "project_deleted"
+msgstr "Проект успешно удален."
+
+msgctxt "projects.views.message"
+msgid "no_project_access"
+msgstr "У вас нет доступа к этому проекту."
+
+msgctxt "projects.views.message"
+msgid "submit_not_allowed"
+msgstr "Отправка невозможна. Лимит попыток исчерпан или срок истек."
+
+msgctxt "projects.views.message"
+msgid "project_submitted"
+msgstr "Ваш проект успешно отправлен."
+
+msgctxt "projects.views.message"
+msgid "grade_given"
+msgstr "Оценка успешно выставлена."
+
+msgctxt "projects.model.project.choice.status"
+msgid "active"
+msgstr "Активно"
+
+msgctxt "projects.model.project.choice.status"
+msgid "inactive"
+msgstr "Неактивно"
+
+msgctxt "projects.model.project.choice.status"
+msgid "archived"
+msgstr "В архиве"
+
+msgctxt "projects.model.project.field"
+msgid "course"
+msgstr "Курс"
+
+msgctxt "projects.model.project.field"
+msgid "title"
+msgstr "Название проекта"
+
+msgctxt "projects.model.project.field"
+msgid "description"
+msgstr "Описание"
+
+msgctxt "projects.model.project.field"
+msgid "start_date"
+msgstr "Дата начала"
+
+msgctxt "projects.model.project.field"
+msgid "deadline"
+msgstr "Срок сдачи"
+
+msgctxt "projects.model.project.field"
+msgid "max_attempts"
+msgstr "Максимум попыток"
+
+msgctxt "projects.model.project.field"
+msgid "max_score"
+msgstr "Максимальный балл"
+
+msgctxt "projects.model.project.field"
+msgid "assigned_students"
+msgstr "Назначенные студенты"
+
+msgctxt "projects.model.project.meta"
+msgid "singular"
+msgstr "Проект"
+
+msgctxt "projects.model.project.meta"
+msgid "plural"
+msgstr "Проекты"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "pending"
+msgstr "Ожидает"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "graded"
+msgstr "Оценено"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "rejected"
+msgstr "Отклонено"
+
+msgctxt "projects.model.submission.field"
+msgid "content"
+msgstr "Ответ / Пояснение"
+
+msgctxt "projects.model.submission.meta"
+msgid "singular"
+msgstr "Отправка проекта"
+
+msgctxt "projects.model.submission.meta"
+msgid "plural"
+msgstr "Отправки проекта"
+
+msgctxt "projects.form.project.placeholder"
+msgid "title"
+msgstr "Название проекта"
+
+msgctxt "projects.form.project.placeholder"
+msgid "description"
+msgstr "Опишите проект..."
+
+msgctxt "projects.form.project.label"
+msgid "title"
+msgstr "Название"
+
+msgctxt "projects.form.project.label"
+msgid "description"
+msgstr "Описание"
+
+msgctxt "projects.form.project.label"
+msgid "start_date"
+msgstr "Дата начала"
+
+msgctxt "projects.form.project.label"
+msgid "deadline"
+msgstr "Срок сдачи"
+
+msgctxt "projects.form.project.label"
+msgid "max_attempts"
+msgstr "Максимум попыток"
+
+msgctxt "projects.form.project.label"
+msgid "max_score"
+msgstr "Максимальный балл"
+
+msgctxt "projects.form.project.label"
+msgid "status"
+msgstr "Статус"
+
+msgctxt "projects.form.submission.placeholder"
+msgid "content"
+msgstr "Опишите проект, добавьте ссылки и т.д."
+
+msgctxt "projects.form.submission.label"
+msgid "content"
+msgstr "Пояснение к проекту"
+
+msgctxt "projects.form.submission.label"
+msgid "file"
+msgstr "Файл проекта (ZIP, PDF)"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "grade"
+msgstr "0-100"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "feedback"
+msgstr "Напишите отзыв студенту..."
+
+msgctxt "projects.form.grade.label"
+msgid "grade"
+msgstr "Оценка"
+
+msgctxt "projects.form.grade.label"
+msgid "feedback"
+msgstr "Отзыв"
+
+msgctxt "projects.form.grade.label"
+msgid "status"
+msgstr "Статус"
+
+msgctxt "projects.section"
+msgid "section_title"
+msgstr "Проекты"
+
+msgctxt "projects.section"
+msgid "add_project_button"
+msgstr "Добавить новый проект"
+
+msgctxt "projects.section"
+msgid "answers_suffix"
+msgstr "ответов"
+
+msgctxt "projects.section"
+msgid "pending_suffix"
+msgstr "ожидает"
+
+msgctxt "projects.section"
+msgid "status_overdue"
+msgstr "Срок истек"
+
+msgctxt "projects.section"
+msgid "status_active"
+msgstr "Активно"
+
+msgctxt "projects.section"
+msgid "status_inactive"
+msgstr "Неактивно"
+
+msgctxt "projects.section"
+msgid "status_archived"
+msgstr "В архиве"
+
+msgctxt "projects.section"
+msgid "max_score_prefix"
+msgstr "Макс. балл:"
+
+msgctxt "projects.section"
+msgid "max_attempts_prefix"
+msgstr "Макс. попыток:"
+
+msgctxt "projects.section"
+msgid "view_submissions"
+msgstr "Смотреть ответы"
+
+msgctxt "projects.section"
+msgid "edit"
+msgstr "Редактировать"
+
+msgctxt "projects.section"
+msgid "delete"
+msgstr "Удалить"
+
+msgctxt "projects.section"
+msgid "empty_teacher"
+msgstr "Проектов пока нет"
+
+msgctxt "projects.section"
+msgid "add_first_project"
+msgstr "Добавить первый проект"
+
+msgctxt "projects.section"
+msgid "attempts_label"
+msgstr "Попытки:"
+
+msgctxt "projects.section"
+msgid "left_suffix"
+msgstr "осталось"
+
+msgctxt "projects.section"
+msgid "attempts_finished"
+msgstr "Попытки закончились"
+
+msgctxt "projects.section"
+msgid "my_submissions"
+msgstr "Мои ответы"
+
+msgctxt "projects.section"
+msgid "submit_project"
+msgstr "Отправить проект"
+
+msgctxt "projects.section"
+msgid "disabled_overdue"
+msgstr "Срок истек"
+
+msgctxt "projects.section"
+msgid "disabled_inactive"
+msgstr "Неактивно"
+
+msgctxt "projects.section"
+msgid "empty_student"
+msgstr "Вам не назначен ни один проект"
+
+msgctxt "projects.section"
+msgid "empty_generic"
+msgstr "Проектов нет"
+
+msgctxt "projects.modals"
+msgid "add_modal_title"
+msgstr "Новый проект"
+
+msgctxt "projects.modals"
+msgid "edit_modal_title"
+msgstr "Редактировать проект"
+
+msgctxt "projects.modals"
+msgid "label_title"
+msgstr "Название"
+
+msgctxt "projects.modals"
+msgid "label_status"
+msgstr "Статус"
+
+msgctxt "projects.modals"
+msgid "status_active"
+msgstr "Активно"
+
+msgctxt "projects.modals"
+msgid "status_inactive"
+msgstr "Неактивно"
+
+msgctxt "projects.modals"
+msgid "status_archived"
+msgstr "В архиве"
+
+msgctxt "projects.modals"
+msgid "label_description"
+msgstr "Описание"
+
+msgctxt "projects.modals"
+msgid "label_start_date"
+msgstr "Начало"
+
+msgctxt "projects.modals"
+msgid "label_deadline"
+msgstr "Срок сдачи"
+
+msgctxt "projects.modals"
+msgid "label_max_attempts"
+msgstr "Макс. попыток"
+
+msgctxt "projects.modals"
+msgid "label_max_score"
+msgstr "Макс. балл"
+
+msgctxt "projects.modals"
+msgid "label_allowed_groups"
+msgstr "Разрешенные группы"
+
+msgctxt "projects.modals"
+msgid "placeholder_group_search"
+msgstr "Поиск группы..."
+
+msgctxt "projects.modals"
+msgid "selected_count"
+msgstr "Выбрано"
+
+msgctxt "projects.modals"
+msgid "label_allowed_students"
+msgstr "Разрешенные студенты"
+
+msgctxt "projects.modals"
+msgid "placeholder_student_search"
+msgstr "Поиск студента..."
+
+msgctxt "projects.modals"
+msgid "select_group_first"
+msgstr "Сначала выберите группу"
+
+msgctxt "projects.modals"
+msgid "close"
+msgstr "Закрыть"
+
+msgctxt "projects.modals"
+msgid "add"
+msgstr "Добавить"
+
+msgctxt "projects.modals"
+msgid "save"
+msgstr "Сохранить"
+
+msgctxt "projects.modals.js"
+msgid "loading"
+msgstr "Загрузка..."
+
+msgctxt "projects.modals.js"
+msgid "no_groups"
+msgstr "Групп нет"
+
+msgctxt "projects.modals.js"
+msgid "no_students"
+msgstr "Студентов нет"
+
+msgctxt "projects.modals.js"
+msgid "error"
+msgstr "Ошибка"
+
+msgctxt "projects.modals.js"
+msgid "select_group_first"
+msgstr "Сначала выберите группу"
+
+msgctxt "projects.modals.js"
+msgid "fetch_failed"
+msgstr "Не удалось загрузить данные"
+
+msgctxt "projects.modals.js"
+msgid "server_error"
+msgstr "Ошибка сервера"
+
+msgctxt "projects.modals.js"
+msgid "create_error_prefix"
+msgstr "Ошибка: "
+
+msgctxt "projects.modals.js"
+msgid "update_error_prefix"
+msgstr "Ошибка: "
+
+msgctxt "projects.modals.js"
+msgid "submitting"
+msgstr "Отправка..."
+
+msgctxt "projects.modals.js"
+msgid "add"
+msgstr "Добавить"
+
+msgctxt "projects.modals.js"
+msgid "save"
+msgstr "Сохранить"
+
+msgctxt "projects.modals.js"
+msgid "delete_confirm"
+msgstr "Вы уверены, что хотите удалить?"
+
+msgctxt "projects.detail"
+msgid "back"
+msgstr "Назад"
+
+msgctxt "projects.detail"
+msgid "due_date"
+msgstr "Срок сдачи:"
+
+msgctxt "projects.detail"
+msgid "max_score"
+msgstr "Максимальный балл:"
+
+msgctxt "projects.detail"
+msgid "attempts_left"
+msgstr "Осталось попыток:"
+
+msgctxt "projects.detail"
+msgid "status_overdue"
+msgstr "Срок истек"
+
+msgctxt "projects.detail"
+msgid "status_inactive"
+msgstr "Неактивно"
+
+msgctxt "projects.detail"
+msgid "status_active"
+msgstr "Активно"
+
+msgctxt "projects.detail"
+msgid "previous_submissions"
+msgstr "Мои предыдущие ответы"
+
+msgctxt "projects.detail"
+msgid "table_date"
+msgstr "Дата"
+
+msgctxt "projects.detail"
+msgid "table_file"
+msgstr "Файл"
+
+msgctxt "projects.detail"
+msgid "table_status"
+msgstr "Статус"
+
+msgctxt "projects.detail"
+msgid "table_grade"
+msgstr "Оценка"
+
+msgctxt "projects.detail"
+msgid "file_missing"
+msgstr "-"
+
+msgctxt "projects.detail"
+msgid "status_pending"
+msgstr "Ожидает"
+
+msgctxt "projects.detail"
+msgid "status_graded"
+msgstr "Оценено"
+
+msgctxt "projects.detail"
+msgid "submit_project"
+msgstr "Отправить проект"
+
+msgctxt "projects.detail"
+msgid "label_content"
+msgstr "Текст / Пояснение"
+
+msgctxt "projects.detail"
+msgid "placeholder_content"
+msgstr "Кратко опишите ваш проект..."
+
+msgctxt "projects.detail"
+msgid "label_file"
+msgstr "Загрузить файл"
+
+msgctxt "projects.detail"
+msgid "clear_file"
+msgstr "Очистить"
+
+msgctxt "projects.detail"
+msgid "attempts_left_info"
+msgstr "Осталось попыток:"
+
+msgctxt "projects.detail"
+msgid "submit"
+msgstr "Отправить"
+
+msgctxt "projects.detail"
+msgid "warning_overdue"
+msgstr "Срок истек, отправка закрыта."
+
+msgctxt "projects.detail"
+msgid "warning_no_attempts"
+msgstr "Вы использовали все попытки."
+
+msgctxt "projects.detail"
+msgid "warning_inactive"
+msgstr "Этот проект сейчас неактивен."
+
+msgctxt "projects.detail.js"
+msgid "sending"
+msgstr "Отправка..."
+
+msgctxt "projects.detail.js"
+msgid "submit"
+msgstr "Отправить"
+
+msgctxt "projects.detail.js"
+msgid "error_prefix"
+msgstr "Ошибка: "
+
+msgctxt "projects.detail.js"
+msgid "unknown_error"
+msgstr "Неизвестная ошибка"
+
+msgctxt "projects.detail.js"
+msgid "server_error"
+msgstr "Ошибка сервера"
+
+msgctxt "projects.my_submissions"
+msgid "page_title"
+msgstr "Мои ответы"
+
+msgctxt "projects.my_submissions"
+msgid "header_title"
+msgstr "Мои ответы"
+
+msgctxt "projects.my_submissions"
+msgid "new_submission"
+msgstr "Отправить новый проект"
+
+msgctxt "projects.my_submissions"
+msgid "back"
+msgstr "Назад"
+
+msgctxt "projects.my_submissions"
+msgid "used_attempts"
+msgstr "Использовано попыток"
+
+msgctxt "projects.my_submissions"
+msgid "attempts_left"
+msgstr "Осталось попыток"
+
+msgctxt "projects.my_submissions"
+msgid "max_score"
+msgstr "Максимальный балл"
+
+msgctxt "projects.my_submissions"
+msgid "status_overdue"
+msgstr "Срок истек"
+
+msgctxt "projects.my_submissions"
+msgid "status_active"
+msgstr "Активно"
+
+msgctxt "projects.my_submissions"
+msgid "submissions_title"
+msgstr "Отправленные проекты"
+
+msgctxt "projects.my_submissions"
+msgid "table_submitted_at"
+msgstr "Дата отправки"
+
+msgctxt "projects.my_submissions"
+msgid "table_status"
+msgstr "Статус"
+
+msgctxt "projects.my_submissions"
+msgid "table_grade"
+msgstr "Оценка"
+
+msgctxt "projects.my_submissions"
+msgid "table_actions"
+msgstr "Действия"
+
+msgctxt "projects.my_submissions"
+msgid "status_pending"
+msgstr "Ожидает"
+
+msgctxt "projects.my_submissions"
+msgid "status_graded"
+msgstr "Оценено"
+
+msgctxt "projects.my_submissions"
+msgid "status_rejected"
+msgstr "Отклонено"
+
+msgctxt "projects.my_submissions"
+msgid "view"
+msgstr "Просмотр"
+
+msgctxt "projects.my_submissions"
+msgid "modal_title_prefix"
+msgstr "Ответ"
+
+msgctxt "projects.my_submissions"
+msgid "submitted_at"
+msgstr "Дата отправки:"
+
+msgctxt "projects.my_submissions"
+msgid "content"
+msgstr "Текст:"
+
+msgctxt "projects.my_submissions"
+msgid "file"
+msgstr "Файл:"
+
+msgctxt "projects.my_submissions"
+msgid "grade"
+msgstr "Оценка:"
+
+msgctxt "projects.my_submissions"
+msgid "teacher_feedback"
+msgstr "Комментарий преподавателя:"
+
+msgctxt "projects.my_submissions"
+msgid "close"
+msgstr "Закрыть"
+
+msgctxt "projects.my_submissions"
+msgid "empty_title"
+msgstr "Вы еще не отправляли проекты"
+
+msgctxt "projects.my_submissions"
+msgid "first_submission"
+msgstr "Отправить первый проект"
+
+msgctxt "projects.review"
+msgid "page_title"
+msgstr "Проекты"
+
+msgctxt "projects.review"
+msgid "header_title"
+msgstr "Отправленные проекты"
+
+msgctxt "projects.review"
+msgid "course_label"
+msgstr "Курс:"
+
+msgctxt "projects.review"
+msgid "back"
+msgstr "Назад"
+
+msgctxt "projects.review"
+msgid "table_student"
+msgstr "Студент"
+
+msgctxt "projects.review"
+msgid "table_submitted_at"
+msgstr "Дата отправки"
+
+msgctxt "projects.review"
+msgid "table_status"
+msgstr "Статус"
+
+msgctxt "projects.review"
+msgid "table_grade"
+msgstr "Оценка"
+
+msgctxt "projects.review"
+msgid "table_actions"
+msgstr "Действия"
+
+msgctxt "projects.review"
+msgid "status_pending"
+msgstr "Ожидает"
+
+msgctxt "projects.review"
+msgid "status_graded"
+msgstr "Оценено"
+
+msgctxt "projects.review"
+msgid "status_rejected"
+msgstr "Отклонено"
+
+msgctxt "projects.review"
+msgid "view"
+msgstr "Просмотр"
+
+msgctxt "projects.review"
+msgid "empty_title"
+msgstr "Пока нет отправленных проектов"
+
+msgctxt "projects.review"
+msgid "modal_title"
+msgstr "Просмотр проекта"
+
+msgctxt "projects.review"
+msgid "student"
+msgstr "Студент:"
+
+msgctxt "projects.review"
+msgid "explanation"
+msgstr "Пояснение к проекту:"
+
+msgctxt "projects.review"
+msgid "file"
+msgstr "Файл проекта:"
+
+msgctxt "projects.review"
+msgid "download"
+msgstr "Скачать"
+
+msgctxt "projects.review"
+msgid "grade_label"
+msgstr "Оценка"
+
+msgctxt "projects.review"
+msgid "feedback_label"
+msgstr "Комментарий:"
+
+msgctxt "projects.review"
+msgid "feedback_placeholder"
+msgstr "Напишите отзыв студенту..."
+
+msgctxt "projects.review"
+msgid "grade_button"
+msgstr "Поставить оценку"
+
+msgctxt "projects.review.js"
+msgid "no_content"
+msgstr "(Текста нет)"
+
+msgctxt "projects.review.js"
+msgid "download"
+msgstr "Скачать"
+
+msgctxt "projects.review.js"
+msgid "sending"
+msgstr "Отправка..."
+
+msgctxt "projects.review.js"
+msgid "error_prefix"
+msgstr "Ошибка: "
+
+msgctxt "projects.review.js"
+msgid "unknown_error"
+msgstr "Неизвестная ошибка"
+
+msgctxt "projects.review.js"
+msgid "server_error"
+msgstr "Ошибка сервера"
+
+msgctxt "projects.review.js"
+msgid "grade_button"
+msgstr "Поставить оценку"

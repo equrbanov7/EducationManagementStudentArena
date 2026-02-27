@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
+from django.utils.translation import pgettext
 
 from .permissions import has_permission
 
@@ -42,7 +43,9 @@ def org_permission_required(permission):
         @org_required
         def wrapper(request, *args, **kwargs):
             if not has_permission(request.org_permissions, permission):
-                raise PermissionDenied(f"You do not have permission: {permission}")
+                raise PermissionDenied(
+                    pgettext("organizations.decorators.error", "missing_permission").format(permission=permission)
+                )
             return view_func(request, *args, **kwargs)
 
         return wrapper
@@ -68,7 +71,12 @@ def org_level_required(min_level):
                 max_level = max([m.role.level for m in request.org_memberships], default=0)
 
             if max_level < min_level:
-                raise PermissionDenied(f"Insufficient role level. Required: {min_level}, Your level: {max_level}")
+                raise PermissionDenied(
+                    pgettext("organizations.decorators.error", "insufficient_role_level").format(
+                        required=min_level,
+                        current=max_level,
+                    )
+                )
 
             return view_func(request, *args, **kwargs)
 
@@ -94,7 +102,11 @@ def org_role_required(role_names):
             user_roles = [m.role.name for m in request.org_memberships]
 
             if not any(role in user_roles for role in role_names):
-                raise PermissionDenied(f"Required role: {', '.join(role_names)}")
+                raise PermissionDenied(
+                    pgettext("organizations.decorators.error", "required_role").format(
+                        roles=", ".join(role_names),
+                    )
+                )
 
             return view_func(request, *args, **kwargs)
 
@@ -142,7 +154,11 @@ class PermissionRequiredMixin(OrganizationRequiredMixin):
         # Then check permission
         if self.permission_required:
             if not has_permission(request.org_permissions, self.permission_required):
-                return HttpResponseForbidden(f"You do not have permission: {self.permission_required}")
+                return HttpResponseForbidden(
+                    pgettext("organizations.decorators.error", "missing_permission").format(
+                        permission=self.permission_required
+                    )
+                )
 
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)
 
@@ -166,6 +182,10 @@ class LevelRequiredMixin(OrganizationRequiredMixin):
             max_level = max([m.role.level for m in request.org_memberships], default=0)
 
         if max_level < self.min_level:
-            return HttpResponseForbidden(f"Insufficient role level. Required: {self.min_level}")
+            return HttpResponseForbidden(
+                pgettext("organizations.decorators.error", "insufficient_role_level_simple").format(
+                    required=self.min_level
+                )
+            )
 
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)

@@ -3,6 +3,8 @@ Core constants for EMS Arena project.
 Application-wide constants and enumerations.
 """
 
+from django.utils.translation import pgettext_lazy
+
 
 class UserRole:
     """User role constants - Deprecated, use ORGANIZATION_ROLES instead"""
@@ -162,10 +164,10 @@ class OrganizationType:
     INDIVIDUAL = "individual"
 
     CHOICES = [
-        (UNIVERSITY, "University"),
-        (SCHOOL, "School"),
-        (COURSE_CENTER, "Course Center"),
-        (INDIVIDUAL, "Individual"),
+        (UNIVERSITY, pgettext_lazy("organizations.model.organization_type.choice", "university")),
+        (SCHOOL, pgettext_lazy("organizations.model.organization_type.choice", "school")),
+        (COURSE_CENTER, pgettext_lazy("organizations.model.organization_type.choice", "course_center")),
+        (INDIVIDUAL, pgettext_lazy("organizations.model.organization_type.choice", "individual")),
     ]
 
 
@@ -200,34 +202,34 @@ class OrgUnitType:
     UNIT = "unit"
 
     UNIVERSITY_CHOICES = [
-        (RECTORATE, "Rectorate"),
-        (VICE_RECTORATE, "Vice Rectorate"),
-        (FACULTY, "Faculty"),
-        (DEANERY, "Deanery"),
-        (CHAIR, "Chair"),
-        (DEPARTMENT, "Department"),
-        (LAB, "Laboratory"),
-        (INSTITUTE, "Institute"),
-        (CENTER, "Center"),
+        (RECTORATE, pgettext_lazy("organizations.unit_type", "rectorate")),
+        (VICE_RECTORATE, pgettext_lazy("organizations.unit_type", "vice_rectorate")),
+        (FACULTY, pgettext_lazy("organizations.unit_type", "faculty")),
+        (DEANERY, pgettext_lazy("organizations.unit_type", "deanery")),
+        (CHAIR, pgettext_lazy("organizations.unit_type", "chair")),
+        (DEPARTMENT, pgettext_lazy("organizations.unit_type", "department")),
+        (LAB, pgettext_lazy("organizations.unit_type", "laboratory")),
+        (INSTITUTE, pgettext_lazy("organizations.unit_type", "institute")),
+        (CENTER, pgettext_lazy("organizations.unit_type", "center")),
     ]
 
     SCHOOL_CHOICES = [
-        (DIRECTORATE, "Directorate"),
-        (SECTION, "Section"),
-        (PARALLEL, "Parallel"),
-        (CLASS, "Class"),
-        (GRADE_LEVEL, "Grade Level"),
+        (DIRECTORATE, pgettext_lazy("organizations.unit_type", "directorate")),
+        (SECTION, pgettext_lazy("organizations.unit_type", "section")),
+        (PARALLEL, pgettext_lazy("organizations.unit_type", "parallel")),
+        (CLASS, pgettext_lazy("organizations.unit_type", "class")),
+        (GRADE_LEVEL, pgettext_lazy("organizations.unit_type", "grade_level")),
     ]
 
     COURSE_CENTER_CHOICES = [
-        (BRANCH, "Branch"),
-        (DIVISION, "Division"),
-        (GROUP, "Group"),
-        (CLASSROOM, "Classroom"),
+        (BRANCH, pgettext_lazy("organizations.unit_type", "branch")),
+        (DIVISION, pgettext_lazy("organizations.unit_type", "division")),
+        (GROUP, pgettext_lazy("organizations.unit_type", "group")),
+        (CLASSROOM, pgettext_lazy("organizations.unit_type", "classroom")),
     ]
 
     INDIVIDUAL_CHOICES = [
-        (UNIT, "Unit"),
+        (UNIT, pgettext_lazy("organizations.unit_type", "unit")),
     ]
 
     ALL_CHOICES = UNIVERSITY_CHOICES + SCHOOL_CHOICES + COURSE_CENTER_CHOICES + INDIVIDUAL_CHOICES

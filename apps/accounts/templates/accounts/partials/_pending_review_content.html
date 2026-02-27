@@ -4,9 +4,6 @@
         {% if embedded_in_profile %}
             <input type="hidden" name="section" value="pending-review">
         {% endif %}
-        <input type="hidden" name="evaluated_search" value="{{ evaluated_review_search_query }}">
-        <input type="hidden" name="evaluated_type" value="{{ evaluated_review_filter_type }}">
-        <input type="hidden" name="evaluated_group" value="{{ evaluated_review_filter_group }}">
 
         <input
             type="text"
@@ -54,9 +51,15 @@
                 </div>
 
                 <div class="post-info">
-                    <div class="post-title">{{ item.title }}</div>
+                    <div class="post-title">
+                        {{ item.title }}
+                        <span class="pending-item-type pending-item-type--{{ item.type }}">{{ item.type_label }}</span>
+                        {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                            <span class="pending-item-recheck">Yenidən yoxla</span>
+                        {% endif %}
+                    </div>
                     <div class="post-date">
-                        <strong>{{ item.student.get_full_name|default:item.student.username }}</strong>
+                        <strong>{{ item.student_display|default:"Anonim tələbə" }}</strong>
                         · {{ item.course_title|default:"-" }}
                         {% if item.group_name %}· {% trans "group_prefix" context "profile.pending_review" %}: {{ item.group_name }}{% endif %}
                         {% if item.date %}· {{ item.date|date:"d M Y H:i" }}{% endif %}
@@ -74,11 +77,20 @@
                             {% endif %}
                         </span>
                     </div>
+                    {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                        <div class="pending-item-review-window">
+                            <span class="pending-item-timer"
+                                  data-review-queue-countdown
+                                  data-seconds="{{ item.review_window_seconds_left }}">
+                                Yenidən yoxlama vaxtı hesablanır...
+                            </span>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="ms-auto">
-                    <a href="{{ item.action_url }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-arrow-up-right-from-square"></i> {{ item.action_label }}
+                    <a href="{{ item.action_url }}" class="btn btn-review-view btn-sm">
+                        {% if item.is_recheck and item.review_window_seconds_left > 0 %}Yenidən yoxla{% else %}Yoxla{% endif %}
                     </a>
                 </div>
             </div>
@@ -90,114 +102,6 @@
         <p>{% trans "empty_not_found" context "profile.pending_review" %}</p>
     </div>
 {% endif %}
-
-<div class="section-card pending-review-results-card">
-    <div class="section-title">
-        <i class="fas fa-table"></i>
-        Dəyərləndirilmiş nəticələr ({{ evaluated_review_total_count|default:0 }})
-    </div>
-
-    <form method="get"
-          class="search-form js-auto-filter-form pending-review-results-filters"
-          data-auto-filter-form>
-        {% if embedded_in_profile %}
-            <input type="hidden" name="section" value="pending-review">
-        {% endif %}
-        <input type="hidden" name="search" value="{{ search_query }}">
-        <input type="hidden" name="type" value="{{ filter_type }}">
-        <input type="hidden" name="status" value="{{ filter_status }}">
-
-        <input
-            type="text"
-            name="evaluated_search"
-            value="{{ evaluated_review_search_query }}"
-            placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
-            class="form-control"
-        >
-
-        <select name="evaluated_type" class="form-control" style="max-width: 220px;">
-            <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
-            <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-            <option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
-            <option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
-            <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
-        </select>
-
-        <select name="evaluated_group" class="form-control" style="max-width: 220px;">
-            <option value="">Bütün qruplar</option>
-            {% for group_name in evaluated_review_available_groups %}
-                <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
-                    {{ group_name }}
-                </option>
-            {% endfor %}
-        </select>
-
-        <noscript>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i> {% trans "filter_button" context "profile.pending_review" %}
-            </button>
-        </noscript>
-    </form>
-
-    {% if evaluated_review_items %}
-        <div class="table-responsive">
-            <table class="table pending-review-results-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Tələbə</th>
-                        <th>Tapşırıq</th>
-                        <th>Növ</th>
-                        <th>Qrup</th>
-                        <th>Nəticə</th>
-                        <th>Qiymətləndirilib</th>
-                        <th>Əməliyyat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in evaluated_review_items %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ item.student.get_full_name|default:item.student.username }}</td>
-                            <td>
-                                <strong>{{ item.title }}</strong>
-                                <div class="text-muted small">{{ item.course_title|default:"-" }}</div>
-                            </td>
-                            <td>
-                                <span class="pending-review-type-badge pending-review-type-badge--{{ item.type }}">
-                                    {% if item.type == 'exam' %}
-                                        {% trans "type_exam" context "profile.pending_review" %}
-                                    {% elif item.type == 'assignment' %}
-                                        {% trans "type_assignment" context "profile.pending_review" %}
-                                    {% elif item.type == 'project' %}
-                                        {% trans "type_project" context "profile.pending_review" %}
-                                    {% else %}
-                                        {% trans "type_lab" context "profile.pending_review" %}
-                                    {% endif %}
-                                </span>
-                            </td>
-                            <td>{{ item.group_name|default:"-" }}</td>
-                            <td>
-                                <span class="pending-review-score">{{ item.score_display }}</span>
-                            </td>
-                            <td>{{ item.date|date:"d.m.Y H:i" }}</td>
-                            <td>
-                                <a href="{{ item.action_url }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> {{ item.action_label }} bax
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="empty-state">
-            <i class="fas fa-chart-line"></i>
-            <p>Dəyərləndirilmiş nəticə tapılmadı.</p>
-        </div>
-    {% endif %}
-</div>
 
 <script>
 (function () {
@@ -238,6 +142,46 @@
         });
     }
 
+    function setupReviewQueueCountdowns() {
+        var countdownNodes = document.querySelectorAll("[data-review-queue-countdown]");
+        if (!countdownNodes.length) {
+            return;
+        }
+
+        var shouldReload = false;
+        countdownNodes.forEach(function (node) {
+            var secondsLeft = parseInt(node.getAttribute("data-seconds"), 10);
+            if (Number.isNaN(secondsLeft)) {
+                node.textContent = "";
+                return;
+            }
+
+            function render() {
+                if (secondsLeft <= 0) {
+                    node.textContent = "Yenidən yoxlama vaxtı bitdi.";
+                    shouldReload = true;
+                    return;
+                }
+                var minutes = Math.floor(secondsLeft / 60);
+                var seconds = secondsLeft % 60;
+                node.textContent = "Yenidən yoxlama üçün qalan vaxt: " + minutes + " dəq " + seconds + " san.";
+            }
+
+            render();
+            window.setInterval(function () {
+                secondsLeft = Math.max(0, secondsLeft - 1);
+                render();
+            }, 1000);
+        });
+
+        window.setInterval(function () {
+            if (shouldReload) {
+                window.location.reload();
+            }
+        }, 1500);
+    }
+
     document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
+    setupReviewQueueCountdowns();
 })();
 </script>

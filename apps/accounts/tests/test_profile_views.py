@@ -217,6 +217,7 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("create_post"))
         self.assertContains(response, reverse("accounts:my_results"))
+        self.assertContains(response, reverse("accounts:pending_answers"))
 
     def test_student_profile_keeps_single_assigned_courses_sidebar_entry(self):
         from apps.accounts.models import ProfileRole, UserProfile
@@ -714,6 +715,170 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, reverse("accounts:profile") + "?section=my-results")
         self.assertContains(response, "results_type=courses")
 
+    def test_my_results_hides_recently_graded_submission_until_window_closes(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        self.assignment_submission.graded_at = timezone.now()
+        self.assignment_submission.save(update_fields=["graded_at"])
+
+        self.client.login(username="results_student", password="testpass123")
+        response = self.client.get(reverse("accounts:my_results"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Unified Assignment")
+
+        self.assignment_submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.assignment_submission.save(update_fields=["graded_at"])
+        response_after_window = self.client.get(reverse("accounts:my_results"))
+        self.assertEqual(response_after_window.status_code, 200)
+        self.assertContains(response_after_window, "Unified Assignment")
+
+    def test_my_result_detail_redirects_when_review_window_is_open(self):
+        from django.utils import timezone
+
+        self.assignment_submission.graded_at = timezone.now()
+        self.assignment_submission.save(update_fields=["graded_at"])
+
+        self.client.login(username="results_student", password="testpass123")
+        response = self.client.get(
+            reverse(
+                "accounts:my_result_detail",
+                kwargs={"item_type": "courses", "item_id": self.assignment_submission.id},
+            )
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("section=my-results", response.url)
+
+
+class PendingAnswersViewTest(TestCase):
+    """Tests for student pending answers section and standalone view."""
+
+    def setUp(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from apps.exams.models import Exam, ExamAttempt
+        from apps.projects.models import Project, ProjectSubmission
+        from django.utils import timezone
+
+        self.client = Client()
+        self.teacher = User.objects.create_user(
+            username="pending_answers_teacher",
+            email="pending_answers_teacher@example.com",
+            password="testpass123",
+        )
+        self.student = User.objects.create_user(
+            username="pending_answers_student",
+            email="pending_answers_student@example.com",
+            password="testpass123",
+        )
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+
+        self.course = Course.objects.create(owner=self.teacher, title="Pending Answers Course", status="published")
+
+        self.pending_assignment = Assignment.objects.create(
+            course=self.course,
+            title="Pending Assignment Visible",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=1),
+            status="published",
+        )
+        Submission.objects.create(
+            assignment=self.pending_assignment,
+            user=self.student,
+            content="Pending assignment answer",
+            status="submitted",
+        )
+
+        self.recently_graded_assignment = Assignment.objects.create(
+            course=self.course,
+            title="Recently Graded Hidden Assignment",
+            start_date=timezone.now() - timedelta(days=2),
+            due_date=timezone.now() + timedelta(days=1),
+            status="published",
+        )
+        self.recent_submission = Submission.objects.create(
+            assignment=self.recently_graded_assignment,
+            user=self.student,
+            content="Recent graded assignment",
+            status="graded",
+            grade=90,
+            graded_at=timezone.now(),
+        )
+
+        old_assignment = Assignment.objects.create(
+            course=self.course,
+            title="Old Finalized Assignment",
+            start_date=timezone.now() - timedelta(days=4),
+            due_date=timezone.now() - timedelta(days=2),
+            status="published",
+        )
+        Submission.objects.create(
+            assignment=old_assignment,
+            user=self.student,
+            content="Old graded assignment",
+            status="graded",
+            grade=88,
+            graded_at=timezone.now() - timedelta(minutes=6),
+        )
+
+        self.written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Async Written Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.written_exam,
+            status="submitted",
+            checked_by_teacher=False,
+        )
+
+        self.project = Project.objects.create(
+            course=self.course,
+            title="Pending Project Work",
+            start_date=timezone.now() - timedelta(days=1),
+            deadline=timezone.now() + timedelta(days=2),
+            status="active",
+        )
+        ProjectSubmission.objects.create(
+            project=self.project,
+            student=self.student,
+            content="Pending project answer",
+            status="pending",
+        )
+
+    def test_pending_answers_requires_login(self):
+        response = self.client.get(reverse("accounts:pending_answers"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_pending_answers_lists_only_pending_or_window_items(self):
+        self.client.login(username="pending_answers_student", password="testpass123")
+        response = self.client.get(reverse("accounts:pending_answers"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pending Assignment Visible")
+        self.assertContains(response, "Recently Graded Hidden Assignment")
+        self.assertContains(response, "Async Written Exam")
+        self.assertContains(response, "Pending Project Work")
+        self.assertNotContains(response, "Old Finalized Assignment")
+
+        items = response.context["pending_answer_items"]
+        recent_item = next(item for item in items if item["title"] == "Recently Graded Hidden Assignment")
+        self.assertGreater(recent_item["review_window_seconds_left"], 0)
+        self.assertIn("section=pending-answers", recent_item["detail_url"])
+
+    def test_pending_answers_search_filters_results(self):
+        self.client.login(username="pending_answers_student", password="testpass123")
+        response = self.client.get(reverse("accounts:pending_answers") + "?pending_search=Async")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Async Written Exam")
+        self.assertNotContains(response, "Pending Assignment Visible")
+
 
 class PendingReviewViewTest(TestCase):
     """Tests for pending review view (teacher-only)."""
@@ -825,3 +990,338 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Teacher Pending Exam")
         self.assertNotContains(response, "Other Pending Exam")
+
+    def test_pending_review_assignment_points_to_pending_detail_with_type_label(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="pending_assignment_student",
+            email="pending_assignment_student@example.com",
+            password="testpass123",
+        )
+        course = Course.objects.create(owner=self.user, title="Pending Detail Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Pending Detail Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Pending detail answer",
+            status="submitted",
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:pending_review"))
+        self.assertEqual(response.status_code, 200)
+        items = response.context["review_items"]
+        assignment_item = next(item for item in items if item["type"] == "assignment")
+        self.assertEqual(assignment_item["type_label"], "Sərbəst iş")
+        self.assertEqual(assignment_item["student_display"], "Anonim tələbə")
+        self.assertIn(
+            reverse(
+                "accounts:pending_review_detail",
+                kwargs={"item_type": "assignment", "item_id": submission.id},
+            ),
+            assignment_item["action_url"],
+        )
+        self.assertContains(response, "Anonim tələbə")
+        self.assertNotContains(response, student.username)
+
+    def test_pending_review_detail_allows_edit_within_window_and_locks_after(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="pending_lock_student",
+            email="pending_lock_student@example.com",
+            password="testpass123",
+        )
+        course = Course.objects.create(owner=self.user, title="Pending Lock Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Pending Lock Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Answer to lock test",
+            status="submitted",
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        detail_url = reverse(
+            "accounts:pending_review_detail",
+            kwargs={"item_type": "assignment", "item_id": submission.id},
+        )
+
+        save_response = self.client.post(
+            detail_url,
+            {"score": "87.5", "feedback": "Initial review feedback"},
+        )
+        self.assertEqual(save_response.status_code, 302)
+        submission.refresh_from_db()
+        self.assertEqual(submission.status, "graded")
+        self.assertEqual(float(submission.grade), 87.5)
+        self.assertEqual(submission.feedback, "Initial review feedback")
+        self.assertIsNotNone(submission.graded_at)
+
+        pending_response = self.client.get(reverse("accounts:pending_review"))
+        self.assertEqual(pending_response.status_code, 200)
+        self.assertContains(pending_response, "Pending Lock Assignment")
+        self.assertContains(pending_response, "Yenidən yoxla")
+        pending_items = pending_response.context["review_items"]
+        lock_item = next(item for item in pending_items if item["title"] == "Pending Lock Assignment")
+        self.assertGreater(lock_item["review_window_seconds_left"], 0)
+
+        submission.graded_at = timezone.now() - timedelta(minutes=6)
+        submission.save(update_fields=["graded_at"])
+
+        locked_response = self.client.post(
+            detail_url,
+            {"score": "95", "feedback": "Should not be saved"},
+        )
+        self.assertEqual(locked_response.status_code, 302)
+        submission.refresh_from_db()
+        self.assertEqual(float(submission.grade), 87.5)
+        self.assertEqual(submission.feedback, "Initial review feedback")
+
+        pending_after_window = self.client.get(reverse("accounts:pending_review"))
+        self.assertEqual(pending_after_window.status_code, 200)
+        self.assertNotContains(pending_after_window, "Pending Lock Assignment")
+
+
+class ReviewResultsViewTest(TestCase):
+    """Tests for evaluated review results view (teacher-only)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="review_user",
+            email="review_user@example.com",
+            password="testpass123",
+        )
+
+    def test_review_results_requires_login(self):
+        response = self.client.get(reverse("accounts:review_results"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_review_results_redirects_non_teacher(self):
+        self.client.login(username="review_user", password="testpass123")
+        response = self.client.get(reverse("accounts:review_results"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_review_results_loads_for_teacher(self):
+        from apps.accounts.models import ProfileRole
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save()
+
+        self.client.login(username="review_user", password="testpass123")
+        response = self.client.get(reverse("accounts:review_results"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("evaluated_review_items", response.context)
+
+    def test_review_results_exam_action_url_points_to_attempt_detail(self):
+        from apps.accounts.models import ProfileRole
+        from apps.exams.models import Exam, ExamAttempt
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="review_result_student",
+            email="review_result_student@example.com",
+            password="testpass123",
+        )
+        exam = Exam.objects.create(
+            author=self.user,
+            title="Direct Detail Test",
+            exam_type="test",
+            is_active=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=student,
+            exam=exam,
+            status="submitted",
+        )
+
+        self.client.login(username="review_user", password="testpass123")
+        response = self.client.get(reverse("accounts:review_results"))
+
+        self.assertEqual(response.status_code, 200)
+        items = response.context["evaluated_review_items"]
+        exam_item = next(item for item in items if item["type"] == "exam" and item["title"] == exam.title)
+        expected_path = reverse(
+            "exams:teacher_view_attempt",
+            kwargs={"slug": exam.slug, "attempt_id": attempt.id},
+        )
+        self.assertIn(expected_path, exam_item["action_url"])
+        self.assertNotIn("/results/", exam_item["action_url"])
+
+    def test_review_results_non_exam_action_urls_point_to_review_detail_page(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from apps.labs.models import Lab, LabAssignment, LabSubmission
+        from apps.projects.models import Project, ProjectSubmission
+        from django.utils import timezone
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="review_result_student_2",
+            email="review_result_student_2@example.com",
+            password="testpass123",
+        )
+
+        course = Course.objects.create(owner=self.user, title="Review Result Course", status="published")
+
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Reviewed Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            status="published",
+        )
+        assignment_submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Assignment reviewed answer",
+            status="graded",
+            grade=88,
+        )
+
+        project = Project.objects.create(
+            course=course,
+            title="Reviewed Project",
+            start_date=timezone.now() - timedelta(days=2),
+            deadline=timezone.now() + timedelta(days=2),
+            status="active",
+        )
+        project_submission = ProjectSubmission.objects.create(
+            project=project,
+            student=student,
+            content="Project reviewed answer",
+            status="graded",
+            grade=91,
+        )
+
+        lab = Lab.objects.create(
+            course=course,
+            title="Reviewed Lab",
+            start_datetime=timezone.now() - timedelta(days=1),
+            end_datetime=timezone.now() + timedelta(days=1),
+            status="published",
+            created_by=self.user,
+        )
+        lab_assignment = LabAssignment.objects.create(lab=lab, student=student)
+        lab_submission = LabSubmission.objects.create(
+            assignment=lab_assignment,
+            submission_text="Lab reviewed answer",
+            status="graded",
+            score=77,
+        )
+
+        self.client.login(username="review_user", password="testpass123")
+        response = self.client.get(reverse("accounts:review_results"))
+        self.assertEqual(response.status_code, 200)
+
+        items = response.context["evaluated_review_items"]
+        assignment_item = next(item for item in items if item["type"] == "assignment")
+        project_item = next(item for item in items if item["type"] == "project")
+        lab_item = next(item for item in items if item["type"] == "lab")
+
+        self.assertIn(
+            reverse(
+                "accounts:review_result_detail",
+                kwargs={"item_type": "assignment", "item_id": assignment_submission.id},
+            ),
+            assignment_item["action_url"],
+        )
+        self.assertIn(
+            reverse(
+                "accounts:review_result_detail",
+                kwargs={"item_type": "project", "item_id": project_submission.id},
+            ),
+            project_item["action_url"],
+        )
+        self.assertIn(
+            reverse(
+                "accounts:review_result_detail",
+                kwargs={"item_type": "lab", "item_id": lab_submission.id},
+            ),
+            lab_item["action_url"],
+        )
+
+    def test_review_result_detail_assignment_loads_for_teacher(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="review_detail_student",
+            email="review_detail_student@example.com",
+            password="testpass123",
+        )
+
+        course = Course.objects.create(owner=self.user, title="Detail Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Detail Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Detail content",
+            status="graded",
+            grade=100,
+        )
+
+        self.client.login(username="review_user", password="testpass123")
+        response = self.client.get(
+            reverse(
+                "accounts:review_result_detail",
+                kwargs={"item_type": "assignment", "item_id": submission.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Detail Assignment")

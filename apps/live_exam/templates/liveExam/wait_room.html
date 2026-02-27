@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Gözləmə Otağı | {{ session.pin }}{% endblock %}
+{% block title %}{% trans "title" context "live_exam.wait_room" %} | {{ session.pin }}{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/wait_room.css' %}">
@@ -26,15 +26,17 @@
     <div class="profile-card">
         <div class="success-badge">
             <i class="fas fa-check-circle"></i>
-            Sən Artıq İçəridəsən!
+            {% trans "success_badge" context "live_exam.wait_room" %}
         </div>
         
         <div id="myAvatar" class="my-avatar">👤</div>
-        <div id="myNickname" class="my-nickname">{{ my_nickname|default:"Oyunçu" }}</div>
+        <div id="myNickname" class="my-nickname">
+            {% if my_nickname %}{{ my_nickname }}{% else %}{% trans "default_player" context "live_exam.wait_room" %}{% endif %}
+        </div>
         
         <div class="status-bar">
             <i class="fas fa-spinner"></i>
-            Müəllim oyunu başladır<span class="loading-dots"></span>
+            {% trans "status_waiting_host" context "live_exam.wait_room" %}<span class="loading-dots"></span>
         </div>
     </div>
 
@@ -43,7 +45,7 @@
         <div class="players-header">
             <div class="players-title">
                 <i class="fas fa-users"></i>
-                Digər oyunçular
+                {% trans "players_title" context "live_exam.wait_room" %}
             </div>
             <div class="player-count" id="playerCount">0</div>
         </div>
@@ -59,13 +61,13 @@
 <div class="lobby-footer">
     <div class="footer-item">
         <i class="fas fa-gamepad"></i>
-        <span>PIN:</span>
+        <span>{% trans "pin_label" context "live_exam.wait_room" %}</span>
         <span class="pin">{{ session.pin }}</span>
     </div>
     <div class="footer-item">
         <div id="wsStatus" class="ws-status">
             <span class="dot"></span>
-            <span class="status-text">Bağlanır...</span>
+            <span class="status-text">{% trans "ws_connecting" context "live_exam.wait_room" %}</span>
         </div>
     </div>
 </div>
@@ -80,6 +82,14 @@
         playerScreenUrl: "{{ player_screen_url }}",
         myNickname: "{{ my_nickname|escapejs }}",
         myAvatarKey: "{{ my_avatar_key|default:'avatar_1' }}"
+    };
+    window.LIVE_EXAM_WAIT_ROOM_I18N = {
+        wsConnecting: "{% trans 'ws_connecting' context 'live_exam.wait_room.js' %}",
+        wsOnline: "{% trans 'ws_online' context 'live_exam.wait_room.js' %}",
+        wsStarting: "{% trans 'ws_starting' context 'live_exam.wait_room.js' %}",
+        wsDisconnected: "{% trans 'ws_disconnected' context 'live_exam.wait_room.js' %}",
+        wsError: "{% trans 'ws_error' context 'live_exam.wait_room.js' %}",
+        wsConnectionError: "{% trans 'ws_connection_error' context 'live_exam.wait_room.js' %}"
     };
 </script>
 <script src="{% static 'js/wait_room.js' %}"></script>

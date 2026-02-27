@@ -5,6 +5,7 @@ Labs Views - Bütün view-lar pk istifadə edir
 import json
 import os
 import traceback
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -21,6 +22,7 @@ from apps.courses.models import Course, CourseMembership
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
 
 def _lab_back_url(request, lab):
@@ -562,12 +564,21 @@ def grade_submission_page(request, pk):
         return redirect("labs:lab_submissions", pk=lab.id)
 
     if request.method == "POST":
+        if (
+            submission.status == "graded"
+            and submission.graded_at
+            and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+        ):
+            messages.error(request, "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil.")
+            return redirect(request.path)
+
         try:
             submission.score = request.POST.get("score")
             submission.feedback = request.POST.get("feedback", "")
             submission.status = "graded"
             submission.graded_by = request.user
-            submission.graded_at = timezone.now()
+            if not submission.graded_at:
+                submission.graded_at = timezone.now()
             submission.save()
 
             messages.success(request, pgettext("labs.view.message", "grade_saved_successfully"))

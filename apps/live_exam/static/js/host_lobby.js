@@ -47,6 +47,16 @@ let timerInterval = null;
 let autoRevealTimeout = null;
 let autoNextTimeout = null;
 let totalPlayers = 0;
+const I18N = window.LIVE_EXAM_HOST_I18N || {};
+const tr = (key, fallback) => I18N[key] || fallback;
+const fmt = (template, values) =>
+    String(template || '').replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
+const stateLabel = (value) => {
+    if (value === 'question') return tr('stateQuestion', 'Question');
+    if (value === 'reveal') return tr('stateReveal', 'Reveal');
+    if (value === 'finished') return tr('stateFinished', 'Finished');
+    return tr('stateLobby', 'Lobby');
+};
 
 /* ═══════════════════════════════════════════════════════════════
    DEBUG
@@ -57,7 +67,7 @@ const logs = [];
 
 UI.debugBtn?.addEventListener('click', () => {
     debugOn = !debugOn;
-    UI.debugBtn.innerHTML = `<i class="fas fa-terminal"></i> Debug ${debugOn ? '▾' : '▸'}`;
+    UI.debugBtn.innerHTML = `<i class="fas fa-terminal"></i> ${tr('debugLabel', 'Debug')} ${debugOn ? '▾' : '▸'}`;
     UI.debugLog.style.display = debugOn ? 'block' : 'none';
 });
 
@@ -83,7 +93,7 @@ async function post(url, data = null) {
         const res = await fetch(url, opts);
         return await res.json();
     } catch (e) {
-        log('POST error: ' + e.message);
+        log(fmt(tr('postError', 'POST error: {message}'), { message: e.message }));
         return { ok: false };
     }
 }
@@ -94,7 +104,8 @@ async function post(url, data = null) {
 
 function setState(newState) {
     state = newState;
-    UI.gameState.textContent = state.toUpperCase();
+    const label = stateLabel(state);
+    UI.gameState.textContent = label;
     
     UI.startBtn.disabled = state !== 'lobby';
     UI.revealBtn.disabled = state !== 'question';
@@ -119,7 +130,7 @@ function setState(newState) {
         UI.qTimer.className = 'timer';
     }
     
-    log(`State: ${state}`);
+    log(fmt(tr('stateLog', 'State: {state}'), { state: label }));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -128,8 +139,8 @@ function setState(newState) {
 
 // Lobby WS
 const lobbyWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/lobby/`));
-lobbyWS.onopen = () => log('Lobby WS open');
-lobbyWS.onclose = () => log('Lobby WS closed');
+lobbyWS.onopen = () => log(tr('wsLobbyOpen', 'Lobby WS open'));
+lobbyWS.onclose = () => log(tr('wsLobbyClosed', 'Lobby WS closed'));
 
 lobbyWS.onmessage = e => {
     try {
@@ -148,13 +159,15 @@ lobbyWS.onmessage = e => {
                 UI.playersList.appendChild(div);
             });
         }
-    } catch (err) { log('Lobby msg error'); }
+    } catch (err) {
+        log(fmt(tr('lobbyMessageError', 'Lobby message error: {message}'), { message: err.message || '' }));
+    }
 };
 
 // Play WS
 const playWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
-playWS.onopen = () => log('Play WS open');
-playWS.onclose = () => log('Play WS closed');
+playWS.onopen = () => log(tr('wsPlayOpen', 'Play WS open'));
+playWS.onclose = () => log(tr('wsPlayClosed', 'Play WS closed'));
 
 playWS.onmessage = e => {
     try {
@@ -183,7 +196,7 @@ playWS.onmessage = e => {
             
             // All answered -> auto reveal
             if (answered >= total && total > 0 && state === 'question') {
-                log('All answered, auto reveal!');
+                log(tr('allAnsweredAutoReveal', 'All answered, auto reveal!'));
                 clearTimeout(autoRevealTimeout);
                 setTimeout(() => {
                     if (state === 'question') UI.revealBtn.click();
@@ -210,7 +223,9 @@ playWS.onmessage = e => {
             renderPodium(d.top || []);
         }
         
-    } catch (err) { log('Play msg error: ' + err.message); }
+    } catch (err) {
+        log(fmt(tr('playMessageError', 'Play message error: {message}'), { message: err.message || '' }));
+    }
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -218,7 +233,10 @@ playWS.onmessage = e => {
    ═══════════════════════════════════════════════════════════════ */
 
 function renderQuestion(q) {
-    UI.qMeta.textContent = `Sual ${q.index} / ${q.total}`;
+    UI.qMeta.textContent = fmt(tr('questionMeta', 'Question {index} / {total}'), {
+        index: q.index,
+        total: q.total,
+    });
     UI.qText.textContent = q.text;
     
     UI.qOptions.innerHTML = '';
@@ -249,7 +267,7 @@ function renderResults(results) {
     UI.resultsList.innerHTML = '';
     
     if (!results || results.length === 0) {
-        UI.resultsList.innerHTML = '<div style="text-align:center;opacity:0.6;padding:20px;">Heç kim cavab vermədi</div>';
+        UI.resultsList.innerHTML = `<div style="text-align:center;opacity:0.6;padding:20px;">${tr('noAnswersYet', 'No one answered yet')}</div>`;
         return;
     }
     
@@ -321,7 +339,7 @@ function renderPodium(top) {
                 ${p.place === 1 ? '<div class="crown">👑</div>' : ''}
                 <div class="podium-avatar">${AVATARS[p.avatar_key] || '👤'}</div>
                 <div class="podium-name">${esc(p.nickname)}</div>
-                <div class="podium-score">${p.score || 0} xal</div>
+                <div class="podium-score">${p.score || 0} ${tr('pointsSuffix', 'pts')}</div>
             </div>
             <div class="podium-stand">${p.place}</div>
         `;
@@ -388,4 +406,4 @@ UI.questionCount.addEventListener('keydown', function(e) {
    ═══════════════════════════════════════════════════════════════ */
 
 setState('lobby');
-log('Host ready');
+log(tr('hostReady', 'Host ready'));

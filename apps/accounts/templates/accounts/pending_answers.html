@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pending cavablar - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-hourglass-half"></i> Pending cavablar
+                {% if pending_answers_total_count > 0 %}
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_answers_total_count }}</span>
+                {% endif %}
+            </h1>
+            <a href="{% url 'accounts:profile' %}?section=pending-answers" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profile geri dön
+            </a>
+        </div>
+
+        {% include "accounts/partials/_pending_answers_content.html" with embedded_in_profile=False %}
+    </div>
+</div>
+{% endblock %}

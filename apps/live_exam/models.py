@@ -3,6 +3,7 @@ import string
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 from apps.exams.models import Exam, ExamQuestion
 
@@ -18,10 +19,10 @@ class LiveSession(models.Model):
     STATE_FINISHED = "finished"
 
     STATE_CHOICES = [
-        (STATE_LOBBY, "Lobby"),
-        (STATE_QUESTION, "Question"),
-        (STATE_REVEAL, "Reveal"),
-        (STATE_FINISHED, "Finished"),
+        (STATE_LOBBY, pgettext_lazy("live_exam.model.session.state", "lobby")),
+        (STATE_QUESTION, pgettext_lazy("live_exam.model.session.state", "question")),
+        (STATE_REVEAL, pgettext_lazy("live_exam.model.session.state", "reveal")),
+        (STATE_FINISHED, pgettext_lazy("live_exam.model.session.state", "finished")),
     ]
 
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="live_sessions")

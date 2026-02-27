@@ -14,6 +14,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 import qrcode
@@ -297,7 +298,7 @@ def _build_options(eq, *, seed: int | None = None):
     out = []
     for i, opt in enumerate(opts):
         label = _get_option_label(opt) or (letters[i] if i < len(letters) else str(i + 1))
-        text = _get_option_text(opt) or f"Variant {label}"
+        text = _get_option_text(opt) or pgettext("live_exam.view.option", "option_fallback_text").format(label=label)
         out.append({"id": opt.id, "label": label, "text": text})
     return out
 
@@ -373,7 +374,7 @@ def _build_reveal_payload(session: LiveSession, question_id: int) -> Dict[str, A
     """
     eq = ExamQuestion.objects.filter(exam=session.exam, id=question_id).first()
     if not eq:
-        return {"type": "error", "message": "Question not found"}
+        return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
     _, _, correct_ids = _detect_multi(eq)
 
@@ -435,10 +436,10 @@ def live_create_session_by_slug(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
 
     if not getattr(request.user, "is_teacher", False):
-        raise Http404("Only teacher can create live session.")
+        raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
 
     if exam.author != request.user:
-        raise Http404("Only exam author can host live session.")
+        raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
     return redirect("liveExam:host_lobby", pin=session.pin)
@@ -449,7 +450,7 @@ def live_host_lobby(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
     if session.host_user != request.user:
-        raise Http404("Not allowed.")
+        raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
     host = getattr(settings, "LAN_HOST", None) or request.get_host()
     join_url = f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
@@ -488,7 +489,10 @@ def live_join_enter(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
     if session.is_locked:
-        return JsonResponse({"ok": False, "message": "Lobby kilidlənib."}, status=403)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "lobby_locked")},
+            status=403,
+        )
 
     nickname = _clean_nickname(request.POST.get("nickname"))
     avatar_key = request.POST.get("avatar_key") or "avatar_1"
@@ -496,7 +500,10 @@ def live_join_enter(request, pin):
         avatar_key = "avatar_1"
 
     if not nickname:
-        return JsonResponse({"ok": False, "message": "Nickname boş ola bilməz."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "nickname_required")},
+            status=400,
+        )
 
     client_id = _get_client_id(request)
     now = timezone.now()
@@ -669,23 +676,35 @@ def host_start_game(request, pin):
     total_in_exam = len(all_ids)
 
     if total_in_exam <= 0:
-        return JsonResponse({"ok": False, "message": "Bu imtahanda sual yoxdur."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "no_questions_in_exam")},
+            status=400,
+        )
 
     desired = None
     if raw:
         try:
             desired = int(raw)
         except Exception:
-            return JsonResponse({"ok": False, "message": "Sual sayı düzgün deyil."}, status=400)
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "invalid_question_count")},
+                status=400,
+            )
 
         if desired <= 0:
-            return JsonResponse({"ok": False, "message": "Sual sayı 1-dən böyük olmalıdır."}, status=400)
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "question_count_minimum")},
+                status=400,
+            )
 
         if desired > total_in_exam:
             return JsonResponse(
                 {
                     "ok": False,
-                    "message": f"Bu imtahanda cəmi {total_in_exam} sual var. {desired} seçilə bilməz.",
+                    "message": pgettext("live_exam.view.message", "question_count_exceeds_total").format(
+                        total_in_exam=total_in_exam,
+                        desired=desired,
+                    ),
                 },
                 status=400,
             )
@@ -729,7 +748,10 @@ def host_start_game(request, pin):
     # 5) Start basan kimi 1-ci sualı publish et
     eq = _get_question_by_index(session, 0)
     if not eq:
-        return JsonResponse({"ok": False, "message": "Sual tapılmadı."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "question_not_found")},
+            status=400,
+        )
 
     total = _get_total_questions(session)
     payload, now, ends = _build_question_payload(session=session, eq=eq, idx=0, total=total)
@@ -803,7 +825,10 @@ def host_reveal(request, pin):
     idx = int(session.current_index or 0)
     eq = _get_question_by_index(session, idx)
     if not eq:
-        return JsonResponse({"ok": False, "message": "Aktiv sual tapılmadı."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "active_question_not_found")},
+            status=400,
+        )
 
     # ✅ multi-choice üçün: bir neçə correct ola bilər
     correct_ids = list(ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list("id", flat=True))

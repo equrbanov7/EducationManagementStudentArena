@@ -12671,3 +12671,1924 @@ msgstr "Kayıt"
 msgctxt "nav"
 msgid "menu_toggle"
 msgstr "Menüyü aç veya kapat"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "title"
+msgstr "Oyuna Katıl"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "game_pin_label"
+msgstr "Oyun PIN'i"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_label"
+msgstr "Adın ne?"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "nickname_placeholder"
+msgstr "Örneğin: SuperPlayer"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "avatar_label"
+msgstr "Avatarını Seç"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "join_button"
+msgstr "Oyuna Katıl!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_prefix"
+msgstr "Hazır ol,"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_highlight"
+msgstr "eğlenme"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join"
+msgid "fun_text_suffix"
+msgstr "zamanı!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "alert_select_avatar"
+msgstr "Bir avatar seç!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_joining"
+msgstr "Bağlanıyor..."
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_unknown"
+msgstr "Bir hata oluştu"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "button_join"
+msgstr "Oyuna Katıl!"
+
+#: apps/live_exam/templates/liveExam/join.html
+msgctxt "live_exam.join.js"
+msgid "error_connection"
+msgstr "Bağlantı hatası"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "title"
+msgstr "Bekleme Odası"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "success_badge"
+msgstr "Artık içeridesin!"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "default_player"
+msgstr "Oyuncu"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "status_waiting_host"
+msgstr "Öğretmen oyunu başlatıyor"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "players_title"
+msgstr "Diğer oyuncular"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "pin_label"
+msgstr "PIN:"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "ws_connecting"
+msgstr "Bağlanıyor..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connecting"
+msgstr "Bağlanıyor..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_online"
+msgstr "Çevrimiçi"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_starting"
+msgstr "Oyun başlıyor..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_disconnected"
+msgstr "Bağlantı kesildi"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_error"
+msgstr "Hata"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "ws_connection_error"
+msgstr "Bağlantı hatası"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "title"
+msgstr "Oyun Sunucusu"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "lobby_title"
+msgstr "Canlı Sınav"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "join_info_label"
+msgstr "Katılmak için:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "start_button"
+msgstr "Başlat"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_label"
+msgstr "Soru:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "reveal_button"
+msgstr "Cevabı Göster"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "next_button"
+msgstr "Sonraki"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "finish_button"
+msgstr "Bitir"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "auto_label"
+msgstr "Otomatik"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "state_lobby"
+msgstr "Lobi"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_meta_placeholder"
+msgstr "Soru 1 / 10"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "question_text_placeholder"
+msgstr "Soru metni..."
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "results_panel_title"
+msgstr "Bu sorunun sonuçları"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "leaderboard_title"
+msgstr "Liderlik Tablosu"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "joined_players"
+msgstr "Katılanlar:"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "questions_available_suffix"
+msgstr "soru mevcut"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "debug_button"
+msgstr "Hata Ayıklama"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_title"
+msgstr "Final Sonuçları"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "final_results_subtitle"
+msgstr "Kazananları tebrikler!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "other_players"
+msgstr "Diğer oyuncular"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby"
+msgid "qr_scan"
+msgstr "Tara!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "debug_label"
+msgstr "Hata Ayıklama"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_lobby"
+msgstr "Lobi"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_question"
+msgstr "Soru"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_reveal"
+msgstr "Gösterim"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_finished"
+msgstr "Bitti"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "state_log"
+msgstr "Durum: {state}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "question_meta"
+msgstr "Soru {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "no_answers_yet"
+msgstr "Kimse cevap vermedi"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "points_suffix"
+msgstr "puan"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "host_ready"
+msgstr "Sunucu hazır"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_open"
+msgstr "Lobi WS açıldı"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_lobby_closed"
+msgstr "Lobi WS kapandı"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_open"
+msgstr "Oyun WS açıldı"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "ws_play_closed"
+msgstr "Oyun WS kapandı"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "all_answered_auto_reveal"
+msgstr "Herkes cevapladı, otomatik gösterim!"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "lobby_message_error"
+msgstr "Lobi mesaj hatası: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "play_message_error"
+msgstr "Oyun mesaj hatası: {message}"
+
+#: apps/live_exam/templates/liveExam/host_lobby.html
+msgctxt "live_exam.host_lobby.js"
+msgid "post_error"
+msgstr "POST hatası: {message}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "title"
+msgstr "Canlı Oyuncu"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "connecting"
+msgstr "Bağlanıyor..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_title"
+msgstr "Hazır ol!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "waiting_subtitle"
+msgstr "Oyun birazdan başlıyor..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "select_counter_placeholder"
+msgstr "Seçildi: 0 / 2"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "submit_button"
+msgstr "Onayla"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "leaderboard_title"
+msgstr "Liderlik Tablosu"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "results_title"
+msgstr "Bu sorunun sonuçları"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_title"
+msgstr "Oyun Bitti!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen"
+msgid "final_subtitle"
+msgstr "Tüm katılımcıları tebrikler!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_online"
+msgstr "Çevrimiçi"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "connection_offline"
+msgstr "Çevrimdışı"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_timeout"
+msgstr "Süre doldu!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "selected_counter"
+msgstr "Seçildi: {selected} / {max}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_meta"
+msgstr "Soru {index} / {total}"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "question_loading"
+msgstr "Soru yükleniyor..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_sending"
+msgstr "Cevap gönderiliyor..."
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_correct"
+msgstr "Doğru!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_wrong"
+msgstr "Yanlış!"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_not_answered"
+msgstr "Cevap verilmedi"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "points_suffix"
+msgstr "puan"
+
+#: apps/live_exam/templates/liveExam/player_screen.html
+msgctxt "live_exam.player_screen.js"
+msgid "status_answer_saved"
+msgstr "Cevap alındı!"
+
+#: apps/live_exam/views.py:297
+msgctxt "live_exam.view.option"
+msgid "option_fallback_text"
+msgstr "Seçenek {label}"
+
+#: apps/live_exam/views.py:389
+msgctxt "live_exam.view.permission"
+msgid "host_teacher_only"
+msgstr "Canlı oturumu yalnızca öğretmenler oluşturabilir."
+
+#: apps/live_exam/views.py:392
+msgctxt "live_exam.view.permission"
+msgid "host_author_only"
+msgstr "Bu canlı oturumu yalnızca sınavın yazarı yönetebilir."
+
+#: apps/live_exam/views.py:402
+msgctxt "live_exam.view.permission"
+msgid "not_allowed"
+msgstr "İzin yok."
+
+#: apps/live_exam/views.py:352
+msgctxt "live_exam.view.message"
+msgid "question_not_found"
+msgstr "Soru bulunamadı."
+
+#: apps/live_exam/views.py:458
+msgctxt "live_exam.view.message"
+msgid "lobby_locked"
+msgstr "Lobi kilitlendi."
+
+#: apps/live_exam/views.py:472
+msgctxt "live_exam.view.message"
+msgid "nickname_required"
+msgstr "Takma ad boş olamaz."
+
+#: apps/live_exam/views.py:581
+msgctxt "live_exam.view.message"
+msgid "no_questions_in_exam"
+msgstr "Bu sınavda soru yok."
+
+#: apps/live_exam/views.py:591
+msgctxt "live_exam.view.message"
+msgid "invalid_question_count"
+msgstr "Soru sayısı geçersiz."
+
+#: apps/live_exam/views.py:597
+msgctxt "live_exam.view.message"
+msgid "question_count_minimum"
+msgstr "Soru sayısı 0'dan büyük olmalıdır."
+
+#: apps/live_exam/views.py:604
+msgctxt "live_exam.view.message"
+msgid "question_count_exceeds_total"
+msgstr "Bu sınavda yalnızca {total_in_exam} soru var. {desired} seçilemez."
+
+#: apps/live_exam/views.py:643
+msgctxt "live_exam.view.message"
+msgid "active_question_not_found"
+msgstr "Aktif soru bulunamadı."
+
+#: apps/live_exam/consumers.py:100
+msgctxt "live_exam.consumer.error"
+msgid "no_token"
+msgstr "Token yok"
+
+#: apps/live_exam/consumers.py:106
+msgctxt "live_exam.consumer.error"
+msgid "bad_token"
+msgstr "Hatalı token"
+
+#: apps/live_exam/consumers.py:110
+msgctxt "live_exam.consumer.error"
+msgid "pin_mismatch"
+msgstr "PIN eşleşmiyor"
+
+#: apps/live_exam/consumers.py:170
+msgctxt "live_exam.consumer.error"
+msgid "no_options_selected"
+msgstr "Seçenek seçilmedi"
+
+#: apps/live_exam/consumers.py:174
+msgctxt "live_exam.consumer.error"
+msgid "bad_payload"
+msgstr "Geçersiz veri"
+
+#: apps/live_exam/consumers.py:202
+msgctxt "live_exam.consumer.error"
+msgid "session_not_found"
+msgstr "Oturum bulunamadı"
+
+#: apps/live_exam/consumers.py:208
+msgctxt "live_exam.consumer.error"
+msgid "player_not_found"
+msgstr "Oyuncu bulunamadı"
+
+#: apps/live_exam/consumers.py:212
+msgctxt "live_exam.consumer.error"
+msgid "already_answered"
+msgstr "Zaten cevaplandı"
+
+#: apps/live_exam/consumers.py:218
+msgctxt "live_exam.consumer.error"
+msgid "question_not_found"
+msgstr "Soru bulunamadı"
+
+#: apps/live_exam/consumers.py:224
+msgctxt "live_exam.consumer.error"
+msgid "no_correct_options"
+msgstr "Bu soru için doğru seçenek işaretlenmemiş"
+
+#: apps/live_exam/models.py:23
+msgctxt "live_exam.model.session.state"
+msgid "lobby"
+msgstr "Lobi"
+
+#: apps/live_exam/models.py:24
+msgctxt "live_exam.model.session.state"
+msgid "question"
+msgstr "Soru"
+
+#: apps/live_exam/models.py:25
+msgctxt "live_exam.model.session.state"
+msgid "reveal"
+msgstr "Gösterim"
+
+#: apps/live_exam/models.py:26
+msgctxt "live_exam.model.session.state"
+msgid "finished"
+msgstr "Bitti"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "dashboard"
+msgstr "Panel"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.nav"
+msgid "structure"
+msgstr "Yapı"
+
+#: templates/organizations/members.html
+msgctxt "organizations.nav"
+msgid "members"
+msgstr "Üyeler"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.nav"
+msgid "roles"
+msgstr "Roller"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.nav"
+msgid "settings"
+msgstr "Ayarlar"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.nav"
+msgid "switch_org"
+msgstr "Kurum Değiştir"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "page_title"
+msgstr "Panel"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "heading"
+msgstr "Panel"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_members"
+msgstr "Toplam Üye"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_units"
+msgstr "Organizasyon Birimleri"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "stat_total_roles"
+msgstr "Aktif Roller"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "quick_actions"
+msgstr "Hızlı İşlemler"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_invite_members"
+msgstr "Üye Davet Et"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_manage_structure"
+msgstr "Yapıyı Yönet"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "action_view_roles"
+msgstr "Rolleri Gör"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "recent_activity"
+msgstr "Son Etkinlik"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "system_user"
+msgstr "Sistem"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "ago"
+msgstr "önce"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_recent_activity"
+msgstr "Son etkinlik yok"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "your_roles"
+msgstr "Bu Kurumdaki Rolleriniz"
+
+#: templates/organizations/dashboard.html
+msgctxt "organizations.dashboard"
+msgid "no_roles_assigned"
+msgstr "Rol atanmamış"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "page_title"
+msgstr "Yapı"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "heading"
+msgstr "Organizasyon Yapısı"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_title"
+msgstr "Organizasyon birimi yok"
+
+#: templates/organizations/structure.html
+msgctxt "organizations.structure"
+msgid "empty_subtitle"
+msgstr "Kurumunuzu yapılandırmak için birimler oluşturun"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "page_title"
+msgstr "Üyeler"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "heading"
+msgstr "Üyeler"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_label"
+msgstr "Ara"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "search_placeholder"
+msgstr "Ad veya email ile ara..."
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "role_label"
+msgstr "Rol"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_roles"
+msgstr "Tüm Roller"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "filter_button"
+msgstr "Filtrele"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_member"
+msgstr "Üye"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_role"
+msgstr "Rol"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_unit"
+msgstr "Birim"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "table_joined"
+msgstr "Katılma"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "all_units"
+msgstr "Tümü"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_title"
+msgstr "Üye bulunamadı"
+
+#: templates/organizations/members.html
+msgctxt "organizations.members"
+msgid "empty_subtitle"
+msgstr "Filtrelerinizi değiştirmeyi deneyin"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "page_title"
+msgstr "Roller"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "heading"
+msgstr "Roller ve İzinler"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "system_role"
+msgstr "Sistem Rolü"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "level_prefix"
+msgstr "Seviye"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "permissions_label"
+msgstr "İzinler:"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_permissions"
+msgstr "İzin yok"
+
+#: templates/organizations/roles.html
+msgctxt "organizations.roles"
+msgid "no_roles_found"
+msgstr "Rol bulunamadı"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "page_title"
+msgstr "Ayarlar"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "heading"
+msgstr "Kurum Ayarları"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name"
+msgstr "Kurum Adı"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_name_help"
+msgstr "Kurum adını değiştirmek için destekle iletişime geçin"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "organization_type"
+msgstr "Kurum Türü"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "description"
+msgstr "Açıklama"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "email"
+msgstr "Email"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "phone"
+msgstr "Telefon"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "address"
+msgstr "Adres"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "website"
+msgstr "Web Sitesi"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "owner"
+msgstr "Sahip"
+
+#: templates/organizations/settings.html
+msgctxt "organizations.settings"
+msgid "save_button"
+msgstr "Ayarları Kaydet"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "page_title"
+msgstr "Kurum Seç"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "heading"
+msgstr "Kurum Seç"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "subtitle"
+msgstr "Devam etmek için bir kurum seçin"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "current_badge"
+msgstr "AKTİF"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "your_roles_label"
+msgstr "Rolleriniz:"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_title"
+msgstr "Kurum Yok"
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_subtitle"
+msgstr "Henüz herhangi bir kuruma üye değilsiniz."
+
+#: templates/organizations/select_organization.html
+msgctxt "organizations.select"
+msgid "empty_help"
+msgstr "Erişim almak için yöneticinizle iletişime geçin."
+
+#: apps/organizations/views.py:57
+msgctxt "organizations.views.message"
+msgid "no_org_access"
+msgstr "Bu kuruma erişiminiz yok."
+
+#: apps/organizations/views.py:63
+msgctxt "organizations.views.message"
+msgid "switched_to_org"
+msgstr "{organization} kurumuna geçildi"
+
+#: apps/organizations/views.py:235
+msgctxt "organizations.views.message"
+msgid "no_settings_access"
+msgstr "Ayarlara erişim izniniz yok."
+
+#: apps/organizations/views.py:246
+msgctxt "organizations.views.message"
+msgid "settings_updated"
+msgstr "Ayarlar başarıyla güncellendi."
+
+#: apps/organizations/decorators.py:47
+msgctxt "organizations.decorators.error"
+msgid "missing_permission"
+msgstr "Bu izin yok: {permission}"
+
+#: apps/organizations/decorators.py:74
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level"
+msgstr "Rol seviyesi yetersiz. Gereken: {required}, Seviyeniz: {current}"
+
+#: apps/organizations/decorators.py:102
+msgctxt "organizations.decorators.error"
+msgid "required_role"
+msgstr "Gerekli rol: {roles}"
+
+#: apps/organizations/decorators.py:188
+msgctxt "organizations.decorators.error"
+msgid "insufficient_role_level_simple"
+msgstr "Rol seviyesi yetersiz. Gereken: {required}"
+
+#: apps/organizations/models.py:40
+msgctxt "organizations.model.institution.choice"
+msgid "school"
+msgstr "Okul"
+
+#: apps/organizations/models.py:41
+msgctxt "organizations.model.institution.choice"
+msgid "university"
+msgstr "Üniversite"
+
+#: apps/organizations/models.py:44
+msgctxt "organizations.model.institution.choice"
+msgid "course_center"
+msgstr "Kurs Merkezi"
+
+#: core/constants.py:168
+msgctxt "organizations.model.organization_type.choice"
+msgid "university"
+msgstr "Üniversite"
+
+#: core/constants.py:169
+msgctxt "organizations.model.organization_type.choice"
+msgid "school"
+msgstr "Okul"
+
+#: core/constants.py:170
+msgctxt "organizations.model.organization_type.choice"
+msgid "course_center"
+msgstr "Kurs Merkezi"
+
+#: core/constants.py:171
+msgctxt "organizations.model.organization_type.choice"
+msgid "individual"
+msgstr "Bireysel"
+
+#: apps/organizations/models.py:82
+msgctxt "organizations.model.organization.help"
+msgid "organization_identifier"
+msgstr "Resmi kurum kodu/numarası (okul ve üniversiteler için)"
+
+#: apps/organizations/models.py:88
+msgctxt "organizations.model.organization.help"
+msgid "license_identifier"
+msgstr "Lisans/VKN veya ek tanımlayıcı"
+
+#: apps/organizations/models.py:105
+msgctxt "organizations.model.organization.choice.status"
+msgid "active"
+msgstr "Aktif"
+
+#: apps/organizations/models.py:106
+msgctxt "organizations.model.organization.choice.status"
+msgid "pending"
+msgstr "Beklemede"
+
+#: apps/organizations/models.py:107
+msgctxt "organizations.model.organization.choice.status"
+msgid "suspended"
+msgstr "Askıya Alındı"
+
+#: apps/organizations/models.py:116
+msgctxt "organizations.model.organization.meta"
+msgid "singular"
+msgstr "Kurum"
+
+#: apps/organizations/models.py:117
+msgctxt "organizations.model.organization.meta"
+msgid "plural"
+msgstr "Kurumlar"
+
+#: apps/organizations/models.py:178
+msgctxt "organizations.model.org_unit.meta"
+msgid "singular"
+msgstr "Organizasyon Birimi"
+
+#: apps/organizations/models.py:179
+msgctxt "organizations.model.org_unit.meta"
+msgid "plural"
+msgstr "Organizasyon Birimleri"
+
+#: apps/organizations/models.py:251
+msgctxt "organizations.model.academic_period.meta"
+msgid "singular"
+msgstr "Akademik Dönem"
+
+#: apps/organizations/models.py:252
+msgctxt "organizations.model.academic_period.meta"
+msgid "plural"
+msgstr "Akademik Dönemler"
+
+#: apps/organizations/models.py:279
+msgctxt "organizations.model.academic_period.error"
+msgid "start_before_end"
+msgstr "Başlangıç tarihi bitiş tarihinden önce olmalıdır."
+
+#: apps/organizations/models.py:288
+msgctxt "organizations.model.academic_period.error"
+msgid "overlaps_existing"
+msgstr "Bu dönem mevcut dönemle çakışıyor: {period_name}"
+
+#: apps/organizations/models.py:315
+msgctxt "organizations.model.role.meta"
+msgid "singular"
+msgstr "Rol"
+
+#: apps/organizations/models.py:316
+msgctxt "organizations.model.role.meta"
+msgid "plural"
+msgstr "Roller"
+
+#: apps/organizations/models.py:363
+msgctxt "organizations.model.membership.meta"
+msgid "singular"
+msgstr "Üyelik"
+
+#: apps/organizations/models.py:364
+msgctxt "organizations.model.membership.meta"
+msgid "plural"
+msgstr "Üyelikler"
+
+#: apps/organizations/models.py:387
+msgctxt "organizations.model.membership.error"
+msgid "scope_unit_must_match_org"
+msgstr "Kapsam birimi, üyelikle aynı kuruma ait olmalıdır."
+
+#: apps/organizations/unit_types.py:11
+msgctxt "organizations.unit_type"
+msgid "rectorate"
+msgstr "Rektörlük"
+
+#: apps/organizations/unit_types.py:12
+msgctxt "organizations.unit_type"
+msgid "vice_rectorate"
+msgstr "Rektör Yardımcılığı"
+
+#: apps/organizations/unit_types.py:13
+msgctxt "organizations.unit_type"
+msgid "faculty"
+msgstr "Fakülte"
+
+#: apps/organizations/unit_types.py:14
+msgctxt "organizations.unit_type"
+msgid "deanery"
+msgstr "Dekanlık"
+
+#: apps/organizations/unit_types.py:15
+msgctxt "organizations.unit_type"
+msgid "chair"
+msgstr "Anabilim Dalı"
+
+#: apps/organizations/unit_types.py:16
+msgctxt "organizations.unit_type"
+msgid "department"
+msgstr "Bölüm"
+
+#: apps/organizations/unit_types.py:17
+msgctxt "organizations.unit_type"
+msgid "laboratory"
+msgstr "Laboratuvar"
+
+#: apps/organizations/unit_types.py:18
+msgctxt "organizations.unit_type"
+msgid "institute"
+msgstr "Enstitü"
+
+#: apps/organizations/unit_types.py:19
+msgctxt "organizations.unit_type"
+msgid "center"
+msgstr "Merkez"
+
+#: apps/organizations/unit_types.py:22
+msgctxt "organizations.unit_type"
+msgid "directorate"
+msgstr "Müdürlük"
+
+#: apps/organizations/unit_types.py:23
+msgctxt "organizations.unit_type"
+msgid "section"
+msgstr "Şube"
+
+#: apps/organizations/unit_types.py:24
+msgctxt "organizations.unit_type"
+msgid "parallel"
+msgstr "Paralel"
+
+#: apps/organizations/unit_types.py:25
+msgctxt "organizations.unit_type"
+msgid "class"
+msgstr "Sınıf"
+
+#: apps/organizations/unit_types.py:26
+msgctxt "organizations.unit_type"
+msgid "grade_level"
+msgstr "Sınıf Düzeyi"
+
+#: apps/organizations/unit_types.py:29
+msgctxt "organizations.unit_type"
+msgid "branch"
+msgstr "Şube"
+
+#: apps/organizations/unit_types.py:30
+msgctxt "organizations.unit_type"
+msgid "division"
+msgstr "Birim"
+
+#: apps/organizations/unit_types.py:31
+msgctxt "organizations.unit_type"
+msgid "group"
+msgstr "Grup"
+
+#: apps/organizations/unit_types.py:32
+msgctxt "organizations.unit_type"
+msgid "classroom"
+msgstr "Sınıf"
+
+#: apps/organizations/unit_types.py:35
+msgctxt "organizations.unit_type"
+msgid "unit"
+msgstr "Birim"
+
+#: apps/organizations/unit_types.py:82
+msgctxt "organizations.unit_type"
+msgid "fallback"
+msgstr "{name}"
+
+msgctxt "projects.views.message"
+msgid "permission_denied"
+msgstr "İzniniz yok."
+
+msgctxt "projects.views.message"
+msgid "project_created"
+msgstr "Proje başarıyla oluşturuldu."
+
+msgctxt "projects.views.message"
+msgid "project_updated"
+msgstr "Proje başarıyla güncellendi."
+
+msgctxt "projects.views.message"
+msgid "project_deleted"
+msgstr "Proje başarıyla silindi."
+
+msgctxt "projects.views.message"
+msgid "no_project_access"
+msgstr "Bu projeye erişim izniniz yok."
+
+msgctxt "projects.views.message"
+msgid "submit_not_allowed"
+msgstr "Gönderim yapılamıyor. Deneme hakkı bitti veya süre doldu."
+
+msgctxt "projects.views.message"
+msgid "project_submitted"
+msgstr "Projeniz başarıyla gönderildi."
+
+msgctxt "projects.views.message"
+msgid "grade_given"
+msgstr "Not başarıyla verildi."
+
+msgctxt "projects.model.project.choice.status"
+msgid "active"
+msgstr "Aktif"
+
+msgctxt "projects.model.project.choice.status"
+msgid "inactive"
+msgstr "Pasif"
+
+msgctxt "projects.model.project.choice.status"
+msgid "archived"
+msgstr "Arşivlendi"
+
+msgctxt "projects.model.project.field"
+msgid "course"
+msgstr "Kurs"
+
+msgctxt "projects.model.project.field"
+msgid "title"
+msgstr "Proje Başlığı"
+
+msgctxt "projects.model.project.field"
+msgid "description"
+msgstr "Açıklama"
+
+msgctxt "projects.model.project.field"
+msgid "start_date"
+msgstr "Başlangıç tarihi"
+
+msgctxt "projects.model.project.field"
+msgid "deadline"
+msgstr "Son tarih"
+
+msgctxt "projects.model.project.field"
+msgid "max_attempts"
+msgstr "Maksimum deneme"
+
+msgctxt "projects.model.project.field"
+msgid "max_score"
+msgstr "Maksimum puan"
+
+msgctxt "projects.model.project.field"
+msgid "assigned_students"
+msgstr "Atanan öğrenciler"
+
+msgctxt "projects.model.project.meta"
+msgid "singular"
+msgstr "Proje"
+
+msgctxt "projects.model.project.meta"
+msgid "plural"
+msgstr "Projeler"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "pending"
+msgstr "Beklemede"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "graded"
+msgstr "Notlandırıldı"
+
+msgctxt "projects.model.submission.choice.status"
+msgid "rejected"
+msgstr "Reddedildi"
+
+msgctxt "projects.model.submission.field"
+msgid "content"
+msgstr "Cevap / Açıklama"
+
+msgctxt "projects.model.submission.meta"
+msgid "singular"
+msgstr "Proje gönderimi"
+
+msgctxt "projects.model.submission.meta"
+msgid "plural"
+msgstr "Proje gönderimleri"
+
+msgctxt "projects.form.project.placeholder"
+msgid "title"
+msgstr "Proje başlığı"
+
+msgctxt "projects.form.project.placeholder"
+msgid "description"
+msgstr "Projeyi açıklayın..."
+
+msgctxt "projects.form.project.label"
+msgid "title"
+msgstr "Başlık"
+
+msgctxt "projects.form.project.label"
+msgid "description"
+msgstr "Açıklama"
+
+msgctxt "projects.form.project.label"
+msgid "start_date"
+msgstr "Başlangıç tarihi"
+
+msgctxt "projects.form.project.label"
+msgid "deadline"
+msgstr "Son tarih"
+
+msgctxt "projects.form.project.label"
+msgid "max_attempts"
+msgstr "Maksimum deneme"
+
+msgctxt "projects.form.project.label"
+msgid "max_score"
+msgstr "Maksimum puan"
+
+msgctxt "projects.form.project.label"
+msgid "status"
+msgstr "Durum"
+
+msgctxt "projects.form.submission.placeholder"
+msgid "content"
+msgstr "Projenizi açıklayın, bağlantıları ekleyin vb."
+
+msgctxt "projects.form.submission.label"
+msgid "content"
+msgstr "Proje açıklaması"
+
+msgctxt "projects.form.submission.label"
+msgid "file"
+msgstr "Proje dosyası (ZIP, PDF)"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "grade"
+msgstr "0-100"
+
+msgctxt "projects.form.grade.placeholder"
+msgid "feedback"
+msgstr "Öğrenciye geri bildirim yazın..."
+
+msgctxt "projects.form.grade.label"
+msgid "grade"
+msgstr "Not"
+
+msgctxt "projects.form.grade.label"
+msgid "feedback"
+msgstr "Geri bildirim"
+
+msgctxt "projects.form.grade.label"
+msgid "status"
+msgstr "Durum"
+
+msgctxt "projects.section"
+msgid "section_title"
+msgstr "Projeler"
+
+msgctxt "projects.section"
+msgid "add_project_button"
+msgstr "Yeni proje ekle"
+
+msgctxt "projects.section"
+msgid "answers_suffix"
+msgstr "cevap"
+
+msgctxt "projects.section"
+msgid "pending_suffix"
+msgstr "bekleyen"
+
+msgctxt "projects.section"
+msgid "status_overdue"
+msgstr "Süre doldu"
+
+msgctxt "projects.section"
+msgid "status_active"
+msgstr "Aktif"
+
+msgctxt "projects.section"
+msgid "status_inactive"
+msgstr "Pasif"
+
+msgctxt "projects.section"
+msgid "status_archived"
+msgstr "Arşivlendi"
+
+msgctxt "projects.section"
+msgid "max_score_prefix"
+msgstr "Maks puan:"
+
+msgctxt "projects.section"
+msgid "max_attempts_prefix"
+msgstr "Maks deneme:"
+
+msgctxt "projects.section"
+msgid "view_submissions"
+msgstr "Cevapları gör"
+
+msgctxt "projects.section"
+msgid "edit"
+msgstr "Düzenle"
+
+msgctxt "projects.section"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "projects.section"
+msgid "empty_teacher"
+msgstr "Henüz proje yok"
+
+msgctxt "projects.section"
+msgid "add_first_project"
+msgstr "İlk projeyi ekle"
+
+msgctxt "projects.section"
+msgid "attempts_label"
+msgstr "Denemeler:"
+
+msgctxt "projects.section"
+msgid "left_suffix"
+msgstr "kaldı"
+
+msgctxt "projects.section"
+msgid "attempts_finished"
+msgstr "Deneme hakkı bitti"
+
+msgctxt "projects.section"
+msgid "my_submissions"
+msgstr "Cevaplarım"
+
+msgctxt "projects.section"
+msgid "submit_project"
+msgstr "Projeyi gönder"
+
+msgctxt "projects.section"
+msgid "disabled_overdue"
+msgstr "Süre doldu"
+
+msgctxt "projects.section"
+msgid "disabled_inactive"
+msgstr "Pasif"
+
+msgctxt "projects.section"
+msgid "empty_student"
+msgstr "Size atanmış proje yok"
+
+msgctxt "projects.section"
+msgid "empty_generic"
+msgstr "Proje yok"
+
+msgctxt "projects.modals"
+msgid "add_modal_title"
+msgstr "Yeni proje"
+
+msgctxt "projects.modals"
+msgid "edit_modal_title"
+msgstr "Projeyi düzenle"
+
+msgctxt "projects.modals"
+msgid "label_title"
+msgstr "Başlık"
+
+msgctxt "projects.modals"
+msgid "label_status"
+msgstr "Durum"
+
+msgctxt "projects.modals"
+msgid "status_active"
+msgstr "Aktif"
+
+msgctxt "projects.modals"
+msgid "status_inactive"
+msgstr "Pasif"
+
+msgctxt "projects.modals"
+msgid "status_archived"
+msgstr "Arşivlendi"
+
+msgctxt "projects.modals"
+msgid "label_description"
+msgstr "Açıklama"
+
+msgctxt "projects.modals"
+msgid "label_start_date"
+msgstr "Başlangıç"
+
+msgctxt "projects.modals"
+msgid "label_deadline"
+msgstr "Son tarih"
+
+msgctxt "projects.modals"
+msgid "label_max_attempts"
+msgstr "Maks deneme"
+
+msgctxt "projects.modals"
+msgid "label_max_score"
+msgstr "Maks puan"
+
+msgctxt "projects.modals"
+msgid "label_allowed_groups"
+msgstr "İzinli gruplar"
+
+msgctxt "projects.modals"
+msgid "placeholder_group_search"
+msgstr "Grup ara..."
+
+msgctxt "projects.modals"
+msgid "selected_count"
+msgstr "Seçildi"
+
+msgctxt "projects.modals"
+msgid "label_allowed_students"
+msgstr "İzinli öğrenciler"
+
+msgctxt "projects.modals"
+msgid "placeholder_student_search"
+msgstr "Öğrenci ara..."
+
+msgctxt "projects.modals"
+msgid "select_group_first"
+msgstr "Önce grup seçin"
+
+msgctxt "projects.modals"
+msgid "close"
+msgstr "Kapat"
+
+msgctxt "projects.modals"
+msgid "add"
+msgstr "Ekle"
+
+msgctxt "projects.modals"
+msgid "save"
+msgstr "Kaydet"
+
+msgctxt "projects.modals.js"
+msgid "loading"
+msgstr "Yükleniyor..."
+
+msgctxt "projects.modals.js"
+msgid "no_groups"
+msgstr "Grup yok"
+
+msgctxt "projects.modals.js"
+msgid "no_students"
+msgstr "Öğrenci yok"
+
+msgctxt "projects.modals.js"
+msgid "error"
+msgstr "Hata"
+
+msgctxt "projects.modals.js"
+msgid "select_group_first"
+msgstr "Önce grup seçin"
+
+msgctxt "projects.modals.js"
+msgid "fetch_failed"
+msgstr "Veri alınamadı"
+
+msgctxt "projects.modals.js"
+msgid "server_error"
+msgstr "Sunucu hatası"
+
+msgctxt "projects.modals.js"
+msgid "create_error_prefix"
+msgstr "Hata: "
+
+msgctxt "projects.modals.js"
+msgid "update_error_prefix"
+msgstr "Hata: "
+
+msgctxt "projects.modals.js"
+msgid "submitting"
+msgstr "Gönderiliyor..."
+
+msgctxt "projects.modals.js"
+msgid "add"
+msgstr "Ekle"
+
+msgctxt "projects.modals.js"
+msgid "save"
+msgstr "Kaydet"
+
+msgctxt "projects.modals.js"
+msgid "delete_confirm"
+msgstr "Silmek istediğinize emin misiniz?"
+
+msgctxt "projects.detail"
+msgid "back"
+msgstr "Geri"
+
+msgctxt "projects.detail"
+msgid "due_date"
+msgstr "Son tarih:"
+
+msgctxt "projects.detail"
+msgid "max_score"
+msgstr "Maksimum puan:"
+
+msgctxt "projects.detail"
+msgid "attempts_left"
+msgstr "Kalan deneme:"
+
+msgctxt "projects.detail"
+msgid "status_overdue"
+msgstr "Süre doldu"
+
+msgctxt "projects.detail"
+msgid "status_inactive"
+msgstr "Pasif"
+
+msgctxt "projects.detail"
+msgid "status_active"
+msgstr "Aktif"
+
+msgctxt "projects.detail"
+msgid "previous_submissions"
+msgstr "Önceki cevaplarım"
+
+msgctxt "projects.detail"
+msgid "table_date"
+msgstr "Tarih"
+
+msgctxt "projects.detail"
+msgid "table_file"
+msgstr "Dosya"
+
+msgctxt "projects.detail"
+msgid "table_status"
+msgstr "Durum"
+
+msgctxt "projects.detail"
+msgid "table_grade"
+msgstr "Not"
+
+msgctxt "projects.detail"
+msgid "file_missing"
+msgstr "-"
+
+msgctxt "projects.detail"
+msgid "status_pending"
+msgstr "Beklemede"
+
+msgctxt "projects.detail"
+msgid "status_graded"
+msgstr "Notlandırıldı"
+
+msgctxt "projects.detail"
+msgid "submit_project"
+msgstr "Projeyi gönder"
+
+msgctxt "projects.detail"
+msgid "label_content"
+msgstr "Metin / Açıklama"
+
+msgctxt "projects.detail"
+msgid "placeholder_content"
+msgstr "Projeniz hakkında kısa bilgi yazın..."
+
+msgctxt "projects.detail"
+msgid "label_file"
+msgstr "Dosya yükle"
+
+msgctxt "projects.detail"
+msgid "clear_file"
+msgstr "Temizle"
+
+msgctxt "projects.detail"
+msgid "attempts_left_info"
+msgstr "Kalan deneme:"
+
+msgctxt "projects.detail"
+msgid "submit"
+msgstr "Gönder"
+
+msgctxt "projects.detail"
+msgid "warning_overdue"
+msgstr "Süre doldu, proje kabul edilmiyor."
+
+msgctxt "projects.detail"
+msgid "warning_no_attempts"
+msgstr "Tüm deneme haklarınızı kullandınız."
+
+msgctxt "projects.detail"
+msgid "warning_inactive"
+msgstr "Bu proje şu anda pasif."
+
+msgctxt "projects.detail.js"
+msgid "sending"
+msgstr "Gönderiliyor..."
+
+msgctxt "projects.detail.js"
+msgid "submit"
+msgstr "Gönder"
+
+msgctxt "projects.detail.js"
+msgid "error_prefix"
+msgstr "Hata: "
+
+msgctxt "projects.detail.js"
+msgid "unknown_error"
+msgstr "Bilinmeyen hata"
+
+msgctxt "projects.detail.js"
+msgid "server_error"
+msgstr "Sunucu hatası"
+
+msgctxt "projects.my_submissions"
+msgid "page_title"
+msgstr "Cevaplarım"
+
+msgctxt "projects.my_submissions"
+msgid "header_title"
+msgstr "Cevaplarım"
+
+msgctxt "projects.my_submissions"
+msgid "new_submission"
+msgstr "Yeni proje gönder"
+
+msgctxt "projects.my_submissions"
+msgid "back"
+msgstr "Geri"
+
+msgctxt "projects.my_submissions"
+msgid "used_attempts"
+msgstr "Kullanılan deneme"
+
+msgctxt "projects.my_submissions"
+msgid "attempts_left"
+msgstr "Kalan deneme"
+
+msgctxt "projects.my_submissions"
+msgid "max_score"
+msgstr "Maksimum puan"
+
+msgctxt "projects.my_submissions"
+msgid "status_overdue"
+msgstr "Süre doldu"
+
+msgctxt "projects.my_submissions"
+msgid "status_active"
+msgstr "Aktif"
+
+msgctxt "projects.my_submissions"
+msgid "submissions_title"
+msgstr "Gönderdiğim projeler"
+
+msgctxt "projects.my_submissions"
+msgid "table_submitted_at"
+msgstr "Gönderim tarihi"
+
+msgctxt "projects.my_submissions"
+msgid "table_status"
+msgstr "Durum"
+
+msgctxt "projects.my_submissions"
+msgid "table_grade"
+msgstr "Not"
+
+msgctxt "projects.my_submissions"
+msgid "table_actions"
+msgstr "İşlemler"
+
+msgctxt "projects.my_submissions"
+msgid "status_pending"
+msgstr "Beklemede"
+
+msgctxt "projects.my_submissions"
+msgid "status_graded"
+msgstr "Notlandırıldı"
+
+msgctxt "projects.my_submissions"
+msgid "status_rejected"
+msgstr "Reddedildi"
+
+msgctxt "projects.my_submissions"
+msgid "view"
+msgstr "Gör"
+
+msgctxt "projects.my_submissions"
+msgid "modal_title_prefix"
+msgstr "Proje"
+
+msgctxt "projects.my_submissions"
+msgid "submitted_at"
+msgstr "Gönderim tarihi:"
+
+msgctxt "projects.my_submissions"
+msgid "content"
+msgstr "Metin:"
+
+msgctxt "projects.my_submissions"
+msgid "file"
+msgstr "Dosya:"
+
+msgctxt "projects.my_submissions"
+msgid "grade"
+msgstr "Not:"
+
+msgctxt "projects.my_submissions"
+msgid "teacher_feedback"
+msgstr "Öğretmen geri bildirimi:"
+
+msgctxt "projects.my_submissions"
+msgid "close"
+msgstr "Kapat"
+
+msgctxt "projects.my_submissions"
+msgid "empty_title"
+msgstr "Henüz hiçbir proje göndermediniz"
+
+msgctxt "projects.my_submissions"
+msgid "first_submission"
+msgstr "İlk projeyi gönder"
+
+msgctxt "projects.review"
+msgid "page_title"
+msgstr "Projeler"
+
+msgctxt "projects.review"
+msgid "header_title"
+msgstr "Gönderilen projeler"
+
+msgctxt "projects.review"
+msgid "course_label"
+msgstr "Kurs:"
+
+msgctxt "projects.review"
+msgid "back"
+msgstr "Geri"
+
+msgctxt "projects.review"
+msgid "table_student"
+msgstr "Öğrenci"
+
+msgctxt "projects.review"
+msgid "table_submitted_at"
+msgstr "Gönderim tarihi"
+
+msgctxt "projects.review"
+msgid "table_status"
+msgstr "Durum"
+
+msgctxt "projects.review"
+msgid "table_grade"
+msgstr "Not"
+
+msgctxt "projects.review"
+msgid "table_actions"
+msgstr "İşlemler"
+
+msgctxt "projects.review"
+msgid "status_pending"
+msgstr "Beklemede"
+
+msgctxt "projects.review"
+msgid "status_graded"
+msgstr "Notlandırıldı"
+
+msgctxt "projects.review"
+msgid "status_rejected"
+msgstr "Reddedildi"
+
+msgctxt "projects.review"
+msgid "view"
+msgstr "Gör"
+
+msgctxt "projects.review"
+msgid "empty_title"
+msgstr "Henüz proje gönderilmedi"
+
+msgctxt "projects.review"
+msgid "modal_title"
+msgstr "Projeyi incele"
+
+msgctxt "projects.review"
+msgid "student"
+msgstr "Öğrenci:"
+
+msgctxt "projects.review"
+msgid "explanation"
+msgstr "Proje açıklaması:"
+
+msgctxt "projects.review"
+msgid "file"
+msgstr "Proje dosyası:"
+
+msgctxt "projects.review"
+msgid "download"
+msgstr "İndir"
+
+msgctxt "projects.review"
+msgid "grade_label"
+msgstr "Not"
+
+msgctxt "projects.review"
+msgid "feedback_label"
+msgstr "Geri bildirim:"
+
+msgctxt "projects.review"
+msgid "feedback_placeholder"
+msgstr "Öğrenciye geri bildirim yazın..."
+
+msgctxt "projects.review"
+msgid "grade_button"
+msgstr "Not ver"
+
+msgctxt "projects.review.js"
+msgid "no_content"
+msgstr "(Metin yok)"
+
+msgctxt "projects.review.js"
+msgid "download"
+msgstr "İndir"
+
+msgctxt "projects.review.js"
+msgid "sending"
+msgstr "Gönderiliyor..."
+
+msgctxt "projects.review.js"
+msgid "error_prefix"
+msgstr "Hata: "
+
+msgctxt "projects.review.js"
+msgid "unknown_error"
+msgstr "Bilinmeyen hata"
+
+msgctxt "projects.review.js"
+msgid "server_error"
+msgstr "Sunucu hatası"
+
+msgctxt "projects.review.js"
+msgid "grade_button"
+msgstr "Not ver"

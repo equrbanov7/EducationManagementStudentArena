@@ -130,9 +130,20 @@
                 {% if my_results_count > 0 %}<span class="sidebar-menu-badge">{{ my_results_count }}</span>{% endif %}
             </a>
         </li>
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=pending-answers"
+               data-section="pending-answers"
+               data-title="Pending cavablar"
+               data-source-url="{% url 'accounts:pending_answers' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-answers' %}active{% endif %}">
+                <i class="fas fa-hourglass-half sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Pending cavablar</span>
+                {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning">{{ pending_answers_count }}</span>{% endif %}
+            </a>
+        </li>
         {% endif %}
 
-        {% if 'groups' in allowed_sections or 'pending-review' in allowed_sections %}
+        {% if 'groups' in allowed_sections or 'pending-review' in allowed_sections or 'review-results' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_teacher" context "profile.sidebar" %}</span></li>
         {% endif %}
 
@@ -160,6 +171,22 @@
                 <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
                 {% if pending_review_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ pending_review_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
+
+        {% if 'review-results' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=review-results"
+               data-section="review-results"
+               data-title="Dəyərləndirilmiş nəticələr"
+               data-source-url="{% url 'accounts:review_results' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'review-results' %}active{% endif %}">
+                <i class="fas fa-table sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Dəyərləndirilmiş nəticələr</span>
+                {% if evaluated_review_count > 0 %}
+                <span class="sidebar-menu-badge">{{ evaluated_review_count }}</span>
                 {% endif %}
             </a>
         </li>
