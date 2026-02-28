@@ -6,6 +6,7 @@ import json
 import os
 import traceback
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -254,11 +255,16 @@ def create_block(request, pk):
         )
 
     try:
+        questions_to_pick = int(request.POST.get("questions_to_pick", 0) or 0)
+        if questions_to_pick < 0:
+            questions_to_pick = 0
+
         block = LabBlock.objects.create(
             lab=lab,
             title=request.POST.get("title"),
             description=request.POST.get("description", ""),
             order=lab.blocks.count() + 1,
+            questions_to_pick=questions_to_pick,
         )
         messages.success(request, pgettext("labs.view.message", "block_created"))
         return JsonResponse({"success": True, "block_id": block.id})
@@ -284,12 +290,18 @@ def edit_block(request, pk):
             "title": block.title,
             "description": block.description,
             "order": block.order,
+            "questions_to_pick": block.questions_to_pick,
         }
         return JsonResponse({"success": True, "data": data})
 
     try:
+        questions_to_pick = int(request.POST.get("questions_to_pick", 0) or 0)
+        if questions_to_pick < 0:
+            questions_to_pick = 0
+
         block.title = request.POST.get("title")
         block.description = request.POST.get("description", "")
+        block.questions_to_pick = questions_to_pick
         block.save()
         return JsonResponse({"success": True})
 
@@ -563,6 +575,36 @@ def grade_submission_page(request, pk):
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("labs:lab_submissions", pk=lab.id)
 
+    # Bu cəhdin cavablarını al
+    try:
+        answers = (
+            LabAnswer.objects.filter(
+                lab=lab,
+                student=submission.assignment.student,
+                attempt_number=submission.attempt_number,
+                is_draft=False,
+            )
+            .select_related("question")
+            .order_by("question__block__order", "question__question_number")
+        )
+        if not answers.exists():
+            answers = (
+                LabAnswer.objects.filter(
+                    lab=lab,
+                    student=submission.assignment.student,
+                    submission=submission,
+                    is_draft=False,
+                )
+                .select_related("question")
+                .order_by("question__block__order", "question__question_number")
+            )
+    except Exception:
+        answers = (
+            LabAnswer.objects.filter(lab=lab, student=submission.assignment.student, is_draft=False)
+            .select_related("question")
+            .order_by("question__block__order", "question__question_number")
+        )
+
     if request.method == "POST":
         if (
             submission.status == "graded"
@@ -573,7 +615,42 @@ def grade_submission_page(request, pk):
             return redirect(request.path)
 
         try:
-            submission.score = request.POST.get("score")
+            auto_total = Decimal("0")
+            for answer in answers:
+                raw_score = (request.POST.get(f"answer_score_{answer.id}", "") or "").strip()
+                if raw_score == "":
+                    answer.score = None
+                else:
+                    try:
+                        val = Decimal(raw_score)
+                    except (InvalidOperation, TypeError):
+                        val = Decimal("0")
+                    if val < 0:
+                        val = Decimal("0")
+                    q_max = Decimal(str(answer.question.points or 0))
+                    if q_max > 0 and val > q_max:
+                        val = q_max
+                    answer.score = val
+                    auto_total += val
+                answer.save(update_fields=["score", "submitted_at"])
+
+            score_raw = (request.POST.get("score", "") or "").strip()
+            use_manual_total = request.POST.get("use_manual_total") == "1"
+            if use_manual_total and score_raw != "":
+                try:
+                    final_score = Decimal(score_raw)
+                except (InvalidOperation, TypeError):
+                    final_score = auto_total
+            else:
+                final_score = auto_total
+
+            if final_score < 0:
+                final_score = Decimal("0")
+            lab_max = Decimal(str(lab.max_score or 0))
+            if lab_max > 0 and final_score > lab_max:
+                final_score = lab_max
+
+            submission.score = final_score
             submission.feedback = request.POST.get("feedback", "")
             submission.status = "graded"
             submission.graded_by = request.user
@@ -586,45 +663,13 @@ def grade_submission_page(request, pk):
         except Exception as e:
             messages.error(request, pgettext("labs.view.error", "error_with_details").format(error=str(e)))
 
-    # Bu cəhdin cavablarını al
-    try:
-        # attempt_number field varsa
-        answers = (
-            LabAnswer.objects.filter(
-                lab=lab,
-                student=submission.assignment.student,
-                attempt_number=submission.attempt_number,
-                is_draft=False,
-            )
-            .select_related("question")
-            .order_by("question__block__order", "question__question_number")
-        )
-
-        # Əgər boşdursa, submission-a bağlı cavabları yoxla
-        if not answers.exists():
-            answers = (
-                LabAnswer.objects.filter(
-                    lab=lab,
-                    student=submission.assignment.student,
-                    submission=submission,
-                    is_draft=False,
-                )
-                .select_related("question")
-                .order_by("question__block__order", "question__question_number")
-            )
-
-    except Exception:
-        # Field yoxdursa, bütün cavabları göstər
-        answers = (
-            LabAnswer.objects.filter(lab=lab, student=submission.assignment.student, is_draft=False)
-            .select_related("question")
-            .order_by("question__block__order", "question__question_number")
-        )
+    auto_total_score = sum([float(a.score) for a in answers if a.score is not None]) if answers else 0
 
     context = {
         "submission": submission,
         "lab": lab,
         "answers": answers,
+        "auto_total_score": auto_total_score,
     }
 
     return render(request, "labs/grade_submission.html", context)
@@ -669,6 +714,34 @@ def preview_randomization(request, pk):
     }
 
     return render(request, "labs/preview_randomization.html", context)
+
+
+@login_required
+@require_POST
+def update_questions_per_student(request, pk):
+    """Lab üçün tələbə başına sual sayını yenilə"""
+    lab = get_object_or_404(Lab, id=pk)
+
+    if lab.created_by != request.user:
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
+        return redirect("courses:course_dashboard", pk=lab.course.id)
+
+    try:
+        value = int(request.POST.get("questions_per_student", 0) or 0)
+        if value < 0:
+            value = 0
+    except (TypeError, ValueError):
+        value = 0
+
+    lab.questions_per_student = value
+    lab.save(update_fields=["questions_per_student", "updated_at"])
+
+    # Mövcud assignment-ları yeni ayara görə yenilə.
+    for assignment in lab.assignments.all():
+        assignment.assign_questions()
+
+    messages.success(request, "Tələbə başına sual sayı yeniləndi.")
+    return redirect("labs:manage_blocks", pk=lab.id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -730,10 +803,20 @@ def lab_detail(request, pk):
             max_attempts = lab.max_attempts or 1
             can_retry = attempt_count < max_attempts
 
-    # Saved answers
+    # Saved answers - yalnız cari cəhd üçün draft cavablar
     saved_answers = {}
     if request.user.is_authenticated:
-        answers = LabAnswer.objects.filter(lab=lab, student=request.user)
+        current_attempt = 1
+        if assignment:
+            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
+            current_attempt = submitted_count + 1
+
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=request.user,
+            attempt_number=current_attempt,
+            is_draft=True,
+        )
         for ans in answers:
             saved_answers[ans.question_id] = ans.answer
 
@@ -775,15 +858,20 @@ def auto_save_answer(request, pk):
             submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
             current_attempt = submitted_count + 1
 
+        update_answer_text = False
         if request.content_type == "application/json":
             data = json.loads(request.body)
             question_id = data.get("question_id")
             answer = data.get("answer", "")
             answer_file = None
+            update_answer_text = True
         else:
             question_id = request.POST.get("question_id")
             answer = request.POST.get("answer", "")
             answer_file = request.FILES.get("answer_file")
+            # File autosave zamanı boş text ilə mövcud cavabı silməmək üçün
+            # yalnız real mətn gələndə answer sahəsini yenilə.
+            update_answer_text = bool((answer or "").strip())
 
         question = get_object_or_404(LabQuestion, id=question_id)
 
@@ -797,7 +885,8 @@ def auto_save_answer(request, pk):
         )
 
         if not created:
-            lab_answer.answer = answer
+            if update_answer_text:
+                lab_answer.answer = answer
             lab_answer.is_draft = True
 
         if answer_file:
@@ -992,11 +1081,17 @@ def my_lab_answers(request, pk):
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
                 if hours > 0:
-                    duration = pgettext("labs.view.message", "duration_hours_minutes").format(
-                        hours=hours, minutes=minutes
-                    )
+                    duration_tpl = pgettext("labs.view.message", "duration_hours_minutes")
+                    try:
+                        duration = duration_tpl % {"hours": hours, "minutes": minutes}
+                    except Exception:
+                        duration = duration_tpl.format(hours=hours, minutes=minutes)
                 else:
-                    duration = pgettext("labs.view.message", "duration_minutes").format(minutes=minutes)
+                    duration_tpl = pgettext("labs.view.message", "duration_minutes")
+                    try:
+                        duration = duration_tpl % {"minutes": minutes}
+                    except Exception:
+                        duration = duration_tpl.format(minutes=minutes)
 
     # Bu cəhdin cavablarını al - attempt_number ilə
     # Əgər attempt_number field yoxdursa, bütün cavabları göstər
@@ -1019,6 +1114,23 @@ def my_lab_answers(request, pk):
             .order_by("question__block__order", "question__question_number")
         )
 
+    show_review_data = False
+    review_available_in_seconds = 0
+    review_reveal_at = None
+    if (
+        submission
+        and submission.status == "graded"
+        and submission.graded_at
+        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    ):
+        show_review_data = True
+    elif submission and submission.status == "graded" and submission.graded_at:
+        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+        remain = int((reveal_at - timezone.now()).total_seconds())
+        if remain > 0:
+            review_available_in_seconds = remain
+            review_reveal_at = reveal_at
+
     context = {
         "lab": lab,
         "submission": submission,
@@ -1027,6 +1139,9 @@ def my_lab_answers(request, pk):
         "duration": duration,
         "attempt_number": attempt_number,
         "total_attempts": total_attempts,
+        "show_review_data": show_review_data,
+        "review_available_in_seconds": review_available_in_seconds,
+        "review_reveal_at": review_reveal_at,
     }
 
     return render(request, "labs/my_lab_answers.html", context)

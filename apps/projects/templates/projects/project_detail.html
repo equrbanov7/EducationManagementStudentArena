@@ -2,11 +2,14 @@
 {% load static i18n %}
 
 {% block title %}{{ project.title }}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'projects/css/project_detail.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 project-header">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
@@ -20,9 +23,14 @@
                 <i class="fa-solid fa-folder-open text-info me-2"></i> {{ project.title }}
             </h3>
         </div>
-        <a href="{{ back_url }}" class="btn btn-outline-secondary">
-            <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "projects.detail" %}
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'projects:my_submissions' project.id %}" class="btn btn-primary project-results-btn">
+                <i class="fa-solid fa-chart-line me-1"></i> Bax köhnə nəticələr
+            </a>
+            <a href="{{ back_url }}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "projects.detail" %}
+            </a>
+        </div>
     </div>
 
     <div class="row mb-4">
@@ -68,14 +76,14 @@
     </div>
 
     {% if user_submissions %}
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
+    <div class="card mb-4 project-history-card">
+        <div class="card-header project-history-header">
             <i class="fa-solid fa-history me-2"></i> {% trans "previous_submissions" context "projects.detail" %}
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover mb-0 project-history-table">
+                    <thead>
                         <tr>
                             <th>#</th>
                             <th>{% trans "table_date" context "projects.detail" %}</th>
@@ -100,9 +108,9 @@
                             </td>
                             <td>
                                 {% if sub.status == 'pending' %}
-                                    <span class="badge bg-warning">{% trans "status_pending" context "projects.detail" %}</span>
+                                    <span class="badge project-status project-status-pending">{% trans "status_pending" context "projects.detail" %}</span>
                                 {% elif sub.status == 'graded' %}
-                                    <span class="badge bg-success">{% trans "status_graded" context "projects.detail" %}</span>
+                                    <span class="badge project-status project-status-graded">{% trans "status_graded" context "projects.detail" %}</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ sub.get_status_display }}</span>
                                 {% endif %}
@@ -124,8 +132,8 @@
     {% endif %}
 
     {% if can_submit %}
-    <div class="card">
-        <div class="card-header bg-info text-white">
+    <div class="card project-submit-card">
+        <div class="card-header project-submit-header">
             <i class="fa-solid fa-upload me-2"></i> {% trans "submit_project" context "projects.detail" %}
         </div>
         <div class="card-body">
@@ -141,7 +149,7 @@
                 <div class="mb-3">
                     <label class="form-label">{% trans "label_file" context "projects.detail" %}</label>
                     <input type="file" name="file" id="fileInput" class="form-control">
-                    <div id="fileNameDisplay" class="mt-2 text-muted small" style="display: none;">
+                    <div id="fileNameDisplay" class="mt-2 text-muted small project-file-name" style="display: none;">
                         <i class="fa-solid fa-file me-1"></i>
                         <span id="fileName"></span>
                         <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-2" id="clearFile">
@@ -155,7 +163,7 @@
                         <i class="fa-solid fa-info-circle"></i>
                         {% trans "attempts_left_info" context "projects.detail" %} <strong>{{ attempts_left }}</strong>
                     </small>
-                    <button type="submit" class="btn btn-info">
+                    <button type="submit" class="btn btn-primary project-submit-btn">
                         <i class="fa-solid fa-paper-plane me-1"></i> {% trans "submit" context "projects.detail" %}
                     </button>
                 </div>
@@ -176,76 +184,20 @@
     {% endif %}
 
 </div>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const I18N = {
+window.projectDetailConfig = {
+    submitUrl: '{% url "projects:submit_project" project.id %}',
+    csrfToken: '{{ csrf_token }}',
+    i18n: {
         sending: `{% trans "sending" context "projects.detail.js" %}`,
         submit: `{% trans "submit" context "projects.detail.js" %}`,
         errorPrefix: `{% trans "error_prefix" context "projects.detail.js" %}`,
         unknownError: `{% trans "unknown_error" context "projects.detail.js" %}`,
-        serverError: `{% trans "server_error" context "projects.detail.js" %}`,
-    };
-
-    const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    const fileName = document.getElementById('fileName');
-    const clearFile = document.getElementById('clearFile');
-
-    if (fileInput) {
-        fileInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                fileName.textContent = this.files[0].name;
-                fileNameDisplay.style.display = 'block';
-            } else {
-                fileNameDisplay.style.display = 'none';
-            }
-        });
+        serverError: `{% trans "server_error" context "projects.detail.js" %}`
     }
-
-    if (clearFile) {
-        clearFile.addEventListener('click', function() {
-            fileInput.value = '';
-            fileNameDisplay.style.display = 'none';
-        });
-    }
-
-    const form = document.getElementById('submitForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const btn = form.querySelector('[type=submit]');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${I18N.sending}`;
-
-            const formData = new FormData(form);
-
-            fetch('{% url "projects:submit_project" project.id %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                } else {
-                    alert(`${I18N.errorPrefix}${data.error || I18N.unknownError}`);
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> ${I18N.submit}`;
-                }
-            })
-            .catch(() => {
-                alert(I18N.serverError);
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> ${I18N.submit}`;
-            });
-        });
-    }
-});
+};
 </script>
+{% endblock %}
+{% block extraJs %}
+<script src="{% static 'projects/js/project_detail.js' %}"></script>
 {% endblock %}

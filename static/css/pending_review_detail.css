@@ -187,21 +187,92 @@
     color: #fff;
     background: linear-gradient(135deg, var(--prd-blue-700), #2b79e9);
     font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.answer-accordion-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lab-answer-preview {
+    padding: 10px 12px;
+    color: #5f7085;
+    border-top: 1px solid var(--prd-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #f6fbff;
+}
+
+.lab-answer-content {
+    max-height: 1200px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    opacity: 1;
+    padding: 12px;
+}
+
+.lab-answer-card.is-collapsed .lab-answer-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.lab-answer-card:not(.is-collapsed) .lab-answer-preview {
+    display: none;
 }
 
 .lab-answer-text {
-    padding: 12px;
+    padding: 12px 14px;
     color: var(--prd-text);
     line-height: 1.55;
+    border-radius: 10px;
+    border: 1px solid #d5e4f8;
+    background: #f8fbff;
 }
 
 .lab-answer-file {
     display: inline-flex;
-    margin: 0 12px 12px;
+    margin-top: 8px;
     text-decoration: none;
     color: var(--prd-blue-900);
     font-weight: 700;
     gap: 8px;
+}
+
+.lab-answer-section {
+    border: 1px solid #d3e4f8;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.lab-answer-section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1f62d8;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lab-answer-file-box {
+    background: #f3f8ff;
 }
 
 .pending-grade-block {
@@ -237,6 +308,38 @@
 .grade-row textarea:disabled {
     background: #f2f5f8;
     color: #77889d;
+}
+
+.question-score-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.question-score-item {
+    border: 1px solid #d7e6f8;
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+}
+
+.question-score-title {
+    font-size: 13px;
+    color: #35567f;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.question-score-input {
+    width: 100%;
+}
+
+.manual-toggle-label {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #466286;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .grade-actions {

@@ -322,11 +322,52 @@ class LabAssignment(models.Model):
         """
         assignment, created = cls.objects.get_or_create(lab=lab, student=student)
 
-        # ƏGƏR YENİ YARANIBSA VƏ YA SUALLARI YOXDURSA
+        # Yeni assignment üçün həmişə sual təyin et.
+        # Mövcud assignment üçün yalnız hələ submission yoxdursa və assignment köhnəlibsə yenilə.
         if created or assignment.assigned_questions.count() == 0:
+            assignment.assign_questions()
+        elif assignment.needs_reassignment():
             assignment.assign_questions()
 
         return assignment
+
+    def _candidate_count(self):
+        """
+        Blok limitlərinə əsasən lab üçün potensial seçilə bilən sual sayını qaytarır.
+        """
+        total = 0
+        for block in self.lab.blocks.all().order_by("order"):
+            block_count = block.questions.count()
+            if block_count == 0:
+                continue
+            if block.questions_to_pick > 0:
+                total += min(block.questions_to_pick, block_count)
+            else:
+                total += block_count
+        return total
+
+    def expected_assigned_count(self):
+        """
+        Cari lab ayarlarına görə assignment-da neçə sual olmalı olduğunu qaytarır.
+        """
+        candidate_count = self._candidate_count()
+        if self.lab.questions_per_student > 0:
+            return min(self.lab.questions_per_student, candidate_count)
+        return candidate_count
+
+    def needs_reassignment(self):
+        """
+        Assignment köhnəlibsə (blok/sual sayı dəyişib və ya silinmiş suallar qalıbsa) True qaytarır.
+        """
+        assigned_ids = set(self.assigned_questions.values_list("id", flat=True))
+        if not assigned_ids:
+            return True
+
+        valid_ids = set(LabQuestion.objects.filter(block__lab=self.lab).values_list("id", flat=True))
+        if not assigned_ids.issubset(valid_ids):
+            return True
+
+        return len(assigned_ids) != self.expected_assigned_count()
 
     def assign_questions(self):
         """

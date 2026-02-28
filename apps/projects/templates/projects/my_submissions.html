@@ -2,11 +2,14 @@
 {% load static i18n %}
 
 {% block title %}{{ project.title }} - {% trans "page_title" context "projects.my_submissions" %}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'projects/css/my_submissions.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 project-submissions-header">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
@@ -20,9 +23,9 @@
                 <i class="fa-solid fa-list-check text-info me-2"></i> {% trans "header_title" context "projects.my_submissions" %}
             </h3>
         </div>
-        <div>
+        <div class="d-flex gap-2">
             {% if can_submit %}
-            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-info">
+            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary project-submissions-primary-btn">
                 <i class="fa-solid fa-plus me-1"></i> {% trans "new_submission" context "projects.my_submissions" %}
             </a>
             {% endif %}
@@ -75,14 +78,14 @@
     </div>
 
     {% if submissions %}
-    <div class="card">
-        <div class="card-header bg-info text-white">
+    <div class="card project-submissions-card">
+        <div class="card-header project-submissions-card-header">
             <i class="fa-solid fa-history me-2"></i> {% trans "submissions_title" context "projects.my_submissions" %}
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover mb-0 project-submissions-table">
+                    <thead>
                         <tr>
                             <th>#</th>
                             <th>{% trans "table_submitted_at" context "projects.my_submissions" %}</th>
@@ -98,11 +101,11 @@
                             <td>{{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                             <td>
                                 {% if sub.status == 'pending' %}
-                                    <span class="badge bg-warning">{% trans "status_pending" context "projects.my_submissions" %}</span>
+                                    <span class="badge project-sub-status project-sub-status-pending">{% trans "status_pending" context "projects.my_submissions" %}</span>
                                 {% elif sub.status == 'graded' %}
-                                    <span class="badge bg-success">{% trans "status_graded" context "projects.my_submissions" %}</span>
+                                    <span class="badge project-sub-status project-sub-status-graded">{% trans "status_graded" context "projects.my_submissions" %}</span>
                                 {% elif sub.status == 'rejected' %}
-                                    <span class="badge bg-danger">{% trans "status_rejected" context "projects.my_submissions" %}</span>
+                                    <span class="badge project-sub-status project-sub-status-rejected">{% trans "status_rejected" context "projects.my_submissions" %}</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ sub.get_status_display }}</span>
                                 {% endif %}

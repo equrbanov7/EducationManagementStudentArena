@@ -1,0 +1,82 @@
+.project-header {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.project-results-btn,
+.project-submit-btn {
+    background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+}
+
+.project-results-btn:hover,
+.project-submit-btn:hover {
+    color: #fff;
+    filter: brightness(0.95);
+}
+
+.project-history-card,
+.project-submit-card {
+    border: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.project-history-header,
+.project-submit-header {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #10b981 100%);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+    border: 0;
+}
+
+.project-history-table thead th {
+    border: 0;
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 0.9rem 0.85rem;
+}
+
+.project-history-table tbody td {
+    padding: 0.9rem 0.85rem;
+    vertical-align: middle;
+}
+
+.project-history-table tbody tr:hover {
+    background: #f0f9ff;
+}
+
+.project-status {
+    padding: 0.45rem 0.7rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.project-status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.project-status-graded {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.project-file-name {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .project-history-table {
+        min-width: 680px;
+    }
+}

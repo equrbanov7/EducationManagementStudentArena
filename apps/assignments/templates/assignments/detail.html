@@ -5,106 +5,242 @@
 {% block title %}{{ assignment.title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-8">
-            <!-- Assignment details -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">{{ assignment.title }}</h4>
-                </div>
-                <div class="card-body">
-                    <p>{{ assignment.description }}</p>
+<style>
+    /* Rəng Palitrası və Xüsusi Dizaynlar */
+    :root {
+        --blue-primary: #2563eb;
+        --blue-dark: #1e40af;
+        --blue-light: #bfdbfe;
+        --blue-very-light: #dbeafe;
+        
+        --green-primary: #10b981;
+        --green-dark: #059669;
+        --green-light: #a7f3d0;
+        --green-very-light: #d1fae5;
+    }
 
-                    <div class="row text-muted">
-                        <div class="col-md-6">
-                            <small>
-                                <i class="bi bi-calendar-event"></i> 
-                                <strong>{% trans "label_duration" context "assignment.legacy.detail" %}:</strong> 
-                                {{ assignment.deadline|date:"d.m.Y H:i" }}
-                                {% if assignment.is_deadline_passed %}
-                                <span class="badge bg-danger ms-2">{% trans "status_deadline_passed" context "assignment.legacy.detail" %}</span>
-                                {% endif %}
-                            </small>
+    .card-modern {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .info-badge {
+        background-color: var(--blue-very-light);
+        color: var(--blue-dark);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary-custom {
+        background-color: var(--blue-primary);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: var(--blue-dark);
+        color: white;
+    }
+
+    .btn-success-custom {
+        background-color: var(--green-primary);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-success-custom:hover {
+        background-color: var(--green-dark);
+        color: white;
+    }
+
+    .form-control-custom {
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.75rem;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--blue-primary);
+        box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+    }
+
+    .history-item {
+        border-left: 4px solid var(--blue-light);
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .history-item.graded {
+        border-left-color: var(--green-primary);
+    }
+
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: var(--green-very-light);
+        color: var(--green-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0 auto 1rem auto;
+        border: 4px solid var(--green-light);
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            
+            <div class="card card-modern p-4 mb-4">
+                <h2 class="fw-bold mb-3" style="color: var(--blue-dark);">{{ assignment.title }}</h2>
+                <p class="text-secondary lh-lg mb-4">{{ assignment.description }}</p>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-badge">
+                            <i class="bi bi-calendar-event fs-5" style="color: var(--blue-primary);"></i>
+                            <div>
+                                <small class="d-block text-muted">{% trans "label_duration" context "assignment.legacy.detail" %}</small>
+                                <strong class="mb-0">{{ assignment.deadline|date:"d.m.Y H:i" }}</strong>
+                            </div>
+                            {% if assignment.is_deadline_passed %}
+                            <span class="badge bg-danger ms-auto rounded-pill px-3 py-2">
+                                {% trans "status_deadline_passed" context "assignment.legacy.detail" %}
+                            </span>
+                            {% endif %}
                         </div>
-                        <div class="col-md-6">
-                            <small>
-                                <i class="bi bi-repeat"></i>
-                                <strong>{% trans "label_attempts" context "assignment.legacy.detail" %}:</strong> 
-                                {{ submissions.count }} / {{ assignment.max_attempts }}
-                            </small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-badge">
+                            <i class="bi bi-repeat fs-5" style="color: var(--blue-primary);"></i>
+                            <div>
+                                <small class="d-block text-muted">{% trans "label_attempts" context "assignment.legacy.detail" %}</small>
+                                <strong class="mb-0">{{ submissions.count }} / {{ assignment.max_attempts }}</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Submission form (if draft exists) -->
             {% if current_submission %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "draft_answer_title" context "assignment.legacy.detail" %}</h5>
-                </div>
+            <div class="card card-modern p-4 mb-4">
+                <h5 class="fw-bold mb-4" style="color: var(--blue-dark);">
+                    <i class="bi bi-pencil-square me-2" style="color: var(--blue-primary);"></i>
+                    {% trans "draft_answer_title" context "assignment.legacy.detail" %}
+                </h5>
+                
                 <form id="submitForm" method="post" action="{% url 'assignments:submit_assignment' assignment.id %}">
                     {% csrf_token %}
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
-                            <textarea name="text_answer" class="form-control" rows="6" required>
-                                {{ current_submission.text_answer }}
-                            </textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">{% trans "label_files" context "assignment.legacy.detail" %}</label>
-                            <input type="file" name="files" class="form-control" multiple>
-                            <small class="text-muted">{% trans "files_help" context "assignment.legacy.detail" %}</small>
-                        </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary">{% trans "label_answer_required" context "assignment.legacy.detail" %}</label>
+                        <textarea name="text_answer" class="form-control form-control-custom" rows="6" required placeholder="Cavabınızı buraya yazın...">{{ current_submission.text_answer|trim }}</textarea>
                     </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-success" 
-                                {% if assignment.is_deadline_passed %}disabled{% endif %}>
-                            <i class="bi bi-send"></i> {% trans "send" context "assignment.legacy.detail" %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary">{% trans "label_files" context "assignment.legacy.detail" %}</label>
+                        <input type="file" name="files" class="form-control form-control-custom" multiple>
+                        <div class="form-text mt-2"><i class="bi bi-info-circle me-1"></i>{% trans "files_help" context "assignment.legacy.detail" %}</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-success-custom" {% if assignment.is_deadline_passed %}disabled{% endif %}>
+                            <i class="bi bi-send-check me-2"></i> {% trans "send" context "assignment.legacy.detail" %}
                         </button>
                     </div>
                 </form>
             </div>
             {% elif can_submit %}
-            <div class="alert alert-info">{% trans "start_new_attempt_info" context "assignment.legacy.detail" %}</div>
+            <div class="alert alert-info rounded-4 border-0 d-flex align-items-center p-4 shadow-sm" style="background-color: var(--blue-very-light); color: var(--blue-dark);">
+                <i class="bi bi-info-circle-fill fs-3 me-3" style="color: var(--blue-primary);"></i>
+                <div>{% trans "start_new_attempt_info" context "assignment.legacy.detail" %}</div>
+            </div>
             {% else %}
-            <div class="alert alert-warning">{% trans "attempt_limit_exceeded" context "assignment.legacy.detail" %}</div>
+            <div class="alert alert-warning rounded-4 border-0 d-flex align-items-center p-4 shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+                <div>{% trans "attempt_limit_exceeded" context "assignment.legacy.detail" %}</div>
+            </div>
             {% endif %}
 
-            <!-- Previous submissions -->
-            {% if submissions %}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">{% trans "previous_answers_title" context "assignment.legacy.detail" %}</h5>
-                </div>
-                <div class="list-group list-group-flush">
-                    {% for submission in submissions %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">{% trans "attempt_label" context "assignment.legacy.detail" %} {{ submission.attempt_number }}</h6>
-                                <small class="text-muted">
-                                    {% trans "submitted_at_label" context "assignment.legacy.detail" %}: {{ submission.submitted_at|date:"d.m.Y H:i" }}
-                                </small>
-                                <div class="mt-2">{{ submission.text_answer|truncatewords:20 }}</div>
-                            </div>
-                            <div class="ms-2 text-end">
-                                <span class="badge bg-{{ submission.get_status_color }}">
-                                    {{ submission.get_status_display }}
-                                </span>
-                                {% if submission.status == 'graded' %}
-                                <div class="mt-2">
-                                    <strong class="text-success">{{ submission.score }}/{{ submission.max_score }}</strong>
-                                </div>
-                                {% endif %}
-                            </div>
+        </div>
+
+        <div class="col-lg-4">
+            
+            <div class="card card-modern p-4 mb-4 text-center">
+                <h6 class="text-uppercase fw-bold mb-4" style="color: var(--blue-dark); letter-spacing: 1px;">
+                    {% trans "current_score" context "assignment.legacy.detail" %}
+                </h6>
+                
+                {% with last_sub=submissions|dictsort:"status"|last %}
+                    {% if last_sub.status == 'graded' %}
+                        <div class="score-circle">
+                            {{ last_sub.score }}/{{ last_sub.max_score }}
                         </div>
+                        <p class="text-muted fw-medium mb-0">Əla nəticə!</p>
+                    {% else %}
+                        <div class="score-circle" style="background-color: #f3f4f6; border-color: #d1d5db; color: #6b7280;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <p class="text-muted fw-medium mb-0">{% trans "waiting" context "assignment.legacy.detail" %}</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% if submissions %}
+            <div class="card card-modern p-4">
+                <h6 class="fw-bold mb-4" style="color: var(--blue-dark);">
+                    <i class="bi bi-clock-history me-2"></i>{% trans "previous_answers_title" context "assignment.legacy.detail" %}
+                </h6>
+                
+                <div class="mt-2">
+                    {% for submission in submissions %}
+                    <div class="history-item {% if submission.status == 'graded' %}graded{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold" style="color: var(--blue-dark);">
+                                {% trans "attempt_label" context "assignment.legacy.detail" %} {{ submission.attempt_number }}
+                            </span>
+                            <span class="badge rounded-pill" style="background-color: var(--blue-very-light); color: var(--blue-primary);">
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <small class="text-muted d-block mb-2">
+                            <i class="bi bi-calendar3 me-1"></i> {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                        </small>
+                        
+                        <p class="text-secondary small mb-2 bg-light p-2 rounded-3">
+                            {{ submission.text_answer|truncatewords:15 }}
+                        </p>
+
+                        {% if submission.status == 'graded' %}
+                            <div class="mb-2">
+                                <span class="badge" style="background-color: var(--green-primary);">
+                                    Nəticə: {{ submission.score }}/{{ submission.max_score }}
+                                </span>
+                            </div>
+                        {% endif %}
+
                         {% if submission.feedback %}
-                        <div class="mt-2 p-2 bg-light rounded">
-                            <strong>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong> {{ submission.feedback }}
+                        <div class="mt-2 p-3 rounded-3" style="background-color: var(--blue-very-light); font-size: 0.85rem;">
+                            <strong style="color: var(--blue-dark);"><i class="bi bi-chat-left-text me-1"></i>{% trans "feedback_label" context "assignment.legacy.detail" %}:</strong><br>
+                            <span class="text-secondary">{{ submission.feedback }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -112,51 +248,52 @@
                 </div>
             </div>
             {% endif %}
-        </div>
 
-        <!-- Sidebar: current score -->
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h6 class="text-muted">{% trans "current_score" context "assignment.legacy.detail" %}</h6>
-                    {% if submissions|dictsort:"status"|last.status == 'graded' %}
-                        <h3 class="text-success">
-                            {{ submissions|dictsort:"status"|last.score }}/{{ submissions|dictsort:"status"|last.max_score }}
-                        </h3>
-                    {% else %}
-                        <h3 class="text-muted">{% trans "waiting" context "assignment.legacy.detail" %}</h3>
-                    {% endif %}
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-const submitForm = document.getElementById('submitForm');
-if (submitForm) {
-submitForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    
-    fetch("{% url 'assignments:submit_assignment' assignment.id %}", {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            location.reload();
-        } else {
-            alert('{% trans "error_prefix" context "assignment.legacy.detail" %}: ' + JSON.stringify(data.errors));
-        }
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    const submitForm = document.getElementById('submitForm');
+    const submitBtn = submitForm ? submitForm.querySelector('button[type="submit"]') : null;
+
+    if (submitForm) {
+        submitForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // UX improvement: Button loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Göndərilir...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(this);
+            
+            fetch("{% url 'assignments:submit_assignment' assignment.id %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success flash message UX can be added here, currently just reload
+                    location.reload();
+                } else {
+                    alert('{% trans "error_prefix" context "assignment.legacy.detail" %}: ' + JSON.stringify(data.errors));
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert("Xəta baş verdi. Zəhmət olmasa bir daha yoxlayın.");
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
 });
-}
 </script>
 {% endblock %}

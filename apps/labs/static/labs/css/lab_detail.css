@@ -1,111 +1,222 @@
-/* ════════════════════════════════════════════════════════���══════
-   LAB DETAIL - Custom Styles
-   ═══════════════════════════════════════════════════════════════ */
+/* Rəng Palitrası və Qlobal Dəyişənlər */
+:root {
+    --primary-blue: #2563eb;
+    --dark-blue: #1e40af;
+    --light-blue: #eff6ff;
+    --pale-blue: #bfdbfe;
+    
+    --primary-green: #10b981;
+    --dark-green: #059669;
+    --light-green: #ecfdf5;
+}
 
-/* Lab Info Card */
+/* Ümumi Mətn Rəngləri */
+.text-dark-blue { color: var(--dark-blue) !important; }
+.text-primary-blue { color: var(--primary-blue) !important; }
+.text-primary-green { color: var(--primary-green) !important; }
+
+/* Kart Dizaynı (Card Modern) */
+.card-modern {
+    background: #fff;
+    border: none;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* Düymələr */
+.btn-outline-custom {
+    color: var(--primary-blue);
+    border: 1px solid var(--pale-blue);
+    background: transparent;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+.btn-outline-custom:hover {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    border-color: var(--primary-blue);
+}
+
+.btn-gradient-success {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    transition: filter 0.3s ease, transform 0.2s ease;
+}
+.btn-gradient-success:hover {
+    color: #fff;
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* Lab Info & Materials Cards */
 .lab-info-card .card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
 }
 
-.lab-info-card .icon-fixed {
-    width: 20px;
-}
-
-/* Materials Card */
 .materials-card .card-header {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
 }
+
+.icon-fixed { width: 24px; text-align: center; }
 
 /* Question Card */
 .question-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 1.25rem;
 }
-
 .question-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
 }
 
 .question-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 100%);
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem 1.25rem 0 0 !important;
+}
+
+.question-toggle-btn {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.question-toggle-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.question-content {
+    max-height: 1200px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.2s ease;
+    opacity: 1;
+}
+
+.question-collapsed .question-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
 .question-number {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 /* Answer Textarea */
 .answer-textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 120px;
     font-family: inherit;
+    border-radius: 0.75rem;
+    border: 1px solid #cbd5e1;
+    padding: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
-
 .answer-textarea:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
-/* File Upload */
+/* File Upload Area */
 .file-upload-area {
-    border-style: dashed !important;
+    border: 2px dashed #cbd5e1 !important;
     cursor: pointer;
-    background: #fafafa;
+    background: #f8fafc;
     transition: all 0.3s ease;
+    border-radius: 0.75rem;
 }
-
 .file-upload-area:hover {
-    background: #f0f0f0;
-    border-color: #667eea !important;
+    background: var(--light-blue);
+    border-color: var(--primary-blue) !important;
+    color: var(--primary-blue);
 }
 
-.file-preview .badge {
-    font-size: 0.9rem;
-}
-
-.file-remove {
-    font-size: 0.5rem;
-}
+.file-preview .badge { font-size: 0.9rem; padding: 0.5rem 1rem !important; border-radius: 2rem; background-color: var(--primary-blue) !important; }
+.file-remove { font-size: 0.6rem; cursor: pointer; }
 
 /* Submit Card */
+.submit-card { border-radius: 1.25rem; }
 .submit-card .card-body {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    border-radius: 1.25rem;
+    padding: 1.5rem 2rem;
 }
 
 /* Save Status */
 .save-status {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
 }
 
-/* Progress Bar */
-.progress {
-    border-radius: 10px;
-    overflow: hidden;
+/* Timer and Progress Box */
+.timer-box {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
 }
+.progress { border-radius: 2rem; overflow: hidden; background-color: #e2e8f0; }
+.progress-bar { transition: width 0.5s ease; background-color: var(--primary-green) !important; }
 
-.progress-bar {
-    transition: width 0.5s ease;
+/* Status Badges */
+.status-badge-custom {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
 }
+.badge-open { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
+.badge-upcoming { background: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--pale-blue); }
+.badge-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 
-/* Timer */
-.font-monospace {
-    font-family: 'Courier New', monospace;
+/* Empty States / Alerts */
+.alert-modern {
+    border: none;
+    border-radius: 1.25rem;
+    padding: 3rem 2rem;
 }
+.alert-info-modern { background-color: var(--light-blue); border: 2px dashed var(--pale-blue); }
+.alert-warning-modern { background-color: #fef3c7; border: 2px dashed #fde68a; }
+.alert-success-modern { background-color: var(--light-green); border: 2px dashed #a7f3d0; }
 
-/* Responsive */
 @media (max-width: 768px) {
-    .question-number {
-        width: 28px;
-        height: 28px;
-        font-size: 0.9rem;
-    }
-    
-    .question-header {
-        font-size: 0.95rem;
-    }
+    .question-number { width: 30px; height: 30px; font-size: 1rem; }
+    .question-header { font-size: 1rem; padding: 1rem; }
 }

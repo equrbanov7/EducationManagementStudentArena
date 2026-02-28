@@ -2,11 +2,14 @@
 {% load static i18n %}
 
 {% block title %}{{ project.title }} - {% trans "page_title" context "projects.review" %}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'projects/css/review_submissions.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 project-review-header">
         <div>
             <h3>
                 <i class="bi bi-folder-check"></i>
@@ -21,13 +24,13 @@
         </a>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm project-review-card">
         <div class="card-body">
 
             {% if submissions %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+                    <table class="table table-hover project-review-table">
+                        <thead>
                             <tr>
                                 <th>{% trans "table_student" context "projects.review" %}</th>
                                 <th>{% trans "table_submitted_at" context "projects.review" %}</th>
@@ -46,11 +49,11 @@
 
                                 <td>
                                     {% if submission.status == 'pending' %}
-                                        <span class="badge bg-warning">{% trans "status_pending" context "projects.review" %}</span>
+                                        <span class="badge project-review-status project-review-status-pending">{% trans "status_pending" context "projects.review" %}</span>
                                     {% elif submission.status == 'graded' %}
-                                        <span class="badge bg-success">{% trans "status_graded" context "projects.review" %}</span>
+                                        <span class="badge project-review-status project-review-status-graded">{% trans "status_graded" context "projects.review" %}</span>
                                     {% else %}
-                                        <span class="badge bg-danger">{% trans "status_rejected" context "projects.review" %}</span>
+                                        <span class="badge project-review-status project-review-status-rejected">{% trans "status_rejected" context "projects.review" %}</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -61,7 +64,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary view-submission-btn"
+                                    <button class="btn btn-sm btn-primary view-submission-btn project-review-view-btn"
                                             data-bs-toggle="modal"
                                             data-bs-target="#submissionModal"
                                             data-id="{{ submission.id }}"
@@ -95,7 +98,7 @@
 <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
+            <div class="modal-header project-review-modal-header text-white">
                 <h5 class="modal-title">
                     <i class="bi bi-file-text"></i>
                     {% trans "modal_title" context "projects.review" %}
@@ -145,7 +148,7 @@
                                   placeholder="{% trans 'feedback_placeholder' context 'projects.review' %}"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success project-review-grade-btn">
                         <i class="bi bi-check-circle"></i> {% trans "grade_button" context "projects.review" %}
                     </button>
                 </form>
@@ -154,100 +157,23 @@
         </div>
     </div>
 </div>
-
-
 <script>
-const REVIEW_I18N = {
-    noContent: `{% trans "no_content" context "projects.review.js" %}`,
-    download: `{% trans "download" context "projects.review.js" %}`,
-    sending: `{% trans "sending" context "projects.review.js" %}`,
-    errorPrefix: `{% trans "error_prefix" context "projects.review.js" %}`,
-    unknownError: `{% trans "unknown_error" context "projects.review.js" %}`,
-    serverError: `{% trans "server_error" context "projects.review.js" %}`,
-    gradeButton: `{% trans "grade_button" context "projects.review.js" %}`,
+window.projectReviewConfig = {
+    selectedSubmissionId: "{{ selected_submission_id }}",
+    gradeUrlTemplate: "/projects/submission/__ID__/grade/",
+    csrfToken: "{{ csrf_token }}",
+    i18n: {
+        noContent: `{% trans "no_content" context "projects.review.js" %}`,
+        download: `{% trans "download" context "projects.review.js" %}`,
+        sending: `{% trans "sending" context "projects.review.js" %}`,
+        errorPrefix: `{% trans "error_prefix" context "projects.review.js" %}`,
+        unknownError: `{% trans "unknown_error" context "projects.review.js" %}`,
+        serverError: `{% trans "server_error" context "projects.review.js" %}`,
+        gradeButton: `{% trans "grade_button" context "projects.review.js" %}`
+    }
 };
-
-document.querySelectorAll('.view-submission-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        openSubmission(this);
-    });
-});
-
-function openSubmission(button) {
-    if (!button) return;
-
-    const submissionId = button.dataset.id;
-    const student = button.dataset.student;
-    const content = button.dataset.content;
-    const file = button.dataset.file;
-    const filename = button.dataset.filename;
-    const grade = button.dataset.grade;
-    const feedback = button.dataset.feedback;
-
-    document.getElementById('submission-id').value = submissionId;
-    document.getElementById('modal-student').textContent = student;
-    document.getElementById('modal-content').textContent = content || REVIEW_I18N.noContent;
-    document.getElementById('grade-input').value = grade;
-    document.getElementById('feedback-input').value = feedback;
-
-    if (file) {
-        document.getElementById('modal-file-container').style.display = 'block';
-        document.getElementById('modal-file-link').href = file;
-        document.getElementById('modal-file-name').textContent = filename || REVIEW_I18N.download;
-    } else {
-        document.getElementById('modal-file-container').style.display = 'none';
-    }
-}
-
-const selectedSubmissionId = "{{ selected_submission_id }}";
-if (selectedSubmissionId) {
-    const targetButton = document.querySelector('.view-submission-btn[data-id="' + selectedSubmissionId + '"]');
-    if (targetButton) {
-        openSubmission(targetButton);
-        if (window.bootstrap && window.bootstrap.Modal) {
-            const modal = window.bootstrap.Modal.getOrCreateInstance(document.getElementById('submissionModal'));
-            modal.show();
-        } else {
-            targetButton.click();
-        }
-    }
-}
-
-document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const submissionId = document.getElementById('submission-id').value;
-    const formData = new FormData(this);
-    const btn = this.querySelector('[type=submit]');
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${REVIEW_I18N.sending}`;
-
-    fetch(`/projects/submission/${submissionId}/grade/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(`${REVIEW_I18N.errorPrefix}${data.error || REVIEW_I18N.unknownError}`);
-            btn.disabled = false;
-            btn.innerHTML = `<i class="bi bi-check-circle"></i> ${REVIEW_I18N.gradeButton}`;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert(REVIEW_I18N.serverError);
-        btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-check-circle"></i> ${REVIEW_I18N.gradeButton}`;
-    });
-});
 </script>
-
+{% endblock %}
+{% block extraJs %}
+<script src="{% static 'projects/js/review_submissions.js' %}"></script>
 {% endblock %}

@@ -15,7 +15,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 # Import routing after Django setup
 from apps.live_exam import routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
 django_asgi_app = get_asgi_application()
 

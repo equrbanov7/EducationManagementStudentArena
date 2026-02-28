@@ -74,6 +74,31 @@ def _get_client_id(request) -> str:
     return cid or uuid.uuid4().hex
 
 
+def _get_public_base_url(request) -> str:
+    """
+    Join link/QR üçün public base URL:
+    1) LIVE_EXAM_PUBLIC_HOST (tam URL və ya host:port)
+    2) LAN_HOST (geri uyğunluq)
+    3) request-in real host/scheme-i
+    """
+    configured = (
+        getattr(settings, "LIVE_EXAM_PUBLIC_HOST", None) or getattr(settings, "LAN_HOST", None) or ""
+    ).strip()
+
+    if configured:
+        configured = configured.rstrip("/")
+        if configured.startswith(("http://", "https://")):
+            return configured
+        scheme = "https" if request.is_secure() else "http"
+        return f"{scheme}://{configured}"
+
+    return request.build_absolute_uri("/").rstrip("/")
+
+
+def _build_join_url(request, session: LiveSession) -> str:
+    return f"{_get_public_base_url(request)}{session.join_url_path()}"
+
+
 # ------------------------
 # Broadcast (Channels group_send)
 # ------------------------
@@ -452,8 +477,7 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    host = getattr(settings, "LAN_HOST", None) or request.get_host()
-    join_url = f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
+    join_url = _build_join_url(request, session)
 
     exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
 
@@ -565,8 +589,7 @@ def live_join_enter(request, pin):
 def live_qr_png(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
-    host = getattr(settings, "LAN_HOST", None) or request.get_host()
-    join_url = f"http://{host}{session.join_url_path()}"
+    join_url = _build_join_url(request, session)
 
     img = qrcode.make(join_url)
     buf = io.BytesIO()
