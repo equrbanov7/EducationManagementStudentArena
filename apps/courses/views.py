@@ -7,6 +7,7 @@ Labs app inteqrasiyası əlavə edilib.
 """
 
 import json
+from datetime import timedelta
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
@@ -19,6 +20,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
@@ -33,6 +35,7 @@ from .models import Course, CourseMembership, CourseResource, CourseTopic
 
 User = get_user_model()
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
 
 def _tenant_scoped_courses(request, queryset=None):
@@ -511,6 +514,12 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
                 max_attempts = lab.max_attempts or 1
                 can_submit = (attempt_count < max_attempts) and lab.is_open
+                can_show_grade = bool(
+                    latest_submission
+                    and latest_submission.status == "graded"
+                    and latest_submission.graded_at
+                    and timezone.now() >= latest_submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+                )
 
                 labs_with_user_data.append(
                     {
@@ -522,6 +531,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         "max_attempts": max_attempts,
                         "attempts_left": max_attempts - attempt_count,
                         "can_submit": can_submit,
+                        "can_show_grade": can_show_grade,
                     }
                 )
 

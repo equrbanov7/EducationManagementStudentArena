@@ -16,6 +16,11 @@ urlpatterns = [
     # Block CRUD
     # ═══════════════════════════════════════════════════════════════════
     path("<int:pk>/blocks/", views.manage_blocks, name="manage_blocks"),
+    path(
+        "<int:pk>/questions-per-student/",
+        views.update_questions_per_student,
+        name="update_questions_per_student",
+    ),
     path("<int:pk>/blocks/create/", views.create_block, name="create_block"),
     path("blocks/<int:pk>/edit/", views.edit_block, name="edit_block"),
     path("blocks/<int:pk>/delete/", views.delete_block, name="delete_block"),

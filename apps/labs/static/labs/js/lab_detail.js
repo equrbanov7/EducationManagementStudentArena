@@ -24,10 +24,12 @@
             if (this.files && this.files[0]) {
                 preview.classList.remove('d-none');
                 preview.querySelector('.file-name').textContent = this.files[0].name;
+                const textarea = document.querySelector('[name="answer_' + questionId + '"]');
+                const answerText = textarea ? textarea.value : '';
 
                 const formData = new FormData();
                 formData.append('question_id', questionId);
-                formData.append('answer', '');
+                formData.append('answer', answerText);
                 formData.append('answer_file', this.files[0]);
 
                 fetch('/labs/' + LAB_ID + '/auto-save/', {
@@ -57,13 +59,16 @@
     function updateTimers() {
         const now = new Date();
         const elapsed = Math.floor((now - labStartTime) / 1000);
-        document.getElementById('elapsedTimer').textContent = formatTime(elapsed);
+        const elapsedEl = document.getElementById('elapsedTimer');
+        if (elapsedEl) elapsedEl.textContent = formatTime(elapsed);
 
         const remaining = Math.max(0, Math.floor((END_TIME - now) / 1000));
-        document.getElementById('remainingTimer').textContent = formatTime(remaining);
+        const remainingEl = document.getElementById('remainingTimer');
+        if (remainingEl) remainingEl.textContent = formatDuration(remaining);
 
         if (remaining <= 0) {
-            document.getElementById('labForm').submit();
+            const form = document.getElementById('labForm');
+            if (form) form.submit();
         }
     }
 
@@ -74,17 +79,40 @@
         return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     }
 
+    function formatDuration(seconds) {
+        const days = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        if (days > 0) {
+            return (
+                String(days).padStart(2, '0') +
+                ':' +
+                String(h).padStart(2, '0') +
+                ':' +
+                String(m).padStart(2, '0') +
+                ':' +
+                String(s).padStart(2, '0')
+            );
+        }
+        return formatTime(seconds);
+    }
+
     setInterval(updateTimers, 1000);
     updateTimers();
 
     function updateProgress() {
+        const answeredEl = document.getElementById('answeredCount');
+        const progressEl = document.getElementById('progressBar');
+        if (!answeredEl || !progressEl) return;
+
         let answered = 0;
         document.querySelectorAll('.answer-textarea').forEach((ta) => {
             if (ta.value.trim()) answered += 1;
         });
 
-        document.getElementById('answeredCount').textContent = answered;
-        document.getElementById('progressBar').style.width = (answered / TOTAL_QUESTIONS) * 100 + '%';
+        answeredEl.textContent = answered;
+        progressEl.style.width = (answered / TOTAL_QUESTIONS) * 100 + '%';
     }
 
     const saveTimeouts = {};
@@ -131,7 +159,24 @@
 
     updateProgress();
 
-    document.getElementById('labForm').addEventListener('submit', function (e) {
+    document.querySelectorAll('.question-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', function () {
+            const questionId = this.dataset.toggleQuestion;
+            const card = document.getElementById('question-' + questionId);
+            if (!card) return;
+            const collapsed = card.classList.toggle('question-collapsed');
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down', collapsed);
+                icon.classList.toggle('fa-chevron-up', !collapsed);
+            }
+        });
+    });
+
+    const labForm = document.getElementById('labForm');
+    if (!labForm) return;
+
+    labForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
         const answered = parseInt(document.getElementById('answeredCount').textContent, 10);

@@ -41,6 +41,9 @@ DATABASES = {
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
@@ -63,6 +66,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.az")
 
 # LAN host
 LAN_HOST = os.getenv("LAN_HOST", "emsarena.az")
+LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "")
 
 # CSRF trusted origins
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
@@ -93,7 +97,9 @@ LOGGING = {
     },
 }
 
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN", ""),
-    send_default_pii=True,
-)
+sentry_dsn = (os.getenv("SENTRY_DSN") or "").strip()
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        send_default_pii=True,
+    )

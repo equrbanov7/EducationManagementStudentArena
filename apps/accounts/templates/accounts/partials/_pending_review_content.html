@@ -47,7 +47,7 @@
         {% for item in review_items %}
             <div class="post-item pending-item">
                 <div class="post-icon {% if item.type == 'exam' %}stat-icon--blue{% elif item.type == 'assignment' %}stat-icon--green{% elif item.type == 'project' %}stat-icon--purple{% else %}stat-icon--orange{% endif %}">
-                    <i class="fas {% if item.type == 'exam' %}fa-file-alt{% elif item.type == 'assignment' %}fa-book-open{% elif item.type == 'project' %}fa-diagram-project{% else %}fa-flask{% endif %}"></i>
+                    <i class="{{ item.icon }}"></i>
                 </div>
 
                 <div class="post-info">

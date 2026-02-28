@@ -7,6 +7,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'labs/css/lab_submissions.css' %}">
+    <link rel="stylesheet" href="{% static 'labs/css/lab_submissions_template.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -219,4 +220,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extraJs %}
+<script src="{% static 'labs/js/lab_submissions_template.js' %}"></script>
 {% endblock %}

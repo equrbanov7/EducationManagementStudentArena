@@ -178,11 +178,46 @@
     font-size: 16px;
     color: #fff;
     background: linear-gradient(135deg, var(--rr-blue-700), #2f7be8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.review-answer-toggle {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-answer-preview {
+    padding: 10px 14px;
+    color: var(--rr-text-600);
+    border-top: 1px solid var(--rr-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: #f6fbff;
 }
 
 .review-answer-body {
     padding: 14px;
     background: #fbfdff;
+    max-height: 1200px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+
+.review-answer-card.is-collapsed .review-answer-body {
+    max-height: 0;
+    opacity: 0;
 }
 
 .review-answer-text {

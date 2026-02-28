@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load static i18n %}
+<link rel="stylesheet" href="{% static 'labs/css/lab_modals.css' %}">
 
 {% if is_owner %}
 
@@ -317,6 +318,7 @@
 .lab-chk-row label{margin:0;flex:1;cursor:pointer;font-weight:500}
 .lab-chk-row .badge{margin-left:auto;flex-shrink:0}
 </style>
+<script src="{% static 'labs/js/lab_modals.js' %}"></script>
 
 <script>
 (function(){

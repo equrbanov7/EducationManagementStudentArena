@@ -40,11 +40,12 @@
             {% for item in pending_answer_items %}
                 <article class="post-item pending-answer-item">
                     <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--purple{% endif %}">
-                        <i class="fas {% if item.category == 'exams' %}fa-file-alt{% elif item.category == 'courses' %}fa-book-open{% elif item.category == 'labs' %}fa-flask{% else %}fa-diagram-project{% endif %}"></i>
+                        <i class="{{ item.icon }}"></i>
                     </div>
                     <div class="post-info">
                         <div class="post-title">{{ item.title }}</div>
                         <div class="post-date">
+                            <span class="kind-badge">{{ item.type_label }}</span>
                             {{ item.kind }}
                             {% if item.submitted_at %}· {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
                             <span class="pending-answer-status pending-answer-status--{{ item.status_class }}">{{ item.status_label }}</span>

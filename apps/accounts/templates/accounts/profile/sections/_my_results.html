@@ -41,12 +41,13 @@
             <div class="modern-result-card">
                 
                 <div class="result-card-header">
-                    <div class="result-icon-wrapper">
-                        <i class="fas fa-file-signature"></i>
+                    <div class="result-icon-wrapper assigned-task-icon assigned-task-icon--{{ item.category }}">
+                        <i class="{{ item.icon }}"></i>
                     </div>
                     <div class="result-title-group">
                         <h4 class="result-title">{{ item.title }}</h4>
                         <div class="result-meta-info">
+                            <span class="kind-badge">{{ item.type_label }}</span>
                             <span class="kind-badge">{{ item.kind }}</span>
                             {% if item.submitted_at %}
                             <span class="meta-divider">•</span>

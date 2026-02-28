@@ -653,6 +653,21 @@ def _task_state_badge_data(state):
     return "Aktiv", "open"
 
 
+def _standard_item_type_meta(raw_type):
+    normalized = (raw_type or "").lower()
+    mapping = {
+        "courses": ("Kurs", "fas fa-graduation-cap"),
+        "assignments": ("Sərbəst iş", "fas fa-file-signature"),
+        "independent": ("Kurs işi", "fas fa-diagram-project"),
+        "projects": ("Kurs işi", "fas fa-diagram-project"),
+        "labs": ("Lab işi", "fas fa-flask"),
+        "lab": ("Lab işi", "fas fa-flask"),
+        "exams": ("İmtahan", "fas fa-file-alt"),
+        "exam": ("İmtahan", "fas fa-file-alt"),
+    }
+    return mapping.get(normalized, ("Tapşırıq", "fas fa-file"))
+
+
 def _collect_assigned_tasks(request, filter_type=None):
     """
     Build a unified assigned task list across courses, assignments, labs, and projects.
@@ -699,6 +714,7 @@ def _collect_assigned_tasks(request, filter_type=None):
                 "title": title,
                 "kind": kind,
                 "icon": icon,
+                "type_label": _standard_item_type_meta(category)[0],
                 "detail_url": detail_url,
                 "assigned_at": assigned_at,
                 "deadline": deadline,
@@ -716,7 +732,7 @@ def _collect_assigned_tasks(request, filter_type=None):
                 category="courses",
                 title=course.title,
                 kind="Kurs",
-                icon="fas fa-graduation-cap",
+                icon=_standard_item_type_meta("courses")[1],
                 detail_url=_append_query_params(
                     reverse("courses:course_dashboard", kwargs={"course_id": course.id}),
                     from_section="assigned-exams",
@@ -753,7 +769,7 @@ def _collect_assigned_tasks(request, filter_type=None):
                 category="assignments",
                 title=assignment.title,
                 kind=f"Sərbəst İş • {assignment.course.title}",
-                icon="fas fa-file-signature",
+                icon=_standard_item_type_meta("assignments")[1],
                 detail_url=_append_query_params(
                     reverse("assignments:assignment_detail", kwargs={"pk": assignment.id}),
                     from_section="assigned-exams",
@@ -799,7 +815,7 @@ def _collect_assigned_tasks(request, filter_type=None):
                 category="labs",
                 title=lab.title,
                 kind=f"Lab işi • {lab.course.title}",
-                icon="fas fa-flask",
+                icon=_standard_item_type_meta("labs")[1],
                 detail_url=_append_query_params(
                     reverse("labs:lab_detail", kwargs={"pk": lab.id}),
                     from_section="assigned-exams",
@@ -837,7 +853,7 @@ def _collect_assigned_tasks(request, filter_type=None):
                 category="independent",
                 title=project.title,
                 kind=f"Kurs işi • {project.course.title}",
-                icon="fas fa-project-diagram",
+                icon=_standard_item_type_meta("independent")[1],
                 detail_url=_append_query_params(
                     reverse("projects:project_detail", kwargs={"pk": project.id}),
                     from_section="assigned-exams",
@@ -905,6 +921,8 @@ def _collect_my_results(request, filter_type=None):
                     "category": "exams",
                     "title": attempt.exam.title,
                     "kind": attempt.exam.get_exam_type_display() or pgettext_lazy("accounts.my_results.kind", "exam"),
+                    "icon": _standard_item_type_meta("exams")[1],
+                    "type_label": _standard_item_type_meta("exams")[0],
                     "submitted_at": attempt.finished_at or attempt.started_at,
                     "status": _result_status_badge(
                         attempt.status,
@@ -946,6 +964,8 @@ def _collect_my_results(request, filter_type=None):
                     "category": "courses",
                     "title": submission.assignment.title,
                     "kind": submission.assignment.course.title,
+                    "icon": _standard_item_type_meta("assignments")[1],
+                    "type_label": _standard_item_type_meta("assignments")[0],
                     "submitted_at": submission.submitted_at,
                     "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
@@ -987,6 +1007,8 @@ def _collect_my_results(request, filter_type=None):
                     "category": "labs",
                     "title": submission.assignment.lab.title,
                     "kind": submission.assignment.lab.course.title,
+                    "icon": _standard_item_type_meta("labs")[1],
+                    "type_label": _standard_item_type_meta("labs")[0],
                     "submitted_at": submission.submitted_at,
                     "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
@@ -1028,6 +1050,8 @@ def _collect_my_results(request, filter_type=None):
                     "category": "independent",
                     "title": submission.project.title,
                     "kind": submission.project.course.title,
+                    "icon": _standard_item_type_meta("independent")[1],
+                    "type_label": _standard_item_type_meta("independent")[0],
                     "submitted_at": submission.submitted_at,
                     "status": _result_status_badge(submission.status, is_graded=is_graded_visible),
                     "status_raw": submission.get_status_display(),
@@ -1117,6 +1141,8 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
                 "category": category,
                 "title": title,
                 "kind": kind,
+                "icon": _standard_item_type_meta(category)[1],
+                "type_label": _standard_item_type_meta(category)[0],
                 "submitted_at": submitted_at,
                 "status_label": status_label,
                 "status_class": status_class,
@@ -1360,6 +1386,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             items.append(
                 {
                     "type": "exam",
+                    "icon": _standard_item_type_meta("exam")[1],
                     "student": attempt.user,
                     "student_display": anonymous_student_label,
                     "title": attempt.exam.title,
@@ -1401,6 +1428,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             items.append(
                 {
                     "type": "assignment",
+                    "icon": _standard_item_type_meta("assignments")[1],
                     "student": submission.user,
                     "student_display": anonymous_student_label,
                     "title": submission.assignment.title,
@@ -1441,6 +1469,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             items.append(
                 {
                     "type": "project",
+                    "icon": _standard_item_type_meta("projects")[1],
                     "student": submission.student,
                     "student_display": anonymous_student_label,
                     "title": submission.project.title,
@@ -1486,6 +1515,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             items.append(
                 {
                     "type": "lab",
+                    "icon": _standard_item_type_meta("lab")[1],
                     "student": student,
                     "student_display": anonymous_student_label,
                     "title": submission.assignment.lab.title,
@@ -3161,35 +3191,6 @@ def pending_review_detail(request, item_type, item_id):
     max_score = Decimal(str(submission.assignment.lab.max_score or 100))
     is_locked = _is_review_window_closed(submission.graded_at)
 
-    if request.method == "POST":
-        if is_locked:
-            messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
-            return redirect(redirect_url)
-
-        feedback = (request.POST.get("feedback") or "").strip()
-        try:
-            score = _parse_decimal_score(request.POST.get("score"))
-        except InvalidOperation:
-            messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
-            return redirect(redirect_url)
-
-        if score < 0 or score > max_score:
-            messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
-            return redirect(redirect_url)
-
-        submission.score = score
-        submission.feedback = feedback
-        submission.status = "graded"
-        submission.graded_by = request.user
-        if not submission.graded_at:
-            submission.graded_at = timezone.now()
-        submission.save(update_fields=["score", "feedback", "status", "graded_by", "graded_at"])
-        messages.success(
-            request,
-            f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
-        )
-        return redirect(redirect_url)
-
     lab_answers = list(
         submission.answers.select_related("question", "question__block").order_by(
             "question__block__order",
@@ -3207,6 +3208,55 @@ def pending_review_detail(request, item_type, item_id):
             .select_related("question", "question__block")
             .order_by("question__block__order", "question__question_number")
         )
+
+    if request.method == "POST":
+        if is_locked:
+            messages.error(request, "Bu cavab üçün yoxlama müddəti bitib. Artıq bal dəyişdirilə bilməz.")
+            return redirect(redirect_url)
+
+        feedback = (request.POST.get("feedback") or "").strip()
+        try:
+            auto_total = Decimal("0")
+            for answer in lab_answers:
+                raw_answer_score = (request.POST.get(f"answer_score_{answer.id}") or "").strip()
+                if not raw_answer_score:
+                    answer.score = None
+                else:
+                    answer_score = _parse_decimal_score(raw_answer_score)
+                    if answer_score < 0:
+                        answer_score = Decimal("0")
+                    question_max = Decimal(str(answer.question.points or 0))
+                    if question_max > 0 and answer_score > question_max:
+                        answer_score = question_max
+                    answer.score = answer_score
+                    auto_total += answer_score
+                answer.save(update_fields=["score", "submitted_at"])
+
+            score = _parse_decimal_score(request.POST.get("score"))
+        except InvalidOperation:
+            messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
+            return redirect(redirect_url)
+
+        use_manual_total = request.POST.get("use_manual_total") == "1"
+        if not use_manual_total:
+            score = auto_total
+
+        if score < 0 or score > max_score:
+            messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
+            return redirect(redirect_url)
+
+        submission.score = score
+        submission.feedback = feedback
+        submission.status = "graded"
+        submission.graded_by = request.user
+        if not submission.graded_at:
+            submission.graded_at = timezone.now()
+        submission.save(update_fields=["score", "feedback", "status", "graded_by", "graded_at"])
+        messages.success(
+            request,
+            f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",
+        )
+        return redirect(redirect_url)
 
     attachments = []
     if submission.submission_file:
@@ -3232,6 +3282,7 @@ def pending_review_detail(request, item_type, item_id):
         "attachments": attachments,
         "lab_answers": lab_answers,
         "current_score": submission.score,
+        "auto_total_score": sum((a.score or Decimal("0")) for a in lab_answers),
         "max_score": max_score,
         "is_locked": is_locked,
         "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),

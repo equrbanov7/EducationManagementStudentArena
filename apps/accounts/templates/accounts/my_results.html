@@ -48,12 +48,13 @@
         <div class="posts-grid">
             {% for item in items %}
             <div class="post-item result-item">
-                <div class="post-icon stat-icon--blue">
-                    <i class="fas fa-file-alt"></i>
+                <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--purple{% endif %}">
+                    <i class="{{ item.icon }}"></i>
                 </div>
                 <div class="post-info">
                     <div class="post-title">{{ item.title }}</div>
                     <div class="post-date">
+                        <span class="kind-badge">{{ item.type_label }}</span>
                         {{ item.kind }}
                         {% if item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
                     </div>

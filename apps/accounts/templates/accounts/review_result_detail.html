@@ -66,8 +66,22 @@
             <h2>Lab sual cavabları</h2>
             <div class="review-answers">
                 {% for answer in lab_answers %}
-                <article class="review-answer-card">
-                    <h3>{{ forloop.counter }}. {{ answer.question.question_text }}</h3>
+                <article class="review-answer-card" id="review-answer-{{ answer.id }}">
+                    <h3>
+                        <span>{{ forloop.counter }}. {{ answer.question.question_text }}</span>
+                        <button type="button" class="review-answer-toggle" data-review-toggle="{{ answer.id }}" aria-label="Toggle answer">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </h3>
+                    <div class="review-answer-preview">
+                        {% if answer.answer %}
+                            {{ answer.answer|striptags|truncatechars:90 }}
+                        {% elif answer.answer_file %}
+                            Fayl əlavə edilib...
+                        {% else %}
+                            Bu sual üçün cavab yoxdur.
+                        {% endif %}
+                    </div>
                     <div class="review-answer-body">
                         {% if answer.answer %}
                         <div class="review-answer-text">{{ answer.answer|linebreaks }}</div>
@@ -97,4 +111,21 @@
         </section>
     </div>
 </div>
+<script>
+(function () {
+    Array.prototype.slice.call(document.querySelectorAll(".review-answer-toggle")).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-review-toggle");
+            var card = document.getElementById("review-answer-" + id);
+            if (!card) return;
+            var collapsed = card.classList.toggle("is-collapsed");
+            var icon = btn.querySelector("i");
+            if (icon) {
+                icon.classList.toggle("fa-chevron-down", collapsed);
+                icon.classList.toggle("fa-chevron-up", !collapsed);
+            }
+        });
+    });
+})();
+</script>
 {% endblock %}

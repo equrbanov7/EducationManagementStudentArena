@@ -54,6 +54,7 @@ STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # LAN host for development
 LAN_HOST = os.getenv("LAN_HOST", "172.20.10.11:8000")
+LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "")
 
 # CSRF trusted origins
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")

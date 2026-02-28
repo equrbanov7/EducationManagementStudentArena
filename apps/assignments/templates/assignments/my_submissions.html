@@ -3,115 +3,120 @@
 
 {% block title %}{{ assignment.title }} - {% trans "page_title_suffix" context "assignment.my_submissions" %}{% endblock %}
 
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'assignment/css/my_submissions.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-1">
+                <ol class="breadcrumb mb-2 small fw-medium">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' assignment.course.id %}">{{ assignment.course.title }}</a>
+                        <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="text-decoration-none text-muted">
+                            {{ assignment.course.title }}
+                        </a>
                     </li>
-                    <li class="breadcrumb-item active">{{ assignment.title }}</li>
+                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">{{ assignment.title }}</li>
                 </ol>
             </nav>
-            <h3 class="mb-0">
-                <i class="fa-solid fa-list-check text-warning me-2"></i> {% trans "title" context "assignment.my_submissions" %}
-            </h3>
+            <h2 class="mb-0 fw-bold text-dark-blue">
+                <i class="fa-solid fa-list-check text-primary-blue me-2"></i> {% trans "title" context "assignment.my_submissions" %}
+            </h2>
         </div>
-        <div>
+        <div class="d-flex gap-2">
             {% if can_submit %}
-            <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-warning">
+            <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-gradient-primary">
                 <i class="fa-solid fa-plus me-1"></i> {% trans "new_submission" context "assignment.my_submissions" %}
             </a>
             {% endif %}
-            <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary">
+            <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary rounded-3 fw-medium">
                 <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "assignment.my_submissions" %}
             </a>
         </div>
     </div>
 
-    <div class="row mb-4">
+    <div class="row mb-5 g-4">
         <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-body text-center">
-                    <h4 class="mb-0">{{ user_attempts }} / {{ assignment.max_attempts }}</h4>
-                    <small class="text-muted">{% trans "attempts_used" context "assignment.my_submissions" %}</small>
-                </div>
+            <div class="stat-card blue">
+                <h2 class="fw-bold text-dark-blue mb-1">{{ user_attempts }} <span class="fs-5 text-muted fw-normal">/ {{ assignment.max_attempts }}</span></h2>
+                <span class="text-muted fw-medium text-uppercase small" style="letter-spacing: 0.5px;">{% trans "attempts_used" context "assignment.my_submissions" %}</span>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-body text-center">
-                    <h4 class="mb-0 {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
-                        {{ attempts_left }}
-                    </h4>
-                    <small class="text-muted">{% trans "attempts_left" context "assignment.my_submissions" %}</small>
-                </div>
+            <div class="stat-card green">
+                <h2 class="fw-bold mb-1 {% if attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
+                    {{ attempts_left }}
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small" style="letter-spacing: 0.5px;">{% trans "attempts_left" context "assignment.my_submissions" %}</span>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card bg-light">
-                <div class="card-body text-center">
+            <div class="stat-card white">
+                <div class="mb-2">
                     {% if assignment.is_deadline_passed %}
-                        <span class="badge bg-danger fs-6">{% trans "status_deadline_passed" context "assignment.my_submissions" %}</span>
+                        <span class="status-badge status-passed"><i class="fa-solid fa-clock-rotate-left"></i> {% trans "status_deadline_passed" context "assignment.my_submissions" %}</span>
                     {% elif not assignment.is_open_status %}
-                        <span class="badge bg-warning fs-6">{% trans "status_inactive" context "assignment.my_submissions" %}</span>
+                        <span class="status-badge status-inactive"><i class="fa-solid fa-lock"></i> {% trans "status_inactive" context "assignment.my_submissions" %}</span>
                     {% else %}
-                        <span class="badge bg-success fs-6">{% trans "status_active" context "assignment.my_submissions" %}</span>
+                        <span class="status-badge status-active"><i class="fa-solid fa-lock-open"></i> {% trans "status_active" context "assignment.my_submissions" %}</span>
                     {% endif %}
-                    <br>
-                    <small class="text-muted">{{ assignment.deadline|date:"d.m.Y H:i" }}</small>
                 </div>
+                <span class="text-muted fw-medium small"><i class="fa-regular fa-calendar me-1"></i> {{ assignment.deadline|date:"d.m.Y H:i" }}</span>
             </div>
         </div>
     </div>
 
     {% if submissions %}
-    <div class="card">
-        <div class="card-header bg-warning text-dark">
-            <i class="fa-solid fa-history me-2"></i> {% trans "submitted_answers" context "assignment.my_submissions" %}
+    <div class="card card-modern border-0">
+        <div class="table-modern-header d-flex align-items-center">
+            <i class="fa-solid fa-inbox me-2"></i> {% trans "submitted_answers" context "assignment.my_submissions" %}
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-modern mb-0">
+                    <thead>
                         <tr>
-                            <th>#</th>
-                            <th>{% trans "table_submitted_at" context "assignment.my_submissions" %}</th>
-                            <th>{% trans "table_status" context "assignment.my_submissions" %}</th>
-                            <th>{% trans "table_grade" context "assignment.my_submissions" %}</th>
-                            <th>{% trans "table_action" context "assignment.my_submissions" %}</th>
+                            <th width="5%">#</th>
+                            <th width="30%">{% trans "table_submitted_at" context "assignment.my_submissions" %}</th>
+                            <th width="20%">{% trans "table_status" context "assignment.my_submissions" %}</th>
+                            <th width="25%">{% trans "table_grade" context "assignment.my_submissions" %}</th>
+                            <th width="20%" class="text-end">{% trans "table_action" context "assignment.my_submissions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sub in submissions %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
-
+                            <td class="fw-bold text-muted">{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center fw-medium text-dark">
+                                    <i class="fa-regular fa-clock text-muted me-2"></i>
+                                    {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                                </div>
+                            </td>
                             <td>
                                 {% if sub.status == 'pending' %}
-                                    <span class="badge bg-warning">{% trans "status_pending" context "assignment.my_submissions" %}</span>
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> {% trans "status_pending" context "assignment.my_submissions" %}</span>
                                 {% elif sub.status == 'graded' %}
-                                    <span class="badge bg-success">{% trans "status_graded" context "assignment.my_submissions" %}</span>
+                                    <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> {% trans "status_graded" context "assignment.my_submissions" %}</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ sub.status }}</span>
+                                    <span class="status-badge bg-secondary text-white">{{ sub.status }}</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if sub.grade %}
-                                    <span class="fw-bold text-success">{{ sub.grade }}</span>
+                                    <span class="fw-bold fs-5 text-primary-green">{{ sub.grade }}</span>
                                 {% else %}
-                                    <span class="text-muted">-</span>
+                                    <span class="text-muted"><i class="fa-solid fa-minus"></i></span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary"
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-custom px-3"
                                         data-bs-toggle="modal"
                                         data-bs-target="#viewSubmission{{ sub.id }}">
-                                    <i class="fa-solid fa-eye"></i> {% trans "view" context "assignment.my_submissions" %}
+                                    <i class="fa-solid fa-eye me-1"></i> {% trans "view" context "assignment.my_submissions" %}
                                 </button>
                             </td>
                         </tr>
@@ -123,53 +128,61 @@
     </div>
 
     {% for sub in submissions %}
-    <div class="modal fade" id="viewSubmission{{ sub.id }}" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="viewSubmission{{ sub.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">{% trans "submission_number" context "assignment.my_submissions" %} #{{ forloop.counter }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header modal-header-custom p-4">
+                    <h5 class="modal-title fw-bold text-dark-blue">
+                        <i class="fa-regular fa-file-lines me-2 text-primary-blue"></i>
+                        {% trans "submission_number" context "assignment.my_submissions" %} #{{ forloop.counter }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <strong>{% trans "submitted_at" context "assignment.my_submissions" %}:</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                <div class="modal-body p-4">
+                    
+                    <div class="d-flex align-items-center mb-4 text-muted border-bottom pb-3">
+                        <i class="fa-regular fa-calendar-check me-2"></i>
+                        <strong>{% trans "submitted_at" context "assignment.my_submissions" %}:</strong> 
+                        <span class="ms-2 text-dark">{{ sub.submitted_at|date:"d.m.Y H:i" }}</span>
                     </div>
 
                     {% if sub.content %}
-                    <div class="mb-3">
-                        <strong>{% trans "text_answer" context "assignment.my_submissions" %}:</strong>
-                        <div class="bg-light p-3 rounded mt-2">{{ sub.content|linebreaks }}</div>
+                    <div class="mb-4">
+                        <strong class="text-dark-blue d-block mb-2">{% trans "text_answer" context "assignment.my_submissions" %}:</strong>
+                        <div class="bg-light p-3 rounded-3 border text-secondary" style="white-space: pre-wrap;">{{ sub.content }}</div>
                     </div>
                     {% endif %}
 
                     {% if sub.file %}
-                    <div class="mb-3">
-                        <strong>{% trans "file" context "assignment.my_submissions" %}:</strong>
-                        <a href="{{ sub.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
-                            <i class="fa-solid fa-download"></i> {{ sub.file.name|cut:"assignments/submissions/" }}
+                    <div class="mb-4">
+                        <strong class="text-dark-blue d-block mb-2">{% trans "file" context "assignment.my_submissions" %}:</strong>
+                        <a href="{{ sub.file.url }}" target="_blank" class="btn btn-outline-custom">
+                            <i class="fa-solid fa-cloud-arrow-down me-2"></i> {{ sub.file.name|cut:"assignments/submissions/" }}
                         </a>
                     </div>
                     {% endif %}
 
                     {% if sub.status == 'graded' %}
-                    <hr>
-                    <div class="mb-3">
-                        <strong>{% trans "grade" context "assignment.my_submissions" %}:</strong>
-                        <span class="badge bg-success fs-5 ms-2">{{ sub.grade }}</span>
-                    </div>
-
-                    {% if sub.feedback %}
-                    <div class="mb-3">
-                        <strong>{% trans "teacher_feedback" context "assignment.my_submissions" %}:</strong>
-                        <div class="bg-light p-3 rounded mt-2 border-start border-4 border-success">
-                            {{ sub.feedback|linebreaks }}
+                    <div class="bg-light rounded-3 p-4 mt-4 border border-success border-opacity-25">
+                        <div class="d-flex align-items-center mb-3">
+                            <strong class="text-dark-blue fs-5">{% trans "grade" context "assignment.my_submissions" %}:</strong>
+                            <span class="badge bg-success fs-5 ms-3 px-3 py-2 rounded-pill">{{ sub.grade }}</span>
                         </div>
+
+                        {% if sub.feedback %}
+                        <div>
+                            <strong class="text-dark-blue d-block mb-2"><i class="fa-regular fa-comment-dots me-1"></i> {% trans "teacher_feedback" context "assignment.my_submissions" %}:</strong>
+                            <div class="bg-white p-3 rounded-3 border-start border-4 border-success shadow-sm text-secondary">
+                                {{ sub.feedback|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endif %}
-                    {% endif %}
+
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "close" context "assignment.my_submissions" %}</button>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">{% trans "close" context "assignment.my_submissions" %}</button>
                 </div>
             </div>
         </div>
@@ -177,16 +190,25 @@
     {% endfor %}
 
     {% else %}
-    <div class="alert alert-light text-center py-5">
-        <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
-        <h5>{% trans "empty_title" context "assignment.my_submissions" %}</h5>
+    <div class="empty-state-card mt-4">
+        <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" style="width: 80px; height: 80px;">
+                <i class="fa-solid fa-folder-open fa-2x text-primary-blue"></i>
+            </div>
+        </div>
+        <h4 class="fw-bold text-dark-blue mb-2">{% trans "empty_title" context "assignment.my_submissions" %}</h4>
+        <p class="text-muted mb-4">Hələ heç bir tapşırıq cavabı göndərməmisiniz.</p>
+        
         {% if can_submit %}
-        <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-warning mt-3">
-            <i class="fa-solid fa-plus me-1"></i> {% trans "submit_first" context "assignment.my_submissions" %}
+        <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-gradient-primary btn-lg px-4 rounded-pill shadow-sm">
+            <i class="fa-solid fa-paper-plane me-2"></i> {% trans "submit_first" context "assignment.my_submissions" %}
         </a>
         {% endif %}
     </div>
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extraJs %}
 {% endblock %}
