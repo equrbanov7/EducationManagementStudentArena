@@ -59,6 +59,10 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or EMAIL_HOST_USER or "nore
 
 # Static files storage - Simple for development
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+# In local env, allow WhiteNoise to serve assets directly from finders.
+# This prevents missing CSS/JS when DEBUG=False and collectstatic was not run.
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 # Add live_exam static files directory for development
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
