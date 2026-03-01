@@ -1,82 +1,83 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ profile_user.username }} | Profil{% endblock %}
+{% block title %}{{ profile_user.username }} | {% trans "title_suffix" context "blog.user_profile_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pagination.css' %}"> {# Pagination CSS-i üçün #}
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="profile-page-wrapper">
     <header class="profile-section-header">
-        <h1><span>{{ profile_user.username }}</span> Profili</h1>
-        <p class="profile-subheading">İstifadəçinin yaratdığı məqalələr</p>
+        <div class="profile-info-container">
+            <div class="profile-avatar">
+                {{ profile_user.username|slice:":1"|upper }}
+            </div>
+            <div class="profile-text-info">
+                <h1><span>{{ profile_user.username }}</span> {% trans "profile_word" context "blog.user_profile_page" %}</h1>
+                <p class="profile-subheading">{% trans "subheading" context "blog.user_profile_page" %}</p>
+            </div>
+        </div>
 
         {% if request.user.is_authenticated and request.user == profile_user %}
             <div class="profile-buttons-container">
-                
+
                 <a href="{% url 'create_post' %}" class="profile-create-post-btn">
-                    <i class="fas fa-plus-circle"></i> Yeni post yarat
+                    <i class="fas fa-plus-circle"></i> {% trans "create_post" context "blog.user_profile_page" %}
                 </a>
 
                 {% if assigned_count > 0 %}
-                    <a href="{% url 'assigned_exam_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-clipboard-check"></i> Təyin olunmuş imtahanlarım
+                    <a href="{% url 'accounts:assigned_exams' %}" class="profile-create-post-btn">
+                        <i class="fas fa-clipboard-check"></i> {% trans "assigned_exams" context "blog.user_profile_page" %}
                         <span class="pending-badge">{{ assigned_count }}</span>
                     </a>
                 {% endif %}
 
                 <a href="{% url 'exams:student_exam_history' %}" class="profile-create-post-btn">
-                    <i class="fas fa-list-alt"></i> İmtahan Nəticələrim
+                    <i class="fas fa-list-alt"></i> {% trans "my_exam_results" context "blog.user_profile_page" %}
                 </a>
 
-                {# ═══════════════════════════════════════════════════════ #}
-                {# TƏLƏBƏ KURSLARI - YENİ                                  #}
-                {# ═══════════════════════════════════════════════════════ #}
                 {% if request.user.is_student %}
-                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981;">
-                        <i class="fas fa-graduation-cap"></i> Kurslarım
+                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981; color: white;">
+                        <i class="fas fa-graduation-cap"></i> {% trans "my_courses" context "blog.user_profile_page" %}
                         {% if student_courses_count > 0 %}
                             <span class="pending-badge">{{ student_courses_count }}</span>
                         {% endif %}
                     </a>
                 {% endif %}
 
-                {# ═══════════════════════════════════════════════════════ #}
-                {# MÜƏLLİM BUTTONLARI                                      #}
-                {# ═══════════════════════════════════════════════════════ #}
                 {% if request.user.is_teacher %}
                     <a href="{% url 'exams:teacher_exam_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-file-alt"></i> İmtahanlarım
+                        <i class="fas fa-file-alt"></i> {% trans "my_exams" context "blog.user_profile_page" %}
                     </a>
-                    
+
                     {% if pending_count > 0 %}
                         <a href="{% url 'exams:teacher_pending_attempts' %}" class="profile-create-post-btn btn-warning-pulse">
-                            <i class="fas fa-bell"></i> Yoxlanılacaq
+                            <i class="fas fa-bell"></i> {% trans "pending_review" context "blog.user_profile_page" %}
                             <span class="pending-badge">{{ pending_count }}</span>
                         </a>
                     {% endif %}
-                    
+
                     <a href="{% url 'exams:create_exam' %}" class="profile-create-post-btn">
-                        <i class="fas fa-plus-square"></i> Yeni imtahan yarat
+                        <i class="fas fa-plus-square"></i> {% trans "new_exam" context "blog.user_profile_page" %}
                     </a>
-                    
+
                     <a href="{% url 'exams:teacher_group_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-users"></i> Qruplarım
+                        <i class="fas fa-users"></i> {% trans "my_groups" context "blog.user_profile_page" %}
                     </a>
-                     
-                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9;">
-                        <i class="fas fa-graduation-cap"></i> Kurslarım
+
+                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9; color: white;">
+                        <i class="fas fa-graduation-cap"></i> {% trans "my_courses" context "blog.user_profile_page" %}
                     </a>
-                    
-                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #28a745;">
-                        <i class="fas fa-graduation-cap"></i> Yeni Kurs Yarat
+
+                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #059669; color: white;">
+                        <i class="fas fa-graduation-cap"></i> {% trans "new_course" context "blog.user_profile_page" %}
                     </a>
                 {% endif %}
-                
+
             </div>
         {% endif %}
     </header>
@@ -84,22 +85,20 @@
 
     <section class="profile-posts-section">
         {% if posts %}
-            <div class="blog-grid-container"> {# Blog kartlarını grid sistemində göstərmək üçün yeni konteyner #}
+            <div class="blog-grid-container">
                 {% for post in posts %}
                     <article class="profile-post-card">
                         {% if request.user == profile_user %}
                             <div class="post-controls">
-                                {# Status Etiketi #}
-                                <span class="post-status-badge 
+                                <span class="post-status-badge
                                     {% if post.is_published %}status-published{% else %}status-draft{% endif %}">
                                     {% if post.is_published %}
-                                        <i class="fas fa-check-circle"></i> Nəşr olunub
+                                        <i class="fas fa-check-circle"></i> {% trans "status_published" context "blog.user_profile_page" %}
                                     {% else %}
-                                        <i class="fas fa-pencil-alt"></i> Qaralama
+                                        <i class="fas fa-pencil-alt"></i> {% trans "status_draft" context "blog.user_profile_page" %}
                                     {% endif %}
                                 </span>
 
-                                {# Redaktə və Sil İkonları #}
                                 <div class="action-icons">
                                     <button class="icon-action-btn edit-btn js-edit-post"
                                             data-post-id="{{ post.pk }}"
@@ -113,64 +112,60 @@
                                             data-slug="{{ post.slug|escape }}"
                                             data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
                                             data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
-                                            title="Redaktə et">
+                                            title="{% trans 'edit_action' context 'blog.user_profile_page' %}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                
+
                                     <button class="icon-action-btn delete-btn js-open-delete"
                                             data-post-id="{{ post.pk }}"
                                             data-title="{{ post.title|escape }}"
-                                            title="Sil">
+                                            title="{% trans 'delete_action' context 'blog.user_profile_page' %}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         {% endif %}
-                        
-                        {% include "partials/_blogCard.html" with post=post %} 
+
+                        {% include "partials/_blogCard.html" with post=post %}
                     </article>
                 {% endfor %}
-            </div> {# .blog-grid-container sonu #}
+            </div>
 
-            {# Pagination partial əlavə olunur #}
             {% if posts.has_other_pages %}
                 {% include "partials/_pagination.html" with page_obj=posts %}
             {% endif %}
 
         {% else %}
-            <p class="profile-no-posts-message">Bu istifadəçinin hələ heç bir postu yoxdur.</p>
+            <p class="profile-no-posts-message">{% trans "no_posts" context "blog.user_profile_page" %}</p>
         {% endif %}
     </section>
-    
-    {# MODAL HİSSƏLƏRİ DƏYİŞMİR #}
-    {# Edit Modal #}
+
     <div id="editModal" class="modal-overlay">
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h3>Postu Redaktə Et</h3>
+                <h3>{% trans "edit_modal_title" context "blog.user_profile_page" %}</h3>
                 <button class="modal-close-btn" id="closeEditModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            {# Meta məlumat bloku #}
             <div class="form-meta">
-                <p><strong>Slug:</strong> <span id="editSlugInfo"></span></p>
-                <p><strong>Yaradılma:</strong> <span id="editCreatedAtInfo"></span></p>
-                <p><strong>Son yenilənmə:</strong> <span id="editUpdatedAtInfo"></span></p>
+                <p><strong>{% trans "meta_slug" context "blog.user_profile_page" %}</strong> <span id="editSlugInfo"></span></p>
+                <p><strong>{% trans "meta_created" context "blog.user_profile_page" %}</strong> <span id="editCreatedAtInfo"></span></p>
+                <p><strong>{% trans "meta_updated" context "blog.user_profile_page" %}</strong> <span id="editUpdatedAtInfo"></span></p>
             </div>
 
             <form id="editForm" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="editTitle">Başlıq</label>
+                    <label for="editTitle">{% trans "field_title" context "blog.user_profile_page" %}</label>
                     <input type="text" id="editTitle" name="title" class="form-control" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="editCategory">Kateqoriya</label>
+                    <label for="editCategory">{% trans "field_category" context "blog.user_profile_page" %}</label>
                     <select id="editCategory" name="category" class="form-control" required>
-                        <option value="" disabled>Kateqoriya seçin</option>
+                        <option value="" disabled>{% trans "field_category_placeholder" context "blog.user_profile_page" %}</option>
                         {% for category in categories %}
                             <option value="{{ category.id }}">{{ category.name }}</option>
                         {% endfor %}
@@ -178,71 +173,71 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="editExcerpt">Qısa məzmun</label>
+                    <label for="editExcerpt">{% trans "field_excerpt" context "blog.user_profile_page" %}</label>
                     <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="editContent">Məzmun</label>
+                    <label for="editContent">{% trans "field_content" context "blog.user_profile_page" %}</label>
                     <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
                 </div>
 
-                {# Şəkil preview + yeni şəkil + URL #}
                 <div class="form-group">
-                    <label>Mövcud şəkil</label>
+                    <label>{% trans "field_current_image" context "blog.user_profile_page" %}</label>
                     <div id="editImagePreviewWrapper" class="image-preview-wrapper">
-                        <img id="editImagePreview" src="" alt="Post şəkli" class="image-preview" style="display:none;">
-                        <p id="noImageText" class="no-image-text">Şəkil təyin edilməyib</p>
+                        <img id="editImagePreview" src="" alt="{% trans 'image_alt' context 'blog.user_profile_page' %}" class="image-preview" style="display:none;">
+                        <p id="noImageText" class="no-image-text">{% trans "no_image" context "blog.user_profile_page" %}</p>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="editImage">Yeni şəkil yüklə (optional)</label>
+                    <label for="editImage">{% trans "field_new_image" context "blog.user_profile_page" %}</label>
                     <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
                 </div>
 
                 <div class="form-group">
-                    <label for="editImageUrl">Şəkil URL (əgər fayl yoxdursa)</label>
+                    <label for="editImageUrl">{% trans "field_image_url" context "blog.user_profile_page" %}</label>
                     <input type="url" id="editImageUrl" name="image_url" class="form-control">
                 </div>
 
                 <div class="form-group form-check">
                     <label class="checkbox-label">
                         <input type="checkbox" id="editIsPublished" name="is_published">
-                        Məqalə dərc olunsun
+                        {% trans "field_publish" context "blog.user_profile_page" %}
                     </label>
                 </div>
 
                 <div class="modal-buttons">
-                    <button type="button" id="cancelEdit" class="modal-cancel-btn">Ləğv Et</button>
-                    <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>Yadda Saxla</button>
+                    <button type="button" id="cancelEdit" class="modal-cancel-btn">{% trans "cancel" context "blog.user_profile_page" %}</button>
+                    <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>{% trans "save" context "blog.user_profile_page" %}</button>
                 </div>
             </form>
         </div>
     </div>
 
 
-    {# Delete Confirmation Modal #}
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>Silinməni Təsdiqlə</h3>
-            <p>Əminsiniz ki, <span id="deleteTitle" class="fw-bold"></span> başlıqlı postu silmək istəyirsiniz?</p>
+            <h3>{% trans "delete_modal_title" context "blog.user_profile_page" %}</h3>
+            <p>
+                {% trans "delete_modal_message_prefix" context "blog.user_profile_page" %}
+                <span id="deleteTitle" class="fw-bold"></span>
+                {% trans "delete_modal_message_suffix" context "blog.user_profile_page" %}
+            </p>
             <div class="modal-buttons">
-                <button id="cancelDelete" class="modal-cancel-btn">Ləğv Et</button>
-                {# Burda .delete-btn yalnız dizayn üçündür, JS selektoru artıq .js-open-delete-dir #}
-                <button id="confirmDelete" class="modal-confirm-btn delete-btn">Sil</button>
+                <button id="cancelDelete" class="modal-cancel-btn">{% trans "cancel" context "blog.user_profile_page" %}</button>
+                <button id="confirmDelete" class="modal-confirm-btn delete-btn">{% trans "delete" context "blog.user_profile_page" %}</button>
             </div>
         </div>
     </div>
 
-    {# Unsaved Changes Warning Modal #}
     <div id="warningModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>Yadda Saxlanılmamış Dəyişikliklər</h3>
-            <p>Postda etdiyiniz dəyişikliklər yadda saxlanılmayıb. Saxlamadan çıxmaq istəyirsiniz?</p>
+            <h3>{% trans "warning_modal_title" context "blog.user_profile_page" %}</h3>
+            <p>{% trans "warning_modal_message" context "blog.user_profile_page" %}</p>
             <div class="modal-buttons">
-                <button id="stayOnModal" class="modal-cancel-btn">Qal</button>
-                <button id="discardChanges" class="modal-confirm-btn warning-btn">Saxlamadan Çıx</button>
+                <button id="stayOnModal" class="modal-cancel-btn">{% trans "stay" context "blog.user_profile_page" %}</button>
+                <button id="discardChanges" class="modal-confirm-btn warning-btn">{% trans "discard_changes" context "blog.user_profile_page" %}</button>
             </div>
         </div>
     </div>

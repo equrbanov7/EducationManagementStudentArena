@@ -3,8 +3,10 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import Exam
+from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 
 @login_required
@@ -13,20 +15,26 @@ def assigned_student_exam_list(request):
 
     # 1) BAZA SORĞUSU (İlkin Filter)
     # Fərq burdadır: yalnız user-ə təyin olunmuş aktiv imtahanlar
-    exams_qs = (
-        Exam.objects.filter(is_active=True)
-        .filter(Q(allowed_users=user) | Q(allowed_groups__students=user))
+    exams_qs = tenant_scoped_exams(
+        request,
+        Exam.objects.filter(is_active=True, is_public=False)
+        .filter(
+            Q(allowed_users=user)
+            | Q(allowed_groups__students=user)
+            | Q(
+                course__memberships__user=user,
+                course__memberships__role="student",
+                course__status="published",
+            )
+        )
         .distinct()
-        .select_related("author")
+        .select_related("author"),
     )
 
     # --- SEARCH (Axtarış) ---
     search_query = request.GET.get("q")
     if search_query:
-        exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query)
-            | Q(author__username__icontains=search_query)
-        )
+        exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")
@@ -58,11 +66,11 @@ def assigned_student_exam_list(request):
 
         # ekrandakı status yazısı
         if exam.access_code:
-            access_label = "Kod tələb olunur"
+            access_label = pgettext("exams.view.student.list.label", "access_code_required")
         elif exam.is_public:
-            access_label = "Hamı üçün açıq"
+            access_label = pgettext("exams.view.student.list.label", "access_public")
         else:
-            access_label = "Yalnız icazəli istifadəçilər"
+            access_label = pgettext("exams.view.student.list.label", "access_allowed_only")
 
         exam_items.append(
             {
@@ -87,7 +95,7 @@ def assigned_student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
-        "page_title": "Təyin olunmuş imtahanlarım",
+        "page_title": pgettext_lazy("exams.view.student.list.title", "assigned_exams"),
         "current_url_name": "assigned_exam_list",
     }
 
@@ -100,21 +108,29 @@ def student_exam_list(request):
     now = timezone.now()
 
     # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
-    exams_qs = (
+    exams_qs = tenant_scoped_exams(
+        request,
         Exam.objects.filter(is_active=True)
         .filter(
-            Q(end_datetime__isnull=True) | Q(end_datetime__gte=now)
-        )  # ✅ keçmişləri gizlədir
-        .select_related("author")
+            Q(is_public=True)
+            | Q(allowed_users=user)
+            | Q(allowed_groups__students=user)
+            | Q(
+                course__memberships__user=user,
+                course__memberships__role="student",
+                course__status="published",
+            )
+            | Q(author=user)
+        )
+        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
+        .distinct()
+        .select_related("author"),
     )
 
     # --- SEARCH ---
     search_query = request.GET.get("q")
     if search_query:
-        exams_qs = exams_qs.filter(
-            Q(title__icontains=search_query)
-            | Q(author__username__icontains=search_query)
-        )
+        exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
 
     # --- FILTER (Tipə görə) ---
     filter_type = request.GET.get("type")
@@ -141,11 +157,11 @@ def student_exam_list(request):
         requires_code = bool(exam.access_code and not can_without_code)
 
         if exam.access_code:
-            access_label = "Kod tələb olunur"
+            access_label = pgettext("exams.view.student.list.label", "access_code_required")
         elif exam.is_public:
-            access_label = "Hamı üçün açıq"
+            access_label = pgettext("exams.view.student.list.label", "access_public")
         else:
-            access_label = "Yalnız icazəli istifadəçilər"
+            access_label = pgettext("exams.view.student.list.label", "access_allowed_only")
 
         exam_items.append(
             {
@@ -169,6 +185,7 @@ def student_exam_list(request):
     context = {
         "page_obj": page_obj,
         "exam_items": page_obj,
+        "page_title": pgettext_lazy("exams.view.student.list.title", "available_exams"),
         "current_url_name": "student_exam_list",
     }
 

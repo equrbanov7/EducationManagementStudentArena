@@ -7,9 +7,6 @@ import re
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
-import qrcode
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core import signing
@@ -17,7 +14,12 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
+
+import qrcode
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -72,6 +74,31 @@ def _get_client_id(request) -> str:
     return cid or uuid.uuid4().hex
 
 
+def _get_public_base_url(request) -> str:
+    """
+    Join link/QR üçün public base URL:
+    1) LIVE_EXAM_PUBLIC_HOST (tam URL və ya host:port)
+    2) LAN_HOST (geri uyğunluq)
+    3) request-in real host/scheme-i
+    """
+    configured = (
+        getattr(settings, "LIVE_EXAM_PUBLIC_HOST", None) or getattr(settings, "LAN_HOST", None) or ""
+    ).strip()
+
+    if configured:
+        configured = configured.rstrip("/")
+        if configured.startswith(("http://", "https://")):
+            return configured
+        scheme = "https" if request.is_secure() else "http"
+        return f"{scheme}://{configured}"
+
+    return request.build_absolute_uri("/").rstrip("/")
+
+
+def _build_join_url(request, session: LiveSession) -> str:
+    return f"{_get_public_base_url(request)}{session.join_url_path()}"
+
+
 # ------------------------
 # Broadcast (Channels group_send)
 # ------------------------
@@ -99,24 +126,14 @@ def _broadcast(pin: str, payload: dict, group_suffix: str) -> None:
 
 
 def _serialize_players(session: LiveSession, limit: int = 50) -> List[Dict[str, Any]]:
-    return list(
-        session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[
-            :limit
-        ]
-    )
+    return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[:limit])
 
 
 def _serialize_top(session: LiveSession, limit: int = 10) -> List[Dict[str, Any]]:
-    return list(
-        session.players.order_by("-score", "created_at").values(
-            "nickname", "avatar_key", "score"
-        )[:limit]
-    )
+    return list(session.players.order_by("-score", "created_at").values("nickname", "avatar_key", "score")[:limit])
 
 
-def _serialize_question_results(
-    session: LiveSession, question_id: int, limit: int = 50
-) -> List[Dict[str, Any]]:
+def _serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
     Reveal zamanı: bu sual üzrə kim nə qədər bal aldı, total score nədir.
     """
@@ -164,11 +181,7 @@ def _get_exam_question_ids(session: LiveSession) -> List[int]:
     Exam-dəki bütün ExamQuestion id-ləri (sıra ilə).
     Səndə order field var deyə: order, id.
     """
-    return list(
-        ExamQuestion.objects.filter(exam=session.exam)
-        .order_by("order", "id")
-        .values_list("id", flat=True)
-    )
+    return list(ExamQuestion.objects.filter(exam=session.exam).order_by("order", "id").values_list("id", flat=True))
 
 
 def _get_total_questions(session: LiveSession) -> int:
@@ -300,9 +313,7 @@ def _build_options(eq, *, seed: int | None = None):
     """
     letters = ["A", "B", "C", "D", "E", "F"]
 
-    qs = ExamQuestionOption.objects.filter(question=eq).order_by(
-        "id"
-    )  # baza stabil olsun
+    qs = ExamQuestionOption.objects.filter(question=eq).order_by("id")  # baza stabil olsun
 
     opts = list(qs)
 
@@ -311,10 +322,8 @@ def _build_options(eq, *, seed: int | None = None):
 
     out = []
     for i, opt in enumerate(opts):
-        label = _get_option_label(opt) or (
-            letters[i] if i < len(letters) else str(i + 1)
-        )
-        text = _get_option_text(opt) or f"Variant {label}"
+        label = _get_option_label(opt) or (letters[i] if i < len(letters) else str(i + 1))
+        text = _get_option_text(opt) or pgettext("live_exam.view.option", "option_fallback_text").format(label=label)
         out.append({"id": opt.id, "label": label, "text": text})
     return out
 
@@ -329,11 +338,7 @@ def _detect_multi(eq: ExamQuestion) -> Tuple[bool, int, List[int]]:
     - eq.max_select varsa götür
     - yoxdursa correct_count
     """
-    correct_ids = list(
-        ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list(
-            "id", flat=True
-        )
-    )
+    correct_ids = list(ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list("id", flat=True))
     correct_count = len(correct_ids)
 
     flags = [
@@ -358,9 +363,7 @@ def _detect_multi(eq: ExamQuestion) -> Tuple[bool, int, List[int]]:
 # ------------------------
 
 
-def _build_question_payload(
-    session: LiveSession, eq: ExamQuestion, idx: int, total: int
-):
+def _build_question_payload(session: LiveSession, eq: ExamQuestion, idx: int, total: int):
     time_limit = _question_time_limit(session, eq)
     now = timezone.now()
     ends = now + timezone.timedelta(seconds=time_limit)
@@ -396,7 +399,7 @@ def _build_reveal_payload(session: LiveSession, question_id: int) -> Dict[str, A
     """
     eq = ExamQuestion.objects.filter(exam=session.exam, id=question_id).first()
     if not eq:
-        return {"type": "error", "message": "Question not found"}
+        return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
     _, _, correct_ids = _detect_multi(eq)
 
@@ -458,10 +461,10 @@ def live_create_session_by_slug(request, slug):
     exam = get_object_or_404(Exam, slug=slug)
 
     if not getattr(request.user, "is_teacher", False):
-        raise Http404("Only teacher can create live session.")
+        raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
 
     if exam.author != request.user:
-        raise Http404("Only exam author can host live session.")
+        raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
     return redirect("liveExam:host_lobby", pin=session.pin)
@@ -472,12 +475,9 @@ def live_host_lobby(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
     if session.host_user != request.user:
-        raise Http404("Not allowed.")
+        raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    host = getattr(settings, "LAN_HOST", None) or request.get_host()
-    join_url = (
-        f"http://{host}{reverse('liveExam:join_page', kwargs={'pin': session.pin})}"
-    )
+    join_url = _build_join_url(request, session)
 
     exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
 
@@ -513,7 +513,10 @@ def live_join_enter(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
     if session.is_locked:
-        return JsonResponse({"ok": False, "message": "Lobby kilidlənib."}, status=403)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "lobby_locked")},
+            status=403,
+        )
 
     nickname = _clean_nickname(request.POST.get("nickname"))
     avatar_key = request.POST.get("avatar_key") or "avatar_1"
@@ -522,7 +525,8 @@ def live_join_enter(request, pin):
 
     if not nickname:
         return JsonResponse(
-            {"ok": False, "message": "Nickname boş ola bilməz."}, status=400
+            {"ok": False, "message": pgettext("live_exam.view.message", "nickname_required")},
+            status=400,
         )
 
     client_id = _get_client_id(request)
@@ -534,9 +538,7 @@ def live_join_enter(request, pin):
         player.avatar_key = avatar_key
         player.is_connected = True
         player.last_seen = now
-        player.save(
-            update_fields=["nickname", "avatar_key", "is_connected", "last_seen"]
-        )
+        player.save(update_fields=["nickname", "avatar_key", "is_connected", "last_seen"])
     else:
         player = LivePlayer.objects.create(
             session=session,
@@ -566,12 +568,8 @@ def live_join_enter(request, pin):
     wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
-    resp.set_cookie(
-        "live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax"
-    )
-    resp.set_cookie(
-        PLAYER_COOKIE_NAME, token, max_age=60 * 60 * 6, samesite="Lax", httponly=True
-    )
+    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax")
+    resp.set_cookie(PLAYER_COOKIE_NAME, token, max_age=60 * 60 * 6, samesite="Lax", httponly=True)
 
     return resp
 
@@ -591,8 +589,7 @@ def live_join_enter(request, pin):
 def live_qr_png(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
-    host = getattr(settings, "LAN_HOST", None) or request.get_host()
-    join_url = f"http://{host}{session.join_url_path()}"
+    join_url = _build_join_url(request, session)
 
     img = qrcode.make(join_url)
     buf = io.BytesIO()
@@ -612,9 +609,7 @@ def live_wait_room(request, pin):
         {
             "session": session,
             "players": players,
-            "player_screen_url": reverse(
-                "liveExam:player_screen", kwargs={"pin": session.pin}
-            ),
+            "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
         },
     )
 
@@ -640,14 +635,8 @@ def live_state_json(request, pin):
         "state": session.state,
         "current_index": int(session.current_index or 0),
         "total_questions": total,
-        "question_started_at": (
-            session.question_started_at.isoformat()
-            if session.question_started_at
-            else None
-        ),
-        "question_ends_at": (
-            session.question_ends_at.isoformat() if session.question_ends_at else None
-        ),
+        "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
+        "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
     }
 
     idx = int(session.current_index or 0)
@@ -686,9 +675,7 @@ def live_state_json(request, pin):
     data["question"] = question
 
     # reveal-də correct ids lazımdır
-    data["correct_option_ids"] = (
-        correct_ids if session.state == LiveSession.STATE_REVEAL else []
-    )
+    data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
 
     return JsonResponse(data)
 
@@ -713,7 +700,8 @@ def host_start_game(request, pin):
 
     if total_in_exam <= 0:
         return JsonResponse(
-            {"ok": False, "message": "Bu imtahanda sual yoxdur."}, status=400
+            {"ok": False, "message": pgettext("live_exam.view.message", "no_questions_in_exam")},
+            status=400,
         )
 
     desired = None
@@ -722,19 +710,24 @@ def host_start_game(request, pin):
             desired = int(raw)
         except Exception:
             return JsonResponse(
-                {"ok": False, "message": "Sual sayı düzgün deyil."}, status=400
+                {"ok": False, "message": pgettext("live_exam.view.message", "invalid_question_count")},
+                status=400,
             )
 
         if desired <= 0:
             return JsonResponse(
-                {"ok": False, "message": "Sual sayı 1-dən böyük olmalıdır."}, status=400
+                {"ok": False, "message": pgettext("live_exam.view.message", "question_count_minimum")},
+                status=400,
             )
 
         if desired > total_in_exam:
             return JsonResponse(
                 {
                     "ok": False,
-                    "message": f"Bu imtahanda cəmi {total_in_exam} sual var. {desired} seçilə bilməz.",
+                    "message": pgettext("live_exam.view.message", "question_count_exceeds_total").format(
+                        total_in_exam=total_in_exam,
+                        desired=desired,
+                    ),
                 },
                 status=400,
             )
@@ -778,12 +771,13 @@ def host_start_game(request, pin):
     # 5) Start basan kimi 1-ci sualı publish et
     eq = _get_question_by_index(session, 0)
     if not eq:
-        return JsonResponse({"ok": False, "message": "Sual tapılmadı."}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "question_not_found")},
+            status=400,
+        )
 
     total = _get_total_questions(session)
-    payload, now, ends = _build_question_payload(
-        session=session, eq=eq, idx=0, total=total
-    )
+    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=0, total=total)
 
     session.question_started_at = now
     session.question_ends_at = ends
@@ -822,14 +816,10 @@ def host_next_question(request, pin):
         session.state = LiveSession.STATE_FINISHED
         session.save(update_fields=["state"])
 
-        _broadcast(
-            pin, {"type": "finished", "top": _serialize_top(session, limit=50)}, "play"
-        )
+        _broadcast(pin, {"type": "finished", "top": _serialize_top(session, limit=50)}, "play")
         return JsonResponse({"ok": True, "finished": True})
 
-    payload, now, ends = _build_question_payload(
-        session=session, eq=eq, idx=idx, total=total
-    )
+    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=idx, total=total)
 
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = now
@@ -859,15 +849,12 @@ def host_reveal(request, pin):
     eq = _get_question_by_index(session, idx)
     if not eq:
         return JsonResponse(
-            {"ok": False, "message": "Aktiv sual tapılmadı."}, status=400
+            {"ok": False, "message": pgettext("live_exam.view.message", "active_question_not_found")},
+            status=400,
         )
 
     # ✅ multi-choice üçün: bir neçə correct ola bilər
-    correct_ids = list(
-        ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list(
-            "id", flat=True
-        )
-    )
+    correct_ids = list(ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list("id", flat=True))
 
     session.state = LiveSession.STATE_REVEAL
     session.save(update_fields=["state"])

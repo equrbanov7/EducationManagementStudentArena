@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.permission_editor_page" %} - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-key"></i> {% trans "heading" context "accounts.permission_editor_page" %}
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.permission_editor_page" %}
+            </a>
+        </div>
+
+        {% include "accounts/partials/_permission_editor_content.html" %}
+    </div>
+</div>
+{% endblock %}

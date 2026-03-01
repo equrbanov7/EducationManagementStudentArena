@@ -1,0 +1,8 @@
+.profile-form-grid {
+    margin-bottom: 2rem;
+}
+
+.profile-form-actions {
+    display: flex;
+    gap: 1rem;
+}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Abunə Ol | Ən son yenilikləri qaçırma{% endblock %}
+{% block title %}{% trans "title" context "blog.subscribe_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/subscribe.css' %}">
@@ -10,18 +10,18 @@
 {% block content %}
 <div class="subscribe-container">
     <div class="subscribe-box">
-        
+
         <header class="subscribe-header">
-            <h1>Yeniliklərdən İlk Siz Xəbərdar Olun!</h1>
+            <h1>{% trans "heading" context "blog.subscribe_page" %}</h1>
             <p class="subscribe-lead">
-                Həftəlik ən maraqlı texnologiya xəbərləri, proqramlaşdırma dərsləri və eksklüziv məqalələr birbaşa poçt qutunuzda.
+                {% trans "lead" context "blog.subscribe_page" %}
             </p>
         </header>
 
         <ul class="subscribe-benefits">
-            <li>Həftədə sadəcə bir dəfə, yığcam e-poçt</li>
-            <li>Yeni məqalələrdən anında xəbər tutmaq imkanı</li>
-            <li>Eksklüziv kontent və endirimlər</li>
+            <li>{% trans "benefit_1" context "blog.subscribe_page" %}</li>
+            <li>{% trans "benefit_2" context "blog.subscribe_page" %}</li>
+            <li>{% trans "benefit_3" context "blog.subscribe_page" %}</li>
         </ul>
 
         {% if messages %}
@@ -36,10 +36,10 @@
 
         <form method="post" class="subscribe-form" novalidate>
             {% csrf_token %}
-            
+
             <div class="form-group">
                 {{ form.email }}
-                
+
                 {% if form.email.errors %}
                     <div style="color: #991b1b; font-size: 0.9rem; margin-top: 5px; text-align: left;">
                         {{ form.email.errors.0 }}
@@ -47,10 +47,11 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn-subscribe">İndi Abunə Ol</button>        </form>
+            <button type="submit" class="btn-subscribe">{% trans "submit" context "blog.subscribe_page" %}</button>
+        </form>
 
         <p class="privacy-note">
-            *Biz spam göndərmirik. İstədiyiniz vaxt abunəlikdən çıxa bilərsiniz.
+            {% trans "privacy_note" context "blog.subscribe_page" %}
         </p>
     </div>
 </div>

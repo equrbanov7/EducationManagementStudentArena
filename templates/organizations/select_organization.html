@@ -1,0 +1,223 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "page_title" context "organizations.select" %} - EMS Arena</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .org-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .org-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .org-card:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .org-card.active {
+            border-color: #059669;
+            background-color: #f0fdf4;
+        }
+
+        .org-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .org-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .org-type {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .org-roles {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-top: 4px;
+        }
+
+        .no-orgs {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .no-orgs-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .current-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #059669;
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 12px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .org-header {
+                flex-direction: column;
+            }
+
+            .org-type {
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{% trans "heading" context "organizations.select" %}</h1>
+        <p class="subtitle">{% trans "subtitle" context "organizations.select" %}</p>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if organizations %}
+        <div class="org-list">
+            {% for org_data in organizations %}
+            <a href="{% url 'organizations:switch' org_data.organization.slug %}?next={{ request.GET.next|default:'/' }}" 
+               class="org-card {% if org_data.organization == current_org %}active{% endif %}">
+                <div class="org-header">
+                    <div>
+                        <div class="org-name">
+                            {{ org_data.organization.name }}
+                            {% if org_data.organization == current_org %}
+                            <span class="current-badge">{% trans "current_badge" context "organizations.select" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="org-type">{{ org_data.organization.get_org_type_display }}</span>
+                </div>
+                <div class="org-roles">
+                    <strong>{% trans "your_roles_label" context "organizations.select" %}</strong>
+                    {% for membership in org_data.memberships %}
+                    <span class="role-badge">{{ membership.role.display_name }}</span>
+                    {% endfor %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-orgs">
+            <div class="no-orgs-icon">📚</div>
+            <h2>{% trans "empty_title" context "organizations.select" %}</h2>
+            <p>{% trans "empty_subtitle" context "organizations.select" %}</p>
+            <p style="margin-top: 12px;">{% trans "empty_help" context "organizations.select" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

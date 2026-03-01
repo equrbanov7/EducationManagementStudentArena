@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.student_dashboard" %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="student-dashboard">
+    <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>{% trans "heading" context "accounts.student_dashboard" %}</h1>
+            <p class="text-muted mb-0">{% trans "welcome" context "accounts.student_dashboard" %}, {{ request.user.get_full_name|default:request.user.username }}!</p>
+            <div class="quick-actions">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-action">
+                    <i class="fas fa-user me-2"></i>{% trans "btn_profile" context "accounts.student_dashboard" %}
+                </a>
+                <a href="{% url 'courses:student_courses' %}" class="btn btn-outline-primary btn-action">
+                    <i class="fas fa-book me-2"></i>{% trans "btn_courses" context "accounts.student_dashboard" %}
+                </a>
+                <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-primary btn-action">
+                    <i class="fas fa-file-alt me-2"></i>{% trans "btn_exams" context "accounts.student_dashboard" %}
+                </a>
+            </div>
+        </div>
+        
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Enrolled Courses -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon courses">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">{% trans "widget_courses_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ enrolled_courses|length }} {% trans "course_unit" context "accounts.student_dashboard" %}</small>
+                    </div>
+                </div>
+                {% if enrolled_courses %}
+                    <div>
+                        {% for course in enrolled_courses %}
+                        <div class="course-item">
+                            <div class="item-title">
+                                <a href="{% url 'courses:course_dashboard' course.id %}?from_section=assigned-courses&return_to={{ request.get_full_path|urlencode }}" class="text-decoration-none">
+                                    {{ course.title }}
+                                </a>
+                            </div>
+                            <div class="item-meta">
+                                <i class="fas fa-user text-muted me-1"></i>{{ course.owner.username }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'courses:student_courses' %}" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                        {% trans "view_all" context "accounts.student_dashboard" %}
+                    </a>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>{% trans "empty_courses" context "accounts.student_dashboard" %}</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pending Assignments -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon assignments">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">{% trans "widget_assignments_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ pending_assignments|length }} {% trans "pending_unit" context "accounts.student_dashboard" %}</small>
+                    </div>
+                </div>
+                {% if pending_assignments %}
+                    <div>
+                        {% for assignment in pending_assignments %}
+                        <div class="assignment-item">
+                            <div class="item-title">
+                                <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="text-decoration-none">
+                                    {{ assignment.title }}
+                                </a>
+                            </div>
+                            <div class="item-meta">
+                                {{ assignment.course.title }}
+                            </div>
+                            {% if assignment.deadline %}
+                            <span class="deadline-badge 
+                                {% if assignment.deadline|timeuntil == '1 gün' %}urgent
+                                {% elif assignment.deadline|timeuntil == '3 gün' %}soon
+                                {% else %}normal{% endif %}">
+                                <i class="fas fa-clock me-1"></i>{{ assignment.deadline|date:"d M" }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>{% trans "empty_assignments" context "accounts.student_dashboard" %}</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Upcoming Exams -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon exams">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">{% trans "widget_upcoming_exams_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ upcoming_exams|length }} {% trans "exam_unit" context "accounts.student_dashboard" %}</small>
+                    </div>
+                </div>
+                {% if upcoming_exams %}
+                    <div>
+                        {% for exam in upcoming_exams %}
+                        <div class="exam-item">
+                            <div class="item-title">
+                                {{ exam.title }}
+                            </div>
+                            <div class="item-meta">
+                                <i class="fas fa-calendar text-muted me-1"></i>
+                                {{ exam.start_date|date:"d M Y, H:i" }}
+                            </div>
+                            <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-primary mt-2">
+                                <i class="fas fa-play me-1"></i>{% trans "start_exam" context "accounts.student_dashboard" %}
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>{% trans "empty_upcoming_exams" context "accounts.student_dashboard" %}</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Recent Grades -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <div class="widget-icon grades">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <div class="widget-title">{% trans "widget_recent_grades_title" context "accounts.student_dashboard" %}</div>
+                        <small class="text-muted">{{ recent_grades|length }} {% trans "answer_unit" context "accounts.student_dashboard" %}</small>
+                    </div>
+                </div>
+                {% if recent_grades %}
+                    <div>
+                        {% for submission in recent_grades %}
+                        <div class="grade-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="item-title">{{ submission.assignment.title }}</div>
+                                    <div class="item-meta">{{ submission.graded_at|date:"d M Y" }}</div>
+                                </div>
+                                <span class="grade-badge 
+                                    {% if submission.grade >= 90 %}excellent
+                                    {% elif submission.grade >= 70 %}good
+                                    {% elif submission.grade >= 50 %}average
+                                    {% else %}poor{% endif %}">
+                                    {{ submission.grade }}
+                                </span>
+                            </div>
+                            {% if submission.feedback %}
+                            <div class="mt-2 text-muted small">
+                                <i class="fas fa-comment me-1"></i>{{ submission.feedback|truncatewords:10 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>{% trans "empty_recent_grades" context "accounts.student_dashboard" %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

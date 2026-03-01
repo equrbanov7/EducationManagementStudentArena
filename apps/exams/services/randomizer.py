@@ -81,10 +81,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
                         continue
                     selected_qs.append(q)
                     picked_ids.add(q.id)
-                    if (
-                        len(selected_qs) >= total_needed
-                        or len(selected_qs) - len(picked_ids) >= take
-                    ):
+                    if len(selected_qs) >= total_needed or len(selected_qs) - len(picked_ids) >= take:
                         # yuxarıdakı “take” limitini yumşaq saxlayırıq,
                         # əsas məqsəd total_needed-ə çatmaqdır
                         pass

@@ -10,12 +10,18 @@ Kurs işləri üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+from datetime import timedelta
+from urllib.parse import urlencode, urlsplit
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import Course, CourseMembership
@@ -23,6 +29,57 @@ from apps.courses.models import Course, CourseMembership
 from .models import Project, ProjectSubmission
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _project_back_url(request, project):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": project.course.id})
+
+
+def _teacher_review_back_url(request, project):
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if explicit_return_url:
+        return explicit_return_url
+
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section in {"pending-review", "review-results"}:
+        return f"{reverse('accounts:profile')}?section={source_section}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": project.course.id})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -46,8 +103,11 @@ def create_project(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     # İcazə yoxlaması - yalnız kurs sahibi
-    if not request.user.is_teacher or course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext("projects.views.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         # Project yarat
@@ -83,7 +143,7 @@ def create_project(request, course_id):
             ).distinct()
             project.assigned_students.set(group_students)
 
-        messages.success(request, "Kurs işi uğurla yaradıldı!")
+        messages.success(request, pgettext("projects.views.message", "project_created"))
         return JsonResponse({"success": True, "project_id": project.id})
 
     except Exception as e:
@@ -103,25 +163,22 @@ def edit_project(request, pk):
     project = get_object_or_404(Project, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or project.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext("projects.views.message", "permission_denied")},
+            status=403,
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # GET - Mövcud məlumatları JSON olaraq qaytar
     # ─────────────────────────────────────────────────────────────────────────
     if request.method == "GET":
-        assigned_students = list(
-            project.assigned_students.values(
-                "id", "username", "first_name", "last_name"
-            )
-        )
+        assigned_students = list(project.assigned_students.values("id", "username", "first_name", "last_name"))
         assigned_student_ids = [s["id"] for s in assigned_students]
 
         # Tələbələrin qruplarını tap
         assigned_groups = list(
-            CourseMembership.objects.filter(
-                course=project.course, user_id__in=assigned_student_ids, role="student"
-            )
+            CourseMembership.objects.filter(course=project.course, user_id__in=assigned_student_ids, role="student")
             .exclude(group_name="")
             .values_list("group_name", flat=True)
             .distinct()
@@ -131,14 +188,8 @@ def edit_project(request, pk):
             "id": project.id,
             "title": project.title,
             "description": project.description,
-            "start_date": (
-                project.start_date.strftime("%Y-%m-%dT%H:%M")
-                if project.start_date
-                else ""
-            ),
-            "deadline": (
-                project.deadline.strftime("%Y-%m-%dT%H:%M") if project.deadline else ""
-            ),
+            "start_date": (project.start_date.strftime("%Y-%m-%dT%H:%M") if project.start_date else ""),
+            "deadline": (project.deadline.strftime("%Y-%m-%dT%H:%M") if project.deadline else ""),
             "max_attempts": project.max_attempts,
             "max_score": project.max_score,
             "status": project.status,
@@ -147,8 +198,7 @@ def edit_project(request, pk):
             "students": [
                 {
                     "id": s["id"],
-                    "name": f"{s['first_name']} {s['last_name']}".strip()
-                    or s["username"],
+                    "name": f"{s['first_name']} {s['last_name']}".strip() or s["username"],
                 }
                 for s in assigned_students
             ],
@@ -190,8 +240,8 @@ def edit_project(request, pk):
         else:
             project.assigned_students.clear()
 
-        messages.success(request, "Kurs işi yeniləndi!")
-        return JsonResponse({"success": True, "message": "Kurs işi yeniləndi"})
+        messages.success(request, pgettext("projects.views.message", "project_updated"))
+        return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_updated")})
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
@@ -208,13 +258,16 @@ def delete_project(request, pk):
     """
     project = get_object_or_404(Project, id=pk)
 
-    if not request.user.is_teacher or project.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext("projects.views.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         project.delete()
-        messages.success(request, "Kurs işi silindi!")
-        return JsonResponse({"success": True, "message": "Silindi"})
+        messages.success(request, pgettext("projects.views.message", "project_deleted"))
+        return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_deleted")})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
@@ -245,13 +298,11 @@ def project_detail(request, pk):
     if getattr(request.user, "is_student", False):
         has_access = project.assigned_students.filter(id=request.user.id).exists()
         if not has_access:
-            messages.error(request, "Bu kurs işinə giriş icazəniz yoxdur")
+            messages.error(request, pgettext("projects.views.message", "no_project_access"))
             return redirect("courses:course_dashboard", course_id=project.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = project.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    user_submissions = project.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = user_submissions.count()
 
     context = {
@@ -260,6 +311,7 @@ def project_detail(request, pk):
         "user_attempts": user_attempts,
         "can_submit": project.can_user_submit(request.user),
         "attempts_left": project.max_attempts - user_attempts,
+        "back_url": _project_back_url(request, project),
     }
 
     return render(request, "projects/project_detail.html", context)
@@ -283,7 +335,7 @@ def submit_project(request, pk):
         return JsonResponse(
             {
                 "success": False,
-                "error": "Təqdim etmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib.",
+                "error": pgettext("projects.views.message", "submit_not_allowed"),
             },
             status=400,
         )
@@ -300,11 +352,11 @@ def submit_project(request, pk):
             submission.file = request.FILES["file"]
             submission.save()
 
-        messages.success(request, "Layihəniz təqdim edildi!")
+        messages.success(request, pgettext("projects.views.message", "project_submitted"))
         return JsonResponse(
             {
                 "success": True,
-                "message": "Layihə təqdim edildi",
+                "message": pgettext("projects.views.message", "project_submitted"),
                 "submission_id": submission.id,
             }
         )
@@ -333,13 +385,11 @@ def my_submissions(request, pk):
     # İcazə yoxlaması - yalnız özünə təyin olunmuş project-lərə baxa bilər
     # ─────────────────────────────────────────────────────────────────────────
     if not project.assigned_students.filter(id=request.user.id).exists():
-        messages.error(request, "Bu kurs işinə giriş icazəniz yoxdur")
+        messages.error(request, pgettext("projects.views.message", "no_project_access"))
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
     # İstifadəçinin cavablarını al
-    submissions = project.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    submissions = project.submissions.filter(student=request.user).order_by("-submitted_at")
     user_attempts = submissions.count()
 
     context = {
@@ -374,17 +424,19 @@ def review_submissions(request, pk):
     project = get_object_or_404(Project, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or project.course.owner != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+    if not request.user.is_teacher_or_above or project.course.owner != request.user:
+        messages.error(request, pgettext("projects.views.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
-    submissions = project.submissions.select_related("student").order_by(
-        "-submitted_at"
-    )
+    submissions = project.submissions.select_related("student").order_by("-submitted_at")
+    selected_submission_raw = (request.GET.get("submission") or "").strip()
+    selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
 
     context = {
         "project": project,
         "submissions": submissions,
+        "selected_submission_id": selected_submission_id,
+        "back_url": _teacher_review_back_url(request, project),
     }
 
     return render(request, "projects/review_submissions.html", context)
@@ -404,19 +456,33 @@ def grade_submission(request, pk):
     submission = get_object_or_404(ProjectSubmission, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or submission.project.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or submission.project.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext("projects.views.message", "permission_denied")},
+            status=403,
+        )
+
+    if (
+        submission.status == "graded"
+        and submission.graded_at
+        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    ):
+        return JsonResponse(
+            {"success": False, "error": "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil."},
+            status=400,
+        )
 
     try:
         submission.grade = request.POST.get("grade")
         submission.feedback = request.POST.get("feedback", "")
         submission.status = "graded"
-        submission.graded_at = timezone.now()
+        if not submission.graded_at:
+            submission.graded_at = timezone.now()
         submission.graded_by = request.user
         submission.save()
 
-        messages.success(request, "Qiymət verildi!")
-        return JsonResponse({"success": True, "message": "Qiymətləndirildi"})
+        messages.success(request, pgettext("projects.views.message", "grade_given"))
+        return JsonResponse({"success": True, "message": pgettext("projects.views.message", "grade_given")})
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
@@ -452,9 +518,7 @@ def api_get_groups(request):
         .order_by("group_name")
     )
 
-    return JsonResponse(
-        {"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]}
-    )
+    return JsonResponse({"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]})
 
 
 @login_required
@@ -479,9 +543,7 @@ def api_get_students(request):
 
     # Qruplardakı tələbələri tap
     memberships = (
-        CourseMembership.objects.filter(
-            course=course, group_name__in=group_names, role="student"
-        )
+        CourseMembership.objects.filter(course=course, group_name__in=group_names, role="student")
         .select_related("user")
         .order_by("group_name", "user__first_name")
     )

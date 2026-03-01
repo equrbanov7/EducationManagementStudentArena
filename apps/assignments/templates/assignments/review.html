@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}Sərbəst İşlər - {{ course.title }}{% endblock %}
+{% block title %}{% trans "page_title_suffix" context "assignment.legacy.review" %} - {{ course.title }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{{ course.title }} - Sərbəst İşlər</h2>
+        <h2>{{ course.title }} - {% trans "heading_suffix" context "assignment.legacy.review" %}</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
-            <i class="bi bi-plus-circle"></i> Əlavə Et
+            <i class="bi bi-plus-circle"></i> {% trans "add" context "assignment.legacy.review" %}
         </button>
     </div>
 
@@ -16,7 +17,7 @@
     <form method="get" class="mb-4">
         <div class="input-group">
             <input type="text" name="group_search" class="form-control" 
-                   placeholder="Qrup ilə axtar..." value="{{ group_search }}">
+                   placeholder="{% trans 'placeholder_search_group' context 'assignment.legacy.review' %}" value="{{ group_search }}">
             <button class="btn btn-outline-secondary" type="submit">
                 <i class="bi bi-search"></i>
             </button>
@@ -29,12 +30,12 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Ad</th>
-                        <th>Status</th>
-                        <th>Son Tarix</th>
-                        <th>Cavablar</th>
-                        <th>Hədəf Qruplar</th>
-                        <th>Əməliyyatlar</th>
+                        <th>{% trans "table_name" context "assignment.legacy.review" %}</th>
+                        <th>{% trans "table_status" context "assignment.legacy.review" %}</th>
+                        <th>{% trans "table_due_date" context "assignment.legacy.review" %}</th>
+                        <th>{% trans "table_answers" context "assignment.legacy.review" %}</th>
+                        <th>{% trans "table_target_groups" context "assignment.legacy.review" %}</th>
+                        <th>{% trans "table_actions" context "assignment.legacy.review" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,23 +48,23 @@
                         </td>
                         <td>
                             {% if assignment.status == 'active' %}
-                                <span class="badge bg-success">Aktiv</span>
+                                <span class="badge bg-success">{% trans "status_active" context "assignment.legacy.review" %}</span>
                             {% elif assignment.status == 'closed' %}
-                                <span class="badge bg-secondary">Bağlı</span>
+                                <span class="badge bg-secondary">{% trans "status_closed" context "assignment.legacy.review" %}</span>
                             {% else %}
-                                <span class="badge bg-dark">Arxiv</span>
+                                <span class="badge bg-dark">{% trans "status_archived" context "assignment.legacy.review" %}</span>
                             {% endif %}
                         </td>
                         <td>
                             {{ assignment.deadline|date:"d.m.Y H:i" }}
                             {% if assignment.is_deadline_passed %}
-                                <br><small class="text-danger">Keçib</small>
+                                <br><small class="text-danger">{% trans "deadline_passed" context "assignment.legacy.review" %}</small>
                             {% endif %}
                         </td>
                         <td>
                             <span class="badge bg-info">{{ assignment.get_submissions_count }}</span>
                             {% if assignment.get_pending_submissions > 0 %}
-                                <span class="badge bg-warning">{{ assignment.get_pending_submissions }} gözləyir</span>
+                                <span class="badge bg-warning">{{ assignment.get_pending_submissions }} {% trans "pending_waiting" context "assignment.legacy.review" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -72,7 +73,7 @@
                                     <span class="badge bg-primary">{{ group }}</span>
                                 {% endfor %}
                             {% else %}
-                                <span class="text-muted">Hamısı</span>
+                                <span class="text-muted">{% trans "all_groups" context "assignment.legacy.review" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -86,14 +87,14 @@
                             </button>
                             <a href="{% url 'assignments:review' assignment.id %}" 
                                class="btn btn-sm btn-info">
-                                <i class="bi bi-eye"></i> Bax
+                                <i class="bi bi-eye"></i> {% trans "view" context "assignment.legacy.review" %}
                             </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="6" class="text-center text-muted">
-                            Heç bir sərbəst iş tapılmadı
+                            {% trans "empty_not_found" context "assignment.legacy.review" %}
                         </td>
                     </tr>
                     {% endfor %}

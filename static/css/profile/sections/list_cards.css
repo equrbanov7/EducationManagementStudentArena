@@ -1,0 +1,73 @@
+.posts-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.post-item {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: var(--bg-page);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-item:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: #cbd5e1;
+}
+
+.post-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--light-blue);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-blue);
+    flex-shrink: 0;
+}
+
+.post-icon--course {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.post-icon--exam {
+    background: var(--light-blue);
+    color: var(--primary-blue);
+}
+
+.post-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.post-title {
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+}
+
+.post-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.post-item--group {
+    align-items: center;
+}
+
+.group-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}

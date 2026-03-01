@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}İmtahanlar{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.student_exam_list" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
@@ -11,7 +11,8 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1>{{ page_title|default:"Mövcud imtahanlar" }}</h1>
+    {% trans "default_page_title" context "exams.template.student_exam_list" as default_page_title %}
+    <h1>{{ page_title|default:default_page_title }}</h1>
 
 
     <form method="get" class="exam-toolbar">
@@ -20,27 +21,27 @@
             <input type="text"
                    name="q"
                    class="form-control"
-                   placeholder="İmtahan adı və ya müəllim..."
+                   placeholder="{% trans 'placeholder_search_exam_or_teacher' context 'exams.template.student_exam_list' %}"
                    value="{{ request.GET.q|default:'' }}">
         </div>
     
         <div class="filter-box">
             <select name="type" class="form-select" onchange="this.form.submit()">
-                <option value="">Bütün tiplər</option>
+                <option value="">{% trans "filter_all_types" context "exams.template.student_exam_list" %}</option>
                 <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
-                    Test
+                    {% trans "filter_test" context "exams.template.student_exam_list" %}
                 </option>
                 <option value="written" {% if request.GET.type == 'written' %}selected{% endif %}>
-                    Yazılı / praktiki
+                    {% trans "filter_written_practical" context "exams.template.student_exam_list" %}
                 </option>
             </select>
         </div>
     
-        <button type="submit" class="btn btn-primary search-btn">Axtar</button>
+        <button type="submit" class="btn btn-primary search-btn">{% trans "action_search" context "exams.template.student_exam_list" %}</button>
     
         {% if request.GET.q or request.GET.type %}
             <a href="{% url 'exams:student_exam_list' %}" class="btn btn-outline-secondary">
-                Sıfırla
+                {% trans "action_reset" context "exams.template.student_exam_list" %}
             </a>
         
         
@@ -69,7 +70,12 @@
 
                         <div class="exam-details mt-2">
                             {% if exam.total_duration_minutes %}
-                                <small class="me-3"><i class="far fa-clock"></i> {{ exam.total_duration_minutes }} dəq</small>
+                                <small class="me-3">
+                                    <i class="far fa-clock"></i>
+                                    {% blocktrans trimmed context "exams.template.student_exam_list" with minutes=exam.total_duration_minutes %}
+                                        label_duration_minutes_short {{ minutes }}
+                                    {% endblocktrans %}
+                                </small>
                             {% endif %}
                             
                             {% if item.access_label %}
@@ -85,11 +91,11 @@
                     <div class="exam-actions">
                         {% if left %}
                             <span class="badge bg-secondary mb-2 d-inline-block">
-                                Qalan cəhd: {{ left }}
+                                {% trans "label_attempt_left" context "exams.template.student_exam_list" %}: {{ left }}
                             </span>
                         {% else %}
                             <span class="badge bg-secondary mb-2 d-inline-block">
-                                Attempts: limitsiz
+                                {% trans "label_attempts_unlimited" context "exams.template.student_exam_list" %}
                             </span>
                         {% endif %}
 
@@ -100,12 +106,12 @@
                                     data-exam-slug="{{ exam.slug }}"
                                     data-exam-title="{{ exam.title }}"
                                     onclick="openExamCodeModal(this)">
-                                İmtahana başla
+                                {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </button>
                         {% else %}
                             {# Əks halda birbaşa start_exam #}
                             <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary customBtn">
-                                İmtahana başla
+                                {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </a>
                         {% endif %}
                     </div>
@@ -123,11 +129,11 @@
         {# ================= BOŞ VƏZİYYƏT (Heç nə tapılmadı) ================= #}
         <div class="empty-state-box">
             <i class="far fa-folder-open empty-icon"></i>
-            <p>Axtarışınıza uyğun heç bir imtahan tapılmadı.</p>
+            <p>{% trans "empty_no_exam_found" context "exams.template.student_exam_list" %}</p>
             {% if request.GET.q or request.GET.type %}
                 <a href="{% url 'exams:student_exam_list' %}"
                 class="btn btn-sm btn-outline-primary mt-2">
-                    Bütün imtahanları göstər
+                    {% trans "action_show_all_exams" context "exams.template.student_exam_list" %}
                 </a>
             
         {% endif %}
@@ -144,8 +150,8 @@
         </button>
 
         <div class="exam-code-icon"><i class="fas fa-lock"></i></div>
-        <h3 id="exam-code-title" class="exam-code-title">Giriş Kodu</h3>
-        <p id="exam-code-text" class="exam-code-text">Kod daxil edin.</p>
+        <h3 id="exam-code-title" class="exam-code-title">{% trans "modal_access_code_title" context "exams.template.student_exam_list" %}</h3>
+        <p id="exam-code-text" class="exam-code-text">{% trans "modal_access_code_description" context "exams.template.student_exam_list" %}</p>
 
         <form id="exam-code-form" method="post" action="{% url 'exams:exam_code_check' %}">
             {% csrf_token %}
@@ -154,14 +160,19 @@
                 <input type="text" name="access_code" id="exam-code-input" class="exam-code-input" maxlength="6" placeholder="• • • • • •" autocomplete="off" inputmode="numeric" required>
             </div>
             <div class="exam-code-actions">
-                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">Ləğv et</button>
-                <button type="submit" class="btn-modal btn-confirm">Təsdiqlə</button>
+                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">{% trans "action_cancel" context "exams.template.student_exam_list" %}</button>
+                <button type="submit" class="btn-modal btn-confirm">{% trans "action_confirm" context "exams.template.student_exam_list" %}</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    const I18N_STUDENT_EXAM_LIST = {
+        modalAccessCodeTitle: "{% trans 'modal_access_code_title' context 'exams.template.student_exam_list' %}",
+        modalAccessCodeDescriptionWithTitle: "{% trans 'modal_access_code_description_with_title' context 'exams.template.student_exam_list' %}"
+    };
+
     // ============================================================
     // 1. MODAL MƏNTİQİ (GLOBAL SCOPE)
     // HTML-də onclick="openExamCodeModal()" işləsin deyə bu funksiyalar
@@ -178,8 +189,8 @@
         const title = button.getAttribute("data-exam-title");
         
         slugInput.value = slug;
-        titleEl.textContent = `Giriş Kodu`; 
-        textEl.innerHTML = `<strong>"${title}"</strong> imtahanına keçid üçün kodu yazın.`;
+        titleEl.textContent = I18N_STUDENT_EXAM_LIST.modalAccessCodeTitle; 
+        textEl.innerHTML = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescriptionWithTitle.replace("{title}", `<strong>"${title}"</strong>`);
         codeInput.value = "";
         
         // Modalı göstər

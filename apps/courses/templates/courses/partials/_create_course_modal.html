@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<div id="createCourseModal"
+     class="course-modal-overlay"
+     aria-hidden="true"
+     data-loading-text="{% trans 'loading' context 'courses.partial.create_modal' %}"
+     data-load-error-text="{% trans 'load_error' context 'courses.partial.create_modal' %}"
+     data-submitting-text="{% trans 'submitting' context 'courses.partial.create_modal' %}">
+    <div class="course-modal-content course-modal-create-course" role="dialog" aria-modal="true" aria-labelledby="createCourseModalTitle">
+        <div class="course-modal-header">
+            <h3 id="createCourseModalTitle">
+                <i class="fas fa-graduation-cap"></i>
+                {% trans "title" context "courses.partial.create_modal" %}
+            </h3>
+            <button class="course-modal-close-btn" id="closeCreateCourseModal" type="button" aria-label="{% trans 'aria_close' context 'courses.partial.create_modal' %}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="createCourseModalBody" class="create-course-modal-body">
+            <div class="create-course-modal-loading">{% trans "loading" context "courses.partial.create_modal" %}</div>
+        </div>
+    </div>
+</div>

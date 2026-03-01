@@ -1,0 +1,187 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.name }} - {% trans "page_title" context "organizations.structure" %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tree-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .unit-node {
+            margin: 1rem 0;
+        }
+
+        .unit-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .unit-item:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .unit-icon {
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+
+        .unit-info {
+            flex: 1;
+        }
+
+        .unit-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+        }
+
+        .unit-type {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .unit-children {
+            margin-left: 3rem;
+            border-left: 2px solid #e2e8f0;
+            padding-left: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div style="font-size: 24px; font-weight: 600;">{{ organization.name }}</div>
+            <nav class="nav-menu">
+                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
+                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 style="margin-bottom: 2rem;">{% trans "heading" context "organizations.structure" %}</h1>
+
+        <div class="tree-container">
+            {% if units %}
+                {% for unit in units %}
+                <div class="unit-node">
+                    <div class="unit-item">
+                        <div class="unit-icon">{{ unit.name|first|upper }}</div>
+                        <div class="unit-info">
+                            <div class="unit-name">{{ unit.name }}</div>
+                            <div class="unit-type">{{ unit.get_unit_type_display }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if unit.children.all %}
+                    <div class="unit-children">
+                        {% for child in unit.children.all %}
+                        <div class="unit-item">
+                            <div class="unit-icon" style="background: #059669;">{{ child.name|first|upper }}</div>
+                            <div class="unit-info">
+                                <div class="unit-name">{{ child.name }}</div>
+                                <div class="unit-type">{{ child.get_unit_type_display }}</div>
+                            </div>
+                        </div>
+                        
+                        {% if child.children.all %}
+                        <div class="unit-children">
+                            {% for grandchild in child.children.all %}
+                            <div class="unit-item">
+                                <div class="unit-icon" style="background: #7c3aed;">{{ grandchild.name|first|upper }}</div>
+                                <div class="unit-info">
+                                    <div class="unit-name">{{ grandchild.name }}</div>
+                                    <div class="unit-type">{{ grandchild.get_unit_type_display }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <h3>{% trans "empty_title" context "organizations.structure" %}</h3>
+                <p>{% trans "empty_subtitle" context "organizations.structure" %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

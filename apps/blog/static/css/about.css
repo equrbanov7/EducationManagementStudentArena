@@ -1,115 +1,254 @@
 /* static/css/about.css */
 
-/* Konteyner və Ümumi Stillər */
-.about-container {
-    max-width: 1000px;
-    margin: 40px auto; /* Yuxarıdan/aşağıdan məsafə və mərkəzləmə */
-    padding: 0 20px;
-    font-family: inherit; /* base.html-dəki şrifti istifadə etsin */
+/* --- Dəyişənlər --- */
+:root {
+    --primary-blue: #2563eb; /* Əsas vurğu rəngi */
+    --primary-dark: #1e40af;
+    --accent-light: #dbeafe; /* İkon arxası açıq rəng */
+    --text-dark: #111827;
+    --text-medium: #4b5563;
+    --bg-page: #f9fafb;
+    --card-bg: #ffffff;
 }
 
-/* Başlıq Hissəsi (Hero-vari) */
-.about-header {
-    text-align: center;
-    margin-bottom: 60px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.about-header h1 {
-    font-size: 2.8rem;
-    color: #222; /* Tünd rəng (base rənglərinizə uyğunlaşdırın) */
-    margin-bottom: 15px;
-    font-weight: 700;
-}
-
-.about-lead-text {
-    font-size: 1.2rem;
-    color: #666;
-    max-width: 700px;
+/* --- Ümumi Layout --- */
+.ems-container {
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 60px 24px 100px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-page);
+    overflow: hidden; /* Animasiyaların daşmasının qarşısını alır */
+}
+
+/* --- Hero Bölməsi (Başlıq) --- */
+.ems-hero {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 80px;
+}
+
+.main-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin-bottom: 24px;
+    letter-spacing: -0.03em;
+}
+
+.main-title .highlight {
+    color: var(--primary-blue);
+    position: relative;
+    display: inline-block;
+}
+
+/* Vurğulanan sözün altından xətt çəkmək effekti (opsional) */
+.main-title .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background-color: var(--accent-light);
+    z-index: -1;
+    opacity: 0.7;
+    border-radius: 4px;
+}
+
+.hero-description {
+    font-size: 1.25rem;
+    color: var(--text-medium);
+    line-height: 1.7;
+}
+
+/* --- Xüsusiyyətlər Bölməsi --- */
+.section-title {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 50px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: var(--primary-blue);
+    border-radius: 2px;
+}
+
+/* Grid Sistemi */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Responsiv grid */
+    gap: 30px;
+    align-items: stretch;
+}
+
+/* --- Funksiya Kartı Dizaynı --- */
+.feature-card {
+    background-color: var(--card-bg);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+    border-color: var(--accent-light);
+}
+
+.icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background-color: var(--accent-light);
+    color: var(--primary-blue);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .icon-wrapper {
+    background-color: var(--primary-blue);
+    color: white;
+    transform: rotate(-5deg) scale(1.1);
+}
+
+.feature-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.feature-text {
+    font-size: 1.05rem;
+    color: var(--text-medium);
     line-height: 1.6;
 }
 
-/* Məzmun Bloku (Şəkil və Mətn yan-yana) */
-.about-content-block {
-    display: flex;
-    align-items: center;
-    gap: 50px;
-    margin-bottom: 80px;
-}
-
-/* Sıranı tərsinə çevirmək üçün köməkçi sinif (optional) */
-.about-content-block.reverse {
-    flex-direction: row-reverse;
-}
-
-.about-text {
-    flex: 1;
-}
-
-.about-text h2 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.about-text p {
-    margin-bottom: 15px;
-    line-height: 1.7;
-    color: #555;
-}
-
-.about-image-wrapper {
-    flex: 1;
-}
-
-.about-image-wrapper img {
-    width: 100%;
-    height: auto;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    object-fit: cover;
-}
-
-/* Komanda və ya Dəyərlər Grid-i (Sadə versiya) */
-.about-values-section {
+/* --- CTA (Hərəkətə çağırış) --- */
+.cta-section {
     text-align: center;
-    margin-top: 60px;
+    margin-top: 80px;
+    padding: 40px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+    border-radius: 20px;
+    color: white;
 }
 
-.about-values-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
+.cta-section p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 25px;
 }
 
-.value-item {
-    padding: 30px;
-    background: #f9fafb; /* Açıq boz fon */
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
+.cta-button {
+    display: inline-block;
+    background-color: white;
+    color: var(--primary-blue);
+    padding: 12px 30px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.3s ease;
 }
 
-.value-item h3 {
-    margin-bottom: 10px;
-    color: #333;
+.cta-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* Responsive Dizayn */
+/* =========================================
+   SADƏ CSS ANİMASİYALARI
+   ========================================= */
+
+/* Yuxarıdan aşağı süzülmə */
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Olduğu yerdə görünmə */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Aşağıdan yuxarı süzülmə */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animasiya sinifləri */
+.animate-fade-down {
+    animation: fadeDown 0.8s ease-out forwards;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+    opacity: 0; /* Başlanğıcda gizli */
+}
+
+.animate-slide-up {
+    animation: slideUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    opacity: 0; /* Başlanğıcda gizli */
+}
+
+/* Gecikmələr (Elementlərin ardıcıl gəlməsi üçün) */
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+.delay-4 { animation-delay: 0.8s; }
+.delay-5 { animation-delay: 1.0s; }
+.delay-6 { animation-delay: 1.2s; }
+
+/* --- Responsive --- */
 @media (max-width: 768px) {
-    .about-header h1 {
-        font-size: 2rem;
+    .main-title {
+        font-size: 2.2rem;
     }
-    
-    .about-content-block {
-        flex-direction: column;
-        gap: 30px;
+    .hero-description {
+        font-size: 1.1rem;
     }
-
-    /* Mobildə şəkli həmişə mətndən əvvəl göstər (optional) */
-    .about-image-wrapper {
-        order: -1; 
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    .feature-card {
+        padding: 30px;
+        align-items: center;
+        text-align: center;
     }
 }

@@ -11,16 +11,18 @@ from django.shortcuts import redirect
 
 def is_teacher(user):
     """
-    Check if user is a teacher.
+    Check if user is a teacher or higher role.
+    Uses group-based role system with is_teacher_or_above property.
     """
-    return hasattr(user, "role") and user.role == "teacher"
+    return getattr(user, "is_teacher_or_above", False)
 
 
 def is_student(user):
     """
     Check if user is a student.
+    Uses group-based role system with is_student property.
     """
-    return hasattr(user, "role") and user.role == "student"
+    return getattr(user, "is_student", False)
 
 
 def teacher_required(view_func):

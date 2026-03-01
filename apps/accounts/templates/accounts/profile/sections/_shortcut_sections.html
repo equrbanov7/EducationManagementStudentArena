@@ -1,0 +1,31 @@
+{% for item in shortcut_sections %}
+<section class="profile-section-panel profile-section--shortcut-{{ item.section }} {% if active_section == item.section %}is-active{% endif %}"
+         data-profile-section-panel="{{ item.section }}"
+         data-source-url="{{ item.source_url }}">
+    <div class="section-card">
+        <div class="section-title">
+            <i class="{{ item.icon }}"></i>
+            {{ item.title }}
+        </div>
+
+        <p class="settings-note">
+            <i class="fas fa-circle-info"></i>
+            {{ item.description }}
+        </p>
+
+        <div class="profile-edit-link">
+            {% if item.section == 'create-post' %}
+                <button type="button" class="btn btn-primary js-open-create-post">
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                    {{ item.action_label }}
+                </button>
+            {% else %}
+                <a href="{{ item.url }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                    {{ item.action_label }}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endfor %}

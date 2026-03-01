@@ -10,6 +10,7 @@ Nə üçün:
 """
 
 from django import forms
+from django.utils.translation import pgettext_lazy
 
 from .models import Course, CourseResource, CourseTopic
 
@@ -43,14 +44,14 @@ class CourseForm(forms.ModelForm):
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": 'Kurs adı (məs: "Python Başlanğıc")',
+                    "placeholder": pgettext_lazy("courses.form.course.placeholder", "title"),
                     "required": True,
                 }
             ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Kurs haqqında məlumat...",
+                    "placeholder": pgettext_lazy("courses.form.course.placeholder", "description"),
                     "rows": 4,
                 }
             ),
@@ -72,10 +73,10 @@ class CourseForm(forms.ModelForm):
         title = self.cleaned_data.get("title", "").strip()
 
         if len(title) < 3:
-            raise forms.ValidationError("Kurs adı ən azı 3 simvol olmalıdır.")
+            raise forms.ValidationError(pgettext_lazy("courses.form.course.error", "title_min_length"))
 
         if len(title) > 255:
-            raise forms.ValidationError("Kurs adı 255 simvoldan çox ola bilməz.")
+            raise forms.ValidationError(pgettext_lazy("courses.form.course.error", "title_max_length"))
 
         return title
 
@@ -106,14 +107,14 @@ class CourseTopicForm(forms.ModelForm):
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": 'Mövzu adı (məs: "Həftə 1: Giriş")',
+                    "placeholder": pgettext_lazy("courses.form.topic.placeholder", "title"),
                 }
             ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Mövzu təsviri...",
+                    "placeholder": pgettext_lazy("courses.form.topic.placeholder", "description"),
                 }
             ),
         }
@@ -123,7 +124,7 @@ class CourseTopicForm(forms.ModelForm):
         title = self.cleaned_data.get("title", "").strip()
 
         if not title:
-            raise forms.ValidationError("Mövzu adı boş ola bilməz.")
+            raise forms.ValidationError(pgettext_lazy("courses.form.topic.error", "title_required"))
 
         return title
 
@@ -153,14 +154,14 @@ class CourseResourceForm(forms.ModelForm):
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Resurs adı",
+                    "placeholder": pgettext_lazy("courses.form.resource.placeholder", "title"),
                 }
             ),
             "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 2,
-                    "placeholder": "Açıqlama...",
+                    "placeholder": pgettext_lazy("courses.form.resource.placeholder", "description"),
                 }
             ),
             "resource_type": forms.Select(
@@ -177,7 +178,7 @@ class CourseResourceForm(forms.ModelForm):
             "url": forms.URLInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "https://example.com/...",
+                    "placeholder": pgettext_lazy("courses.form.resource.placeholder", "url"),
                 }
             ),
             "topic": forms.Select(
@@ -194,13 +195,9 @@ class CourseResourceForm(forms.ModelForm):
         url = cleaned_data.get("url")
 
         if not file and not url:
-            raise forms.ValidationError(
-                "Fayl yüklə və ya URL linki əlavə et (ikisindən biri lazımdır)."
-            )
+            raise forms.ValidationError(pgettext_lazy("courses.form.resource.error", "file_or_url_required"))
 
         if file and url:
-            raise forms.ValidationError(
-                "Fayl VƏ URL bir vaxtda ola bilməz. Birini seç."
-            )
+            raise forms.ValidationError(pgettext_lazy("courses.form.resource.error", "file_and_url_mutually_exclusive"))
 
         return cleaned_data
