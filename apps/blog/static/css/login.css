@@ -137,6 +137,33 @@
     box-sizing: border-box;
 }
 
+.input-visibility-wrapper {
+    position: relative;
+}
+
+.input-visibility-wrapper input[type="text"],
+.input-visibility-wrapper input[type="email"],
+.input-visibility-wrapper input[type="password"] {
+    padding-right: 48px;
+}
+
+.input-visibility-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+}
+
+.input-visibility-toggle:hover {
+    color: var(--primary-blue);
+}
+
 .auth-form-field input:focus {
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);

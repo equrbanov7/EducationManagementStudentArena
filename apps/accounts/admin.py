@@ -7,8 +7,45 @@ from django.contrib import admin
 from apps.accounts.models import UserProfile
 
 
+class SuperadminBypassAdminMixin:
+    """Allow platform superadmins to manage objects from Django admin."""
+
+    @staticmethod
+    def _is_platform_superadmin(user):
+        return bool(
+            user
+            and user.is_authenticated
+            and (user.is_superuser or getattr(user, "is_superadmin", False))
+        )
+
+    def has_module_permission(self, request):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_view_permission(request, obj=obj)
+
+    def has_add_permission(self, request):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_change_permission(request, obj=obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_delete_permission(request, obj=obj)
+
+
 @admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
+class UserProfileAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """
     Admin interface for UserProfile model.
     """
@@ -25,7 +62,14 @@ class UserProfileAdmin(admin.ModelAdmin):
         "created_at",
     ]
     list_filter = ["role", "organization_type", "organization", "created_at"]
-    list_editable = ["role"]
+    list_editable = [
+        "role",
+        "organization",
+        "organization_type",
+        "student_university_name",
+        "student_school_identifier",
+    ]
+    list_select_related = ["user", "organization"]
     search_fields = [
         "user__username",
         "user__email",

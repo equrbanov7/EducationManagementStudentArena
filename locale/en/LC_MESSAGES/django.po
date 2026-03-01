@@ -28,12 +28,12 @@ msgstr "Password"
 #: apps/accounts/forms.py:31
 msgctxt "accounts.form.register.label"
 msgid "password_confirm"
-msgstr "Password confirm"
+msgstr "Confirm password"
 
 #: apps/accounts/forms.py:34
 msgctxt "accounts.form.register.placeholder"
 msgid "password_confirm"
-msgstr "Password confirm"
+msgstr "Confirm password"
 
 #: apps/accounts/forms.py:41
 msgctxt "accounts.form.register.label"
@@ -43,27 +43,27 @@ msgstr "Country"
 #: apps/accounts/forms.py:48
 msgctxt "accounts.form.register.label"
 msgid "registration_type"
-msgstr "Registration type"
+msgstr "Account type"
 
 #: apps/accounts/forms.py:52
 msgctxt "accounts.form.register.choice"
 msgid "org_type_individual"
-msgstr "Organization type individual"
+msgstr "Individual account (I own my workspace)"
 
 #: apps/accounts/forms.py:56
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school"
-msgstr "Organization type school"
+msgstr "School"
 
 #: apps/accounts/forms.py:60
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university"
-msgstr "Organization type university"
+msgstr "University"
 
 #: apps/accounts/forms.py:64
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_center"
-msgstr "Organization type course center"
+msgstr "Course center"
 
 #: apps/accounts/forms.py:72
 msgctxt "accounts.form.register.label"
@@ -73,7 +73,7 @@ msgstr "Institution"
 #: apps/accounts/forms.py:75
 msgctxt "accounts.form.register.choice"
 msgid "institution_empty"
-msgstr "Institution empty"
+msgstr "Select institution"
 
 #: apps/accounts/forms.py:80
 msgctxt "accounts.form.register.label"
@@ -83,17 +83,17 @@ msgstr "Join organization"
 #: apps/accounts/forms.py:83
 msgctxt "accounts.form.register.choice"
 msgid "organization_empty"
-msgstr "Organization empty"
+msgstr "Select organization"
 
 #: apps/accounts/forms.py:88
 msgctxt "accounts.form.register.label"
 msgid "institution_not_listed"
-msgstr "Institution not listed"
+msgstr "Institution name (if not listed)"
 
 #: apps/accounts/forms.py:92
 msgctxt "accounts.form.register.placeholder"
 msgid "institution_not_listed"
-msgstr "Institution not listed"
+msgstr "Enter institution name"
 
 #: apps/accounts/forms.py:99
 msgctxt "accounts.form.register.label"
@@ -108,12 +108,12 @@ msgstr "Official identifier"
 #: apps/accounts/forms.py:110
 msgctxt "accounts.form.register.label"
 msgid "license_identifier_optional"
-msgstr "License identifier optional"
+msgstr "License identifier (optional)"
 
 #: apps/accounts/forms.py:114
 msgctxt "accounts.form.register.placeholder"
 msgid "license_identifier_optional"
-msgstr "License identifier optional"
+msgstr "License identifier (optional)"
 
 #: apps/accounts/forms.py:121
 msgctxt "accounts.form.register.label"
@@ -123,22 +123,22 @@ msgstr "Initial role"
 #: apps/accounts/forms.py:125
 msgctxt "accounts.form.register.choice"
 msgid "role_member_pending"
-msgstr "Member / Pending"
+msgstr "Member"
 
 #: apps/accounts/forms.py:129
 msgctxt "accounts.form.register.choice"
 msgid "role_teacher"
-msgstr "Role teacher"
+msgstr "Teacher"
 
 #: apps/accounts/forms.py:133
 msgctxt "accounts.form.register.choice"
 msgid "role_hr"
-msgstr "Role hr"
+msgstr "HR"
 
 #: apps/accounts/forms.py:137
 msgctxt "accounts.form.register.choice"
 msgid "role_org_admin"
-msgstr "Organization Admin"
+msgstr "Organization admin"
 
 #: apps/accounts/forms.py:150
 msgctxt "accounts.form.register.placeholder"
@@ -163,42 +163,42 @@ msgstr "Last name"
 #: apps/accounts/forms.py:189
 msgctxt "accounts.form.register.error"
 msgid "password_mismatch"
-msgstr "Password mismatch"
+msgstr "Passwords do not match."
 
 #: apps/accounts/forms.py:192
 msgctxt "accounts.form.register.error"
 msgid "country_required"
-msgstr "Country required"
+msgstr "Country is required."
 
 #: apps/accounts/forms.py:194
 msgctxt "accounts.form.register.error"
 msgid "country_invalid"
-msgstr "Country invalid"
+msgstr "Selected country is invalid."
 
 #: apps/accounts/forms.py:199
 msgctxt "accounts.form.register.error"
 msgid "signup_student_role_not_allowed"
-msgstr "Student role cannot be selected during signup."
+msgstr "Student role cannot be selected manually."
 
 #: apps/accounts/forms.py:204
 msgctxt "accounts.form.register.error"
 msgid "institution_required"
-msgstr "Institution required"
+msgstr "Please select an institution."
 
 #: apps/accounts/forms.py:207
 msgctxt "accounts.form.register.error"
 msgid "institution_name_required"
-msgstr "Institution name required"
+msgstr "Institution name is required."
 
 #: apps/accounts/forms.py:213
 msgctxt "accounts.form.register.error"
 msgid "institution_country_mismatch"
-msgstr "Institution country mismatch"
+msgstr "Institution does not match selected country."
 
 #: apps/accounts/forms.py:218
 msgctxt "accounts.form.register.error"
 msgid "institution_type_mismatch"
-msgstr "Institution type mismatch"
+msgstr "Institution does not match selected account type."
 
 #: apps/accounts/forms.py:225
 msgctxt "accounts.form.register.error"
@@ -208,22 +208,22 @@ msgstr "An official university identifier or code is required."
 #: apps/accounts/forms.py:236
 msgctxt "accounts.form.register.error"
 msgid "individual_organization_required"
-msgstr "Organization selection is required for individual registration."
+msgstr "Individual account does not require selecting an organization."
 
 #: apps/accounts/forms.py:256
 msgctxt "accounts.form.register.error"
 msgid "username_taken"
-msgstr "Username taken"
+msgstr "This username is already taken."
 
 #: apps/accounts/forms.py:262
 msgctxt "accounts.form.register.error"
 msgid "email_taken"
-msgstr "Email taken"
+msgstr "This email is already in use."
 
 #: apps/accounts/forms.py:270
 msgctxt "accounts.form.register.choice"
 msgid "country_select"
-msgstr "Country select"
+msgstr "Select country"
 
 #: apps/accounts/forms.py:296
 msgctxt "accounts.form.login.label"
@@ -248,14 +248,12 @@ msgstr "Password"
 #: apps/accounts/forms.py:320
 msgctxt "accounts.form.login.error"
 msgid "account_inactive"
-msgstr "Account is inactive. Please contact support."
+msgstr "Account is inactive. Complete email verification first."
 
 #: apps/accounts/forms.py:331
 msgctxt "accounts.form.login.error"
 msgid "organization_suspended"
-msgstr ""
-"Your organization has been suspended. Login is blocked, contact the "
-"administrator."
+msgstr "Your organization has been suspended. Contact the administrator."
 
 #: apps/accounts/templates/accounts/assigned_courses.html:4
 msgctxt "accounts.assigned_courses_page"
@@ -521,17 +519,17 @@ msgstr "A modal will open to view the submission content. ID: {id}"
 #: apps/accounts/templates/accounts/login.html:4
 msgctxt "accounts.login"
 msgid "title"
-msgstr "Login"
+msgstr "Sign in"
 
 #: apps/accounts/templates/accounts/login.html:13
 msgctxt "accounts.login"
 msgid "heading"
-msgstr "Login"
+msgstr "Sign in"
 
 #: apps/accounts/templates/accounts/login.html:14
 msgctxt "accounts.login"
 msgid "subheading"
-msgstr "Sign in to your account and manage your posts."
+msgstr "Sign in to your account."
 
 #: apps/accounts/templates/accounts/login.html:44
 msgctxt "accounts.login"
@@ -541,7 +539,7 @@ msgstr "Forgot password?"
 #: apps/accounts/templates/accounts/login.html:48
 msgctxt "accounts.login"
 msgid "submit"
-msgstr "Submit"
+msgstr "Sign in"
 
 #: apps/accounts/templates/accounts/login.html:52
 msgctxt "accounts.login"
@@ -551,7 +549,7 @@ msgstr "Don't have an account?"
 #: apps/accounts/templates/accounts/login.html:52
 msgctxt "accounts.login"
 msgid "register_now"
-msgstr "Register"
+msgstr "Create one"
 
 #: apps/accounts/templates/accounts/manage_roles.html:4
 msgctxt "accounts.manage_roles_page"
@@ -2495,7 +2493,7 @@ msgstr "Discard changes"
 #: apps/accounts/templates/accounts/register.html:4
 msgctxt "accounts.register"
 msgid "title"
-msgstr "Register"
+msgstr "Sign up"
 
 #: apps/accounts/templates/accounts/register.html:13
 msgctxt "accounts.register"
@@ -2505,8 +2503,7 @@ msgstr "Create account"
 #: apps/accounts/templates/accounts/register.html:14
 msgctxt "accounts.register"
 msgid "subheading"
-msgstr ""
-"Create a multi-tenant account and join the platform by selecting your role."
+msgstr "Create your account and choose how you want to join."
 
 #: apps/accounts/templates/accounts/register.html:20
 msgctxt "accounts.register"
@@ -2537,14 +2534,12 @@ msgstr "Continue"
 #: apps/accounts/templates/accounts/register.html:62
 msgctxt "accounts.register"
 msgid "choose_registration_type"
-msgstr "Choose registration type"
+msgstr "Choose account type"
 
 #: apps/accounts/templates/accounts/register.html:79
 msgctxt "accounts.register"
 msgid "individual_org_required_help"
-msgstr ""
-"When selecting Individual, organization selection is required. Role will be "
-"set automatically as student."
+msgstr "Individual accounts no longer require selecting an existing organization."
 
 #: apps/accounts/templates/accounts/register.html:86
 msgctxt "accounts.register"
@@ -2559,9 +2554,7 @@ msgstr "Search institution..."
 #: apps/accounts/templates/accounts/register.html:106
 msgctxt "accounts.register"
 msgid "institution_not_listed_help"
-msgstr ""
-"If it is not listed, select “Not listed / Other” and enter institution name "
-"manually."
+msgstr "If it is not listed, enter the institution name manually."
 
 #: apps/accounts/templates/accounts/register.html:117
 msgctxt "accounts.register"
@@ -2582,14 +2575,12 @@ msgstr "Personal information"
 #: apps/accounts/templates/accounts/register.html:186
 msgctxt "accounts.register"
 msgid "auto_student_role_info"
-msgstr ""
-"For the selected individual organization, status will be set automatically "
-"as student."
+msgstr "Role is assigned automatically based on selected account type."
 
 #: apps/accounts/templates/accounts/register.html:210
 msgctxt "accounts.register"
 msgid "submit"
-msgstr "Submit"
+msgstr "Complete registration"
 
 #: apps/accounts/templates/accounts/register.html:216
 msgctxt "accounts.register"
@@ -2599,27 +2590,27 @@ msgstr "Already have an account?"
 #: apps/accounts/templates/accounts/register.html:216
 msgctxt "accounts.register"
 msgid "login_now"
-msgstr "Login"
+msgstr "Sign in"
 
 #: apps/accounts/templates/accounts/register.html:228
 msgctxt "accounts.register.js"
 msgid "select_empty_university"
-msgstr "Select empty university"
+msgstr "Select university"
 
 #: apps/accounts/templates/accounts/register.html:229
 msgctxt "accounts.register.js"
 msgid "select_empty_school"
-msgstr "Select empty school"
+msgstr "Select school"
 
 #: apps/accounts/templates/accounts/register.html:230
 msgctxt "accounts.register.js"
 msgid "select_empty_course_center"
-msgstr "Select empty course center"
+msgstr "Select course center"
 
 #: apps/accounts/templates/accounts/register.html:231
 msgctxt "accounts.register.js"
 msgid "select_empty_default"
-msgstr "Select empty default"
+msgstr "Select institution"
 
 #: apps/accounts/templates/accounts/register.html:232
 msgctxt "accounts.register.js"
@@ -2639,62 +2630,62 @@ msgstr "University"
 #: apps/accounts/templates/accounts/register.html:235
 msgctxt "accounts.register.js"
 msgid "label_university_manual"
-msgstr "University manual"
+msgstr "Enter university name"
 
 #: apps/accounts/templates/accounts/register.html:236
 msgctxt "accounts.register.js"
 msgid "placeholder_university_manual"
-msgstr "University manual..."
+msgstr "Enter university name..."
 
 #: apps/accounts/templates/accounts/register.html:237
 msgctxt "accounts.register.js"
 msgid "label_university_identifier"
-msgstr "University identifier"
+msgstr "University code / identifier"
 
 #: apps/accounts/templates/accounts/register.html:238
 msgctxt "accounts.register.js"
 msgid "hint_university_az"
-msgstr "Hint university az"
+msgstr "You can select universities in Azerbaijan from the list."
 
 #: apps/accounts/templates/accounts/register.html:239
 msgctxt "accounts.register.js"
 msgid "hint_university_global"
-msgstr "Hint university global"
+msgstr "Choose a university from your country list."
 
 #: apps/accounts/templates/accounts/register.html:240
 msgctxt "accounts.register.js"
 msgid "label_search_school"
-msgstr "Search school"
+msgstr "Search school (name or number)"
 
 #: apps/accounts/templates/accounts/register.html:241
 msgctxt "accounts.register.js"
 msgid "placeholder_search_school"
-msgstr "Search school..."
+msgstr "Search school name or number..."
 
 #: apps/accounts/templates/accounts/register.html:242
 msgctxt "accounts.register.js"
 msgid "label_school_optional"
-msgstr "School optional"
+msgstr "School (optional)"
 
 #: apps/accounts/templates/accounts/register.html:243
 msgctxt "accounts.register.js"
 msgid "label_school_manual"
-msgstr "School manual"
+msgstr "Enter school name"
 
 #: apps/accounts/templates/accounts/register.html:244
 msgctxt "accounts.register.js"
 msgid "placeholder_school_manual"
-msgstr "School manual..."
+msgstr "Enter school name if not listed..."
 
 #: apps/accounts/templates/accounts/register.html:245
 msgctxt "accounts.register.js"
 msgid "label_school_identifier"
-msgstr "School identifier"
+msgstr "School number / code (optional)"
 
 #: apps/accounts/templates/accounts/register.html:246
 msgctxt "accounts.register.js"
 msgid "hint_school"
-msgstr "Hint school"
+msgstr "Select an active registered school from the list."
 
 #: apps/accounts/templates/accounts/register.html:247
 msgctxt "accounts.register.js"
@@ -2709,62 +2700,62 @@ msgstr "Search course center..."
 #: apps/accounts/templates/accounts/register.html:249
 msgctxt "accounts.register.js"
 msgid "label_course_center_optional"
-msgstr "Course center optional"
+msgstr "Course center (optional)"
 
 #: apps/accounts/templates/accounts/register.html:250
 msgctxt "accounts.register.js"
 msgid "label_course_center_manual"
-msgstr "Course center manual"
+msgstr "Enter course center name"
 
 #: apps/accounts/templates/accounts/register.html:251
 msgctxt "accounts.register.js"
 msgid "placeholder_course_center_manual"
-msgstr "Course center manual..."
+msgstr "Enter course center name if not listed..."
 
 #: apps/accounts/templates/accounts/register.html:252
 msgctxt "accounts.register.js"
 msgid "label_course_center_identifier"
-msgstr "Course center identifier"
+msgstr "Center identifier (optional)"
 
 #: apps/accounts/templates/accounts/register.html:253
 msgctxt "accounts.register.js"
 msgid "hint_course_center"
-msgstr "Hint course center"
+msgstr "Select an active registered course center from the list."
 
 #: apps/accounts/templates/accounts/register.html:254
 msgctxt "accounts.register.js"
 msgid "label_search_default"
-msgstr "Search default"
+msgstr "Search institution"
 
 #: apps/accounts/templates/accounts/register.html:255
 msgctxt "accounts.register.js"
 msgid "placeholder_search_default"
-msgstr "Search default..."
+msgstr "Search institution..."
 
 #: apps/accounts/templates/accounts/register.html:256
 msgctxt "accounts.register.js"
 msgid "label_institution_default"
-msgstr "Institution default"
+msgstr "Institution"
 
 #: apps/accounts/templates/accounts/register.html:257
 msgctxt "accounts.register.js"
 msgid "label_institution_manual_default"
-msgstr "Institution manual default"
+msgstr "Institution name (Not listed / Other)"
 
 #: apps/accounts/templates/accounts/register.html:258
 msgctxt "accounts.register.js"
 msgid "label_identifier_default"
-msgstr "Identifier default"
+msgstr "Official identifier / code"
 
 #: apps/accounts/templates/accounts/register.html:259
 msgctxt "accounts.register.js"
 msgid "help_identifier_required"
-msgstr "Help identifier required"
+msgstr "This field is required for university."
 
 #: apps/accounts/templates/accounts/register.html:260
 msgctxt "accounts.register.js"
 msgid "help_identifier_optional"
-msgstr "Help identifier optional"
+msgstr "This field is optional."
 
 #: apps/accounts/templates/accounts/role_assignment.html:4
 msgctxt "accounts.role_assignment_page"
@@ -3042,12 +3033,12 @@ msgstr "Email verification"
 #: apps/accounts/templates/accounts/verify_code.html:8
 msgctxt "accounts.verify_code"
 msgid "heading"
-msgstr "Email verification"
+msgstr "Verify your email"
 
 #: apps/accounts/templates/accounts/verify_code.html:9
 msgctxt "accounts.verify_code"
 msgid "code_sent_suffix"
-msgstr "address received a code."
+msgstr "address received a verification code."
 
 #: apps/accounts/templates/accounts/verify_code.html:14
 msgctxt "accounts.verify_code"
@@ -3057,7 +3048,7 @@ msgstr "Verification code"
 #: apps/accounts/templates/accounts/verify_code.html:15
 msgctxt "accounts.verify_code"
 msgid "code_placeholder"
-msgstr "6-digit code..."
+msgstr "Enter 6-digit code"
 
 #: apps/accounts/templates/accounts/verify_code.html:17
 msgctxt "accounts.verify_code"
@@ -3323,12 +3314,12 @@ msgstr "Unknown action"
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Registration completed request recorded"
+msgstr "Registration completed and your organization request is recorded. Verify the email code to continue."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Registration completed you can login now"
+msgstr "Registration completed. Verify the email code to activate your account."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3363,7 +3354,7 @@ msgstr "Email not found"
 #: apps/accounts/views.py:2798
 msgctxt "accounts.auth.message"
 msgid "new_code_sent"
-msgstr "New code sent"
+msgstr "A new verification code has been sent."
 
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
@@ -14574,3 +14565,61 @@ msgstr "Server error"
 msgctxt "projects.review.js"
 msgid "grade_button"
 msgstr "Submit Grade"
+
+
+# Added for auth/signup localization updates
+
+msgctxt "accounts.register"
+msgid "auto_role_info_owner"
+msgstr "For individual account, role will be set to organization admin automatically."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_student"
+msgstr "For this account type, role will be set to student automatically."
+
+msgctxt "accounts.register"
+msgid "individual_owner_help"
+msgstr "For an individual account, your personal workspace is created automatically and you become the admin."
+
+
+# Added for updated register searchable select and org-role copy
+
+msgctxt "accounts.register"
+msgid "auto_role_info_org"
+msgstr "For this organization type, role will be set to organization admin automatically."
+
+msgctxt "accounts.register.js"
+msgid "no_results"
+msgstr "No results found"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_student"
+msgstr "School student"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_student"
+msgstr "University student"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_student"
+msgstr "Course student"
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_required"
+msgstr "Organization selection is required."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_inactive"
+msgstr "Selected organization is not active or is suspended."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_type_mismatch"
+msgstr "Selected organization does not match the selected registration type."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_country_mismatch"
+msgstr "Selected organization does not match the selected country."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_student_join"
+msgstr "After email verification, you will join the selected organization as a student."

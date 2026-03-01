@@ -83,6 +83,33 @@
     background-color: #f9fafb; /* Yüngül input fonu */
 }
 
+.input-visibility-wrapper {
+    position: relative;
+}
+
+.input-visibility-wrapper input[type="text"],
+.input-visibility-wrapper input[type="email"],
+.input-visibility-wrapper input[type="password"] {
+    padding-right: 46px;
+}
+
+.input-visibility-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+.input-visibility-toggle:hover {
+    color: #2563eb;
+}
+
 .register-form-field input[type="text"]:focus,
 .register-form-field input[type="email"]:focus,
 .register-form-field input[type="password"]:focus {
@@ -240,6 +267,46 @@
     margin-top: 0.25rem;
     font-size: 0.8rem;
     color: #9ca3af;
+}
+
+.register-hidden-field {
+    display: none;
+}
+
+.register-search-list {
+    margin-top: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.register-search-option {
+    width: 100%;
+    border: 0;
+    background: #ffffff;
+    text-align: left;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.register-search-option:last-child {
+    border-bottom: 0;
+}
+
+.register-search-option:hover,
+.register-search-option.is-selected {
+    background: #eef2ff;
+}
+
+.register-search-empty {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: #6b7280;
 }
 
 .register-card {

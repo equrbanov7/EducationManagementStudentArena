@@ -1,0 +1,174 @@
+{% if 'pending-post-approvals' in allowed_sections %}
+<section class="profile-section-panel profile-section--pending-post-approvals {% if active_section == 'pending-post-approvals' %}is-active{% endif %}"
+         data-profile-section-panel="pending-post-approvals">
+    <div class="section-card pending-post-approvals-card">
+        <div class="section-title">
+            <i class="fas fa-user-check"></i>
+            Təsdiq gözləyən postlar ({{ pending_post_approval_count }})
+        </div>
+
+        <form method="get" class="search-form pending-post-approvals-filters" data-auto-filter-form>
+            <input type="hidden" name="section" value="pending-post-approvals">
+
+            <input
+                type="text"
+                name="approval_search"
+                value="{{ pending_post_approval_search_query }}"
+                placeholder="Post, tələbə və məzmun üzrə axtar"
+                class="form-control"
+            >
+
+            <select name="approval_status" class="form-control pending-post-approvals-filter-select">
+                <option value="pending" {% if pending_post_approval_filter_status == 'pending' %}selected{% endif %}>Təsdiq gözləyən</option>
+                <option value="needs_changes" {% if pending_post_approval_filter_status == 'needs_changes' %}selected{% endif %}>Düzəliş tələb olunan</option>
+                <option value="approved" {% if pending_post_approval_filter_status == 'approved' %}selected{% endif %}>Təsdiqlənənlər</option>
+                <option value="all" {% if pending_post_approval_filter_status == 'all' %}selected{% endif %}>Hamısı</option>
+            </select>
+
+            <select name="approval_group" class="form-control pending-post-approvals-filter-select">
+                <option value="">Bütün qruplar</option>
+                {% for group in pending_post_approval_available_groups %}
+                    <option value="{{ group.id }}" {% if pending_post_approval_filter_group == group.id|stringformat:'s' %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <noscript>
+                <button type="submit" class="btn btn-primary">Axtar</button>
+            </noscript>
+        </form>
+    </div>
+
+    {% if pending_post_approval_items %}
+        <div class="section-card pending-posts-list-card">
+            <div class="posts-grid pending-posts-grid">
+                {% for item in pending_post_approval_items %}
+                    <article class="post-item pending-post-item">
+                        <div class="post-icon stat-icon--blue">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+
+                        <div class="post-info">
+                            <div class="post-title">
+                                <a href="{% url 'post_detail' item.post.slug %}" class="pending-post-title-link">
+                                    {{ item.post.title }}
+                                </a>
+                                <span class="post-status-badge {{ item.status_class }}">{{ item.status_label }}</span>
+                            </div>
+
+                            <div class="post-date pending-post-meta">
+                                <span><i class="fas fa-user"></i> {{ item.author_name }}</span>
+                                {% if item.post.category %}
+                                    <span><i class="fas fa-tag"></i> {{ item.post.category.name }}</span>
+                                {% endif %}
+                                {% if item.group_names %}
+                                    <span><i class="fas fa-users"></i> {{ item.group_names|join:", " }}</span>
+                                {% endif %}
+                                <span><i class="far fa-clock"></i> {{ item.post.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+
+                            {% if item.post.excerpt %}
+                                <p class="pending-post-text pending-post-text--excerpt">{{ item.post.excerpt|truncatechars:200 }}</p>
+                            {% endif %}
+                            <p class="pending-post-text">{{ item.post.content|truncatechars:260 }}</p>
+
+                            {% if item.post.get_image %}
+                                <div class="pending-post-preview">
+                                    <img src="{{ item.post.get_image }}"
+                                         alt="{{ item.post.title }}"
+                                         loading="lazy">
+                                </div>
+                            {% endif %}
+
+                            {% if item.post.approval_feedback %}
+                                <div class="pending-post-feedback">
+                                    <strong>Son feedback:</strong> {{ item.post.approval_feedback }}
+                                </div>
+                            {% endif %}
+
+                            {% if item.post.approval_status != 'approved' %}
+                                <form method="post" action="{% url 'review_post' item.post.id %}" class="pending-post-actions">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <label class="pending-post-feedback-label" for="feedback_{{ item.post.id }}">
+                                        Feedback (müsbət və ya düzəliş üçün)
+                                    </label>
+                                    <textarea id="feedback_{{ item.post.id }}"
+                                              name="feedback"
+                                              rows="3"
+                                              class="form-control"
+                                              placeholder="Rəyini yaz..."></textarea>
+
+                                    <div class="pending-post-buttons">
+                                        <button type="submit" name="action" value="needs_changes" class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-pen"></i> Düzəliş istə
+                                        </button>
+                                        <button type="submit" name="action" value="approve" class="btn btn-review-view btn-sm">
+                                            <i class="fas fa-check"></i> Təsdiqlə və paylaş
+                                        </button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <div class="pending-post-approved-note">
+                                    <i class="fas fa-circle-check"></i>
+                                    Bu post artıq təsdiqlənib və paylaşılıb.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="section-card">
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>Filtrə uyğun təsdiq gözləyən post tapılmadı.</p>
+            </div>
+        </div>
+    {% endif %}
+</section>
+
+<script>
+(function () {
+    var forms = document.querySelectorAll(".pending-post-approvals-filters[data-auto-filter-form]");
+    forms.forEach(function (form) {
+        if (!form || form.dataset.autoFilterBound === "1") {
+            return;
+        }
+        form.dataset.autoFilterBound = "1";
+
+        var debounceHandle = null;
+        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
+        var selects = form.querySelectorAll("select");
+
+        function submitForm() {
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+                return;
+            }
+            form.submit();
+        }
+
+        textFields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                window.clearTimeout(debounceHandle);
+                debounceHandle = window.setTimeout(submitForm, 350);
+            });
+            field.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    window.clearTimeout(debounceHandle);
+                    submitForm();
+                }
+            });
+        });
+
+        selects.forEach(function (select) {
+            select.addEventListener("change", submitForm);
+        });
+    });
+})();
+</script>
+{% endif %}

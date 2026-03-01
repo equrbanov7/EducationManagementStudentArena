@@ -28,6 +28,31 @@
 
 .profile-post-card {
     position: relative;
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-post-card > .blog-card {
+    border-radius: 0;
+    box-shadow: none;
+    height: auto;
+    flex: 1 0 auto;
+}
+
+.profile-post-card > .blog-card:hover {
+    transform: translateY(-2px);
+}
+
+.profile-post-card > .blog-card .card-body {
+    padding-bottom: 0.7rem;
+}
+
+.profile-post-card > .post-feedback-accordion {
+    flex-shrink: 0;
 }
 
 .post-controls {
@@ -62,6 +87,18 @@
     background: #fffbeb;
     color: #b45309;
     border-color: #fcd34d;
+}
+
+.status-awaiting {
+    background: #e0f2fe;
+    color: #0c4a6e;
+    border-color: #7dd3fc;
+}
+
+.status-needs-changes {
+    background: #fff1f2;
+    color: #9f1239;
+    border-color: #fda4af;
 }
 
 .action-icons {
@@ -239,6 +276,140 @@ textarea.form-control {
     color: #94a3b8;
 }
 
+.approval-notice {
+    margin-bottom: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.55rem;
+    border: 1px solid #99f6e4;
+    background: linear-gradient(135deg, #ecfeff 0%, #ecfdf5 100%);
+    color: #065f46;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.approval-help-text {
+    display: block;
+    margin-top: 0.35rem;
+    color: #0f766e;
+    font-size: 0.8rem;
+}
+
+.approval-lock-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.55rem;
+    border: 1px solid #99f6e4;
+    background: #ecfeff;
+    color: #0f766e;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.post-feedback-accordion {
+    margin: 0.55rem 0.7rem 0.85rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.6rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #f0f9ff 100%);
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, margin-bottom 0.25s ease;
+    width: auto;
+}
+
+.post-feedback-accordion.is-empty {
+    border-style: dashed;
+    border-color: #cbd5e1;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.post-feedback-accordion[open] {
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.12);
+    margin-bottom: 1.2rem;
+}
+
+.post-feedback-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.62rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    color: #1e3a8a;
+    font-size: 0.86rem;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    min-width: 0;
+}
+
+.post-feedback-summary:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.post-feedback-summary:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: -2px;
+}
+
+.post-feedback-summary::-webkit-details-marker {
+    display: none;
+}
+
+.post-feedback-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.post-feedback-preview {
+    color: #334155;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    text-align: right;
+}
+
+.post-feedback-chevron {
+    color: #2563eb;
+    font-size: 0.78rem;
+    transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.post-feedback-accordion[open] .post-feedback-chevron {
+    transform: rotate(180deg);
+    color: #0f766e;
+}
+
+.post-feedback-content {
+    border-top: 1px solid transparent;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 0.8rem;
+    opacity: 0;
+    transform: translateY(-6px);
+    color: #1e3a8a;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    transition: max-height 0.38s ease, opacity 0.28s ease, padding 0.35s ease, transform 0.35s ease,
+        border-color 0.35s ease;
+}
+
+.post-feedback-accordion[open] .post-feedback-content {
+    border-top-color: #bfdbfe;
+    max-height: 1200px;
+    padding: 0.68rem 0.8rem 0.78rem;
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .checkbox-label {
     display: inline-flex;
     align-items: center;
@@ -290,6 +461,20 @@ textarea.form-control {
 @media (max-width: 768px) {
     .blog-grid-container {
         grid-template-columns: 1fr;
+    }
+
+    .post-feedback-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .post-feedback-preview {
+        white-space: normal;
+        text-align: left;
+    }
+
+    .post-feedback-chevron {
+        align-self: flex-end;
     }
 
     .modal-content {

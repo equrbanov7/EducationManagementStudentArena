@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const editSlugInfo = document.getElementById("editSlugInfo");
   const editCreatedAtInfo = document.getElementById("editCreatedAtInfo");
   const editUpdatedAtInfo = document.getElementById("editUpdatedAtInfo");
+  const editApprovalNotice = document.getElementById("editApprovalNotice");
 
   // Image preview elementləri
   const editImagePreview = document.getElementById("editImagePreview");
@@ -53,9 +54,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const createFormError = document.getElementById("createFormError");
   const closeCreateModalBtn = document.getElementById("closeCreateModal");
   const cancelCreateBtn = document.getElementById("cancelCreate");
+  const createFormRequiresApproval =
+    createForm && createForm.dataset.requiresApproval === "true";
 
   // State idarəetməsi
   let currentPostId = null;
+  let currentPostRequiresApproval = false;
   let originalFormData = {};
   let hasUnsavedChanges = false;
   let pendingClose = false;
@@ -77,7 +81,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!createForm) return;
     createForm.reset();
     if (createIsPublished) {
-      createIsPublished.checked = true;
+      if (createFormRequiresApproval) {
+        createIsPublished.checked = false;
+        createIsPublished.disabled = true;
+      } else {
+        createIsPublished.checked = true;
+        createIsPublished.disabled = false;
+      }
     }
     hideCreateError();
   }
@@ -107,7 +117,11 @@ document.addEventListener("DOMContentLoaded", function () {
       hideCreateError();
 
       const formData = new FormData(createForm);
-      formData.set("is_published", createIsPublished && createIsPublished.checked ? "on" : "");
+      const publishValue =
+        !createFormRequiresApproval &&
+        createIsPublished &&
+        createIsPublished.checked;
+      formData.set("is_published", publishValue ? "on" : "");
 
       try {
         const response = await fetch("/blog/posts/create/", {
@@ -174,9 +188,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const imageUrl = this.dataset.imageUrl || "";
       const fileImage = this.dataset.fileImage || "";
       const isPublished = this.dataset.isPublished === "true";
+      const requiresApproval = this.dataset.requiresApproval === "true";
       const slug = this.dataset.slug || "";
       const createdAt = this.dataset.createdAt || "";
       const updatedAt = this.dataset.updatedAt || "";
+      currentPostRequiresApproval = requiresApproval;
 
       // Form sahələrini doldur
       editTitle.value = title;
@@ -184,7 +200,19 @@ document.addEventListener("DOMContentLoaded", function () {
       editCategory.value = category;
       editExcerpt.value = excerpt;
       editImageUrl.value = imageUrl;
-      editIsPublished.checked = isPublished;
+      if (editIsPublished) {
+        if (requiresApproval) {
+          editIsPublished.checked = false;
+          editIsPublished.disabled = true;
+        } else {
+          editIsPublished.checked = isPublished;
+          editIsPublished.disabled = false;
+        }
+      }
+
+      if (editApprovalNotice) {
+        editApprovalNotice.hidden = !requiresApproval;
+      }
 
       // Meta məlumatları doldur
       editSlugInfo.textContent = slug;
@@ -231,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
         category: category,
         excerpt: excerpt,
         image_url: imageUrl,
-        is_published: isPublished,
+        is_published: requiresApproval ? false : isPublished,
       };
 
       hasUnsavedChanges = false;
@@ -306,7 +334,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const formData = new FormData(editForm);
 
     // Checkbox üçün: seçilməyibsə də backend-də düzgün getsin
-    formData.set("is_published", editIsPublished.checked ? "on" : "");
+    formData.set(
+      "is_published",
+      !currentPostRequiresApproval && editIsPublished.checked ? "on" : ""
+    );
 
     try {
       const response = await fetch(`/blog/post/${currentPostId}/edit/`, {

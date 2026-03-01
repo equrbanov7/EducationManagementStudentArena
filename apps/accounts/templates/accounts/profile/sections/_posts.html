@@ -14,8 +14,12 @@
                     {% for post in user_posts %}
                         <article class="profile-post-card">
                             <div class="post-controls">
-                                <span class="post-status-badge {% if post.is_published %}status-published{% else %}status-draft{% endif %}">
-                                    {% if post.is_published %}
+                                <span class="post-status-badge {% if post.requires_approval and post.approval_status == 'pending' %}status-awaiting{% elif post.requires_approval and post.approval_status == 'needs_changes' %}status-needs-changes{% elif post.is_published %}status-published{% else %}status-draft{% endif %}">
+                                    {% if post.requires_approval and post.approval_status == 'pending' %}
+                                        <i class="fas fa-hourglass-half"></i> Müəllim təsdiqi gözləyir
+                                    {% elif post.requires_approval and post.approval_status == 'needs_changes' %}
+                                        <i class="fas fa-pen"></i> Düzəliş tələb olunur
+                                    {% elif post.is_published %}
                                         <i class="fas fa-check-circle"></i> {% trans "published" context "profile.posts" %}
                                     {% else %}
                                         <i class="fas fa-pencil-alt"></i> {% trans "draft" context "profile.posts" %}
@@ -32,6 +36,9 @@
                                             data-image-url="{{ post.image_url|default_if_none:''|escape }}"
                                             data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
                                             data-is-published="{{ post.is_published|yesno:'true,false' }}"
+                                            data-requires-approval="{{ post.requires_approval|yesno:'true,false' }}"
+                                            data-approval-status="{{ post.approval_status }}"
+                                            data-approval-feedback="{{ post.latest_feedback_text|default_if_none:''|escape }}"
                                             data-slug="{{ post.slug|escape }}"
                                             data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
                                             data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
@@ -49,6 +56,40 @@
                             </div>
 
                             {% include "partials/_blogCard.html" with post=post %}
+                            {% if post.requires_approval or post.latest_feedback_text %}
+                                {% with feedback_text=post.latest_feedback_text|default_if_none:'' %}
+                                    <details class="post-feedback-accordion{% if not feedback_text %} is-empty{% endif %}">
+                                        <summary class="post-feedback-summary">
+                                            <span class="post-feedback-title"><i class="fas fa-comment-dots"></i> Feedback</span>
+                                            <span class="post-feedback-preview">
+                                                {% if feedback_text %}
+                                                    {{ feedback_text|truncatechars:70 }}
+                                                {% elif post.approval_status == 'pending' %}
+                                                    Müəllim baxışı gözlənilir.
+                                                {% elif post.approval_status == 'needs_changes' %}
+                                                    Düzəliş üçün feedback əlavə edilə bilər.
+                                                {% else %}
+                                                    Hələ feedback yoxdur.
+                                                {% endif %}
+                                            </span>
+                                            <span class="post-feedback-chevron" aria-hidden="true">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </span>
+                                        </summary>
+                                        <div class="post-feedback-content">
+                                            {% if feedback_text %}
+                                                {{ feedback_text|linebreaksbr }}
+                                            {% elif post.approval_status == 'needs_changes' %}
+                                                Müəllim “düzəliş tələb olunur” seçib, amma əlavə mətn yazmayıb.
+                                            {% elif post.approval_status == 'pending' %}
+                                                Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.
+                                            {% else %}
+                                                Bu post üçün hələ feedback paylaşılmayıb.
+                                            {% endif %}
+                                        </div>
+                                    </details>
+                                {% endwith %}
+                            {% endif %}
                         </article>
                     {% endfor %}
                 </div>
@@ -80,8 +121,14 @@
 
                 <div id="createFormError" class="create-form-error" hidden></div>
 
-                <form id="createForm" enctype="multipart/form-data">
+                <form id="createForm" enctype="multipart/form-data" data-requires-approval="{{ post_creation_requires_approval|yesno:'true,false' }}">
                     {% csrf_token %}
+                    {% if post_creation_requires_approval %}
+                        <div class="approval-notice">
+                            Bu post əvvəlcə müəllim təsdiqinə gedəcək və təsdiqlənənə qədər paylaşılmayacaq.
+                        </div>
+                    {% endif %}
+
                     <div class="form-group">
                         <label for="createTitle">{% trans "label_title" context "profile.posts" %}</label>
                         <input type="text" id="createTitle" name="title" class="form-control" required>
@@ -123,12 +170,25 @@
                         <input type="file" id="createImage" name="image" class="form-control" accept="image/*">
                     </div>
 
-                    <div class="form-group form-check">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="createIsPublished" name="is_published" checked>
-                            {% trans "publish_article" context "profile.posts" %}
-                        </label>
-                    </div>
+                    {% if post_creation_requires_approval %}
+                        <div class="form-group">
+                            <div class="approval-lock-row">
+                                <i class="fas fa-lock"></i>
+                                <span>Bu post avtomatik olaraq müəllim təsdiqinə göndəriləcək.</span>
+                            </div>
+                            <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
+                        </div>
+                    {% else %}
+                        <div class="form-group form-check">
+                            <label class="checkbox-label">
+                                <input type="checkbox"
+                                       id="createIsPublished"
+                                       name="is_published"
+                                       checked>
+                                {% trans "publish_article" context "profile.posts" %}
+                            </label>
+                        </div>
+                    {% endif %}
 
                     <div class="modal-buttons">
                         <button type="button" id="cancelCreate" class="modal-cancel-btn">{% trans "cancel" context "profile.posts" %}</button>
@@ -151,6 +211,10 @@
                     <p><strong>{% trans "meta_slug" context "profile.posts" %}:</strong> <span id="editSlugInfo"></span></p>
                     <p><strong>{% trans "meta_created" context "profile.posts" %}:</strong> <span id="editCreatedAtInfo"></span></p>
                     <p><strong>{% trans "meta_updated" context "profile.posts" %}:</strong> <span id="editUpdatedAtInfo"></span></p>
+                </div>
+
+                <div id="editApprovalNotice" class="approval-notice" hidden>
+                    Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.
                 </div>
 
                 <form id="editForm" enctype="multipart/form-data">

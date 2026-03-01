@@ -337,12 +337,14 @@ def _role_capabilities(user, profile):
     is_student = _user_has_any_role(user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
     is_teacher = _user_has_any_role(user, {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER})
     is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR})
+    user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
 
     can_manage_org = is_superadmin or is_org_admin
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
     can_manage_blog = getattr(user, "is_authenticated", False)
+    can_approve_posts = is_superadmin or user_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
     if is_superadmin:
         allowed_sections = {
@@ -361,6 +363,7 @@ def _role_capabilities(user, profile):
             "permission-editor",
             "manage-roles",
             "superadmin-organizations",
+            "pending-post-approvals",
             "blog",
             "edit-profile",
         }
@@ -398,6 +401,8 @@ def _role_capabilities(user, profile):
 
     if can_manage_blog:
         allowed_sections.add("create-post")
+    if can_approve_posts:
+        allowed_sections.add("pending-post-approvals")
 
     return {
         "role": role,
@@ -411,6 +416,7 @@ def _role_capabilities(user, profile):
         "can_view_student_assignments": can_view_student_assignments,
         "can_view_blog": True,
         "can_manage_blog": can_manage_blog,
+        "can_approve_posts": can_approve_posts,
         "allowed_sections": allowed_sections,
     }
 
@@ -567,21 +573,127 @@ def _resolve_membership_role(organization, initial_role):
 
 def _get_signup_lookup_payload():
     """
-    Return lookup payload for signup institution filtering.
+    Return lookup payload for signup filtering.
     """
-    from apps.organizations.models import Country, Institution
+    from apps.organizations.models import Country, Organization
 
     countries = list(Country.objects.filter(is_active=True).values("code", "name").order_by("name"))
-    institutions = list(
-        Institution.objects.filter(is_active=True)
-        .select_related("country")
-        .values("id", "name", "code", "institution_type", "country__code")
+    country_codes = {country["code"] for country in countries}
+    country_name_to_code = {country["name"].strip().lower(): country["code"] for country in countries}
+    organizations = []
+    org_rows = (
+        Organization.objects.filter(
+            is_active=True,
+            status="active",
+            org_type__in={
+                OrganizationType.SCHOOL,
+                OrganizationType.UNIVERSITY,
+                OrganizationType.COURSE_CENTER,
+            },
+        )
+        .values("id", "name", "slug", "org_type", "country")
         .order_by("name")
     )
+
+    for org in org_rows:
+        raw_country = (org.get("country") or "").strip()
+        normalized_country = raw_country.upper()
+        country_code = ""
+        if normalized_country in country_codes:
+            country_code = normalized_country
+        elif raw_country:
+            country_code = country_name_to_code.get(raw_country.lower(), "")
+
+        organizations.append(
+            {
+                "id": str(org["id"]),
+                "name": org["name"],
+                "slug": org["slug"],
+                "org_type": org["org_type"],
+                "country": raw_country,
+                "country_code": country_code,
+            }
+        )
+
     return {
         "countries": countries,
-        "institutions": institutions,
+        "organizations": organizations,
     }
+
+
+def _activate_verified_student_membership(user):
+    """
+    Finalize pending student join after email verification.
+    """
+    from apps.organizations.models import Membership
+
+    profile = getattr(user, "profile", None)
+    if profile is None:
+        return None
+
+    requested_organization = getattr(profile, "requested_organization", None)
+    if requested_organization is None:
+        return None
+
+    if profile.organization_id:
+        return profile.organization
+
+    if requested_organization.is_suspended:
+        return None
+
+    student_role = _resolve_membership_role(requested_organization, ProfileRole.STUDENT)
+    if student_role is None:
+        return None
+
+    membership = (
+        Membership.objects.filter(user=user, organization=requested_organization, is_active=True)
+        .select_related("role")
+        .order_by("-is_primary", "-role__level")
+        .first()
+    )
+    if membership:
+        update_fields = []
+        if membership.role_id != student_role.id:
+            membership.role = student_role
+            update_fields.append("role")
+        if not membership.is_primary:
+            membership.is_primary = True
+            update_fields.append("is_primary")
+        if update_fields:
+            membership.save(update_fields=update_fields)
+    else:
+        Membership.objects.create(
+            user=user,
+            organization=requested_organization,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+            assigned_by=user,
+        )
+
+    profile.organization = requested_organization
+    profile.organization_type = requested_organization.org_type
+    profile.role = ProfileRole.STUDENT
+    profile.requested_organization_name = requested_organization.name
+    profile.student_university_name = requested_organization.name
+    if requested_organization.org_type == OrganizationType.SCHOOL:
+        profile.student_school_identifier = (
+            requested_organization.organization_identifier or requested_organization.license_identifier or ""
+        )
+    else:
+        profile.student_school_identifier = ""
+    profile.save(
+        update_fields=[
+            "organization",
+            "organization_type",
+            "role",
+            "requested_organization_name",
+            "student_university_name",
+            "student_school_identifier",
+        ]
+    )
+
+    return requested_organization
 
 
 def _result_status_badge(status, is_graded=False):
@@ -1860,6 +1972,11 @@ def user_profile(request):
     Now accessible to ALL users (not just teachers).
     """
     from apps.blog.models import Category, Post
+    from apps.blog.services import (
+        author_requires_post_approval,
+        collect_reviewable_posts,
+        count_pending_reviewable_posts,
+    )
 
     # Ensure profile exists (get_or_create for safety)
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -1959,11 +2076,18 @@ def user_profile(request):
     user_posts = None
     posts_count = 0
     categories = []
+    post_creation_requires_approval = False
     if capabilities["can_manage_blog"]:
-        user_posts_qs = Post.objects.filter(author=request.user).select_related("category").order_by("-created_at")
+        user_posts_qs = (
+            Post.objects.filter(author=request.user)
+            .select_related("category")
+            .prefetch_related("approval_logs")
+            .order_by("-created_at")
+        )
         posts_count = user_posts_qs.count()
         user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
         categories = Category.objects.all().order_by("name")
+        post_creation_requires_approval = author_requires_post_approval(request.user)
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -2151,6 +2275,27 @@ def user_profile(request):
                     "students": student_ids,
                     "teachers": teacher_ids,
                 }
+
+    pending_post_approval_items = []
+    pending_post_approval_count = 0
+    pending_post_approval_search_query = ""
+    pending_post_approval_filter_status = "pending"
+    pending_post_approval_filter_group = ""
+    pending_post_approval_available_groups = []
+    if "pending-post-approvals" in allowed_sections:
+        (
+            pending_post_approval_items,
+            pending_post_approval_search_query,
+            pending_post_approval_filter_status,
+            pending_post_approval_filter_group,
+            pending_post_approval_available_groups,
+        ) = collect_reviewable_posts(
+            request.user,
+            search=request.GET.get("approval_search"),
+            status=request.GET.get("approval_status"),
+            group_id=request.GET.get("approval_group"),
+        )
+        pending_post_approval_count = count_pending_reviewable_posts(request.user)
 
     pending_review_items = []
     pending_review_search_query = ""
@@ -2458,6 +2603,7 @@ def user_profile(request):
         "my-results": pgettext_lazy("profile.section", "my_results"),
         "pending-answers": "Pending cavablar",
         "groups": pgettext_lazy("profile.section", "groups"),
+        "pending-post-approvals": "Təsdiq gözləyən postlar",
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
@@ -2508,6 +2654,7 @@ def user_profile(request):
         "user_posts": user_posts,
         "posts_count": posts_count,
         "categories": categories,
+        "post_creation_requires_approval": post_creation_requires_approval,
         "my_courses": my_courses,
         "courses_count": courses_count,
         "my_exams": my_exams,
@@ -2538,6 +2685,12 @@ def user_profile(request):
         "group_form": group_form,
         "can_multi_assign_group_teachers": can_multi_assign_group_teachers,
         "groups_section_return_url": groups_section_return_url,
+        "pending_post_approval_items": pending_post_approval_items,
+        "pending_post_approval_count": pending_post_approval_count,
+        "pending_post_approval_search_query": pending_post_approval_search_query,
+        "pending_post_approval_filter_status": pending_post_approval_filter_status,
+        "pending_post_approval_filter_group": pending_post_approval_filter_group,
+        "pending_post_approval_available_groups": pending_post_approval_available_groups,
         "pending_review_items": pending_review_items,
         "pending_review_search_query": pending_review_search_query,
         "pending_review_filter_type": pending_review_filter_type,
@@ -2559,6 +2712,7 @@ def user_profile(request):
         "can_manage_org": capabilities["can_manage_org"],
         "can_view_owned_learning": capabilities["can_view_owned_learning"],
         "can_review_submissions": capabilities["can_review_submissions"],
+        "can_approve_posts": capabilities["can_approve_posts"],
         "can_view_blog": capabilities["can_view_blog"],
         "can_manage_blog": capabilities["can_manage_blog"],
         "can_view_student_assignments": capabilities["can_view_student_assignments"],
@@ -3885,7 +4039,7 @@ class CustomLoginView(LoginView):
 
 
 def register_view(request):
-    """User registration with organization bootstrap and immediate login eligibility."""
+    """User registration with organization bootstrap and email verification."""
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -3895,14 +4049,15 @@ def register_view(request):
                 user = form.save(commit=False)
                 user.email = form.cleaned_data["email"]
                 user.set_password(form.cleaned_data["password"])
-                user.is_active = True
+                # Account becomes active only after OTP/email-link verification.
+                user.is_active = False
                 user.save()
 
+                signup_mode = form.cleaned_data.get("signup_mode", "individual")
                 organization_type = form.cleaned_data["organization_type"]
                 country_code = form.cleaned_data.get("country", "")
                 country_obj = Country.objects.filter(code=country_code).first()
                 country_name = country_obj.name if country_obj else country_code
-                institution = form.cleaned_data.get("institution")
                 join_organization = form.cleaned_data.get("join_organization")
                 institution_not_listed_name = form.cleaned_data.get("institution_not_listed_name", "")
                 organization_identifier = form.cleaned_data.get("organization_identifier", "")
@@ -3913,42 +4068,42 @@ def register_view(request):
                 requested_organization = None
                 requested_organization_name = ""
                 resolved_identifier = organization_identifier
-                if organization_type == OrganizationType.INDIVIDUAL:
-                    if join_organization is not None:
-                        organization = join_organization
-                        requested_organization = join_organization
-                        requested_organization_name = join_organization.name
-                else:
-                    organization_name = institution.name if institution else institution_not_listed_name
-                    requested_organization_name = organization_name
-                    resolved_identifier = organization_identifier or (institution.code if institution else "")
 
-                    if initial_role == ProfileRole.ORG_ADMIN:
-                        organization = Organization.objects.create(
-                            name=organization_name,
-                            org_type=organization_type,
-                            country=country_name,
-                            owner=user,
-                            status="active",
-                            is_active=True,
-                            organization_identifier=resolved_identifier,
-                            license_identifier=organization_license_identifier,
-                        )
-                        requested_organization = organization
-                        requested_organization_name = organization.name
-                    else:
-                        requested_organization = (
-                            Organization.objects.filter(
-                                name__iexact=organization_name,
-                                org_type=organization_type,
-                                country=country_name,
-                                is_active=True,
-                            )
-                            .order_by("name")
-                            .first()
-                        )
-                        if requested_organization is not None:
-                            requested_organization_name = requested_organization.name
+                if signup_mode == "individual":
+                    owner_display_name = (f"{user.first_name} {user.last_name}").strip() or user.username
+                    organization_name = f"{owner_display_name} Workspace"
+                    organization = Organization.objects.create(
+                        name=organization_name,
+                        org_type=OrganizationType.INDIVIDUAL,
+                        country=country_name,
+                        owner=user,
+                        status="active",
+                        is_active=True,
+                    )
+                    requested_organization = organization
+                    requested_organization_name = organization.name
+                elif signup_mode == "organization_create":
+                    organization_name = institution_not_listed_name
+                    requested_organization_name = organization_name
+                    resolved_identifier = organization_identifier
+                    organization = Organization.objects.create(
+                        name=organization_name,
+                        org_type=organization_type,
+                        country=country_name,
+                        owner=user,
+                        status="active",
+                        is_active=True,
+                        organization_identifier=resolved_identifier,
+                        license_identifier=organization_license_identifier,
+                    )
+                    requested_organization = organization
+                    requested_organization_name = organization.name
+                else:
+                    requested_organization = join_organization
+                    requested_organization_name = join_organization.name if join_organization else ""
+                    resolved_identifier = (
+                        join_organization.organization_identifier if join_organization else organization_identifier
+                    )
 
                 profile, _ = UserProfile.objects.get_or_create(user=user)
                 profile.organization_type = organization.org_type if organization is not None else organization_type
@@ -3959,7 +4114,8 @@ def register_view(request):
                 profile.role = _map_signup_role_to_profile_role(initial_role)
                 profile.student_university_name = (
                     requested_organization_name
-                    if organization_type
+                    if signup_mode == "student_join"
+                    or organization_type
                     in {
                         OrganizationType.UNIVERSITY,
                         OrganizationType.SCHOOL,
@@ -3977,11 +4133,11 @@ def register_view(request):
                     if membership_role is None:
                         membership_role = Role.objects.create(
                             organization=organization,
-                            name="member",
-                            display_name="Member",
-                            level=20,
+                            name="owner",
+                            display_name="Owner",
+                            level=100,
                             scope_type="organization",
-                            permissions=["course.view", "exam.view", "analytics.view_own"],
+                            permissions=["*"],
                             is_system=False,
                             is_active=True,
                         )
@@ -3997,6 +4153,12 @@ def register_view(request):
 
                     request.session["active_organization"] = organization.slug
 
+            EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
+            code = generate_otp()
+            EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10))
+            send_verify_email(user, code)
+            request.session["pending_verify_email"] = user.email
+
             if organization is None and requested_organization_name:
                 messages.success(
                     request,
@@ -4007,7 +4169,8 @@ def register_view(request):
                     request,
                     pgettext_lazy("accounts.auth.message", "registration_completed_you_can_login_now"),
                 )
-            return redirect("accounts:login")
+            messages.success(request, pgettext_lazy("accounts.auth.message", "new_code_sent"))
+            return redirect("accounts:verify_code")
     else:
         form = RegisterForm()
 
@@ -4046,6 +4209,10 @@ def verify_code_view(request):
 
         user.is_active = True
         user.save()
+        joined_organization = _activate_verified_student_membership(user)
+        if joined_organization is not None:
+            request.session["active_organization"] = joined_organization.slug
+        request.session.pop("pending_verify_email", None)
 
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
         return redirect("accounts:login")
@@ -4061,6 +4228,10 @@ def verify_email_link_view(request):
         user = User.objects.get(pk=user_id)
         user.is_active = True
         user.save()
+        joined_organization = _activate_verified_student_membership(user)
+        if joined_organization is not None:
+            request.session["active_organization"] = joined_organization.slug
+        request.session.pop("pending_verify_email", None)
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
         return redirect("accounts:login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
@@ -4079,7 +4250,11 @@ def resend_code_view(request):
     if not user:
         messages.error(request, pgettext_lazy("accounts.auth.message", "user_not_found"))
         return redirect("accounts:register")
+    if user.is_active:
+        messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
+        return redirect("accounts:login")
 
+    EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
     code = generate_otp()
     EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10))
     send_verify_email(user, code)
@@ -4114,11 +4289,17 @@ def public_user_profile(request, username):
 
     # 1. Posts filtering
     if request.user == profile_user:
-        user_posts_list = Post.objects.filter(author=profile_user).select_related("category").order_by("-created_at")
+        user_posts_list = (
+            Post.objects.filter(author=profile_user)
+            .select_related("category")
+            .prefetch_related("approval_logs")
+            .order_by("-created_at")
+        )
     else:
         user_posts_list = (
             Post.objects.filter(author=profile_user, is_published=True)
             .select_related("category")
+            .prefetch_related("approval_logs")
             .order_by("-created_at")
         )
 

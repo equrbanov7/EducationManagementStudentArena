@@ -14,6 +14,11 @@
         <p class="post-form-subheading">
             {% trans "subheading" context "blog.post_form_page" %}
         </p>
+        {% if requires_approval %}
+            <div style="margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; border: 1px solid #99f6e4; background: linear-gradient(135deg, #ecfeff 0%, #ecfdf5 100%); color: #065f46; font-weight: 600;">
+                Bu post əvvəlcə müəllim təsdiqinə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.
+            </div>
+        {% endif %}
 
         <form method="post" class="post-creation-form" novalidate enctype="multipart/form-data">
             {% csrf_token %}
