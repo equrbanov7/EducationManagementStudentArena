@@ -1,0 +1,156 @@
+:root {
+    --task-primary: #2563eb;
+    --task-hover: #1d4ed8;
+    --task-light: #dbeafe;
+    --task-border: #bfdbfe;
+}
+
+.text-indigo { color: var(--task-primary) !important; }
+.icon-indigo-light { background: var(--task-light) !important; color: var(--task-primary) !important; }
+
+.profile-section--assigned-exams .assigned-task-tabs {
+    margin-bottom: 1.5rem;
+}
+
+.profile-section--assigned-exams .modern-tab:hover {
+    border-color: var(--task-primary);
+    color: var(--task-primary);
+    background: var(--task-light);
+}
+
+.profile-section--assigned-exams .modern-tab.active {
+    background: var(--task-primary);
+    border-color: var(--task-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.profile-section--assigned-exams .modern-tab.active .tab-count {
+    color: var(--task-primary);
+}
+
+.profile-section--assigned-exams .modern-assigned-task-card:hover {
+    border-color: var(--task-border);
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.15);
+}
+
+.profile-section--assigned-exams .assigned-task-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.profile-section--assigned-exams .assigned-task-icon--courses {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.profile-section--assigned-exams .assigned-task-icon--assignments {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.profile-section--assigned-exams .assigned-task-icon--labs {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.profile-section--assigned-exams .assigned-task-icon--independent {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.profile-section--assigned-exams .assigned-task-body {
+    margin-bottom: 1.5rem;
+}
+
+.profile-section--assigned-exams .assigned-task-desc {
+    background: #f8fafc;
+    border-left: 3px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: #334155;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.profile-section--assigned-exams .assigned-task-desc p {
+    margin: 0;
+}
+
+.profile-section--assigned-exams .status-open {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.profile-section--assigned-exams .status-upcoming {
+    background: #e0f2fe;
+    color: #075985;
+    border-color: #bae6fd;
+}
+
+.profile-section--assigned-exams .status-closed {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* --- Yeni Düymə və Footer Dizaynı --- */
+.profile-section--assigned-exams .task-card-footer {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.profile-section--assigned-exams .btn-task-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, var(--task-primary), var(--task-hover));
+    color: #ffffff;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.profile-section--assigned-exams .btn-task-primary .icon-arrow {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.profile-section--assigned-exams .btn-task-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.35);
+    color: #ffffff;
+}
+
+.profile-section--assigned-exams .btn-task-primary:hover .icon-arrow {
+    transform: translateX(6px);
+}
+
+@media (max-width: 640px) {
+    .profile-section--assigned-exams .results-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-section--assigned-exams .result-card-header {
+        flex-direction: column;
+    }
+
+    .profile-section--assigned-exams .result-status-wrap {
+        margin-top: 0.5rem;
+    }
+}

@@ -1,9 +1,10 @@
+{% load i18n %}
 <div class="modal fade" id="addAssignmentModal" tabindex="-1" >
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Yeni Sərbəst İş Əlavə Et</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">{% trans "modal_add_title" context "assignment.legacy.modals" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close_aria' context 'assignment.legacy.modals' %}"></button>
             </div>
             <div class="modal-body" id="addAssignmentModalContent">
                 <form id="addAssignmentForm" method="post" action="{% url 'assignments:add_assignment' course.id %}">
@@ -11,43 +12,43 @@
                     
                     <div class="row">
                         <div class="col-md-5 border-end">
-                            <h6 class="fw-bold mb-3">Əsas Məlumatlar</h6>
+                            <h6 class="fw-bold mb-3">{% trans "basic_information" context "assignment.legacy.modals" %}</h6>
                             
                             <div class="mb-3">
-                                <label class="form-label">Başlıq</label>
-                                <input type="text" name="title" class="form-control" required placeholder="Məs: Lab 1">
+                                <label class="form-label">{% trans "label_title" context "assignment.legacy.modals" %}</label>
+                                <input type="text" name="title" class="form-control" required placeholder="{% trans 'placeholder_title' context 'assignment.legacy.modals' %}">
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Təsvir</label>
+                                <label class="form-label">{% trans "label_description" context "assignment.legacy.modals" %}</label>
                                 <textarea name="description" class="form-control" rows="3"></textarea>
                             </div>
 
                             <div class="row">
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">Başlama Tarixi</label>
+                                    <label class="form-label">{% trans "label_start_date" context "assignment.legacy.modals" %}</label>
                                     <input type="datetime-local" name="start_date" class="form-control">
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">Bitmə Tarixi</label>
+                                    <label class="form-label">{% trans "label_due_date" context "assignment.legacy.modals" %}</label>
                                     <input type="datetime-local" name="deadline" class="form-control" required>
                                 </div>
                             </div>
                             
                             <div class="row">
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">Cəhd Limiti</label>
+                                    <label class="form-label">{% trans "label_attempt_limit" context "assignment.legacy.modals" %}</label>
                                     <input type="number" name="max_attempts" class="form-control" value="1">
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <label class="form-label">Maks. Bal</label>
+                                    <label class="form-label">{% trans "label_max_score" context "assignment.legacy.modals" %}</label>
                                     <input type="number" name="max_score" class="form-control" value="10">
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-7">
-                            <h6 class="fw-bold mb-3">Kimə Təyin Olunsun?</h6>
+                            <h6 class="fw-bold mb-3">{% trans "assign_to" context "assignment.legacy.modals" %}</h6>
                             
                             <input type="hidden" name="target_groups" id="hidden_target_groups">
                             <input type="hidden" name="target_user_ids" id="hidden_target_users">
@@ -58,17 +59,17 @@
                                         <div class="card-header bg-light py-2">
                                             <ul class="nav nav-tabs card-header-tabs" id="selectionTabs" role="tablist">
                                                 <li class="nav-item">
-                                                    <button class="nav-link active py-1" data-bs-toggle="tab" data-bs-target="#tab-groups" type="button">Qruplar</button>
+                                                    <button class="nav-link active py-1" data-bs-toggle="tab" data-bs-target="#tab-groups" type="button">{% trans "tab_groups" context "assignment.legacy.modals" %}</button>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <button class="nav-link py-1" data-bs-toggle="tab" data-bs-target="#tab-students" type="button">Tələbələr</button>
+                                                    <button class="nav-link py-1" data-bs-toggle="tab" data-bs-target="#tab-students" type="button">{% trans "tab_students" context "assignment.legacy.modals" %}</button>
                                                 </li>
                                             </ul>
                                         </div>
                                         <div class="card-body p-2">
                                             <div class="tab-content">
                                                 <div class="tab-pane fade show active" id="tab-groups">
-                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="Qrup axtar...">
+                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="{% trans 'placeholder_search_group' context 'assignment.legacy.modals' %}">
                                                     <div class="list-group list-group-flush border rounded overflow-auto js-source-list" style="max-height: 250px;">
                                                         {% for grp in all_groups %}
                                                         <label class="list-group-item list-group-item-action py-1 d-flex align-items-center">
@@ -80,7 +81,7 @@
                                                 </div>
 
                                                 <div class="tab-pane fade" id="tab-students">
-                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="Tələbə axtar...">
+                                                    <input type="text" class="form-control form-control-sm mb-2 js-search-input" placeholder="{% trans 'placeholder_search_student' context 'assignment.legacy.modals' %}">
                                                     <div class="list-group list-group-flush border rounded overflow-auto js-source-list" style="max-height: 250px;">
                                                         {% for m in course_students %}
                                                         <label class="list-group-item list-group-item-action py-1 d-flex align-items-center">
@@ -99,11 +100,11 @@
                                 <div class="col-md-6">
                                     <div class="card shadow-sm h-100">
                                         <div class="card-header bg-light py-2 fw-bold small text-success">
-                                            Seçilənlər
+                                            {% trans "selected_items" context "assignment.legacy.modals" %}
                                         </div>
                                         <div class="card-body p-2 bg-white" style="min-height: 200px;">
                                             <div id="selected-items-container" class="d-flex flex-wrap gap-1">
-                                                <span class="text-muted small w-100 text-center mt-4 js-placeholder">Heç nə seçilməyib</span>
+                                                <span class="text-muted small w-100 text-center mt-4 js-placeholder">{% trans "nothing_selected" context "assignment.legacy.modals" %}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -114,8 +115,8 @@
                     </div>
                     
                     <div class="modal-footer mt-3">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
-                        <button type="submit" class="btn btn-primary" id="btnSaveAssignment">Yadda Saxla</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "cancel" context "assignment.legacy.modals" %}</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveAssignment">{% trans "save" context "assignment.legacy.modals" %}</button>
                     </div>
                 </form>
             </div>

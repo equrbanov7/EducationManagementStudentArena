@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ category.name }} | Kateqoriya{% endblock %}
+{% block title %}{{ category.name }} | {% trans "title_suffix" context "blog.category_detail_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/categoryDetail.css' %}">
@@ -13,29 +13,33 @@
 
 <section class="category-hero-section">
     <div class="category-container">
-        <span class="category-label">KATEQORİYA</span>
+        <span class="category-label">{% trans "hero_label" context "blog.category_detail_page" %}</span>
         <h1 class="category-hero-title">{{ category.name }}</h1>
-        <p class="category-hero-desc">Bu mövzuda cəmi {{ posts.count }} məqalə tapıldı.</p>
+        <p class="category-hero-desc">
+            {% trans "posts_found_prefix" context "blog.category_detail_page" %}
+            {{ posts.count }}
+            {% trans "posts_found_suffix" context "blog.category_detail_page" %}
+        </p>
     </div>
 </section>
 
 <div class="category-container">
     <div class="category-layout">
-        
+
         <div class="category-content-area">
             <div class="category-grid">
                 {% for post in posts %}
-                    {% include "partials/_blogCard.html" with post=post %} 
+                    {% include "partials/_blogCard.html" with post=post %}
                 {% empty %}
                     <div class="category-empty-state">
-                        <h3>Bu kateqoriyada hələ məqalə yoxdur.</h3>
-                        <a href="{% url 'home' %}" class="category-back-btn">Ana səhifəyə qayıt</a>
+                        <h3>{% trans "empty_title" context "blog.category_detail_page" %}</h3>
+                        <a href="{% url 'home' %}" class="category-back-btn">{% trans "back_home" context "blog.category_detail_page" %}</a>
                     </div>
                 {% endfor %}
             </div>
         </div>
 
-        {% include "partials/_sideBar.html" with categories=categories %} 
+        {% include "partials/_sideBar.html" with categories=categories %}
 
     </div>
 </div>

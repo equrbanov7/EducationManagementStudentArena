@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Qeydiyyat | MyBlog{% endblock %}
- 
+{% block title %}{% trans "title" context "blog.register_page" %} | MyBlog{% endblock %}
+
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
 {% endblock %}
@@ -10,8 +10,8 @@
 {% block content %}
 <div class="register-page-wrapper">
     <div class="register-card">
-        <h1 class="register-heading">Hesab Yarat</h1>
-        <p class="register-subheading">Yeni hesab yaradın və öz bloqunuzu paylaşmağa başlayın.</p>
+        <h1 class="register-heading">{% trans "heading" context "blog.register_page" %}</h1>
+        <p class="register-subheading">{% trans "subheading" context "blog.register_page" %}</p>
 
         {% if form.non_field_errors %}
             <div class="register-global-errors">
@@ -56,11 +56,12 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="register-submit-btn">Qeydiyyatdan keç</button>
+            <button type="submit" class="register-submit-btn">{% trans "submit" context "blog.register_page" %}</button>
         </form>
 
         <p class="register-footer-text">
-            Artıq hesabınız var? <a href="{% url 'login' %}">Daxil olun</a>
+            {% trans "has_account" context "blog.register_page" %}
+            <a href="{% url 'login' %}">{% trans "login_now" context "blog.register_page" %}</a>
         </p>
     </div>
 </div>

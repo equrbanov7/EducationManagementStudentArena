@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "live_exam.join" %} | {{ session.pin }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/join.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Floating Background Shapes -->
+<div class="floating-shapes">
+    <div class="shape">🎮</div>
+    <div class="shape">🎯</div>
+    <div class="shape">🏆</div>
+    <div class="shape">⭐</div>
+    <div class="shape">🚀</div>
+    <div class="shape">💡</div>
+</div>
+
+<div class="join-container">
+    <div class="join-card">
+        
+        <!-- Game Icon -->
+        <div class="game-icon">🎮</div>
+        
+        <!-- PIN Section -->
+        <div class="pin-section">
+            <div class="pin-label">{% trans "game_pin_label" context "live_exam.join" %}</div>
+            <div class="pin-badge">{{ session.pin }}</div>
+        </div>
+
+        <!-- Nickname Input -->
+        <div class="input-group">
+            <label class="input-label">
+                <i class="fas fa-user"></i> {% trans "nickname_label" context "live_exam.join" %}
+            </label>
+            <input id="nickname" 
+                   class="custom-input" 
+                   maxlength="15" 
+                   placeholder="{% trans 'nickname_placeholder' context 'live_exam.join' %}" 
+                   autocomplete="off"
+                   autofocus>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="input-group">
+            <label class="input-label">
+                <i class="fas fa-smile"></i> {% trans "avatar_label" context "live_exam.join" %}
+            </label>
+            <div id="avatarGrid" class="avatar-grid">
+                <!-- Emoji-lər JS ilə doldurulacaq -->
+            </div>
+        </div>
+
+        <!-- Join Button -->
+        <button id="joinBtn" class="join-btn">
+            <i class="fas fa-play me-2"></i> {% trans "join_button" context "live_exam.join" %}
+        </button>
+
+        <!-- Fun Text -->
+        <p class="fun-text">
+            {% trans "fun_text_prefix" context "live_exam.join" %} <span>{% trans "fun_text_highlight" context "live_exam.join" %}</span> {% trans "fun_text_suffix" context "live_exam.join" %}
+        </p>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<!-- ÖNCƏ CONFIG-i Django ilə render et -->
+<script>
+    const CONFIG = {
+        joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
+        csrf: "{{ csrf_token }}"
+    };
+    window.LIVE_EXAM_JOIN_I18N = {
+        alertSelectAvatar: "{% trans 'alert_select_avatar' context 'live_exam.join.js' %}",
+        buttonJoining: "{% trans 'button_joining' context 'live_exam.join.js' %}",
+        errorUnknown: "{% trans 'error_unknown' context 'live_exam.join.js' %}",
+        buttonJoin: "{% trans 'button_join' context 'live_exam.join.js' %}",
+        errorConnection: "{% trans 'error_connection' context 'live_exam.join.js' %}"
+    };
+</script>
+<!-- SONRA static JS-i yüklə -->
+<script src="{% static 'js/join.js' %}"></script>
+{% endblock %}

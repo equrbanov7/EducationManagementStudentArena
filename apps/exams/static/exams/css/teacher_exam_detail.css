@@ -28,6 +28,33 @@
     text-align: center;
 }
 
+.exam-header-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 14px;
+}
+
+.exam-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #334155;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.exam-back-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
 .exam-detail-title {
     font-size: 2.2rem;
     color: var(--text-dark, #111827);
@@ -346,6 +373,9 @@
     }
     .card-header {
         padding: 20px;
+    }
+    .exam-header-actions {
+        margin-bottom: 10px;
     }
     .card-body {
         padding: 20px;

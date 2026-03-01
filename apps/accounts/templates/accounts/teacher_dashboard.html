@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.teacher_dashboard" %} - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/teacher_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-chalkboard-teacher"></i> {% trans "panel_title" context "accounts.teacher_dashboard" %}</h4>
+            <p>{{ request.user.get_full_name|default:request.user.username }}</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'accounts:teacher_dashboard' %}" class="sidebar-nav-item active">
+                <i class="fas fa-home"></i>
+                <span>{% trans "home" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-book"></i>
+                <span>{% trans "courses" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="{% url 'accounts:grading_queue' %}" class="sidebar-nav-item">
+                <i class="fas fa-tasks"></i>
+                <span>{% trans "grading_queue" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>{% trans "exams" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-users"></i>
+                <span>{% trans "students" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>{% trans "reports" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="{% url 'accounts:profile' %}" class="sidebar-nav-item">
+                <i class="fas fa-user"></i>
+                <span>{% trans "profile" context "accounts.teacher_dashboard" %}</span>
+            </a>
+            <a href="#" class="sidebar-nav-item">
+                <i class="fas fa-cog"></i>
+                <span>{% trans "settings" context "accounts.teacher_dashboard" %}</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">{% trans "dashboard_title" context "accounts.teacher_dashboard" %}</h1>
+            <button class="toggle-sidebar-btn" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">{% trans "stat_total_courses" context "accounts.teacher_dashboard" %}</div>
+                        <div class="stat-value">{{ total_courses|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">{% trans "stat_total_students" context "accounts.teacher_dashboard" %}</div>
+                        <div class="stat-value">{{ total_students|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">{% trans "stat_pending_grading" context "accounts.teacher_dashboard" %}</div>
+                        <div class="stat-value">{{ pending_grading|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card red">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-label">{% trans "stat_at_risk" context "accounts.teacher_dashboard" %}</div>
+                        <div class="stat-value">{{ at_risk_students|default:0 }}</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widgets -->
+        <div class="widgets-grid">
+            <!-- Pending Grading Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-tasks text-primary"></i>
+                        {% trans "widget_pending_grading_title" context "accounts.teacher_dashboard" %}
+                    </h3>
+                    <a href="{% url 'accounts:grading_queue' %}" class="widget-link">
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if pending_submissions %}
+                <ul class="widget-list">
+                    {% for submission in pending_submissions %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ submission.student.get_full_name }}</strong><br>
+                                <small class="text-muted">{{ submission.assignment.title }}</small>
+                            </span>
+                            <span class="widget-badge pending">{{ submission.submitted_at|timesince }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>{% trans "empty_pending_grading" context "accounts.teacher_dashboard" %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Exams Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-calendar-alt text-success"></i>
+                        {% trans "widget_upcoming_exams_title" context "accounts.teacher_dashboard" %}
+                    </h3>
+                    <a href="#" class="widget-link">
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if upcoming_exams %}
+                <ul class="widget-list">
+                    {% for exam in upcoming_exams %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ exam.title }}</strong><br>
+                                <small class="text-muted">{{ exam.course.title }}</small>
+                            </span>
+                            <span class="widget-badge info">{{ exam.start_time|date:"d M" }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-check"></i>
+                    <p>{% trans "empty_upcoming_exams" context "accounts.teacher_dashboard" %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Courses Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-book text-info"></i>
+                        {% trans "widget_active_courses_title" context "accounts.teacher_dashboard" %}
+                    </h3>
+                    <a href="#" class="widget-link">
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if recent_courses %}
+                <ul class="widget-list">
+                    {% for course in recent_courses %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ course.title }}</strong><br>
+                                <small class="text-muted">{{ course.memberships.count }} {% trans "student_unit" context "accounts.teacher_dashboard" %}</small>
+                            </span>
+                            <span class="widget-badge info">{{ course.status }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-book-open"></i>
+                    <p>{% trans "empty_active_courses" context "accounts.teacher_dashboard" %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- At-Risk Students Widget -->
+            <div class="widget-card">
+                <div class="widget-header">
+                    <h3 class="widget-title">
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                        {% trans "widget_at_risk_students_title" context "accounts.teacher_dashboard" %}
+                    </h3>
+                    <a href="#" class="widget-link">
+                        {% trans "view_all" context "accounts.teacher_dashboard" %} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                {% if at_risk_list %}
+                <ul class="widget-list">
+                    {% for student in at_risk_list %}
+                    <li class="widget-list-item">
+                        <a href="#">
+                            <span>
+                                <strong>{{ student.user.get_full_name }}</strong><br>
+                                <small class="text-muted">{% trans "average_score_prefix" context "accounts.teacher_dashboard" %}: {{ student.average_grade|floatformat:1 }}</small>
+                            </span>
+                            <span class="widget-badge urgent">{% trans "attention_badge" context "accounts.teacher_dashboard" %}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-smile"></i>
+                    <p>{% trans "empty_at_risk_students" context "accounts.teacher_dashboard" %}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+
+        toggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+            }
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggleBtn.contains(e.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    });
+</script>
+{% endblock %}

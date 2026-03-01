@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+    <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page"
+     data-profile-base-url="{{ profile_base_url }}"
+     data-default-section="profile-info"
+     data-default-section-title="{% trans 'title' context 'profile.sidebar' %}">
+    {% include "accounts/profile/_sidebar.html" %}
+    <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
+ 
+    <main class="profile-main">
+        {% include "accounts/profile/_messages.html" %}
+        {% include "accounts/profile/_header.html" %}
+
+        <div class="profile-sections">
+            {% include "accounts/profile/sections/_profile_info.html" %}
+            {% include "accounts/profile/sections/_posts.html" %}
+            {% include "accounts/profile/sections/_my_exams.html" %}
+            {% include "accounts/profile/sections/_my_courses.html" %}
+            {% include "accounts/profile/sections/_courses.html" %}
+            {% include "accounts/profile/sections/_assigned_exams.html" %}
+            {% include "accounts/profile/sections/_assigned_courses.html" %}
+            {% include "accounts/profile/sections/_my_results.html" %}
+            {% include "accounts/profile/sections/_pending_answers.html" %}
+            {% include "accounts/profile/sections/_groups.html" %}
+            {% include "accounts/profile/sections/_pending_post_approvals.html" %}
+            {% include "accounts/profile/sections/_pending_review.html" %}
+            {% include "accounts/profile/sections/_review_results.html" %}
+            {% include "accounts/profile/sections/_role_assignment.html" %}
+            {% include "accounts/profile/sections/_permission_editor.html" %}
+            {% include "accounts/profile/sections/_manage_roles.html" %}
+            {% include "accounts/profile/sections/_superadmin_organizations.html" %}
+            {% include "accounts/profile/sections/_edit_profile.html" %}
+            {% include "accounts/profile/sections/_shortcut_sections.html" %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/user_profile.js' %}"></script>
+<script src="{% static 'courses/js/create_course_modal.js' %}"></script>
+<script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260222-2"></script>
+{% endblock %}

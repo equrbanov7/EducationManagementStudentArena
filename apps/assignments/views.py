@@ -10,13 +10,19 @@ Sərbəst işlər üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
+from datetime import timedelta
+from urllib.parse import urlencode, urlsplit
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import Course, CourseMembership
@@ -24,6 +30,57 @@ from apps.courses.models import Course, CourseMembership
 from .models import Assignment, AssignmentSubmission
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _teacher_review_back_url(request, assignment):
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if explicit_return_url:
+        return explicit_return_url
+
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section in {"pending-review", "review-results"}:
+        return f"{reverse('accounts:profile')}?section={source_section}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
+
+
+def _assignment_back_url(request, assignment):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -47,8 +104,11 @@ def create_assignment(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     # İcazə yoxlaması - yalnız kurs sahibi
-    if not request.user.is_teacher or course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         # Assignment yarat
@@ -57,7 +117,7 @@ def create_assignment(request, course_id):
             title=request.POST.get("title"),
             description=request.POST.get("description", ""),
             start_date=request.POST.get("start_date"),
-            deadline=request.POST.get("deadline"),
+            due_date=request.POST.get("deadline"),
             max_attempts=request.POST.get("max_attempts", 3),
             status=request.POST.get("status", "active"),
         )
@@ -83,11 +143,14 @@ def create_assignment(request, course_id):
             ).distinct()
             assignment.assigned_students.set(group_students)
 
-        messages.success(request, "Sərbəst iş uğurla yaradıldı!")
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_created_successfully"))
         return JsonResponse({"success": True, "assignment_id": assignment.id})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_create_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -103,18 +166,17 @@ def edit_assignment(request, pk):
     assignment = get_object_or_404(Assignment, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     # ─────────────────────────────────────────────────────────────────────────
     # GET - Mövcud məlumatları JSON olaraq qaytar
     # ─────────────────────────────────────────────────────────────────────────
     if request.method == "GET":
-        assigned_students = list(
-            assignment.assigned_students.values(
-                "id", "username", "first_name", "last_name"
-            )
-        )
+        assigned_students = list(assignment.assigned_students.values("id", "username", "first_name", "last_name"))
         assigned_student_ids = [s["id"] for s in assigned_students]
 
         # Tələbələrin qruplarını tap
@@ -133,16 +195,8 @@ def edit_assignment(request, pk):
             "id": assignment.id,
             "title": assignment.title,
             "description": assignment.description,
-            "start_date": (
-                assignment.start_date.strftime("%Y-%m-%dT%H:%M")
-                if assignment.start_date
-                else ""
-            ),
-            "deadline": (
-                assignment.deadline.strftime("%Y-%m-%dT%H:%M")
-                if assignment.deadline
-                else ""
-            ),
+            "start_date": (assignment.start_date.strftime("%Y-%m-%dT%H:%M") if assignment.start_date else ""),
+            "deadline": (assignment.due_date.strftime("%Y-%m-%dT%H:%M") if assignment.due_date else ""),
             "max_attempts": assignment.max_attempts,
             "status": assignment.status,
             "group_names": assigned_groups,
@@ -150,8 +204,7 @@ def edit_assignment(request, pk):
             "students": [
                 {
                     "id": s["id"],
-                    "name": f"{s['first_name']} {s['last_name']}".strip()
-                    or s["username"],
+                    "name": f"{s['first_name']} {s['last_name']}".strip() or s["username"],
                 }
                 for s in assigned_students
             ],
@@ -165,7 +218,7 @@ def edit_assignment(request, pk):
         assignment.title = request.POST.get("title")
         assignment.description = request.POST.get("description", "")
         assignment.start_date = request.POST.get("start_date")
-        assignment.deadline = request.POST.get("deadline")
+        assignment.due_date = request.POST.get("deadline")
         assignment.max_attempts = request.POST.get("max_attempts", 3)
         assignment.status = request.POST.get("status", "active")
         assignment.save()
@@ -192,11 +245,16 @@ def edit_assignment(request, pk):
         else:
             assignment.assigned_students.clear()
 
-        messages.success(request, "Sərbəst iş yeniləndi!")
-        return JsonResponse({"success": True, "message": "Sərbəst iş yeniləndi"})
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_updated_successfully"))
+        return JsonResponse(
+            {"success": True, "message": pgettext_lazy("assignment.message", "assignment_updated_successfully")}
+        )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_update_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -210,15 +268,21 @@ def delete_assignment(request, pk):
     """
     assignment = get_object_or_404(Assignment, id=pk)
 
-    if not request.user.is_teacher or assignment.course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
 
     try:
         assignment.delete()
-        messages.success(request, "Sərbəst iş silindi!")
-        return JsonResponse({"success": True, "message": "Silindi"})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+        messages.success(request, pgettext_lazy("assignment.message", "assignment_deleted_successfully"))
+        return JsonResponse({"success": True, "message": pgettext_lazy("assignment.message", "deleted")})
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "assignment_delete_failed")},
+            status=400,
+        )
 
 
 # ���══════════════════════════════════════════════════════════════════════════════
@@ -247,13 +311,11 @@ def assignment_detail(request, pk):
     if getattr(request.user, "is_student", False):
         has_access = assignment.assigned_students.filter(id=request.user.id).exists()
         if not has_access:
-            messages.error(request, "Bu tapşırığa giriş icazəniz yoxdur")
+            messages.error(request, pgettext_lazy("assignment.message", "access_denied_for_assignment"))
             return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = assignment.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    user_submissions = assignment.submissions.filter(user=request.user).order_by("-submitted_at")
     user_attempts = user_submissions.count()
 
     context = {
@@ -262,6 +324,7 @@ def assignment_detail(request, pk):
         "user_attempts": user_attempts,
         "can_submit": assignment.can_user_submit(request.user),
         "attempts_left": assignment.max_attempts - user_attempts,
+        "back_url": _assignment_back_url(request, assignment),
     }
 
     return render(request, "assignments/assignment_detail.html", context)
@@ -285,7 +348,7 @@ def submit_assignment(request, pk):
         return JsonResponse(
             {
                 "success": False,
-                "error": "Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib.",
+                "error": pgettext_lazy("assignment.message", "submission_not_allowed_attempts_or_deadline"),
             },
             status=400,
         )
@@ -293,7 +356,7 @@ def submit_assignment(request, pk):
     try:
         submission = AssignmentSubmission.objects.create(
             assignment=assignment,
-            student=request.user,
+            user=request.user,
             content=request.POST.get("content", ""),
         )
 
@@ -302,17 +365,20 @@ def submit_assignment(request, pk):
             submission.file = request.FILES["file"]
             submission.save()
 
-        messages.success(request, "Cavabınız göndərildi!")
+        messages.success(request, pgettext_lazy("assignment.message", "submission_sent_successfully"))
         return JsonResponse(
             {
                 "success": True,
-                "message": "Cavab göndərildi",
+                "message": pgettext_lazy("assignment.message", "submission_sent"),
                 "submission_id": submission.id,
             }
         )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "submission_send_failed")},
+            status=400,
+        )
 
 
 @login_required
@@ -335,13 +401,11 @@ def my_submissions(request, pk):
     # İcazə yoxlaması - yalnız özünə təyin olunmuş assignment-lara baxa bilər
     # ──────────────────��──────────────────────────────────────────────────────
     if not assignment.assigned_students.filter(id=request.user.id).exists():
-        messages.error(request, "Bu tapşırığa giriş icazəniz yoxdur")
+        messages.error(request, pgettext_lazy("assignment.message", "access_denied_for_assignment"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
     # İstifadəçinin cavablarını al
-    submissions = assignment.submissions.filter(student=request.user).order_by(
-        "-submitted_at"
-    )
+    submissions = assignment.submissions.filter(user=request.user).order_by("-submitted_at")
     user_attempts = submissions.count()
 
     context = {
@@ -376,17 +440,20 @@ def review_submissions(request, pk):
     assignment = get_object_or_404(Assignment, id=pk)
 
     # İcazə yoxlaması
-    if not request.user.is_teacher or assignment.course.owner != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        messages.error(request, pgettext_lazy("assignment.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
-    submissions = assignment.submissions.select_related("student").order_by(
-        "-submitted_at"
-    )
+    submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
+
+    selected_submission_raw = (request.GET.get("submission") or "").strip()
+    selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
 
     context = {
         "assignment": assignment,
         "submissions": submissions,
+        "selected_submission_id": selected_submission_id,
+        "back_url": _teacher_review_back_url(request, assignment),
     }
 
     return render(request, "assignments/review_submissions.html", context)
@@ -406,25 +473,39 @@ def grade_submission(request, pk):
     submission = get_object_or_404(AssignmentSubmission, id=pk)
 
     # İcazə yoxlaması
+    if not request.user.is_teacher_or_above or submission.assignment.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
+
     if (
-        not request.user.is_teacher
-        or submission.assignment.course.owner != request.user
+        submission.status == "graded"
+        and submission.graded_at
+        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
     ):
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil."},
+            status=400,
+        )
 
     try:
         submission.grade = request.POST.get("grade")
         submission.feedback = request.POST.get("feedback", "")
         submission.status = "graded"
-        submission.graded_at = timezone.now()
+        if not submission.graded_at:
+            submission.graded_at = timezone.now()
         submission.graded_by = request.user
         submission.save()
 
-        messages.success(request, "Qiymət verildi!")
-        return JsonResponse({"success": True, "message": "Qiymətləndirildi"})
+        messages.success(request, pgettext_lazy("assignment.message", "grade_given_successfully"))
+        return JsonResponse({"success": True, "message": pgettext_lazy("assignment.message", "graded")})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "grade_save_failed")},
+            status=400,
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -464,11 +545,7 @@ def search_students(request):
     results = [
         {
             "id": m.user.id,
-            "text": (
-                f"{m.user.get_full_name()} ({m.user.username})"
-                if m.user.first_name
-                else m.user.username
-            ),
+            "text": (f"{m.user.get_full_name()} ({m.user.username})" if m.user.first_name else m.user.username),
             "group_name": m.group_name or "",
         }
         for m in student_memberships
@@ -532,9 +609,7 @@ def students_by_groups(request):
 
     # Qruplardakı tələbələri tap
     memberships = (
-        CourseMembership.objects.filter(
-            course=course, group_name__in=group_names, role="student"
-        )
+        CourseMembership.objects.filter(course=course, group_name__in=group_names, role="student")
         .select_related("user")
         .order_by("group_name", "user__first_name")
     )

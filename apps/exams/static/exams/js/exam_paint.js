@@ -166,7 +166,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
     clearBtn?.addEventListener("click", (e) => {
       e.preventDefault();
-      if (confirm("Paint-i təmizləmək istədiyinizdən əminsiniz?")) {
+      const confirmText =
+        (window.EXAMS_I18N && window.EXAMS_I18N.paintConfirmClear) ||
+        "confirm_paint_clear";
+      if (confirm(confirmText)) {
         signaturePad.clear();
         // clear undo too (optional)
         undoStack = [];

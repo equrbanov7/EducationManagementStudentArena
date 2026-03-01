@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!-- MODAL: Resurs Əlavə Etmə (Updated with Topic Context) -->
 <!-- courses/templates/courses/partials/_resource_form_modal.html -->
 
@@ -7,7 +9,7 @@
             <!-- Header -->
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-file-upload"></i> Yeni Resurs Əlavə Et
+                    <i class="fas fa-file-upload"></i> {% trans "title_add_resource" context "courses.partial.resource_modal" %}
                     <span id="resourceModalTopicName" class="text-white-50"></span>
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -21,32 +23,32 @@
                     <!-- Resource Type Selection -->
                     <div class="mb-3">
                         <label class="form-label">
-                            <strong>Resurs Tipi</strong>
+                            <strong>{% trans "field_resource_type" context "courses.partial.resource_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <div class="btn-group w-100" role="group">
                             <input type="radio" class="btn-check" name="resource_type" 
                                    id="typeFile" value="file" checked>
                             <label class="btn btn-outline-primary" for="typeFile">
-                                <i class="fas fa-file-pdf"></i> Fayl
+                                <i class="fas fa-file-pdf"></i> {% trans "type_file" context "courses.partial.resource_modal" %}
                             </label>
                             
                             <input type="radio" class="btn-check" name="resource_type" 
                                    id="typeLink" value="link">
                             <label class="btn btn-outline-primary" for="typeLink">
-                                <i class="fas fa-link"></i> Link
+                                <i class="fas fa-link"></i> {% trans "type_link" context "courses.partial.resource_modal" %}
                             </label>
                             
                             <input type="radio" class="btn-check" name="resource_type" 
                                    id="typeVideo" value="video">
                             <label class="btn btn-outline-primary" for="typeVideo">
-                                <i class="fas fa-video"></i> Video
+                                <i class="fas fa-video"></i> {% trans "type_video" context "courses.partial.resource_modal" %}
                             </label>
                             
                             <input type="radio" class="btn-check" name="resource_type" 
                                    id="typeDocument" value="document">
                             <label class="btn btn-outline-primary" for="typeDocument">
-                                <i class="fas fa-file-alt"></i> Sənəd
+                                <i class="fas fa-file-alt"></i> {% trans "type_document" context "courses.partial.resource_modal" %}
                             </label>
                         </div>
                     </div>
@@ -54,62 +56,62 @@
                     <!-- Title Field -->
                     <div class="mb-3">
                         <label for="resourceTitle" class="form-label">
-                            <strong>Resurs Başlığı</strong>
+                            <strong>{% trans "field_resource_title" context "courses.partial.resource_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <input type="text" class="form-control" id="resourceTitle" 
-                               name="title" placeholder="Məs: Mühazirə 1 - Giriş"
+                               name="title" placeholder="{% trans 'placeholder_resource_title' context 'courses.partial.resource_modal' %}"
                                required>
                     </div>
                     
                     <!-- Topic Selection -->
                     <div class="mb-3">
                         <label for="resourceTopic" class="form-label">
-                            <strong>Mövzu</strong>
+                            <strong>{% trans "field_topic" context "courses.partial.resource_modal" %}</strong>
                         </label>
                         <select class="form-select" id="resourceTopic" name="topic">
-                            <option value="">Mövzu seçilməyib (kurs səviyyəsi)</option>
+                            <option value="">{% trans "option_no_topic" context "courses.partial.resource_modal" %}</option>
                             {% for topic in topics %}
                                 <option value="{{ topic.id }}">{{ topic.order }}. {{ topic.title }}</option>
                             {% endfor %}
                         </select>
                         <small class="text-muted">
-                            Opsional: Resursu konkret mövzuya bağlayın
+                            {% trans "help_topic_optional" context "courses.partial.resource_modal" %}
                         </small>
                     </div>
                     
                     <!-- Description Field -->
                     <div class="mb-3">
                         <label for="resourceDescription" class="form-label">
-                            <strong>Açıqlama</strong>
+                            <strong>{% trans "field_description" context "courses.partial.resource_modal" %}</strong>
                         </label>
                         <textarea class="form-control" id="resourceDescription" 
                                   name="description" rows="2" 
-                                  placeholder="Bu resurs haqqında qısa məlumat"></textarea>
+                                  placeholder="{% trans 'placeholder_description' context 'courses.partial.resource_modal' %}"></textarea>
                     </div>
                     
                     <!-- File Upload (conditional) -->
                     <div class="mb-3" id="fileUploadSection">
                         <label for="resourceFile" class="form-label">
-                            <strong>Fayl</strong>
+                            <strong>{% trans "field_file" context "courses.partial.resource_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <input type="file" class="form-control" id="resourceFile" name="file">
                         <small class="text-muted">
-                            Dəstəklənən formatlar: PDF, ZIP, DOC, DOCX, PPT, PPTX, XLS, XLSX
+                            {% trans "help_supported_formats" context "courses.partial.resource_modal" %}
                         </small>
                     </div>
                     
                     <!-- URL Input (conditional) -->
                     <div class="mb-3 d-none" id="urlInputSection">
                         <label for="resourceUrl" class="form-label">
-                            <strong>URL Linki</strong>
+                            <strong>{% trans "field_url" context "courses.partial.resource_modal" %}</strong>
                             <span class="text-danger">*</span>
                         </label>
                         <input type="url" class="form-control" id="resourceUrl" 
-                               name="url" placeholder="https://example.com">
+                               name="url" placeholder="{% trans 'placeholder_url' context 'courses.partial.resource_modal' %}">
                         <small class="text-muted">
-                            Xarici resurs linki (YouTube, Google Drive və s.)
+                            {% trans "help_external_link" context "courses.partial.resource_modal" %}
                         </small>
                     </div>
                     
@@ -119,10 +121,10 @@
                     <!-- Submit Button -->
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success flex-grow-1">
-                            <i class="fas fa-save"></i> Resurs Əlavə Et
+                            <i class="fas fa-save"></i> {% trans "action_add_resource" context "courses.partial.resource_modal" %}
                         </button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Ləğv Et
+                            <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.resource_modal" %}
                         </button>
                     </div>
                 </form>
@@ -165,7 +167,7 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yüklənir...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "loading" context "courses.partial.resource_modal" %}';
     
     fetch(actionUrl, {
         method: 'POST',
@@ -197,7 +199,7 @@ document.getElementById('resourceForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        notify('Xəta baş verdi. Lütfən yenidən cəhd edin.', 'error');
+        notify('{% trans "error_retry" context "courses.partial.resource_modal" %}', 'error');
     })
     .finally(() => {
         submitBtn.disabled = false;

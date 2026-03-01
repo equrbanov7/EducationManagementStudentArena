@@ -1,0 +1,122 @@
+/* --- Zümrüd/Yaşıl (Emerald) Rəng Dəyişənləri --- */
+:root {
+    --emerald-primary: #10b981;
+    --emerald-hover: #059669;
+    --emerald-light: #d1fae5;
+    --emerald-border: #a7f3d0;
+}
+
+/* Xüsusi Rəng Klassları */
+.text-emerald { color: var(--emerald-primary) !important; }
+.icon-emerald-light { background: var(--emerald-light) !important; color: var(--emerald-primary) !important; }
+
+/* --- Təyin Olunmuş Kurslar Grid --- */
+.assigned-course-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- Kart Dizaynı --- */
+.modern-assigned-course-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.modern-assigned-course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+    border-color: var(--emerald-border);
+}
+
+/* Kart İkonu */
+.assigned-course-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--emerald-light);
+    color: var(--emerald-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.modern-assigned-course-card:hover .assigned-course-icon {
+    background: var(--emerald-primary);
+    color: #ffffff;
+}
+
+/* Kart Məzmunu */
+.assigned-course-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.assigned-course-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.4rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.assigned-course-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Sağ Tərəf Aksiyası (Ox işarəsi və Mətn) */
+.assigned-course-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #cbd5e1;
+    font-size: 1rem;
+    transition: transform 0.2s ease, color 0.2s;
+}
+
+.btn-action-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.2s ease;
+}
+
+.modern-assigned-course-card:hover .assigned-course-action {
+    color: var(--emerald-primary);
+    transform: translateX(2px);
+}
+
+.modern-assigned-course-card:hover .btn-action-text {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Mobil Responsivlik */
+@media (max-width: 640px) {
+    .assigned-course-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-action-text {
+        display: none; /* Mobildə yerə qənaət etmək üçün mətni gizlədirik, yalnız ox qalır */
+    }
+}

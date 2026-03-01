@@ -1,0 +1,412 @@
+/* --- Header və Flex Layout --- */
+.section-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--bg-light);
+    padding-bottom: 1rem;
+}
+
+.section-title.mb-0 {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.text-primary {
+    color: var(--primary-blue);
+}
+
+.btn-create-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+/* --- İmtahan Grid Sistemi --- */
+.exam-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- İmtahan Kartı Dizaynı --- */
+.modern-exam-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.modern-exam-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+    border-color: #bfdbfe;
+}
+
+/* Kart İkonu */
+.exam-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: #eff6ff; /* Açıq mavi */
+    color: var(--primary-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.modern-exam-card:hover .exam-card-icon {
+    background: var(--primary-blue);
+    color: #ffffff;
+}
+
+/* Kart Məzmunu */
+.exam-card-content {
+    flex: 1;
+    min-width: 0; /* Mətnin daşmasının qarşısını alır */
+}
+
+.exam-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.4rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exam-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.meta-divider {
+    color: #cbd5e1;
+}
+
+.badge-type {
+    background: #f1f5f9;
+    padding: 0.15rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Sağ Tərəf Ox İşarəsi (Action) */
+.exam-card-action {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, color 0.2s;
+}
+
+.modern-exam-card:hover .exam-card-action {
+    color: var(--primary-blue);
+    transform: translateX(4px);
+}
+
+/* --- Empty State (Boş Vəziyyət) Dizaynı --- */
+.modern-empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+}
+
+.empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #94a3b8;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.modern-empty-state h3 {
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.modern-empty-state p {
+    color: var(--text-muted);
+    max-width: 400px;
+    margin: 0 auto 1.5rem auto;
+    line-height: 1.6;
+}
+
+/* Köməkçi klasslar */
+.mt-3 {
+    margin-top: 1.25rem;
+}
+
+.modal-create-exam {
+    width: min(1120px, 96vw);
+    max-width: none;
+    padding: 1rem 1rem 1.25rem;
+}
+
+.create-exam-modal-body {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: auto;
+    background: #ffffff;
+    max-height: 78vh;
+    padding: 1rem;
+}
+
+.create-exam-modal-loading,
+.create-exam-modal-error {
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #64748b;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.create-exam-modal-error {
+    color: #991b1b;
+}
+
+.create-exam-form-errors {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.create-exam-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+.create-exam-form-grid .form-group {
+    margin-bottom: 0;
+}
+
+.create-exam-form-grid .form-control {
+    width: 100%;
+}
+
+.create-exam-form-grid .form-group > label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.35rem;
+}
+
+.create-exam-modal-section-title {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 0.7rem;
+}
+
+.create-exam-modal-section-title h4 {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+    color: #0f172a;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.create-exam-modal-section-title p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.86rem;
+}
+
+.create-exam-access-block {
+    transition: max-height 0.2s ease, opacity 0.2s ease;
+    max-height: 1100px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.create-exam-access-block.is-hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+}
+
+.create-exam-access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.create-exam-searchable-select {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-exam-searchable-label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.35rem;
+}
+
+.create-exam-search-wrap {
+    position: relative;
+    margin-bottom: 0.45rem;
+}
+
+.create-exam-search-wrap i {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.create-exam-search-input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem 0.55rem 2rem;
+    font-size: 0.92rem;
+    color: #1f2937;
+    outline: none;
+}
+
+.create-exam-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.create-exam-search-list {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    min-height: 180px;
+    max-height: 230px;
+    overflow-y: auto;
+}
+
+.create-exam-list-empty {
+    padding: 0.75rem;
+    color: #94a3b8;
+    font-style: italic;
+    text-align: center;
+}
+
+.create-exam-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+}
+
+.create-exam-list-item:last-child {
+    border-bottom: none;
+}
+
+.create-exam-list-item:hover {
+    background: #eef2ff;
+}
+
+.create-exam-item-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #2563eb;
+}
+
+.create-exam-item-label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 0.91rem;
+    color: #1f2937;
+}
+
+.create-exam-selection-counter {
+    margin-top: 0.35rem;
+    text-align: right;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.modal-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.create-exam-modal-actions {
+    margin-top: 1rem;
+}
+
+/* Mobil Responsivlik */
+@media (max-width: 768px) {
+    .section-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .btn-create-new {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal-create-exam {
+        width: 96vw;
+        padding: 0.75rem;
+    }
+
+    .create-exam-modal-body {
+        max-height: 72vh;
+    }
+
+    .create-exam-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .create-exam-access-grid {
+        grid-template-columns: 1fr;
+    }
+}

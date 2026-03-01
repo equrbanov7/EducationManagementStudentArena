@@ -1,0 +1,193 @@
+{% load static i18n %}
+<link rel="stylesheet" href="{% static 'labs/css/lab_section.css' %}">
+
+<div class="accordion-item">
+    <h2 class="accordion-header" id="labHeading">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#labCollapse" aria-expanded="false">
+            <i class="fas fa-flask text-danger me-2 fs-5"></i>
+            <strong>{% trans "section_title" context "labs.template.lab_section" %}</strong>
+            <span class="badge bg-danger ms-2">
+                {% if is_student %}
+                    {{ labs_with_user_data|length }}
+                {% else %}
+                    {{ labs|length }}
+                {% endif %}
+            </span>
+        </button>
+    </h2>
+    
+    <div id="labCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
+        <div class="accordion-body">
+            
+            {% if is_owner %}
+                <div class="mb-3 text-end">
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                        <i class="fas fa-plus-circle me-1"></i> {% trans "action_add_new_lab" context "labs.template.lab_section" %}
+                    </button>
+                </div>
+            {% endif %}
+
+            {# Teacher View #}
+            {% if is_owner or is_teacher %}
+                {% if labs %}
+                    <div class="list-group list-group-flush">
+                        {% for lab in labs %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-flask text-danger"></i> {{ lab.title }}
+                                </h6>
+                                <div>
+                                    {% if lab.status == 'draft' %}
+                                        <span class="badge bg-secondary">{% trans "status_draft" context "labs.template.lab_section" %}</span>
+                                    {% elif lab.is_upcoming %}
+                                        <span class="badge bg-info">{% trans "status_upcoming" context "labs.template.lab_section" %}</span>
+                                    {% elif lab.is_open %}
+                                        <span class="badge bg-success">{% trans "status_open" context "labs.template.lab_section" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{% trans "status_closed" context "labs.template.lab_section" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if lab.description %}
+                            <p class="text-muted small mb-2">{{ lab.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ lab.start_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-clock"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-star"></i> {% blocktrans trimmed context "labs.template.lab_section" with max_score=lab.max_score %}label_points {{ max_score }}{% endblocktrans %}</small>
+                                <small class="text-muted"><i class="fas fa-redo"></i> {% blocktrans trimmed context "labs.template.lab_section" with max_attempts=lab.max_attempts|default:1 %}label_attempt {{ max_attempts }}{% endblocktrans %}</small>
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm gap-2">
+                                <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-cubes"></i> {% trans "action_blocks" context "labs.template.lab_section" %}
+                                </a>
+                                <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i> {% trans "action_answers" context "labs.template.lab_section" %}
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="openEditLabModal('{% url 'labs:edit_lab' lab.id %}')">
+                                    <i class="fas fa-pen"></i> {% trans "action_edit" context "labs.template.lab_section" %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="deleteLabConfirm('{% url 'labs:delete_lab' lab.id %}')">
+                                    <i class="fas fa-trash"></i> {% trans "action_delete" context "labs.template.lab_section" %}
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">{% trans "empty_no_labs_yet" context "labs.template.lab_section" %}</p>
+                        <button class="btn btn-danger btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addLabModal">
+                            <i class="fas fa-plus-circle"></i> {% trans "action_add_first_lab" context "labs.template.lab_section" %}
+                        </button>
+                    </div>
+                {% endif %}
+            
+            {# Student View #}
+            {% elif is_student %}
+                {% if labs_with_user_data %}
+                    <div class="list-group list-group-flush">
+                        {% for item in labs_with_user_data %}
+                        {% with lab=item.lab %}
+                        <div class="list-group-item border-0 border-bottom pb-3 mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                <h6 class="mb-1 fw-bold">
+                                    <i class="fas fa-flask text-danger"></i> {{ lab.title }}
+                                </h6>
+                                <div>
+                                    {% if item.has_submitted %}
+                                        <span class="badge bg-success">{% trans "status_submitted" context "labs.template.lab_section" %}</span>
+                                        {% if item.submission.status == 'graded' and item.can_show_grade %}
+                                            <span class="badge bg-primary ms-1">{{ item.submission.score }}/{{ lab.max_score }}</span>
+                                        {% endif %}
+                                    {% elif lab.is_upcoming %}
+                                        <span class="badge bg-info">{% trans "status_upcoming" context "labs.template.lab_section" %}</span>
+                                    {% elif lab.is_open %}
+                                        <span class="badge bg-success">{% trans "status_open" context "labs.template.lab_section" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{% trans "status_closed" context "labs.template.lab_section" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if lab.description %}
+                            <p class="text-muted small mb-2">{{ lab.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ lab.start_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-clock"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}</small>
+                                <small class="text-muted"><i class="fas fa-star"></i> {% blocktrans trimmed context "labs.template.lab_section" with max_score=lab.max_score %}label_points {{ max_score }}{% endblocktrans %}</small>
+                                <small class="text-muted">
+                                    <i class="fas fa-redo"></i> 
+                                    {% blocktrans trimmed context "labs.template.lab_section" with attempt_count=item.attempt_count|default:0 max_attempts=item.max_attempts|default:1 %}label_attempt_ratio {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
+                                    {% if item.attempts_left <= 0 %}
+                                        <span class="badge bg-danger ms-1">{% trans "status_attempts_exhausted" context "labs.template.lab_section" %}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            
+                            <div class="btn-group btn-group-sm gap-2">
+                                {% if item.has_submitted %}
+                                    <a href="{% url 'labs:my_lab_answers' lab.id %}" 
+                                       class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-list-check"></i>
+                                        {% blocktrans trimmed context "labs.template.lab_section" with attempt_count=item.attempt_count %}action_my_answers {{ attempt_count }}{% endblocktrans %}
+                                    </a>
+                                    
+                                    {% if item.attempts_left > 0 and lab.is_open %}
+                                        <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-redo"></i> {% trans "action_resubmit" context "labs.template.lab_section" %}
+                                        </a>
+                                    {% else %}
+                                        <span class="btn btn-sm btn-secondary disabled">
+                                            <i class="fas fa-check-circle"></i> {% trans "status_completed" context "labs.template.lab_section" %}
+                                        </span>
+                                    {% endif %}
+                                
+                                {% elif lab.is_open %}
+                                    <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-arrow-right"></i> {% trans "action_open_lab" context "labs.template.lab_section" %}
+                                    </a>
+                                
+                                {% elif lab.is_upcoming %}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> {% trans "status_not_started" context "labs.template.lab_section" %}
+                                    </button>
+                                
+                                {% else %}
+                                    <span class="btn btn-sm btn-secondary disabled">
+                                        <i class="fas fa-lock"></i> {% trans "status_deadline_passed" context "labs.template.lab_section" %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-light text-center py-4">
+                        <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2 mb-0">{% trans "empty_no_assigned_labs" context "labs.template.lab_section" %}</p>
+                    </div>
+                {% endif %}
+            
+            {% else %}
+                <div class="alert alert-light text-center py-4">
+                    <i class="fas fa-flask" style="font-size: 2rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2 mb-0">{% trans "empty_no_labs" context "labs.template.lab_section" %}</p>
+                </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+<script src="{% static 'labs/js/lab_section.js' %}"></script>

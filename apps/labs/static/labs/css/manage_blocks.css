@@ -1,88 +1,145 @@
-/* ═══════════════════════════════════════════════════════════════
-   MANAGE BLOCKS & QUESTIONS - Custom Styles
-   ═══════════════════════════════════════════════════════════════ */
-
-   .accordion-item {
-    border: 1px solid #dee2e6;
-    margin-bottom: 0.5rem;
-    border-radius: 8px !important;
-    overflow: hidden;
-    transition: box-shadow 0.2s ease;
+/* Rəng Palitrası və Qlobal Dəyişənlər */
+:root {
+    --primary-blue: #2563eb;
+    --dark-blue: #1e40af;
+    --light-blue: #eff6ff;
+    --pale-blue: #bfdbfe;
+    
+    --primary-green: #10b981;
+    --dark-green: #059669;
+    --light-green: #ecfdf5;
 }
 
-.accordion-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
+/* Xüsusi Mətn Rəngləri */
+.text-dark-blue { color: var(--dark-blue) !important; }
+.text-primary-blue { color: var(--primary-blue) !important; }
+.text-primary-green { color: var(--primary-green) !important; }
 
-.accordion-button:not(.collapsed) {
-    background-color: #e7f1ff;
-    color: #0c63e4;
-    font-weight: 600;
-}
-
-.accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(13, 110, 253, 0.25);
-}
-
-.accordion-button .badge {
-    font-size: 0.85rem;
-}
-
-/* Questions Table */
-.table-hover tbody tr:hover {
-    background-color: #f8f9fa;
-    cursor: pointer;
-}
-
-/* Modal Enhancements */
-.modal-header.bg-success,
-.modal-header.bg-primary,
-.modal-header.bg-info {
-    border-bottom: none;
-}
-
-.modal-header .btn-close-white {
-    opacity: 0.9;
-}
-
-.modal-header .btn-close-white:hover {
-    opacity: 1;
-}
-
-/* Import textarea */
-textarea.font-monospace {
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-/* Stats cards animation */
-.card.bg-light {
+/* Statistika Kartları */
+.stat-card {
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    border: 1px solid rgba(0,0,0,0.05);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.stat-card.blue { background-color: var(--light-blue); border-color: var(--pale-blue); }
+.stat-card.green { background-color: var(--light-green); border-color: #a7f3d0; }
+.stat-card.white { background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 
-.card.bg-light:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Düymələr */
+.btn-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-green) 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    transition: filter 0.3s ease, transform 0.2s ease;
 }
-
-/* Button hover effects */
-.btn-sm {
-    transition: all 0.2s ease;
-}
-
-.btn-sm:hover {
+.btn-gradient-primary:hover {
+    color: #fff;
+    filter: brightness(0.9);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-/* Alert formatting in import modal */
-.alert code {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.9em;
+.btn-outline-custom {
+    color: var(--primary-blue);
+    border: 1px solid var(--pale-blue);
+    background: transparent;
+    font-weight: 500;
+    border-radius: 0.5rem;
+}
+.btn-outline-custom:hover {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    border-color: var(--primary-blue);
 }
 
-.alert ul {
-    padding-left: 1.5rem;
+/* Modern Akkordion Dizaynı */
+.custom-accordion .accordion-item {
+    border: none;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+    background: #fff;
+}
+.custom-accordion .accordion-button {
+    background-color: #fff;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    color: var(--dark-blue);
+    box-shadow: none !important;
+}
+.custom-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+}
+.custom-accordion .accordion-button::after {
+    background-size: 1rem;
+}
+
+/* Cədvəl Dizaynı */
+.table-modern { margin-bottom: 0; }
+.table-modern thead th {
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+}
+.table-modern tbody td {
+    
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+.table-modern tbody .operation-column{
+    display: flex;
+}
+.table-modern tbody tr:hover { background-color: #f8fafc; }
+
+/* Status Badges */
+.badge-soft-blue { background-color: var(--light-blue); color: var(--primary-blue); border: 1px solid var(--pale-blue); }
+.badge-soft-green { background-color: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
+
+.status-badge { padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 2rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; }
+.status-published { background: var(--light-green); color: var(--dark-green); border: 1px solid #a7f3d0; }
+.status-archived { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.status-draft { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+/* Modals */
+.modal-modern .modal-content {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+.modal-modern .modal-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.5rem 1.5rem 1rem;
+    background: transparent;
+}
+.modal-modern .modal-footer {
+    border-top: 1px solid #f1f5f9;
+    padding: 1rem 1.5rem;
+}
+.form-control-modern {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+.form-control-modern:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }

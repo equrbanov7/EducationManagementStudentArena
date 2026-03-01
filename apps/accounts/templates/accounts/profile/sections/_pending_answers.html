@@ -1,0 +1,7 @@
+{% if 'pending-answers' in allowed_sections %}
+<section class="profile-section-panel profile-section--pending-answers {% if active_section == 'pending-answers' %}is-active{% endif %}"
+         data-profile-section-panel="pending-answers"
+         data-source-url="{% url 'accounts:pending_answers' %}">
+    {% include "accounts/partials/_pending_answers_content.html" with pending_answer_items=pending_answer_items pending_answer_counts=pending_answer_counts pending_answers_active_filter=pending_answers_active_filter pending_answers_search_query=pending_answers_search_query pending_answers_total_count=pending_answers_count embedded_in_profile=True %}
+</section>
+{% endif %}

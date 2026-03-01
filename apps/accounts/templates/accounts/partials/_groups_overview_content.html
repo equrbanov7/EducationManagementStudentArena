@@ -1,0 +1,186 @@
+{% load i18n %}
+{% trans "label_assigned_teachers" context "profile.groups" as groups_label_assigned_teachers %}
+{% trans "placeholder_search_teacher" context "profile.groups" as groups_search_teacher %}
+{% trans "help_assigned_teachers" context "profile.groups" as groups_help_assigned_teachers %}
+{% trans "label_group_students" context "profile.groups" as groups_label_group_students %}
+{% trans "placeholder_search_student" context "profile.groups" as groups_search_student %}
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-users"></i>
+        {% trans "title" context "profile.groups" %} ({{ teacher_groups_count }})
+    </div>
+
+    <div class="profile-edit-link mb-3">
+        {% if group_form %}
+            <button type="button" class="btn btn-primary jsOpenCreateGroupProfile">
+                <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
+            </button>
+        {% else %}
+            <a href="{% url 'exams:create_student_group' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> {% trans "create_group" context "profile.groups" %}
+            </a>
+        {% endif %}
+    </div>
+
+    {% if teacher_groups %}
+        <div class="posts-grid">
+            {% for group in teacher_groups %}
+                <div class="post-item post-item--group">
+                    <div class="post-icon stat-icon--blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+
+                    <div class="post-info">
+                        <div class="post-title">{{ group.name }}</div>
+                        <div class="post-date">
+                            {% trans "primary_teacher" context "profile.groups" %}: {{ group.teacher.username }}
+                            · {% trans "students" context "profile.groups" %}: {{ group.students.count }}
+                            · {% trans "teachers" context "profile.groups" %}: {{ group.teachers.count }}
+                        </div>
+                    </div>
+
+                    <div class="group-card-actions">
+                        {% if group_form %}
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary jsOpenEditGroupProfile"
+                                data-group-id="{{ group.id }}"
+                                data-group-name="{{ group.name|escape }}"
+                                data-primary-teacher="{{ group.teacher_id }}"
+                                data-students="[{% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
+                                data-teachers="[{% for t in group.teachers.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
+                                title="{% trans 'edit_group' context 'profile.groups' %}"
+                            >
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        {% endif %}
+
+                        <form method="post" action="{% url 'exams:teacher_delete_group' group.id %}" class="d-inline" id="groupDeleteForm_{{ group.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ groups_section_return_url }}">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger jsOpenDeleteGroupProfile"
+                                data-delete-form-id="groupDeleteForm_{{ group.id }}"
+                                data-group-name="{{ group.name|escape }}"
+                                title="{% trans 'delete_group' context 'profile.groups' %}"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users-slash"></i>
+            <p>{% trans "empty_visible_groups" context "profile.groups" %}</p>
+        </div>
+    {% endif %}
+</div>
+
+{% if group_form %}
+{{ teacher_groups_payload|json_script:"profileGroupPayloads" }}
+<div
+    class="modal fade"
+    id="profileGroupModal"
+    tabindex="-1"
+    aria-hidden="true"
+    data-create-url="{% url 'exams:teacher_create_group' %}"
+    data-update-url-template="{% url 'exams:teacher_update_group' 0 %}"
+    data-next-url="{{ groups_section_return_url }}"
+    data-default-primary-teacher="{{ request.user.id }}"
+    data-title-create="{% trans 'modal_create_title' context 'profile.groups' %}"
+    data-title-edit="{% trans 'modal_edit_title' context 'profile.groups' %}"
+    data-submit-create="{% trans 'submit_create' context 'profile.groups' %}"
+    data-submit-edit="{% trans 'submit_save_changes' context 'profile.groups' %}"
+    data-empty-search-result="{% trans 'search_no_results' context 'profile.groups' %}"
+    data-fallback-this="{% trans 'fallback_this' context 'profile.groups' %}"
+>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable profile-group-modal">
+        <div class="modal-content profile-group-modal__content">
+            <div class="modal-header profile-group-modal__header">
+                <h5 class="modal-title" id="profileGroupModalTitle">{% trans "modal_create_title" context "profile.groups" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.groups' %}"></button>
+            </div>
+
+            <form id="profileGroupForm" method="post" action="{% url 'exams:teacher_create_group' %}">
+                <div class="modal-body profile-group-modal__body">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ groups_section_return_url }}" id="profileGroupNextInput">
+
+                    <div class="group-modal-section">
+                        <label for="{{ group_form.name.id_for_label }}" class="group-modal-label">{% trans "label_group_name" context "profile.groups" %}</label>
+                        {{ group_form.name }}
+                        {% for error in group_form.name.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="group-modal-section">
+                        <label for="{{ group_form.primary_teacher.id_for_label }}" class="group-modal-label">{% trans "label_primary_teacher" context "profile.groups" %}</label>
+                        <div class="group-checklist__search group-checklist__search--single">
+                            <i class="fas fa-search"></i>
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="{% trans 'placeholder_search_primary_teacher' context 'profile.groups' %}"
+                                id="profileGroupPrimaryTeacherSearch"
+                            >
+                        </div>
+                        {{ group_form.primary_teacher }}
+                        {% for error in group_form.primary_teacher.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    {% if can_multi_assign_group_teachers %}
+                        <div class="group-modal-section">
+                            {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.assigned_teachers label=groups_label_assigned_teachers search_placeholder=groups_search_teacher container_id="profileGroupTeacherSelector" help_text=groups_help_assigned_teachers %}
+                        </div>
+                    {% else %}
+                        <div style="display:none;">
+                            {{ group_form.assigned_teachers }}
+                        </div>
+                    {% endif %}
+
+                    <div class="group-modal-section group-modal-section--last">
+                        {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.students label=groups_label_group_students search_placeholder=groups_search_student container_id="profileGroupStudentSelector" %}
+                    </div>
+                </div>
+
+                <div class="modal-footer profile-group-modal__footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "profile.groups" %}</button>
+                    <button type="submit" class="btn btn-primary" id="profileGroupSubmitBtn">
+                        <span id="profileGroupSubmitLabel">{% trans "submit_create" context "profile.groups" %}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if group_form %}
+<div class="modal fade" id="profileGroupDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered profile-group-delete-modal">
+        <div class="modal-content profile-group-delete-modal__content">
+            <div class="modal-header profile-group-delete-modal__header">
+                <h5 class="modal-title mb-0">{% trans "delete_group" context "profile.groups" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.groups' %}"></button>
+            </div>
+            <div class="modal-body profile-group-delete-modal__body">
+                <p class="mb-0">
+                    {% trans "delete_confirm_prefix" context "profile.groups" %} <strong id="profileGroupDeleteName"></strong> {% trans "delete_confirm_suffix" context "profile.groups" %}
+                    {% trans "delete_confirm_warning" context "profile.groups" %}
+                </p>
+            </div>
+            <div class="modal-footer profile-group-delete-modal__footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "cancel" context "profile.groups" %}</button>
+                <button type="button" class="btn btn-danger" id="profileGroupDeleteConfirmBtn">{% trans "delete" context "profile.groups" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

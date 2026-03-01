@@ -7,16 +7,18 @@ WebSocket (real-time) üçün isə Django Channels routing istifadə olunur.
 
 import os
 
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
-
-django_asgi_app = get_asgi_application()
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 
 # Import routing after Django setup
 from apps.live_exam import routing
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
+
+django_asgi_app = get_asgi_application()
+
 
 application = ProtocolTypeRouter(
     {

@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="editFormData"
      data-members-bulk-url="{% url 'assignments:course_group_members_bulk' course.id %}">
 
@@ -11,33 +12,33 @@
 
       <div class="col-lg-8">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Tapşırıq adı</label>
+          <label class="form-label fw-semibold">{% trans "assignment_name" context "assignment.legacy.edit_form" %}</label>
           {{ form.title }}
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Təsvir</label>
+          <label class="form-label fw-semibold">{% trans "description" context "assignment.legacy.edit_form" %}</label>
           {{ form.description }}
         </div>
 
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Başlama tarixi</label>
+            <label class="form-label fw-semibold">{% trans "start_date" context "assignment.legacy.edit_form" %}</label>
             {{ form.start_date }}
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Son tarix</label>
-            {{ form.deadline }}
+            <label class="form-label fw-semibold">{% trans "due_date" context "assignment.legacy.edit_form" %}</label>
+            {{ form.due_date }}
           </div>
         </div>
 
         <div class="row g-3 mt-2">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Maksimum cəhd</label>
+            <label class="form-label fw-semibold">{% trans "max_attempts" context "assignment.legacy.edit_form" %}</label>
             {{ form.max_attempts }}
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Status</label>
+            <label class="form-label fw-semibold">{% trans "status" context "assignment.legacy.edit_form" %}</label>
             {{ form.status }}
           </div>
         </div>
@@ -47,10 +48,10 @@
         <div class="card border-0 shadow-sm">
           <div class="card-body">
 
-            <h6 class="fw-bold">Hədəf seçim</h6>
+            <h6 class="fw-bold">{% trans "target_selection" context "assignment.legacy.edit_form" %}</h6>
 
             <div class="mb-2">
-              <input type="text" class="form-control js-group-search-edit" placeholder="Qrup axtar...">
+              <input type="text" class="form-control js-group-search-edit" placeholder="{% trans 'search_group' context 'assignment.legacy.edit_form' %}">
             </div>
 
             <div class="js-group-list-edit" style="max-height: 160px; overflow:auto;">
@@ -68,7 +69,7 @@
             <hr>
 
             <div class="mb-2">
-              <input type="text" class="form-control js-student-search-edit" placeholder="Tələbə axtar...">
+              <input type="text" class="form-control js-student-search-edit" placeholder="{% trans 'search_student' context 'assignment.legacy.edit_form' %}">
             </div>
 
             <div class="js-student-list-edit" style="max-height: 160px; overflow:auto;">
@@ -92,8 +93,8 @@
     </div>
 
     <div class="mt-4 d-flex justify-content-end gap-2">
-      <button type="button" class="btn btn-light" data-bs-dismiss="modal">Bağla</button>
-      <button type="submit" class="btn btn-warning fw-bold">Yadda saxla</button>
+      <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "close" context "assignment.legacy.edit_form" %}</button>
+      <button type="submit" class="btn btn-warning fw-bold">{% trans "save" context "assignment.legacy.edit_form" %}</button>
     </div>
 
   </form>

@@ -1,0 +1,7 @@
+{% if 'permission-editor' in allowed_sections %}
+<section class="profile-section-panel profile-section--permission-editor {% if active_section == 'permission-editor' %}is-active{% endif %}"
+         data-profile-section-panel="permission-editor"
+         data-source-url="{% url 'accounts:permission_editor' %}">
+    {% include "accounts/partials/_permission_editor_content.html" with organization=permission_editor_section.organization roles=permission_editor_section.roles selected_role=permission_editor_section.selected_role permission_categories=permission_editor_section.permission_categories actor_permissions=permission_editor_section.actor_permissions grantable_permissions=permission_editor_section.grantable_permissions can_manage_permissions=permission_editor_section.can_manage_permissions access_denied_message=permission_editor_section.access_denied_message embedded_in_profile=True profile_base_url=profile_base_url %}
+</section>
+{% endif %}

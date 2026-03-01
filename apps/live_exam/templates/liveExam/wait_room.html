@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "live_exam.wait_room" %} | {{ session.pin }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/wait_room.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="wait-page-wrapper">
+    
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle">🎮</div>
+        <div class="particle">⭐</div>
+        <div class="particle">🎯</div>
+        <div class="particle">🏆</div>
+        <div class="particle">🚀</div>
+        <div class="particle">💡</div>
+        <div class="particle">🎲</div>
+        <div class="particle">✨</div>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="profile-card">
+        <div class="success-badge">
+            <i class="fas fa-check-circle"></i>
+            {% trans "success_badge" context "live_exam.wait_room" %}
+        </div>
+        
+        <div id="myAvatar" class="my-avatar">👤</div>
+        <div id="myNickname" class="my-nickname">
+            {% if my_nickname %}{{ my_nickname }}{% else %}{% trans "default_player" context "live_exam.wait_room" %}{% endif %}
+        </div>
+        
+        <div class="status-bar">
+            <i class="fas fa-spinner"></i>
+            {% trans "status_waiting_host" context "live_exam.wait_room" %}<span class="loading-dots"></span>
+        </div>
+    </div>
+
+    <!-- Other Players Section -->
+    <div class="players-section">
+        <div class="players-header">
+            <div class="players-title">
+                <i class="fas fa-users"></i>
+                {% trans "players_title" context "live_exam.wait_room" %}
+            </div>
+            <div class="player-count" id="playerCount">0</div>
+        </div>
+        
+        <div id="playersList" class="players-grid">
+            <!-- Players will be rendered here by JS -->
+        </div>
+    </div>
+
+</div>
+
+<!-- Footer Info -->
+<div class="lobby-footer">
+    <div class="footer-item">
+        <i class="fas fa-gamepad"></i>
+        <span>{% trans "pin_label" context "live_exam.wait_room" %}</span>
+        <span class="pin">{{ session.pin }}</span>
+    </div>
+    <div class="footer-item">
+        <div id="wsStatus" class="ws-status">
+            <span class="dot"></span>
+            <span class="status-text">{% trans "ws_connecting" context "live_exam.wait_room" %}</span>
+        </div>
+    </div>
+</div>
+
+{{ players|json_script:"initialPlayers" }}
+{% endblock %}
+
+{% block extraJs %}
+<script>
+    const CONFIG = {
+        wsPath: `/ws/live/{{ session.pin }}/lobby/`,
+        playerScreenUrl: "{{ player_screen_url }}",
+        myNickname: "{{ my_nickname|escapejs }}",
+        myAvatarKey: "{{ my_avatar_key|default:'avatar_1' }}"
+    };
+    window.LIVE_EXAM_WAIT_ROOM_I18N = {
+        wsConnecting: "{% trans 'ws_connecting' context 'live_exam.wait_room.js' %}",
+        wsOnline: "{% trans 'ws_online' context 'live_exam.wait_room.js' %}",
+        wsStarting: "{% trans 'ws_starting' context 'live_exam.wait_room.js' %}",
+        wsDisconnected: "{% trans 'ws_disconnected' context 'live_exam.wait_room.js' %}",
+        wsError: "{% trans 'ws_error' context 'live_exam.wait_room.js' %}",
+        wsConnectionError: "{% trans 'ws_connection_error' context 'live_exam.wait_room.js' %}"
+    };
+</script>
+<script src="{% static 'js/wait_room.js' %}"></script>
+{% endblock %}

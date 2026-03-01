@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ lab.title }} - {% trans "title_suffix_random_preview" context "labs.template.preview_randomization" %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'labs/css/preview_randomization.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2 small fw-medium">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="text-decoration-none text-muted">{{ lab.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'labs:manage_blocks' lab.id %}" class="text-decoration-none text-muted">{{ lab.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active text-primary-blue">{% trans "breadcrumb_random_preview" context "labs.template.preview_randomization" %}</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-dark-blue">
+                <i class="fas fa-random text-primary-blue me-2"></i> {% trans "heading_randomization_preview" context "labs.template.preview_randomization" %}
+            </h3>
+        </div>
+        <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-custom px-4">
+            <i class="fas fa-arrow-left me-2"></i> {% trans "action_back" context "labs.template.preview_randomization" %}
+        </a>
+    </div>
+    
+    <div class="card card-modern">
+        <div class="card-body p-4">
+            <form method="GET" class="row g-4 align-items-center">
+                <div class="col-md-6  selectStudent ">
+                    <label class="form-label fw-bold text-dark-blue mb-2">
+                        <i class="fas fa-user-graduate me-1 text-primary-blue"></i> 
+                        {% trans "label_select_student" context "labs.template.preview_randomization" %}
+                    </label>
+                    <select name="student" class="form-select form-select-modern" onchange="this.form.submit()">
+                        <option value="">{% trans "placeholder_select_student" context "labs.template.preview_randomization" %}</option>
+                        {% for m in memberships %}
+                        <option value="{{ m.user.id }}" {% if selected_student and selected_student.id == m.user.id %}selected{% endif %}>
+                            {{ m.user.get_full_name|default:m.user.username }}
+                            {% if m.group_name %}({{ m.group_name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 helpSelectStudent">
+                    <div class="bg-light p-3 rounded-3 border-start border-4 border-primary">
+                        <p class="text-secondary mb-0 small lh-lg">
+                            <i class="fas fa-info-circle text-primary-blue me-1"></i>
+                            {% trans "help_select_student" context "labs.template.preview_randomization" %}
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if selected_student %}
+    <div class="card card-modern">
+        <div class="card-header-gradient d-flex justify-content-between align-items-center">
+            <span class="fs-5">
+                <i class="fas fa-user-check me-2 text-white-50"></i>
+                <strong>{% blocktrans trimmed context "labs.template.preview_randomization" with student_name=selected_student.get_full_name|default:selected_student.username %}heading_questions_for_student {{ student_name }}{% endblocktrans %}</strong>
+            </span>
+            <span class="badge bg-white text-primary-blue fs-6 px-3 py-2 rounded-pill shadow-sm">
+                {% blocktrans trimmed context "labs.template.preview_randomization" with question_count=questions|length %}label_question_count {{ question_count }}{% endblocktrans %}
+            </span>
+        </div>
+        <div class="card-body p-0">
+            {% if questions %}
+                <div class="list-group list-group-flush">
+                    {% for question in questions %}
+                    <div class="list-group-item question-item p-4 {% if not forloop.last %}border-bottom{% endif %} border-light">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center question-number shadow-sm">
+                                {{ forloop.counter }}
+                            </span>
+                            <div class="flex-grow-1">
+                                <div class="mb-2">
+                                    <span class="badge badge-soft-blue px-2 py-1 rounded-pill"><i class="fas fa-layer-group me-1"></i> {{ question.block.title }}</span>
+                                </div>
+                                <p class="mb-2 text-dark fs-6">{{ question.question_text }}</p>
+                                
+                                {% if question.points > 0 %}
+                                <div class="d-inline-flex align-items-center bg-light border px-2 py-1 rounded-2 text-muted small fw-medium">
+                                    <i class="fas fa-star text-warning me-1"></i>
+                                    {% blocktrans trimmed context "labs.template.preview_randomization" with points=question.points %}label_points {{ points }}{% endblocktrans %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-question text-muted fa-2x"></i>
+                    </div>
+                    <h5 class="text-dark-blue fw-bold">{% trans "empty_no_questions" context "labs.template.preview_randomization" %}</h5>
+                    <p class="text-secondary">Bu tələbə üçün seçiləcək heç bir sual tapılmadı.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state-box mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-3" style="width: 80px; height: 80px;">
+            <i class="fas fa-hand-pointer fa-2x text-primary-blue"></i>
+        </div>
+        <h4 class="fw-bold text-dark-blue mb-2">{% trans "empty_select_student_title" context "labs.template.preview_randomization" %}</h4>
+        <p class="text-muted mb-0">{% trans "empty_select_student_desc" context "labs.template.preview_randomization" %}</p>
+    </div>
+    {% endif %}
+    
+    <div class="card card-modern bg-transparent shadow-none border-0 mt-2 mb-0">
+        <h5 class="fw-bold text-dark-blue mb-3">
+            <i class="fas fa-sliders-h text-primary-green me-2"></i> {% trans "card_randomization_settings" context "labs.template.preview_randomization" %}
+        </h5>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-box-icon">
+                        <i class="fas fa-user-edit fs-5"></i>
+                    </div>
+                    <strong class="d-block text-dark mb-1">{% trans "label_questions_per_student" context "labs.template.preview_randomization" %}</strong>
+                    <p class="text-muted mb-0 fw-medium">
+                        {% if lab.questions_per_student > 0 %}
+                            {% blocktrans trimmed context "labs.template.preview_randomization" with question_count=lab.questions_per_student %}value_questions_count {{ question_count }}{% endblocktrans %}
+                        {% else %}
+                            {% trans "value_all_questions" context "labs.template.preview_randomization" %}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-box-icon" style="background-color: var(--light-blue); color: var(--primary-blue);">
+                        <i class="fas fa-database fs-5"></i>
+                    </div>
+                    <strong class="d-block text-dark mb-1">{% trans "label_total_questions" context "labs.template.preview_randomization" %}</strong>
+                    <p class="text-muted mb-0 fw-medium">{% blocktrans trimmed context "labs.template.preview_randomization" with question_count=lab.total_questions %}value_questions_count {{ question_count }}{% endblocktrans %}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box">
+                    <div class="info-box-icon" style="background-color: #fef3c7; color: #d97706;">
+                        <i class="fas fa-cubes fs-5"></i>
+                    </div>
+                    <strong class="d-block text-dark mb-1">{% trans "label_total_blocks" context "labs.template.preview_randomization" %}</strong>
+                    <p class="text-muted mb-0 fw-medium">{% blocktrans trimmed context "labs.template.preview_randomization" with block_count=lab.blocks.count %}value_blocks_count {{ block_count }}{% endblocktrans %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'labs/js/preview_randomization.js' %}"></script>
+{% endblock %}

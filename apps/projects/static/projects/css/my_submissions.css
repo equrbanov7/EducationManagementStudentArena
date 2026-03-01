@@ -1,0 +1,76 @@
+.project-submissions-header {
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.project-submissions-primary-btn {
+    background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+}
+
+.project-submissions-primary-btn:hover {
+    color: #fff;
+    filter: brightness(0.95);
+}
+
+.project-submissions-card {
+    border: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.project-submissions-card-header {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #10b981 100%);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+    border: 0;
+}
+
+.project-submissions-table thead th {
+    border: 0;
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 0.9rem 0.85rem;
+}
+
+.project-submissions-table tbody td {
+    padding: 0.9rem 0.85rem;
+    vertical-align: middle;
+}
+
+.project-submissions-table tbody tr:hover {
+    background: #f0f9ff;
+}
+
+.project-sub-status {
+    padding: 0.45rem 0.7rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.project-sub-status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.project-sub-status-graded {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.project-sub-status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+@media (max-width: 768px) {
+    .project-submissions-table {
+        min-width: 700px;
+    }
+}

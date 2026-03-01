@@ -1,0 +1,93 @@
+{% load i18n %}
+{% if can_view_student_assignments %}
+<section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
+    <div class="section-card">
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-tasks text-indigo"></i>
+                    <span>{% trans "title" context "profile.assigned_tasks" %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modern-results-tabs assigned-task-tabs">
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=all"
+               class="modern-tab {% if assigned_tasks_active_filter == 'all' %}active{% endif %}">
+                {% trans "tab_all" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.all|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=courses"
+               class="modern-tab {% if assigned_tasks_active_filter == 'courses' %}active{% endif %}">
+                {% trans "tab_courses" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.courses|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=assignments"
+               class="modern-tab {% if assigned_tasks_active_filter == 'assignments' %}active{% endif %}">
+                {% trans "tab_assignments" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.assignments|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=labs"
+               class="modern-tab {% if assigned_tasks_active_filter == 'labs' %}active{% endif %}">
+                {% trans "tab_labs" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.labs|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=independent"
+               class="modern-tab {% if assigned_tasks_active_filter == 'independent' %}active{% endif %}">
+                {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
+            </a>
+        </div>
+
+        {% if assigned_task_items %}
+        <div class="results-cards-grid assigned-tasks-grid">
+            {% for item in assigned_task_items %}
+            <div class="modern-result-card modern-assigned-task-card">
+                <div class="result-card-header">
+                    <div class="result-icon-wrapper assigned-task-icon assigned-task-icon--{{ item.category }}">
+                        <i class="{{ item.icon }}"></i>
+                    </div>
+                    <div class="result-title-group">
+                        <h4 class="result-title">{{ item.title }}</h4>
+                        <div class="result-meta-info">
+                            <span class="kind-badge">{{ item.kind }}</span>
+                            {% if item.assigned_at %}
+                            <span class="meta-divider">•</span>
+                            <span><i class="far fa-clock"></i> {{ item.assigned_at|date:"d M Y H:i" }}</span>
+                            {% endif %}
+                            {% if item.deadline %}
+                            <span class="meta-divider">•</span>
+                            <span><i class="fas fa-hourglass-end"></i> {% trans "deadline_prefix" context "profile.assigned_tasks" %}: {{ item.deadline|date:"d M Y H:i" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="result-status-wrap">
+                        <span class="status-badge status-{{ item.state_badge }}">{{ item.state_label }}</span>
+                    </div>
+                </div>
+
+                {% if item.description %}
+                <div class="result-card-body assigned-task-body">
+                    <div class="assigned-task-desc">
+                        <p>{{ item.description|truncatechars:180 }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="result-card-footer task-card-footer">
+                    <a href="{{ item.detail_url }}" class="btn-action btn-task-primary">
+                        <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
+                        <i class="fas fa-arrow-right icon-arrow"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="modern-empty-state">
+            <div class="empty-icon-wrapper icon-indigo-light">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <h3>{% trans "empty_title" context "profile.assigned_tasks" %}</h3>
+            <p>{% trans "empty_description" context "profile.assigned_tasks" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

@@ -9,6 +9,9 @@
  * - Error clear
  */
 
+const MODAL_I18N = window.COURSES_I18N || {};
+const MODAL_ERRORS_LABEL = MODAL_I18N.errorsLabel || "Errors";
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeModals();
 });
@@ -80,7 +83,7 @@ function showModalErrors(modalId, errors) {
     const errorContainer = modal.querySelector('.alert-danger');
     if (!errorContainer) return;
     
-    let errorHtml = '<strong>Xətalar:</strong><ul class="mb-0">';
+    let errorHtml = '<strong>' + MODAL_ERRORS_LABEL + ':</strong><ul class="mb-0">';
     
     Object.keys(errors).forEach(field => {
         const messages = errors[field];
