@@ -59,3 +59,38 @@ class TitleSlugModel(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+class ActiveManager(models.Manager):
+    """
+    Manager that returns only active records.
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
+class ActiveModel(models.Model):
+    """
+    Abstract model that provides is_active field with custom manager.
+    """
+
+    is_active = models.BooleanField(default=True)
+
+    objects = models.Manager()
+    active = ActiveManager()
+
+    class Meta:
+        abstract = True
+
+
+class OrderedModel(models.Model):
+    """
+    Abstract model that provides ordering functionality.
+    """
+
+    order = models.PositiveIntegerField(default=0, db_index=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["order"]

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.login" %} | EMSArena{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
+{% endblock %}
+ 
+{% block content %}
+<div class="auth-page-wrapper"> {# auth-page -> auth-page-wrapper #}
+    <div class="auth-card">
+        <h1 class="auth-heading">{% trans "heading" context "accounts.login" %}</h1> {# auth-title -> auth-heading #}
+        <p class="auth-subheading">{% trans "subheading" context "accounts.login" %}</p> {# auth-subtitle -> auth-subheading #}
+
+        {% if form.non_field_errors %}
+            <div class="auth-global-errors"> {# auth-errors -> auth-global-errors #}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+
+            <div class="auth-form-field"> {# auth-field -> auth-form-field #}
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="auth-field-error">{{ form.username.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="auth-form-field"> {# auth-field -> auth-form-field #}
+                {{ form.password.label_tag }}
+                <div class="input-visibility-wrapper">
+                    {{ form.password }}
+                    <button
+                        type="button"
+                        class="input-visibility-toggle"
+                        data-toggle-visibility
+                        data-target="{{ form.password.id_for_label }}"
+                        aria-label="Toggle field visibility"
+                    >
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                {% endif %}
+            </div>
+
+            <div class="auth-forgot-password "> 
+                <a class="auth-forget-password-link" href="{% url 'accounts:password_reset' %}">{% trans "forgot_password" context "accounts.login" %}</a>
+            </div>
+            
+
+            <button type="submit" class="auth-submit-btn">{% trans "submit" context "accounts.login" %}</button> {# auth-btn -> auth-submit-btn #}
+        </form>
+
+        <p class="auth-footer-text">
+            {% trans "no_account" context "accounts.login" %} <a href="{% url 'accounts:register' %}">{% trans "register_now" context "accounts.login" %}</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
+{% endblock %}

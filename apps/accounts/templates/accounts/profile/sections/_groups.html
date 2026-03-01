@@ -1,0 +1,8 @@
+{% if 'groups' in allowed_sections %}
+<section class="profile-section-panel profile-section--groups {% if active_section == 'groups' %}is-active{% endif %}"
+         data-profile-section-panel="groups"
+         data-source-url="{% url 'exams:teacher_group_list' %}">
+    {% include "accounts/partials/_groups_overview_content.html" %}
+</section>
+{% endif %}
+ 

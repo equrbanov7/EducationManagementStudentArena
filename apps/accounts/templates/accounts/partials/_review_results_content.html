@@ -1,0 +1,146 @@
+{% load i18n %}
+<div class="section-card pending-review-results-card">
+    <div class="section-title">
+        <i class="fas fa-table"></i>
+        Dəyərləndirilmiş nəticələr ({{ evaluated_review_total_count|default:0 }})
+    </div>
+
+    <form method="get"
+          class="search-form js-auto-filter-form pending-review-results-filters"
+          data-auto-filter-form>
+        {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="review-results">
+        {% endif %}
+
+        <input
+            type="text"
+            name="evaluated_search"
+            value="{{ evaluated_review_search_query }}"
+            placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
+            class="form-control"
+        >
+
+        <select name="evaluated_type" class="form-control" style="max-width: 220px;">
+            <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
+            <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
+            <option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
+            <option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+            <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
+        </select>
+
+        <select name="evaluated_group" class="form-control" style="max-width: 220px;">
+            <option value="">Bütün qruplar</option>
+            {% for group_name in evaluated_review_available_groups %}
+                <option value="{{ group_name }}" {% if evaluated_review_filter_group == group_name %}selected{% endif %}>
+                    {{ group_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <noscript>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i> {% trans "filter_button" context "profile.pending_review" %}
+            </button>
+        </noscript>
+    </form>
+
+    {% if evaluated_review_items %}
+        <div class="table-responsive">
+            <table class="table pending-review-results-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tələbə</th>
+                        <th>Tapşırıq</th>
+                        <th>Növ</th>
+                        <th>Qrup</th>
+                        <th>Nəticə</th>
+                        <th>Qiymətləndirilib</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in evaluated_review_items %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.student.get_full_name|default:item.student.username }}</td>
+                            <td>
+                                <strong>{{ item.title }}</strong>
+                                <div class="text-muted small">{{ item.course_title|default:"-" }}</div>
+                            </td>
+                            <td>
+                                <span class="pending-review-type-badge pending-review-type-badge--{{ item.type }}">
+                                    {% if item.type == 'exam' %}
+                                        {% trans "type_exam" context "profile.pending_review" %}
+                                    {% elif item.type == 'assignment' %}
+                                        {% trans "type_assignment" context "profile.pending_review" %}
+                                    {% elif item.type == 'project' %}
+                                        {% trans "type_project" context "profile.pending_review" %}
+                                    {% else %}
+                                        {% trans "type_lab" context "profile.pending_review" %}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ item.group_name|default:"-" }}</td>
+                            <td>
+                                <span class="pending-review-score">{{ item.score_display }}</span>
+                            </td>
+                            <td>{{ item.date|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <a href="{{ item.action_url }}" class="btn btn-sm btn-review-view">Bax</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <p>Dəyərləndirilmiş nəticə tapılmadı.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+(function () {
+    function setupAutoFilterForm(form) {
+        if (!form || form.dataset.autoFilterBound === "1") {
+            return;
+        }
+        form.dataset.autoFilterBound = "1";
+
+        var debounceHandle = null;
+        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
+        var selects = form.querySelectorAll("select");
+
+        function submitForm() {
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+                return;
+            }
+            form.submit();
+        }
+
+        textFields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                window.clearTimeout(debounceHandle);
+                debounceHandle = window.setTimeout(submitForm, 350);
+            });
+            field.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    window.clearTimeout(debounceHandle);
+                    submitForm();
+                }
+            });
+        });
+
+        selects.forEach(function (select) {
+            select.addEventListener("change", submitForm);
+        });
+    }
+
+    document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
+})();
+</script>

@@ -1,0 +1,7 @@
+{% if 'manage-roles' in allowed_sections %}
+<section class="profile-section-panel profile-section--manage-roles {% if active_section == 'manage-roles' %}is-active{% endif %}"
+         data-profile-section-panel="manage-roles"
+         data-source-url="{% url 'accounts:manage_roles' %}">
+    {% include "accounts/partials/_manage_roles_content.html" with organization=manage_roles_section.organization profiles=manage_roles_section.profiles assignable_roles=manage_roles_section.assignable_roles search_query=manage_roles_section.search_query access_denied_message=manage_roles_section.access_denied_message profiles_page_param=manage_roles_section.profiles_page_param profiles_pagination_query=manage_roles_section.profiles_pagination_query post_next_url=manage_roles_section.post_next_url embedded_in_profile=True profile_base_url=profile_base_url %}
+</section>
+{% endif %}

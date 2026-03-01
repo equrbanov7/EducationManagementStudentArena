@@ -1,25 +1,28 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Yeni Post | MyBlog.az{% endblock %}
+{% block title %}{% trans "title" context "blog.post_form_page" %} | MyBlog.az{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/post_form.css' %}">
 {% endblock %}
- 
+
 {% block content %}
 <div class="post-form-page-wrapper">
     <div class="post-form-card">
-        <h1 class="post-form-heading">Yeni Yazı Yarat</h1>
+        <h1 class="post-form-heading">{% trans "heading" context "blog.post_form_page" %}</h1>
         <p class="post-form-subheading">
-            Bloqun üçün yeni məqalə əlavə et.
+            {% trans "subheading" context "blog.post_form_page" %}
         </p>
+        {% if requires_approval %}
+            <div style="margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; border: 1px solid #99f6e4; background: linear-gradient(135deg, #ecfeff 0%, #ecfdf5 100%); color: #065f46; font-weight: 600;">
+                Bu post əvvəlcə müəllim təsdiqinə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq.
+            </div>
+        {% endif %}
 
-        {# DİQQƏT: enctype="multipart/form-data" mütləq olmalıdır #}
         <form method="post" class="post-creation-form" novalidate enctype="multipart/form-data">
             {% csrf_token %}
 
-            {# Formun ümumi xəta mesajları #}
             {% if form.non_field_errors %}
                 <div class="post-form-global-errors">
                     {% for error in form.non_field_errors %}
@@ -37,15 +40,15 @@
             </div>
 
             <div class="post-form-group">
-                <label>Kateqoriya</label>
-                
+                <label>{% trans "category_label" context "blog.post_form_page" %}</label>
+
                 {{ form.category }}
                 {% if form.category.errors %}
                     <div class="post-form-field-error">{{ form.category.errors.0 }}</div>
                 {% endif %}
 
                 <div style="text-align: center; margin: 10px 0; color: #888; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">
-                    — və ya yenisini yarat —
+                    {% trans "or_create_new" context "blog.post_form_page" %}
                 </div>
 
                 {{ form.new_category }}
@@ -55,19 +58,17 @@
             </div>
 
             <div class="post-form-group">
-                <label>Şəkil Seçimi</label>
-                
-                {# 1. URL ilə şəkil #}
+                <label>{% trans "image_selection_label" context "blog.post_form_page" %}</label>
+
                 {{ form.image_url }}
                 {% if form.image_url.errors %}
                     <div class="post-form-field-error">{{ form.image_url.errors.0 }}</div>
                 {% endif %}
 
                 <div style="text-align: center; margin: 10px 0; color: #888; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">
-                    — və ya kompüterdən yüklə —
+                    {% trans "or_upload_from_device" context "blog.post_form_page" %}
                 </div>
 
-                {# 2. Fayl kimi yükləmə #}
                 {{ form.image }}
                 {% if form.image.errors %}
                     <div class="post-form-field-error">{{ form.image.errors.0 }}</div>
@@ -91,7 +92,7 @@
             </div>
 
             <button type="submit" class="post-form-submit-btn">
-                Yazını Yarat
+                {% trans "submit" context "blog.post_form_page" %}
             </button>
         </form>
     </div>

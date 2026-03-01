@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.grading_queue_page" %} - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/grading_queue.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="grading-container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-tasks"></i>
+            {% trans "heading" context "accounts.grading_queue_page" %}
+        </h1>
+        <a href="{% url 'accounts:teacher_dashboard' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            {% trans "back" context "accounts.grading_queue_page" %}
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" id="filterForm">
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label class="form-label" for="course">{% trans "filter_course_label" context "accounts.grading_queue_page" %}</label>
+                    <select class="form-select" id="course" name="course">
+                        <option value="">{% trans "filter_course_all" context "accounts.grading_queue_page" %}</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if request.GET.course == course.id|stringformat:"s" %}selected{% endif %}>
+                            {{ course.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="assignment">{% trans "filter_assignment_label" context "accounts.grading_queue_page" %}</label>
+                    <select class="form-select" id="assignment" name="assignment">
+                        <option value="">{% trans "filter_assignment_all" context "accounts.grading_queue_page" %}</option>
+                        {% for assignment in assignments %}
+                        <option value="{{ assignment.id }}" {% if request.GET.assignment == assignment.id|stringformat:"s" %}selected{% endif %}>
+                            {{ assignment.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="sort">{% trans "filter_sort_label" context "accounts.grading_queue_page" %}</label>
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="oldest" {% if request.GET.sort == "oldest" %}selected{% endif %}>{% trans "sort_oldest" context "accounts.grading_queue_page" %}</option>
+                        <option value="newest" {% if request.GET.sort == "newest" %}selected{% endif %}>{% trans "sort_newest" context "accounts.grading_queue_page" %}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="filter-btn w-100">
+                        <i class="fas fa-filter"></i>
+                        {% trans "filter_apply" context "accounts.grading_queue_page" %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value">{{ total_pending|default:0 }}</div>
+            <div class="stat-label">{% trans "stat_pending" context "accounts.grading_queue_page" %}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ graded_today|default:0 }}</div>
+            <div class="stat-label">{% trans "stat_graded_today" context "accounts.grading_queue_page" %}</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">{{ avg_grading_time|default:"0" }}</div>
+            <div class="stat-label">{% trans "stat_avg_time" context "accounts.grading_queue_page" %}</div>
+        </div>
+    </div>
+
+    <!-- Submissions Table -->
+    <div class="submissions-card">
+        {% if submissions %}
+        <div class="table-responsive">
+            <table class="submissions-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "table_student" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_assignment" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_submitted_at" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_file" context "accounts.grading_queue_page" %}</th>
+                        <th>{% trans "table_grading" context "accounts.grading_queue_page" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    <tr data-submission-id="{{ submission.id }}">
+                        <td>
+                            <div class="student-info">
+                                <div class="student-avatar">
+                                    {{ submission.student.first_name.0|default:submission.student.username.0 }}{{ submission.student.last_name.0|default:"" }}
+                                </div>
+                                <div>
+                                    <div class="student-name">{{ submission.student.get_full_name|default:submission.student.username }}</div>
+                                    <div class="student-email">{{ submission.student.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="assignment-title">{{ submission.assignment.title }}</div>
+                            <div class="course-name">{{ submission.assignment.course.title }}</div>
+                        </td>
+                        <td>
+                            {% with days_ago=submission.submitted_at|timesince|slice:":2" %}
+                            <span class="time-badge {% if '0' in days_ago or '1' in days_ago %}urgent{% elif '2' in days_ago or '3' in days_ago %}warning{% else %}normal{% endif %}">
+                                {{ submission.submitted_at|timesince }} {% trans "time_ago_suffix" context "accounts.grading_queue_page" %}
+                            </span>
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% if submission.file %}
+                            <a href="{{ submission.file.url }}" class="view-link" target="_blank">
+                                <i class="fas fa-file-download"></i>
+                                {% trans "file_download" context "accounts.grading_queue_page" %}
+                            </a>
+                            {% endif %}
+                            {% if submission.text_submission %}
+                            <a href="#" class="view-link" onclick="viewSubmission({{ submission.id }}); return false;">
+                                <i class="fas fa-eye"></i>
+                                {% trans "file_view" context "accounts.grading_queue_page" %}
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form class="grade-form" onsubmit="submitGrade(event, {{ submission.id }}, false)">
+                                {% csrf_token %}
+                                <div class="grade-input-group">
+                                    <input 
+                                        type="number" 
+                                        class="grade-input" 
+                                        name="score" 
+                                        placeholder="{% trans 'score_placeholder' context 'accounts.grading_queue_page' %}"
+                                        min="0" 
+                                        max="{{ submission.assignment.max_points|default:100 }}"
+                                        required
+                                    >
+                                    <span style="align-self: center;">/ {{ submission.assignment.max_points|default:100 }}</span>
+                                </div>
+                                <textarea 
+                                    class="feedback-input" 
+                                    name="feedback" 
+                                    placeholder="{% trans 'feedback_placeholder' context 'accounts.grading_queue_page' %}"
+                                    rows="2"
+                                ></textarea>
+                                <div class="grade-actions">
+                                    <button type="submit" class="grade-btn grade-btn-submit">
+                                        <i class="fas fa-check"></i> {% trans "submit_grade" context "accounts.grading_queue_page" %}
+                                    </button>
+                                    <button type="button" class="grade-btn grade-btn-next" onclick="submitGrade(event, {{ submission.id }}, true)">
+                                        <i class="fas fa-forward"></i> {% trans "next_grade" context "accounts.grading_queue_page" %}
+                                    </button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-double"></i>
+            <h3>{% trans "empty_title" context "accounts.grading_queue_page" %}</h3>
+            <p>{% trans "empty_description" context "accounts.grading_queue_page" %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>{% trans "loading" context "accounts.grading_queue_page" %}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+    const gradeQueueSuccessMessage = "{% trans 'toast_success' context 'accounts.grading_queue_page' %}";
+    const gradeQueueGenericErrorMessage = "{% trans 'toast_error_generic' context 'accounts.grading_queue_page' %}";
+    const gradeQueueErrorPrefix = "{% trans 'toast_error_prefix' context 'accounts.grading_queue_page' %}";
+    const viewSubmissionAlertTemplate = "{% trans 'view_submission_alert_template' context 'accounts.grading_queue_page' %}";
+
+    function submitGrade(event, submissionId, goToNext) {
+        event.preventDefault();
+        
+        const form = event.target.closest('form');
+        const formData = new FormData(form);
+        const row = form.closest('tr');
+        
+        // Show loading
+        document.getElementById('loadingSpinner').classList.add('active');
+        
+        // AJAX submission
+        fetch(`/accounts/grade-submission/${submissionId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loadingSpinner').classList.remove('active');
+            
+            if (data.success) {
+                // Remove the row
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                setTimeout(() => row.remove(), 300);
+                
+                // Update stats
+                updateStats();
+                
+                // Show success message
+                showMessage('success', gradeQueueSuccessMessage);
+                
+                if (goToNext) {
+                    // Scroll to next submission
+                    const nextRow = row.nextElementSibling;
+                    if (nextRow) {
+                        nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        nextRow.querySelector('.grade-input').focus();
+                    }
+                }
+            } else {
+                showMessage('error', data.error || gradeQueueGenericErrorMessage);
+            }
+        })
+        .catch(error => {
+            document.getElementById('loadingSpinner').classList.remove('active');
+            showMessage('error', gradeQueueErrorPrefix + ': ' + error.message);
+        });
+    }
+    
+    function updateStats() {
+        // Reload page to update stats
+        // In production, this should be an AJAX call
+        setTimeout(() => location.reload(), 1000);
+    }
+    
+    function showMessage(type, message) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+    
+    function viewSubmission(submissionId) {
+        // Open modal to view text submission
+        // This would require a modal implementation
+        alert(viewSubmissionAlertTemplate.replace('{id}', submissionId));
+    }
+    
+    // Auto-submit on course selection change
+    document.getElementById('course').addEventListener('change', function() {
+        // Load assignments for selected course via AJAX
+        // For now, just submit the form
+        // document.getElementById('filterForm').submit();
+    });
+</script>
+{% endblock %}

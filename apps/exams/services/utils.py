@@ -52,23 +52,13 @@ def _attempt_has_any_answer(attempt) -> bool:
     False-positive verməsin deyə count-based yoxlayırıq.
     """
     # text
-    if (
-        attempt.answers.exclude(text_answer__isnull=True)
-        .exclude(text_answer="")
-        .exists()
-    ):
+    if attempt.answers.exclude(text_answer__isnull=True).exclude(text_answer="").exists():
         return True
 
     # selected options
     if attempt.answers.filter(selected_options__isnull=False).distinct().exists():
         # bu da bəzən false-positive ola bilər, ona görə bir addım da:
-        return (
-            attempt.answers.filter(selected_options__isnull=False)
-            .values("id")
-            .distinct()
-            .count()
-            > 0
-        )
+        return attempt.answers.filter(selected_options__isnull=False).values("id").distinct().count() > 0
 
     # files
     if attempt.answers.filter(files__isnull=False).distinct().exists():

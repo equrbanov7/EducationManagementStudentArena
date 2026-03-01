@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const editModal = document.getElementById("editModal");
   const deleteModal = document.getElementById("deleteModal");
   const warningModal = document.getElementById("warningModal");
+  const createModal = document.getElementById("createModal");
 
   // Edit modal elementləri
   const editForm = document.getElementById("editForm");
@@ -22,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const editSlugInfo = document.getElementById("editSlugInfo");
   const editCreatedAtInfo = document.getElementById("editCreatedAtInfo");
   const editUpdatedAtInfo = document.getElementById("editUpdatedAtInfo");
+  const editApprovalNotice = document.getElementById("editApprovalNotice");
 
   // Image preview elementləri
   const editImagePreview = document.getElementById("editImagePreview");
@@ -39,11 +41,138 @@ document.addEventListener("DOMContentLoaded", function () {
   const stayOnModalBtn = document.getElementById("stayOnModal");
   const discardChangesBtn = document.getElementById("discardChanges");
 
+  // Create modal elementləri
+  const createForm = document.getElementById("createForm");
+  const createTitle = document.getElementById("createTitle");
+  const createCategory = document.getElementById("createCategory");
+  const createNewCategory = document.getElementById("createNewCategory");
+  const createExcerpt = document.getElementById("createExcerpt");
+  const createContent = document.getElementById("createContent");
+  const createImageUrl = document.getElementById("createImageUrl");
+  const createImage = document.getElementById("createImage");
+  const createIsPublished = document.getElementById("createIsPublished");
+  const createFormError = document.getElementById("createFormError");
+  const closeCreateModalBtn = document.getElementById("closeCreateModal");
+  const cancelCreateBtn = document.getElementById("cancelCreate");
+  const createFormRequiresApproval =
+    createForm && createForm.dataset.requiresApproval === "true";
+
   // State idarəetməsi
   let currentPostId = null;
+  let currentPostRequiresApproval = false;
   let originalFormData = {};
   let hasUnsavedChanges = false;
   let pendingClose = false;
+
+  // ============= CREATE FUNKSIONALLARI =============
+  function showCreateError(message) {
+    if (!createFormError) return;
+    createFormError.hidden = false;
+    createFormError.textContent = message || "Xəta baş verdi.";
+  }
+
+  function hideCreateError() {
+    if (!createFormError) return;
+    createFormError.hidden = true;
+    createFormError.textContent = "";
+  }
+
+  function resetCreateForm() {
+    if (!createForm) return;
+    createForm.reset();
+    if (createIsPublished) {
+      if (createFormRequiresApproval) {
+        createIsPublished.checked = false;
+        createIsPublished.disabled = true;
+      } else {
+        createIsPublished.checked = true;
+        createIsPublished.disabled = false;
+      }
+    }
+    hideCreateError();
+  }
+
+  function openCreateModal() {
+    resetCreateForm();
+    showModal(createModal);
+    if (createTitle) {
+      createTitle.focus();
+    }
+  }
+
+  if (createModal && createForm) {
+    if (createModal.parentElement !== document.body) {
+      document.body.appendChild(createModal);
+    }
+
+    document.querySelectorAll(".js-open-create-post").forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        openCreateModal();
+      });
+    });
+
+    createForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      hideCreateError();
+
+      const formData = new FormData(createForm);
+      const publishValue =
+        !createFormRequiresApproval &&
+        createIsPublished &&
+        createIsPublished.checked;
+      formData.set("is_published", publishValue ? "on" : "");
+
+      try {
+        const response = await fetch("/blog/posts/create/", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          hideModal(createModal);
+          location.reload();
+          return;
+        }
+
+        const errorText =
+          (data.errors &&
+            Object.values(data.errors)
+              .flat()
+              .join(" ")) ||
+          data.message ||
+          "Post yaradılmadı.";
+        showCreateError(errorText);
+      } catch (error) {
+        console.error("Error:", error);
+        showCreateError("Əlaqə xətası baş verdi.");
+      }
+    });
+
+    if (cancelCreateBtn) {
+      cancelCreateBtn.addEventListener("click", function () {
+        hideModal(createModal);
+      });
+    }
+
+    if (closeCreateModalBtn) {
+      closeCreateModalBtn.addEventListener("click", function () {
+        hideModal(createModal);
+      });
+    }
+
+    createModal.addEventListener("click", function (e) {
+      if (e.target === createModal) {
+        hideModal(createModal);
+      }
+    });
+
+    window.openCreatePostModal = openCreateModal;
+  }
 
   // ============= EDIT FUNKSIONALLARI =============
 
@@ -59,9 +188,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const imageUrl = this.dataset.imageUrl || "";
       const fileImage = this.dataset.fileImage || "";
       const isPublished = this.dataset.isPublished === "true";
+      const requiresApproval = this.dataset.requiresApproval === "true";
       const slug = this.dataset.slug || "";
       const createdAt = this.dataset.createdAt || "";
       const updatedAt = this.dataset.updatedAt || "";
+      currentPostRequiresApproval = requiresApproval;
 
       // Form sahələrini doldur
       editTitle.value = title;
@@ -69,7 +200,19 @@ document.addEventListener("DOMContentLoaded", function () {
       editCategory.value = category;
       editExcerpt.value = excerpt;
       editImageUrl.value = imageUrl;
-      editIsPublished.checked = isPublished;
+      if (editIsPublished) {
+        if (requiresApproval) {
+          editIsPublished.checked = false;
+          editIsPublished.disabled = true;
+        } else {
+          editIsPublished.checked = isPublished;
+          editIsPublished.disabled = false;
+        }
+      }
+
+      if (editApprovalNotice) {
+        editApprovalNotice.hidden = !requiresApproval;
+      }
 
       // Meta məlumatları doldur
       editSlugInfo.textContent = slug;
@@ -116,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
         category: category,
         excerpt: excerpt,
         image_url: imageUrl,
-        is_published: isPublished,
+        is_published: requiresApproval ? false : isPublished,
       };
 
       hasUnsavedChanges = false;
@@ -191,7 +334,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const formData = new FormData(editForm);
 
     // Checkbox üçün: seçilməyibsə də backend-də düzgün getsin
-    formData.set("is_published", editIsPublished.checked ? "on" : "");
+    formData.set(
+      "is_published",
+      !currentPostRequiresApproval && editIsPublished.checked ? "on" : ""
+    );
 
     try {
       const response = await fetch(`/blog/post/${currentPostId}/edit/`, {
@@ -212,13 +358,8 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
       }
     } catch (error) {
-      if (data.success) {
-        hasUnsavedChanges = false;
-        hideModal(editModal);
-        location.reload();
-      } else {
-        alert("Xəta baş verdi: " + (data.message || "Naməlum xəta"));
-      }
+      console.error("Error:", error);
+      alert("Əlaqə xətası baş verdi");
     }
   });
 
@@ -340,6 +481,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "Escape") {
       if (warningModal && warningModal.classList.contains("active")) {
         hideModal(warningModal);
+      } else if (createModal && createModal.classList.contains("active")) {
+        hideModal(createModal);
       } else if (editModal && editModal.classList.contains("active")) {
         attemptCloseEditModal();
       } else if (deleteModal && deleteModal.classList.contains("active")) {

@@ -1,0 +1,116 @@
+{% load i18n %}
+{% if can_view_student_assignments %}
+<section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
+    <div class="section-card">
+        
+        <div class="section-header-flex">
+            <div class="section-title mb-0">
+                <div class="title-left">
+                    <i class="fas fa-chart-pie text-teal"></i>
+                    <span>{% trans "title" context "profile.results" %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modern-results-tabs">
+            <a href="{{ profile_base_url }}?section=my-results&results_type=all"
+               class="modern-tab {% if my_results_active_filter == 'all' %}active{% endif %}">
+                {% trans "tab_all" context "profile.results" %} <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=exams"
+               class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
+                {% trans "tab_exams" context "profile.results" %} <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=courses"
+               class="modern-tab {% if my_results_active_filter == 'courses' %}active{% endif %}">
+                  {% trans "tab_assignments" context "profile.results" %} <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=labs"
+               class="modern-tab {% if my_results_active_filter == 'labs' %}active{% endif %}">
+                {% trans "tab_labs" context "profile.results" %} <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=independent"
+               class="modern-tab {% if my_results_active_filter == 'independent' %}active{% endif %}">
+               {% trans "tab_independent" context "profile.results" %} <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
+            </a>
+        </div>
+
+        {% if my_result_items %}
+        <div class="results-cards-grid">
+            {% for item in my_result_items %}
+            <div class="modern-result-card">
+                
+                <div class="result-card-header">
+                    <div class="result-icon-wrapper assigned-task-icon assigned-task-icon--{{ item.category }}">
+                        <i class="{{ item.icon }}"></i>
+                    </div>
+                    <div class="result-title-group">
+                        <h4 class="result-title">{{ item.title }}</h4>
+                        <div class="result-meta-info">
+                            <span class="kind-badge">{{ item.type_label }}</span>
+                            <span class="kind-badge">{{ item.kind }}</span>
+                            {% if item.submitted_at %}
+                            <span class="meta-divider">•</span>
+                            <span><i class="far fa-clock"></i> {{ item.submitted_at|date:"d M Y H:i" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="result-status-wrap">
+                        <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                    </div>
+                </div>
+
+                <div class="result-card-body">
+                    {% if item.score != None %}
+                    <div class="result-score-box">
+                        <span class="score-label">{% trans "score_label" context "profile.results" %}:</span>
+                        <span class="score-value">{{ item.score }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if item.feedback %}
+                    <div class="result-feedback-box">
+                        <div class="feedback-icon"><i class="fas fa-comment-dots"></i></div>
+                        <p>{{ item.feedback|truncatechars:180 }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if item.score == None and not item.feedback %}
+                    <div class="result-pending-box result-pending-box--{{ item.status|lower }}">
+                        <div class="pending-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <p>
+                            {% if item.status == "submitted" %}
+                                {% trans "pending_submitted" context "profile.results" %}
+                            {% elif item.status == "pending" %}
+                                {% trans "pending_processing" context "profile.results" %}
+                            {% else %}
+                                {% trans "pending_default" context "profile.results" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="result-card-footer">
+                    <a href="{{ item.detail_url }}" class="btn-action btn-teal">
+                        <i class="fas fa-eye"></i> {% trans "view_result" context "profile.results" %}
+                    </a>
+                </div>
+                
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="modern-empty-state">
+            <div class="empty-icon-wrapper icon-teal-light">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>{% trans "empty_title" context "profile.results" %}</h3>
+            <p>{% trans "empty_description" context "profile.results" %}</p>
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endif %}

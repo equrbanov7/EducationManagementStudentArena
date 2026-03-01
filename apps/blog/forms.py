@@ -1,6 +1,7 @@
 # blog/forms.py
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.translation import pgettext_lazy
 
 from .models import Comment, Post, Question
 
@@ -11,30 +12,29 @@ class SubscriptionForm(forms.Form):
         label="",
         widget=forms.EmailInput(
             attrs={
-                "placeholder": "Email ünvanınızı daxil edin...",
+                "placeholder": pgettext_lazy("blog.form.subscription", "email_placeholder"),
                 "class": "form-control",
                 "id": "emailInput",
             }
         ),
     )
-    # Gələcəkdə ad/soyad sahələri də əlavə edə bilərsən.
 
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(
-        label="Şifrə",
+        label=pgettext_lazy("blog.form.register", "password_label"),
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "Şifrənizi daxil edin...",
+                "placeholder": pgettext_lazy("blog.form.register", "password_placeholder"),
                 "class": "form-control",
             }
         ),
     )
     password2 = forms.CharField(
-        label="Şifrə təkrar",
+        label=pgettext_lazy("blog.form.register", "password_confirm_label"),
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "Şifrəni təkrar daxil edin...",
+                "placeholder": pgettext_lazy("blog.form.register", "password_confirm_placeholder"),
                 "class": "form-control",
             }
         ),
@@ -46,13 +46,13 @@ class RegisterForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(
                 attrs={
-                    "placeholder": "İstifadəçi adınız...",
+                    "placeholder": pgettext_lazy("blog.form.register", "username_placeholder"),
                     "class": "form-control",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
-                    "placeholder": "Email ünvanınız...",
+                    "placeholder": pgettext_lazy("blog.form.register", "email_placeholder"),
                     "class": "form-control",
                 }
             ),
@@ -64,26 +64,25 @@ class RegisterForm(forms.ModelForm):
         p2 = cleaned_data.get("password2")
 
         if p1 and p2 and p1 != p2:
-            raise forms.ValidationError("Şifrələr uyğun gəlmir")
+            raise forms.ValidationError(pgettext_lazy("blog.form.register", "password_mismatch"))
 
         return cleaned_data
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
         if email and User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Bu email artıq istifadə olunur.")
+            raise forms.ValidationError(pgettext_lazy("blog.form.register", "email_exists"))
         return email
 
 
 class PostForm(forms.ModelForm):
-    # Modeldə olmayan, amma yeni kateqoriya yaratmaq üçün lazım olan sahə
     new_category = forms.CharField(
-        label="Yeni Kateqoriya",
+        label=pgettext_lazy("blog.form.post", "new_category_label"),
         required=False,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Siyahıda yoxdursa, yenisini bura yazın...",
+                "placeholder": pgettext_lazy("blog.form.post", "new_category_placeholder"),
             }
         ),
     )
@@ -97,12 +96,12 @@ class PostForm(forms.ModelForm):
             "content",
             "image_url",
             "image",
-        ]  # new_category bura daxil edilmir!
+        ]
         widgets = {
             "title": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Məqalə başlığı",
+                    "placeholder": pgettext_lazy("blog.form.post", "title_placeholder"),
                 }
             ),
             "category": forms.Select(
@@ -114,20 +113,20 @@ class PostForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Qısa təsvir (excerpt)...",
+                    "placeholder": pgettext_lazy("blog.form.post", "excerpt_placeholder"),
                 }
             ),
             "content": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 8,
-                    "placeholder": "Məqalə mətni...",
+                    "placeholder": pgettext_lazy("blog.form.post", "content_placeholder"),
                 }
             ),
             "image_url": forms.URLInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Şəklin URL-i (məs: https://...)",
+                    "placeholder": pgettext_lazy("blog.form.post", "image_url_placeholder"),
                 }
             ),
             "image": forms.ClearableFileInput(
@@ -139,10 +138,8 @@ class PostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Kateqoriya seçimini məcburi etmirik (istifadəçi yenisini yaza bilsin deyə)
         self.fields["category"].required = False
-        self.fields["category"].empty_label = "--- Kateqoriya Seçin ---"
-        # Image və image_url sahələrindən yalnız biri doldurulmalıdır
+        self.fields["category"].empty_label = pgettext_lazy("blog.form.post", "category_empty_label")
         self.fields["image"].required = False
         self.fields["image_url"].required = False
 
@@ -156,7 +153,7 @@ class CommentForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Fikrini yaz...",
+                    "placeholder": pgettext_lazy("blog.form.comment", "text_placeholder"),
                 }
             ),
             "rating": forms.Select(
@@ -176,14 +173,14 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Sual mətni...",
+                    "placeholder": pgettext_lazy("blog.form.question", "question_placeholder"),
                 }
             ),
             "answer_text": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 3,
-                    "placeholder": "Cavab mətni (istəyə görə)...",
+                    "placeholder": pgettext_lazy("blog.form.question", "answer_placeholder"),
                 }
             ),
             "visible_to_all": forms.CheckboxInput(
@@ -198,8 +195,8 @@ class QuestionForm(forms.ModelForm):
             ),
         }
         labels = {
-            "question_text": "Sual",
-            "answer_text": "Cavab",
-            "visible_to_all": "Hamı görə bilsin?",
-            "visible_users": "Görə bilən istifadəçilər (əgər hamı deyilsə)",
+            "question_text": pgettext_lazy("blog.form.question", "label_question"),
+            "answer_text": pgettext_lazy("blog.form.question", "label_answer"),
+            "visible_to_all": pgettext_lazy("blog.form.question", "label_visible_to_all"),
+            "visible_users": pgettext_lazy("blog.form.question", "label_visible_users"),
         }

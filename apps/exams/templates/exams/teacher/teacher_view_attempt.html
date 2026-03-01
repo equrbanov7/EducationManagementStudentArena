@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Cəhdin Təfərrüatları - {{ attempt.user.get_full_name|default:attempt.user.username }}{% endblock %}
+{% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ attempt.user.get_full_name|default:attempt.user.username }}{% endblock %}
 
 {% block extraCss %}
     {# Yeni CSS faylını qoşuruq #}
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}">
 {% endblock %}
 
@@ -13,7 +14,7 @@
     <div class="page-header">
         <h1 class="h3">
             <i class="fas fa-user-graduate me-2"></i>
-            Tələbə Cavabları: 
+            {% trans "heading_student_answers" context "exams.template.teacher_view_attempt" %}:
             <span class="student-name">{{ attempt.user.get_full_name|default:attempt.user.username }}</span>
         </h1>
     </div>
@@ -22,40 +23,40 @@
         <div class="summary-item">
             <i class="fas fa-book"></i>
             <div class="summary-content">
-                <span class="label">İmtahan:</span>
+                <span class="label">{% trans "label_exam" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value">{{ exam.title }}</span>
             </div>
         </div>
         <div class="summary-item">
             <i class="fas fa-tag"></i>
             <div class="summary-content">
-                <span class="label">Tip:</span>
+                <span class="label">{% trans "label_type" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value badge bg-primary text-white">{{ exam.get_exam_type_display }}</span>
             </div>
         </div>
         <div class="summary-item">
             <i class="far fa-calendar-alt"></i>
             <div class="summary-content">
-                <span class="label">Başlama:</span>
+                <span class="label">{% trans "label_started_at" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value">{{ attempt.started_at|date:"d.m.Y H:i" }}</span>
             </div>
         </div>
         <div class="summary-item result-item">
             <i class="fas fa-star-half-alt"></i>
             <div class="summary-content">
-                <span class="label">Nəticə:</span>
+                <span class="label">{% trans "label_result" context "exams.template.teacher_view_attempt" %}:</span>
                 <span class="value">
                     {% if exam.exam_type == 'test' %}
                         <span class="score badge {% if attempt.score_percent >= 50 %}bg-success{% else %}bg-danger{% endif %}">
                             {{ attempt.score_percent }}%
                         </span>
-                        <span class="details text-muted">({{ attempt.correct_count }} düz, {{ attempt.wrong_count }} səhv)</span>
+                        <span class="details text-muted">({{ attempt.correct_count }} {% trans "result_correct" context "exams.template.teacher_view_attempt" %}, {{ attempt.wrong_count }} {% trans "result_wrong" context "exams.template.teacher_view_attempt" %})</span>
                     {% else %}
                         {% if attempt.checked_by_teacher %}
                             <span class="score badge bg-info text-dark">{{ attempt.teacher_score }}%</span>
-                            <span class="details text-muted">(Müəllim balı)</span>
+                            <span class="details text-muted">({% trans "teacher_score" context "exams.template.teacher_view_attempt" %})</span>
                         {% else %}
-                            <span class="badge bg-warning text-dark">Yoxlanılmayıb</span>
+                            <span class="badge bg-warning text-dark">{% trans "status_not_checked" context "exams.template.teacher_view_attempt" %}</span>
                         {% endif %}
                     {% endif %}
                 </span>
@@ -65,15 +66,41 @@
 
     <hr class="section-divider">
 
+    <div class="attempt-tools mb-4">
+        <form method="get" class="attempt-search-form" role="search">
+            <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            <div class="attempt-search-group input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text"
+                       class="form-control attempt-search-input"
+                       name="q"
+                       value="{{ qa_search_query }}"
+                       placeholder="Sual və ya cavab üzrə axtar"
+                       aria-label="Sual və ya cavab üzrə axtar">
+                <button type="submit" class="btn attempt-search-btn">Axtar</button>
+                {% if qa_search_query %}
+                <a href="{{ qa_clear_search_url }}" class="btn attempt-reset-btn">Təmizlə</a>
+                {% endif %}
+            </div>
+        </form>
+        <div class="attempt-search-meta">
+            Tapılan sual sayı: {{ qa_page.paginator.count }}
+        </div>
+    </div>
+
     <div class="questions-list">
+        {% if qa_list %}
         {% for item in qa_list %}
             <div class="question-card card shadow-sm mb-4">
                 <div class="card-header question-header">
                     <h5 class="mb-0">
-                        <span class="q-number">Sual {{ forloop.counter }}:</span>
+                        <span class="q-number">{{ qa_page.start_index|add:forloop.counter0 }}</span>
                         <span class="q-text">{{ item.question.text }}</span>
                         <span class="q-points badge bg-light text-dark float-end">
-                            {{ item.question.points }} bal
+                            {{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %}
                         </span>
                     </h5>
                 </div>
@@ -93,9 +120,9 @@
                                 </div>
                                 <div class="status-icon">
                                     {% if opt.is_correct %}
-                                        <i class="fas fa-check-circle text-success" title="Düzgün cavab"></i>
+                                        <i class="fas fa-check-circle text-success" title="{% trans 'title_correct_answer' context 'exams.template.teacher_view_attempt' %}"></i>
                                     {% else %}
-                                        <i class="fas fa-times-circle text-danger" title="Səhv seçim"></i>
+                                        <i class="fas fa-times-circle text-danger" title="{% trans 'title_wrong_selection' context 'exams.template.teacher_view_attempt' %}"></i>
                                     {% endif %}
                                 </div>
                             </div>
@@ -109,7 +136,7 @@
                                 </div>
                                 <div class="status-icon">
                                     {% if opt.is_correct %}
-                                        <i class="fas fa-check-circle text-success" title="Düzgün cavab"></i>
+                                        <i class="fas fa-check-circle text-success" title="{% trans 'title_correct_answer' context 'exams.template.teacher_view_attempt' %}"></i>
                                     {% endif %}
                                 </div>
                             </div>
@@ -123,12 +150,12 @@
                             {% if item.answer.is_correct %}
                                 <div class="alert alert-success d-flex align-items-center">
                                     <i class="fas fa-check-circle fa-lg me-2"></i>
-                                    <div>Tamamilə düzgün cavab! (+{{ item.question.points }} bal)</div>
+                                    <div>{% trans "message_answer_fully_correct" context "exams.template.teacher_view_attempt" %} (+{{ item.question.points }} {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>
                                 </div>
                             {% else %}
                                 <div class="alert alert-danger d-flex align-items-center">
                                     <i class="fas fa-times-circle fa-lg me-2"></i>
-                                    <div>Səhv cavab (0 bal)</div>
+                                    <div>{% trans "message_answer_wrong" context "exams.template.teacher_view_attempt" %} (0 {% trans "unit_points" context "exams.template.teacher_view_attempt" %})</div>
                                 </div>
                             {% endif %}
                         </div>
@@ -136,15 +163,16 @@
                     {# ================== YAZILI İMTAHAN CAVABLARI ================== #}
                     {% else %}
                         <div class="student-answer-block mb-4">
-                            <h6 class="block-title"><i class="fas fa-pen"></i> Tələbənin Cavabı:</h6>
+                            <h6 class="block-title"><i class="fas fa-pen"></i> {% trans "label_student_answer" context "exams.template.teacher_view_attempt" %}:</h6>
                             <div class="answer-content p-3 bg-light border rounded">
-                                {{ item.answer.text_answer|default:"<i>Tələbə mətn cavabı yazmayıb.</i>"|linebreaks }}
+                                {% trans "empty_student_text_answer" context "exams.template.teacher_view_attempt" as empty_student_text_answer %}
+                                {{ item.answer.text_answer|default:empty_student_text_answer|linebreaks }}
                             </div>
                         </div>
 
                         {% if item.answer.files.exists %}
                             <div class="attached-files-block mb-4">
-                                <h6 class="block-title"><i class="fas fa-paperclip"></i> Əlavə edilmiş fayllar:</h6>
+                                <h6 class="block-title"><i class="fas fa-paperclip"></i> {% trans "label_attached_files" context "exams.template.teacher_view_attempt" %}:</h6>
                                 <ul class="list-group list-group-flush rounded border">
                                     {% for f in item.answer.files.all %}
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -152,7 +180,7 @@
                                                 <i class="far fa-file me-2"></i> {{ f.filename }}
                                             </a>
                                             <a href="{{ f.file.url }}" download class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-download"></i> Endir
+                                                <i class="fas fa-download"></i> {% trans "action_download" context "exams.template.teacher_view_attempt" %}
                                             </a>
                                         </li>
                                     {% endfor %}
@@ -161,24 +189,24 @@
                         {% endif %}
 
                         <div class="teacher-feedback-block">
-                            <h6 class="block-title text-primary"><i class="fas fa-chalkboard-teacher"></i> Müəllim Qiymətləndirməsi:</h6>
+                            <h6 class="block-title text-primary"><i class="fas fa-chalkboard-teacher"></i> {% trans "label_teacher_evaluation" context "exams.template.teacher_view_attempt" %}:</h6>
                             
                             {% if item.answer.teacher_feedback %}
                                 <div class="feedback-box alert alert-primary mb-3">
-                                    <strong>Rəy:</strong> {{ item.answer.teacher_feedback|linebreaks }}
+                                    <strong>{% trans "label_feedback" context "exams.template.teacher_view_attempt" %}:</strong> {{ item.answer.teacher_feedback|linebreaks }}
                                 </div>
                             {% else %}
                                 <div class="alert alert-light border mb-3 text-muted">
-                                    <i>Rəy yazılmayıb.</i>
+                                    <i>{% trans "empty_feedback_not_written" context "exams.template.teacher_view_attempt" %}</i>
                                 </div>
                             {% endif %}
 
                             <div class="score-box p-3 border rounded bg-white d-flex align-items-center justify-content-between">
-                                <span><i class="fas fa-star text-warning me-2"></i> Verilən Bal:</span>
+                                <span><i class="fas fa-star text-warning me-2"></i> {% trans "label_given_score" context "exams.template.teacher_view_attempt" %}:</span>
                                 {% if item.answer.teacher_score is not None %}
                                     <span class="badge bg-primary fs-6">{{ item.answer.teacher_score }} / {{ item.question.points }}</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">Qiymətləndirilməyib</span>
+                                    <span class="badge bg-secondary">{% trans "status_not_graded" context "exams.template.teacher_view_attempt" %}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -186,11 +214,19 @@
                 </div>
             </div>
         {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                Axtarışa uyğun sual tapılmadı.
+            </div>
+        {% endif %}
+    </div>
+    <div class="questions-pagination">
+        {% include "partials/_pagination.html" with page_obj=qa_page extra_query=qa_pagination_query page_param='questions_page' %}
     </div>
 
     <div class="mt-4 mb-5">
-        <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-arrow-left me-2"></i> Nəticələr siyahısına qayıt
+        <a href="{{ profile_return_url }}" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-user me-2"></i> Profile geri dön
         </a>
     </div>
 </div>

@@ -29,22 +29,9 @@ from .teacher.groups import (
     teacher_group_list,
     teacher_update_group,
 )
-from .teacher.question_bank import (
-    create_question_bank,
-    process_question_bank,
-    test_question_bank,
-)
-from .teacher.questions import (
-    add_exam_question,
-    delete_exam_question,
-    edit_exam_question,
-)
-from .teacher.results import (
-    teacher_check_attempt,
-    teacher_exam_results,
-    teacher_pending_attempts,
-    teacher_view_attempt,
-)
+from .teacher.question_bank import create_question_bank, process_question_bank, test_question_bank
+from .teacher.questions import add_exam_question, delete_exam_question, edit_exam_question
+from .teacher.results import teacher_check_attempt, teacher_exam_results, teacher_pending_attempts, teacher_view_attempt
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Export ediləcək bütün funksiyalar

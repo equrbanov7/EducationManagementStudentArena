@@ -50,9 +50,7 @@ urlpatterns = [
     # Mövzu əlavə etmə
     path("<int:course_id>/topic/add/", views.AddTopicView.as_view(), name="add_topic"),
     # Mövzu redaktə etmə
-    path(
-        "topic/<int:topic_id>/edit/", views.EditTopicView.as_view(), name="edit_topic"
-    ),
+    path("topic/<int:topic_id>/edit/", views.EditTopicView.as_view(), name="edit_topic"),
     # POST /courses/<id>/topic/<topic_id>/delete/ (AJAX)
     # Mövzu silmə
     path(
@@ -92,9 +90,7 @@ urlpatterns = [
         name="available_students",
     ),
     # Tələbə əlavə et (AJAX)
-    path(
-        "<int:course_id>/members/add/", views.AddMemberView.as_view(), name="add_member"
-    ),
+    path("<int:course_id>/members/add/", views.AddMemberView.as_view(), name="add_member"),
     # Qrup əlavə et (Bulk)
     path(
         "<int:course_id>/members/add-bulk/",

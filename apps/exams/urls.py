@@ -18,13 +18,12 @@ urlpatterns = [
     # ==========================
     path("", views.teacher_exam_list, name="teacher_exam_list"),
     path("create/", views.createAndEditExamView, name="create_exam"),
-    path(
-        "pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"
-    ),
+    path("pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"),
     # ==========================
     # TEACHER - Student Groups (sabit)
     # ==========================
     path("groups/", views.teacher_group_list, name="teacher_group_list"),
+    path("groups/create/form/", views.create_student_group, name="create_student_group"),
     path("groups/create/", views.teacher_create_group, name="teacher_create_group"),
     path(
         "groups/<int:group_id>/update/",
@@ -76,9 +75,7 @@ urlpatterns = [
     # ==========================
     # SLUG - Teacher Questions
     # ==========================
-    path(
-        "<slug:slug>/add-question/", views.add_exam_question, name="add_exam_question"
-    ),
+    path("<slug:slug>/add-question/", views.add_exam_question, name="add_exam_question"),
     path(
         "<slug:slug>/questions/<int:question_id>/edit/",
         views.edit_exam_question,
@@ -92,9 +89,7 @@ urlpatterns = [
     # ==========================
     # SLUG - Teacher Exam Ops
     # ==========================
-    path(
-        "<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"
-    ),
+    path("<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
     path(
         "<slug:slug>/toggle-active/",
         views.toggle_exam_active,

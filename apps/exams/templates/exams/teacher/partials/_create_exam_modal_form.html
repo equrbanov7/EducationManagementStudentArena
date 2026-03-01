@@ -1,0 +1,131 @@
+{% load i18n %}
+
+<form id="createExamModalForm" method="post" action="{{ request.path }}?modal=1" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="modal" value="1">
+
+    {% if form.non_field_errors %}
+        <div class="create-exam-form-errors">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="create-exam-form-grid">
+        <div class="form-group form-group-full">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.exam_type.label_tag }}
+            {{ form.exam_type }}
+            {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.access_code.label_tag }}
+            {{ form.access_code }}
+            {% if form.access_code.errors %}<div class="field-error">{{ form.access_code.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.start_datetime.label_tag }}
+            {{ form.start_datetime }}
+            {% if form.start_datetime.errors %}<div class="field-error">{{ form.start_datetime.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.end_datetime.label_tag }}
+            {{ form.end_datetime }}
+            {% if form.end_datetime.errors %}<div class="field-error">{{ form.end_datetime.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.total_duration_minutes.label_tag }}
+            {{ form.total_duration_minutes }}
+            {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.default_question_time_seconds.label_tag }}
+            {{ form.default_question_time_seconds }}
+            {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.max_attempts_per_user.label_tag }}
+            {{ form.max_attempts_per_user }}
+            {% if form.max_attempts_per_user.errors %}<div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="modal-check-label">{{ form.is_active }} {{ form.is_active.label }}</label>
+            {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="modal-check-label">{{ form.enable_paint }} {% trans "enable_paint" context "exams.template.create_exam_modal_form" %}</label>
+            {% if form.enable_paint.errors %}<div class="field-error">{{ form.enable_paint.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            <label class="modal-check-label">{{ form.is_public }} {% trans "is_public" context "exams.template.create_exam_modal_form" %}</label>
+            {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group form-group-full">
+            <div class="create-exam-modal-section-title">
+                <h4><i class="fas fa-users"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
+                <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
+            </div>
+        </div>
+
+        <div id="createExamAccessRestrictions" class="form-group form-group-full create-exam-access-block">
+            <div class="create-exam-access-grid">
+                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups">
+                    <label class="create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
+                    <div class="create-exam-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}">
+                    </div>
+                    <div id="createExamGroupsList" class="create-exam-search-list"></div>
+                    <div class="create-exam-selection-counter">
+                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
+                    </div>
+                    <div class="d-none">
+                        {{ form.allowed_groups }}
+                    </div>
+                    {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="create-exam-searchable-select" data-target-select-name="allowed_users">
+                    <label class="create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
+                    <div class="create-exam-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}">
+                    </div>
+                    <div id="createExamUsersList" class="create-exam-search-list"></div>
+                    <div class="create-exam-selection-counter">
+                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamUsersCount">0</span>
+                    </div>
+                    <div class="d-none">
+                        {{ form.allowed_users }}
+                    </div>
+                    {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-buttons create-exam-modal-actions">
+        <button type="button" class="modal-cancel-btn js-close-create-exam">{% trans "action_cancel" context "exams.template.create_exam_modal_form" %}</button>
+        <button type="submit" class="modal-confirm-btn">{% if is_editing %}{% trans "action_save" context "exams.template.create_exam_modal_form" %}{% else %}{% trans "action_create" context "exams.template.create_exam_modal_form" %}{% endif %}</button>
+    </div>
+</form>

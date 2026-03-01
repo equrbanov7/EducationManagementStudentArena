@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Tələbə qruplarım{% endblock %}
+{% block title %}{% trans "page_title" context "exams.template.teacher_group_list" %}{% endblock %}
 
 {% block extraCss %}
   <link rel="stylesheet" href="{% static 'exams/css/teacher_group_list.css' %}">
+  <link rel="stylesheet" href="{% static 'css/_searchable_multi_select.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -12,28 +13,22 @@
 
   <div class="page-header-wrapper mb-4">
     <div class="header-text">
-      <h1 class="page-title">Tələbə qruplarım</h1>
+      <h1 class="page-title">{% trans "heading_student_groups" context "exams.template.teacher_group_list" %}</h1>
       <p class="page-subtitle text-muted mb-0">
-        Qrupları idarə et və imtahanlar üçün tələbə siyahıları yarat.
+        {% trans "subtitle_manage_groups" context "exams.template.teacher_group_list" %}
       </p>
     </div>
 
     <div class="header-actions-toolbar">
       <div class="group-search-box">
         <i class="fas fa-search search-icon-main"></i>
-        <input type="text" id="groupListSearch" placeholder="Qrup adı axtar..." class="group-search-input">
+        <input type="text" id="groupListSearch" placeholder="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}" class="group-search-input">
       </div>
 
-      {# onclick YOX! #}
-      <button
-        type="button"
-        class="btn-create-new"
-        id="btnOpenCreateGroup"
-        data-create-url="{% url 'exams:teacher_create_group' %}"
-      >
+      <a href="{% url 'exams:create_student_group' %}" class="btn-create-new">
         <i class="fas fa-plus"></i>
-        <span>Yeni qrup yarat</span>
-      </button>
+        <span>{% trans "action_create_new_group" context "exams.template.teacher_group_list" %}</span>
+      </a>
     </div>
   </div>
 
@@ -45,31 +40,50 @@
             <div>
               <h2 class="group-name">{{ group.name }}</h2>
               <p class="group-meta text-muted mb-0">{{ group.created_at|date:"d.m.Y H:i" }}</p>
+              <p class="group-meta text-muted mb-0">{% trans "label_primary_teacher" context "exams.template.teacher_group_list" %}: <strong>{{ group.teacher.username }}</strong></p>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
               <div class="group-stats">
                 <span class="badge rounded-pill bg-light text-dark">
                   <i class="fas fa-user-graduate me-1"></i>
                   {{ group.students.count }}
                 </span>
               </div>
+              <div class="group-stats">
+                <span class="badge rounded-pill bg-light text-dark">
+                  <i class="fas fa-chalkboard-teacher me-1"></i>
+                  {{ group.teachers.count|default:1 }}
+                </span>
+              </div>
 
-              {# onclick YOX! Data ilə veririk. group.name escapejs mütləq! #}
               <button
                 type="button"
                 class="btn btn-sm btn-outline-secondary btn-edit-custom jsOpenEditGroup"
                 data-group-id="{{ group.id }}"
-                data-group-name="{{ group.name|escapejs }}"
+                data-group-name="{{ group.name|escape }}"
+                data-primary-teacher="{{ group.teacher_id }}"
                 data-students="[{% for s in group.students.all %}{{ s.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
+                data-teachers="[{% for t in group.teachers.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
               >
                 <i class="fas fa-pen"></i>
               </button>
+
+              <form method="post" action="{% url 'exams:teacher_delete_group' group.id %}" class="d-inline">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-outline-danger jsConfirmDeleteGroup"
+                  data-confirm-message="{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list' %}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
             </div>
           </div>
 
           <div class="group-card-body">
-            <h6 class="students-title text-muted">Qrupun tələbələri:</h6>
+            <h6 class="students-title text-muted">{% trans "heading_group_students" context "exams.template.teacher_group_list" %}:</h6>
             {% if group.students.all %}
               <div class="students-badge-list">
                 {% for student in group.students.all %}
@@ -79,45 +93,40 @@
                 {% endfor %}
               </div>
             {% else %}
-              <span class="text-muted small">Bu qrupda hələ tələbə yoxdur.</span>
+              <span class="text-muted small">{% trans "empty_no_student_in_group" context "exams.template.teacher_group_list" %}</span>
             {% endif %}
           </div>
         </div>
       {% endfor %}
 
       <div id="noGroupFound" style="display:none; text-align:center; padding:20px; color:#64748b;">
-        <i class="fas fa-search me-2"></i> Heç bir qrup tapılmadı.
+        <i class="fas fa-search me-2"></i> {% trans "empty_no_group_found" context "exams.template.teacher_group_list" %}
       </div>
     </div>
   {% else %}
     <div class="empty-state">
       <div class="empty-icon"><i class="fas fa-users-slash"></i></div>
-      <h3>Hələ qrup yaratmamısan</h3>
-      <p class="text-muted">Başlamaq üçün yeni qrup yarat.</p>
+      <h3>{% trans "empty_no_group_yet_title" context "exams.template.teacher_group_list" %}</h3>
+      <p class="text-muted">{% trans "empty_no_group_yet_desc" context "exams.template.teacher_group_list" %}</p>
 
-      <button
-        type="button"
-        class="btn-create-new mt-3"
-        id="btnOpenCreateGroupEmpty"
-        data-create-url="{% url 'exams:teacher_create_group' %}"
-      >
-        İlk qrupunu yarat
-      </button>
+      <a href="{% url 'exams:create_student_group' %}" class="btn-create-new mt-3">
+        {% trans "action_create_first_group" context "exams.template.teacher_group_list" %}
+      </a>
     </div>
   {% endif %}
 </div>
 
-{# ================= MODAL ================= #}
 <div
   id="groupModal"
   class="custom-modal-overlay"
-  data-update-url-template="/teacher/groups/update/__ID__/"
-  data-delete-url-template="/teacher/groups/delete/__ID__/"
+  data-update-url-template="{% url 'exams:teacher_update_group' 0 %}"
+  data-delete-url-template="{% url 'exams:teacher_delete_group' 0 %}"
+  data-can-multi-teacher="{{ can_multi_assign_teachers|yesno:'1,0' }}"
 >
   <div class="custom-modal-content">
 
     <div class="modal-header-custom">
-      <h3 id="modalTitle">Qrup</h3>
+      <h3 id="modalTitle">{% trans "modal_title_edit_group" context "exams.template.teacher_group_list" %}</h3>
       <button type="button" class="close-modal-btn" id="btnCloseGroupModal">&times;</button>
     </div>
 
@@ -125,61 +134,122 @@
       {% csrf_token %}
       <div class="modal-body-custom">
 
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-3">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
         <div class="mb-4">
-          <label for="id_name" class="form-label-custom">Qrup adı</label>
+          <label for="id_name" class="form-label-custom">{% trans "label_group_name" context "exams.template.teacher_group_list" %}</label>
           {{ form.name }}
+          {% for error in form.name.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label for="{{ form.primary_teacher.id_for_label }}" class="form-label-custom">{% trans "label_primary_teacher" context "exams.template.teacher_group_list" %}</label>
+          {% if can_multi_assign_teachers %}
+            <div class="search-wrapper mb-2">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="teacherSearchInput" class="custom-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
+            </div>
+          {% else %}
+            <div class="form-text mb-2">{% trans "help_only_one_primary_teacher" context "exams.template.teacher_group_list" %}</div>
+          {% endif %}
+          {{ form.primary_teacher }}
+          {% for error in form.primary_teacher.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
         </div>
 
         <div class="mb-3">
-          <label class="form-label-custom">Tələbələri seç</label>
+          <label class="form-label-custom">{% trans "label_select_students" context "exams.template.teacher_group_list" %}</label>
 
           <div class="student-search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="Ad və ya username axtar...">
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}">
           </div>
 
           <div id="studentListContainer" class="student-list-container">
-            <div class="text-center text-muted p-3">Yüklənir...</div>
+            <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
           </div>
 
           <div class="selection-counter">
-            Seçilib: <span id="selectedCount">0</span> tələbə
+            {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedStudentCount">0</span> {% trans "label_student" context "exams.template.teacher_group_list" %}
           </div>
 
           <div style="display:none;">
             {{ form.students }}
           </div>
+          {% for error in form.students.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+          {% endfor %}
         </div>
+
+        {% if can_multi_assign_teachers %}
+          <div class="mb-3">
+            <label class="form-label-custom">{% trans "label_additional_teachers_multi" context "exams.template.teacher_group_list" %}</label>
+
+            <div class="student-search-wrapper">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
+            </div>
+
+            <div id="assignedTeacherListContainer" class="student-list-container">
+              <div class="text-center text-muted p-3">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
+            </div>
+
+            <div class="selection-counter">
+              {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="selectedTeacherCount">0</span> {% trans "label_teacher" context "exams.template.teacher_group_list" %}
+            </div>
+
+            <div style="display:none;">
+              {{ form.assigned_teachers }}
+            </div>
+            {% for error in form.assigned_teachers.errors %}
+              <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="display:none;">
+            {{ form.assigned_teachers }}
+          </div>
+        {% endif %}
       </div>
 
       <div class="modal-footer-custom">
-        <a href="#" id="deleteBtn" class="btn-delete-custom" style="display:none;">
+        <button type="button" id="deleteBtn" class="btn-delete-custom">
           <i class="fas fa-trash-alt"></i>
-        </a>
+        </button>
 
         <div class="action-buttons">
           <button type="button" class="btn-action btn-cancel" id="btnCancelGroupModal">
-            Ləğv et
+            {% trans "action_cancel" context "exams.template.teacher_group_list" %}
           </button>
           <button type="submit" class="btn-action btn-save">
-            Yadda saxla
+            {% trans "action_save" context "exams.template.teacher_group_list" %}
           </button>
         </div>
       </div>
     </form>
+
+    <form id="groupDeleteForm" method="post" action="" style="display:none;">
+      {% csrf_token %}
+    </form>
   </div>
 </div>
 
-{# ========= Warning modal ========= #}
 <div id="warningModal" class="custom-modal-overlay" style="z-index:10000; display:none;">
   <div class="warning-modal-box">
     <div class="warning-icon"><i class="fas fa-exclamation"></i></div>
-    <h3>Dəyişikliklər var!</h3>
-    <p>Yadda saxlanmamış dəyişiklikləriniz var. Pəncərəni bağlasanız, bütün dəyişikliklər itəcək.</p>
+    <h3>{% trans "warning_unsaved_changes_title" context "exams.template.teacher_group_list" %}</h3>
+    <p>{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_group_list" %}</p>
 
     <div class="warning-actions">
-      <button class="btn-warning-action btn-stay" id="btnWarningStay">Geri qayıt</button>
-      <button class="btn-warning-action btn-discard" id="btnWarningDiscard">Bağla və İtirmək</button>
+      <button class="btn-warning-action btn-stay" id="btnWarningStay">{% trans "action_go_back" context "exams.template.teacher_group_list" %}</button>
+      <button class="btn-warning-action btn-discard" id="btnWarningDiscard">{% trans "action_close_and_discard" context "exams.template.teacher_group_list" %}</button>
     </div>
   </div>
 </div>
@@ -188,247 +258,296 @@
 {% block extraJs %}
 <script>
 (function () {
-  // === DOM ===
-  const groupModal = document.getElementById('groupModal');
-  const warningModal = document.getElementById('warningModal');
-  const groupForm = document.getElementById('groupForm');
-  const modalTitle = document.getElementById('modalTitle');
-  const deleteBtn = document.getElementById('deleteBtn');
+  const I18N_TEACHER_GROUP_LIST = {
+    noDataFound: "{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list'|escapejs %}",
+    modalTitleEditGroup: "{% trans 'modal_title_edit_group' context 'exams.template.teacher_group_list'|escapejs %}",
+    confirmDeleteGroup: "{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list'|escapejs %}"
+  };
 
-  const studentListContainer = document.getElementById('studentListContainer');
-  const studentSearchInput = document.getElementById('studentSearchInput');
-  const selectedCountSpan = document.getElementById('selectedCount');
+  const groupModal = document.getElementById("groupModal");
+  const warningModal = document.getElementById("warningModal");
+  const groupForm = document.getElementById("groupForm");
+  const groupDeleteForm = document.getElementById("groupDeleteForm");
+  const modalTitle = document.getElementById("modalTitle");
+  const deleteBtn = document.getElementById("deleteBtn");
+  const canMultiAssignTeachers = groupModal?.dataset.canMultiTeacher === "1";
 
-  const hiddenDjangoSelect = document.getElementById('id_students');
-  const nameInput = document.getElementById('id_name');
+  const studentListContainer = document.getElementById("studentListContainer");
+  const studentSearchInput = document.getElementById("studentSearchInput");
+  const selectedStudentCountSpan = document.getElementById("selectedStudentCount");
 
-  const btnOpenCreate = document.getElementById('btnOpenCreateGroup');
-  const btnOpenCreateEmpty = document.getElementById('btnOpenCreateGroupEmpty');
+  const teacherListContainer = document.getElementById("assignedTeacherListContainer");
+  const teacherSearchInput = document.getElementById("assignedTeacherSearchInput");
+  const selectedTeacherCountSpan = document.getElementById("selectedTeacherCount");
+  const primaryTeacherSearchInput = document.getElementById("teacherSearchInput");
 
-  const btnClose = document.getElementById('btnCloseGroupModal');
-  const btnCancel = document.getElementById('btnCancelGroupModal');
+  const hiddenStudentsSelect = document.getElementById("id_students");
+  const hiddenTeachersSelect = document.getElementById("id_assigned_teachers");
+  const primaryTeacherSelect = document.getElementById("id_primary_teacher");
+  const nameInput = document.getElementById("id_name");
 
-  const btnWarningStay = document.getElementById('btnWarningStay');
-  const btnWarningDiscard = document.getElementById('btnWarningDiscard');
+  const btnClose = document.getElementById("btnCloseGroupModal");
+  const btnCancel = document.getElementById("btnCancelGroupModal");
 
-  const groupSearchInput = document.getElementById('groupListSearch');
-  const noGroupMsg = document.getElementById('noGroupFound');
+  const btnWarningStay = document.getElementById("btnWarningStay");
+  const btnWarningDiscard = document.getElementById("btnWarningDiscard");
+
+  const groupSearchInput = document.getElementById("groupListSearch");
+  const noGroupMsg = document.getElementById("noGroupFound");
 
   let initialFormData = null;
 
-  // ===== Guard =====
-  function assertEl(el, name) {
-    if (!el) console.error(`[GroupModal] Missing element: ${name}`);
-    return !!el;
-  }
-  if (!assertEl(groupModal, "groupModal") || !assertEl(groupForm, "groupForm")) return;
+  function createChecklist(hiddenSelect, container, counterSpan, searchInput) {
+    if (!hiddenSelect || !container) return;
 
-  // ===== Search filter =====
-  if (groupSearchInput) {
-    groupSearchInput.addEventListener('input', function (e) {
-      const filter = (e.target.value || "").toLowerCase();
-      let hasVisible = false;
+    function build() {
+      container.innerHTML = "";
+      const options = Array.from(hiddenSelect.options);
 
-      document.querySelectorAll('.group-card').forEach(card => {
-        const titleEl = card.querySelector('.group-name');
-        const name = (titleEl ? titleEl.innerText : "").toLowerCase();
+      if (options.length === 0) {
+        container.innerHTML = `<div class="p-3 text-muted">${I18N_TEACHER_GROUP_LIST.noDataFound}</div>`;
+        return;
+      }
 
-        if (name.includes(filter)) {
-          card.style.display = 'block';
-          hasVisible = true;
-        } else {
-          card.style.display = 'none';
-        }
+      options.forEach((option) => {
+        const row = document.createElement("div");
+        row.className = "student-item-row";
+        row.setAttribute("data-search", (option.text || "").toLowerCase());
+        row.innerHTML = `
+          <input type="checkbox" class="student-checkbox" value="${option.value}" id="chk_${hiddenSelect.id}_${option.value}">
+          <label class="student-label" for="chk_${hiddenSelect.id}_${option.value}">${option.text}</label>
+        `;
+
+        const checkbox = row.querySelector("input");
+        checkbox.checked = option.selected;
+
+        checkbox.addEventListener("change", function () {
+          option.selected = this.checked;
+          updateCounter();
+        });
+
+        row.addEventListener("click", function (e) {
+          if (e.target !== checkbox) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event("change"));
+          }
+        });
+
+        container.appendChild(row);
       });
 
-      if (noGroupMsg) noGroupMsg.style.display = hasVisible ? 'none' : 'block';
-    });
-  }
-
-  // ===== Build custom student list =====
-  function buildCustomStudentList() {
-    if (!hiddenDjangoSelect) {
-      studentListContainer.innerHTML = '<div class="p-3 text-danger">id_students tapılmadı. form.students render olunmayıb.</div>';
-      return;
+      updateCounter();
     }
 
-    studentListContainer.innerHTML = '';
-    const options = Array.from(hiddenDjangoSelect.options);
-
-    if (options.length === 0) {
-      studentListContainer.innerHTML = '<div class="p-3 text-muted">Tələbə tapılmadı.</div>';
-      return;
+    function updateCounter() {
+      if (!counterSpan) return;
+      counterSpan.textContent = hiddenSelect.selectedOptions.length;
     }
 
-    options.forEach(option => {
-      const row = document.createElement('div');
-      row.className = 'student-item-row';
-      row.setAttribute('data-search', (option.text || '').toLowerCase());
+    function resetSelection() {
+      Array.from(hiddenSelect.options).forEach((opt) => { opt.selected = false; });
+      container.querySelectorAll(".student-checkbox").forEach((cb) => { cb.checked = false; });
+      updateCounter();
+    }
 
-      row.innerHTML = `
-        <input type="checkbox" class="student-checkbox" value="${option.value}" id="chk_${option.value}">
-        <label class="student-label" for="chk_${option.value}">${option.text}</label>
-      `;
-
-      const checkbox = row.querySelector('input');
-
-      checkbox.addEventListener('change', function () {
-        option.selected = this.checked;
-        updateCounter();
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        const filter = (this.value || "").toLowerCase();
+        container.querySelectorAll(".student-item-row").forEach((row) => {
+          const text = row.getAttribute("data-search") || "";
+          row.style.display = text.includes(filter) ? "flex" : "none";
+        });
       });
+    }
 
-      row.addEventListener('click', function (e) {
-        if (e.target !== checkbox) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event('change'));
-        }
-      });
-
-      studentListContainer.appendChild(row);
-    });
-
-    updateCounter();
+    return { build, resetSelection, updateCounter };
   }
 
-  function updateCounter() {
-    if (!hiddenDjangoSelect) return;
-    selectedCountSpan.textContent = hiddenDjangoSelect.selectedOptions.length;
-  }
-
-  if (studentSearchInput) {
-    studentSearchInput.addEventListener('input', function () {
+  function applyPrimaryTeacherSearch() {
+    if (!primaryTeacherSearchInput || !primaryTeacherSelect) return;
+    primaryTeacherSearchInput.addEventListener("input", function () {
       const filter = (this.value || "").toLowerCase();
-      studentListContainer.querySelectorAll('.student-item-row').forEach(row => {
-        const text = row.getAttribute('data-search') || '';
-        row.style.display = text.includes(filter) ? 'flex' : 'none';
+      Array.from(primaryTeacherSelect.options).forEach((option) => {
+        option.hidden = !(option.text || "").toLowerCase().includes(filter);
       });
     });
   }
 
-  // ===== Modal open/close =====
   function saveInitialState() {
     initialFormData = new URLSearchParams(new FormData(groupForm)).toString();
   }
 
   function forceCloseGroupModal() {
-    groupModal.classList.remove('active');
-    setTimeout(() => { groupModal.style.display = 'none'; }, 250);
+    groupModal.classList.remove("active");
+    setTimeout(() => { groupModal.style.display = "none"; }, 250);
   }
 
   function closeWarningModal() {
-    warningModal.classList.remove('active');
-    setTimeout(() => { warningModal.style.display = 'none'; }, 250);
+    warningModal.classList.remove("active");
+    setTimeout(() => { warningModal.style.display = "none"; }, 250);
   }
 
   function tryCloseModal() {
     const currentDataString = new URLSearchParams(new FormData(groupForm)).toString();
     if (initialFormData !== currentDataString) {
-      warningModal.style.display = 'flex';
-      setTimeout(() => warningModal.classList.add('active'), 10);
+      warningModal.style.display = "flex";
+      setTimeout(() => warningModal.classList.add("active"), 10);
     } else {
       forceCloseGroupModal();
     }
   }
 
-  function clearSelections() {
-    if (hiddenDjangoSelect) {
-      Array.from(hiddenDjangoSelect.options).forEach(opt => opt.selected = false);
+  function clearTeacherFilters() {
+    if (studentSearchInput) studentSearchInput.value = "";
+    if (teacherSearchInput) teacherSearchInput.value = "";
+    if (primaryTeacherSearchInput) primaryTeacherSearchInput.value = "";
+    if (studentListContainer) {
+      studentListContainer.querySelectorAll(".student-item-row").forEach((row) => { row.style.display = "flex"; });
     }
-    studentListContainer.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
-    updateCounter();
-    if (studentSearchInput) studentSearchInput.value = '';
-    studentListContainer.querySelectorAll('.student-item-row').forEach(row => row.style.display = 'flex');
+    if (teacherListContainer) {
+      teacherListContainer.querySelectorAll(".student-item-row").forEach((row) => { row.style.display = "flex"; });
+    }
+    if (primaryTeacherSelect) {
+      Array.from(primaryTeacherSelect.options).forEach((option) => { option.hidden = false; });
+    }
   }
 
-  function openModalCreate(createUrl) {
+  function openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId) {
     groupForm.reset();
-    clearSelections();
-
-    modalTitle.innerText = "Yeni Qrup Yarat";
-    groupForm.action = createUrl;
-    deleteBtn.style.display = 'none';
-    if (nameInput) nameInput.value = "";
-
-    groupModal.style.display = 'flex';
-    setTimeout(() => groupModal.classList.add('active'), 10);
-    saveInitialState();
-  }
-
-  function openModalEdit(groupId, groupName, studentIds) {
-    groupForm.reset();
-    clearSelections();
-
-    modalTitle.innerText = "Qrupu Redaktə Et";
+    modalTitle.innerText = I18N_TEACHER_GROUP_LIST.modalTitleEditGroup;
     if (nameInput) nameInput.value = groupName || "";
 
-    const updateTpl = groupModal.dataset.updateUrlTemplate || "/teacher/groups/update/__ID__/";
-    const deleteTpl = groupModal.dataset.deleteUrlTemplate || "/teacher/groups/delete/__ID__/";
+    const updateTpl = groupModal.dataset.updateUrlTemplate || "{% url 'exams:teacher_update_group' 0 %}";
+    const deleteTpl = groupModal.dataset.deleteUrlTemplate || "{% url 'exams:teacher_delete_group' 0 %}";
 
-    groupForm.action = updateTpl.replace("__ID__", groupId);
-    deleteBtn.style.display = 'inline-flex';
-    deleteBtn.href = deleteTpl.replace("__ID__", groupId);
+    groupForm.action = updateTpl.replace("/0/", `/${groupId}/`);
+    groupDeleteForm.action = deleteTpl.replace("/0/", `/${groupId}/`);
 
-    // select existing students
-    (studentIds || []).forEach(id => {
-      const chk = document.getElementById(`chk_${id}`);
-      if (chk) chk.checked = true;
-
-      if (hiddenDjangoSelect) {
-        const opt = Array.from(hiddenDjangoSelect.options).find(o => String(o.value) === String(id));
-        if (opt) opt.selected = true;
+    if (primaryTeacherSelect && primaryTeacherId) {
+      primaryTeacherSelect.value = String(primaryTeacherId);
+      if (!canMultiAssignTeachers) {
+        primaryTeacherSelect.setAttribute("readonly", "readonly");
       }
-    });
+    }
 
-    updateCounter();
+    if (hiddenStudentsSelect) {
+      Array.from(hiddenStudentsSelect.options).forEach((option) => {
+        option.selected = (studentIds || []).map(String).includes(String(option.value));
+      });
+    }
 
-    groupModal.style.display = 'flex';
-    setTimeout(() => groupModal.classList.add('active'), 10);
+    if (hiddenTeachersSelect) {
+      Array.from(hiddenTeachersSelect.options).forEach((option) => {
+        option.selected = (teacherIds || []).map(String).includes(String(option.value));
+      });
+    }
+
+    studentsChecklist?.build();
+    teachersChecklist?.build();
+    clearTeacherFilters();
+
+    groupModal.style.display = "flex";
+    setTimeout(() => groupModal.classList.add("active"), 10);
     saveInitialState();
   }
 
-  // ===== Wire buttons =====
-  function getCreateUrl(btn) {
-    return (btn && btn.dataset && btn.dataset.createUrl) ? btn.dataset.createUrl : "{% url 'exams:teacher_create_group' %}";
+  if (groupSearchInput) {
+    groupSearchInput.addEventListener("input", function (e) {
+      const filter = (e.target.value || "").toLowerCase();
+      let hasVisible = false;
+
+      document.querySelectorAll(".group-card").forEach((card) => {
+        const titleEl = card.querySelector(".group-name");
+        const name = (titleEl ? titleEl.innerText : "").toLowerCase();
+
+        if (name.includes(filter)) {
+          card.style.display = "block";
+          hasVisible = true;
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      if (noGroupMsg) noGroupMsg.style.display = hasVisible ? "none" : "block";
+    });
   }
 
-  if (btnOpenCreate) {
-    btnOpenCreate.addEventListener('click', () => openModalCreate(getCreateUrl(btnOpenCreate)));
-  }
-  if (btnOpenCreateEmpty) {
-    btnOpenCreateEmpty.addEventListener('click', () => openModalCreate(getCreateUrl(btnOpenCreateEmpty)));
-  }
-
-  // Edit buttons
-  document.querySelectorAll('.jsOpenEditGroup').forEach(btn => {
-    btn.addEventListener('click', () => {
+  document.querySelectorAll(".jsOpenEditGroup").forEach((btn) => {
+    btn.addEventListener("click", () => {
       const groupId = btn.dataset.groupId;
       const groupName = btn.dataset.groupName || "";
+      const primaryTeacherId = btn.dataset.primaryTeacher || "";
       let studentIds = [];
+      let teacherIds = [];
+
       try {
         studentIds = JSON.parse(btn.dataset.students || "[]");
       } catch (e) {
         console.error("students parse error:", e);
       }
-      openModalEdit(groupId, groupName, studentIds);
+
+      try {
+        teacherIds = JSON.parse(btn.dataset.teachers || "[]");
+      } catch (e) {
+        console.error("teachers parse error:", e);
+      }
+
+      if (primaryTeacherId && !teacherIds.map(String).includes(String(primaryTeacherId))) {
+        teacherIds.push(Number(primaryTeacherId));
+      }
+
+      openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId);
     });
   });
 
-  // Close actions
-  if (btnClose) btnClose.addEventListener('click', tryCloseModal);
-  if (btnCancel) btnCancel.addEventListener('click', tryCloseModal);
+  document.querySelectorAll(".jsConfirmDeleteGroup").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const msg = btn.dataset.confirmMessage || I18N_TEACHER_GROUP_LIST.confirmDeleteGroup;
+      if (!window.confirm(msg)) {
+        e.preventDefault();
+      }
+    });
+  });
 
-  // Overlay click
-  groupModal.addEventListener('click', (e) => { if (e.target === groupModal) tryCloseModal(); });
-  warningModal.addEventListener('click', (e) => { if (e.target === warningModal) closeWarningModal(); });
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", function () {
+      if (!groupDeleteForm?.action) return;
+      if (window.confirm(I18N_TEACHER_GROUP_LIST.confirmDeleteGroup)) {
+        groupDeleteForm.submit();
+      }
+    });
+  }
 
-  // Warning actions
-  if (btnWarningStay) btnWarningStay.addEventListener('click', closeWarningModal);
-  if (btnWarningDiscard) btnWarningDiscard.addEventListener('click', () => { closeWarningModal(); forceCloseGroupModal(); });
+  if (btnClose) btnClose.addEventListener("click", tryCloseModal);
+  if (btnCancel) btnCancel.addEventListener("click", tryCloseModal);
+  groupModal.addEventListener("click", (e) => { if (e.target === groupModal) tryCloseModal(); });
+  warningModal.addEventListener("click", (e) => { if (e.target === warningModal) closeWarningModal(); });
+  if (btnWarningStay) btnWarningStay.addEventListener("click", closeWarningModal);
+  if (btnWarningDiscard) btnWarningDiscard.addEventListener("click", () => { closeWarningModal(); forceCloseGroupModal(); });
 
-  // Init list
-  document.addEventListener('DOMContentLoaded', buildCustomStudentList);
+  const studentsChecklist = createChecklist(
+    hiddenStudentsSelect,
+    studentListContainer,
+    selectedStudentCountSpan,
+    studentSearchInput,
+  );
+  const teachersChecklist = createChecklist(
+    hiddenTeachersSelect,
+    teacherListContainer,
+    selectedTeacherCountSpan,
+    teacherSearchInput,
+  );
+  studentsChecklist?.build();
+  teachersChecklist?.build();
+  applyPrimaryTeacherSearch();
+
+  const editGroupId = "{{ edit_group_id|default:'' }}";
+  if (editGroupId) {
+    const editBtn = document.querySelector(`.jsOpenEditGroup[data-group-id="${editGroupId}"]`);
+    if (editBtn) {
+      editBtn.click();
+    }
+  }
 })();
 </script>
-
-
 {% endblock %}

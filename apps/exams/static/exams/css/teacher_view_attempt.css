@@ -1,13 +1,13 @@
 /* static/exams/css/teacher_view_attempt.css */
 
 :root {
-    --primary-blue: #2563eb;
-    --dark-blue: #1e3a8a;
-    --light-blue-bg: #f0f9ff;
-    --border-color: #cbd5e1;
+    --primary-blue: #1f61d2;
+    --dark-blue: #163f8c;
+    --light-blue-bg: #eaf3ff;
+    --border-color: #c5d8f1;
     --text-dark: #1e293b;
     --text-muted: #64748b;
-    --success-green: #10b981;
+    --success-green: #1aa574;
     --danger-red: #ef4444;
     --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -133,13 +133,23 @@
 }
 
 .q-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
     font-weight: 800;
-    color: #a5b4fc; /* Açıq mavi */
+    color: #ffffff;
     white-space: nowrap;
 }
 
 .q-text {
-    font-weight: 600;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
 }
 
 .q-points {
@@ -182,12 +192,12 @@
 
 /* Düzgün cavabın stili (həmişə yaşıl olmalıdır) */
 .option-item.correct-option {
-    background-color: #ecfdf5; /* Açıq yaşıl */
+    background-color: #ebfbf4; /* Açıq yaşıl */
     border-color: var(--success-green);
 }
 
 .option-item.correct-option label {
-    color: #065f46; /* Tünd yaşıl mətn */
+    color: #0f6248; /* Tünd yaşıl mətn */
     font-weight: 700;
 }
 
@@ -252,10 +262,10 @@
 
 /* Müəllim Rəyi Bloku */
 .teacher-feedback-block {
-    background: var(--light-blue-bg);
+    background: linear-gradient(180deg, #eef5ff 0%, #f4fffb 100%);
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #bfdbfe; /* Bir az daha tünd mavi çərçivə */
+    border: 1px solid #b6cff3; /* Bir az daha tünd mavi çərçivə */
 }
 
 .feedback-box.alert-primary {
@@ -288,6 +298,111 @@
     color: white;
 }
 
+.attempt-tools {
+    padding: 14px;
+    border: 1px solid #c5d8f1;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f5f9ff 0%, #eff8f4 100%);
+}
+
+.attempt-search-form {
+    width: 100%;
+}
+
+.attempt-search-group {
+    border: 1px solid #a9c6ef;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.attempt-search-group .input-group-text {
+    border: 0;
+    background: #eef5ff;
+    color: #456ea8;
+    padding-inline: 14px;
+}
+
+.attempt-search-input {
+    min-height: 46px;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.attempt-search-input::placeholder {
+    color: #6880a6;
+}
+
+.attempt-search-btn,
+.attempt-reset-btn {
+    min-width: 110px;
+    border: 0;
+    border-radius: 0;
+    font-weight: 700;
+}
+
+.attempt-search-btn {
+    background: linear-gradient(135deg, #1f63d3 0%, #1aa574 100%);
+    color: #fff;
+    padding-inline: 16px;
+}
+
+.attempt-search-btn:hover {
+    color: #fff;
+    filter: brightness(0.95);
+}
+
+.attempt-reset-btn {
+    background: #f3f8ff;
+    color: #1d4f97;
+    border-left: 1px solid #d4e3f9;
+}
+
+.attempt-reset-btn:hover {
+    background: #e9f3ff;
+    color: #163f8c;
+}
+
+.attempt-search-meta {
+    margin-top: 8px;
+    color: #55709a;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.questions-pagination {
+    margin-top: 18px;
+}
+
+.view-attempt-container .questions-pagination .pagination-wrapper {
+    justify-content: center;
+}
+
+.view-attempt-container .questions-pagination .pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.view-attempt-container .questions-pagination .page-link {
+    border: 1px solid #bdd4f3;
+    background: #f4f9ff;
+    color: #1f5299;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.view-attempt-container .questions-pagination .page-link.active {
+    border-color: #1f63d3;
+    background: linear-gradient(135deg, #1f63d3 0%, #1aa574 100%);
+    color: #fff;
+}
+
+.view-attempt-container .questions-pagination .page-link.prev-next {
+    background: #ebf4ff;
+}
+
 /* --- RESPONSİV DÜZƏLİŞLƏR --- */
 @media (max-width: 768px) {
     .summary-item {
@@ -299,5 +414,32 @@
     .q-points {
         margin-top: 10px;
         align-self: flex-start;
+    }
+    .attempt-search-group {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        border: 0;
+        background: transparent;
+        overflow: visible;
+    }
+    .attempt-search-group .input-group-text {
+        border: 1px solid #b9d0f1;
+        border-radius: 10px !important;
+        justify-content: center;
+        min-height: 44px;
+    }
+    .attempt-search-group .attempt-search-input,
+    .attempt-search-group .attempt-search-btn,
+    .attempt-search-group .attempt-reset-btn {
+        width: 100% !important;
+        border-radius: 10px !important;
+    }
+    .attempt-search-group .attempt-search-input {
+        border: 1px solid #b9d0f1 !important;
+    }
+    .attempt-search-group .attempt-reset-btn {
+        border-left: 0;
+        border: 1px solid #c7daf6;
     }
 }

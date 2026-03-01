@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.assigned_exams_page" %} - EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1000px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-file-alt"></i> {% trans "heading" context "accounts.assigned_exams_page" %}
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.assigned_exams_page" %}
+            </a>
+        </div>
+
+        <div class="section-card">
+            <form method="get" class="search-form">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}" class="form-control">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+
+        {% if exam_items %}
+        <div class="posts-grid">
+            {% for item in exam_items %}
+            {% with exam=item.exam %}
+            <div class="post-item">
+                <div class="post-icon stat-icon--blue">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="post-info">
+                    <div class="post-title">{{ exam.title }}</div>
+                    <div class="post-date">
+                        {% if exam.start_datetime %}{{ exam.start_datetime|date:"d M Y H:i" }}{% endif %}
+                        {% if exam.exam_type %}<span class="role-badge student">{{ exam.exam_type }}</span>{% endif %}
+                    </div>
+                </div>
+                <div class="post-actions mt-2">
+                    {% if item.requires_code %}
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            data-exam-slug="{{ exam.slug }}"
+                            data-exam-title="{{ exam.title }}"
+                            onclick="openExamCodeModal(this)">
+                        <i class="fas fa-lock me-1"></i>{% trans "start_with_code" context "accounts.assigned_exams_page" %}
+                    </button>
+                    {% else %}
+                    <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-play me-1"></i>{% trans "start" context "accounts.assigned_exams_page" %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-file-alt"></i>
+            <p>{% trans "empty_state" context "accounts.assigned_exams_page" %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="exam-code-backdrop" class="exam-code-backdrop" style="display:none;">
+    <div class="exam-code-modal">
+        <button type="button" class="exam-code-close-btn" onclick="closeExamCodeModal()">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="exam-code-icon"><i class="fas fa-lock"></i></div>
+        <h3 id="exam-code-title" class="exam-code-title">{% trans "modal_title" context "accounts.assigned_exams_page" %}</h3>
+        <p id="exam-code-text" class="exam-code-text">{% trans "modal_text" context "accounts.assigned_exams_page" %}</p>
+
+        <form id="exam-code-form" method="post" action="{% url 'exams:exam_code_check' %}">
+            {% csrf_token %}
+            <input type="hidden" name="exam_slug" id="exam-code-exam-slug">
+            <div class="exam-input-wrapper">
+                <input type="text"
+                       name="access_code"
+                       id="exam-code-input"
+                       class="exam-code-input"
+                       maxlength="6"
+                       placeholder="{% trans 'modal_code_placeholder' context 'accounts.assigned_exams_page' %}"
+                       autocomplete="off"
+                       inputmode="numeric"
+                       required>
+            </div>
+            <div class="exam-code-actions">
+                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">{% trans "modal_cancel" context "accounts.assigned_exams_page" %}</button>
+                <button type="submit" class="btn-modal btn-confirm">{% trans "modal_confirm" context "accounts.assigned_exams_page" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const backdrop = document.getElementById("exam-code-backdrop");
+    const titleEl = document.getElementById("exam-code-title");
+    const textEl = document.getElementById("exam-code-text");
+    const slugInput = document.getElementById("exam-code-exam-slug");
+    const codeInput = document.getElementById("exam-code-input");
+    const codeModalTitle = "{% trans 'modal_title' context 'accounts.assigned_exams_page' %}";
+    const codeModalPromptTemplate = "{% trans 'modal_prompt_template' context 'accounts.assigned_exams_page' %}";
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function openExamCodeModal(button) {
+        const slug = button.getAttribute("data-exam-slug");
+        const title = button.getAttribute("data-exam-title");
+
+        slugInput.value = slug;
+        titleEl.textContent = codeModalTitle;
+        textEl.innerHTML = codeModalPromptTemplate.replace(
+            "{title}",
+            `<strong>"${escapeHtml(title)}"</strong>`
+        );
+        codeInput.value = "";
+
+        backdrop.style.display = "flex";
+        setTimeout(() => {
+            backdrop.classList.add("show");
+            codeInput.focus();
+        }, 10);
+    }
+
+    function closeExamCodeModal() {
+        backdrop.classList.remove("show");
+        setTimeout(() => {
+            backdrop.style.display = "none";
+        }, 300);
+    }
+
+    if (backdrop) {
+        backdrop.addEventListener("click", function(e) {
+            if (e.target === backdrop) closeExamCodeModal();
+        });
+    }
+
+    if (codeInput) {
+        codeInput.addEventListener("input", function() {
+            this.value = this.value.replace(/[^0-9]/g, "");
+        });
+    }
+</script>
+{% endblock %}

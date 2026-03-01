@@ -5,6 +5,9 @@ Labs Views - Bütün view-lar pk istifadə edir
 import json
 import os
 import traceback
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,11 +15,28 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.courses.models import Course, CourseMembership
 
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+
+
+def _lab_back_url(request, lab):
+    source_section = (request.GET.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        params = {"section": "assigned-exams"}
+        assigned_type = (request.GET.get("assigned_type") or "").strip().lower()
+        if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+            params["assigned_type"] = assigned_type
+        return f"{reverse('accounts:profile')}?{urlencode(params)}"
+
+    return reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
+
 
 # ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
@@ -31,7 +51,9 @@ def create_lab(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     if course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         # Seçilmiş qruplar və tələbələr
@@ -80,35 +102,27 @@ def edit_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         # Mövcud qrupları al
         group_names = []
         if lab.allowed_groups:
-            group_names = [
-                g.strip() for g in lab.allowed_groups.split(",") if g.strip()
-            ]
+            group_names = [g.strip() for g in lab.allowed_groups.split(",") if g.strip()]
 
         # Mövcud tələbə ID-lərini al
         student_ids = []
         if lab.allowed_students:
-            student_ids = [
-                int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()
-            ]
+            student_ids = [int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()]
 
         data = {
             "id": lab.id,
             "title": lab.title or "",
             "description": lab.description or "",
-            "start_datetime": (
-                lab.start_datetime.strftime("%Y-%m-%dT%H:%M")
-                if lab.start_datetime
-                else ""
-            ),
-            "end_datetime": (
-                lab.end_datetime.strftime("%Y-%m-%dT%H:%M") if lab.end_datetime else ""
-            ),
+            "start_datetime": (lab.start_datetime.strftime("%Y-%m-%dT%H:%M") if lab.start_datetime else ""),
+            "end_datetime": (lab.end_datetime.strftime("%Y-%m-%dT%H:%M") if lab.end_datetime else ""),
             "max_score": lab.max_score or 100,
             "max_attempts": getattr(lab, "max_attempts", 1) or 1,
             "status": lab.status or "draft",
@@ -118,8 +132,7 @@ def edit_lab(request, pk):
             "allow_file_upload": lab.allow_file_upload,
             "allow_link_submission": lab.allow_link_submission,
             "max_file_size_mb": lab.max_file_size_mb or 50,
-            "allowed_extensions": lab.allowed_extensions
-            or "zip,pdf,docx,png,jpg,txt,py,java,cpp",
+            "allowed_extensions": lab.allowed_extensions or "zip,pdf,docx,png,jpg,txt,py,java,cpp",
             "teacher_instructions": lab.teacher_instructions or "",
             "teacher_files_url": lab.teacher_files.url if lab.teacher_files else None,
             "group_names": group_names,
@@ -143,9 +156,7 @@ def edit_lab(request, pk):
         if hasattr(lab, "max_attempts"):
             lab.max_attempts = int(request.POST.get("max_attempts", 1) or 1)
 
-        lab.questions_per_student = int(
-            request.POST.get("questions_per_student", 0) or 0
-        )
+        lab.questions_per_student = int(request.POST.get("questions_per_student", 0) or 0)
         lab.allow_late_submission = request.POST.get("allow_late_submission") == "on"
         lab.late_penalty_percent = int(request.POST.get("late_penalty_percent", 0) or 0)
         lab.allow_file_upload = request.POST.get("allow_file_upload") == "on"
@@ -176,11 +187,13 @@ def delete_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     course_id = lab.course.id
     lab.delete()
-    messages.success(request, "Lab silindi!")
+    messages.success(request, pgettext("labs.view.message", "lab_deleted"))
     return JsonResponse(
         {
             "success": True,
@@ -196,11 +209,13 @@ def publish_lab(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     lab.status = "published"
     lab.save()
-    messages.success(request, "Lab yayımlandı!")
+    messages.success(request, pgettext("labs.view.message", "lab_published"))
     return JsonResponse({"success": True})
 
 
@@ -215,7 +230,7 @@ def manage_blocks(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     blocks = lab.blocks.all().order_by("order")
@@ -235,16 +250,23 @@ def create_block(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
+        questions_to_pick = int(request.POST.get("questions_to_pick", 0) or 0)
+        if questions_to_pick < 0:
+            questions_to_pick = 0
+
         block = LabBlock.objects.create(
             lab=lab,
             title=request.POST.get("title"),
             description=request.POST.get("description", ""),
             order=lab.blocks.count() + 1,
+            questions_to_pick=questions_to_pick,
         )
-        messages.success(request, "Blok yaradıldı!")
+        messages.success(request, pgettext("labs.view.message", "block_created"))
         return JsonResponse({"success": True, "block_id": block.id})
 
     except Exception as e:
@@ -258,7 +280,9 @@ def edit_block(request, pk):
     block = get_object_or_404(LabBlock, id=pk)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         data = {
@@ -266,12 +290,18 @@ def edit_block(request, pk):
             "title": block.title,
             "description": block.description,
             "order": block.order,
+            "questions_to_pick": block.questions_to_pick,
         }
         return JsonResponse({"success": True, "data": data})
 
     try:
+        questions_to_pick = int(request.POST.get("questions_to_pick", 0) or 0)
+        if questions_to_pick < 0:
+            questions_to_pick = 0
+
         block.title = request.POST.get("title")
         block.description = request.POST.get("description", "")
+        block.questions_to_pick = questions_to_pick
         block.save()
         return JsonResponse({"success": True})
 
@@ -286,7 +316,9 @@ def delete_block(request, pk):
     block = get_object_or_404(LabBlock, id=pk)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     block.delete()
     return JsonResponse({"success": True})
@@ -304,7 +336,9 @@ def create_question(request, block_id):
     block = get_object_or_404(LabBlock, id=block_id)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         question = LabQuestion.objects.create(
@@ -331,7 +365,9 @@ def edit_question(request, pk):
     question = get_object_or_404(LabQuestion, id=pk)
 
     if question.block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     if request.method == "GET":
         data = {
@@ -359,7 +395,9 @@ def delete_question(request, pk):
     question = get_object_or_404(LabQuestion, id=pk)
 
     if question.block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     question.delete()
     return JsonResponse({"success": True})
@@ -382,14 +420,16 @@ def import_questions(request, block_id):
     block = get_object_or_404(LabBlock, id=block_id)
 
     if block.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     try:
         questions_text = request.POST.get("questions_text", "")
 
         if not questions_text.strip():
             return JsonResponse(
-                {"success": False, "error": "Boş mətn göndərildi"}, status=400
+                {"success": False, "error": pgettext("labs.view.error", "empty_text_submitted")}, status=400
             )
 
         # Regex pattern: başda rəqəm + nöqtə və ya mötərizə
@@ -426,7 +466,7 @@ def import_questions(request, block_id):
             return JsonResponse(
                 {
                     "success": False,
-                    "error": 'Heç bir sual tapılmadı. Format: "1. Sual metni" və ya "1) Sual metni"',
+                    "error": pgettext("labs.view.error", "import_no_questions_found_format"),
                 },
                 status=400,
             )
@@ -447,7 +487,7 @@ def import_questions(request, block_id):
             {
                 "success": True,
                 "count": created_count,
-                "message": f"{created_count} sual uğurla əlavə edildi",
+                "message": pgettext("labs.view.message", "import_success_with_count").format(count=created_count),
             }
         )
 
@@ -466,7 +506,7 @@ def lab_submissions(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     # Bütün submission-lar
@@ -495,9 +535,7 @@ def lab_submissions(request, pk):
 
     if group_filter:
         # Qrup filter - membership üzərindən
-        student_ids = memberships.filter(group_name=group_filter).values_list(
-            "user_id", flat=True
-        )
+        student_ids = memberships.filter(group_name=group_filter).values_list("user_id", flat=True)
         submissions = submissions.filter(assignment__student_id__in=student_ids)
 
     # Statistika
@@ -534,26 +572,11 @@ def grade_submission_page(request, pk):
     lab = submission.assignment.lab
 
     if lab.created_by != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("labs:lab_submissions", pk=lab.id)
-
-    if request.method == "POST":
-        try:
-            submission.score = request.POST.get("score")
-            submission.feedback = request.POST.get("feedback", "")
-            submission.status = "graded"
-            submission.graded_by = request.user
-            submission.graded_at = timezone.now()
-            submission.save()
-
-            messages.success(request, "Qiymət uğurla saxlanıldı!")
-            return redirect("labs:lab_submissions", pk=lab.id)
-        except Exception as e:
-            messages.error(request, f"Xəta: {str(e)}")
 
     # Bu cəhdin cavablarını al
     try:
-        # attempt_number field varsa
         answers = (
             LabAnswer.objects.filter(
                 lab=lab,
@@ -564,8 +587,6 @@ def grade_submission_page(request, pk):
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
-
-        # Əgər boşdursa, submission-a bağlı cavabları yoxla
         if not answers.exists():
             answers = (
                 LabAnswer.objects.filter(
@@ -577,21 +598,78 @@ def grade_submission_page(request, pk):
                 .select_related("question")
                 .order_by("question__block__order", "question__question_number")
             )
-
     except Exception:
-        # Field yoxdursa, bütün cavabları göstər
         answers = (
-            LabAnswer.objects.filter(
-                lab=lab, student=submission.assignment.student, is_draft=False
-            )
+            LabAnswer.objects.filter(lab=lab, student=submission.assignment.student, is_draft=False)
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
+
+    if request.method == "POST":
+        if (
+            submission.status == "graded"
+            and submission.graded_at
+            and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+        ):
+            messages.error(request, "Yoxlama müddəti bitib. Artıq dəyişiklik etmək mümkün deyil.")
+            return redirect(request.path)
+
+        try:
+            auto_total = Decimal("0")
+            for answer in answers:
+                raw_score = (request.POST.get(f"answer_score_{answer.id}", "") or "").strip()
+                if raw_score == "":
+                    answer.score = None
+                else:
+                    try:
+                        val = Decimal(raw_score)
+                    except (InvalidOperation, TypeError):
+                        val = Decimal("0")
+                    if val < 0:
+                        val = Decimal("0")
+                    q_max = Decimal(str(answer.question.points or 0))
+                    if q_max > 0 and val > q_max:
+                        val = q_max
+                    answer.score = val
+                    auto_total += val
+                answer.save(update_fields=["score", "submitted_at"])
+
+            score_raw = (request.POST.get("score", "") or "").strip()
+            use_manual_total = request.POST.get("use_manual_total") == "1"
+            if use_manual_total and score_raw != "":
+                try:
+                    final_score = Decimal(score_raw)
+                except (InvalidOperation, TypeError):
+                    final_score = auto_total
+            else:
+                final_score = auto_total
+
+            if final_score < 0:
+                final_score = Decimal("0")
+            lab_max = Decimal(str(lab.max_score or 0))
+            if lab_max > 0 and final_score > lab_max:
+                final_score = lab_max
+
+            submission.score = final_score
+            submission.feedback = request.POST.get("feedback", "")
+            submission.status = "graded"
+            submission.graded_by = request.user
+            if not submission.graded_at:
+                submission.graded_at = timezone.now()
+            submission.save()
+
+            messages.success(request, pgettext("labs.view.message", "grade_saved_successfully"))
+            return redirect("labs:lab_submissions", pk=lab.id)
+        except Exception as e:
+            messages.error(request, pgettext("labs.view.error", "error_with_details").format(error=str(e)))
+
+    auto_total_score = sum([float(a.score) for a in answers if a.score is not None]) if answers else 0
 
     context = {
         "submission": submission,
         "lab": lab,
         "answers": answers,
+        "auto_total_score": auto_total_score,
     }
 
     return render(request, "labs/grade_submission.html", context)
@@ -603,14 +681,12 @@ def preview_randomization(request, pk):
     lab = get_object_or_404(Lab, id=pk)
 
     if lab.created_by != request.user:
-        messages.error(request, "İcazəniz yoxdur")
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     # Kurs tələbələrini al
 
-    memberships = CourseMembership.objects.filter(
-        course=lab.course, role="student"
-    ).select_related("user")
+    memberships = CourseMembership.objects.filter(course=lab.course, role="student").select_related("user")
 
     # Seçilmiş tələbə
     selected_student_id = request.GET.get("student")
@@ -626,9 +702,7 @@ def preview_randomization(request, pk):
 
             # Bu tələbə üçün assignment yarat/al
             assignment = LabAssignment.get_or_create_for_student(lab, selected_student)
-            questions = assignment.assigned_questions.all().order_by(
-                "block__order", "question_number"
-            )
+            questions = assignment.assigned_questions.all().order_by("block__order", "question_number")
         except Exception:
             pass
 
@@ -640,6 +714,34 @@ def preview_randomization(request, pk):
     }
 
     return render(request, "labs/preview_randomization.html", context)
+
+
+@login_required
+@require_POST
+def update_questions_per_student(request, pk):
+    """Lab üçün tələbə başına sual sayını yenilə"""
+    lab = get_object_or_404(Lab, id=pk)
+
+    if lab.created_by != request.user:
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
+        return redirect("courses:course_dashboard", pk=lab.course.id)
+
+    try:
+        value = int(request.POST.get("questions_per_student", 0) or 0)
+        if value < 0:
+            value = 0
+    except (TypeError, ValueError):
+        value = 0
+
+    lab.questions_per_student = value
+    lab.save(update_fields=["questions_per_student", "updated_at"])
+
+    # Mövcud assignment-ları yeni ayara görə yenilə.
+    for assignment in lab.assignments.all():
+        assignment.assign_questions()
+
+    messages.success(request, "Tələbə başına sual sayı yeniləndi.")
+    return redirect("labs:manage_blocks", pk=lab.id)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -668,9 +770,7 @@ def lab_detail(request, pk):
                 .order_by("block__order", "question_number")
             )
 
-            print(
-                f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir"
-            )
+            print(f"[TEACHER] {request.user.username} - {questions.count()} sual göstərilir")
 
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
@@ -688,15 +788,13 @@ def lab_detail(request, pk):
             if questions.count() == 0:
                 print("[WARNING] Sual tapılmadı, yenidən assign edilir...")
                 assignment.assign_questions()
-                questions = assignment.assigned_questions.select_related(
-                    "block"
-                ).order_by("block__order", "question_number")
+                questions = assignment.assigned_questions.select_related("block").order_by(
+                    "block__order", "question_number"
+                )
                 print(f"[STUDENT] Yenidən assign: {questions.count()} sual")
 
             # Submission yoxlaması
-            submissions = LabSubmission.objects.filter(assignment=assignment).order_by(
-                "-submitted_at"
-            )
+            submissions = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
 
             attempt_count = submissions.count()
             has_submitted = attempt_count > 0
@@ -705,10 +803,20 @@ def lab_detail(request, pk):
             max_attempts = lab.max_attempts or 1
             can_retry = attempt_count < max_attempts
 
-    # Saved answers
+    # Saved answers - yalnız cari cəhd üçün draft cavablar
     saved_answers = {}
     if request.user.is_authenticated:
-        answers = LabAnswer.objects.filter(lab=lab, student=request.user)
+        current_attempt = 1
+        if assignment:
+            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
+            current_attempt = submitted_count + 1
+
+        answers = LabAnswer.objects.filter(
+            lab=lab,
+            student=request.user,
+            attempt_number=current_attempt,
+            is_draft=True,
+        )
         for ans in answers:
             saved_answers[ans.question_id] = ans.answer
 
@@ -721,6 +829,7 @@ def lab_detail(request, pk):
         "submission": submission,
         "attempt_count": attempt_count,
         "can_retry": can_retry,
+        "back_url": _lab_back_url(request, lab),
     }
 
     return render(request, "labs/lab_detail.html", context)
@@ -734,34 +843,35 @@ def auto_save_answer(request, pk):
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
-        is_open = (
-            lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-        )
+        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
     else:
         is_open = lab.status == "published"
 
     if not is_open:
-        return JsonResponse({"success": False, "error": "Lab bağlıdır"})
+        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
 
     try:
         # Cari cəhd nömrəsini tap
         assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
         current_attempt = 1
         if assignment:
-            submitted_count = LabSubmission.objects.filter(
-                assignment=assignment
-            ).count()
+            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
             current_attempt = submitted_count + 1
 
+        update_answer_text = False
         if request.content_type == "application/json":
             data = json.loads(request.body)
             question_id = data.get("question_id")
             answer = data.get("answer", "")
             answer_file = None
+            update_answer_text = True
         else:
             question_id = request.POST.get("question_id")
             answer = request.POST.get("answer", "")
             answer_file = request.FILES.get("answer_file")
+            # File autosave zamanı boş text ilə mövcud cavabı silməmək üçün
+            # yalnız real mətn gələndə answer sahəsini yenilə.
+            update_answer_text = bool((answer or "").strip())
 
         question = get_object_or_404(LabQuestion, id=question_id)
 
@@ -775,7 +885,8 @@ def auto_save_answer(request, pk):
         )
 
         if not created:
-            lab_answer.answer = answer
+            if update_answer_text:
+                lab_answer.answer = answer
             lab_answer.is_draft = True
 
         if answer_file:
@@ -799,25 +910,23 @@ def submit_lab(request, pk):
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
-        is_open = (
-            lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-        )
+        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
     else:
         is_open = lab.status == "published"
 
     if not is_open and not lab.allow_late_submission:
-        return JsonResponse({"success": False, "error": "Lab bağlıdır"})
+        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
 
     try:
         assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
         if not assignment:
-            return JsonResponse({"success": False, "error": "Təyinat tapılmadı"})
+            return JsonResponse({"success": False, "error": pgettext("labs.view.error", "assignment_not_found")})
 
         current_attempts = LabSubmission.objects.filter(assignment=assignment).count()
         max_attempts = lab.max_attempts or 1
 
         if current_attempts >= max_attempts:
-            return JsonResponse({"success": False, "error": "Cəhd sayınız bitib"})
+            return JsonResponse({"success": False, "error": pgettext("labs.view.error", "attempts_exhausted")})
 
         new_attempt_number = current_attempts + 1
 
@@ -837,9 +946,7 @@ def submit_lab(request, pk):
         return JsonResponse(
             {
                 "success": True,
-                "redirect_url": reverse(
-                    "courses:course_dashboard", args=[lab.course.id]
-                ),
+                "redirect_url": reverse("courses:course_dashboard", args=[lab.course.id]),
             }
         )
 
@@ -868,9 +975,7 @@ def api_get_groups(request, course_id):
         .distinct()
     )
 
-    return JsonResponse(
-        {"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]}
-    )
+    return JsonResponse({"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]})
 
 
 @login_required
@@ -881,9 +986,7 @@ def api_get_students(request, course_id):
     groups = request.GET.get("groups", "").split(",")
     groups = [g.strip() for g in groups if g.strip()]
 
-    memberships = CourseMembership.objects.filter(
-        course=course, role="student"
-    ).select_related("user")
+    memberships = CourseMembership.objects.filter(course=course, role="student").select_related("user")
 
     if groups:
         memberships = memberships.filter(group_name__in=groups)
@@ -907,7 +1010,9 @@ def submission_answers(request, pk):
     submission = get_object_or_404(LabSubmission, id=pk)
 
     if submission.assignment.lab.created_by != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
 
     # Bu submission-a aid cavabları al
     answers = (
@@ -927,9 +1032,7 @@ def submission_answers(request, pk):
                 "question": ans.question.question_text,
                 "answer": ans.answer or "",
                 "file_url": ans.answer_file.url if ans.answer_file else None,
-                "file_name": (
-                    os.path.basename(ans.answer_file.name) if ans.answer_file else None
-                ),
+                "file_name": (os.path.basename(ans.answer_file.name) if ans.answer_file else None),
                 "score": float(ans.score) if ans.score else None,
             }
         )
@@ -944,15 +1047,13 @@ def my_lab_answers(request, pk):
 
     assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
     if not assignment:
-        messages.error(request, "Təyinat tapılmadı")
+        messages.error(request, pgettext("labs.view.error", "assignment_not_found"))
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
-    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by(
-        "attempt_number"
-    )
+    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by("attempt_number")
 
     if not all_submissions.exists():
-        messages.error(request, "Göndəriş tapılmadı")
+        messages.error(request, pgettext("labs.view.error", "submission_not_found"))
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     total_attempts = all_submissions.count()
@@ -972,9 +1073,7 @@ def my_lab_answers(request, pk):
     # Müddət
     duration = None
     if submission and submission.submitted_at:
-        start_time = (
-            assignment.assigned_at if assignment.assigned_at else lab.start_datetime
-        )
+        start_time = assignment.assigned_at if assignment.assigned_at else lab.start_datetime
         if start_time:
             delta = submission.submitted_at - start_time
             total_seconds = int(delta.total_seconds())
@@ -982,9 +1081,17 @@ def my_lab_answers(request, pk):
                 hours = total_seconds // 3600
                 minutes = (total_seconds % 3600) // 60
                 if hours > 0:
-                    duration = f"{hours} saat {minutes} dəqiqə"
+                    duration_tpl = pgettext("labs.view.message", "duration_hours_minutes")
+                    try:
+                        duration = duration_tpl % {"hours": hours, "minutes": minutes}
+                    except Exception:
+                        duration = duration_tpl.format(hours=hours, minutes=minutes)
                 else:
-                    duration = f"{minutes} dəqiqə"
+                    duration_tpl = pgettext("labs.view.message", "duration_minutes")
+                    try:
+                        duration = duration_tpl % {"minutes": minutes}
+                    except Exception:
+                        duration = duration_tpl.format(minutes=minutes)
 
     # Bu cəhdin cavablarını al - attempt_number ilə
     # Əgər attempt_number field yoxdursa, bütün cavabları göstər
@@ -1007,6 +1114,23 @@ def my_lab_answers(request, pk):
             .order_by("question__block__order", "question__question_number")
         )
 
+    show_review_data = False
+    review_available_in_seconds = 0
+    review_reveal_at = None
+    if (
+        submission
+        and submission.status == "graded"
+        and submission.graded_at
+        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    ):
+        show_review_data = True
+    elif submission and submission.status == "graded" and submission.graded_at:
+        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+        remain = int((reveal_at - timezone.now()).total_seconds())
+        if remain > 0:
+            review_available_in_seconds = remain
+            review_reveal_at = reveal_at
+
     context = {
         "lab": lab,
         "submission": submission,
@@ -1015,6 +1139,9 @@ def my_lab_answers(request, pk):
         "duration": duration,
         "attempt_number": attempt_number,
         "total_attempts": total_attempts,
+        "show_review_data": show_review_data,
+        "review_available_in_seconds": review_available_in_seconds,
+        "review_reveal_at": review_reveal_at,
     }
 
     return render(request, "labs/my_lab_answers.html", context)

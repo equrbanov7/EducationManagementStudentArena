@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if request.user.is_teacher %}
 
 <!-- ADD MODAL -->
@@ -5,7 +6,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Yeni Kurs İşi</h5>
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> {% trans "add_modal_title" context "projects.modals" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="createProjectForm">
@@ -13,61 +14,61 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Başlıq <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="text" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
                             <select name="status" class="form-select">
-                                <option value="active">Aktiv</option>
-                                <option value="inactive">Deaktiv</option>
-                                <option value="archived">Arxivləndi</option>
+                                <option value="active">{% trans "status_active" context "projects.modals" %}</option>
+                                <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
+                                <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Təsvir</label>
+                        <label class="form-label">{% trans "label_description" context "projects.modals" %}</label>
                         <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Son tarix <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Maks. cəhd</label>
+                            <label class="form-label">{% trans "label_max_attempts" context "projects.modals" %}</label>
                             <input type="number" name="max_attempts" class="form-control" value="1" min="1">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Maks. bal</label>
+                            <label class="form-label">{% trans "label_max_score" context "projects.modals" %}</label>
                             <input type="number" name="max_score" class="form-control" value="100" min="1">
                         </div>
                     </div>
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">İcazəli Qruplar</label>
-                            <input type="text" class="form-control mb-2" id="addGroupSearch" placeholder="Qrup axtar...">
+                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="addGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
                             <div id="addGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
-                            <small class="text-muted">Seçilib: <span id="addGroupCount">0</span></small>
+                            <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                            <input type="text" class="form-control mb-2" id="addStudentSearch" placeholder="Tələbə axtar...">
+                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="addStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
                             <div id="addStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
-                                <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
-                            <small class="text-muted">Seçilib: <span id="addStudentCount">0</span></small>
+                            <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="addStudentCount">0</span></small>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-info"><i class="bi bi-check"></i> Əlavə Et</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "close" context "projects.modals" %}</button>
+                    <button type="submit" class="btn btn-info"><i class="bi bi-check"></i> {% trans "add" context "projects.modals" %}</button>
                 </div>
             </form>
         </div>
@@ -79,7 +80,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil"></i> Redaktə Et</h5>
+                <h5 class="modal-title"><i class="bi bi-pencil"></i> {% trans "edit_modal_title" context "projects.modals" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editProjectForm">
@@ -88,61 +89,61 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Başlıq <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_title" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="text" id="editTitle" name="title" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
+                            <label class="form-label">{% trans "label_status" context "projects.modals" %}</label>
                             <select id="editStatus" name="status" class="form-select">
-                                <option value="active">Aktiv</option>
-                                <option value="inactive">Deaktiv</option>
-                                <option value="archived">Arxivləndi</option>
+                                <option value="active">{% trans "status_active" context "projects.modals" %}</option>
+                                <option value="inactive">{% trans "status_inactive" context "projects.modals" %}</option>
+                                <option value="archived">{% trans "status_archived" context "projects.modals" %}</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Təsvir</label>
+                        <label class="form-label">{% trans "label_description" context "projects.modals" %}</label>
                         <textarea id="editDescription" name="description" class="form-control" rows="2"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Başlanğıc <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editStartDate" name="start_date" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Son tarix <span class="text-danger">*</span></label>
+                            <label class="form-label">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="editDeadline" name="deadline" class="form-control" required>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Maks. cəhd</label>
+                            <label class="form-label">{% trans "label_max_attempts" context "projects.modals" %}</label>
                             <input type="number" id="editMaxAttempts" name="max_attempts" class="form-control" min="1">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Maks. bal</label>
+                            <label class="form-label">{% trans "label_max_score" context "projects.modals" %}</label>
                             <input type="number" id="editMaxScore" name="max_score" class="form-control" min="1">
                         </div>
                     </div>
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">İcazəli Qruplar</label>
-                            <input type="text" class="form-control mb-2" id="editGroupSearch" placeholder="Qrup axtar...">
+                            <label class="form-label fw-bold">{% trans "label_allowed_groups" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="editGroupSearch" placeholder="{% trans 'placeholder_group_search' context 'projects.modals' %}">
                             <div id="editGroupList" class="border rounded" style="max-height:250px;overflow-y:auto;"></div>
-                            <small class="text-muted">Seçilib: <span id="editGroupCount">0</span></small>
+                            <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editGroupCount">0</span></small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">İcazəli Tələbələr</label>
-                            <input type="text" class="form-control mb-2" id="editStudentSearch" placeholder="Tələbə axtar...">
+                            <label class="form-label fw-bold">{% trans "label_allowed_students" context "projects.modals" %}</label>
+                            <input type="text" class="form-control mb-2" id="editStudentSearch" placeholder="{% trans 'placeholder_student_search' context 'projects.modals' %}">
                             <div id="editStudentList" class="border rounded" style="max-height:250px;overflow-y:auto;">
-                                <p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>
+                                <p class="text-muted text-center py-3">{% trans "select_group_first" context "projects.modals" %}</p>
                             </div>
-                            <small class="text-muted">Seçilib: <span id="editStudentCount">0</span></small>
+                            <small class="text-muted">{% trans "selected_count" context "projects.modals" %}: <span id="editStudentCount">0</span></small>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i> Yadda Saxla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "close" context "projects.modals" %}</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check"></i> {% trans "save" context "projects.modals" %}</button>
                 </div>
             </form>
         </div>
@@ -165,23 +166,30 @@
     if(window._PROJ_MODAL_V4) return;
     window._PROJ_MODAL_V4 = true;
 
+    const I18N = {
+        loading: `{% trans "loading" context "projects.modals.js" %}`,
+        noGroups: `{% trans "no_groups" context "projects.modals.js" %}`,
+        noStudents: `{% trans "no_students" context "projects.modals.js" %}`,
+        error: `{% trans "error" context "projects.modals.js" %}`,
+        selectGroupFirst: `{% trans "select_group_first" context "projects.modals.js" %}`,
+        fetchFailed: `{% trans "fetch_failed" context "projects.modals.js" %}`,
+        serverError: `{% trans "server_error" context "projects.modals.js" %}`,
+        createErrorPrefix: `{% trans "create_error_prefix" context "projects.modals.js" %}`,
+        updateErrorPrefix: `{% trans "update_error_prefix" context "projects.modals.js" %}`,
+        submitting: `{% trans "submitting" context "projects.modals.js" %}`,
+        add: `{% trans "add" context "projects.modals.js" %}`,
+        save: `{% trans "save" context "projects.modals.js" %}`,
+        deleteConfirm: `{% trans "delete_confirm" context "projects.modals.js" %}`,
+    };
+
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     const $ = id => document.getElementById(id);
 
-    // ═══════════════════════════════════════════════════════════
-    // STATE
-    // ═══════════════════════════════════════════════════════════
-    
-    // Edit modal üçün - serverdən gələn orijinal tələbə ID-ləri
     let editSavedStudentIds = new Set();
 
-    // ═══════════════════════════════════════════════════════════
-    // HELPERS
-    // ═══════════════════════════════════════════════════════════
-    
     const esc = s => s ? String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]) : '';
-    
+
     const toLocal = dt => {
         if(!dt) return '';
         const d = new Date(dt);
@@ -197,26 +205,22 @@
         if($(mode+'StudentCount')) $(mode+'StudentCount').textContent = sc;
     };
 
-    // ═══════════════════════════════════════════════════════════
-    // LOAD GROUPS
-    // ═══════════════════════════════════════════════════════════
-    
     function loadGroups(mode, checkedGroups = []) {
         const container = $(mode + 'GroupList');
-        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        container.innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
 
         fetch(`/projects/api/groups/?course_id=${COURSE_ID}`)
             .then(r => r.json())
             .then(data => {
                 const groups = data.groups || [];
                 if(!groups.length) {
-                    container.innerHTML = '<p class="text-muted text-center py-3">Qrup yoxdur</p>';
+                    container.innerHTML = `<p class="text-muted text-center py-3">${I18N.noGroups}</p>`;
                     return;
                 }
 
                 container.innerHTML = groups.map(g => `
                     <div class="chk-row">
-                        <input type="checkbox" id="${mode}G${g.id}" name="group_names[]" value="${esc(g.name)}" 
+                        <input type="checkbox" id="${mode}G${g.id}" name="group_names[]" value="${esc(g.name)}"
                                data-group="${esc(g.name)}" ${checkedGroups.includes(g.name)?'checked':''}>
                         <label for="${mode}G${g.id}">${esc(g.name)}</label>
                     </div>
@@ -230,54 +234,44 @@
                 });
 
                 updateCount(mode);
-                
-                // Qruplar yükləndikdən sonra tələbələri yüklə
+
                 if(checkedGroups.length) loadStudents(mode);
             })
             .catch(() => {
-                container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+                container.innerHTML = `<p class="text-danger text-center py-3">${I18N.error}</p>`;
             });
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // LOAD STUDENTS
-    // ═══════════════════════════════════════════════════════════
-    
     function loadStudents(mode) {
         const container = $(mode + 'StudentList');
-        
-        // Seçilmiş qrupları tap
+
         const groups = Array.from(document.querySelectorAll(`#${mode}GroupList input:checked`))
                            .map(cb => cb.dataset.group);
 
         if(!groups.length) {
-            container.innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+            container.innerHTML = `<p class="text-muted text-center py-3">${I18N.selectGroupFirst}</p>`;
             updateCount(mode);
             return;
         }
 
-        container.innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        container.innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
 
         fetch(`/projects/api/students/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
             .then(r => r.json())
             .then(data => {
                 const students = data.students || [];
                 if(!students.length) {
-                    container.innerHTML = '<p class="text-muted text-center py-3">Tələbə yoxdur</p>';
+                    container.innerHTML = `<p class="text-muted text-center py-3">${I18N.noStudents}</p>`;
                     updateCount(mode);
                     return;
                 }
 
                 container.innerHTML = students.map(s => {
-                    // ════════════════════════════════════════════════════════
-                    // ƏSAS: Edit modunda yalnız savedStudentIds-də olanları check et
-                    // Add modunda heç birini check etmə
-                    // ════════════════════════════════════════════════════════
                     let isChecked = '';
                     if(mode === 'edit' && editSavedStudentIds.has(s.id)) {
                         isChecked = 'checked';
                     }
-                    
+
                     return `
                         <div class="chk-row">
                             <input type="checkbox" id="${mode}S${s.id}" name="students[]" value="${s.id}" ${isChecked}>
@@ -294,14 +288,10 @@
                 updateCount(mode);
             })
             .catch(() => {
-                container.innerHTML = '<p class="text-danger text-center py-3">Xəta</p>';
+                container.innerHTML = `<p class="text-danger text-center py-3">${I18N.error}</p>`;
             });
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // SEARCH
-    // ═══════════════════════════════════════════════════════════
-    
     ['add','edit'].forEach(mode => {
         $(mode+'GroupSearch')?.addEventListener('input', e => {
             const t = e.target.value.toLowerCase();
@@ -317,12 +307,8 @@
         });
     });
 
-    // ═════════════════════════════════���═════════════════════════
-    // ADD MODAL
-    // ═══════════════════════════════════════════════════════════
-    
     $('addProjectModal')?.addEventListener('shown.bs.modal', () => {
-        $('addStudentList').innerHTML = '<p class="text-muted text-center py-3">Əvvəlcə qrup seçin</p>';
+        $('addStudentList').innerHTML = `<p class="text-muted text-center py-3">${I18N.selectGroupFirst}</p>`;
         loadGroups('add');
     });
 
@@ -334,7 +320,7 @@
         e.preventDefault();
         const btn = e.target.querySelector('[type=submit]');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${I18N.submitting}`;
 
         fetch(`/projects/create/${COURSE_ID}/`, {
             method: 'POST',
@@ -342,37 +328,34 @@
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error||'')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check"></i> Əlavə Et'; });
+        .then(d => d.success ? location.reload() : alert(`${I18N.createErrorPrefix}${d.error || I18N.fetchFailed}`))
+        .catch(() => alert(I18N.serverError))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-check"></i> ${I18N.add}`;
+        });
     });
 
-    // ═══════════════════════════════════════════════════════════
-    // EDIT MODAL
-    // ═══════════════════════════════════════════════════════════
-    
     document.addEventListener('click', e => {
         const btn = e.target.closest('.js-edit-project');
         if(!btn) return;
         e.preventDefault();
 
         const url = btn.dataset.url;
-        
-        // RESET
+
         editSavedStudentIds.clear();
-        $('editGroupList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
-        $('editStudentList').innerHTML = '<p class="text-muted text-center py-3">Yüklənir...</p>';
+        $('editGroupList').innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
+        $('editStudentList').innerHTML = `<p class="text-muted text-center py-3">${I18N.loading}</p>`;
 
         bootstrap.Modal.getOrCreateInstance($('editProjectModal')).show();
 
         fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
             .then(r => r.json())
             .then(res => {
-                if(!res.success) return alert('Məlumat alınmadı');
-                
+                if(!res.success) return alert(I18N.fetchFailed);
+
                 const d = res.data;
-                
-                // Form doldur
+
                 $('editProjectId').value = d.id;
                 $('editTitle').value = d.title || '';
                 $('editDescription').value = d.description || '';
@@ -382,18 +365,10 @@
                 $('editMaxScore').value = d.max_score || 100;
                 $('editStatus').value = d.status || 'active';
 
-                // ════════════════════════════════════════════════════════
-                // ƏSAS: Serverdən gələn tələbə ID-lərini SAXLA
-                // Bu set loadStudents() funksiyasında istifadə olunacaq
-                // ════════════════════════════════════════════════════════
                 editSavedStudentIds = new Set(d.student_ids || []);
-                
-                console.log('Saved student IDs:', editSavedStudentIds);
-
-                // Qrupları yüklə
                 loadGroups('edit', d.group_names || []);
             })
-            .catch(() => alert('Xəta'));
+            .catch(() => alert(I18N.error));
     });
 
     $('editProjectForm')?.addEventListener('submit', e => {
@@ -403,7 +378,7 @@
 
         const btn = e.target.querySelector('[type=submit]');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${I18N.submitting}`;
 
         fetch(`/projects/${projectId}/edit/`, {
             method: 'POST',
@@ -411,28 +386,27 @@
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta: ' + (d.error||'')))
-        .catch(() => alert('Server xətası'))
-        .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check"></i> Yadda Saxla'; });
+        .then(d => d.success ? location.reload() : alert(`${I18N.updateErrorPrefix}${d.error || I18N.fetchFailed}`))
+        .catch(() => alert(I18N.serverError))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-check"></i> ${I18N.save}`;
+        });
     });
 
-    // ═══════════════════════════════════════════════════════════
-    // DELETE
-    // ═══════════════════════════════════════════════════════════
-    
     document.addEventListener('click', e => {
         const btn = e.target.closest('.js-delete-project');
         if(!btn) return;
         e.preventDefault();
-        if(!confirm('Silmək istədiyinizə əminsiniz?')) return;
+        if(!confirm(I18N.deleteConfirm)) return;
 
         fetch(btn.dataset.url, {
             method: 'POST',
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert('Xəta'))
-        .catch(() => alert('Server xətası'));
+        .then(d => d.success ? location.reload() : alert(I18N.error))
+        .catch(() => alert(I18N.serverError));
     });
 
 })();

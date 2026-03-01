@@ -1,0 +1,111 @@
+{% load i18n %}
+{% trans "not_set" context "profile.info" as profile_not_set %}
+{% trans "default_role" context "profile.info" as profile_default_role %}
+{% trans "default_org" context "profile.info" as profile_default_org %}
+<div class="profile-identity-wrapper">
+    <div class="avatar-section">
+        <div class="avatar-container">
+            {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-large">
+            {% else %}
+            <div class="avatar-placeholder">
+                {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
+        <p class="user-email">{{ user.email }}</p>
+
+        <div class="role-badges">
+            {% if user_roles %}
+                {% for role in user_roles %}
+                <span class="role-badge {{ role }}">
+                    <i class="fas fa-shield-alt"></i>
+                    {{ role|title }}
+                </span>
+                {% endfor %}
+            {% else %}
+            <span class="role-badge student">
+                <i class="fas fa-user"></i>
+                {% trans "user" context "profile.info" %}
+            </span>
+            {% endif %}
+        </div>
+    </div> 
+
+    <div class="profile-details-section">
+        <div class="section-title">
+            <i class="fas fa-address-card"></i>
+            <span>{% trans "personal_info" context "profile.info" %}</span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-at"></i> {% trans "username" context "profile.info" %}</div>
+                <div class="info-value">{{ user.username }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-id-badge"></i> {% trans "first_name" context "profile.info" %}</div>
+                <div class="info-value">{{ user.first_name|default:profile_not_set }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-id-badge"></i> {% trans "last_name" context "profile.info" %}</div>
+                <div class="info-value">{{ user.last_name|default:profile_not_set }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-envelope"></i> {% trans "email" context "profile.info" %}</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-phone-alt"></i> {% trans "phone" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.phone|default:profile_not_set }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-map-marker-alt"></i> {% trans "location" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.location|default:profile_not_set }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-user-tag"></i> {% trans "role" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.get_role_display|default:profile_default_role }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.organization_name|default:profile_default_org }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-university"></i> {% trans "institution_name" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.student_university_name|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-hashtag"></i> {% trans "school_code" context "profile.info" %}</div>
+                <div class="info-value">{{ profile.student_school_identifier|default:"-" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-calendar-alt"></i> {% trans "joined_date" context "profile.info" %}</div>
+                <div class="info-value">{{ user.date_joined|date:"d M Y" }}</div>
+            </div>
+        </div>
+
+        {% if profile.bio %}
+        <div class="profile-bio info-item bio-item">
+            <div class="info-label"><i class="fas fa-align-left"></i> {% trans "about" context "profile.info" %}</div>
+            <div class="info-value">{{ profile.bio }}</div>
+        </div>
+        {% endif %}
+
+        {% if profile.supervisor_code %}
+        <div class="profile-supervisor info-item">
+            <div class="info-label"><i class="fas fa-key"></i> {% trans "supervisor_code" context "profile.info" %}</div>
+            <div class="info-value info-value--readonly">{{ profile.supervisor_code }}</div>
+        </div>
+        {% endif %}
+
+        <div class="profile-edit-link">
+            <a href="{{ profile_base_url }}?section=edit-profile" class="btn-edit-profile js-profile-section-link"
+               data-section="edit-profile" data-title="{% trans 'edit_profile' context 'profile.section' %}">
+                <i class="fas fa-user-edit"></i> {% trans "edit_profile" context "profile.sidebar" %}
+            </a>
+        </div>
+    </div>
+</div>

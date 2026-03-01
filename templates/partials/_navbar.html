@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 <header class="blog-header">
     <div class="blog-header__container">
         <nav class="blog-header__nav">
@@ -8,39 +8,38 @@
                 <li class="blog-header__nav-item">
                     <a href="/blog/"
                        class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
-                        Ana Səhifə
+                        {% trans "home" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="/blog/technology/"
                        class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
-                        Texnologiya
+                        {% trans "technology" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="/blog/about/"
                        class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
-                        Haqqımızda
+                        {% trans "about" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
-                        Exams
+                        {% trans "exams" context "nav" %}
                     </a>
                 </li>
-
-                
                 <li class="blog-header__nav-item">
                     <a href="{% url 'subscribe' %}"
                        class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
-                        Abunə Ol
+                        {% trans "subscribe" context "nav" %}
                     </a>
                 </li>
             </ul>
 
-            {# -------- SAĞ TƏRƏF: AUTH HİSSƏSİ -------- #}
             <div class="blog-header__auth">
+                {% include "partials/_language_switcher.html" with switcher_variant="navbar" %}
+
                 {% if request.user.is_authenticated %}
                     <div class="blog-header__user">
                         <button
@@ -59,92 +58,95 @@
                         </button>
 
                         <div class="blog-header__user-menu">
-                            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__user-menu-item">
-                                Profilim
+                            <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
+                                {% trans "my_profile" context "nav" %}
                             </a>
-                            <a href="{% url 'logout' %}" class="blog-header__user-menu-item">
-                                Çıxış et
+                            <a href="{% url 'accounts:logout' %}" class="blog-header__user-menu-item">
+                                {% trans "logout" context "nav" %}
                             </a>
                         </div>
                     </div>
                 {% else %}
                     <div class="blog-header__guest-actions">
-                        <a href="{% url 'login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
-                            Daxil ol
+                        <a href="{% url 'accounts:login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
+                            {% trans "login" context "nav" %}
                         </a>
-                        <a href="{% url 'register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
-                            Qeydiyyat
+                        <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
+                            {% trans "signup" context "nav" %}
                         </a>
                     </div>
                 {% endif %}
 
-                {# Burger button mobil üçün #}
-                <button class="blog-header__toggle" type="button" aria-label="Menyunu aç/bağla">
+                <button class="blog-header__toggle" type="button" aria-label="{% trans 'menu_toggle' context 'nav' %}">
                     <span class="blog-header__toggle-line"></span>
                     <span class="blog-header__toggle-line"></span>
                     <span class="blog-header__toggle-line"></span>
                 </button>
             </div>
-
-            
         </nav>
     </div>
 </header>
 
-{# Mobil menyu #}
 <div class="mobile-nav-overlay"></div>
 <ul class="blog-header__nav-list mobile-nav-panel">
     <li class="blog-header__nav-item">
         <a href="/blog/"
            class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
-            Ana Səhifə
+            {% trans "home" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="/blog/technology/"
            class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
-            Texnologiya
+            {% trans "technology" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
         <a href="/blog/about/"
            class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
-            Haqqımızda
+            {% trans "about" context "nav" %}
         </a>
     </li>
-    
+    <li class="blog-header__nav-item">
+        <a href="{% url 'exams:student_exam_list' %}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'student_exam_list' %}blog-header__nav-link--active{% endif %}">
+            {% trans "exams" context "nav" %}
+        </a>
+    </li>
 
-    {# Mobil menyuda da auth hissəsi olsun #}
     {% if request.user.is_authenticated %}
-    
         <li class="blog-header__nav-item">
-            <a href="{% url 'user_profile' request.user.username %}" class="blog-header__nav-link">
-                Profilim ({{ request.user.username }})
+            <a href="{% url 'accounts:profile' %}" class="blog-header__nav-link">
+                {% trans "my_profile" context "nav" %} ({{ request.user.username }})
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'logout' %}" class="blog-header__nav-link">
-                Çıxış et
+            <a href="{% url 'accounts:logout' %}" class="blog-header__nav-link">
+                {% trans "logout" context "nav" %}
             </a>
         </li>
     {% else %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'login' %}" class="blog-header__nav-link">
-                Daxil ol
+            <a href="{% url 'accounts:login' %}" class="blog-header__nav-link">
+                {% trans "login" context "nav" %}
             </a>
         </li>
         <li class="blog-header__nav-item">
-            <a href="{% url 'register' %}" class="blog-header__nav-link">
-                Qeydiyyat
+            <a href="{% url 'accounts:register' %}" class="blog-header__nav-link">
+                {% trans "signup" context "nav" %}
             </a>
         </li>
     {% endif %}
 
+    <li class="blog-header__nav-item blog-header__nav-item--language">
+        {% include "partials/_language_switcher.html" with switcher_variant="mobile" %}
+    </li>
+
     <li class="blog-header__nav-item">
         <a href="{% url 'subscribe' %}"
            class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
-            Abunə Ol
+            {% trans "subscribe" context "nav" %}
         </a>
     </li>
 </ul>
