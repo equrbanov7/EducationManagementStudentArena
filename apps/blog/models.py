@@ -13,9 +13,7 @@ from django.utils.text import slugify
 
 
 class EmailOTP(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps"
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -64,6 +62,11 @@ class Category(models.Model):
 
 
 class Post(models.Model):
+    class ApprovalStatus(models.TextChoices):
+        APPROVED = "approved", "Approved"
+        PENDING = "pending", "Pending approval"
+        NEEDS_CHANGES = "needs_changes", "Needs changes"
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -88,6 +91,23 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=True)
+    requires_approval = models.BooleanField(default=False, db_index=True)
+    approval_status = models.CharField(
+        max_length=20,
+        choices=ApprovalStatus.choices,
+        default=ApprovalStatus.APPROVED,
+        db_index=True,
+    )
+    approval_feedback = models.TextField(blank=True, default="")
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="approved_blog_posts",
+        null=True,
+        blank=True,
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approval_requested_at = models.DateTimeField(null=True, blank=True)
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
 
     class Meta:
@@ -108,6 +128,17 @@ class Post(models.Model):
             if not Post.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 break
             self.slug = "%s-%d" % (original_slug, x)
+
+        if not self.requires_approval and self.approval_status != self.ApprovalStatus.APPROVED:
+            self.approval_status = self.ApprovalStatus.APPROVED
+
+        if self.approval_status == self.ApprovalStatus.PENDING and not self.approval_requested_at:
+            self.approval_requested_at = timezone.now()
+
+        if self.approval_status != self.ApprovalStatus.APPROVED:
+            self.is_published = False
+            self.approved_by = None
+            self.approved_at = None
 
         super().save(*args, **kwargs)
 
@@ -131,6 +162,62 @@ class Post(models.Model):
             return self.image_url
         else:
             return static("img/default-post.jpg")  # Default şəklin yeri
+
+    @property
+    def is_pending_approval(self):
+        return self.requires_approval and self.approval_status == self.ApprovalStatus.PENDING
+
+    @property
+    def needs_approval_changes(self):
+        return self.requires_approval and self.approval_status == self.ApprovalStatus.NEEDS_CHANGES
+
+    @property
+    def latest_feedback_text(self):
+        current_feedback = (self.approval_feedback or "").strip()
+        if current_feedback:
+            return current_feedback
+
+        prefetched = getattr(self, "_prefetched_objects_cache", {}).get("approval_logs")
+        if prefetched is not None:
+            for log in prefetched:
+                feedback_text = (getattr(log, "feedback", "") or "").strip()
+                if feedback_text:
+                    return feedback_text
+            return ""
+
+        latest_log = self.approval_logs.exclude(feedback__isnull=True).exclude(feedback__exact="").first()
+        if latest_log:
+            return (latest_log.feedback or "").strip()
+        return ""
+
+
+class PostApprovalLog(models.Model):
+    class Action(models.TextChoices):
+        APPROVED = "approved", "Approved"
+        NEEDS_CHANGES = "needs_changes", "Needs changes"
+        FEEDBACK = "feedback", "Feedback"
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="approval_logs",
+    )
+    reviewer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="post_approval_logs",
+    )
+    action = models.CharField(max_length=20, choices=Action.choices)
+    feedback = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.post_id}:{self.action}"
 
 
 # ---- Models for Comment functionality ----
@@ -168,9 +255,7 @@ class Comment(models.Model):
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
-    conf_token = models.CharField(
-        max_length=64, blank=True, null=True
-    )  # Təsdiq linki üçün token
+    conf_token = models.CharField(max_length=64, blank=True, null=True)  # Təsdiq linki üçün token
     is_active = models.BooleanField(default=False)  # Təsdiq olunmayıbsa passivdir
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -182,9 +267,7 @@ class Subscriber(models.Model):
 
 
 class Question(models.Model):
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="questions", verbose_name="Müəllif"
-    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="questions", verbose_name="Müəllif")
     question_text = models.TextField("Sual")
     answer_text = models.TextField("Cavab", blank=True, null=True)
 
@@ -221,10 +304,3 @@ class Question(models.Model):
         if user == self.author:
             return True
         return self.visible_users.filter(id=user.id).exists()
-
-
-def _user_is_teacher(self):
-    return self.groups.filter(name="teacher").exists()
-
-
-User.add_to_class("is_teacher", property(_user_is_teacher))

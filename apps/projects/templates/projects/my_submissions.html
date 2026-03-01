@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ project.title }} - Cavablarım{% endblock %}
+{% block title %}{{ project.title }} - {% trans "page_title" context "projects.my_submissions" %}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'projects/css/my_submissions.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 project-submissions-header">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
@@ -18,28 +20,27 @@
                 </ol>
             </nav>
             <h3 class="mb-0">
-                <i class="fa-solid fa-list-check text-info me-2"></i> Mənim Cavablarım
+                <i class="fa-solid fa-list-check text-info me-2"></i> {% trans "header_title" context "projects.my_submissions" %}
             </h3>
         </div>
-        <div>
+        <div class="d-flex gap-2">
             {% if can_submit %}
-            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-info">
-                <i class="fa-solid fa-plus me-1"></i> Yeni Layihə Təqdim Et
+            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary project-submissions-primary-btn">
+                <i class="fa-solid fa-plus me-1"></i> {% trans "new_submission" context "projects.my_submissions" %}
             </a>
             {% endif %}
             <a href="{% url 'courses:course_dashboard' project.course.id %}" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left me-1"></i> Geri
+                <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "projects.my_submissions" %}
             </a>
         </div>
     </div>
-    
-    <!-- Stats -->
+
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <h4 class="mb-0">{{ user_attempts }} / {{ project.max_attempts }}</h4>
-                    <small class="text-muted">İstifadə olunmuş cəhd</small>
+                    <small class="text-muted">{% trans "used_attempts" context "projects.my_submissions" %}</small>
                 </div>
             </div>
         </div>
@@ -49,7 +50,7 @@
                     <h4 class="mb-0 {% if attempts_left == 0 %}text-danger{% else %}text-success{% endif %}">
                         {{ attempts_left }}
                     </h4>
-                    <small class="text-muted">Qalan cəhd</small>
+                    <small class="text-muted">{% trans "attempts_left" context "projects.my_submissions" %}</small>
                 </div>
             </div>
         </div>
@@ -57,7 +58,7 @@
             <div class="card bg-light">
                 <div class="card-body text-center">
                     <h4 class="mb-0 text-info">{{ project.max_score }}</h4>
-                    <small class="text-muted">Maksimum bal</small>
+                    <small class="text-muted">{% trans "max_score" context "projects.my_submissions" %}</small>
                 </div>
             </div>
         </div>
@@ -65,49 +66,48 @@
             <div class="card bg-light">
                 <div class="card-body text-center">
                     {% if project.is_deadline_passed %}
-                        <span class="badge bg-danger fs-6">Müddət Keçib</span>
+                        <span class="badge bg-danger fs-6">{% trans "status_overdue" context "projects.my_submissions" %}</span>
                     {% else %}
-                        <span class="badge bg-success fs-6">Aktiv</span>
+                        <span class="badge bg-success fs-6">{% trans "status_active" context "projects.my_submissions" %}</span>
                     {% endif %}
                     <br>
-                    <small class="text-muted">{{ project.deadline|date:"d.m.Y H:i" }}</small>
+                    <small class="text-muted">{{ project.deadline|date:"SHORT_DATETIME_FORMAT" }}</small>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Submissions List -->
+
     {% if submissions %}
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <i class="fa-solid fa-history me-2"></i> Göndərdiyim Layihələr
+    <div class="card project-submissions-card">
+        <div class="card-header project-submissions-card-header">
+            <i class="fa-solid fa-history me-2"></i> {% trans "submissions_title" context "projects.my_submissions" %}
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover mb-0 project-submissions-table">
+                    <thead>
                         <tr>
                             <th>#</th>
-                            <th>Göndərilmə Tarixi</th>
-                            <th>Status</th>
-                            <th>Qiymət</th>
-                            <th>Əməliyyat</th>
+                            <th>{% trans "table_submitted_at" context "projects.my_submissions" %}</th>
+                            <th>{% trans "table_status" context "projects.my_submissions" %}</th>
+                            <th>{% trans "table_grade" context "projects.my_submissions" %}</th>
+                            <th>{% trans "table_actions" context "projects.my_submissions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sub in submissions %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</td>
                             <td>
                                 {% if sub.status == 'pending' %}
-                                    <span class="badge bg-warning">Gözləyir</span>
+                                    <span class="badge project-sub-status project-sub-status-pending">{% trans "status_pending" context "projects.my_submissions" %}</span>
                                 {% elif sub.status == 'graded' %}
-                                    <span class="badge bg-success">Qiymətləndirildi</span>
+                                    <span class="badge project-sub-status project-sub-status-graded">{% trans "status_graded" context "projects.my_submissions" %}</span>
                                 {% elif sub.status == 'rejected' %}
-                                    <span class="badge bg-danger">Rədd edildi</span>
+                                    <span class="badge project-sub-status project-sub-status-rejected">{% trans "status_rejected" context "projects.my_submissions" %}</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">{{ sub.status }}</span>
+                                    <span class="badge bg-secondary">{{ sub.get_status_display }}</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -118,10 +118,10 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        data-bs-toggle="modal" 
+                                <button class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#viewSubmission{{ sub.id }}">
-                                    <i class="fa-solid fa-eye"></i> Bax
+                                    <i class="fa-solid fa-eye"></i> {% trans "view" context "projects.my_submissions" %}
                                 </button>
                             </td>
                         </tr>
@@ -131,47 +131,46 @@
             </div>
         </div>
     </div>
-    
-    <!-- Modals for each submission -->
+
     {% for sub in submissions %}
     <div class="modal fade" id="viewSubmission{{ sub.id }}" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Layihə #{{ forloop.counter }}</h5>
+                    <h5 class="modal-title">{% trans "modal_title_prefix" context "projects.my_submissions" %} #{{ forloop.counter }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <strong>Göndərilmə tarixi:</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                        <strong>{% trans "submitted_at" context "projects.my_submissions" %}</strong> {{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}
                     </div>
-                    
+
                     {% if sub.content %}
                     <div class="mb-3">
-                        <strong>Mətn:</strong>
+                        <strong>{% trans "content" context "projects.my_submissions" %}</strong>
                         <div class="bg-light p-3 rounded mt-2">{{ sub.content|linebreaks }}</div>
                     </div>
                     {% endif %}
-                    
+
                     {% if sub.file %}
                     <div class="mb-3">
-                        <strong>Fayl:</strong>
+                        <strong>{% trans "file" context "projects.my_submissions" %}</strong>
                         <a href="{{ sub.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="fa-solid fa-download"></i> {{ sub.file.name|cut:"projects/submissions/" }}
                         </a>
                     </div>
                     {% endif %}
-                    
+
                     {% if sub.status == 'graded' %}
                     <hr>
                     <div class="mb-3">
-                        <strong>Qiymət:</strong> 
+                        <strong>{% trans "grade" context "projects.my_submissions" %}</strong>
                         <span class="badge bg-success fs-5 ms-2">{{ sub.grade }} / {{ project.max_score }}</span>
                     </div>
-                    
+
                     {% if sub.feedback %}
                     <div class="mb-3">
-                        <strong>Müəllim rəyi:</strong>
+                        <strong>{% trans "teacher_feedback" context "projects.my_submissions" %}</strong>
                         <div class="bg-light p-3 rounded mt-2 border-start border-4 border-success">
                             {{ sub.feedback|linebreaks }}
                         </div>
@@ -180,24 +179,24 @@
                     {% endif %}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "close" context "projects.my_submissions" %}</button>
                 </div>
             </div>
         </div>
     </div>
     {% endfor %}
-    
+
     {% else %}
     <div class="alert alert-light text-center py-5">
         <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
-        <h5>Hələ heç bir layihə təqdim etməmisiniz</h5>
+        <h5>{% trans "empty_title" context "projects.my_submissions" %}</h5>
         {% if can_submit %}
         <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-info mt-3">
-            <i class="fa-solid fa-plus me-1"></i> İlk Layihəni Təqdim Et
+            <i class="fa-solid fa-plus me-1"></i> {% trans "first_submission" context "projects.my_submissions" %}
         </a>
         {% endif %}
     </div>
     {% endif %}
-    
+
 </div>
 {% endblock %}

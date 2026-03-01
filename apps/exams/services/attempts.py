@@ -1,7 +1,9 @@
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.utils.translation import pgettext
 
+from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
@@ -9,8 +11,19 @@ from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed
 
 # / Bu funksiya yalnız müəllimlərin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
 def _ensure_teacher(user):
-    if not getattr(user, "is_teacher", False):
-        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return
+
+    has_teacher_role = False
+    if hasattr(user, "has_role"):
+        has_teacher_role = user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
+    if not has_teacher_role:
+        profile = getattr(user, "profile", None)
+        role = getattr(profile, "role", None)
+        has_teacher_role = role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+
+    if not has_teacher_role:
+        raise PermissionDenied(pgettext("exams.service.attempt.permission", "teachers_only_page"))
 
 
 # / Bu funksiya yalnız tələbələrin imtahan cəhdlərini idarə etməsi üçün istifadə olunur.
@@ -21,11 +34,7 @@ def _start_or_resume_attempt(request, exam: Exam):
     user = request.user
 
     # ✅ DƏYİŞİKLİK: Bitməmiş attempt-i yoxla
-    current = (
-        exam.attempts.filter(user=user, status__in=["draft", "in_progress"])
-        .order_by("-started_at")
-        .first()
-    )
+    current = exam.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at").first()
 
     if current:
         # Suallar düzgün generate edilib?
@@ -39,9 +48,7 @@ def _start_or_resume_attempt(request, exam: Exam):
         return redirect("exams:take_exam", slug=exam.slug, attempt_id=current.id)
 
     # ✅ Bitmiş cəhdləri yoxla
-    finished_qs = exam.attempts.filter(
-        user=user, status__in=["submitted", "expired"]
-    ).order_by("-started_at")
+    finished_qs = exam.attempts.filter(user=user, status__in=["submitted", "expired"]).order_by("-started_at")
 
     finished_count = finished_qs.count()
 
@@ -54,7 +61,7 @@ def _start_or_resume_attempt(request, exam: Exam):
         if last:
             messages.info(
                 request,
-                f"Siz bu imtahana maksimum {max_attempts} dəfə cəhd edə bilərsiniz.",
+                pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
             )
             return redirect("exams:exam_result", slug=exam.slug, attempt_id=last.id)
         return redirect("exams:student_exam_list")
@@ -79,5 +86,8 @@ def _start_or_resume_attempt(request, exam: Exam):
     # Sualları generate et
     generate_random_questions_for_attempt(attempt)
 
-    messages.success(request, f"İmtahan başladı! (Cəhd #{next_attempt_number})")
+    messages.success(
+        request,
+        pgettext("exams.service.attempt.message", "exam_started").format(attempt_number=next_attempt_number),
+    )
     return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)

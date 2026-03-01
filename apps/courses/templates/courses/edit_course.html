@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
-{% block title %}{{ course.title }} - Redaktə - EMSArena{% endblock %}
+{% block title %}{{ course.title }} - {% trans "page_suffix_edit" context "courses.edit_page" %} - EMSArena{% endblock %}
 
 {% block extraCss%}
 <style>
@@ -304,7 +305,7 @@
                         <i class="fas fa-pen-to-square"></i>
                     </div>
                     <h2 class="header-title">
-                        Kursu Redaktə Et: <span style="color: var(--edit-primary);">{{ course.title }}</span>
+                        {% trans "header_edit_course" context "courses.edit_page" %}: <span style="color: var(--edit-primary);">{{ course.title }}</span>
                     </h2>
                 </div>
                 
@@ -314,7 +315,7 @@
                         
                         <div class="mb-4">
                             <label for="{{ form.title.id_for_label }}" class="modern-label">
-                                <i class="fas fa-heading"></i> Kurs Adı <span class="text-danger">*</span>
+                                <i class="fas fa-heading"></i> {% trans "field_course_name" context "courses.edit_page" %} <span class="text-danger">*</span>
                             </label>
                             {{ form.title }}
                             {% if form.title.errors %}
@@ -326,7 +327,7 @@
                         
                         <div class="mb-4">
                             <label for="{{ form.description.id_for_label }}" class="modern-label">
-                                <i class="fas fa-paragraph"></i> Kurs Təsviri
+                                <i class="fas fa-paragraph"></i> {% trans "field_course_description" context "courses.edit_page" %}
                             </label>
                             {{ form.description }}
                             {% if form.description.errors %}
@@ -338,28 +339,28 @@
                         
                         <div class="mb-4">
                             <label class="modern-label mb-3">
-                                <i class="fas fa-image"></i> Kurs Şəkli (Cover Image)
+                                <i class="fas fa-image"></i> {% trans "field_course_cover" context "courses.edit_page" %}
                             </label>
                             
                             <div class="image-upload-container">
                                 <div id="imageDisplayArea">
                                     {% if course.cover_image %}
                                         <div id="currentImageBlock" class="current-image-wrapper">
-                                            <img src="{{ course.cover_image.url }}" alt="Current Cover">
-                                            <span class="image-label-tag">Mövcud Şəkil</span>
+                                            <img src="{{ course.cover_image.url }}" alt="{% trans 'alt_current_cover' context 'courses.edit_page' %}">
+                                            <span class="image-label-tag">{% trans "label_current_image" context "courses.edit_page" %}</span>
                                         </div>
                                     {% endif %}
 
                                     <div id="imagePreviewBlock" class="preview-wrapper" style="display: none;">
-                                        <img id="previewImg" src="#" alt="New Preview">
-                                        <span class="image-label-tag" style="background: var(--edit-primary);">Yeni Seçim</span>
+                                        <img id="previewImg" src="#" alt="{% trans 'alt_new_preview' context 'courses.edit_page' %}">
+                                        <span class="image-label-tag" style="background: var(--edit-primary);">{% trans "label_new_selection" context "courses.edit_page" %}</span>
                                     </div>
                                 </div>
 
                                 <div class="custom-file-upload-zone">
                                     {{ form.cover_image }} <div class="upload-trigger-btn">
                                         <i class="fas fa-cloud-arrow-up"></i>
-                                        <span>Şəkli dəyişdirmək üçün klikləyin</span>
+                                        <span>{% trans "action_click_change_image" context "courses.edit_page" %}</span>
                                     </div>
                                 </div>
                             </div>
@@ -373,22 +374,22 @@
                         
                         <div class="mb-4">
                             <label for="{{ form.status.id_for_label }}" class="modern-label">
-                                <i class="fas fa-toggle-on"></i> Kurs Statusu
+                                <i class="fas fa-toggle-on"></i> {% trans "field_course_status" context "courses.edit_page" %}
                             </label>
                             {{ form.status }}
                             <small class="text-muted-modern">
                                 <i class="fas fa-info-circle"></i>
-                                <span>Status kursun tələbələrə görünüb-görünməməsini təyin edir.</span>
+                                <span>{% trans "help_status_visibility" context "courses.edit_page" %}</span>
                             </small>
                         </div>
                         
                         <div class="form-actions d-flex gap-3">
                             <a href="{% url 'courses:course_dashboard' course.id %}" 
                                class="btn btn-lg-modern btn-back flex-grow-1">
-                                <i class="fas fa-arrow-left"></i> Ləğv et və Geri Dön
+                                <i class="fas fa-arrow-left"></i> {% trans "action_cancel_back" context "courses.edit_page" %}
                             </a>
                             <button type="submit" class="btn btn-lg-modern btn-save flex-grow-1">
-                                <i class="fas fa-floppy-disk"></i> Dəyişiklikləri Yadda Saxla
+                                <i class="fas fa-floppy-disk"></i> {% trans "action_save_changes" context "courses.edit_page" %}
                             </button>
                         </div>
                     </form>
@@ -397,12 +398,12 @@
             
             <div class="info-tip-box shadow-sm">
                 <h5 class="info-tip-title">
-                    <i class="fas fa-lightbulb"></i> Faydalı Məlumatlar
+                    <i class="fas fa-lightbulb"></i> {% trans "info_title" context "courses.edit_page" %}
                 </h5>
                 <ul class="info-tip-list">
-                    <li><strong>Anında Yenilənmə:</strong> Kurs adı və təsvirində etdiyiniz dəyişikliklər yadda saxlanılan kimi tələbələr üçün yenilənəcək.</li>
-                    <li><strong>Statusun Önəmi:</strong> Kursu "Draft" rejimində saxlayaraq üzərində rahatca işləyə bilərsiniz. Hazır olduqda "Published" etməyi unutmayın.</li>
-                    <li><strong>Şəkil Ölçüsü:</strong> Ən yaxşı görünüş üçün yüksək keyfiyyətli, üfüqi (landscape) şəkillərdən istifadə etməyiniz tövsiyə olunur.</li>
+                    <li>{% trans "info_item_instant_update" context "courses.edit_page" %}</li>
+                    <li>{% trans "info_item_status_importance" context "courses.edit_page" %}</li>
+                    <li>{% trans "info_item_cover_size" context "courses.edit_page" %}</li>
                 </ul>
             </div>
         </div>

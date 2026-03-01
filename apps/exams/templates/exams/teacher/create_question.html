@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Yeni sual{% endblock %}
+{% block title %}{% trans "page_title_new_question" context "exams.template.create_question" %}{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-    <h1>Yeni sual yarat</h1>
+    <h1>{% trans "heading_create_new_question" context "exams.template.create_question" %}</h1>
 
     <form method="post">
         {% csrf_token %}
@@ -34,7 +35,7 @@
             {{ form.visible_users.errors }}
         </div>
 
-        <button type="submit" class="btn btn-primary">Yadda saxla</button>
+        <button type="submit" class="btn btn-primary">{% trans "action_save" context "exams.template.create_question" %}</button>
     </form>
 </div>
 {% endblock %}

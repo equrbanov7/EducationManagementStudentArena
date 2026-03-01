@@ -1,6 +1,6 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="az">
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,99 +19,14 @@
     <!-- Sənin global CSS-lərin -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}">
 
     <!-- Courses app CSS -->
     <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
 
     {% block extraCss %}{% endblock %}
-    
-    <style>
-        /* Toast/Alert container - navbar-dan aşağıda, sağda */
-        .toast-container {
-            position: fixed;
-            top: 80px; /* Navbar hündürlüyündən aşağı */
-            right: 20px;
-            z-index: 1080;
-            max-width: 400px;
-        }
-        
-        .toast-container .alert {
-            margin-bottom: 10px;
-            animation: slideInRight 0.3s ease-out;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 40px 12px 16px;
-            position: relative;
-        }
-        
-        .toast-container .alert .btn-close {
-            position: absolute;
-            top: 50%;
-            right: 12px;
-            transform: translateY(-50%);
-            padding: 8px;
-            opacity: 0.7;
-        }
-        
-        .toast-container .alert .btn-close:hover {
-            opacity: 1;
-        }
-        
-        /* Alert rəngləri */
-        .toast-container .alert-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-        }
-        
-        .toast-container .alert-error,
-        .toast-container .alert-danger {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-        }
-        
-        .toast-container .alert-warning {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-        }
-        
-        .toast-container .alert-info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-        }
-        
-        .toast-container .alert .btn-close {
-            filter: brightness(0) invert(1);
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Auto-hide animation */
-        .toast-container .alert.fade-out {
-            animation: slideOutRight 0.3s ease-in forwards;
-        }
-        
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -147,28 +62,22 @@
     <script src="{% static 'js/burgerMenu.js' %}"></script>
     <script src="{% static 'js/pagination.js' %}"></script>
 
+    <script>
+        window.COURSES_I18N = {
+            errorsLabel: "{% trans 'errors_label' context 'courses.common.js' %}",
+            pleaseWait: "{% trans 'please_wait' context 'courses.common.js' %}",
+            retryError: "{% trans 'retry_error' context 'courses.common.js' %}"
+        };
+    </script>
+
     <!-- Courses app JS -->
     <script src="{% static 'courses/js/accordion.js' %}"></script>
     <script src="{% static 'courses/js/modal.js' %}"></script>
     <script src="{% static 'courses/js/forms.js' %}"></script>
     <script src="{% static 'courses/js/notifications.js' %}"></script>
 
-    <!-- Toast auto-hide script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Auto-hide alerts after specified time
-            document.querySelectorAll('.toast-container .alert[data-auto-hide]').forEach(function(alert) {
-                var hideTime = parseInt(alert.dataset.autoHide) || 5000;
-                
-                setTimeout(function() {
-                    alert.classList.add('fade-out');
-                    setTimeout(function() {
-                        alert.remove();
-                    }, 300);
-                }, hideTime);
-            });
-        });
-    </script>
+    <!-- Toast auto-hide -->
+    <script src="{% static 'js/toast.js' %}"></script>
 
     {% block extraJs %}{% endblock %}
 </body>

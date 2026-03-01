@@ -1,0 +1,23 @@
+.answer-toggle-btn {
+    border: 1px solid #cbd5e1;
+    color: #2563eb;
+    background: #fff;
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grade-answer-content {
+    max-height: 1200px;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+
+.answer-collapsed .grade-answer-content {
+    max-height: 0;
+    opacity: 0;
+}

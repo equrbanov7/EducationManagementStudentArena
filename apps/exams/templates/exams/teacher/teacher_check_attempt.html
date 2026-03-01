@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}{{ exam.title }} - Yoxlama{% endblock %}
+{% block title %}{{ exam.title }} - {% trans "title_review" context "exams.template.teacher_check_attempt" %}{% endblock %}
 
 {% block extraCss %} 
     <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt.css' %}">
@@ -10,7 +10,7 @@
 {% block content %}
 <div class="review-container">
     <div class="exam-header">
-        <h1>{{ exam.title }} – Yoxlama</h1>
+        <h1>{{ exam.title }} – {% trans "heading_review" context "exams.template.teacher_check_attempt" %}</h1>
     </div>
 
     <form method="post" id="gradingForm">
@@ -20,7 +20,7 @@
                 {% with q=item.question ans=item.answer %}
                     <li class="question-card" data-question-id="{{ q.id }}">
                         <div class="question-card-header">
-                            <span>Sual #{{ forloop.counter }}</span>
+                            <span>{% trans "label_question" context "exams.template.teacher_check_attempt" %} #{{ forloop.counter }}</span>
 
                             <span class="status-badge 
                                 {% if not ans %}
@@ -35,13 +35,13 @@
                                 id="badge_{{ q.id }}">
                                 
                                 {% if not ans %}
-                                    Cavab yoxdur
+                                    {% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}
                                 {% elif ans.teacher_score is not None %}
-                                    {{ ans.teacher_score }} Bal
+                                    {{ ans.teacher_score }} {% trans "unit_points" context "exams.template.teacher_check_attempt" %}
                                 {% elif not ans.text_answer %}
-                                    Boş Cavab
+                                    {% trans "status_empty_answer" context "exams.template.teacher_check_attempt" %}
                                 {% else %}
-                                    Yoxlanmayıb
+                                    {% trans "status_not_checked" context "exams.template.teacher_check_attempt" %}
                                 {% endif %}
                             </span>
                         </div>
@@ -71,11 +71,11 @@
                         
                             {% elif ans and ans.paint_image %}
                                 <span class="answered-with-paint">
-                                    <i class="fas fa-paint-brush"></i> Paint ilə cavab verilib
+                                    <i class="fas fa-paint-brush"></i> {% trans "status_answered_with_paint" context "exams.template.teacher_check_attempt" %}
                                 </span>
                         
                             {% else %}
-                                <span class="not-answered">Cavab yoxdur</span>
+                                <span class="not-answered">{% trans "status_no_answer" context "exams.template.teacher_check_attempt" %}</span>
                             {% endif %}
                         </div>
                         
@@ -83,7 +83,7 @@
                         {# ====== YENİ: YÜKLƏNMİŞ FAYLLAR BLOKU ====== #}
                         {% if ans and ans.files.all %}
                             <div class="answer-files">
-                                <span class="files-title">Yüklənmiş fayllar:</span>
+                                <span class="files-title">{% trans "label_uploaded_files" context "exams.template.teacher_check_attempt" %}:</span>
                                 <ul class="file-list">
                                     {% for f in ans.files.all %}
                                         {% with name=f.filename|lower %}
@@ -125,14 +125,14 @@
                         <div class="paint-preview-section">
                         <h4>
                             <i class="fas fa-paint-brush"></i>
-                            Paint Cavabı
+                            {% trans "label_paint_answer" context "exams.template.teacher_check_attempt" %}
                             {% if ans.paint_updated_at %}
                                 <small style="opacity:.7; font-weight:400;">({{ ans.paint_updated_at|date:"d.m.Y H:i" }})</small>
                             {% endif %}
                                 </h4>
 
-                                <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link">
-                                    <img src="{{ ans.paint_image.url }}" alt="Paint" class="paint-preview-img">
+                                <a href="{{ ans.paint_image.url }}" target="_blank" class="paint-open-link" data-label-no-answer="{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}">
+                                    <img src="{{ ans.paint_image.url }}" alt="{% trans 'alt_paint' context 'exams.template.teacher_check_attempt' %}" class="paint-preview-img">
                                 </a>
                                 </div>
                         {% endif %}
@@ -144,11 +144,11 @@
         </ul>
 
         <div class="main-actions sticky-bottom">
-            <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="btn btn-secondary" id="backBtn">
-                <i class="fas fa-arrow-left"></i> Geri
+            <a href="{{ results_return_url }}" class="btn btn-secondary" id="backBtn">
+                <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.teacher_check_attempt" %}
             </a>
             <button type="submit" class="btn btn-success" id="mainSaveBtn" disabled>
-                <i class="fas fa-save"></i> Dəyişiklik yoxdur
+                <i class="fas fa-save"></i> {% trans "status_no_changes" context "exams.template.teacher_check_attempt" %}
             </button>
         </div>
     </form>
@@ -157,7 +157,7 @@
 <div class="modal-backdrop" id="modalBackdrop"></div>
 <div class="modal-content-wrapper" id="questionModal">
     <div class="modal-header">
-        <span id="modalTitle">Sual</span>
+        <span id="modalTitle">{% trans "label_question" context "exams.template.teacher_check_attempt" %}</span>
         <button type="button" class="close-btn" onclick="attemptCloseModal()">&times;</button>
     </div>
     <div class="modal-body">
@@ -165,18 +165,18 @@
         <div class="answer-detail" id="modalAnswerText"></div>
         
         <div class="grading-area">
-            <label>Bal:</label>
+            <label>{% trans "label_score" context "exams.template.teacher_check_attempt" %}:</label>
             <input type="number" id="modalScoreInput" class="form-control mb-2">
             
-            <label>Rəy:</label>
+            <label>{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}:</label>
             <textarea id="modalFeedbackInput" rows="3" class="form-control"></textarea>
             
             <input type="hidden" id="currentQuestionId">
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="attemptCloseModal()">İmtina</button>
-        <button type="button" class="btn btn-primary" onclick="saveFromModal()">Təsdiqlə (Müvəqqəti)</button>
+        <button type="button" class="btn btn-secondary" onclick="attemptCloseModal()">{% trans "action_cancel" context "exams.template.teacher_check_attempt" %}</button>
+        <button type="button" class="btn btn-primary" onclick="saveFromModal()">{% trans "action_confirm_temporary" context "exams.template.teacher_check_attempt" %}</button>
     </div>
 </div> 
 
@@ -185,16 +185,25 @@
         <div class="alert-icon">
             <i class="fas fa-exclamation-triangle"></i>
         </div>
-        <h3>Dəyişikliklər yadda saxlanmadı!</h3>
-        <p>Pəncərəni bağlasanız, yazdığınız bal və rəy itəcək. Davam etmək istəyirsiniz?</p>
+        <h3>{% trans "warning_unsaved_changes_title" context "exams.template.teacher_check_attempt" %}</h3>
+        <p>{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_check_attempt" %}</p>
         <div class="alert-actions">
-            <button class="btn btn-secondary" onclick="closeWarningModal()">Xeyr, Qayıt</button>
-            <button class="btn btn-danger" onclick="forceCloseModal()">Bəli, Bağla</button>
+            <button class="btn btn-secondary" onclick="closeWarningModal()">{% trans "warning_no_return" context "exams.template.teacher_check_attempt" %}</button>
+            <button class="btn btn-danger" onclick="forceCloseModal()">{% trans "warning_yes_close" context "exams.template.teacher_check_attempt" %}</button>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extraJs %}
+    <script>
+        window.TEACHER_CHECK_I18N = {
+            modalTitleDetails: "{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}",
+            noAnswer: "{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}",
+            pointsUnit: "{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}",
+            statusNotChecked: "{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}",
+            saveButtonDirty: "{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}"
+        };
+    </script>
     <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>
 {% endblock %}

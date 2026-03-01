@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if is_owner or is_teacher %}
 
 <!-- LINK EXAM MODAL -->
@@ -5,13 +6,13 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-link me-2"></i> İmtahanı Kursa Əlaqələndir</h5>
+                <h5 class="modal-title"><i class="fas fa-link me-2"></i> {% trans "heading_link_exam_to_course" context "exams.partial.exam_modals" %}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
                     <input type="text" class="form-control" id="examSearchInput" 
-                           placeholder="İmtahan adı ilə axtar...">
+                           placeholder="{% trans 'placeholder_search_by_exam_name' context 'exams.partial.exam_modals' %}">
                 </div>
                 
                 <div id="examSearchResults" style="max-height: 400px; overflow-y: auto;">
@@ -21,9 +22,9 @@
                             <div>
                                 <strong>{{ exam.title }}</strong>
                                 <small class="text-muted d-block">
-                                    {{ exam.get_exam_type_display }} · {{ exam.questions.count }} sual
+                                    {{ exam.get_exam_type_display }} · {{ exam.questions.count }} {% trans "label_question_short" context "exams.partial.exam_modals" %}
                                     {% if exam.course %}
-                                        · <span class="text-warning">{{ exam.course.title }} kursuna bağlı</span>
+                                        · <span class="text-warning">{{ exam.course.title }} {% trans "label_linked_to_course" context "exams.partial.exam_modals" %}</span>
                                     {% endif %}
                                 </small>
                             </div>
@@ -31,9 +32,9 @@
                                     data-exam-id="{{ exam.id }}"
                                     {% if exam.course %}disabled{% endif %}>
                                 {% if exam.course %}
-                                    <i class="fas fa-check"></i> Bağlı
+                                    <i class="fas fa-check"></i> {% trans "status_linked" context "exams.partial.exam_modals" %}
                                 {% else %}
-                                    <i class="fas fa-link"></i> Əlaqələndir
+                                    <i class="fas fa-link"></i> {% trans "action_link" context "exams.partial.exam_modals" %}
                                 {% endif %}
                             </button>
                         </div>
@@ -41,16 +42,16 @@
                     {% else %}
                         <div class="text-center py-4 text-muted">
                             <i class="fas fa-info-circle fa-2x mb-2"></i>
-                            <p>Əlaqələndirilə biləcək imtahan yoxdur.</p>
-                            <a href="{% url 'create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Yeni İmtahan Yarat
+                            <p>{% trans "empty_no_exam_to_link" context "exams.partial.exam_modals" %}</p>
+                            <a href="{% url 'exams:create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> {% trans "action_create_new_exam" context "exams.partial.exam_modals" %}
                             </a>
                         </div>
                     {% endif %}
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_close" context "exams.partial.exam_modals" %}</button>
             </div>
         </div>
     </div>
@@ -60,6 +61,10 @@
 (function(){
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    const I18N_EXAM_MODALS = {
+        errorPrefix: "{% trans 'msg_error_prefix' context 'exams.partial.exam_modals'|escapejs %}",
+        unlinkConfirm: "{% trans 'confirm_unlink_exam' context 'exams.partial.exam_modals'|escapejs %}"
+    };
     
     // Link exam
     document.querySelectorAll('.js-link-exam').forEach(btn => {
@@ -80,7 +85,7 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Xəta: ' + (data.error || ''));
+                    alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
                 }
             });
         });
@@ -89,7 +94,7 @@
     // Unlink exam
     document.querySelectorAll('.js-unlink-exam').forEach(btn => {
         btn.addEventListener('click', function() {
-            if (!confirm('İmtahanı kursdan ayırmaq istəyirsiniz?')) return;
+            if (!confirm(I18N_EXAM_MODALS.unlinkConfirm)) return;
             
             const examId = this.dataset.examId;
             
@@ -107,7 +112,7 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Xəta: ' + (data.error || ''));
+                    alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
                 }
             });
         });

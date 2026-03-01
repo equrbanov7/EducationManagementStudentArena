@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% load static %}
-{% block title %}İmtahanlarım{% endblock %}
+{% load static i18n %}
+{% block title %}{% trans "page_title" context "exams.template.teacher_exam_list" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_list.css' %}">
@@ -9,9 +9,9 @@
 {% block content %}
 <div class="exams-page-container">
     <div class="header-section">
-        <h1>İmtahanlarım</h1>
+        <h1>{% trans "page_title" context "exams.template.teacher_exam_list" %}</h1>
         <a href="{% url 'exams:create_exam' %}" class="create-exam-btn">
-            <i class="fas fa-plus-circle"></i> Yeni imtahan yarat
+            <i class="fas fa-plus-circle"></i> {% trans "action_create_exam" context "exams.template.teacher_exam_list" %}
         </a>
     </div>
 
@@ -33,9 +33,9 @@
                                     <i class="fas fa-file-alt"></i> {{ exam.get_exam_type_display }}
                                 </span>
                                 {% if exam.is_active %}
-                                    <span class="status-badge active">Aktiv</span>
+                                    <span class="status-badge active">{% trans "status_active" context "exams.template.teacher_exam_list" %}</span>
                                 {% else %}
-                                    <span class="status-badge passive">Passiv</span>
+                                    <span class="status-badge passive">{% trans "status_passive" context "exams.template.teacher_exam_list" %}</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                         {% if exam.total_duration_minutes %}
                             <div class="exam-card-footer">
                                 <span class="duration-badge">
-                                    <i class="far fa-clock"></i> {{ exam.total_duration_minutes }} dəq
+                                    <i class="far fa-clock"></i> {{ exam.total_duration_minutes }} {% trans "unit_minutes_short" context "exams.template.teacher_exam_list" %}
                                 </span>
                             </div>
                         {% endif %}
@@ -57,7 +57,7 @@
             <div class="empty-icon">
                 <i class="far fa-folder-open"></i>
             </div>
-            <p>Hələ heç bir imtahan yaratmamısınız.</p>
+            <p>{% trans "empty_no_exam" context "exams.template.teacher_exam_list" %}</p>
         </div>
     {% endif %}
 </div>

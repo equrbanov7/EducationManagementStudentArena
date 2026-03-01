@@ -1,11 +1,71 @@
+from urllib.parse import urlencode, urlsplit
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from core.tenancy import get_organization_int_id
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _resolve_profile_navigation(request, *, default_section="my-exams"):
+    requested_profile_section = (request.GET.get("from_section") or "").strip()
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+        "review-results",
+    }
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = default_section
+
+    fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+
+    profile_return_url = explicit_return_url or fallback_profile_return_url
+    nav_params = {"from_section": requested_profile_section}
+    if profile_return_url:
+        nav_params["return_to"] = profile_return_url
+
+    return profile_return_url, requested_profile_section, urlencode(nav_params)
 
 
 @login_required
@@ -14,7 +74,7 @@ def teacher_exam_list(request):
     Müəllimin yaratdığı bütün imtahanların siyahısı.
     """
     _ensure_teacher(request.user)
-    exams = Exam.objects.filter(author=request.user).order_by("-created_at")
+    exams = tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
     return render(
         request,
         "exams/teacher/teacher_exam_list.html",
@@ -35,22 +95,24 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
+    organization = get_active_organization(request)
 
     # Əgər slug varsa -> Edit mode
     if slug:
-        exam = get_object_or_404(Exam, slug=slug, author=request.user)
+        exam = get_teacher_exam_or_404(request, slug=slug)
         is_editing = True
     else:
         exam = None
         is_editing = False
+    is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
     if request.method == "POST":
         if is_editing:
             # Edit mode
-            form = ExamForm(request.POST, instance=exam, user=request.user)
+            form = ExamForm(request.POST, instance=exam, user=request.user, organization=organization)
         else:
             # Create mode
-            form = ExamForm(request.POST, user=request.user)
+            form = ExamForm(request.POST, user=request.user, organization=organization)
 
         if form.is_valid():
             exam_instance = form.save(commit=False)
@@ -58,6 +120,7 @@ def createAndEditExamView(request, slug=None):
             # Yeni imtahanda author-u set et
             if not is_editing:
                 exam_instance.author = request.user
+            exam_instance.organization_id = get_organization_int_id(organization)
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
@@ -65,18 +128,42 @@ def createAndEditExamView(request, slug=None):
             messages.success(
                 request,
                 (
-                    "İmtahan uğurla yeniləndi!"
+                    pgettext_lazy("exams.view.exams.message", "exam_updated")
                     if is_editing
-                    else "İmtahan uğurla yaradıldı!"
+                    else pgettext_lazy("exams.view.exams.message", "exam_created")
                 ),
             )
+            if is_modal_request:
+                return JsonResponse({"success": True, "slug": exam_instance.slug})
             return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
+        if is_modal_request:
+            html = render_to_string(
+                "exams/teacher/partials/_create_exam_modal_form.html",
+                {
+                    "form": form,
+                    "is_editing": is_editing,
+                    "exam": exam,
+                },
+                request=request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
     else:
         # GET request
         if is_editing:
-            form = ExamForm(instance=exam, user=request.user)
+            form = ExamForm(instance=exam, user=request.user, organization=organization)
         else:
-            form = ExamForm(user=request.user)
+            form = ExamForm(user=request.user, organization=organization)
+
+    if is_modal_request:
+        return render(
+            request,
+            "exams/teacher/partials/_create_exam_modal_form.html",
+            {
+                "form": form,
+                "exam": exam,
+                "is_editing": is_editing,
+            },
+        )
 
     return render(
         request,
@@ -99,8 +186,9 @@ def teacher_exam_detail(request, slug):
     (sonra bura statistikalar, attempts və s. də əlavə ediləcək).
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
+    profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
 
     return render(
         request,
@@ -108,6 +196,8 @@ def teacher_exam_detail(request, slug):
         {
             "exam": exam,
             "questions": questions,
+            "profile_return_url": profile_return_url,
+            "exam_navigation_query": nav_query,
         },
     )
 
@@ -118,7 +208,7 @@ def toggle_exam_active(request, slug):
     Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
         exam.is_active = not exam.is_active
@@ -133,12 +223,12 @@ def delete_exam(request, slug):
     Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
     """
     _ensure_teacher(request.user)
-    exam = get_object_or_404(Exam, slug=slug, author=request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
 
     if exam.attempts.exists():
         # sadə variant: hazırda cəhd varsa silməyə icazə vermirik
         # istəsən bunu sonradan dəyişərik
-        raise PermissionDenied("Bu imtahan üzrə artıq cəhdlər var, silə bilməzsiniz.")
+        raise PermissionDenied(pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
 
     if request.method == "POST":
         exam.delete()

@@ -83,6 +83,33 @@
     background-color: #f9fafb; /* Yüngül input fonu */
 }
 
+.input-visibility-wrapper {
+    position: relative;
+}
+
+.input-visibility-wrapper input[type="text"],
+.input-visibility-wrapper input[type="email"],
+.input-visibility-wrapper input[type="password"] {
+    padding-right: 46px;
+}
+
+.input-visibility-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+.input-visibility-toggle:hover {
+    color: #2563eb;
+}
+
 .register-form-field input[type="text"]:focus,
 .register-form-field input[type="email"]:focus,
 .register-form-field input[type="password"]:focus {
@@ -146,4 +173,142 @@
     .register-heading {
         font-size: 1.8rem;
     }
+}
+/* --- Registration Wizard Steps --- */
+.register-wizard-steps {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.wizard-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+}
+
+.wizard-step.active,
+.wizard-step.completed {
+    opacity: 1;
+}
+
+.wizard-step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.wizard-step.active .wizard-step-number {
+    background: #2563eb;
+    color: white;
+}
+
+.wizard-step.completed .wizard-step-number {
+    background: #10b981;
+    color: white;
+}
+
+.wizard-step-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.wizard-step.active .wizard-step-label {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.register-step-title {
+    font-size: 1.1rem;
+    color: #374151;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.register-back-btn {
+    padding: 10px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.register-back-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.register-help-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.register-hidden-field {
+    display: none;
+}
+
+.register-search-list {
+    margin-top: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.register-search-option {
+    width: 100%;
+    border: 0;
+    background: #ffffff;
+    text-align: left;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.register-search-option:last-child {
+    border-bottom: 0;
+}
+
+.register-search-option:hover,
+.register-search-option.is-selected {
+    background: #eef2ff;
+}
+
+.register-search-empty {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.register-card {
+    max-width: 520px;
 }

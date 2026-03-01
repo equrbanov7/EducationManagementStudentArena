@@ -7,24 +7,32 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.courses.models import Course
-from apps.exams.models import Exam, ExamAttempt
-
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
-from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
+from .models import Category, Comment, EmailOTP, Post, PostApprovalLog, Question, Subscriber
+from .services import author_requires_post_approval, can_user_review_post
 from .utils import generate_otp, send_verify_email
 
 User = get_user_model()
 signer = TimestampSigner()
+
+
+def _can_manage_blog_content(user):
+    """
+    Any authenticated user can create and manage their own posts.
+    """
+    return getattr(user, "is_authenticated", False)
 
 
 # ------------------- ƏSAS SƏHİFƏLƏR ------------------- #
@@ -33,17 +41,11 @@ signer = TimestampSigner()
 def home(request):
 
     query = request.GET.get("q", "").strip()
-    post_list = (
-        Post.objects.filter(is_published=True)
-        .select_related("category", "author")
-        .order_by("-created_at")
-    )
+    post_list = Post.objects.filter(is_published=True).select_related("category", "author").order_by("-created_at")
 
     if query:
         post_list = post_list.filter(
-            Q(title__icontains=query)
-            | Q(excerpt__icontains=query)
-            | Q(content__icontains=query)
+            Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(content__icontains=query)
         ).distinct()
 
     paginator = Paginator(post_list, 6)
@@ -51,9 +53,7 @@ def home(request):
     page_obj = paginator.get_page(page_number)
 
     categories = (
-        Category.objects.annotate(
-            post_count=Count("posts", filter=Q(posts__is_published=True))
-        )
+        Category.objects.annotate(post_count=Count("posts", filter=Q(posts__is_published=True)))
         .filter(post_count__gt=0)
         .order_by("name")
     )
@@ -62,6 +62,7 @@ def home(request):
         "page_obj": page_obj,
         "categories": categories,
         "search_query": query,
+        "query": query,  # Also pass as 'query' for template compatibility
     }
 
     return render(request, "blog/home.html", context)
@@ -110,23 +111,19 @@ def post_detail(request, slug):
     # 1) Postu statusdan asılı olmayaraq tap
     post = get_object_or_404(Post, slug=slug)
 
-    # 2) Əgər post nəşr olunmayıbsa və bu user author DEYİLSƏ -> 404
-    if not post.is_published and request.user != post.author:
+    # 2) Əgər post nəşr olunmayıbsa, yalnız müəllif və ya uyğun reviewer görə bilsin.
+    if not post.is_published and request.user != post.author and not can_user_review_post(request.user, post):
         raise Http404("No Post matches the given query.")
 
     comments = post.comments.select_related("user").order_by("-created_at")
 
     user_first_comment = None
     if request.user.is_authenticated:
-        user_first_comment = (
-            Comment.objects.filter(post=post, user=request.user)
-            .order_by("created_at")
-            .first()
-        )
+        user_first_comment = Comment.objects.filter(post=post, user=request.user).order_by("created_at").first()
 
     if request.method == "POST":
         if not request.user.is_authenticated:
-            messages.error(request, "Şərh yazmaq üçün əvvəlcə daxil olun.")
+            messages.error(request, pgettext("blog.post_detail.message", "login_required"))
             return redirect("login")
 
         form = CommentForm(request.POST)
@@ -138,9 +135,7 @@ def post_detail(request, slug):
                 comment.post = post
                 comment.user = request.user
                 comment.save()
-                messages.success(
-                    request, "Şərhiniz və qiymətləndirməniz əlavə olundu. ⭐"
-                )
+                messages.success(request, pgettext("blog.post_detail.message", "comment_added_with_rating"))
             else:
                 # Artıq bu posta şərhi var → yeni şərh, eyni rating
                 comment = Comment(
@@ -150,9 +145,7 @@ def post_detail(request, slug):
                     rating=user_first_comment.rating,
                 )
                 comment.save()
-                messages.success(
-                    request, "Yeni şərhiniz əlavə olundu, rating dəyişdirilmədi. 🙂"
-                )
+                messages.success(request, pgettext("blog.post_detail.message", "comment_added_without_rating"))
 
             return redirect("post_detail", slug=post.slug)
     else:
@@ -183,15 +176,12 @@ def subscribe_page(request):
                 if created or not subscriber.is_active:
 
                     # 2. Email şablonunu yarat
-                    html_message = render_to_string(
-                        "email_templates/welcome_email.html", {"email": email}
-                    )
+                    html_message = render_to_string("email_templates/welcome_email.html", {"email": email})
 
                     # 3. Email göndər
                     send_mail(
-                        "Abunəliyə Xoş Gəlmisiniz! [Sənin Blog Adın]",
-                        # Text versiyası (html-i dəstəkləməyən proqramlar üçün)
-                        f"Salam, {email}! Blogumuza uğurla abunə oldunuz. Ən son yenilikləri qaçırmamaq üçün bizi izləyin.",
+                        pgettext("blog.subscribe.email", "subject"),
+                        pgettext("blog.subscribe.email", "plain_text_body").format(email=email),
                         settings.DEFAULT_FROM_EMAIL,
                         [email],
                         html_message=html_message,
@@ -200,25 +190,25 @@ def subscribe_page(request):
 
                     messages.success(
                         request,
-                        f"'{email}' ünvanına təsdiq maili göndərildi. Zəhmət olmasa poçt qutunuzu yoxlayın.",
+                        pgettext("blog.subscribe.message", "confirmation_email_sent").format(email=email),
                     )
 
                 else:
                     messages.warning(
-                        request, f"'{email}' ünvanı artıq abunəçilərimizdədir."
+                        request, pgettext("blog.subscribe.message", "already_subscribed").format(email=email)
                     )
 
             except Exception as e:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
                 messages.error(
                     request,
-                    "Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd edin.",
+                    pgettext("blog.subscribe.message", "send_error"),
                 )
                 print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
 
             return redirect("subscribe")
         else:
-            messages.error(request, "Zəhmət olmasa düzgün email ünvanı daxil edin.")
+            messages.error(request, pgettext("blog.subscribe.message", "invalid_email"))
     else:
         form = SubscriptionForm()
 
@@ -230,7 +220,13 @@ def subscribe_page(request):
 
 @login_required
 def create_post(request):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
+
+    requires_approval = author_requires_post_approval(request.user)
+
     if request.method == "POST":
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
@@ -245,9 +241,7 @@ def create_post(request):
                 post.category = category
 
                 if created:
-                    messages.info(
-                        request, f"Yeni '{new_cat_name}' kateqoriyası yaradıldı."
-                    )
+                    messages.info(request, pgettext("blog.post.message", "category_created").format(name=new_cat_name))
 
             elif selected_cat:
                 # 2. Əgər yeni heç nə yazmayıb, sadəcə siyahıdan seçibsə:
@@ -258,17 +252,61 @@ def create_post(request):
                 # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
                 pass
 
+            if requires_approval:
+                post.requires_approval = True
+                post.approval_status = Post.ApprovalStatus.PENDING
+                post.approval_requested_at = timezone.now()
+                post.approval_feedback = ""
+                post.is_published = False
+            else:
+                post.requires_approval = False
+                post.approval_status = Post.ApprovalStatus.APPROVED
+                post.approval_requested_at = None
+                if "is_published" in request.POST:
+                    post.is_published = bool(request.POST.get("is_published"))
+
             # --- SLUG MƏNTİQİ SİLİNDİ ---
             # Sənin Post modelinin save() metodu slug-ı və unikallığı
             # avtomatik həll edir. Burda artıq kod yazmağa ehtiyac yoxdur.
 
             post.save()
-            messages.success(request, "Post uğurla yaradıldı.")
+            if is_ajax:
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "post_id": post.id,
+                        "slug": post.slug,
+                        "status": post.approval_status,
+                        "is_published": post.is_published,
+                    }
+                )
+            if requires_approval:
+                messages.success(request, "Post yaradıldı və müəllim təsdiqi gözləyir.")
+                return redirect(f"{reverse('accounts:profile')}?section=posts")
+
+            messages.success(request, pgettext("blog.post.message", "created"))
             return redirect("post_detail", slug=post.slug)
+        if is_ajax:
+            errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": errors,
+                    "message": pgettext("blog.post.message", "form_invalid"),
+                },
+                status=400,
+            )
     else:
         form = PostForm()
 
-    return render(request, "post_form.html", {"form": form})
+    return render(
+        request,
+        "post_form.html",
+        {
+            "form": form,
+            "requires_approval": requires_approval,
+        },
+    )
 
 
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
@@ -277,6 +315,9 @@ def create_post(request):
 @login_required
 @require_POST
 def post_edit_ajax(request, pk):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
+
     # Yalnız öz postunu düzəldə bilsin
     post = get_object_or_404(Post, pk=pk, author=request.user)
 
@@ -290,7 +331,7 @@ def post_edit_ajax(request, pk):
     # Sadə validasiya (istəsən form ilə də edə bilərsən)
     if not title or not content:
         return JsonResponse(
-            {"success": False, "message": "Başlıq və məzmun tələb olunur."},
+            {"success": False, "message": pgettext("blog.post.message", "title_and_content_required")},
             status=400,
         )
 
@@ -316,28 +357,125 @@ def post_edit_ajax(request, pk):
     # Şəkil URL
     post.image_url = image_url or None
 
-    # Dərc statusu
-    post.is_published = is_published
+    if post.requires_approval or author_requires_post_approval(post.author):
+        post.requires_approval = True
+        post.approval_status = Post.ApprovalStatus.PENDING
+        post.approval_requested_at = timezone.now()
+        post.is_published = False
+    else:
+        post.requires_approval = False
+        post.approval_status = Post.ApprovalStatus.APPROVED
+        post.approval_requested_at = None
+        post.is_published = is_published
 
     # Save
     post.save()
 
-    return JsonResponse({"success": True})
+    return JsonResponse(
+        {
+            "success": True,
+            "status": post.approval_status,
+            "is_published": post.is_published,
+        }
+    )
+
+
+@login_required
+@require_POST
+def review_post(request, post_id):
+    post = get_object_or_404(Post.objects.select_related("author"), pk=post_id, requires_approval=True)
+
+    if not can_user_review_post(request.user, post):
+        raise PermissionDenied("Bu postu təsdiqləmək üçün icazəniz yoxdur.")
+
+    action = (request.POST.get("action") or "").strip().lower()
+    feedback = (request.POST.get("feedback") or "").strip()
+
+    if action not in {"approve", "needs_changes"}:
+        messages.error(request, "Yanlış əməliyyat seçildi.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "needs_changes" and not feedback:
+        messages.error(request, "Düzəliş istəyi üçün feedback yazın.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "approve":
+        post.approval_status = Post.ApprovalStatus.APPROVED
+        post.is_published = True
+        post.approved_by = request.user
+        post.approved_at = timezone.now()
+        post.approval_feedback = feedback
+        post.save(
+            update_fields=[
+                "approval_status",
+                "is_published",
+                "approved_by",
+                "approved_at",
+                "approval_feedback",
+                "updated_at",
+            ]
+        )
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.APPROVED,
+            feedback=feedback,
+        )
+        messages.success(request, "Post təsdiqləndi və paylaşıldı.")
+    else:
+        post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
+        post.is_published = False
+        post.approval_feedback = feedback
+        post.save(
+            update_fields=[
+                "approval_status",
+                "is_published",
+                "approved_by",
+                "approved_at",
+                "approval_feedback",
+                "updated_at",
+            ]
+        )
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.NEEDS_CHANGES,
+            feedback=feedback,
+        )
+        messages.info(request, "Feedback göndərildi. Post düzəliş gözləyir.")
+
+    next_url = (request.POST.get("next") or "").strip()
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+
+    return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
 
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)
 @login_required
+@require_POST
 def delete_post(request, post_id):
+    if not _can_manage_blog_content(request.user):
+        raise PermissionDenied(pgettext("blog.permission", "no_permission"))
+
     post = get_object_or_404(Post, pk=post_id, author=request.user)
+    post_title = post.title
+    post.delete()
 
-    if request.method == "POST":
-        # Yalnız POST gələndə silməni icra et (silmə düyməsi POST göndərməlidir)
-        post.delete()
-        # Və ya sadəcə redirect edirik (çünki JS modalı bağlayıb səhifəni yeniləyir)
-        return redirect("user_profile", username=request.user.username)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    if is_ajax:
+        return JsonResponse(
+            {
+                "success": True,
+                "message": pgettext("blog.post.message", "deleted").format(title=post_title),
+            }
+        )
 
-    # Əgər GET gələrsə, xəta veririk və ya sadəcə silməni icra etmədən geri göndəririk
-    return redirect("user_profile", username=request.user.username)
+    return redirect(f"{reverse('accounts:profile')}?section=posts")
 
 
 def list_posts(request):
@@ -356,9 +494,7 @@ def search_posts(request):
     posts = Post.objects.all()
 
     if query:
-        posts = posts.filter(title__icontains=query) | posts.filter(
-            excerpt__icontains=query
-        )
+        posts = posts.filter(title__icontains=query) | posts.filter(excerpt__icontains=query)
 
     posts = posts.order_by("-created_at")
 
@@ -398,7 +534,7 @@ def register_view(request):
             send_verify_email(user, code)
 
             request.session["pending_verify_email"] = user.email
-            messages.success(request, "Email-ə təsdiq kodu göndərildi.")
+            messages.success(request, pgettext("blog.verify.message", "code_sent"))
             return redirect("verify_code")
     else:
         form = RegisterForm()
@@ -409,9 +545,7 @@ def register_view(request):
 def verify_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(
-            request, "Təsdiqləmə üçün email tapılmadı. Yenidən qeydiyyatdan keç."
-        )
+        messages.error(request, pgettext("blog.verify.message", "pending_email_missing"))
         return redirect("register")
 
     if request.method == "POST":
@@ -419,16 +553,12 @@ def verify_code_view(request):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            messages.error(request, "User tapılmadı.")
+            messages.error(request, pgettext("blog.verify.message", "user_not_found"))
             return redirect("register")
 
-        otp = (
-            EmailOTP.objects.filter(user=user, code=code, is_used=False)
-            .order_by("-created_at")
-            .first()
-        )
+        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
         if not otp or otp.is_expired():
-            messages.error(request, "Kod yanlışdır və ya vaxtı bitib.")
+            messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_code"))
             return render(request, "blog/verify_code.html", {"email": email})
 
         otp.is_used = True
@@ -437,7 +567,7 @@ def verify_code_view(request):
         user.is_active = True
         user.save()
 
-        messages.success(request, "Email təsdiqləndi. İndi daxil ola bilərsən.")
+        messages.success(request, pgettext("blog.verify.message", "email_verified"))
         return redirect("login")
 
     return render(request, "blog/verify_code.html", {"email": email})
@@ -450,129 +580,50 @@ def verify_email_link_view(request):
         user = User.objects.get(pk=user_id)
         user.is_active = True
         user.save()
-        messages.success(request, "Email təsdiqləndi. İndi login ola bilərsən.")
+        messages.success(request, pgettext("blog.verify.message", "email_verified"))
         return redirect("login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
-        messages.error(request, "Link yanlışdır və ya vaxtı bitib.")
+        messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_link"))
         return redirect("register")
 
 
 def resend_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
-        messages.error(request, "Email tapılmadı.")
+        messages.error(request, pgettext("blog.verify.message", "email_missing"))
         return redirect("register")
 
     user = User.objects.filter(email=email).first()
     if not user:
-        messages.error(request, "User tapılmadı.")
+        messages.error(request, pgettext("blog.verify.message", "user_not_found"))
         return redirect("register")
 
     code = generate_otp()
-    EmailOTP.objects.create(
-        user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10)
-    )
+    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
     send_verify_email(user, code)
 
-    messages.success(request, "Yeni kod göndərildi.")
+    messages.success(request, pgettext("blog.verify.message", "new_code_sent"))
     return redirect("verify_code")
 
 
 def user_profile(request, username):
     """
-    İstifadəçi profili.
+    Legacy route redirect:
+    - Own profile -> accounts profile
+    - Other users -> accounts public profile
     """
-
-    profile_user = get_object_or_404(User, username=username)
-
-    # 1. Postların Filterlənməsi
-    if request.user == profile_user:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user)
-            .select_related("category")
-            .order_by("-created_at")
-        )
+    if request.user.is_authenticated and request.user.username == username:
+        target_url = reverse("accounts:profile")
     else:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user, is_published=True)
-            .select_related("category")
-            .order_by("-created_at")
-        )
+        # Keep existing 404 behavior when username does not exist.
+        profile_user = get_object_or_404(User, username=username)
+        target_url = reverse("accounts:public_profile", kwargs={"username": profile_user.username})
 
-    # 2. Pagination
-    paginator = Paginator(user_posts_list, 6)
-    page_number = request.GET.get("page")
-    try:
-        posts = paginator.page(page_number)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
+    query_string = request.GET.urlencode()
+    if query_string:
+        target_url = f"{target_url}?{query_string}"
 
-    # 3. YOXLANILMAMIŞ İMTAHANLARIN SAYI
-    pending_count = 0
-    if (
-        request.user.is_authenticated
-        and request.user == profile_user
-        and getattr(request.user, "is_teacher", False)
-    ):
-        pending_count = (
-            ExamAttempt.objects.filter(
-                exam__author=request.user,
-                status__in=["submitted", "expired"],
-                checked_by_teacher=False,
-            )
-            .exclude(exam__exam_type="test")
-            .count()
-        )
-
-    # 4. TƏYİN OLUNMUŞ İMTAHANLARIN SAYI
-    assigned_count = 0
-    if request.user.is_authenticated and request.user == profile_user:
-        assigned_count = (
-            Exam.objects.filter(is_active=True)
-            .filter(
-                Q(allowed_users=request.user) | Q(allowed_groups__students=request.user)
-            )
-            .distinct()
-            .count()
-        )
-
-    # ══════════════════════════════════════��════════════════════════
-    # 5. TƏLƏBƏNİN KURSLARI (YENİ)
-    # ═══════════════════════════════════════════════════════════════
-    student_courses = []
-    student_courses_count = 0
-
-    if request.user.is_authenticated and request.user == profile_user:
-        # Tələbə öz profilinə baxır
-        if getattr(request.user, "is_student", False):
-            # CourseMembership vasitəsilə tələbənin üzv olduğu kurslar
-            student_courses = (
-                Course.objects.filter(
-                    memberships__user=request.user,
-                    memberships__role="student",
-                    status="published",  # Yalnız published kurslar
-                )
-                .distinct()
-                .order_by("-created_at")
-            )
-
-            student_courses_count = student_courses.count()
-
-    # 6. Kateqoriyalar
-    categories = Category.objects.all().order_by("name")
-
-    context = {
-        "profile_user": profile_user,
-        "posts": posts,
-        "categories": categories,
-        "pending_count": pending_count,
-        "assigned_count": assigned_count,
-        "student_courses": student_courses,  # YENİ
-        "student_courses_count": student_courses_count,  # YENİ
-    }
-    return render(request, "blog/user_profile.html", context)
+    return redirect(target_url)
 
 
 def logout_view(request):
@@ -591,15 +642,11 @@ def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
 
     # 2. YALNIZ bu kateqoriyaya aid olan və yayımlanmış postları tapırıq
-    posts = Post.objects.filter(category=category, is_published=True).order_by(
-        "-created_at"
-    )
+    posts = Post.objects.filter(category=category, is_published=True).order_by("-created_at")
 
     # 3. Sidebar üçün bütün kateqoriyaları və post saylarını hesablayırıq (Home view-dakı kimi)
     categories = (
-        Category.objects.annotate(
-            post_count=Count("posts", filter=Q(posts__is_published=True))
-        )
+        Category.objects.annotate(post_count=Count("posts", filter=Q(posts__is_published=True)))
         .filter(post_count__gt=0)
         .order_by("name")
     )
@@ -619,8 +666,8 @@ def category_detail(request, slug):
 @login_required
 def create_question(request):
     # Yalnız teacher qrupu olanlar sual yarada bilsin
-    if not request.user.is_teacher:
-        raise PermissionDenied("Bu səhifə yalnız müəllimlər üçündür.")
+    if not request.user.is_teacher_or_above:
+        raise PermissionDenied(pgettext("blog.permission", "teacher_only"))
 
     if request.method == "POST":
         form = QuestionForm(request.POST)
@@ -655,11 +702,7 @@ def questions_i_can_see(request):
     """
 
     questions = (
-        Question.objects.filter(
-            Q(visible_to_all=True)
-            | Q(author=request.user)
-            | Q(visible_users=request.user)
-        )
+        Question.objects.filter(Q(visible_to_all=True) | Q(author=request.user) | Q(visible_users=request.user))
         .distinct()
         .select_related("author")
     )

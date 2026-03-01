@@ -1,0 +1,209 @@
+{% load i18n %}
+
+
+<div class="pr-filter-card">
+    <form method="get" class="js-auto-filter-form" data-auto-filter-form>
+        {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="pending-review">
+        {% endif %}
+
+        <div class="pr-filter-grid">
+            <input
+                type="text"
+                name="search"
+                value="{{ search_query }}"
+                placeholder="{% trans 'search_placeholder' context 'profile.pending_review' %}"
+                class="pr-form-control"
+            >
+
+            <select name="type" class="pr-form-control">
+                <option value="all" {% if filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
+                <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
+                <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
+                <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+                <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
+            </select>
+
+            <select name="status" class="pr-form-control">
+                <option value="all" {% if filter_status == 'all' %}selected{% endif %}>{% trans "status_all" context "profile.pending_review" %}</option>
+                <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>{% trans "status_submitted" context "profile.pending_review" %}</option>
+                <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>{% trans "status_expired" context "profile.pending_review" %}</option>
+                <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>{% trans "status_pending" context "profile.pending_review" %}</option>
+                <option value="late" {% if filter_status == 'late' %}selected{% endif %}>{% trans "status_late" context "profile.pending_review" %}</option>
+            </select>
+
+            <noscript>
+                <button type="submit" class="pr-btn-review w-100">
+                    <i class="fas fa-search"></i> {% trans "filter_button" context "profile.pending_review" %}
+                </button>
+            </noscript>
+        </div>
+    </form>
+</div>
+
+{% if review_items %}
+    <div class="pr-list-container">
+        <h3 class="pr-section-title">
+            <i class="fas fa-list-check"></i>
+            {% trans "list_title" context "profile.pending_review" %} ({{ total_count }})
+        </h3>
+
+        {% for item in review_items %}
+            <div class="pr-item-card">
+                <div class="pr-item-icon">
+                    <i class="{{ item.icon }}"></i>
+                </div>
+
+                <div class="pr-item-content">
+                    <h4 class="pr-item-title">
+                        {{ item.title }}
+                        <span class="pr-badge pr-badge-type">{{ item.type_label }}</span>
+                        {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-redo me-1"></i>Yenidən yoxla</span>
+                        {% endif %}
+                    </h4>
+                    
+                    <div class="pr-item-meta">
+                        <strong><i class="fas fa-user-graduate me-1 text-primary"></i>{{ item.student_display|default:"Anonim tələbə" }}</strong>
+                        <span class="pr-item-meta-divider">•</span>
+                        <span>{{ item.course_title|default:"-" }}</span>
+                        
+                        {% if item.group_name %}
+                            <span class="pr-item-meta-divider">•</span>
+                            <span>{% trans "group_prefix" context "profile.pending_review" %}: {{ item.group_name }}</span>
+                        {% endif %}
+                        
+                        {% if item.date %}
+                            <span class="pr-item-meta-divider">•</span>
+                            <span><i class="far fa-clock me-1"></i>{{ item.date|date:"d M Y H:i" }}</span>
+                        {% endif %}
+                        
+                        <span class="pr-item-meta-divider">•</span>
+                        <span class="pr-badge pr-badge-status {% if item.status == 'submitted' or item.status == 'late' or item.status == 'pending' %}pending{% else %}graded{% endif %}">
+                            {% if item.status == 'submitted' %}
+                                {% trans "status_submitted" context "profile.pending_review" %}
+                            {% elif item.status == 'expired' %}
+                                {% trans "status_expired" context "profile.pending_review" %}
+                            {% elif item.status == 'pending' %}
+                                {% trans "status_pending" context "profile.pending_review" %}
+                            {% elif item.status == 'late' %}
+                                {% trans "status_late" context "profile.pending_review" %}
+                            {% else %}
+                                {{ item.status }}
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                        <div class="pr-timer-box">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span data-review-queue-countdown
+                                  data-seconds="{{ item.review_window_seconds_left }}">
+                                Yenidən yoxlama vaxtı hesablanır...
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="pr-item-action">
+                    <a href="{{ item.action_url }}" class="pr-btn-review">
+                        {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                            <i class="fas fa-search"></i> Yenidən yoxla
+                        {% else %}
+                            <i class="fas fa-check-double"></i> Yoxla
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="pr-empty-state">
+        <i class="fas fa-clipboard-check"></i>
+        <h4 class="mb-2 text-dark">Gözləyən yoxlama yoxdur</h4>
+        <p class="mb-0">{% trans "empty_not_found" context "profile.pending_review" %}</p>
+    </div>
+{% endif %}
+
+<script>
+(function () {
+    function setupAutoFilterForm(form) {
+        if (!form || form.dataset.autoFilterBound === "1") {
+            return;
+        }
+        form.dataset.autoFilterBound = "1";
+
+        var debounceHandle = null;
+        var textFields = form.querySelectorAll('input[type="text"], input[type="search"]');
+        var selects = form.querySelectorAll("select");
+
+        function submitForm() {
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit();
+                return;
+            }
+            form.submit();
+        }
+
+        textFields.forEach(function (field) {
+            field.addEventListener("input", function () {
+                window.clearTimeout(debounceHandle);
+                debounceHandle = window.setTimeout(submitForm, 350);
+            });
+            field.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    window.clearTimeout(debounceHandle);
+                    submitForm();
+                }
+            });
+        });
+
+        selects.forEach(function (select) {
+            select.addEventListener("change", submitForm);
+        });
+    }
+
+    function setupReviewQueueCountdowns() {
+        var countdownNodes = document.querySelectorAll("[data-review-queue-countdown]");
+        if (!countdownNodes.length) {
+            return;
+        }
+
+        var shouldReload = false;
+        countdownNodes.forEach(function (node) {
+            var secondsLeft = parseInt(node.getAttribute("data-seconds"), 10);
+            if (Number.isNaN(secondsLeft)) {
+                node.textContent = "";
+                return;
+            }
+
+            function render() {
+                if (secondsLeft <= 0) {
+                    node.textContent = "Yenidən yoxlama vaxtı bitdi.";
+                    shouldReload = true;
+                    return;
+                }
+                var minutes = Math.floor(secondsLeft / 60);
+                var seconds = secondsLeft % 60;
+                node.textContent = "Yenidən yoxlama üçün qalan vaxt: " + minutes + " dəq " + seconds + " san.";
+            }
+
+            render();
+            window.setInterval(function () {
+                secondsLeft = Math.max(0, secondsLeft - 1);
+                render();
+            }, 1000);
+        });
+
+        window.setInterval(function () {
+            if (shouldReload) {
+                window.location.reload();
+            }
+        }, 1500);
+    }
+
+    document.querySelectorAll("[data-auto-filter-form]").forEach(setupAutoFilterForm);
+    setupReviewQueueCountdowns();
+})();
+</script>

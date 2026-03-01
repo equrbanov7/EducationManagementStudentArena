@@ -28,23 +28,17 @@ urlpatterns = [
     ),
     path(
         "password-reset/done/",
-        auth_views.PasswordResetDoneView.as_view(
-            template_name="blog/password_reset_done.html"
-        ),
+        auth_views.PasswordResetDoneView.as_view(template_name="blog/password_reset_done.html"),
         name="password_reset_done",
     ),
     path(
         "reset/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name="blog/password_reset_confirm.html"
-        ),
+        auth_views.PasswordResetConfirmView.as_view(template_name="blog/password_reset_confirm.html"),
         name="password_reset_confirm",
     ),
     path(
         "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(
-            template_name="blog/password_reset_complete.html"
-        ),
+        auth_views.PasswordResetCompleteView.as_view(template_name="blog/password_reset_complete.html"),
         name="password_reset_complete",
     ),
     # --- User profil səhifəsi ---
@@ -53,6 +47,8 @@ urlpatterns = [
     path("posts/create/", views.create_post, name="create_post"),
     path("posts/<slug:slug>/", views.post_detail, name="post_detail"),
     path("post/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
+    path("post/<int:post_id>/review/", views.review_post, name="review_post"),
+    path("post/<int:post_id>/delete/", views.delete_post, name="delete_post"),
     # ---- Category URL-ləri ----
     path("category/<slug:slug>/", views.category_detail, name="category_detail"),
     # ---- Question URL-ləri ----

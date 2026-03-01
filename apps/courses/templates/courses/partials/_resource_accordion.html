@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <!-- ACCORDION 5: RESURSLAR (Resources) -->
 <!-- courses/templates/courses/partials/_resource_accordion.html -->
 
@@ -6,7 +8,7 @@
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#resourceCollapse">
             <i class="fas fa-folder-open text-success me-2"></i>
-            <strong>Resurslar ({{ resources|length }})</strong>
+            <strong>{% blocktrans with count=resources|length context "courses.partial.resource_accordion" %}Resources ({{ count }}){% endblocktrans %}</strong>
             {% if is_owner %}
                 <span class="badge bg-success ms-2">{{ resources|length }}</span>
             {% endif %}
@@ -18,7 +20,7 @@
             <!-- Add Resource Button (Owner only) -->
             {% if is_owner %}
                 <button type="button" class="btn btn-success btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
-                    <i class="fas fa-plus-circle"></i> Yeni Resurs Əlavə Et
+                    <i class="fas fa-plus-circle"></i> {% trans "action_add_resource" context "courses.partial.resource_accordion" %}
                 </button>
             {% endif %}
             
@@ -69,12 +71,12 @@
                                         {% if resource.file %}
                                             <a href="{{ resource.file.url }}" class="btn btn-sm btn-primary" 
                                                download target="_blank">
-                                                <i class="fas fa-download"></i> Endir
+                                                <i class="fas fa-download"></i> {% trans "action_download" context "courses.partial.resource_accordion" %}
                                             </a>
                                         {% elif resource.url %}
                                             <a href="{{ resource.url }}" class="btn btn-sm btn-info" 
                                                target="_blank" rel="noopener noreferrer">
-                                                <i class="fas fa-external-link-alt"></i> Aç
+                                                <i class="fas fa-external-link-alt"></i> {% trans "action_open" context "courses.partial.resource_accordion" %}
                                             </a>
                                         {% endif %}
                                         
@@ -82,7 +84,7 @@
                                         {% if is_owner %}
                                             <button type="button" class="btn btn-sm btn-outline-danger"
                                                     onclick="deleteResource({{ course.id }}, {{ resource.id }})"
-                                                    title="Sil">
+                                                    title="{% trans 'action_delete' context 'courses.partial.resource_accordion' %}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         {% endif %}
@@ -95,10 +97,10 @@
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i>
-                    Hələ resurs əlavə olunmayıb.
+                    {% trans "empty_resource" context "courses.partial.resource_accordion" %}
                     {% if is_owner %}
                         <button type="button" class="btn btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
-                            Birinci resursunuzu əlavə edin →
+                            {% trans "action_add_first_resource" context "courses.partial.resource_accordion" %} →
                         </button>
                     {% endif %}
                 </div>
@@ -110,7 +112,7 @@
 <!-- Delete Resource Script -->
 <script>
 function deleteResource(courseId, resourceId) {
-    if (confirm('Bu resursu silmək istədiniz?')) {
+    if (confirm("{% trans 'confirm_delete_resource' context 'courses.partial.resource_accordion' %}")) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/courses/${courseId}/resource/${resourceId}/delete/`;

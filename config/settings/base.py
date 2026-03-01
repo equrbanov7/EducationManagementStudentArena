@@ -7,7 +7,6 @@ import os
 import ssl
 from pathlib import Path
 
-
 from django.contrib.messages import constants as messages
 
 if hasattr(ssl, "_create_unverified_context"):
@@ -26,6 +25,8 @@ INSTALLED_APPS = [
     "apps.accounts.apps.AccountsConfig",
     "apps.projects",
     "apps.labs",
+    "apps.organizations.apps.OrganizationsConfig",
+    "apps.audit.apps.AuditConfig",
     "daphne",
     "apps.exams",
     "django.contrib.admin",
@@ -40,11 +41,14 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.organizations.middleware.OrganizationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -57,8 +61,10 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.organizations.context_processors.organization_context",
             ],
         },
     },
@@ -68,11 +74,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 # Channel Layers for WebSocket support
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [REDIS_URL],
         },
     },
 }
@@ -94,12 +102,27 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Login / logout settings
-LOGIN_URL = "/blog/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/blog/"
 LOGOUT_REDIRECT_URL = "/blog/"
 
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    "apps.accounts.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # Internationalization
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "az"
+LANGUAGES = [
+    ("az", "Azərbaycan dili"),
+    ("en", "English"),
+    ("ru", "Русский"),
+    ("tr", "Türkçe"),
+]
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 TIME_ZONE = "Asia/Baku"
 USE_I18N = True
 USE_TZ = True
@@ -133,8 +156,3 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
-
-
-
-
-

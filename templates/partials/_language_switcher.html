@@ -1,0 +1,74 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANGUAGE %}
+{% with current_lang=CURRENT_LANGUAGE|slice:":2"|lower switcher_kind=switcher_variant|default:'navbar' %}
+<div class="dropdown language-switcher language-switcher--{{ switcher_kind }}">
+    <button type="button"
+            class="language-switcher__trigger dropdown-toggle"
+            data-bs-toggle="dropdown"
+            data-bs-display="static"
+            aria-haspopup="listbox"
+            aria-expanded="false">
+        <span class="language-switcher__label">{% trans "label" context "language" %}</span>
+        <span class="language-switcher__value">
+            {% if current_lang == "en" %}
+                EN
+            {% elif current_lang == "ru" %}
+                RU
+            {% elif current_lang == "tr" %}
+                TR
+            {% else %}
+                AZ
+            {% endif %}
+        </span>
+        <i class="fas fa-chevron-down language-switcher__caret" aria-hidden="true"></i>
+    </button>
+
+    <div class="language-switcher__menu dropdown-menu {% if switcher_kind == 'navbar' %}dropdown-menu-end{% endif %}"
+         role="listbox"
+         aria-label="{% trans 'selection' context 'language' %}">
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="az">
+            <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'az' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'az' %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">AZ</span>
+                <span class="language-switcher__option-label">{% trans "name_az" context "language" %}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="en">
+            <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'en' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'en' %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">EN</span>
+                <span class="language-switcher__option-label">{% trans "name_en" context "language" %}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="ru">
+            <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'ru' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'ru' %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">RU</span>
+                <span class="language-switcher__option-label">{% trans "name_ru" context "language" %}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="tr">
+            <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'tr' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'tr' %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">TR</span>
+                <span class="language-switcher__option-label">{% trans "name_tr" context "language" %}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endwith %}

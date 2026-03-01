@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block title %}{{ exam.title }}{% endblock %}
 
@@ -11,6 +11,11 @@
 <div class="exam-detail-page-wrapper">
     <div class="exam-detail-card">
         <div class="card-header">
+            <div class="exam-header-actions">
+                <a href="{{ profile_return_url }}" class="exam-back-btn">
+                    <i class="fas fa-arrow-left"></i> {% trans "action_back_profile" context "exams.template.teacher_exam_detail" %}
+                </a>
+            </div>
             <h1 class="exam-detail-title">{{ exam.title }}</h1>
             <p class="exam-detail-description">{{ exam.description }}</p>
         </div>
@@ -19,32 +24,32 @@
             {# --- İmtahan Məlumatları Hissəsi --- #}
             <section class="exam-info-section">
                 <div class="info-item">
-                    <span class="info-label"><i class="fas fa-file-alt"></i> Tip:</span>
+                    <span class="info-label"><i class="fas fa-file-alt"></i> {% trans "label_type" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.get_exam_type_display }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label"><i class="fas fa-info-circle"></i> Status:</span>
+                    <span class="info-label"><i class="fas fa-info-circle"></i> {% trans "label_status" context "exams.template.teacher_exam_detail" %}:</span>
                     {% if exam.is_active %}
-                        <span class="status-badge active">Aktiv</span>
+                        <span class="status-badge active">{% trans "status_active" context "exams.template.teacher_exam_detail" %}</span>
                     {% else %}
-                        <span class="status-badge passive">Passiv</span>
+                        <span class="status-badge passive">{% trans "status_passive" context "exams.template.teacher_exam_detail" %}</span>
                     {% endif %}
                 </div>
                 {% if exam.total_duration_minutes %}
                 <div class="info-item">
-                    <span class="info-label"><i class="far fa-clock"></i> Ümumi Müddət:</span>
-                    <span class="info-value">{{ exam.total_duration_minutes }} dəqiqə</span>
+                    <span class="info-label"><i class="far fa-clock"></i> {% trans "label_total_duration" context "exams.template.teacher_exam_detail" %}:</span>
+                    <span class="info-value">{{ exam.total_duration_minutes }} {% trans "unit_minutes" context "exams.template.teacher_exam_detail" %}</span>
                 </div>
                 {% endif %}
                 {% if exam.default_question_time_seconds %}
                 <div class="info-item">
-                    <span class="info-label"><i class="fas fa-stopwatch"></i> Sual Vaxtı:</span>
-                    <span class="info-value">{{ exam.default_question_time_seconds }} saniyə</span>
+                    <span class="info-label"><i class="fas fa-stopwatch"></i> {% trans "label_question_time" context "exams.template.teacher_exam_detail" %}:</span>
+                    <span class="info-value">{{ exam.default_question_time_seconds }} {% trans "unit_seconds" context "exams.template.teacher_exam_detail" %}</span>
                 </div>
                 {% endif %}
                 {% if exam.max_attempts_per_user %}
                 <div class="info-item">
-                    <span class="info-label"><i class="fas fa-redo-alt"></i> Cəhdlər:</span>
+                    <span class="info-label"><i class="fas fa-redo-alt"></i> {% trans "label_attempts" context "exams.template.teacher_exam_detail" %}:</span>
                     <span class="info-value">{{ exam.max_attempts_per_user }}</span>
                 </div>
                 {% endif %}
@@ -53,7 +58,7 @@
                 {% if exam.exam_type == "test" %}
                 <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
                    class="btn btn-success">
-                    🚀 Live başlat
+                    🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
                 </a>
                 {% endif %}
 
@@ -63,7 +68,7 @@
             <section class="exam-actions-section">
                 <div class="action-group">
                     <a href="{% url 'exams:add_exam_question' exam.slug %}" class="action-btn primary-btn">
-                        <i class="fas fa-plus-circle"></i> Yeni sual əlavə et
+                        <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_exam_detail" %}
                     </a>
 
                     {# Sual Bankı Düyməsi #}
@@ -71,18 +76,18 @@
                         <a href="{% url 'exams:test_question_bank' exam.slug %}"
                            class="action-btn info-btn"
                            style="background-color: #6c5ce7; color: white;">
-                            <i class="fas fa-layer-group"></i> Sual Bankı / Bloklar
+                            <i class="fas fa-layer-group"></i> {% trans "action_question_bank_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% else %}
                         <a href="{% url 'exams:create_question_bank' exam.slug %}"
                            class="action-btn info-btn"
                            style="background-color: #6c5ce7; color: white;">
-                            <i class="fas fa-layer-group"></i> Sual Bankı / Bloklar
+                            <i class="fas fa-layer-group"></i> {% trans "action_question_bank_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% endif %}
 
-                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}" class="action-btn secondary-btn">
-                        <i class="fas fa-poll"></i> Nəticələrə bax
+                    <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
+                        <i class="fas fa-poll"></i> {% trans "action_view_results" context "exams.template.teacher_exam_detail" %}
                     </a>
                 </div>
 
@@ -91,24 +96,24 @@
                         {% csrf_token %}
                         {% if exam.is_active %}
                             <button type="submit" class="action-btn warning-btn">
-                                <i class="fas fa-pause-circle"></i> Deaktiv et
+                                <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% else %}
                             <button type="submit" class="action-btn success-btn">
-                                <i class="fas fa-play-circle"></i> Aktiv et
+                                <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% endif %}
                     </form>
 
                     <a href="{% url 'exams:edit_exam' exam.slug %}" class="action-btn outline-btn">
-                        <i class="fas fa-edit"></i> Redaktə et
+                        <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                     </a>
 
                     <form method="post" action="{% url 'exams:delete_exam' exam.slug %}"
-                          onsubmit="return confirm('Bu imtahanı silməyə əminsiniz?');">
+                          onsubmit="return confirm('{% trans 'confirm_delete_exam' context 'exams.template.teacher_exam_detail' %}');">
                         {% csrf_token %}
                         <button type="submit" class="action-btn danger-btn">
-                            <i class="fas fa-trash-alt"></i> Sil
+                            <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
                         </button>
                     </form>
                 </div>
@@ -116,7 +121,7 @@
 
             {# --- Mövcud Suallar Hissəsi --- #}
             <section class="questions-section">
-                <h2 class="section-title">Mövcud suallar</h2>
+                <h2 class="section-title">{% trans "heading_existing_questions" context "exams.template.teacher_exam_detail" %}</h2>
                 {% if questions %}
                     <ol class="question-list">
                         {% for q in questions %}
@@ -142,15 +147,15 @@
                             <div class="question-actions">
                                 <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
                                    class="action-btn outline-btn-sm">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                                 </a>
 
                                 <form method="post"
                                       action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
-                                      onsubmit="return confirm('Bu sualı silməyə əminsiniz?');">
+                                      onsubmit="return confirm('{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}');">
                                     {% csrf_token %}
                                     <button type="submit" class="action-btn danger-btn-sm">
-                                        <i class="fas fa-trash-alt"></i> Delete
+                                        <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
                                     </button>
                                 </form>
                             </div>
@@ -160,9 +165,9 @@
                 {% else %}
                     <div class="empty-state-questions">
                         <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
-                        <p>Bu imtahan üçün hələ sual əlavə etməmisiniz.</p>
+                        <p>{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
                         <a href="{% url 'exams:add_exam_question' exam.slug %}"
-                           class="action-btn primary-btn-sm">İlk sualı əlavə et</a>
+                           class="action-btn primary-btn-sm">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
                     </div>
                 {% endif %}
             </section>

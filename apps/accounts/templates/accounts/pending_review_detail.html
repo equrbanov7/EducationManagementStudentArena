@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ item_type_label }} - Yoxla{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/pending_review_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="pending-detail-page">
+    <div class="pending-detail-shell">
+        <header class="pending-detail-header">
+            <div class="pending-detail-kicker">{{ item_type_label }}</div>
+            <h1>{{ item_title }}</h1>
+            <p>{{ student_display }} · {{ course_title }}</p>
+            <a href="{{ back_url }}" class="pending-detail-back">
+                <i class="fas fa-arrow-left"></i> Pending review-a qayıt
+            </a>
+        </header>
+
+        <section class="pending-detail-meta">
+            <article class="meta-card">
+                <span class="meta-label">Status</span>
+                <span class="meta-value">{{ status_display }}</span>
+            </article>
+            <article class="meta-card">
+                <span class="meta-label">Göndərilib</span>
+                <span class="meta-value">{{ submitted_at|date:"d.m.Y H:i" }}</span>
+            </article>
+            <article class="meta-card">
+                <span class="meta-label">Son yoxlama</span>
+                <span class="meta-value">{% if graded_at %}{{ graded_at|date:"d.m.Y H:i" }}{% else %}-{% endif %}</span>
+            </article>
+            <article class="meta-card meta-card-score">
+                <span class="meta-label">Cari bal</span>
+                <span class="meta-value">{% if current_score is not None %}{{ current_score }} / {{ max_score }}{% else %}-{% endif %}</span>
+            </article>
+        </section>
+
+        {% if graded_at and not is_locked %}
+        <div class="review-window-banner">
+            <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+            <span>
+                Tələbə nəticəni yalnız bu pəncərə bitdikdən sonra görəcək.
+                <span data-review-countdown data-seconds="{{ review_window_seconds_left }}"></span>
+            </span>
+        </div>
+        {% elif is_locked %}
+        <div class="review-window-banner review-window-banner--locked">
+            <strong>Yoxlama bağlanıb.</strong>
+            <span>{{ review_window_minutes }} dəqiqə tamamlandığı üçün bal və rəy artıq dəyişdirilə bilməz.</span>
+        </div>
+        {% endif %}
+
+        <section class="pending-detail-block">
+            <h2>Cavab mətni</h2>
+            <div class="pending-detail-content">
+                {% if content_text %}
+                    {{ content_text|linebreaks }}
+                {% else %}
+                    <p class="pending-empty">Mətn cavabı daxil edilməyib.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if attachments %}
+        <section class="pending-detail-block">
+            <h2>Əlavələr</h2>
+            <ul class="pending-file-list">
+                {% for file_item in attachments %}
+                <li>
+                    <a href="{{ file_item.url }}" target="_blank" rel="noopener">
+                        <i class="fas fa-paperclip"></i> {{ file_item.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if lab_answers %}
+        <section class="pending-detail-block">
+            <h2>Lab sual cavabları</h2>
+            <div class="lab-answer-list">
+                {% for answer in lab_answers %}
+                <article class="lab-answer-card" id="lab-answer-{{ answer.id }}">
+                    <h3>
+                        <span>{{ forloop.counter }}. {{ answer.question.question_text }}</span>
+                        <button type="button" class="answer-accordion-btn" data-answer-toggle="{{ answer.id }}" aria-label="Toggle answer">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </h3>
+                    <div class="lab-answer-preview">
+                        {% if answer.answer %}
+                            {{ answer.answer|striptags|truncatechars:90 }}
+                        {% elif answer.answer_file %}
+                            Fayl əlavə edilib...
+                        {% else %}
+                            Bu suala cavab daxil edilməyib.
+                        {% endif %}
+                    </div>
+                    <div class="lab-answer-content">
+                        {% if answer.answer %}
+                        <div class="lab-answer-section">
+                            <div class="lab-answer-section-title"><i class="fas fa-pen-nib"></i> MƏTN CAVABI</div>
+                            <div class="lab-answer-text">{{ answer.answer|linebreaks }}</div>
+                        </div>
+                        {% endif %}
+                        {% if answer.answer_file %}
+                        <div class="lab-answer-section lab-answer-file-box">
+                            <div class="lab-answer-section-title"><i class="fas fa-paperclip"></i> YÜKLƏNMİŞ FAYL</div>
+                            <a href="{{ answer.answer_file.url }}" target="_blank" rel="noopener" class="lab-answer-file">
+                                <i class="fas fa-download"></i> Faylı aç
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if not answer.answer and not answer.answer_file %}
+                        <p class="pending-empty">Bu suala cavab daxil edilməyib.</p>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="pending-detail-block pending-grade-block">
+            <h2>{% if graded_at and not is_locked %}Yenidən yoxla{% else %}Yoxla{% endif %}</h2>
+            <form method="post" class="pending-grade-form" id="pendingGradeForm">
+                {% csrf_token %}
+                {% if lab_answers %}
+                <div class="grade-row">
+                    <label>Sual üzrə bal</label>
+                    <div class="question-score-grid">
+                        {% for answer in lab_answers %}
+                        <div class="question-score-item">
+                            <div class="question-score-title">{{ forloop.counter }}. {{ answer.question.question_text|truncatechars:42 }}</div>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {% if answer.question.points > 0 %}max="{{ answer.question.points }}"{% endif %}
+                                name="answer_score_{{ answer.id }}"
+                                value="{% if answer.score is not None %}{{ answer.score }}{% endif %}"
+                                class="question-score-input"
+                                data-question-max="{% if answer.question.points > 0 %}{{ answer.question.points }}{% else %}0{% endif %}"
+                                {% if is_locked %}disabled{% endif %}
+                            >
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="grade-row">
+                    <label for="id_score">Bal (0 - {{ max_score }})</label>
+                    <input
+                        id="id_score"
+                        type="number"
+                        name="score"
+                        min="0"
+                        max="{{ max_score }}"
+                        step="0.01"
+                        value="{% if current_score is not None %}{{ current_score }}{% else %}{{ auto_total_score }}{% endif %}"
+                        {% if is_locked %}disabled{% endif %}
+                        required
+                    >
+                    {% if lab_answers %}
+                    <label class="manual-toggle-label">
+                        <input type="checkbox" id="useManualTotal" {% if is_locked %}disabled{% endif %}>
+                        Yekun balı əl ilə dəyiş
+                    </label>
+                    <input type="hidden" name="use_manual_total" id="useManualTotalHidden" value="0">
+                    {% endif %}
+                </div>
+                <div class="grade-row">
+                    <label for="id_feedback">Feedback</label>
+                    <textarea
+                        id="id_feedback"
+                        name="feedback"
+                        rows="5"
+                        {% if is_locked %}disabled{% endif %}
+                        placeholder="Tələbə üçün qısa və aydın rəy yazın"
+                    >{{ feedback|default:'' }}</textarea>
+                </div>
+                <div class="grade-actions">
+                    <button type="submit" class="btn-save" {% if is_locked %}disabled{% endif %}>
+                        {% if graded_at and not is_locked %}Yenidən yoxla və yadda saxla{% else %}Yoxla və yadda saxla{% endif %}
+                    </button>
+                    <a href="{{ back_url }}" class="btn-cancel">Geri qayıt</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+(function () {
+    var countdownEl = document.querySelector("[data-review-countdown]");
+    if (countdownEl) {
+        var secondsLeft = parseInt(countdownEl.getAttribute("data-seconds"), 10);
+        if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
+            countdownEl.textContent = "Yoxlama pəncərəsi bitmək üzrədir.";
+        } else {
+            function renderCountdown() {
+                var min = Math.floor(secondsLeft / 60);
+                var sec = secondsLeft % 60;
+                countdownEl.textContent = "Qalan vaxt: " + min + " dəq " + sec + " san.";
+            }
+
+            renderCountdown();
+            window.setInterval(function () {
+                secondsLeft = Math.max(0, secondsLeft - 1);
+                renderCountdown();
+            }, 1000);
+        }
+    }
+
+    var scoreInputs = Array.prototype.slice.call(document.querySelectorAll(".question-score-input"));
+    var totalInput = document.getElementById("id_score");
+    var useManualTotal = document.getElementById("useManualTotal");
+    var useManualTotalHidden = document.getElementById("useManualTotalHidden");
+
+    function sanitizeScore(input) {
+        var max = parseFloat(input.getAttribute("data-question-max") || "0");
+        var val = parseFloat(input.value || "0");
+        if (isNaN(val) || val < 0) val = 0;
+        if (max > 0 && val > max) val = max;
+        input.value = val;
+        return val;
+    }
+
+    function recalcTotal() {
+        if (!totalInput || (useManualTotal && useManualTotal.checked)) return;
+        var sum = 0;
+        scoreInputs.forEach(function (input) {
+            sum += sanitizeScore(input);
+        });
+        totalInput.value = sum.toFixed(2);
+    }
+
+    scoreInputs.forEach(function (input) {
+        input.addEventListener("input", recalcTotal);
+        input.addEventListener("blur", recalcTotal);
+    });
+
+    if (useManualTotal && useManualTotalHidden) {
+        useManualTotal.addEventListener("change", function () {
+            useManualTotalHidden.value = this.checked ? "1" : "0";
+            if (!this.checked) recalcTotal();
+        });
+    }
+    recalcTotal();
+
+    Array.prototype.slice.call(document.querySelectorAll(".answer-accordion-btn")).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-answer-toggle");
+            var card = document.getElementById("lab-answer-" + id);
+            if (!card) return;
+            var collapsed = card.classList.toggle("is-collapsed");
+            var icon = btn.querySelector("i");
+            if (icon) {
+                icon.classList.toggle("fa-chevron-down", collapsed);
+                icon.classList.toggle("fa-chevron-up", !collapsed);
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

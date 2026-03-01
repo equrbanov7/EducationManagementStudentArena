@@ -1,24 +1,25 @@
-{% load static %}
+{% load static i18n %}
 <article class="blog-card">
-    
-    <div class="card-img" style="background-image: url('{{ post.get_image }}')"></div> <div class="card-body">
+
+    <div class="card-img" style="background-image: url('{{ post.get_image }}')"></div>
+    <div class="card-body">
         <span class="card-category">{{ post.category }}</span>
         <h2 class="card-title">
-            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a> {# Linki buraya da əlavə etdim #}
+            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
         </h2>
         <p class="card-excerpt">{{ post.excerpt }}</p>
         <div class="card-footer">
-            <div class="card-meta"> {# Author və Tarix üçün yeni konteyner #}
+            <div class="card-meta">
                 {% if post.author %}
-                <a href="{% url 'user_profile' post.author.username %}" class="card-author">
+                <a href="{% url 'accounts:public_profile' post.author.username %}" class="card-author">
                     <i class="fas fa-user-circle"></i> {{ post.author.username }}
                 </a>
-            {% endif %}
+                {% endif %}
                 <span class="card-date">
                     <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}
-                </span> {# Yeni ikon və tarix formatı #}
+                </span>
             </div>
-            <a href="{% url 'post_detail' post.slug %}" class="read-more">Oxumağa davam et →</a>
+            <a href="{% url 'post_detail' post.slug %}" class="read-more">{% trans "read_more" context "blog.partial.blog_card" %} →</a>
         </div>
     </div>
 </article>

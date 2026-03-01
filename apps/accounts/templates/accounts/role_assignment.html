@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "title" context "accounts.role_assignment_page" %} - EMSArena{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-user-shield"></i> {% trans "heading" context "accounts.role_assignment_page" %}
+            </h1>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> {% trans "back_to_profile" context "accounts.role_assignment_page" %}
+            </a>
+        </div>
+
+        {% include "accounts/partials/_role_assignment_content.html" %}
+    </div>
+</div>
+{% endblock %}

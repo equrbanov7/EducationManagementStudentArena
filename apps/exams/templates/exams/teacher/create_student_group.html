@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Yeni tələbə qrupu yarat{% endblock %}
+{% block title %}{% trans "title_create_group" context "exams.template.create_student_group" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/create_student_group.css' %}">
+    <link rel="stylesheet" href="{% static 'css/_searchable_multi_select.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -13,15 +14,14 @@
         <div class="col-lg-7 col-md-9">
             <div class="create-group-card">
                 <div class="card-header-custom">
-                    <h1 class="card-title">Yeni tələbə qrupu</h1>
+                    <h1 class="card-title">{% trans "heading_create_group" context "exams.template.create_student_group" %}</h1>
                     <p class="card-subtitle text-muted mb-0">
-                        Məsələn: <strong>875i</strong>, <strong>842A1</strong> və s. Qrupa tələbələri əlavə etdikdən sonra
-                        imtahanları birbaşa bu qruplara aça biləcəksən.
+                        {% trans "subtitle_create_group" context "exams.template.create_student_group" %}
                     </p>
                 </div>
 
                 <div class="card-body-custom">
-                    <form method="post" novalidate>
+                    <form method="post" action="{% url 'exams:teacher_create_group' %}" novalidate>
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -42,28 +42,77 @@
                         </div>
 
                         <div class="mb-3">
-                            {{ form.students.label_tag }}
-                            {{ form.students }}
-                            {% if form.students.help_text %}
-                                <div class="form-text">{{ form.students.help_text }}</div>
+                            {{ form.primary_teacher.label_tag }}
+                            {% if can_multi_assign_teachers %}
+                                <div class="search-wrapper mb-2">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input
+                                        type="text"
+                                        id="primaryTeacherSearch"
+                                        class="custom-search-input"
+                                        placeholder="{% trans 'placeholder_search_primary_teacher' context 'exams.template.create_student_group' %}"
+                                    >
+                                </div>
+                                {{ form.primary_teacher }}
+                                <div class="form-text mt-1">
+                                    {% trans "primary_teacher_help" context "exams.template.create_student_group" %}: <strong>{{ teacher_count }}</strong>
+                                </div>
+                                {% if teacher_count == 0 %}
+                                    <div class="alert alert-warning mt-2 mb-0">
+                                        {% trans "warning_no_teacher_in_tenant" context "exams.template.create_student_group" %}:
+                                        <code>python manage.py seed_group_demo_data</code>
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 <div class="form-text">
-                                    Birdən çox tələbə seçmək üçün 
-                                    <strong>Ctrl</strong> (Windows) və ya <strong>Cmd</strong> (Mac)
-                                    düyməsini basılı saxlayaraq click et.
+                                    {% trans "single_primary_teacher_only" context "exams.template.create_student_group" %}
                                 </div>
+                                {{ form.primary_teacher }}
                             {% endif %}
-                            {% for error in form.students.errors %}
+                            {% for error in form.primary_teacher.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
                             {% endfor %}
                         </div>
 
+                        <div class="mb-3">
+                            {% trans "label_add_students" context "exams.template.create_student_group" as label_add_students %}
+                            {% trans "placeholder_search_student" context "exams.template.create_student_group" as placeholder_search_student %}
+                            {% include "partials/_searchable_multi_select.html" with field=form.students label=label_add_students search_placeholder=placeholder_search_student container_id="groupStudentsSelector" %}
+                            {% if form.students.help_text %}
+                                <div class="form-text">{{ form.students.help_text }}</div>
+                            {% endif %}
+                            <div class="form-text mt-1">{% trans "tenant_student_count" context "exams.template.create_student_group" %}: <strong>{{ student_count }}</strong></div>
+                            {% if student_count == 0 %}
+                                <div class="alert alert-warning mt-2 mb-0">
+                                    {% trans "warning_no_student_in_tenant" context "exams.template.create_student_group" %}:
+                                    <code>python manage.py seed_group_demo_data</code>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if can_multi_assign_teachers %}
+                            <div class="mb-3">
+                                {% trans "label_assign_teachers_multi" context "exams.template.create_student_group" as label_assign_teachers %}
+                                {% trans "placeholder_search_teacher" context "exams.template.create_student_group" as placeholder_search_teacher %}
+                                {% include "partials/_searchable_multi_select.html" with field=form.assigned_teachers label=label_assign_teachers search_placeholder=placeholder_search_teacher container_id="groupTeachersSelector" %}
+                                <div class="form-text">
+                                    {% blocktrans trimmed context "exams.template.create_student_group" with max_multi_teachers=max_multi_teachers %}
+                                        help_multi_teacher_limit_with_count {{ max_multi_teachers }}
+                                    {% endblocktrans %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="display:none;">
+                                {{ form.assigned_teachers }}
+                            </div>
+                        {% endif %}
+
                         <div class="form-footer d-flex justify-content-between align-items-center">
                             <a href="{% url 'exams:teacher_group_list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Qruplara qayıt
+                                <i class="fas fa-arrow-left me-1"></i> {% trans "action_back_to_groups" context "exams.template.create_student_group" %}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Qrupu yarat
+                                <i class="fas fa-save me-1"></i> {% if is_editing %}{% trans "action_update_group" context "exams.template.create_student_group" %}{% else %}{% trans "action_create_group" context "exams.template.create_student_group" %}{% endif %}
                             </button>
                         </div>
                     </form>
@@ -71,10 +120,38 @@
 
                 <div class="card-hint">
                     <i class="fas fa-lightbulb me-2"></i>
-                    Daha sonra imtahan yaradarkən <strong>İcazəli qruplar</strong> hissəsindən bu qrupu seçə biləcəksən.
+                    {% trans "hint_allowed_groups_selection" context "exams.template.create_student_group" %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+(function () {
+  const searchInput = document.getElementById("primaryTeacherSearch");
+  const teacherSelect = document.getElementById("{{ form.primary_teacher.id_for_label }}");
+
+  if (!searchInput || !teacherSelect) return;
+
+  searchInput.addEventListener("input", function () {
+    const filter = (this.value || "").toLowerCase();
+    const options = Array.from(teacherSelect.options);
+
+    options.forEach((option) => {
+      option.hidden = !(option.text || "").toLowerCase().includes(filter);
+    });
+
+    const selectedVisible = options.find((option) => option.selected && !option.hidden);
+    if (!selectedVisible) {
+      const firstVisible = options.find((option) => !option.hidden);
+      if (firstVisible) {
+        firstVisible.selected = true;
+      }
+    }
+  });
+})();
+</script>
 {% endblock %}

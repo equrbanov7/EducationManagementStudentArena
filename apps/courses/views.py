@@ -7,25 +7,84 @@ Labs app inteqrasiyası əlavə edilib.
 """
 
 import json
+from datetime import timedelta
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Max
+from django.core.exceptions import PermissionDenied
+from django.db.models import Max, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.template.loader import render_to_string
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView, View
 
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
+from core.tenancy import get_organization_int_id, get_request_organization, scoped_by_organization_id
 
 from .forms import CourseForm, CourseResourceForm, CourseTopicForm
 from .models import Course, CourseMembership, CourseResource, CourseTopic
 
 User = get_user_model()
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+
+
+def _tenant_scoped_courses(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Course.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="owner__profile__organization",
+    )
+
+
+def _owner_courses_queryset(request):
+    return _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
+
+
+def _get_owner_course_or_404(request, course_id):
+    return get_object_or_404(_owner_courses_queryset(request), id=course_id)
+
+
+def _student_users_queryset(queryset):
+    return queryset.filter(
+        Q(profile__role__in=["student", "lead_student"]) | Q(groups__name__in=["student", "lead_student"])
+    ).distinct()
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    """
+    Return a safe same-origin relative path (with query/fragment) or empty string.
+    """
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -34,13 +93,13 @@ User = get_user_model()
 
 
 class IsTeacherMixin(UserPassesTestMixin):
-    """Yalnız müəllim (is_teacher) bu view-a girə bilər."""
+    """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər."""
 
     def test_func(self):
-        return getattr(self.request.user, "is_teacher", False)
+        return getattr(self.request.user, "is_teacher_or_above", False)
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu əməliyyat yalnız müəllimlər üçün mümkündür.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "teachers_only_action"))
         return redirect("home")
 
 
@@ -49,11 +108,10 @@ class IsCourseOwnerMixin(UserPassesTestMixin):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu kursu redaktə etməyə icazəniz yoxdur.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "no_permission_edit_course"))
         return redirect("home")
 
 
@@ -68,15 +126,55 @@ class CreateCourseView(IsTeacherMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = "courses/create_course.html"
+    modal_form_template_name = "courses/partials/_create_course_modal_form.html"
+
+    def _is_modal_request(self):
+        return self.request.GET.get("modal") == "1"
+
+    def get(self, request, *args, **kwargs):
+        if self._is_modal_request():
+            self.object = None
+            form = self.get_form()
+            return render(
+                request,
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+            )
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         form.instance.status = "draft"
-        response = super().form_valid(form)
+        organization = get_request_organization(self.request)
+        form.instance.organization_id = get_organization_int_id(organization)
+        super().form_valid(form)
         messages.success(
-            self.request, f'✅ "{form.instance.title}" kursu uğurla yaradıldı!'
+            self.request,
+            pgettext("courses.view.message", "course_created_successfully").format(title=form.instance.title),
         )
-        return response
+        if self._is_modal_request():
+            return JsonResponse(
+                {
+                    "success": True,
+                    "course_id": self.object.id,
+                    "dashboard_url": str(self.get_success_url()),
+                }
+            )
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        if self._is_modal_request():
+            html = render_to_string(
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+        return super().form_invalid(form)
 
     def get_success_url(self):
         return reverse_lazy("courses:course_dashboard", args=[self.object.id])
@@ -103,6 +201,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
     context_object_name = "course"
     pk_url_kwarg = "course_id"
 
+    def get_queryset(self):
+        return _tenant_scoped_courses(self.request).select_related("owner", "owner__profile")
+
+    def get_object(self, queryset=None):
+        course = super().get_object(queryset=queryset)
+        membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
+        is_owner = course.owner_id == self.request.user.id
+
+        if not is_owner and membership is None:
+            raise PermissionDenied(pgettext("courses.view.permission", "no_access_this_course"))
+
+        self._membership = membership
+        return course
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course = self.get_object()
@@ -111,19 +223,47 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # ═══════════════════════════════════════════════════════════════════
         # 1. İSTİFADƏÇİ ROLUNU TƏYİN ET
         # ═══════════════════════════════════════════════════════════════════
-        membership = CourseMembership.objects.filter(course=course, user=user).first()
+        membership = getattr(self, "_membership", None)
         user_role = membership.role if membership else None
 
         # ─────────────────────────────────────────────────────────────────────
         # Context-ə rol məlumatlarını əlavə et
         # ─────────────────────────────────────────────────────────────────────
-        context["is_owner"] = course.owner == user
-        context["is_teacher"] = getattr(user, "is_teacher", False)
+        context["is_owner"] = course.owner_id == user.id
+        context["is_teacher"] = context["is_owner"] or user_role in {"teacher", "assistant"}
         context["is_student"] = user_role == "student"
-        context["is_assistant"] = user_role in ["assistant_teacher", "moderator"]
-        context["can_view_members"] = context["is_owner"] or context["is_assistant"]
+        context["is_assistant"] = user_role == "assistant"
+        context["can_manage_course"] = context["is_owner"] or context["is_assistant"] or user_role == "teacher"
+        context["can_view_members"] = context["can_manage_course"]
         context["user_role"] = user_role
         context["membership"] = membership  # Template-də lazım ola bilər
+
+        requested_profile_section = (self.request.GET.get("from_section") or "").strip()
+        valid_profile_sections = {"my-courses", "assigned-courses", "courses", "assigned-exams"}
+        if requested_profile_section not in valid_profile_sections:
+            requested_profile_section = "assigned-courses" if context["is_student"] else "my-courses"
+
+        profile_return_params = {"section": requested_profile_section}
+        if requested_profile_section == "assigned-exams":
+            assigned_type = (self.request.GET.get("assigned_type") or "").strip().lower()
+            if assigned_type in ASSIGNED_TASK_FILTER_CHOICES:
+                profile_return_params["assigned_type"] = assigned_type
+
+        fallback_profile_return_url = f"{reverse('accounts:profile')}?{urlencode(profile_return_params)}"
+        explicit_return_url = _safe_same_origin_redirect_path(
+            self.request,
+            self.request.GET.get("return_to") or self.request.GET.get("next"),
+        )
+        if not explicit_return_url:
+            explicit_return_url = _safe_same_origin_redirect_path(
+                self.request,
+                self.request.META.get("HTTP_REFERER"),
+            )
+        if explicit_return_url == self.request.get_full_path():
+            explicit_return_url = ""
+
+        context["profile_return_section"] = requested_profile_section
+        context["profile_return_url"] = explicit_return_url or fallback_profile_return_url
 
         # ═══════════════════════════════════════════════════════════════════
         # 2. MÖVZULAR & RESURSLAR (Hamı görür)
@@ -135,9 +275,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # 3. ÜZVLƏR (Yalnız owner və assistant görür)
         # ═══════════════════════════════════════════════════════════════════
         if context["can_view_members"]:
-            context["members"] = course.memberships.select_related("user").order_by(
-                "group_name", "joined_at"
-            )
+            context["members"] = course.memberships.select_related("user").order_by("group_name", "joined_at")
         else:
             context["members"] = []
 
@@ -147,7 +285,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Müəllim: Bütün assignment-ları görür
         # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
         # ═══════════════════════════════════════════════════════════════════
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün assignment-lar
             context["assignments"] = course.assignments.all().order_by("-created_at")
             context["assignments_with_user_data"] = []
@@ -163,16 +301,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Hər assignment üçün user-specific məlumat hazırla
             assignments_with_user_data = []
             for a in assignments_qs:
-                user_attempts = a.submissions.filter(student=user).count()
-                is_deadline_passed = (
-                    a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
-                )
-                is_active = a.status == "active"
-                can_submit = (
-                    user_attempts < a.max_attempts
-                    and not is_deadline_passed
-                    and is_active
-                )
+                user_attempts = a.submissions.filter(user=user).count()
+                is_deadline_passed = a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
+                is_active = a.status in {"active", "published"}
+                can_submit = user_attempts < a.max_attempts and not is_deadline_passed and is_active
                 attempts_left = a.max_attempts - user_attempts
 
                 assignments_with_user_data.append(
@@ -197,7 +329,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Müəllim: Bütün project-ləri görür
         # Tələbə: Yalnız özünə təyin olunmuşları görür (arxivlənmişlər istisna)
         # ═════════════════════════════════════════��═════════════════════════
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün project-lər
             context["projects"] = course.projects.all().order_by("-created_at")
             context["projects_with_user_data"] = []
@@ -217,11 +349,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     user_attempts = p.submissions.filter(student=user).count()
                     is_deadline_passed = p.is_deadline_passed
                     is_active = p.status == "active"
-                    can_submit = (
-                        user_attempts < p.max_attempts
-                        and not is_deadline_passed
-                        and is_active
-                    )
+                    can_submit = user_attempts < p.max_attempts and not is_deadline_passed and is_active
                     attempts_left = p.max_attempts - user_attempts
 
                     projects_with_user_data.append(
@@ -247,31 +375,38 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # 7. İMTAHANLAR
         # ───────────────────────────────────────────────────────────────────
 
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = Exam.objects.filter(course=course).order_by(
-                "-created_at"
-            )
+            context["course_exams"] = scoped_by_organization_id(
+                Exam.objects.filter(course=course),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ).order_by("-created_at")
 
             # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
-            context["teacher_exams"] = (
-                Exam.objects.filter(author=user)
-                .exclude(course=course)
-                .order_by("-created_at")[:10]
-            )
+            context["teacher_exams"] = scoped_by_organization_id(
+                Exam.objects.filter(author=user).exclude(course=course),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ).order_by("-created_at")[:10]
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
-            all_course_exams = Exam.objects.filter(course=course, is_active=True)
+            all_course_exams = scoped_by_organization_id(
+                Exam.objects.filter(course=course, is_active=True),
+                self.request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            )
 
             exams_with_data = []
             for exam in all_course_exams:
                 if exam.can_user_see(user):
                     # Bu tələbənin attempt-ları
                     attempts = (
-                        ExamAttempt.objects.filter(exam=exam, user=user)
-                        .exclude(status="draft")
-                        .order_by("-started_at")
+                        ExamAttempt.objects.filter(exam=exam, user=user).exclude(status="draft").order_by("-started_at")
                     )
 
                     last_attempt = attempts.first()
@@ -301,7 +436,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # Tələbə: Yalnız özünə təyin olunmuşları görür + user-specific data
         # ═══════════════════════════════════════════════════════════════════
 
-        if context["is_owner"] or context["is_teacher"]:
+        if context["can_manage_course"]:
             # MÜƏLLİM - bütün lab-lar
             context["labs"] = course.labs.all().order_by("-created_at")
             context["labs_with_user_data"] = []
@@ -314,16 +449,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             if membership and hasattr(membership, "group_name"):
                 student_group = membership.group_name or ""
 
-            print(f"DEBUG: Student ID: {user.id}, Group: '{student_group}'")  # DEBUG
-
             labs_with_user_data = []
 
             # Published olan lab-ları yoxla
             for lab in course.labs.filter(status="published").order_by("-created_at"):
-
-                print(f"DEBUG: Checking Lab '{lab.title}' (ID: {lab.id})")  # DEBUG
-                print(f"DEBUG:   allowed_students: '{lab.allowed_students}'")  # DEBUG
-                print(f"DEBUG:   allowed_groups: '{lab.allowed_groups}'")  # DEBUG
 
                 # Bu lab tələbəyə təyin olunubmu?
                 is_assigned = False
@@ -344,40 +473,26 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         if g:
                             allowed_group_names.append(g)
 
-                print(f"DEBUG:   Parsed student IDs: {allowed_student_ids}")  # DEBUG
-                print(f"DEBUG:   Parsed group names: {allowed_group_names}")  # DEBUG
-
                 # ƏSAS MƏNTİQ:
                 # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
                 # 2. Əgər student ID siyahısında varsa → görür
                 # 3. Əgər qrup siyahısında varsa → görür
 
-                has_any_filter = (
-                    len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
-                )
+                has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
 
                 if not has_any_filter:
                     # Heç bir filtr yoxdur - heç kim görməsin (və ya hamı görsün - hansını istəyirsən?)
                     # Əgər heç bir tələbə/qrup seçilməyibsə, heç kim görməsin:
                     is_assigned = False
-                    print("DEBUG:   No filter set - NOT assigned")  # DEBUG
                 else:
                     # Filtr var - yoxla
                     # Student ID ilə yoxla
                     if user.id in allowed_student_ids:
                         is_assigned = True
-                        print("DEBUG:   Assigned by student ID")  # DEBUG
 
                     # Qrup adı ilə yoxla
-                    if (
-                        not is_assigned
-                        and student_group
-                        and student_group in allowed_group_names
-                    ):
+                    if not is_assigned and student_group and student_group in allowed_group_names:
                         is_assigned = True
-                        print("DEBUG:   Assigned by group name")  # DEBUG
-
-                print(f"DEBUG:   Final is_assigned: {is_assigned}")  # DEBUG
 
                 # Əgər təyin olunmayıbsa, skip et
                 if not is_assigned:
@@ -392,17 +507,19 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 latest_submission = None
 
                 if assignment:
-                    submissions_qs = LabSubmission.objects.filter(
-                        assignment=assignment
-                    ).order_by("-submitted_at")
+                    submissions_qs = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
                     attempt_count = submissions_qs.count()
                     has_submitted = attempt_count > 0
-                    latest_submission = (
-                        submissions_qs.first() if has_submitted else None
-                    )
+                    latest_submission = submissions_qs.first() if has_submitted else None
 
                 max_attempts = lab.max_attempts or 1
                 can_submit = (attempt_count < max_attempts) and lab.is_open
+                can_show_grade = bool(
+                    latest_submission
+                    and latest_submission.status == "graded"
+                    and latest_submission.graded_at
+                    and timezone.now() >= latest_submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+                )
 
                 labs_with_user_data.append(
                     {
@@ -414,12 +531,12 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         "max_attempts": max_attempts,
                         "attempts_left": max_attempts - attempt_count,
                         "can_submit": can_submit,
+                        "can_show_grade": can_show_grade,
                     }
                 )
 
             context["labs"] = []
             context["labs_with_user_data"] = labs_with_user_data
-            print(f"DEBUG: Total labs for student: {len(labs_with_user_data)}")  # DEBUG
 
         else:
             context["labs"] = []
@@ -451,19 +568,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Kursa əlavə olunmamış istifadəçilər (üzv əlavə etmək üçün)
             # ─────────────────────────────────────────────────────────────────
             course_user_ids = course.memberships.values_list("user_id", flat=True)
-            context["all_users"] = (
-                User.objects.exclude(id__in=course_user_ids)
-                .filter(groups__name="student")
-                .distinct()
-                .order_by("username")
-            )
+            user_org = get_request_organization(self.request)
+            user_candidates = User.objects.exclude(id__in=course_user_ids)
+            if user_org is not None:
+                user_candidates = user_candidates.filter(profile__organization=user_org)
+            context["all_users"] = _student_users_queryset(user_candidates).order_by("username")
 
             # ─────────────────────────────────────────────────────────────────
             # Bütün qruplar (StudentGroup modelindən)
             # ─────────────────────────────────────────────────────────────────
             try:
-
-                context["all_groups"] = StudentGroup.objects.all().order_by("name")
+                qs = StudentGroup.objects.filter(teacher=user)
+                if user_org is not None:
+                    qs = qs.filter(organization=user_org)
+                context["all_groups"] = qs.order_by("name")
             except ImportError:
                 context["all_groups"] = []
         else:
@@ -487,28 +605,22 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
     form_class = CourseTopicForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.course = get_object_or_404(Course, id=kwargs["course_id"])
-        if self.course.owner != request.user:
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        self.course = _get_owner_course_or_404(request, kwargs["course_id"])
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.course = self.course
-        max_order = (
-            CourseTopic.objects.filter(course=self.course).aggregate(Max("order"))[
-                "order__max"
-            ]
-            or 0
-        )
+        max_order = CourseTopic.objects.filter(course=self.course).aggregate(Max("order"))["order__max"] or 0
         form.instance.order = max_order + 1
 
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "topic_added").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" mövzusu əlavə olundu',
+                    "message": success_message,
                     "topic": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -517,13 +629,13 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" mövzusu əlavə olundu')
+        messages.success(self.request, success_message)
         return response
 
     def form_invalid(self, form):
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": False, "errors": form.errors}, status=400)
-        messages.error(self.request, "Mövzu əlavə olunarkən xəta baş verdi.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "topic_add_failed"))
         return redirect("courses:course_dashboard", course_id=self.course.id)
 
     def get_success_url(self):
@@ -542,21 +654,26 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
     form_class = CourseTopicForm
     pk_url_kwarg = "topic_id"
 
+    def test_func(self):
+        topic = self.get_object()
+        return _owner_courses_queryset(self.request).filter(id=topic.course_id).exists()
+
     def dispatch(self, request, *args, **kwargs):
         self.topic = self.get_object()
         self.course = self.topic.course
-        if self.course.owner != request.user:
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        if not _owner_courses_queryset(request).filter(id=self.course.id).exists():
+            return HttpResponseForbidden(pgettext("courses.view.message", "no_permission_edit_course"))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "topic_updated").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" mövzusu yeniləndi',
+                    "message": success_message,
                     "topic": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -566,14 +683,14 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" mövzusu yeniləndi')
+        messages.success(self.request, success_message)
         return response
 
     def form_invalid(self, form):
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": False, "errors": form.errors}, status=400)
 
-        messages.error(self.request, "Mövzu yenilənərkən xəta baş verdi.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "topic_update_failed"))
         return redirect("courses:course_dashboard", course_id=self.course.id)
 
     def get_success_url(self):
@@ -592,17 +709,16 @@ class DeleteTopicView(IsCourseOwnerMixin, View):
         course_id = kwargs.get("course_id")
         topic_id = kwargs.get("topic_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         topic = get_object_or_404(CourseTopic, id=topic_id, course=course)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu əməliyyata icazəniz yoxdur.")
-            return redirect("courses:course_dashboard", course_id=course_id)
 
         topic_title = topic.title
         topic.delete()
 
-        messages.success(request, f'✅ "{topic_title}" mövzusu silindi.')
+        messages.success(
+            request,
+            pgettext("courses.view.message", "topic_deleted").format(title=topic_title),
+        )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": True})
@@ -622,20 +738,19 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
     form_class = CourseResourceForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.course = get_object_or_404(Course, id=kwargs["course_id"])
-        if self.course.owner != request.user:
-            return HttpResponseForbidden("Bu kursu redaktə etməyə icazəniz yoxdur.")
+        self.course = _get_owner_course_or_404(request, kwargs["course_id"])
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.course = self.course
         response = super().form_valid(form)
+        success_message = pgettext("courses.view.message", "resource_added").format(title=form.instance.title)
 
         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f'"{form.instance.title}" resursu əlavə olundu',
+                    "message": success_message,
                     "resource": {
                         "id": form.instance.id,
                         "title": form.instance.title,
@@ -644,7 +759,7 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
                 }
             )
 
-        messages.success(self.request, f'"{form.instance.title}" resursu əlavə olundu')
+        messages.success(self.request, success_message)
         return response
 
     def get_success_url(self):
@@ -663,17 +778,16 @@ class DeleteResourceView(IsCourseOwnerMixin, View):
         course_id = kwargs.get("course_id")
         resource_id = kwargs.get("resource_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         resource = get_object_or_404(CourseResource, id=resource_id, course=course)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu əməliyyata icazəniz yoxdur.")
-            return redirect("courses:course_dashboard", course_id=course_id)
 
         resource_title = resource.title
         resource.delete()
 
-        messages.success(request, f'✅ "{resource_title}" resursu silindi.')
+        messages.success(
+            request,
+            pgettext("courses.view.message", "resource_deleted").format(title=resource_title),
+        )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"success": True})
@@ -691,41 +805,34 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        messages.error(self.request, "Bu səhifəyə giriş icazəniz yoxdur.")
+        messages.error(self.request, pgettext_lazy("courses.view.message", "no_permission_access_page"))
         return redirect("home")
 
     def get(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         members = course.memberships.all().order_by("joined_at")
         teacher = members.filter(role="teacher").first()
         assistants = members.filter(role="assistant")
-        students = members.filter(role="student").order_by(
-            "group_name", "user__username"
-        )
+        students = members.filter(role="student").order_by("group_name", "user__username")
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
 
-        if hasattr(User, "groups"):
-            all_users = (
-                User.objects.exclude(id__in=course_user_ids)
-                .filter(groups__name="student")
-                .distinct()
-                .order_by("username")
-            )
-        else:
-            all_users = User.objects.exclude(id__in=course_user_ids).order_by(
-                "username"
-            )
+        user_org = get_request_organization(request)
+        all_users = User.objects.exclude(id__in=course_user_ids)
+        if user_org is not None:
+            all_users = all_users.filter(profile__organization=user_org)
+        all_users = _student_users_queryset(all_users).order_by("username")
 
         try:
-
-            all_groups = StudentGroup.objects.all().order_by("name")
+            all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
+            if user_org is not None:
+                all_groups_qs = all_groups_qs.filter(organization=user_org)
+            all_groups = all_groups_qs.order_by("name")
         except ImportError:
             all_groups = []
 
@@ -748,21 +855,19 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def get(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         course_user_ids = course.memberships.values_list("user_id", flat=True)
+        user_org = get_request_organization(request)
 
-        qs = (
-            User.objects.exclude(id__in=course_user_ids)
-            .filter(groups__name="student")
-            .distinct()
-            .order_by("username")
-        )
+        qs = User.objects.exclude(id__in=course_user_ids)
+        if user_org is not None:
+            qs = qs.filter(profile__organization=user_org)
+        qs = _student_users_queryset(qs).order_by("username")
 
         data = [
             {
@@ -786,31 +891,36 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         return JsonResponse(
-            {"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403
+            {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+            status=403,
         )
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         user_ids = request.POST.getlist("user_ids")
         group_name = request.POST.get("group_name", "").strip()
 
         if not user_ids:
             return JsonResponse(
-                {"success": False, "error": "Heç bir tələbə seçilməyib."}, status=400
+                {"success": False, "error": pgettext("courses.view.message", "no_student_selected")},
+                status=400,
             )
 
         added_count = 0
 
+        owner_org = get_request_organization(request)
         for uid in user_ids:
             try:
-                user = User.objects.get(id=uid)
+                user_qs = User.objects.filter(id=uid)
+                if owner_org is not None:
+                    user_qs = user_qs.filter(profile__organization=owner_org)
+                user = user_qs.get()
                 membership, created = CourseMembership.objects.get_or_create(
                     course=course,
                     user=user,
@@ -824,7 +934,10 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                 continue
 
         return JsonResponse(
-            {"success": True, "message": f"{added_count} tələbə kursa əlavə olundu."}
+            {
+                "success": True,
+                "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
+            }
         )
 
 
@@ -838,26 +951,28 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur."}, status=403)
+        return JsonResponse({"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403)
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
         group_ids = request.POST.getlist("group_ids")
 
         if not group_ids:
             return JsonResponse(
-                {"success": False, "error": "Qrup seçilməyib."}, status=400
+                {"success": False, "error": pgettext("courses.view.message", "no_group_selected")},
+                status=400,
             )
 
         try:
-
-            groups = StudentGroup.objects.filter(id__in=group_ids)
+            user_org = get_request_organization(request)
+            groups = StudentGroup.objects.filter(id__in=group_ids, teacher=request.user)
+            if user_org is not None:
+                groups = groups.filter(organization=user_org)
 
             added_count = 0
 
@@ -880,14 +995,14 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse(
                 {
                     "success": True,
-                    "message": f"{added_count} tələbə kursa əlavə olundu.",
+                    "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
                     "added_count": added_count,
                 }
             )
 
         except ImportError:
             return JsonResponse(
-                {"success": False, "error": "StudentGroup modeli tapılmadı."},
+                {"success": False, "error": pgettext("courses.view.message", "studentgroup_model_not_found")},
                 status=500,
             )
         except Exception as e:
@@ -904,28 +1019,29 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
         return JsonResponse(
-            {"success": False, "error": "Bu əməliyyata icazəniz yoxdur."}, status=403
+            {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+            status=403,
         )
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
         member_id = kwargs.get("member_id")
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
         membership = get_object_or_404(CourseMembership, id=member_id, course=course)
 
         username = membership.user.username
         membership.delete()
+        success_message = pgettext("courses.view.message", "member_deleted").format(username=username)
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "message": f"{username} silindi."})
+            return JsonResponse({"success": True, "message": success_message})
 
-        messages.success(request, f"✅ {username} silindi.")
+        messages.success(request, success_message)
         return redirect("courses:course_members", course_id=course_id)
 
 
@@ -939,26 +1055,26 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-        return course.owner == self.request.user
+        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
         group_name = request.POST.get("group_name")
 
         if not group_name:
-            messages.error(request, "Qrup adı tapılmadı.")
+            messages.error(request, pgettext_lazy("courses.view.message", "group_name_missing"))
             return redirect("courses:course_members", course_id=course_id)
 
-        course = get_object_or_404(Course, id=course_id)
+        course = _get_owner_course_or_404(request, course_id)
 
-        deleted_count, _ = CourseMembership.objects.filter(
-            course=course, group_name=group_name
-        ).delete()
+        deleted_count, _ = CourseMembership.objects.filter(course=course, group_name=group_name).delete()
 
         messages.success(
             request,
-            f'✅ "{group_name}" qrupundan {deleted_count} tələbə kursdan çıxarıldı.',
+            pgettext("courses.view.message", "group_removed_from_course").format(
+                group_name=group_name,
+                count=deleted_count,
+            ),
         )
         return redirect("courses:course_members", course_id=course_id)
 
@@ -978,7 +1094,10 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
     pk_url_kwarg = "course_id"
 
     def form_valid(self, form):
-        messages.success(self.request, f'✅ "{form.instance.title}" kursu yeniləndi.')
+        messages.success(
+            self.request,
+            pgettext("courses.view.message", "course_updated").format(title=form.instance.title),
+        )
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -995,19 +1114,23 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
 
     def post(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
-        course = get_object_or_404(Course, id=course_id)
-
-        if course.owner != request.user:
-            messages.error(request, "Bu kursu silməyə icazəniz yoxdur.")
-            return redirect("home")
+        course = _get_owner_course_or_404(request, course_id)
 
         course_title = course.title
         course.delete()
 
         messages.success(
-            request, f'✅ "{course_title}" kursu və bütün məlumatları silindi.'
+            request,
+            pgettext("courses.view.message", "course_deleted").format(title=course_title),
         )
-        return redirect("user_profile", username=request.user.username)
+        return_to = _safe_same_origin_redirect_path(
+            request,
+            request.POST.get("return_to") or request.GET.get("return_to"),
+        )
+        if return_to:
+            return redirect(return_to)
+
+        return redirect(f"{reverse('accounts:profile')}?section=my-courses")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1021,7 +1144,7 @@ class MyCoursesListView(LoginRequiredMixin, ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Course.objects.filter(owner=self.request.user).order_by("-created_at")
+        return _owner_courses_queryset(self.request).order_by("-created_at")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -1046,14 +1169,13 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         user = self.request.user
 
         # Tələbənin üzv olduğu kurslar
-        return (
-            Course.objects.filter(
-                memberships__user=user, memberships__role="student", status="published"
-            )
+        courses = (
+            Course.objects.filter(memberships__user=user, memberships__role="student", status="published")
             .distinct()
             .select_related("owner")
             .order_by("-created_at")
         )
+        return _tenant_scoped_courses(self.request, courses)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1061,9 +1183,7 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         # Hər kurs üçün əlavə məlumat
         courses_with_info = []
         for course in context["courses"]:
-            membership = CourseMembership.objects.filter(
-                course=course, user=self.request.user
-            ).first()
+            membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
 
             courses_with_info.append(
                 {
@@ -1081,16 +1201,19 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
 @require_POST
 def link_exam_to_course(request, pk):
     """İmtahanı kursa əlaqələndir"""
-    course = get_object_or_404(Course, id=pk)
-
-    if course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    course = _get_owner_course_or_404(request, pk)
 
     try:
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam = get_object_or_404(Exam, id=exam_id, author=request.user)
+        exam_qs = scoped_by_organization_id(
+            Exam.objects.filter(author=request.user),
+            request,
+            org_id_field="organization_id",
+            fallback_org_field="author__profile__organization",
+        )
+        exam = get_object_or_404(exam_qs, id=exam_id)
         exam.course = course
         exam.save()
 
@@ -1103,16 +1226,21 @@ def link_exam_to_course(request, pk):
 @require_POST
 def unlink_exam_from_course(request, pk):
     """İmtahanı kursdan ayır"""
-    course = get_object_or_404(Course, id=pk)
-
-    if course.owner != request.user:
-        return JsonResponse({"success": False, "error": "İcazəniz yoxdur"}, status=403)
+    course = _get_owner_course_or_404(request, pk)
 
     try:
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam = get_object_or_404(Exam, id=exam_id, course=course)
+        exam = get_object_or_404(
+            scoped_by_organization_id(
+                Exam.objects.filter(course=course),
+                request,
+                org_id_field="organization_id",
+                fallback_org_field="author__profile__organization",
+            ),
+            id=exam_id,
+        )
         exam.course = None
         exam.save()
 

@@ -1,7 +1,5 @@
-{# templates/partials/paint_answer.html #}
-{% load static %}
+{% load static i18n %}
 
-{# Bu partial q və ans gözləyir #}
 <div class="paint-card"
      data-qid="{{ q.id }}"
      {% if ans and ans.paint_image %}
@@ -10,7 +8,6 @@
 
   <div class="paint-header">
     <div class="paint-toggle">
-      {# Hidden input: backend-də paint_enabled_{qid} oxuyursan #}
       <input type="hidden" name="paint_enabled_{{ q.id }}" value="{% if ans and ans.has_paint %}1{% else %}0{% endif %}" class="paint-enabled-hidden">
 
       <label class="paint-switch">
@@ -18,39 +15,39 @@
                class="paint-enabled-checkbox"
                {% if ans and ans.has_paint %}checked{% endif %}>
         <span class="paint-switch-ui"></span>
-        <span class="paint-switch-text">Paint cavabı</span>
+        <span class="paint-switch-text">{% trans "switch_text" context "blog.partial.paint_answer" %}</span>
       </label>
     </div>
 
     <div class="paint-hint">
-      Qələm / silgi ilə çək, avtomatik yadda saxlanır.
+      {% trans "hint" context "blog.partial.paint_answer" %}
     </div>
   </div>
- 
+
   <div class="paint-body" style="{% if ans and ans.has_paint %}display:block{% else %}display:none{% endif %}">
     <div class="paint-toolbar">
       <div class="paint-tools">
-        <button type="button" class="paint-btn paint-pen active" title="Qələm">✏️ Qələm</button>
-        <button type="button" class="paint-btn paint-eraser" title="Silgi">🧽 Silgi</button>
+        <button type="button" class="paint-btn paint-pen active" title="{% trans 'pen' context 'blog.partial.paint_answer' %}">✏️ {% trans "pen" context "blog.partial.paint_answer" %}</button>
+        <button type="button" class="paint-btn paint-eraser" title="{% trans 'eraser' context 'blog.partial.paint_answer' %}">🧽 {% trans "eraser" context "blog.partial.paint_answer" %}</button>
       </div>
 
       <div class="paint-controls">
         <label class="paint-control">
-          Rəng
+          {% trans "color" context "blog.partial.paint_answer" %}
           <input type="color" class="paint-color" value="#111111">
         </label>
 
         <label class="paint-control">
-          Qalınlıq
+          {% trans "thickness" context "blog.partial.paint_answer" %}
           <input type="range" class="paint-width" min="1" max="30" value="4">
           <span class="paint-width-val">4</span>
         </label>
 
-        <button type="button" class="paint-btn paint-clear" title="Hamısını təmizlə">🗑️ Təmizlə</button>
+        <button type="button" class="paint-btn paint-clear" title="{% trans 'clear' context 'blog.partial.paint_answer' %}">🗑️ {% trans "clear" context "blog.partial.paint_answer" %}</button>
       </div>
 
       <div class="paint-actions">
-        <button type="button" class="paint-btn paint-save" title="Şəkli saxla">💾 Saxla</button>
+        <button type="button" class="paint-btn paint-save" title="{% trans 'save' context 'blog.partial.paint_answer' %}">💾 {% trans "save" context "blog.partial.paint_answer" %}</button>
       </div>
     </div>
 
@@ -58,7 +55,6 @@
       <canvas class="paint-canvas"></canvas>
     </div>
 
-    {# Backend üçün hidden input-lar #}
     <input type="hidden" name="paint_clear_{{ q.id }}" value="0" class="paint-clear-hidden">
     <input type="hidden" name="paint_data_{{ q.id }}" class="paint-data-hidden" value="">
   </div>

@@ -1,0 +1,94 @@
+[project]
+name = "emsarena"
+version = "0.1.0"
+description = "EMS Arena Django application"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "Django==5.2.8",
+    "sqlparse==0.4.2",
+    "asgiref==3.11.0",
+    "tzdata==2024.2",
+    "typing_extensions==4.15.0",
+    "psycopg2-binary==2.9.9",
+    "dj-database-url==2.0.0",
+    "python-decouple==3.8",
+    "python-dotenv==1.0.0",
+    "pillow==11.0.0",
+    "whitenoise==6.5.0",
+    "channels==4.3.2",
+    "channels-redis==4.3.0",
+    "daphne==4.2.1",
+    "redis==7.1.0",
+    "attrs==25.4.0",
+    "autobahn==25.12.2",
+    "Automat==25.4.16",
+    "cffi==2.0.0",
+    "constantly==23.10.4",
+    "cryptography==46.0.3",
+    "hyperlink==21.0.0",
+    "Incremental==24.11.0",
+    "pyasn1==0.6.1",
+    "pyasn1_modules==0.4.2",
+    "pycparser==2.23",
+    "pyOpenSSL==25.3.0",
+    "service-identity==24.2.0",
+    "Twisted==25.5.0",
+    "txaio==25.12.2",
+    "zope.interface==8.1.1",
+    "django-phonenumber-field==8.0.0",
+    "phonenumbers==8.13.50",
+    "django-haystack==3.3.0",
+    "Markdown==3.2.1",
+    "python-docx==1.2.0",
+    "lxml==6.0.2",
+    "qrcode==8.2",
+    "requests==2.32.3",
+    "beautifulsoup4==4.12.3",
+    "soupsieve==2.6",
+    "urllib3==2.6.2",
+    "idna==3.11",
+    "charset-normalizer==3.4.4",
+    "certifi==2026.1.4",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0",
+    "packaging==25.0",
+    "msgpack==1.1.2",
+    "ujson==5.11.0",
+    "cbor2==5.8.0",
+    "py-ubjson==0.16.1",
+    "gunicorn==21.2.0",
+    "sentry-sdk",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+extend-exclude = '''
+/(
+    \.git
+    | \.venv
+    | venv
+    | migrations
+    | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = ["migrations", "venv", ".venv", "__pycache__"]
+known_django = ["django"]
+known_first_party = ["apps", "core", "config"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["tests.py", "test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+testpaths = ["tests", "apps"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
