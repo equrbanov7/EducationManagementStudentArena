@@ -68,41 +68,22 @@
                     {% endif %}
                 </div>
 
-                <div id="individualOrgFields" hidden>
+                <div id="individualAccountInfo" hidden>
                     <div class="register-form-field">
-                        {{ form.join_organization.label_tag }}
-                        {{ form.join_organization }}
-                        {% if form.join_organization.errors %}
-                            <div class="register-field-error">{{ form.join_organization.errors.0 }}</div>
-                        {% endif %}
                         <small class="register-help-text">
-                            {% trans "individual_org_required_help" context "accounts.register" %}
+                            {% trans "individual_owner_help" context "accounts.register" %}
                         </small>
                     </div>
                 </div>
 
-                <div id="orgFields" hidden>
+                <div id="orgCreateFields" hidden>
                     <div class="register-form-field">
-                        <label for="institutionSearchInput" id="institutionSearchLabel">{% trans "institution_search_label" context "accounts.register" %}</label>
-                        <input type="text" id="institutionSearchInput" class="form-control" placeholder="{% trans 'institution_search_placeholder' context 'accounts.register' %}">
-                        <small class="register-help-text" id="institutionTypeHint"></small>
-                    </div>
-
-                    <div class="register-form-field" id="institutionSelectField">
-                        <label for="{{ form.institution.id_for_label }}" id="institutionSelectLabel">{{ form.institution.label }}</label>
-                        {{ form.institution }}
-                        {% if form.institution.errors %}
-                            <div class="register-field-error">{{ form.institution.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="register-form-field">
-                        <label for="{{ form.institution_not_listed_name.id_for_label }}" id="institutionManualLabel">{{ form.institution_not_listed_name.label }}</label>
+                        <label for="{{ form.institution_not_listed_name.id_for_label }}" id="organizationNameLabel">{{ form.institution_not_listed_name.label }}</label>
                         {{ form.institution_not_listed_name }}
                         {% if form.institution_not_listed_name.errors %}
                             <div class="register-field-error">{{ form.institution_not_listed_name.errors.0 }}</div>
                         {% endif %}
-                        <small class="register-help-text">
+                        <small class="register-help-text" id="organizationNameHelp">
                             {% trans "institution_not_listed_help" context "accounts.register" %}
                         </small>
                     </div>
@@ -124,6 +105,23 @@
                         {% if form.organization_license_identifier.errors %}
                             <div class="register-field-error">{{ form.organization_license_identifier.errors.0 }}</div>
                         {% endif %}
+                    </div>
+                </div>
+
+                <div id="studentJoinFields" hidden>
+                    <div class="register-form-field">
+                        <label for="organizationSearchInput" id="organizationSearchLabel">{% trans "institution_search_label" context "accounts.register" %}</label>
+                        <input type="text" id="organizationSearchInput" class="form-control" autocomplete="off" placeholder="{% trans 'institution_search_placeholder' context 'accounts.register' %}">
+                        <div id="organizationSearchList" class="register-search-list" hidden></div>
+                        {% if form.join_organization.errors %}
+                            <div class="register-field-error">{{ form.join_organization.errors.0 }}</div>
+                        {% endif %}
+                        <small class="register-help-text" id="studentJoinHint"></small>
+                    </div>
+
+                    <div class="register-form-field register-hidden-field" id="organizationSelectField">
+                        <label for="{{ form.join_organization.id_for_label }}" id="organizationSelectLabel">{{ form.join_organization.label }}</label>
+                        {{ form.join_organization }}
                     </div>
                 </div>
 
@@ -173,7 +171,7 @@
                     {% endif %}
                 </div>
 
-                <div class="register-form-field" id="initialRoleField">
+                <div class="register-form-field" id="initialRoleField" hidden>
                     {{ form.initial_role.label_tag }}
                     {{ form.initial_role }}
                     {% if form.initial_role.errors %}
@@ -181,15 +179,26 @@
                     {% endif %}
                 </div>
 
-                <div class="register-form-field" id="autoStudentRoleInfo" hidden>
-                    <small class="register-help-text">
-                        {% trans "auto_student_role_info" context "accounts.register" %}
+                <div class="register-form-field" id="autoRoleInfoField">
+                    <small class="register-help-text" id="autoRoleInfoText">
+                        {% trans "auto_role_info_org" context "accounts.register" %}
                     </small>
                 </div>
 
                 <div class="register-form-field">
                     {{ form.password.label_tag }}
-                    {{ form.password }}
+                    <div class="input-visibility-wrapper">
+                        {{ form.password }}
+                        <button
+                            type="button"
+                            class="input-visibility-toggle"
+                            data-toggle-visibility
+                            data-target="{{ form.password.id_for_label }}"
+                            aria-label="Toggle field visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
                     {% if form.password.errors %}
                         <div class="register-field-error">{{ form.password.errors.0 }}</div>
                     {% endif %}
@@ -197,7 +206,18 @@
 
                 <div class="register-form-field">
                     {{ form.password2.label_tag }}
-                    {{ form.password2 }}
+                    <div class="input-visibility-wrapper">
+                        {{ form.password2 }}
+                        <button
+                            type="button"
+                            class="input-visibility-toggle"
+                            data-toggle-visibility
+                            data-target="{{ form.password2.id_for_label }}"
+                            aria-label="Toggle field visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
                     {% if form.password2.errors %}
                         <div class="register-field-error">{{ form.password2.errors.0 }}</div>
                     {% endif %}
@@ -221,17 +241,17 @@
 
 {% block extraJs %}
 <script src="{% static 'js/register_wizard.js' %}"></script>
+<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script>
     window.SIGNUP_LOOKUP_DATA = JSON.parse(document.getElementById('signup-lookup-data').textContent);
     window.REGISTER_I18N = {
-        select_empty_university: "{% trans 'select_empty_university' context 'accounts.register.js' %}",
-        select_empty_school: "{% trans 'select_empty_school' context 'accounts.register.js' %}",
-        select_empty_course_center: "{% trans 'select_empty_course_center' context 'accounts.register.js' %}",
-        select_empty_default: "{% trans 'select_empty_default' context 'accounts.register.js' %}",
+        auto_role_info_owner: "{% trans 'auto_role_info_owner' context 'accounts.register' %}",
+        auto_role_info_org: "{% trans 'auto_role_info_org' context 'accounts.register' %}",
+        auto_role_info_student_join: "{% trans 'auto_role_info_student_join' context 'accounts.register' %}",
+        select_empty_organization: "{% trans 'organization_empty' context 'accounts.form.register.choice' %}",
         label_search_university: "{% trans 'label_search_university' context 'accounts.register.js' %}",
         placeholder_search_university: "{% trans 'placeholder_search_university' context 'accounts.register.js' %}",
-        label_university: "{% trans 'label_university' context 'accounts.register.js' %}",
         label_university_manual: "{% trans 'label_university_manual' context 'accounts.register.js' %}",
         placeholder_university_manual: "{% trans 'placeholder_university_manual' context 'accounts.register.js' %}",
         label_university_identifier: "{% trans 'label_university_identifier' context 'accounts.register.js' %}",
@@ -239,25 +259,23 @@
         hint_university_global: "{% trans 'hint_university_global' context 'accounts.register.js' %}",
         label_search_school: "{% trans 'label_search_school' context 'accounts.register.js' %}",
         placeholder_search_school: "{% trans 'placeholder_search_school' context 'accounts.register.js' %}",
-        label_school_optional: "{% trans 'label_school_optional' context 'accounts.register.js' %}",
         label_school_manual: "{% trans 'label_school_manual' context 'accounts.register.js' %}",
         placeholder_school_manual: "{% trans 'placeholder_school_manual' context 'accounts.register.js' %}",
         label_school_identifier: "{% trans 'label_school_identifier' context 'accounts.register.js' %}",
         hint_school: "{% trans 'hint_school' context 'accounts.register.js' %}",
         label_search_course_center: "{% trans 'label_search_course_center' context 'accounts.register.js' %}",
         placeholder_search_course_center: "{% trans 'placeholder_search_course_center' context 'accounts.register.js' %}",
-        label_course_center_optional: "{% trans 'label_course_center_optional' context 'accounts.register.js' %}",
         label_course_center_manual: "{% trans 'label_course_center_manual' context 'accounts.register.js' %}",
         placeholder_course_center_manual: "{% trans 'placeholder_course_center_manual' context 'accounts.register.js' %}",
         label_course_center_identifier: "{% trans 'label_course_center_identifier' context 'accounts.register.js' %}",
         hint_course_center: "{% trans 'hint_course_center' context 'accounts.register.js' %}",
         label_search_default: "{% trans 'label_search_default' context 'accounts.register.js' %}",
         placeholder_search_default: "{% trans 'placeholder_search_default' context 'accounts.register.js' %}",
-        label_institution_default: "{% trans 'label_institution_default' context 'accounts.register.js' %}",
         label_institution_manual_default: "{% trans 'label_institution_manual_default' context 'accounts.register.js' %}",
         label_identifier_default: "{% trans 'label_identifier_default' context 'accounts.register.js' %}",
         help_identifier_required: "{% trans 'help_identifier_required' context 'accounts.register.js' %}",
-        help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}"
+        help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}",
+        no_results: "{% trans 'no_results' context 'accounts.register.js' %}"
     };
 </script>
 {% endblock %}

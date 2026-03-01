@@ -14,12 +14,14 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
-from .models import Category, Comment, EmailOTP, Post, Question, Subscriber
+from .models import Category, Comment, EmailOTP, Post, PostApprovalLog, Question, Subscriber
+from .services import author_requires_post_approval, can_user_review_post
 from .utils import generate_otp, send_verify_email
 
 User = get_user_model()
@@ -109,8 +111,8 @@ def post_detail(request, slug):
     # 1) Postu statusdan asılı olmayaraq tap
     post = get_object_or_404(Post, slug=slug)
 
-    # 2) Əgər post nəşr olunmayıbsa və bu user author DEYİLSƏ -> 404
-    if not post.is_published and request.user != post.author:
+    # 2) Əgər post nəşr olunmayıbsa, yalnız müəllif və ya uyğun reviewer görə bilsin.
+    if not post.is_published and request.user != post.author and not can_user_review_post(request.user, post):
         raise Http404("No Post matches the given query.")
 
     comments = post.comments.select_related("user").order_by("-created_at")
@@ -221,6 +223,8 @@ def create_post(request):
     if not _can_manage_blog_content(request.user):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
+    requires_approval = author_requires_post_approval(request.user)
+
     if request.method == "POST":
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         form = PostForm(request.POST, request.FILES)
@@ -248,9 +252,18 @@ def create_post(request):
                 # post.category = None # (Modeldə null=True olduğu üçün problem yoxdur)
                 pass
 
-            # AJAX modalı üçün qaralama/dərc statusu idarəsi.
-            if "is_published" in request.POST:
-                post.is_published = bool(request.POST.get("is_published"))
+            if requires_approval:
+                post.requires_approval = True
+                post.approval_status = Post.ApprovalStatus.PENDING
+                post.approval_requested_at = timezone.now()
+                post.approval_feedback = ""
+                post.is_published = False
+            else:
+                post.requires_approval = False
+                post.approval_status = Post.ApprovalStatus.APPROVED
+                post.approval_requested_at = None
+                if "is_published" in request.POST:
+                    post.is_published = bool(request.POST.get("is_published"))
 
             # --- SLUG MƏNTİQİ SİLİNDİ ---
             # Sənin Post modelinin save() metodu slug-ı və unikallığı
@@ -263,8 +276,14 @@ def create_post(request):
                         "success": True,
                         "post_id": post.id,
                         "slug": post.slug,
+                        "status": post.approval_status,
+                        "is_published": post.is_published,
                     }
                 )
+            if requires_approval:
+                messages.success(request, "Post yaradıldı və müəllim təsdiqi gözləyir.")
+                return redirect(f"{reverse('accounts:profile')}?section=posts")
+
             messages.success(request, pgettext("blog.post.message", "created"))
             return redirect("post_detail", slug=post.slug)
         if is_ajax:
@@ -280,7 +299,14 @@ def create_post(request):
     else:
         form = PostForm()
 
-    return render(request, "post_form.html", {"form": form})
+    return render(
+        request,
+        "post_form.html",
+        {
+            "form": form,
+            "requires_approval": requires_approval,
+        },
+    )
 
 
 # 1. POSTU REDAKTƏ ET (AJAX Endpoint)
@@ -331,13 +357,102 @@ def post_edit_ajax(request, pk):
     # Şəkil URL
     post.image_url = image_url or None
 
-    # Dərc statusu
-    post.is_published = is_published
+    if post.requires_approval or author_requires_post_approval(post.author):
+        post.requires_approval = True
+        post.approval_status = Post.ApprovalStatus.PENDING
+        post.approval_requested_at = timezone.now()
+        post.is_published = False
+    else:
+        post.requires_approval = False
+        post.approval_status = Post.ApprovalStatus.APPROVED
+        post.approval_requested_at = None
+        post.is_published = is_published
 
     # Save
     post.save()
 
-    return JsonResponse({"success": True})
+    return JsonResponse(
+        {
+            "success": True,
+            "status": post.approval_status,
+            "is_published": post.is_published,
+        }
+    )
+
+
+@login_required
+@require_POST
+def review_post(request, post_id):
+    post = get_object_or_404(Post.objects.select_related("author"), pk=post_id, requires_approval=True)
+
+    if not can_user_review_post(request.user, post):
+        raise PermissionDenied("Bu postu təsdiqləmək üçün icazəniz yoxdur.")
+
+    action = (request.POST.get("action") or "").strip().lower()
+    feedback = (request.POST.get("feedback") or "").strip()
+
+    if action not in {"approve", "needs_changes"}:
+        messages.error(request, "Yanlış əməliyyat seçildi.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "needs_changes" and not feedback:
+        messages.error(request, "Düzəliş istəyi üçün feedback yazın.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "approve":
+        post.approval_status = Post.ApprovalStatus.APPROVED
+        post.is_published = True
+        post.approved_by = request.user
+        post.approved_at = timezone.now()
+        post.approval_feedback = feedback
+        post.save(
+            update_fields=[
+                "approval_status",
+                "is_published",
+                "approved_by",
+                "approved_at",
+                "approval_feedback",
+                "updated_at",
+            ]
+        )
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.APPROVED,
+            feedback=feedback,
+        )
+        messages.success(request, "Post təsdiqləndi və paylaşıldı.")
+    else:
+        post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
+        post.is_published = False
+        post.approval_feedback = feedback
+        post.save(
+            update_fields=[
+                "approval_status",
+                "is_published",
+                "approved_by",
+                "approved_at",
+                "approval_feedback",
+                "updated_at",
+            ]
+        )
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.NEEDS_CHANGES,
+            feedback=feedback,
+        )
+        messages.info(request, "Feedback göndərildi. Post düzəliş gözləyir.")
+
+    next_url = (request.POST.get("next") or "").strip()
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+
+    return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
 
 # 2. POSTU SİLMƏ (Təsdiqdən sonra)

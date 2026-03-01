@@ -1,6 +1,10 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}{% trans "title" context "accounts.verify_code" %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="register-page-wrapper">
@@ -12,15 +16,38 @@
       {% csrf_token %}
       <div class="register-form-field">
         <label>{% trans "code_label" context "accounts.verify_code" %}</label>
-        <input name="code" class="form-control" placeholder="{% trans 'code_placeholder' context 'accounts.verify_code' %}" />
+        <div class="input-visibility-wrapper">
+          <input
+            type="password"
+            name="code"
+            class="form-control"
+            maxlength="6"
+            required
+            placeholder="{% trans 'code_placeholder' context 'accounts.verify_code' %}"
+            id="verify-code-input"
+          />
+          <button
+            type="button"
+            class="input-visibility-toggle"
+            data-toggle-visibility
+            data-target="verify-code-input"
+            aria-label="Toggle field visibility"
+          >
+            <i class="fas fa-eye" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
       <button class="register-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
     </form>
 
-    <form method="post" action="{% url 'resend_code' %}" style="margin-top:12px;">
+    <form method="post" action="{% url 'accounts:resend_code' %}" style="margin-top:12px;">
       {% csrf_token %}
       <button class="register-submit-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
 {% endblock %}

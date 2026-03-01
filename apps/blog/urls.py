@@ -47,6 +47,7 @@ urlpatterns = [
     path("posts/create/", views.create_post, name="create_post"),
     path("posts/<slug:slug>/", views.post_detail, name="post_detail"),
     path("post/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
+    path("post/<int:post_id>/review/", views.review_post, name="review_post"),
     path("post/<int:post_id>/delete/", views.delete_post, name="delete_post"),
     # ---- Category URL-ləri ----
     path("category/<slug:slug>/", views.category_detail, name="category_detail"),

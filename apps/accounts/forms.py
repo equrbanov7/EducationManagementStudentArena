@@ -15,6 +15,18 @@ from .models import ProfileRole
 User = get_user_model()
 
 
+STUDENT_JOIN_ORG_TYPE_MAP = {
+    "school_student": OrganizationType.SCHOOL,
+    "university_student": OrganizationType.UNIVERSITY,
+    "course_student": OrganizationType.COURSE_CENTER,
+}
+ORGANIZATION_CREATOR_TYPES = {
+    OrganizationType.SCHOOL,
+    OrganizationType.UNIVERSITY,
+    OrganizationType.COURSE_CENTER,
+}
+
+
 class RegisterForm(forms.ModelForm):
     """User registration form with multi-step wizard support."""
 
@@ -62,6 +74,18 @@ class RegisterForm(forms.ModelForm):
             (
                 OrganizationType.COURSE_CENTER,
                 pgettext_lazy("accounts.form.register.choice", "org_type_course_center"),
+            ),
+            (
+                "school_student",
+                pgettext_lazy("accounts.form.register.choice", "org_type_school_student"),
+            ),
+            (
+                "university_student",
+                pgettext_lazy("accounts.form.register.choice", "org_type_university_student"),
+            ),
+            (
+                "course_student",
+                pgettext_lazy("accounts.form.register.choice", "org_type_course_student"),
             ),
         ],
         widget=forms.Select(attrs={"class": "form-control"}),
@@ -119,6 +143,7 @@ class RegisterForm(forms.ModelForm):
 
     initial_role = forms.ChoiceField(
         label=pgettext_lazy("accounts.form.register.label", "initial_role"),
+        required=False,
         choices=[
             (
                 ProfileRole.MEMBER,
@@ -176,14 +201,15 @@ class RegisterForm(forms.ModelForm):
 
         p1 = cleaned_data.get("password")
         p2 = cleaned_data.get("password2")
-        country_code = cleaned_data.get("country")
-        organization_type = cleaned_data.get("organization_type")
-        institution = cleaned_data.get("institution")
+        country_code = (cleaned_data.get("country") or "").upper()
+        selected_registration_type = cleaned_data.get("organization_type")
         join_organization = cleaned_data.get("join_organization")
         institution_not_listed_name = (cleaned_data.get("institution_not_listed_name") or "").strip()
         organization_identifier = (cleaned_data.get("organization_identifier") or "").strip()
         organization_license_identifier = (cleaned_data.get("organization_license_identifier") or "").strip()
         initial_role = cleaned_data.get("initial_role")
+        signup_mode = "individual"
+        organization_type = selected_registration_type
 
         if p1 and p2 and p1 != p2:
             self.add_error("password2", pgettext_lazy("accounts.form.register.error", "password_mismatch"))
@@ -193,56 +219,75 @@ class RegisterForm(forms.ModelForm):
         elif not Country.objects.filter(code=country_code, is_active=True).exists():
             self.add_error("country", pgettext_lazy("accounts.form.register.error", "country_invalid"))
 
-        if initial_role == ProfileRole.STUDENT and organization_type != OrganizationType.INDIVIDUAL:
-            self.add_error(
-                "initial_role",
-                pgettext_lazy("accounts.form.register.error", "signup_student_role_not_allowed"),
-            )
+        if selected_registration_type in STUDENT_JOIN_ORG_TYPE_MAP:
+            signup_mode = "student_join"
+            organization_type = STUDENT_JOIN_ORG_TYPE_MAP[selected_registration_type]
+        elif selected_registration_type in ORGANIZATION_CREATOR_TYPES:
+            signup_mode = "organization_create"
+            organization_type = selected_registration_type
+        elif selected_registration_type == OrganizationType.INDIVIDUAL:
+            signup_mode = "individual"
+            organization_type = OrganizationType.INDIVIDUAL
 
-        if organization_type in {OrganizationType.SCHOOL, OrganizationType.UNIVERSITY, OrganizationType.COURSE_CENTER}:
-            if not institution and not institution_not_listed_name:
-                self.add_error("institution", pgettext_lazy("accounts.form.register.error", "institution_required"))
+        if signup_mode == "organization_create":
+            if not institution_not_listed_name:
                 self.add_error(
                     "institution_not_listed_name",
                     pgettext_lazy("accounts.form.register.error", "institution_name_required"),
                 )
-            if institution:
-                if institution.country.code != country_code:
-                    self.add_error(
-                        "institution",
-                        pgettext_lazy("accounts.form.register.error", "institution_country_mismatch"),
-                    )
-                if institution.institution_type != organization_type:
-                    self.add_error(
-                        "institution",
-                        pgettext_lazy("accounts.form.register.error", "institution_type_mismatch"),
-                    )
-            if organization_type == OrganizationType.UNIVERSITY and not (
-                organization_identifier or (institution and institution.code)
-            ):
+
+            if organization_type == OrganizationType.UNIVERSITY and not organization_identifier:
                 self.add_error(
                     "organization_identifier",
                     pgettext_lazy("accounts.form.register.error", "university_identifier_required"),
                 )
+
+            cleaned_data["institution"] = None
             cleaned_data["join_organization"] = None
+            cleaned_data["initial_role"] = ProfileRole.ORG_ADMIN
+        elif signup_mode == "student_join":
+            if not join_organization:
+                self.add_error(
+                    "join_organization",
+                    pgettext_lazy("accounts.form.register.error", "join_organization_required"),
+                )
+            else:
+                if not join_organization.is_active or join_organization.status != "active":
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_inactive"),
+                    )
+                if join_organization.org_type != organization_type:
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_type_mismatch"),
+                    )
+                if not self._organization_matches_country(join_organization, country_code):
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_country_mismatch"),
+                    )
+
+            cleaned_data["institution"] = None
+            cleaned_data["institution_not_listed_name"] = ""
+            cleaned_data["organization_identifier"] = ""
+            cleaned_data["organization_license_identifier"] = ""
+            cleaned_data["initial_role"] = ProfileRole.STUDENT
         else:
             cleaned_data["institution"] = None
             cleaned_data["institution_not_listed_name"] = ""
             cleaned_data["organization_identifier"] = ""
             cleaned_data["organization_license_identifier"] = ""
-            if not join_organization:
-                self.add_error(
-                    "join_organization",
-                    pgettext_lazy("accounts.form.register.error", "individual_organization_required"),
-                )
-            else:
-                # Individual + selected organization should always onboard as student.
-                cleaned_data["initial_role"] = ProfileRole.STUDENT
+            cleaned_data["join_organization"] = None
+            cleaned_data["initial_role"] = ProfileRole.ORG_ADMIN
 
-        cleaned_data["country"] = (country_code or "").upper()
+        cleaned_data["country"] = country_code
         cleaned_data["organization_type"] = organization_type
+        cleaned_data["signup_mode"] = signup_mode
         cleaned_data["initial_role"] = cleaned_data.get("initial_role", initial_role)
-        cleaned_data["institution_not_listed_name"] = institution_not_listed_name
+        cleaned_data["institution_not_listed_name"] = cleaned_data.get(
+            "institution_not_listed_name", institution_not_listed_name
+        )
         cleaned_data["organization_identifier"] = cleaned_data.get("organization_identifier", organization_identifier)
         cleaned_data["organization_license_identifier"] = cleaned_data.get(
             "organization_license_identifier", organization_license_identifier
@@ -271,22 +316,45 @@ class RegisterForm(forms.ModelForm):
         ]
 
         selected_country = (self.data.get("country") or self.initial.get("country") or "").upper()
-        selected_org_type = self.data.get("organization_type") or self.initial.get("organization_type")
+        selected_registration_type = self.data.get("organization_type") or self.initial.get("organization_type")
+        selected_org_type = STUDENT_JOIN_ORG_TYPE_MAP.get(selected_registration_type, selected_registration_type)
 
         institutions = Institution.objects.filter(is_active=True)
         if selected_country:
             institutions = institutions.filter(country__code=selected_country)
-        if selected_org_type in {OrganizationType.SCHOOL, OrganizationType.UNIVERSITY, OrganizationType.COURSE_CENTER}:
+        if selected_org_type in ORGANIZATION_CREATOR_TYPES:
             institutions = institutions.filter(institution_type=selected_org_type)
         else:
             institutions = institutions.none()
 
         self.fields["institution"].queryset = institutions.order_by("name")
-        self.fields["join_organization"].queryset = (
-            Organization.objects.filter(is_active=True, status="active")
-            .exclude(org_type=OrganizationType.INDIVIDUAL)
-            .order_by("name")
+        join_orgs = Organization.objects.filter(is_active=True, status="active").exclude(
+            org_type=OrganizationType.INDIVIDUAL
         )
+        if selected_org_type in ORGANIZATION_CREATOR_TYPES:
+            join_orgs = join_orgs.filter(org_type=selected_org_type)
+        self.fields["join_organization"].queryset = join_orgs.order_by("name")
+
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["first_name"].widget.attrs["required"] = "required"
+        self.fields["last_name"].widget.attrs["required"] = "required"
+
+    @staticmethod
+    def _organization_matches_country(organization, country_code):
+        if not organization or not country_code:
+            return True
+
+        org_country = (organization.country or "").strip()
+        if not org_country:
+            return True
+        if org_country.upper() == country_code:
+            return True
+
+        country = Country.objects.filter(code=country_code, is_active=True).first()
+        if not country:
+            return False
+        return org_country.lower() == country.name.lower()
 
 
 class CustomLoginForm(AuthenticationForm):

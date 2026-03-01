@@ -18,132 +18,132 @@ msgstr ""
 #: apps/accounts/forms.py:22
 msgctxt "accounts.form.register.label"
 msgid "password"
-msgstr "Password"
+msgstr "Şifre"
 
 #: apps/accounts/forms.py:25
 msgctxt "accounts.form.register.placeholder"
 msgid "password"
-msgstr "Password"
+msgstr "Şifre"
 
 #: apps/accounts/forms.py:31
 msgctxt "accounts.form.register.label"
 msgid "password_confirm"
-msgstr "Password confirm"
+msgstr "Şifre tekrarı"
 
 #: apps/accounts/forms.py:34
 msgctxt "accounts.form.register.placeholder"
 msgid "password_confirm"
-msgstr "Password confirm"
+msgstr "Şifre tekrarı"
 
 #: apps/accounts/forms.py:41
 msgctxt "accounts.form.register.label"
 msgid "country"
-msgstr "Country"
+msgstr "Ülke"
 
 #: apps/accounts/forms.py:48
 msgctxt "accounts.form.register.label"
 msgid "registration_type"
-msgstr "Registration type"
+msgstr "Hesap türü"
 
 #: apps/accounts/forms.py:52
 msgctxt "accounts.form.register.choice"
 msgid "org_type_individual"
-msgstr "Organization type individual"
+msgstr "Bireysel hesap (kendi workspace’im)"
 
 #: apps/accounts/forms.py:56
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school"
-msgstr "Organization type school"
+msgstr "Okul"
 
 #: apps/accounts/forms.py:60
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university"
-msgstr "Organization type university"
+msgstr "Üniversite"
 
 #: apps/accounts/forms.py:64
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_center"
-msgstr "Organization type course center"
+msgstr "Kurs merkezi"
 
 #: apps/accounts/forms.py:72
 msgctxt "accounts.form.register.label"
 msgid "institution"
-msgstr "Institution"
+msgstr "Kurum"
 
 #: apps/accounts/forms.py:75
 msgctxt "accounts.form.register.choice"
 msgid "institution_empty"
-msgstr "Institution empty"
+msgstr "Kurum seçin"
 
 #: apps/accounts/forms.py:80
 msgctxt "accounts.form.register.label"
 msgid "join_organization"
-msgstr "Join organization"
+msgstr "Kuruluşa katıl"
 
 #: apps/accounts/forms.py:83
 msgctxt "accounts.form.register.choice"
 msgid "organization_empty"
-msgstr "Organization empty"
+msgstr "Kuruluş seçin"
 
 #: apps/accounts/forms.py:88
 msgctxt "accounts.form.register.label"
 msgid "institution_not_listed"
-msgstr "Institution not listed"
+msgstr "Kurum adı (listede yoksa)"
 
 #: apps/accounts/forms.py:92
 msgctxt "accounts.form.register.placeholder"
 msgid "institution_not_listed"
-msgstr "Institution not listed"
+msgstr "Kurum adını girin"
 
 #: apps/accounts/forms.py:99
 msgctxt "accounts.form.register.label"
 msgid "official_identifier"
-msgstr "Official identifier"
+msgstr "Resmi tanımlayıcı"
 
 #: apps/accounts/forms.py:103
 msgctxt "accounts.form.register.placeholder"
 msgid "official_identifier"
-msgstr "Official identifier"
+msgstr "Resmi tanımlayıcı"
 
 #: apps/accounts/forms.py:110
 msgctxt "accounts.form.register.label"
 msgid "license_identifier_optional"
-msgstr "License identifier optional"
+msgstr "Lisans tanımlayıcısı (isteğe bağlı)"
 
 #: apps/accounts/forms.py:114
 msgctxt "accounts.form.register.placeholder"
 msgid "license_identifier_optional"
-msgstr "License identifier optional"
+msgstr "Lisans tanımlayıcısı (isteğe bağlı)"
 
 #: apps/accounts/forms.py:121
 msgctxt "accounts.form.register.label"
 msgid "initial_role"
-msgstr "Initial role"
+msgstr "Başlangıç rolü"
 
 #: apps/accounts/forms.py:125
 msgctxt "accounts.form.register.choice"
 msgid "role_member_pending"
-msgstr "Member / Pending"
+msgstr "Üye"
 
 #: apps/accounts/forms.py:129
 msgctxt "accounts.form.register.choice"
 msgid "role_teacher"
-msgstr "Role teacher"
+msgstr "Öğretmen"
 
 #: apps/accounts/forms.py:133
 msgctxt "accounts.form.register.choice"
 msgid "role_hr"
-msgstr "Role hr"
+msgstr "HR"
 
 #: apps/accounts/forms.py:137
 msgctxt "accounts.form.register.choice"
 msgid "role_org_admin"
-msgstr "Organization Admin"
+msgstr "Kuruluş yöneticisi"
 
 #: apps/accounts/forms.py:150
 msgctxt "accounts.form.register.placeholder"
 msgid "username"
-msgstr "Username"
+msgstr "Kullanıcı adı"
 
 #: apps/accounts/forms.py:156
 msgctxt "accounts.form.register.placeholder"
@@ -153,109 +153,107 @@ msgstr "Email"
 #: apps/accounts/forms.py:162
 msgctxt "accounts.form.register.placeholder"
 msgid "first_name"
-msgstr "First name"
+msgstr "Ad"
 
 #: apps/accounts/forms.py:168
 msgctxt "accounts.form.register.placeholder"
 msgid "last_name"
-msgstr "Last name"
+msgstr "Soyad"
 
 #: apps/accounts/forms.py:189
 msgctxt "accounts.form.register.error"
 msgid "password_mismatch"
-msgstr "Password mismatch"
+msgstr "Şifreler eşleşmiyor."
 
 #: apps/accounts/forms.py:192
 msgctxt "accounts.form.register.error"
 msgid "country_required"
-msgstr "Country required"
+msgstr "Ülke seçimi zorunludur."
 
 #: apps/accounts/forms.py:194
 msgctxt "accounts.form.register.error"
 msgid "country_invalid"
-msgstr "Country invalid"
+msgstr "Seçilen ülke geçersiz."
 
 #: apps/accounts/forms.py:199
 msgctxt "accounts.form.register.error"
 msgid "signup_student_role_not_allowed"
-msgstr "Student role cannot be selected during signup."
+msgstr "Öğrenci rolü manuel seçilemez."
 
 #: apps/accounts/forms.py:204
 msgctxt "accounts.form.register.error"
 msgid "institution_required"
-msgstr "Institution required"
+msgstr "Lütfen bir kurum seçin."
 
 #: apps/accounts/forms.py:207
 msgctxt "accounts.form.register.error"
 msgid "institution_name_required"
-msgstr "Institution name required"
+msgstr "Kurum adı zorunludur."
 
 #: apps/accounts/forms.py:213
 msgctxt "accounts.form.register.error"
 msgid "institution_country_mismatch"
-msgstr "Institution country mismatch"
+msgstr "Kurum seçilen ülke ile eşleşmiyor."
 
 #: apps/accounts/forms.py:218
 msgctxt "accounts.form.register.error"
 msgid "institution_type_mismatch"
-msgstr "Institution type mismatch"
+msgstr "Kurum seçilen hesap türü ile eşleşmiyor."
 
 #: apps/accounts/forms.py:225
 msgctxt "accounts.form.register.error"
 msgid "university_identifier_required"
-msgstr "An official university identifier or code is required."
+msgstr "Üniversite için resmi tanımlayıcı veya kod zorunludur."
 
 #: apps/accounts/forms.py:236
 msgctxt "accounts.form.register.error"
 msgid "individual_organization_required"
-msgstr "Organization selection is required for individual registration."
+msgstr "Bireysel hesap için kuruluş seçimi gerekmez."
 
 #: apps/accounts/forms.py:256
 msgctxt "accounts.form.register.error"
 msgid "username_taken"
-msgstr "Username taken"
+msgstr "Bu kullanıcı adı zaten kullanılıyor."
 
 #: apps/accounts/forms.py:262
 msgctxt "accounts.form.register.error"
 msgid "email_taken"
-msgstr "Email taken"
+msgstr "Bu email zaten kullanılıyor."
 
 #: apps/accounts/forms.py:270
 msgctxt "accounts.form.register.choice"
 msgid "country_select"
-msgstr "Country select"
+msgstr "Ülke seçin"
 
 #: apps/accounts/forms.py:296
 msgctxt "accounts.form.login.label"
 msgid "username_or_email"
-msgstr "Username or email"
+msgstr "Kullanıcı adı veya email"
 
 #: apps/accounts/forms.py:300
 msgctxt "accounts.form.login.placeholder"
 msgid "username_or_email"
-msgstr "Username or email"
+msgstr "Kullanıcı adı veya email"
 
 #: apps/accounts/forms.py:305
 msgctxt "accounts.form.login.label"
 msgid "password"
-msgstr "Password"
+msgstr "Şifre"
 
 #: apps/accounts/forms.py:309
 msgctxt "accounts.form.login.placeholder"
 msgid "password"
-msgstr "Password"
+msgstr "Şifre"
 
 #: apps/accounts/forms.py:320
 msgctxt "accounts.form.login.error"
 msgid "account_inactive"
-msgstr "Account is inactive. Please contact support."
+msgstr "Hesap aktif değil. Önce email doğrulamasını tamamlayın."
 
 #: apps/accounts/forms.py:331
 msgctxt "accounts.form.login.error"
 msgid "organization_suspended"
-msgstr ""
-"Your organization has been suspended. Login is blocked, contact the "
-"administrator."
+msgstr "Kuruluşunuz askıya alındı. Yöneticiyle iletişime geçin."
 
 #: apps/accounts/templates/accounts/assigned_courses.html:4
 msgctxt "accounts.assigned_courses_page"
@@ -521,37 +519,37 @@ msgstr "A modal will open to view the submission content. ID: {id}"
 #: apps/accounts/templates/accounts/login.html:4
 msgctxt "accounts.login"
 msgid "title"
-msgstr "Login"
+msgstr "Giriş yap"
 
 #: apps/accounts/templates/accounts/login.html:13
 msgctxt "accounts.login"
 msgid "heading"
-msgstr "Login"
+msgstr "Giriş yap"
 
 #: apps/accounts/templates/accounts/login.html:14
 msgctxt "accounts.login"
 msgid "subheading"
-msgstr "Sign in to your account and manage your posts."
+msgstr "Hesabınıza giriş yapın."
 
 #: apps/accounts/templates/accounts/login.html:44
 msgctxt "accounts.login"
 msgid "forgot_password"
-msgstr "Forgot password?"
+msgstr "Şifrenizi mi unuttunuz?"
 
 #: apps/accounts/templates/accounts/login.html:48
 msgctxt "accounts.login"
 msgid "submit"
-msgstr "Submit"
+msgstr "Giriş yap"
 
 #: apps/accounts/templates/accounts/login.html:52
 msgctxt "accounts.login"
 msgid "no_account"
-msgstr "Don't have an account?"
+msgstr "Hesabınız yok mu?"
 
 #: apps/accounts/templates/accounts/login.html:52
 msgctxt "accounts.login"
 msgid "register_now"
-msgstr "Register"
+msgstr "Hesap oluştur"
 
 #: apps/accounts/templates/accounts/manage_roles.html:4
 msgctxt "accounts.manage_roles_page"
@@ -2499,276 +2497,269 @@ msgstr "Discard changes"
 #: apps/accounts/templates/accounts/register.html:4
 msgctxt "accounts.register"
 msgid "title"
-msgstr "Register"
+msgstr "Kayıt ol"
 
 #: apps/accounts/templates/accounts/register.html:13
 msgctxt "accounts.register"
 msgid "heading"
-msgstr "Create account"
+msgstr "Hesap oluştur"
 
 #: apps/accounts/templates/accounts/register.html:14
 msgctxt "accounts.register"
 msgid "subheading"
-msgstr ""
-"Create a multi-tenant account and join the platform by selecting your role."
+msgstr "Hesabınızı oluşturun ve platforma nasıl katılacağınızı seçin."
 
 #: apps/accounts/templates/accounts/register.html:20
 msgctxt "accounts.register"
 msgid "step_country"
-msgstr "Country"
+msgstr "Ülke"
 
 #: apps/accounts/templates/accounts/register.html:24
 msgctxt "accounts.register"
 msgid "step_account_type"
-msgstr "Account type"
+msgstr "Hesap türü"
 
 #: apps/accounts/templates/accounts/register.html:28
 msgctxt "accounts.register"
 msgid "step_details"
-msgstr "Details"
+msgstr "Detaylar"
 
 #: apps/accounts/templates/accounts/register.html:45
 msgctxt "accounts.register"
 msgid "choose_country"
-msgstr "Choose your country"
+msgstr "Ülkenizi seçin"
 
 #: apps/accounts/templates/accounts/register.html:55
 #: apps/accounts/templates/accounts/register.html:135
 msgctxt "accounts.register"
 msgid "continue"
-msgstr "Continue"
+msgstr "Devam et"
 
 #: apps/accounts/templates/accounts/register.html:62
 msgctxt "accounts.register"
 msgid "choose_registration_type"
-msgstr "Choose registration type"
+msgstr "Hesap türünü seçin"
 
 #: apps/accounts/templates/accounts/register.html:79
 msgctxt "accounts.register"
 msgid "individual_org_required_help"
-msgstr ""
-"When selecting Individual, organization selection is required. Role will be "
-"set automatically as student."
+msgstr "Bireysel hesap için artık mevcut kuruluş seçimi zorunlu değildir."
 
 #: apps/accounts/templates/accounts/register.html:86
 msgctxt "accounts.register"
 msgid "institution_search_label"
-msgstr "Search institution"
+msgstr "Kurum ara"
 
 #: apps/accounts/templates/accounts/register.html:87
 msgctxt "accounts.register"
 msgid "institution_search_placeholder"
-msgstr "Search institution..."
+msgstr "Kurum ara..."
 
 #: apps/accounts/templates/accounts/register.html:106
 msgctxt "accounts.register"
 msgid "institution_not_listed_help"
-msgstr ""
-"If it is not listed, select “Not listed / Other” and enter institution name "
-"manually."
+msgstr "Listede yoksa kurum adını manuel girin."
 
 #: apps/accounts/templates/accounts/register.html:117
 msgctxt "accounts.register"
 msgid "org_identifier_help_university"
-msgstr "This field is required for university."
+msgstr "Üniversite için bu alan zorunludur."
 
 #: apps/accounts/templates/accounts/register.html:132
 #: apps/accounts/templates/accounts/register.html:208
 msgctxt "accounts.register"
 msgid "back"
-msgstr "Back"
+msgstr "Geri"
 
 #: apps/accounts/templates/accounts/register.html:142
 msgctxt "accounts.register"
 msgid "personal_info"
-msgstr "Personal information"
+msgstr "Kişisel bilgiler"
 
 #: apps/accounts/templates/accounts/register.html:186
 msgctxt "accounts.register"
 msgid "auto_student_role_info"
-msgstr ""
-"For the selected individual organization, status will be set automatically "
-"as student."
+msgstr "Rol seçilen hesap türüne göre otomatik atanır."
 
 #: apps/accounts/templates/accounts/register.html:210
 msgctxt "accounts.register"
 msgid "submit"
-msgstr "Submit"
+msgstr "Kaydı tamamla"
 
 #: apps/accounts/templates/accounts/register.html:216
 msgctxt "accounts.register"
 msgid "already_have_account"
-msgstr "Already have an account?"
+msgstr "Zaten hesabınız var mı?"
 
 #: apps/accounts/templates/accounts/register.html:216
 msgctxt "accounts.register"
 msgid "login_now"
-msgstr "Login"
+msgstr "Giriş yap"
 
 #: apps/accounts/templates/accounts/register.html:228
 msgctxt "accounts.register.js"
 msgid "select_empty_university"
-msgstr "Select empty university"
+msgstr "Üniversite seçin"
 
 #: apps/accounts/templates/accounts/register.html:229
 msgctxt "accounts.register.js"
 msgid "select_empty_school"
-msgstr "Select empty school"
+msgstr "Okul seçin"
 
 #: apps/accounts/templates/accounts/register.html:230
 msgctxt "accounts.register.js"
 msgid "select_empty_course_center"
-msgstr "Select empty course center"
+msgstr "Kurs merkezi seçin"
 
 #: apps/accounts/templates/accounts/register.html:231
 msgctxt "accounts.register.js"
 msgid "select_empty_default"
-msgstr "Select empty default"
+msgstr "Kurum seçin"
 
 #: apps/accounts/templates/accounts/register.html:232
 msgctxt "accounts.register.js"
 msgid "label_search_university"
-msgstr "Search university"
+msgstr "Üniversite ara"
 
 #: apps/accounts/templates/accounts/register.html:233
 msgctxt "accounts.register.js"
 msgid "placeholder_search_university"
-msgstr "Search university..."
+msgstr "Üniversite ara..."
 
 #: apps/accounts/templates/accounts/register.html:234
 msgctxt "accounts.register.js"
 msgid "label_university"
-msgstr "University"
+msgstr "Üniversite"
 
 #: apps/accounts/templates/accounts/register.html:235
 msgctxt "accounts.register.js"
 msgid "label_university_manual"
-msgstr "University manual"
+msgstr "Üniversite adını girin"
 
 #: apps/accounts/templates/accounts/register.html:236
 msgctxt "accounts.register.js"
 msgid "placeholder_university_manual"
-msgstr "University manual..."
+msgstr "Üniversite adını girin..."
 
 #: apps/accounts/templates/accounts/register.html:237
 msgctxt "accounts.register.js"
 msgid "label_university_identifier"
-msgstr "University identifier"
+msgstr "Üniversite kodu / tanımlayıcısı"
 
 #: apps/accounts/templates/accounts/register.html:238
 msgctxt "accounts.register.js"
 msgid "hint_university_az"
-msgstr "Hint university az"
+msgstr "Azerbaycan’daki üniversiteleri listeden seçebilirsiniz."
 
 #: apps/accounts/templates/accounts/register.html:239
 msgctxt "accounts.register.js"
 msgid "hint_university_global"
-msgstr "Hint university global"
+msgstr "Ülkenize göre üniversite listesinden seçim yapın."
 
 #: apps/accounts/templates/accounts/register.html:240
 msgctxt "accounts.register.js"
 msgid "label_search_school"
-msgstr "Search school"
+msgstr "Okul ara (ad veya numara)"
 
 #: apps/accounts/templates/accounts/register.html:241
 msgctxt "accounts.register.js"
 msgid "placeholder_search_school"
-msgstr "Search school..."
+msgstr "Okul adı veya numarası ara..."
 
 #: apps/accounts/templates/accounts/register.html:242
 msgctxt "accounts.register.js"
 msgid "label_school_optional"
-msgstr "School optional"
+msgstr "Okul (isteğe bağlı)"
 
 #: apps/accounts/templates/accounts/register.html:243
 msgctxt "accounts.register.js"
 msgid "label_school_manual"
-msgstr "School manual"
+msgstr "Okul adını girin"
 
 #: apps/accounts/templates/accounts/register.html:244
 msgctxt "accounts.register.js"
 msgid "placeholder_school_manual"
-msgstr "School manual..."
+msgstr "Listede yoksa okul adını girin..."
 
 #: apps/accounts/templates/accounts/register.html:245
 msgctxt "accounts.register.js"
 msgid "label_school_identifier"
-msgstr "School identifier"
+msgstr "Okul numarası / kodu (isteğe bağlı)"
 
 #: apps/accounts/templates/accounts/register.html:246
 msgctxt "accounts.register.js"
 msgid "hint_school"
-msgstr "Hint school"
+msgstr "Listeden aktif ve kayıtlı bir okul seçin."
 
 #: apps/accounts/templates/accounts/register.html:247
 msgctxt "accounts.register.js"
 msgid "label_search_course_center"
-msgstr "Search course center"
+msgstr "Kurs merkezi ara"
 
 #: apps/accounts/templates/accounts/register.html:248
 msgctxt "accounts.register.js"
 msgid "placeholder_search_course_center"
-msgstr "Search course center..."
+msgstr "Kurs merkezi ara..."
 
 #: apps/accounts/templates/accounts/register.html:249
 msgctxt "accounts.register.js"
 msgid "label_course_center_optional"
-msgstr "Course center optional"
+msgstr "Kurs merkezi (isteğe bağlı)"
 
 #: apps/accounts/templates/accounts/register.html:250
 msgctxt "accounts.register.js"
 msgid "label_course_center_manual"
-msgstr "Course center manual"
+msgstr "Kurs merkezi adını girin"
 
 #: apps/accounts/templates/accounts/register.html:251
 msgctxt "accounts.register.js"
 msgid "placeholder_course_center_manual"
-msgstr "Course center manual..."
+msgstr "Listede yoksa kurs merkezi adını girin..."
 
 #: apps/accounts/templates/accounts/register.html:252
 msgctxt "accounts.register.js"
 msgid "label_course_center_identifier"
-msgstr "Course center identifier"
+msgstr "Merkez tanımlayıcısı (isteğe bağlı)"
 
 #: apps/accounts/templates/accounts/register.html:253
 msgctxt "accounts.register.js"
 msgid "hint_course_center"
-msgstr "Hint course center"
+msgstr "Listeden aktif ve kayıtlı bir kurs merkezi seçin."
 
 #: apps/accounts/templates/accounts/register.html:254
 msgctxt "accounts.register.js"
 msgid "label_search_default"
-msgstr "Search default"
+msgstr "Kurum ara"
 
 #: apps/accounts/templates/accounts/register.html:255
 msgctxt "accounts.register.js"
 msgid "placeholder_search_default"
-msgstr "Search default..."
+msgstr "Kurum ara..."
 
 #: apps/accounts/templates/accounts/register.html:256
 msgctxt "accounts.register.js"
 msgid "label_institution_default"
-msgstr "Institution default"
+msgstr "Kurum"
 
 #: apps/accounts/templates/accounts/register.html:257
 msgctxt "accounts.register.js"
 msgid "label_institution_manual_default"
-msgstr "Institution manual default"
+msgstr "Kurum adı (Listede yok / Diğer)"
 
 #: apps/accounts/templates/accounts/register.html:258
 msgctxt "accounts.register.js"
 msgid "label_identifier_default"
-msgstr "Identifier default"
+msgstr "Resmi tanımlayıcı / kod"
 
 #: apps/accounts/templates/accounts/register.html:259
 msgctxt "accounts.register.js"
 msgid "help_identifier_required"
-msgstr "Help identifier required"
+msgstr "Üniversite için bu alan zorunludur."
 
 #: apps/accounts/templates/accounts/register.html:260
 msgctxt "accounts.register.js"
 msgid "help_identifier_optional"
-msgstr "Help identifier optional"
+msgstr "Bu alan isteğe bağlıdır."
 
 #: apps/accounts/templates/accounts/role_assignment.html:4
 msgctxt "accounts.role_assignment_page"
@@ -3041,37 +3032,37 @@ msgstr "Empty at risk students"
 #: apps/accounts/templates/accounts/verify_code.html:3
 msgctxt "accounts.verify_code"
 msgid "title"
-msgstr "Email verification"
+msgstr "Email doğrulama"
 
 #: apps/accounts/templates/accounts/verify_code.html:8
 msgctxt "accounts.verify_code"
 msgid "heading"
-msgstr "Email verification"
+msgstr "Email doğrulama"
 
 #: apps/accounts/templates/accounts/verify_code.html:9
 msgctxt "accounts.verify_code"
 msgid "code_sent_suffix"
-msgstr "address received a code."
+msgstr "adresine doğrulama kodu gönderildi."
 
 #: apps/accounts/templates/accounts/verify_code.html:14
 msgctxt "accounts.verify_code"
 msgid "code_label"
-msgstr "Verification code"
+msgstr "Doğrulama kodu"
 
 #: apps/accounts/templates/accounts/verify_code.html:15
 msgctxt "accounts.verify_code"
 msgid "code_placeholder"
-msgstr "6-digit code..."
+msgstr "6 haneli kodu girin"
 
 #: apps/accounts/templates/accounts/verify_code.html:17
 msgctxt "accounts.verify_code"
 msgid "submit_verify"
-msgstr "Verify"
+msgstr "Doğrula"
 
 #: apps/accounts/templates/accounts/verify_code.html:22
 msgctxt "accounts.verify_code"
 msgid "resend_code"
-msgstr "Resend code"
+msgstr "Kodu yeniden gönder"
 
 #: apps/accounts/views.py:764
 msgctxt "accounts.my_results.kind"
@@ -3330,16 +3321,12 @@ msgstr "Bilinmeyen işlem."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr ""
-"Kayıt tamamlandı. Hesabınız oluşturuldu ve organizasyon başvurunuz "
-"kaydedildi."
+msgstr "Kayıt tamamlandı ve kuruluş başvurunuz kaydedildi. Devam etmek için email kodunu doğrulayın."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr ""
-"Kayıt tamamlandı. Artık aynı kullanıcı adı/e-posta ve şifreyle giriş "
-"yapabilirsiniz."
+msgstr "Kayıt tamamlandı. Hesabı etkinleştirmek için email kodunu doğrulayın."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -3374,7 +3361,7 @@ msgstr "E-posta bulunamadı."
 #: apps/accounts/views.py:2798
 msgctxt "accounts.auth.message"
 msgid "new_code_sent"
-msgstr "Yeni bir kod gönderildi."
+msgstr "Yeni doğrulama kodu gönderildi."
 
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
@@ -14592,3 +14579,61 @@ msgstr "Sunucu hatası"
 msgctxt "projects.review.js"
 msgid "grade_button"
 msgstr "Not ver"
+
+
+# Added for auth/signup localization updates
+
+msgctxt "accounts.register"
+msgid "auto_role_info_owner"
+msgstr "Bireysel hesap için rol otomatik olarak kuruluş yöneticisi olacaktır."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_student"
+msgstr "Bu hesap türü için rol otomatik olarak öğrenci olacaktır."
+
+msgctxt "accounts.register"
+msgid "individual_owner_help"
+msgstr "Bireysel hesapta kişisel workspace otomatik oluşturulur ve siz kuruluş yöneticisi olursunuz."
+
+
+# Added for updated register searchable select and org-role copy
+
+msgctxt "accounts.register"
+msgid "auto_role_info_org"
+msgstr "Bu kuruluş tipi için rol otomatik olarak kuruluş yöneticisi olacaktır."
+
+msgctxt "accounts.register.js"
+msgid "no_results"
+msgstr "Sonuç bulunamadı"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_student"
+msgstr "Okul öğrencisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_student"
+msgstr "Üniversite öğrencisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_student"
+msgstr "Kurs öğrencisi"
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_required"
+msgstr "Kuruluş seçimi zorunludur."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_inactive"
+msgstr "Seçilen kuruluş aktif değil veya askıya alınmış."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_type_mismatch"
+msgstr "Seçilen kuruluş, seçilen kayıt türüyle eşleşmiyor."
+
+msgctxt "accounts.form.register.error"
+msgid "join_organization_country_mismatch"
+msgstr "Seçilen kuruluş, seçilen ülkeyle eşleşmiyor."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_student_join"
+msgstr "Email doğrulamasından sonra seçtiğiniz kuruluşa öğrenci olarak katılacaksınız."

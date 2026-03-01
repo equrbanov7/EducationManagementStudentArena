@@ -40,11 +40,22 @@ DATABASES = {
     )
 }
 
-# Email backend - Console for development
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email backend:
+# - If EMAIL_BACKEND is set explicitly, use it.
+# - Otherwise, use SMTP when credentials exist; fallback to console backend.
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend"
+    if os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
+    else "django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", EMAIL_PORT))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() == "true"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() == "true"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@emsarena.local")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or EMAIL_HOST_USER or "noreply@emsarena.local"
 
 # Static files storage - Simple for development
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"

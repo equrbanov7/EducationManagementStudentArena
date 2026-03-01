@@ -7,15 +7,52 @@ from django.contrib import admin
 from .models import AcademicPeriod, Country, Institution, Membership, Organization, OrgUnit, Role
 
 
+class SuperadminBypassAdminMixin:
+    """Allow platform superadmins to manage org models from Django admin."""
+
+    @staticmethod
+    def _is_platform_superadmin(user):
+        return bool(
+            user
+            and user.is_authenticated
+            and (user.is_superuser or getattr(user, "is_superadmin", False))
+        )
+
+    def has_module_permission(self, request):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_view_permission(request, obj=obj)
+
+    def has_add_permission(self, request):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_change_permission(request, obj=obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if self._is_platform_superadmin(request.user):
+            return True
+        return super().has_delete_permission(request, obj=obj)
+
+
 @admin.register(Country)
-class CountryAdmin(admin.ModelAdmin):
+class CountryAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     list_display = ["code", "name", "is_active"]
     list_filter = ["is_active"]
     search_fields = ["code", "name"]
 
 
 @admin.register(Institution)
-class InstitutionAdmin(admin.ModelAdmin):
+class InstitutionAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     list_display = ["name", "institution_type", "country", "code", "is_active"]
     list_filter = ["institution_type", "country", "is_active"]
     search_fields = ["name", "code", "country__name", "country__code"]
@@ -31,7 +68,7 @@ class OrgUnitInline(admin.TabularInline):
 
 
 @admin.register(Organization)
-class OrganizationAdmin(admin.ModelAdmin):
+class OrganizationAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for Organization model."""
 
     list_display = [
@@ -93,7 +130,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 @admin.register(OrgUnit)
-class OrgUnitAdmin(admin.ModelAdmin):
+class OrgUnitAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for OrgUnit model with tree display."""
 
     list_display = [
@@ -147,7 +184,7 @@ class OrgUnitAdmin(admin.ModelAdmin):
 
 
 @admin.register(AcademicPeriod)
-class AcademicPeriodAdmin(admin.ModelAdmin):
+class AcademicPeriodAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for AcademicPeriod model."""
 
     list_display = [
@@ -212,7 +249,7 @@ class AcademicPeriodAdmin(admin.ModelAdmin):
 
 
 @admin.register(Role)
-class RoleAdmin(admin.ModelAdmin):
+class RoleAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for Role model."""
 
     list_display = [
@@ -261,7 +298,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Membership)
-class MembershipAdmin(admin.ModelAdmin):
+class MembershipAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for Membership model."""
 
     list_display = [

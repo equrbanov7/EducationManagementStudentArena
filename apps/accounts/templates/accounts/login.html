@@ -34,7 +34,18 @@
 
             <div class="auth-form-field"> {# auth-field -> auth-form-field #}
                 {{ form.password.label_tag }}
-                {{ form.password }}
+                <div class="input-visibility-wrapper">
+                    {{ form.password }}
+                    <button
+                        type="button"
+                        class="input-visibility-toggle"
+                        data-toggle-visibility
+                        data-target="{{ form.password.id_for_label }}"
+                        aria-label="Toggle field visibility"
+                    >
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
                 {% if form.password.errors %}
                     <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
                 {% endif %}
@@ -53,4 +64,8 @@
         </p>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
 {% endblock %}
