@@ -13,6 +13,11 @@ from dotenv import load_dotenv
 
 from .base import *
 
+
+def _split_csv_env(name: str, default: str = "") -> list[str]:
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
 # Ensure mutable copy (base-də tuple ola bilər)
 STATICFILES_DIRS = list(STATICFILES_DIRS)
 
@@ -29,7 +34,11 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # ALLOWED_HOSTS - read from .env or use default
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0").split(",")
+ALLOWED_HOSTS = _split_csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
+ENABLE_NGROK = os.getenv("ENABLE_NGROK", "True").lower() == "true"
+if ENABLE_NGROK:
+    ALLOWED_HOSTS.extend([".ngrok-free.dev", ".ngrok-free.app", ".ngrok.io", ".ngrok.app"])
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
 
 # Database - PostgreSQL with SQLite fallback for development
 DATABASES = {
@@ -72,8 +81,21 @@ LAN_HOST = os.getenv("LAN_HOST", "172.20.10.11:8000")
 LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "")
 
 # CSRF trusted origins
-raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
-CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
+CSRF_TRUSTED_ORIGINS = _split_csv_env("CSRF_TRUSTED_ORIGINS")
+if ENABLE_NGROK:
+    CSRF_TRUSTED_ORIGINS.extend(
+        [
+            "https://*.ngrok-free.app",
+            "http://*.ngrok-free.app",
+            "https://*.ngrok-free.dev",
+            "http://*.ngrok-free.dev",
+            "https://*.ngrok.io",
+            "http://*.ngrok.io",
+            "https://*.ngrok.app",
+            "http://*.ngrok.app",
+        ]
+    )
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 
 # Site URL for development
 SITE_URL = os.getenv("SITE_URL", "http://172.20.10.11:8000")
