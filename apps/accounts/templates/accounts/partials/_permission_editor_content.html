@@ -46,20 +46,80 @@
     </div>
 
     <div class="permission-editor-search-wrap">
-        <i class="fas fa-search"></i>
-        <input
-            type="search"
-            class="form-control"
-            placeholder="Search permission (key/label)"
-            autocomplete="off"
-            data-permission-search>
+        <div class="permission-editor-search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input
+                type="search"
+                class="form-control"
+                placeholder="İcazə axtar (məs: view, edit, member)"
+                autocomplete="off"
+                data-permission-search>
+            <button type="button"
+                    class="permission-editor-search-clear"
+                    data-permission-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="button"
+                class="btn btn-primary btn-sm permission-editor-search-submit"
+                data-permission-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </div>
+
+    <div class="permission-editor-guide" role="note" aria-label="İstifadə qaydası">
+        <div class="permission-editor-guide-title">
+            <i class="fas fa-circle-info"></i>
+            <span data-permission-guide-title>Bu bölmə nə üçündür?</span>
+        </div>
+        <p class="permission-editor-guide-text" data-permission-guide-text>
+            Bu rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz.
+        </p>
+        <ul class="permission-editor-guide-list">
+            <li>
+                <span class="permission-editor-guide-step">1</span>
+                <span data-permission-guide-step="1">Bölməni açın (məs: Təşkilat, Üzvlər)</span>
+            </li>
+            <li>
+                <span class="permission-editor-guide-step">2</span>
+                <span data-permission-guide-step="2">“Əlavə et” ilə aktiv edin, “Sil” ilə söndürün</span>
+            </li>
+            <li>
+                <span class="permission-editor-guide-step">3</span>
+                <span data-permission-guide-step="3">Çoxlu seçim üçün checkbox + toplu düymələrdən istifadə edin</span>
+            </li>
+        </ul>
+        <div class="permission-editor-mini-legend" aria-label="Qısa izah">
+            <div class="permission-legend-item permission-legend-item--active">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                <span data-permission-legend="active">Aktiv: icazə açıqdır, funksiya işləyir.</span>
+            </div>
+            <div class="permission-legend-item permission-legend-item--inactive">
+                <i class="fas fa-minus-circle" aria-hidden="true"></i>
+                <span data-permission-legend="inactive">Deaktiv: icazə bağlıdır, funksiya məhduddur.</span>
+            </div>
+            <div class="permission-legend-item permission-legend-item--bulk">
+                <i class="fas fa-layer-group" aria-hidden="true"></i>
+                <span data-permission-legend="bulk">Bulk: birdən çox icazəni eyni anda dəyişir.</span>
+            </div>
+        </div>
     </div>
 
     <div class="mb-4">
-        <div class="info-label">{% trans "active_permissions_label" context "profile.permission_editor" %}</div>
+        <div class="info-label"
+             data-permission-active-count
+             data-count="{{ actor_permissions|length }}">
+            Aktiv icazələr: {{ actor_permissions|length }}
+        </div>
         <div class="role-badges">
             {% for perm in actor_permissions %}
-            <span class="role-badge">{{ perm }}</span>
+            <span class="role-badge permission-active-badge"
+                  data-active-permission-badge
+                  data-permission-key="{{ perm|lower }}">
+                {% if perm == "*" %}Bütün icazələr (*){% else %}{{ perm }}{% endif %}
+            </span>
             {% empty %}
             <span class="text-muted">{% trans "permissions_not_found" context "profile.permission_editor" %}</span>
             {% endfor %}
@@ -70,54 +130,86 @@
 
     <div class="permission-modules" data-permission-modules>
         {% for category, perms in permission_categories.items %}
-        <details class="permission-module" data-permission-module>
+        <details class="permission-module" data-permission-module data-permission-category="{{ category|lower }}">
             <summary class="permission-module-summary">
                 <div class="permission-module-summary-main">
                     <i class="fas fa-folder"></i>
-                    <span class="permission-module-title">
+                    <span class="permission-module-title-wrap">
+                        <span class="permission-module-title" data-permission-module-title>
                         {% if category == "organization" %}
-                        Organization
+                        Təşkilat
                         {% elif category == "structure" %}
-                        Structure
+                        Struktur
                         {% elif category == "members" %}
-                        Members
+                        Üzvlər
                         {% elif category == "roles" %}
-                        Roles
+                        Rollar
                         {% elif category == "courses" %}
-                        Courses
+                        Kurslar
                         {% elif category == "grading" %}
-                        Grading
+                        Qiymətləndirmə
                         {% elif category == "exams" %}
-                        Exams
+                        İmtahanlar
                         {% elif category == "appeal" %}
-                        Appeal
+                        Apellyasiya
                         {% elif category == "analytics" %}
-                        Analytics
+                        Analitika
                         {% elif category == "qa" %}
-                        QA
+                        Keyfiyyət
                         {% elif category == "audit" %}
-                        Audit
+                        Audit jurnalı
                         {% else %}
                         {{ category|title }}
                         {% endif %}
+                        </span>
+                        <span class="permission-module-subtitle" data-permission-module-subtitle>
+                        {% if category == "organization" %}
+                        Təşkilat ayarları və idarəetmə əməliyyatları
+                        {% elif category == "structure" %}
+                        Fakültə, şöbə və struktur vahidləri
+                        {% elif category == "members" %}
+                        İstifadəçilər və üzvlüklə bağlı əməliyyatlar
+                        {% elif category == "roles" %}
+                        Rol təyini və rol səviyyələri
+                        {% elif category == "courses" %}
+                        Kurs yaradılması və kurs idarəetməsi
+                        {% elif category == "grading" %}
+                        Qiymətləndirmə və nəticə axınları
+                        {% elif category == "exams" %}
+                        İmtahan idarəetməsi və nəzarət
+                        {% elif category == "appeal" %}
+                        Apellyasiya müraciətləri
+                        {% elif category == "analytics" %}
+                        Analitik hesabat və göstəricilər
+                        {% elif category == "qa" %}
+                        Keyfiyyət yoxlaması əməliyyatları
+                        {% elif category == "audit" %}
+                        Tarixçə və audit log baxışı
+                        {% else %}
+                        Bu bölmə üçün icazələr
+                        {% endif %}
+                        </span>
                     </span>
                 </div>
-                <span class="permission-module-count">{{ perms|length }}</span>
+                <div class="permission-module-summary-meta">
+                    <i class="fas fa-chevron-down permission-module-caret" aria-hidden="true"></i>
+                    <span class="permission-module-count">{{ perms|length }}</span>
+                </div>
             </summary>
 
             <div class="permission-module-body">
                 <div class="permission-module-toolbar">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-module-select-all>
-                        Select all
+                        Hamısını seç
                     </button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-module-deselect-all>
-                        Deselect all
+                        Seçimi sıfırla
                     </button>
                     <button type="button" class="btn btn-sm btn-success" data-module-bulk-add disabled>
-                        Bulk Add
+                        Seçilənləri əlavə et
                     </button>
                     <button type="button" class="btn btn-sm btn-danger" data-module-bulk-remove disabled>
-                        Bulk Remove
+                        Seçilənləri sil
                     </button>
                 </div>
 
@@ -138,6 +230,7 @@
                     {% for perm in perms %}
                     <div class="permission-row {% if perm in selected_role.permissions or '*' in selected_role.permissions %}is-active{% else %}is-inactive{% endif %}"
                          data-permission-row
+                         data-permission-active="{% if perm in selected_role.permissions or '*' in selected_role.permissions %}1{% else %}0{% endif %}"
                          data-permission-key="{{ perm|lower }}">
                         <div class="permission-row-main">
                             <label class="permission-select-wrap" aria-label="Permission seç">
@@ -149,6 +242,7 @@
                             <div class="permission-row-text">
                                 <div class="permission-key">{{ perm }}</div>
                                 <div class="permission-label" data-permission-label>{{ perm }}</div>
+                                <div class="permission-description" data-permission-description></div>
                             </div>
                         </div>
 
@@ -172,12 +266,15 @@
                                        name="action"
                                        value="{% if perm in selected_role.permissions or '*' in selected_role.permissions %}remove{% else %}add{% endif %}"
                                        data-permission-action>
-                                <label class="permission-switch" aria-label="Permission vəziyyətini dəyiş">
-                                    <input type="checkbox"
-                                           {% if perm in selected_role.permissions or '*' in selected_role.permissions %}checked{% endif %}
-                                           data-permission-switch>
-                                    <span class="permission-switch-slider"></span>
-                                </label>
+                                <button type="button"
+                                        class="btn btn-sm permission-action-btn {% if perm in selected_role.permissions or '*' in selected_role.permissions %}permission-action-btn--remove{% else %}permission-action-btn--add{% endif %}"
+                                        data-permission-action-btn>
+                                    {% if perm in selected_role.permissions or '*' in selected_role.permissions %}
+                                    <i class="fas fa-minus-circle"></i> Sil
+                                    {% else %}
+                                    <i class="fas fa-plus-circle"></i> Əlavə et
+                                    {% endif %}
+                                </button>
                             </form>
                         </div>
                     </div>

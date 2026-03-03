@@ -5,7 +5,8 @@
         <i class="fas fa-user-graduate"></i> {{ organization.name }}
     </div>
     <form method="get"
-          class="search-form"
+          class="search-form role-assignment-search-form"
+          data-standard-search-form
           data-debounce-ms="1000"
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
         {% if embedded_in_profile %}
@@ -13,12 +14,27 @@
         {% endif %}
         <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
         <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
-        <input type="text"
-               name="student_org_search"
-               value="{{ student_search_query }}"
-               placeholder="Tələbə axtar..."
-               class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_search"
+                   value="{{ student_search_query }}"
+                   placeholder="Tələbə axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
     </form>
 </div>
 
@@ -85,7 +101,8 @@
         Artıq başqa təşkilata qəbul olanların müraciəti "Bağlanıb" kimi görünəcək.
     </p>
     <form method="get"
-          class="search-form mb-3"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
           data-debounce-ms="1000"
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
         {% if embedded_in_profile %}
@@ -94,12 +111,27 @@
         <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
         <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
         <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
-        <input type="text"
-               name="student_org_pending_search"
-               value="{{ pending_search_query }}"
-               placeholder="Təsdiq gözləyən tələbə axtar..."
-               class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_pending_search"
+                   value="{{ pending_search_query }}"
+                   placeholder="Təsdiq gözləyən tələbə axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
     </form>
 
     <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -129,14 +161,18 @@
                 <button type="submit"
                         name="bulk_reject"
                         value="1"
-                        class="btn btn-outline-danger btn-sm"
-                        {% if not can_manage_students %}disabled{% endif %}>
+                        class="btn btn-outline-danger btn-sm js-pending-remove-bulk"
+                        data-default-label="Seçilənləri sil"
+                        data-selected-label="Seçilənləri sil ({count} seçildi)"
+                        data-disabled-tooltip="Ən az 1 seçin"
+                        data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                        title="Ən az 1 seçin"
+                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
                     <i class="fas fa-trash"></i> Seçilənləri sil
                 </button>
             </div>
         </div>
 
-        {% if pending_requested_students.paginator.count %}
         <div class="table-responsive profile-section-table-scroll">
             <table class="table">
                 <thead>
@@ -208,16 +244,14 @@
                             </div>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="empty-state py-4">
-            <i class="fas fa-user-clock"></i>
-            <p class="mb-0">Təsdiq gözləyən tələbə yoxdur.</p>
-        </div>
-        {% endif %}
     </form>
     {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
 </div>
@@ -230,7 +264,8 @@
         Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə kabinetində qəbul etdikdən sonra təşkilata qoşulacaq.
     </p>
     <form method="get"
-          class="search-form mb-3"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
           data-debounce-ms="1000"
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
         {% if embedded_in_profile %}
@@ -239,12 +274,27 @@
         <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
         <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
         <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
-        <input type="text"
-               name="student_org_unassigned_search"
-               value="{{ unassigned_search_query }}"
-               placeholder="Təşkilatsız tələbə axtar..."
-               class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_unassigned_search"
+                   value="{{ unassigned_search_query }}"
+                   placeholder="Təşkilatsız tələbə axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
     </form>
 
     <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -253,12 +303,20 @@
         <input type="hidden" name="action" value="bulk_invite_students">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <label class="form-check d-flex align-items-center gap-2 mb-0">
-                <input type="checkbox" id="selectAllUnassignedStudents" class="form-check-input mt-0">
+                <input type="checkbox"
+                       id="selectAllUnassignedStudents"
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
                 <span class="form-check-label">Hamısını seç</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
-                    {% if not can_manage_students %}disabled{% endif %}>
+                    data-default-label="Seçilənlərə dəvət et"
+                    data-selected-label="Seçilənlərə dəvət et ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
                 <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
             </button>
         </div>
@@ -285,7 +343,8 @@
                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
-                                   data-target-role="Tələbə">
+                                   data-target-role="Tələbə"
+                                   {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
                         <td>@{{ profile.user.username }}</td>
@@ -323,7 +382,8 @@
         Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə bilərsiniz.
     </p>
     <form method="get"
-          class="search-form mb-3"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
           data-debounce-ms="1000"
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
         {% if embedded_in_profile %}
@@ -332,12 +392,27 @@
         <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
         <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
         <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
-        <input type="text"
-               name="student_org_sent_invite_search"
-               value="{{ sent_invite_search_query }}"
-               placeholder="Göndərilən dəvət axtar..."
-               class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_sent_invite_search"
+                   value="{{ sent_invite_search_query }}"
+                   placeholder="Göndərilən dəvət axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
     </form>
 
     <form method="post" action="{% url 'accounts:student_organization_management' %}">
@@ -346,15 +421,23 @@
         <input type="hidden" name="action" value="revoke_sent_invites">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <label class="form-check d-flex align-items-center gap-2 mb-0">
-                <input type="checkbox" id="selectAllSentInvites" class="form-check-input mt-0">
+                <input type="checkbox"
+                       id="selectAllSentInvites"
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
                 <span class="form-check-label">Hamısını seç</span>
             </label>
             <button type="button"
-                    class="btn btn-outline-danger btn-sm"
+                    class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
                     data-bs-toggle="modal"
                     data-bs-target="#revokeSentInvitesConfirmModal"
                     data-revoke-mode="bulk"
-                    {% if not can_manage_students %}disabled{% endif %}>
+                    data-default-label="Seçilənləri geri çək"
+                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
                 <i class="fas fa-trash"></i> Seçilənləri geri çək
             </button>
         </div>
@@ -378,7 +461,8 @@
                             <input type="checkbox"
                                    class="sent-invite-checkbox form-check-input"
                                    name="selected_sent_invite_user_ids"
-                                   value="{{ invite.user.id }}">
+                                   value="{{ invite.user.id }}"
+                                   {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
                         <td>@{{ invite.user.username }}</td>
@@ -556,6 +640,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return !checkbox.disabled;
     });
     var pendingAddBulkBtn = document.querySelector(".js-pending-add-confirm-bulk");
+    var pendingRemoveBulkBtn = document.querySelector(".js-pending-remove-bulk");
     var pendingAddBulkLabel = document.querySelector(".js-pending-add-bulk-label");
     var pendingAddDefaultLabel = pendingAddBulkBtn
         ? (pendingAddBulkBtn.getAttribute("data-default-label") || "Seçilənləri təşkilata əlavə et")
@@ -569,6 +654,51 @@ document.addEventListener("DOMContentLoaded", function () {
     var pendingAddPermissionDisabled = pendingAddBulkBtn
         ? pendingAddBulkBtn.getAttribute("data-permission-disabled") === "1"
         : false;
+    var pendingRemovePermissionDisabled = pendingRemoveBulkBtn
+        ? pendingRemoveBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+    var pendingRemoveDisabledTooltip = pendingRemoveBulkBtn
+        ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
+        : "Ən az 1 seçin";
+
+    var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
+    var unassignedCheckboxes = Array.from(document.querySelectorAll(".unassigned-student-checkbox"));
+    var unassignedSelectableCheckboxes = unassignedCheckboxes.filter(function (checkbox) {
+        return !checkbox.disabled;
+    });
+    var inviteBulkBtn = document.querySelector(".js-invite-confirm-bulk");
+    var unassignedPermissionDisabled = inviteBulkBtn
+        ? inviteBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+    var unassignedDisabledTooltip = inviteBulkBtn
+        ? (inviteBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
+        : "Ən az 1 seçin";
+
+    var selectAllSentInvites = document.getElementById("selectAllSentInvites");
+    var sentInviteCheckboxes = Array.from(document.querySelectorAll(".sent-invite-checkbox"));
+    var sentInviteSelectableCheckboxes = sentInviteCheckboxes.filter(function (checkbox) {
+        return !checkbox.disabled;
+    });
+    var sentInviteRevokeBulkBtn = document.querySelector(".js-sent-invite-revoke-bulk");
+    var sentInvitePermissionDisabled = sentInviteRevokeBulkBtn
+        ? sentInviteRevokeBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+    var sentInviteDisabledTooltip = sentInviteRevokeBulkBtn
+        ? (sentInviteRevokeBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
+        : "Ən az 1 seçin";
+
+    function syncBulkButtonState(button, selectedCount, hasRows, isPermissionDisabled, tooltipText) {
+        if (!button) {
+            return;
+        }
+        var shouldDisable = isPermissionDisabled || !hasRows || selectedCount === 0;
+        button.disabled = shouldDisable;
+        if (!isPermissionDisabled && shouldDisable) {
+            button.setAttribute("title", tooltipText);
+        } else {
+            button.removeAttribute("title");
+        }
+    }
 
     function syncPendingBulkSelectionUi() {
         var selectedPendingCount = pendingSelectableCheckboxes.filter(function (checkbox) {
@@ -582,18 +712,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 : pendingAddDefaultLabel;
         }
 
-        if (pendingAddBulkBtn) {
-            var shouldDisable = pendingAddPermissionDisabled || !hasPendingRows || selectedPendingCount === 0;
-            pendingAddBulkBtn.disabled = shouldDisable;
-            if (!pendingAddPermissionDisabled && (selectedPendingCount === 0 || !hasPendingRows)) {
-                pendingAddBulkBtn.setAttribute("title", pendingAddDisabledTooltip);
-            } else {
-                pendingAddBulkBtn.removeAttribute("title");
-            }
-        }
+        syncBulkButtonState(
+            pendingAddBulkBtn,
+            selectedPendingCount,
+            hasPendingRows,
+            pendingAddPermissionDisabled,
+            pendingAddDisabledTooltip
+        );
+        syncBulkButtonState(
+            pendingRemoveBulkBtn,
+            selectedPendingCount,
+            hasPendingRows,
+            pendingRemovePermissionDisabled,
+            pendingRemoveDisabledTooltip
+        );
 
         if (selectAll) {
-            var canToggleAll = hasPendingRows && !pendingAddPermissionDisabled;
+            var canToggleAll = hasPendingRows && !pendingAddPermissionDisabled && !pendingRemovePermissionDisabled;
             selectAll.disabled = !canToggleAll;
             if (!canToggleAll) {
                 selectAll.checked = false;
@@ -614,6 +749,78 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function syncUnassignedBulkSelectionUi() {
+        var selectedCount = unassignedSelectableCheckboxes.filter(function (checkbox) {
+            return checkbox.checked;
+        }).length;
+        var hasRows = unassignedSelectableCheckboxes.length > 0;
+
+        syncBulkButtonState(
+            inviteBulkBtn,
+            selectedCount,
+            hasRows,
+            unassignedPermissionDisabled,
+            unassignedDisabledTooltip
+        );
+
+        if (selectAllUnassigned) {
+            var canToggleAll = hasRows && !unassignedPermissionDisabled;
+            selectAllUnassigned.disabled = !canToggleAll;
+            if (!canToggleAll) {
+                selectAllUnassigned.checked = false;
+                selectAllUnassigned.indeterminate = false;
+                return;
+            }
+
+            if (selectedCount === 0) {
+                selectAllUnassigned.checked = false;
+                selectAllUnassigned.indeterminate = false;
+            } else if (selectedCount === unassignedSelectableCheckboxes.length) {
+                selectAllUnassigned.checked = true;
+                selectAllUnassigned.indeterminate = false;
+            } else {
+                selectAllUnassigned.checked = false;
+                selectAllUnassigned.indeterminate = true;
+            }
+        }
+    }
+
+    function syncSentInvitesBulkSelectionUi() {
+        var selectedCount = sentInviteSelectableCheckboxes.filter(function (checkbox) {
+            return checkbox.checked;
+        }).length;
+        var hasRows = sentInviteSelectableCheckboxes.length > 0;
+
+        syncBulkButtonState(
+            sentInviteRevokeBulkBtn,
+            selectedCount,
+            hasRows,
+            sentInvitePermissionDisabled,
+            sentInviteDisabledTooltip
+        );
+
+        if (selectAllSentInvites) {
+            var canToggleAll = hasRows && !sentInvitePermissionDisabled;
+            selectAllSentInvites.disabled = !canToggleAll;
+            if (!canToggleAll) {
+                selectAllSentInvites.checked = false;
+                selectAllSentInvites.indeterminate = false;
+                return;
+            }
+
+            if (selectedCount === 0) {
+                selectAllSentInvites.checked = false;
+                selectAllSentInvites.indeterminate = false;
+            } else if (selectedCount === sentInviteSelectableCheckboxes.length) {
+                selectAllSentInvites.checked = true;
+                selectAllSentInvites.indeterminate = false;
+            } else {
+                selectAllSentInvites.checked = false;
+                selectAllSentInvites.indeterminate = true;
+            }
+        }
+    }
+
     if (selectAll) {
         selectAll.addEventListener("change", function () {
             pendingSelectableCheckboxes.forEach(function (checkbox) {
@@ -626,28 +833,32 @@ document.addEventListener("DOMContentLoaded", function () {
         checkbox.addEventListener("change", syncPendingBulkSelectionUi);
     });
     syncPendingBulkSelectionUi();
-    var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
+
     if (selectAllUnassigned) {
         selectAllUnassigned.addEventListener("change", function () {
-            document.querySelectorAll(".unassigned-student-checkbox").forEach(function (checkbox) {
-                if (checkbox.disabled) {
-                    return;
-                }
+            unassignedSelectableCheckboxes.forEach(function (checkbox) {
                 checkbox.checked = selectAllUnassigned.checked;
             });
+            syncUnassignedBulkSelectionUi();
         });
     }
-    var selectAllSentInvites = document.getElementById("selectAllSentInvites");
+    unassignedSelectableCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", syncUnassignedBulkSelectionUi);
+    });
+    syncUnassignedBulkSelectionUi();
+
     if (selectAllSentInvites) {
         selectAllSentInvites.addEventListener("change", function () {
-            document.querySelectorAll(".sent-invite-checkbox").forEach(function (checkbox) {
-                if (checkbox.disabled) {
-                    return;
-                }
+            sentInviteSelectableCheckboxes.forEach(function (checkbox) {
                 checkbox.checked = selectAllSentInvites.checked;
             });
+            syncSentInvitesBulkSelectionUi();
         });
     }
+    sentInviteSelectableCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", syncSentInvitesBulkSelectionUi);
+    });
+    syncSentInvitesBulkSelectionUi();
 
     function getSelectedUsers(selector) {
         return Array.from(document.querySelectorAll(selector + ":checked"))
@@ -670,6 +881,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getSelectedSentInviteUserIds() {
         return Array.from(document.querySelectorAll(".sent-invite-checkbox:checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
             .map(function (checkbox) {
                 return checkbox.value || "";
             })
@@ -917,7 +1131,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        var inviteBulkBtn = document.querySelector(".js-invite-confirm-bulk");
         if (inviteBulkBtn) {
             inviteBulkBtn.addEventListener("click", function () {
                 fillInviteModal(getSelectedUsers(".unassigned-student-checkbox"), "bulk");

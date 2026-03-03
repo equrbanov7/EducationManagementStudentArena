@@ -3489,6 +3489,9 @@ def manage_roles(request):
         if not effective_roles:
             effective_roles = {ProfileRole.MEMBER}
 
+        added_roles = effective_roles - current_roles
+        removed_roles = current_roles - effective_roles
+
         primary_role = max(effective_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
         additional_roles = effective_roles - {primary_role}
 
@@ -3504,10 +3507,24 @@ def manage_roles(request):
             )
 
         assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
+        added_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(added_roles)]
+        removed_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(removed_roles)]
+        diff_parts = []
+        if added_labels:
+            diff_parts.append("Əlavə edildi: " + ", ".join(added_labels))
+        if removed_labels:
+            diff_parts.append("Silindi: " + ", ".join(removed_labels))
+        if not diff_parts:
+            diff_parts.append("Dəyişiklik yoxdur.")
+
         messages.success(
             request,
-            pgettext_lazy("accounts.manage_roles.message", "roles_updated_for_user")
-            % {"username": target_user.username, "roles": ", ".join(assigned_labels)},
+            (
+                pgettext_lazy("accounts.manage_roles.message", "roles_updated_for_user")
+                % {"username": target_user.username, "roles": ", ".join(assigned_labels)}
+            )
+            + " "
+            + " / ".join(diff_parts),
         )
         return redirect(next_url)
 

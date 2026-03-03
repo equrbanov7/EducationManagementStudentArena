@@ -39,10 +39,18 @@
 }
 
 .role-assignment-search-submit {
-    min-width: 44px;
+    min-width: 82px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+.role-assignment-search-submit-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
 }
 
 .role-assignment-search-spinner {

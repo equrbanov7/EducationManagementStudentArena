@@ -318,12 +318,12 @@
         </li>
         {% endif %} {% endcomment %}
 
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_language" context "profile.sidebar" %}</span></li>
+        <li class="sidebar-menu-group-label" data-sidebar-static-group="1"><span class="sidebar-menu-text">{% trans "group_language" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item sidebar-language">
             {% include "partials/_language_switcher.html" with switcher_variant="sidebar" %}
         </li>
 
-        <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom"><span class="sidebar-menu-text">{% trans "group_account" context "profile.sidebar" %}</span></li>
+        <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom" data-sidebar-static-group="1"><span class="sidebar-menu-text">{% trans "group_account" context "profile.sidebar" %}</span></li>
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=edit-profile"
                data-section="edit-profile"
