@@ -4,16 +4,34 @@
 {% trans "default_org" context "profile.info" as profile_default_org %}
 <div class="profile-identity-wrapper">
     <div class="avatar-section">
-        <div class="avatar-container">
+        <div class="avatar-container avatar-container--interactive"
+             data-bs-toggle="modal"
+             data-bs-target="#profileAvatarUpdateModal"
+             role="button"
+             aria-label="Profil şəklini dəyiş">
             {% if profile.avatar %}
-            <img src="{{ profile.avatar.url }}" alt="Avatar" class="avatar-large">
+            <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
+                 alt="Avatar"
+                 class="avatar-large"
+                 id="profileIdentityAvatarImage">
+            <div class="avatar-placeholder avatar-placeholder--fallback d-none" id="profileIdentityAvatarFallback">
+                {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+            </div>
             {% else %}
-            <div class="avatar-placeholder">
+            <div class="avatar-placeholder" id="profileIdentityAvatarFallback">
                 {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
             </div>
             {% endif %}
+            <button type="button"
+                    class="avatar-change-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#profileAvatarUpdateModal"
+                    aria-label="Profil şəklini dəyiş">
+                <i class="fas fa-camera"></i>
+            </button>
         </div>
-        
+        <p class="avatar-hint mb-0">Şəklin üzərinə klik edin, böyüdülmüş önizləmə ilə dəyişin.</p>
+
         <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
         <p class="user-email">{{ user.email }}</p>
 
@@ -35,6 +53,29 @@
     </div> 
 
     <div class="profile-details-section">
+        {% if pending_student_join_requests %}
+        <div class="section-card mb-3">
+            <div class="section-title">
+                <i class="fas fa-hourglass-half"></i>
+                <span>Təşkilat təsdiqi gözlənilir</span>
+            </div>
+            <div class="d-grid gap-2">
+                {% for pending_request in pending_student_join_requests %}
+                <div class="{% if not forloop.last %}pb-2 border-bottom{% endif %}">
+                    <p class="mb-0">
+                        <strong>{{ pending_request.organization.name }}</strong> üçün müraciətiniz göndərilib və hazırda təsdiq gözləyir.
+                    </p>
+                    {% if pending_request.message %}
+                    <p class="mt-2 mb-0">
+                        <small class="text-muted"><strong>Mesajınız:</strong> {{ pending_request.message }}</small>
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="section-title">
             <i class="fas fa-address-card"></i>
             <span>{% trans "personal_info" context "profile.info" %}</span>
@@ -73,6 +114,29 @@
                 <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>
                 <div class="info-value">{{ profile.organization_name|default:profile_default_org }}</div>
             </div>
+            <div class="info-item info-item--full">
+                <div class="info-label"><i class="fas fa-users"></i> Qrup üzvlüyü</div>
+                <div class="info-value">
+                    {% if student_member_groups %}
+                    <div class="profile-group-chip-meta">{{ student_member_groups_count|default:0 }} qrup</div>
+                    <div class="profile-group-chip-list profile-group-chip-list--scroll">
+                        {% for student_group in student_member_groups %}
+                        <span class="profile-group-chip">
+                            {{ student_group.name }}
+                            {% if student_group.organization %}
+                                <small>· {{ student_group.organization.name }}</small>
+                            {% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% if student_member_groups_more_count > 0 %}
+                    <div class="profile-group-chip-note">+{{ student_member_groups_more_count }} əlavə qrup var</div>
+                    {% endif %}
+                    {% else %}
+                    <span class="text-muted">Qrup təyin edilməyib</span>
+                    {% endif %}
+                </div>
+            </div>
             <div class="info-item">
                 <div class="info-label"><i class="fas fa-university"></i> {% trans "institution_name" context "profile.info" %}</div>
                 <div class="info-value">{{ profile.student_university_name|default:"-" }}</div>
@@ -101,6 +165,25 @@
         </div>
         {% endif %}
 
+        {% if student_can_leave_org %}
+        <div class="section-card mt-3">
+            <div class="section-title">
+                <i class="fas fa-door-open"></i>
+                <span>Təşkilatdan çıx</span>
+            </div>
+            <p class="text-muted mb-3">
+                Çıxış əməliyyatı üçün təsdiq pəncərəsində səbəb yazılmalıdır.
+            </p>
+            <button type="button"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#studentLeaveOrgConfirmModal"
+                    data-next-section="profile-info">
+                <i class="fas fa-sign-out-alt"></i> Təşkilatdan çıx
+            </button>
+        </div>
+        {% endif %}
+
         <div class="profile-edit-link">
             <a href="{{ profile_base_url }}?section=edit-profile" class="btn-edit-profile js-profile-section-link"
                data-section="edit-profile" data-title="{% trans 'edit_profile' context 'profile.section' %}">
@@ -109,3 +192,146 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="profileAvatarUpdateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data" action="{{ profile_base_url }}">
+                {% csrf_token %}
+                <input type="hidden" name="profile_form" value="update-avatar">
+                <input type="hidden" name="section" value="profile-info">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-image me-2"></i>Profil şəklini dəyiş</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="avatar-modal-preview">
+                        {% if profile.avatar %}
+                        <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
+                             alt="Avatar"
+                             id="profileAvatarPreviewImage">
+                        <div class="avatar-placeholder avatar-placeholder--fallback d-none" id="profileAvatarPreviewFallback">
+                            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+                        </div>
+                        {% else %}
+                        <img src="" alt="Avatar" id="profileAvatarPreviewImage" class="d-none">
+                        <div class="avatar-placeholder" id="profileAvatarPreviewFallback">
+                            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <label for="profileAvatarInput" class="form-label">Yeni şəkil seçin</label>
+                    <input id="profileAvatarInput"
+                           name="avatar"
+                           type="file"
+                           class="form-control"
+                           accept="image/*"
+                           required>
+                    <div class="form-text">Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Şəkli yenilə
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if student_can_leave_org %}
+<div class="modal fade" id="studentLeaveOrgConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_leave_organization' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-door-open me-2"></i>Təşkilatdan çıxışı təsdiqlə</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Bu əməliyyatdan sonra təşkilat üzvlüyünüz deaktiv ediləcək.</p>
+                    <input type="hidden" name="next" id="studentLeaveOrgModalNext" value="{{ profile_base_url }}?section=profile-info">
+                    <label for="studentLeaveReasonInput" class="form-label">Çıxma səbəbi</label>
+                    <textarea id="studentLeaveReasonInput"
+                              name="leave_reason"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Çıxma səbəbini yazın..."
+                              required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Təsdiqlə və çıx
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function showAvatarFallback(imageNode, fallbackNode) {
+        if (imageNode) {
+            imageNode.classList.add("d-none");
+        }
+        if (fallbackNode) {
+            fallbackNode.classList.remove("d-none");
+        }
+    }
+
+    var identityAvatarImage = document.getElementById("profileIdentityAvatarImage");
+    var identityAvatarFallback = document.getElementById("profileIdentityAvatarFallback");
+    if (identityAvatarImage) {
+        identityAvatarImage.addEventListener("error", function () {
+            showAvatarFallback(identityAvatarImage, identityAvatarFallback);
+        });
+        if (identityAvatarImage.complete && !identityAvatarImage.naturalWidth) {
+            showAvatarFallback(identityAvatarImage, identityAvatarFallback);
+        }
+    }
+
+    var avatarInput = document.getElementById("profileAvatarInput");
+    var avatarPreviewImage = document.getElementById("profileAvatarPreviewImage");
+    var avatarPreviewFallback = document.getElementById("profileAvatarPreviewFallback");
+    if (avatarPreviewImage) {
+        avatarPreviewImage.addEventListener("error", function () {
+            showAvatarFallback(avatarPreviewImage, avatarPreviewFallback);
+        });
+        if (avatarPreviewImage.complete && !avatarPreviewImage.naturalWidth) {
+            showAvatarFallback(avatarPreviewImage, avatarPreviewFallback);
+        }
+    }
+
+    if (avatarInput && avatarPreviewImage) {
+        avatarInput.addEventListener("change", function () {
+            var file = avatarInput.files && avatarInput.files.length ? avatarInput.files[0] : null;
+            if (!file) {
+                return;
+            }
+            if (avatarPreviewFallback) {
+                avatarPreviewFallback.classList.add("d-none");
+            }
+            avatarPreviewImage.src = URL.createObjectURL(file);
+            avatarPreviewImage.classList.remove("d-none");
+        });
+    }
+
+    var leaveModal = document.getElementById("studentLeaveOrgConfirmModal");
+    if (leaveModal) {
+        var nextInput = document.getElementById("studentLeaveOrgModalNext");
+        leaveModal.addEventListener("show.bs.modal", function (event) {
+            if (!nextInput) return;
+            var trigger = event.relatedTarget;
+            var nextSection = trigger ? trigger.getAttribute("data-next-section") : "";
+            var section = nextSection || "profile-info";
+            nextInput.value = "{{ profile_base_url }}?section=" + section;
+        });
+    }
+});
+</script>

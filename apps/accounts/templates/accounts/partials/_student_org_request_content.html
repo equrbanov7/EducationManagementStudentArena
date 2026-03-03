@@ -1,0 +1,178 @@
+{% load i18n %}
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-building"></i> Təşkilata qoşulma
+    </div>
+    <p class="text-muted mb-3">
+        Mövcud təşkilatları axtarıb birini seçin və qısa mesajla qoşulma müraciəti göndərin.
+    </p>
+
+    {% if current_organization %}
+    <div class="alert alert-info">
+        Hazırda <strong>{{ current_organization.name }}</strong> təşkilatına bağlısınız.
+    </div>
+    {% elif has_pending_student_requests %}
+    <div class="alert alert-warning">
+        <div class="mb-2">
+            Hazırda <strong>{{ pending_student_requests_count }}</strong> təşkilat üzrə müraciətiniz təsdiq gözləyir.
+        </div>
+        <div class="d-grid gap-2">
+            {% for pending_request in pending_student_requests %}
+            <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap {% if not forloop.last %}pb-2 border-bottom{% endif %}">
+                <div>
+                    <div><strong>{{ pending_request.organization.name }}</strong></div>
+                    {% if pending_request.message %}
+                    <small class="text-muted"><strong>Mesaj:</strong> {{ pending_request.message }}</small>
+                    {% endif %}
+                </div>
+                <form method="post" action="{% url 'accounts:student_organization_request' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ post_next_url }}">
+                    <input type="hidden" name="action" value="clear_request">
+                    <input type="hidden" name="request_id" value="{{ pending_request.id }}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        Ləğv et
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_pending_invites %}
+    <div class="alert alert-success">
+        Sizə <strong>{{ pending_invites_count }}</strong> təşkilat dəvəti var. Profil məlumatlarında qəbul edə bilərsiniz.
+    </div>
+    {% endif %}
+
+    <form method="get"
+          class="search-form mb-3"
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_request' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-request">
+        {% endif %}
+        <input type="text"
+               name="student_org_request_search"
+               value="{{ search_query }}"
+               placeholder="Təşkilat axtar..."
+               class="form-control">
+        <select name="student_org_request_type" class="form-select" style="max-width: 240px;">
+            <option value="">Bütün təşkilat növləri</option>
+            <option value="university" {% if org_type_filter == 'university' %}selected{% endif %}>Universitet</option>
+            <option value="school" {% if org_type_filter == 'school' %}selected{% endif %}>Məktəb</option>
+            <option value="course_center" {% if org_type_filter == 'course_center' %}selected{% endif %}>Kurs mərkəzi</option>
+        </select>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+
+    <form method="post" action="{% url 'accounts:student_organization_request' %}" class="d-grid gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="submit_request">
+
+        <div class="d-flex justify-content-end">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#studentOrgRequestMessageCollapse"
+                    aria-expanded="false">
+                <i class="fas fa-paper-plane"></i> Müraciət göndər
+            </button>
+        </div>
+
+        <div id="studentOrgRequestMessageCollapse"
+             class="collapse">
+            <div class="card card-body">
+                <label for="studentOrgRequestMessage" class="form-label">Müraciət mesajı</label>
+                <textarea id="studentOrgRequestMessage"
+                          name="request_message"
+                          class="form-control"
+                          rows="3"
+                          maxlength="{{ request_message_max_length }}"
+                          data-char-count-target="studentOrgRequestCharCount"
+                          {% if current_organization %}disabled{% endif %}
+                          placeholder="Təşkilata qısa qeyd yaza bilərsiniz..."></textarea>
+                <div class="form-text text-end">
+                    <span id="studentOrgRequestCharCount">0</span>/{{ request_message_max_length }}
+                </div>
+                <div class="mt-2">
+                    <button type="submit" class="btn btn-primary" {% if current_organization %}disabled{% endif %}>
+                        <i class="fas fa-paper-plane"></i> Müraciəti təsdiqlə
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 48px;">Seç</th>
+                        <th>Təşkilat</th>
+                        <th>Növ</th>
+                        <th>Ölkə</th>
+                        <th>Vəziyyət</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for organization in organizations %}
+                    <tr>
+                        <td>
+                            <div class="form-check m-0">
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="organization_id"
+                                    id="organizationRequestChoice{{ organization.id }}"
+                                    value="{{ organization.id }}"
+                                    {% if selected_org_id == organization.id|stringformat:'s' %}checked{% endif %}
+                                    {% if current_organization or organization.id in pending_request_org_ids %}disabled{% endif %}
+                                >
+                            </div>
+                        </td>
+                        <td>
+                            <label for="organizationRequestChoice{{ organization.id }}" class="mb-0">
+                                <strong>{{ organization.name }}</strong>
+                            </label>
+                        </td>
+                        <td>{{ organization.get_org_type_display }}</td>
+                        <td>{{ organization.country|default:"-" }}</td>
+                        <td>
+                            {% if organization.id in pending_request_org_ids %}
+                            <span class="badge bg-warning text-dark">Müraciət göndərilib</span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Uyğun təşkilat tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "partials/_pagination.html" with page_obj=organizations extra_query=pagination_query page_param=page_param %}
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var messageInput = document.getElementById("studentOrgRequestMessage");
+    if (!messageInput) return;
+    var counterId = messageInput.getAttribute("data-char-count-target");
+    if (!counterId) return;
+    var counter = document.getElementById(counterId);
+    if (!counter) return;
+
+    function syncCounter() {
+        counter.textContent = String((messageInput.value || "").length);
+    }
+
+    messageInput.addEventListener("input", syncCounter);
+    syncCounter();
+});
+</script>

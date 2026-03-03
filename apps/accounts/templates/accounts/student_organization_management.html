@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Tələbə idarəetməsi - EMSArena{% endblock %}
+
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-main" style="max-width: 1200px; margin: 0 auto;">
+        <div class="profile-header">
+            <h1 class="profile-title">
+                <i class="fas fa-user-graduate"></i> Tələbə idarəetməsi
+            </h1>
+            <a href="{% url 'accounts:profile' %}?section=student-organization-management" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Profilə qayıt
+            </a>
+        </div>
+
+        {% include "accounts/partials/_student_org_management_content.html" %}
+    </div>
+</div>
+{% endblock %}

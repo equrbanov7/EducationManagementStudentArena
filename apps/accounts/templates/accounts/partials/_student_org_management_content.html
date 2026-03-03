@@ -1,0 +1,578 @@
+{% load i18n %}
+{% if organization %}
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-user-graduate"></i> {{ organization.name }}
+    </div>
+    <form method="get"
+          class="search-form"
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
+        <input type="text"
+               name="student_org_search"
+               value="{{ student_search_query }}"
+               placeholder="Tələbə axtar..."
+               class="form-control">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+</div>
+
+{% if access_denied_message %}
+<div class="empty-state">
+    <i class="fas fa-user-lock"></i>
+    <p>{{ access_denied_message }}</p>
+</div>
+{% else %}
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-users"></i> Təşkilat tələbələri
+    </div>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>İstifadəçi</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Əməliyyat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.user.get_full_name|default:student.user.username }}</td>
+                    <td>@{{ student.user.username }}</td>
+                    <td>{{ student.user.email }}</td>
+                    <td>
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeStudentConfirmModal"
+                            data-student-user-id="{{ student.user.id }}"
+                            data-student-username="@{{ student.user.username }}"
+                            {% if not can_manage_students %}disabled{% endif %}>
+                            <i class="fas fa-user-minus"></i> Uzaqlaşdır
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Tələbə tapılmadı.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=students extra_query=students_pagination_query page_param=students_page_param %}
+</div>
+
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-user-clock"></i> Təsdiq gözləyən tələbələr
+    </div>
+    <p class="text-muted mb-3">
+        Qeydiyyat zamanı bu təşkilatı seçən tələbələri buradan tək-tək və ya hamısını seçib əlavə edə bilərsiniz.
+        Artıq başqa təşkilata qəbul olanların müraciəti "Bağlanıb" kimi görünəcək.
+    </p>
+    <form method="get"
+          class="search-form mb-3"
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
+        <input type="text"
+               name="student_org_pending_search"
+               value="{{ pending_search_query }}"
+               placeholder="Təsdiq gözləyən tələbə axtar..."
+               class="form-control">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+
+    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_approve_requested_students">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox" id="selectAllPendingStudents" class="form-check-input mt-0">
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success btn-sm" {% if not can_manage_students %}disabled{% endif %}>
+                    <i class="fas fa-check-double"></i> Seçilənləri əlavə et
+                </button>
+                <button type="submit"
+                        name="bulk_reject"
+                        value="1"
+                        class="btn btn-outline-danger btn-sm"
+                        {% if not can_manage_students %}disabled{% endif %}>
+                    <i class="fas fa-trash"></i> Seçilənləri sil
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Seçilmiş təşkilat</th>
+                        <th>Mesaj</th>
+                        <th>Status/Qeyd</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pending_request in pending_requested_students %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="pending-student-checkbox form-check-input"
+                                   name="selected_pending_user_ids"
+                                   value="{{ pending_request.user.id }}"
+                                   {% if not pending_request.request_is_actionable %}disabled{% endif %}>
+                        </td>
+                        <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>
+                        <td>@{{ pending_request.user.username }}</td>
+                        <td>{{ pending_request.user.email }}</td>
+                        <td>
+                            {{ pending_request.organization.name }}
+                        </td>
+                        <td>
+                            {% if pending_request.message %}
+                                <small>{{ pending_request.message }}</small>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ pending_request.request_display_class }}">{{ pending_request.request_display_status }}</span>
+                            {% if pending_request.request_note %}
+                            <div class="mt-1"><small class="text-muted">{{ pending_request.request_note }}</small></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                {% if pending_request.request_is_actionable %}
+                                <button type="submit"
+                                        name="single_user_id"
+                                        value="{{ pending_request.user.id }}"
+                                        class="btn btn-success btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-user-check"></i> Əlavə et
+                                </button>
+                                {% endif %}
+                                <button type="submit"
+                                        name="reject_user_id"
+                                        value="{{ pending_request.user.id }}"
+                                        class="btn btn-outline-danger btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
+</div>
+
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan tələbələr
+    </div>
+    <p class="text-muted mb-3">
+        Təşkilat seçmədən qeydiyyatdan keçən tələbələrə dəvət göndərin. Tələbə kabinetində qəbul etdikdən sonra təşkilata qoşulacaq.
+    </p>
+    <form method="get"
+          class="search-form mb-3"
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
+        <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
+        <input type="text"
+               name="student_org_unassigned_search"
+               value="{{ unassigned_search_query }}"
+               placeholder="Təşkilatsız tələbə axtar..."
+               class="form-control">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+
+    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_invite_students">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox" id="selectAllUnassignedStudents" class="form-check-input mt-0">
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="submit" class="btn btn-success btn-sm" {% if not can_manage_students %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət göndər
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_students %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="unassigned-student-checkbox form-check-input"
+                                   name="selected_unassigned_user_ids"
+                                   value="{{ profile.user.id }}">
+                        </td>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>@{{ profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>
+                            <button type="submit"
+                                    name="single_invite_user_id"
+                                    value="{{ profile.user.id }}"
+                                    class="btn btn-success btn-sm"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane"></i> Dəvət et
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Dəvət göndəriləcək tələbə tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=unassigned_students extra_query=unassigned_pagination_query page_param=unassigned_page_param %}
+</div>
+
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-paper-plane"></i> Göndərilmiş dəvətlər
+    </div>
+    <p class="text-muted mb-3">
+        Hələ qəbul edilməmiş dəvətləri buradan tək-tək və ya toplu şəkildə geri çəkə bilərsiniz.
+    </p>
+    <form method="get"
+          class="search-form mb-3"
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <input type="text"
+               name="student_org_sent_invite_search"
+               value="{{ sent_invite_search_query }}"
+               placeholder="Göndərilən dəvət axtar..."
+               class="form-control">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+    </form>
+
+    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="revoke_sent_invites">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox" id="selectAllSentInvites" class="form-check-input mt-0">
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#revokeSentInvitesConfirmModal"
+                    data-revoke-mode="bulk"
+                    {% if not can_manage_students %}disabled{% endif %}>
+                <i class="fas fa-trash"></i> Seçilənləri geri çək
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Göndərən</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invite in sent_student_invites %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="sent-invite-checkbox form-check-input"
+                                   name="selected_sent_invite_user_ids"
+                                   value="{{ invite.user.id }}">
+                        </td>
+                        <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
+                        <td>@{{ invite.user.username }}</td>
+                        <td>{{ invite.user.email }}</td>
+                        <td>@{{ invite.assigned_by.username|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeSentInvitesConfirmModal"
+                                    data-revoke-mode="single"
+                                    data-single-revoke-user-id="{{ invite.user.id }}"
+                                    data-single-revoke-username="@{{ invite.user.username }}"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-trash"></i> Geri çək
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Geri çəkiləcək aktiv dəvət yoxdur.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=sent_student_invites extra_query=sent_invites_pagination_query page_param=sent_invites_page_param %}
+</div>
+
+<div class="modal fade" id="revokeSentInvitesConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="revoke_sent_invites">
+                <input type="hidden" name="single_revoke_user_id" id="revokeSentInvitesSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="revokeSentInvitesSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Dəvəti geri çək</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="revokeSentInvitesModalText">
+                        Seçilən dəvətləri geri çəkmək istədiyinizi təsdiqləyin.
+                    </p>
+                    <small class="text-muted d-block mt-2" id="revokeSentInvitesModalHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger" id="revokeSentInvitesConfirmBtn">
+                        <i class="fas fa-trash"></i> Təsdiqlə
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeStudentConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="remove_student">
+                <input type="hidden" name="user_id" id="removeStudentModalUserId">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>Tələbəni uzaqlaşdır</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong id="removeStudentModalUsername"></strong> istifadəçisini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin.
+                    </p>
+                    <label for="removeStudentReasonInput" class="form-label mt-3">Qısa qeyd (opsional)</label>
+                    <textarea
+                        id="removeStudentReasonInput"
+                        name="remove_reason"
+                        class="form-control"
+                        rows="3"
+                        maxlength="280"
+                        placeholder="Uzaqlaşdırma səbəbi..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-user-minus"></i> Uzaqlaşdır
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var selectAll = document.getElementById("selectAllPendingStudents");
+    if (selectAll) {
+        selectAll.addEventListener("change", function () {
+            document.querySelectorAll(".pending-student-checkbox").forEach(function (checkbox) {
+                if (checkbox.disabled) {
+                    return;
+                }
+                checkbox.checked = selectAll.checked;
+            });
+        });
+    }
+    var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
+    if (selectAllUnassigned) {
+        selectAllUnassigned.addEventListener("change", function () {
+            document.querySelectorAll(".unassigned-student-checkbox").forEach(function (checkbox) {
+                if (checkbox.disabled) {
+                    return;
+                }
+                checkbox.checked = selectAllUnassigned.checked;
+            });
+        });
+    }
+    var selectAllSentInvites = document.getElementById("selectAllSentInvites");
+    if (selectAllSentInvites) {
+        selectAllSentInvites.addEventListener("change", function () {
+            document.querySelectorAll(".sent-invite-checkbox").forEach(function (checkbox) {
+                if (checkbox.disabled) {
+                    return;
+                }
+                checkbox.checked = selectAllSentInvites.checked;
+            });
+        });
+    }
+
+    function getSelectedSentInviteUserIds() {
+        return Array.from(document.querySelectorAll(".sent-invite-checkbox:checked"))
+            .map(function (checkbox) {
+                return checkbox.value || "";
+            })
+            .filter(function (value) {
+                return value !== "";
+            });
+    }
+
+    var revokeModal = document.getElementById("revokeSentInvitesConfirmModal");
+    if (revokeModal) {
+        var revokeTextNode = document.getElementById("revokeSentInvitesModalText");
+        var revokeHintNode = document.getElementById("revokeSentInvitesModalHint");
+        var revokeSingleInput = document.getElementById("revokeSentInvitesSingleUserId");
+        var revokeSelectedInput = document.getElementById("revokeSentInvitesSelectedUserIds");
+        var revokeConfirmBtn = document.getElementById("revokeSentInvitesConfirmBtn");
+
+        revokeModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            var mode = trigger ? (trigger.getAttribute("data-revoke-mode") || "bulk") : "bulk";
+
+            if (revokeSingleInput) {
+                revokeSingleInput.value = "";
+            }
+            if (revokeSelectedInput) {
+                revokeSelectedInput.value = "";
+            }
+            if (revokeHintNode) {
+                revokeHintNode.textContent = "";
+            }
+            if (revokeConfirmBtn) {
+                revokeConfirmBtn.disabled = false;
+            }
+
+            if (mode === "single") {
+                var singleUserId = trigger ? (trigger.getAttribute("data-single-revoke-user-id") || "") : "";
+                var singleUsername = trigger ? (trigger.getAttribute("data-single-revoke-username") || "Bu istifadəçi") : "Bu istifadəçi";
+                if (revokeSingleInput) {
+                    revokeSingleInput.value = singleUserId;
+                }
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = singleUsername + " üçün göndərilmiş dəvəti geri çəkmək istədiyinizi təsdiqləyin.";
+                }
+                return;
+            }
+
+            var selectedUserIds = getSelectedSentInviteUserIds();
+            if (revokeSelectedInput) {
+                revokeSelectedInput.value = selectedUserIds.join(",");
+            }
+
+            if (selectedUserIds.length) {
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = "Seçilmiş dəvətləri geri çəkmək istədiyinizi təsdiqləyin.";
+                }
+                if (revokeHintNode) {
+                    revokeHintNode.textContent = "Seçilən dəvət sayı: " + String(selectedUserIds.length);
+                }
+            } else {
+                if (revokeTextNode) {
+                    revokeTextNode.textContent = "Əvvəlcə ən azı bir dəvət seçin.";
+                }
+                if (revokeHintNode) {
+                    revokeHintNode.textContent = "Bu halda təsdiqlə düyməsi deaktiv edilir.";
+                }
+                if (revokeConfirmBtn) {
+                    revokeConfirmBtn.disabled = true;
+                }
+            }
+        });
+    }
+
+    var removeStudentModal = document.getElementById("removeStudentConfirmModal");
+    if (removeStudentModal) {
+        var userIdInput = document.getElementById("removeStudentModalUserId");
+        var usernameNode = document.getElementById("removeStudentModalUsername");
+        var reasonInput = document.getElementById("removeStudentReasonInput");
+        removeStudentModal.addEventListener("show.bs.modal", function (event) {
+            var trigger = event.relatedTarget;
+            if (!trigger) return;
+            if (userIdInput) {
+                userIdInput.value = trigger.getAttribute("data-student-user-id") || "";
+            }
+            if (usernameNode) {
+                usernameNode.textContent = trigger.getAttribute("data-student-username") || "Bu istifadəçi";
+            }
+            if (reasonInput) {
+                reasonInput.value = "";
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-building"></i>
+    <p>Aktiv təşkilat tapılmadı.</p>
+</div>
+{% endif %}

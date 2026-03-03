@@ -74,6 +74,7 @@
                             </div>
                             <div>
                                 <div class="user-name">{{ p.user.get_full_name|default:p.user.username }}</div>
+                                <div class="user-email">@{{ p.user.username }}</div>
                                 <div class="user-email">{{ p.user.email }}</div>
                             </div>
                         </div>

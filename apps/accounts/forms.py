@@ -246,12 +246,7 @@ class RegisterForm(forms.ModelForm):
             cleaned_data["join_organization"] = None
             cleaned_data["initial_role"] = ProfileRole.ORG_ADMIN
         elif signup_mode == "student_join":
-            if not join_organization:
-                self.add_error(
-                    "join_organization",
-                    pgettext_lazy("accounts.form.register.error", "join_organization_required"),
-                )
-            else:
+            if join_organization:
                 if not join_organization.is_active or join_organization.status != "active":
                     self.add_error(
                         "join_organization",

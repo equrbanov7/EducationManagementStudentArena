@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var organizationSearchList = document.getElementById("organizationSearchList");
     var studentJoinHint = document.getElementById("studentJoinHint");
     var organizationSelect = document.getElementById("id_join_organization");
+    var organizationSearchDebounceTimer = null;
 
     var initialRoleField = document.getElementById("initialRoleField");
     var autoRoleInfoField = document.getElementById("autoRoleInfoField");
@@ -247,10 +248,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
                 );
             } else if (isStudentJoinMode) {
-                autoRoleInfoText.textContent = tr(
-                    "auto_role_info_student_join",
-                    "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqsınız."
-                );
+                autoRoleInfoText.textContent =
+                    "Email təsdiqindən sonra təşkilata qoşulma müraciətiniz təsdiq gözləyəcək.";
             } else {
                 autoRoleInfoText.textContent = tr(
                     "auto_role_info_org",
@@ -278,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (organizationSelect) {
-            organizationSelect.required = isStudentJoinMode;
+            organizationSelect.required = false;
             if (!isStudentJoinMode) organizationSelect.value = "";
         }
 
@@ -291,6 +290,10 @@ document.addEventListener("DOMContentLoaded", function () {
             populateJoinOrganizationOptions(organizationSearchInput ? organizationSearchInput.value : "");
             syncSearchInputWithSelectedOrganization();
         } else {
+            if (organizationSearchDebounceTimer) {
+                clearTimeout(organizationSearchDebounceTimer);
+                organizationSearchDebounceTimer = null;
+            }
             if (organizationSearchInput) {
                 organizationSearchInput.value = "";
                 organizationSearchInput.dataset.selectedValue = "";
@@ -324,12 +327,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
-            populateJoinOrganizationOptions(organizationSearchInput.value);
-            renderOrganizationSearchList(organizationSearchInput.value);
+            if (organizationSearchDebounceTimer) {
+                clearTimeout(organizationSearchDebounceTimer);
+            }
+            organizationSearchDebounceTimer = window.setTimeout(function () {
+                populateJoinOrganizationOptions(organizationSearchInput.value);
+                renderOrganizationSearchList(organizationSearchInput.value);
+            }, 1000);
         });
 
         organizationSearchInput.addEventListener("focus", function () {
             if (currentSelection().mode !== "student_join") return;
+            if (organizationSearchDebounceTimer) {
+                clearTimeout(organizationSearchDebounceTimer);
+                organizationSearchDebounceTimer = null;
+            }
             populateJoinOrganizationOptions(organizationSearchInput.value);
             renderOrganizationSearchList(organizationSearchInput.value);
         });

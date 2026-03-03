@@ -72,6 +72,7 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 # This prevents missing CSS/JS when DEBUG=False and collectstatic was not run.
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
+SERVE_MEDIA = True
 
 # Add live_exam static files directory for development
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
