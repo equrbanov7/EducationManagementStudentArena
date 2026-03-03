@@ -7,6 +7,7 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .profile-sidebar.collapsed {

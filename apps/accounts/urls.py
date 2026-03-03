@@ -47,6 +47,7 @@ urlpatterns = [
     path("dashboard/teacher/", views.teacher_dashboard, name="teacher_dashboard"),
     # Profile
     path("profile/", views.user_profile, name="profile"),
+    path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
     path("users/<str:username>/", views.public_user_profile, name="public_profile"),
     # Role management
     path("manage-roles/", views.manage_roles, name="manage_roles"),
@@ -73,6 +74,26 @@ urlpatterns = [
     ),
     # RBAC management
     path("role-assignment/", views.role_assignment, name="role_assignment"),
+    path(
+        "student-organization-management/",
+        views.student_organization_management,
+        name="student_organization_management",
+    ),
+    path(
+        "student-organization-request/",
+        views.student_organization_request,
+        name="student_organization_request",
+    ),
+    path(
+        "student-organization-invitation/",
+        views.student_org_invitation_action,
+        name="student_org_invitation_action",
+    ),
+    path(
+        "student-leave-organization/",
+        views.student_leave_organization,
+        name="student_leave_organization",
+    ),
     path("permission-editor/", views.permission_editor, name="permission_editor"),
     # Superadmin oversight
     path("superadmin/organizations/", views.superadmin_organizations, name="superadmin_organizations"),

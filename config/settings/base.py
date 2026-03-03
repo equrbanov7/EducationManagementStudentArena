@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "apps.live_exam",
     "apps.assignments",
     "apps.accounts.apps.AccountsConfig",
+    "apps.notifications.apps.NotificationsConfig",
     "apps.projects",
     "apps.labs",
     "apps.organizations.apps.OrganizationsConfig",
@@ -137,6 +138,7 @@ STATICFILES_DIRS = [
 # Media files (Uploaded by users)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+SERVE_MEDIA = False
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

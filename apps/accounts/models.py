@@ -85,6 +85,14 @@ class UserProfile(models.Model):
         help_text="Təşkilat DB-də yoxdursa signup zamanı daxil edilən ad",
     )
 
+    requested_organization_message = models.CharField(
+        max_length=280,
+        blank=True,
+        default="",
+        verbose_name="Təşkilata müraciət mesajı",
+        help_text="Tələbənin təşkilata qoşulma üçün yazdığı qısa mesaj",
+    )
+
     organization_type = models.CharField(
         max_length=20,
         choices=OrganizationType.CHOICES,

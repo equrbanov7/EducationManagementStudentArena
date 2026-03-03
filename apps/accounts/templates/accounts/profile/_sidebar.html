@@ -24,6 +24,21 @@
                 <span class="sidebar-menu-text">{% trans "profile_info" context "profile.sidebar" %}</span>
             </a>
         </li>
+        {% if 'notifications' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=notifications"
+               data-section="notifications"
+               data-title="Bildirişlər"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'notifications' %}active{% endif %}">
+                <i class="fas fa-bell sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Bildirişlər</span>
+                {% if notifications_unread_count > 0 %}
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ notifications_unread_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endif %}
  
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_education" context "profile.sidebar" %}</span></li>
         {% if 'posts' in allowed_sections %}
@@ -119,6 +134,18 @@
                 {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge">{{ assigned_courses_count }}</span>{% endif %}
             </a>
         </li>
+        {% if 'student-organization-request' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=student-organization-request"
+               data-section="student-organization-request"
+               data-title="Təşkilata qoşul"
+               data-source-url="{% url 'accounts:student_organization_request' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-request' %}active{% endif %}">
+                <i class="fas fa-building sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Təşkilata qoşul</span>
+            </a>
+        </li>
+        {% endif %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-results"
                data-section="my-results"
@@ -220,6 +247,19 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'role-assignment' %}active{% endif %}">
                 <i class="fas fa-user-shield sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "role_assignment" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% if 'student-organization-management' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=student-organization-management"
+               data-section="student-organization-management"
+               data-title="Tələbə idarəetməsi"
+               data-source-url="{% url 'accounts:student_organization_management' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
+                <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Tələbə idarəetməsi</span>
             </a>
         </li>
         {% endif %}

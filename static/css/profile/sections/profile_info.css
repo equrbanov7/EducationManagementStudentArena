@@ -33,11 +33,38 @@
 
 .avatar-container {
     display: inline-block;
+    position: relative;
     padding: 6px;
     border-radius: 50%;
     background: linear-gradient(135deg, #eff6ff, #dbeafe);
     box-shadow: var(--shadow-sm);
     margin-bottom: 15px;
+}
+
+.avatar-container--interactive {
+    cursor: pointer;
+}
+
+.avatar-change-btn {
+    position: absolute;
+    right: 4px;
+    bottom: 8px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.avatar-change-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
 }
 
 .avatar-large, .avatar-placeholder {
@@ -57,6 +84,12 @@
     justify-content: center;
     font-size: 3.5rem;
     font-weight: 800;
+}
+
+.avatar-hint {
+    margin-top: -4px;
+    color: var(--profile-muted);
+    font-size: 0.86rem;
 }
 
 .user-name {
@@ -138,6 +171,10 @@
     box-shadow: var(--shadow-sm);
 }
 
+.info-item--full {
+    grid-column: 1 / -1;
+}
+
 .info-label {
     font-size: 0.75rem;
     font-weight: 700;
@@ -159,6 +196,78 @@
     font-weight: 600;
     color: var(--profile-text);
     word-break: break-word;
+}
+
+.profile-group-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-group-chip-list--scroll {
+    max-height: 160px;
+    overflow: auto;
+    padding-right: 6px;
+}
+
+.profile-group-chip-meta {
+    color: var(--profile-muted);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.profile-group-chip-note {
+    margin-top: 8px;
+    color: var(--profile-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.profile-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1e3a8a;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-group-chip small {
+    color: #334155;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.avatar-modal-preview {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1rem auto;
+    border-radius: 50%;
+    padding: 8px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+}
+
+.avatar-modal-preview img,
+.avatar-modal-preview .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+}
+
+.avatar-modal-preview img {
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: var(--shadow-sm);
 }
 
 /* Bio və Redonly xüsusi sahələr */

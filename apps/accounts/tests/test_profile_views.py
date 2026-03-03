@@ -3,6 +3,7 @@ Tests for profile and dashboard views.
 """
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -218,6 +219,218 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("create_post"))
         self.assertContains(response, reverse("accounts:my_results"))
         self.assertContains(response, reverse("accounts:pending_answers"))
+        self.assertContains(response, reverse("accounts:student_organization_request"))
+        self.assertContains(response, reverse("accounts:profile") + "?section=notifications")
+
+    def test_profile_info_shows_student_group_membership_readonly(self):
+        from apps.accounts.models import ProfileRole
+        from apps.exams.models import StudentGroup
+        from apps.organizations.models import Membership, Organization, Role
+        from core.constants import OrganizationType, RoleScopeType
+
+        owner = User.objects.create_user(
+            username="group_owner",
+            email="group_owner@example.com",
+            password="testpass123",
+        )
+        teacher = User.objects.create_user(
+            username="group_teacher",
+            email="group_teacher@example.com",
+            password="testpass123",
+        )
+
+        organization = Organization.objects.create(
+            name="Group Test University",
+            slug="group-test-university",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            is_active=True,
+            status="active",
+        )
+        teacher_role, _ = Role.objects.get_or_create(
+            organization=organization,
+            name="teacher",
+            defaults={
+                "display_name": "Müəllim",
+                "level": 60,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "is_system": True,
+                "is_active": True,
+            },
+        )
+        student_role, _ = Role.objects.get_or_create(
+            organization=organization,
+            name="student",
+            defaults={
+                "display_name": "Tələbə",
+                "level": 10,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "is_system": True,
+                "is_active": True,
+            },
+        )
+
+        teacher_profile = teacher.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.organization = organization
+        teacher_profile.organization_type = OrganizationType.UNIVERSITY
+        teacher_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        student_profile = self.user.profile
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.organization = organization
+        student_profile.organization_type = OrganizationType.UNIVERSITY
+        student_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        Membership.objects.create(
+            user=teacher,
+            organization=organization,
+            role=teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=self.user,
+            organization=organization,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        student_group = StudentGroup.objects.create(
+            teacher=teacher,
+            organization=organization,
+            name="Qrup 101",
+        )
+        student_group.students.add(self.user)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Qrup üzvlüyü")
+        self.assertContains(response, "Qrup 101")
+        self.assertContains(response, "Group Test University")
+
+    def test_profile_info_handles_many_student_groups_without_breaking(self):
+        from apps.accounts.models import ProfileRole
+        from apps.exams.models import StudentGroup
+        from apps.organizations.models import Membership, Organization, Role
+        from core.constants import OrganizationType, RoleScopeType
+
+        owner = User.objects.create_user(
+            username="group_owner_many",
+            email="group_owner_many@example.com",
+            password="testpass123",
+        )
+        teacher = User.objects.create_user(
+            username="group_teacher_many",
+            email="group_teacher_many@example.com",
+            password="testpass123",
+        )
+
+        organization = Organization.objects.create(
+            name="Many Group University",
+            slug="many-group-university",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            is_active=True,
+            status="active",
+        )
+        teacher_role, _ = Role.objects.get_or_create(
+            organization=organization,
+            name="teacher",
+            defaults={
+                "display_name": "Müəllim",
+                "level": 60,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "is_system": True,
+                "is_active": True,
+            },
+        )
+        student_role, _ = Role.objects.get_or_create(
+            organization=organization,
+            name="student",
+            defaults={
+                "display_name": "Tələbə",
+                "level": 10,
+                "scope_type": RoleScopeType.ORGANIZATION,
+                "is_system": True,
+                "is_active": True,
+            },
+        )
+
+        teacher_profile = teacher.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.organization = organization
+        teacher_profile.organization_type = OrganizationType.UNIVERSITY
+        teacher_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        student_profile = self.user.profile
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.organization = organization
+        student_profile.organization_type = OrganizationType.UNIVERSITY
+        student_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+
+        Membership.objects.create(
+            user=teacher,
+            organization=organization,
+            role=teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=self.user,
+            organization=organization,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        for idx in range(55):
+            group = StudentGroup.objects.create(
+                teacher=teacher,
+                organization=organization,
+                name=f"Qrup-{idx:02d}",
+            )
+            group.students.add(self.user)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "55 qrup")
+        self.assertContains(response, "+5 əlavə qrup var")
+
+    def test_profile_avatar_update_form_updates_avatar_and_navbar(self):
+        tiny_png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDATx\x9cc`\x00"
+            b"\x00\x00\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        avatar_file = SimpleUploadedFile("avatar.png", tiny_png, content_type="image/png")
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("accounts:profile"),
+            {
+                "profile_form": "update-avatar",
+                "section": "profile-info",
+                "avatar": avatar_file,
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.profile.avatar.name.startswith("avatars/"))
+
+        avatar_response = self.client.get(reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id}))
+        self.assertEqual(avatar_response.status_code, 200)
+        self.assertEqual(avatar_response["Content-Type"], "image/png")
+
+        profile_response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+        self.assertEqual(profile_response.status_code, 200)
+        self.assertContains(profile_response, "blog-header__user-avatar-image")
 
     def test_student_profile_keeps_single_assigned_courses_sidebar_entry(self):
         from apps.accounts.models import ProfileRole, UserProfile
@@ -245,6 +458,8 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("exams:teacher_group_list"))
         self.assertContains(response, reverse("accounts:pending_review"))
         self.assertNotContains(response, reverse("accounts:superadmin_organizations"))
+        self.assertNotContains(response, reverse("accounts:student_organization_management"))
+        self.assertNotContains(response, reverse("accounts:student_organization_request"))
 
     def test_member_profile_shows_group_navigation(self):
         self.client.login(username="testuser", password="testpass123")
@@ -264,9 +479,21 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("accounts:role_assignment"))
+        self.assertContains(response, reverse("accounts:student_organization_management"))
         self.assertContains(response, reverse("accounts:permission_editor"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         self.assertContains(response, reverse("exams:teacher_group_list"))
+
+    def test_manage_roles_table_shows_username(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin",
+            email="profile_superadmin@example.com",
+            password="adminpass123",
+        )
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:manage_roles"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"@{self.user.username}")
 
     def test_org_owner_with_teacher_secondary_role_sees_teacher_navigation(self):
         from django.contrib.auth.models import Group
