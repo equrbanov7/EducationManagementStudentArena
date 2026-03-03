@@ -243,7 +243,7 @@
             <a href="{{ profile_base_url }}?section=role-assignment"
                data-section="role-assignment"
                data-title="{% trans 'role_assignment' context 'profile.section' %}"
-               data-source-url="{% url 'accounts:role_assignment' %}"
+               data-source-url="{{ profile_base_url }}?section=role-assignment"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'role-assignment' %}active{% endif %}">
                 <i class="fas fa-user-shield sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "role_assignment" context "profile.sidebar" %}</span>

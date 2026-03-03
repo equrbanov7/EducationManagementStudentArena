@@ -40,9 +40,19 @@
 </div>
 
 {% if not access_denied_message and selected_role %}
-<div class="section-card">
+<div class="section-card js-permission-editor" data-permission-editor>
     <div class="section-title">
         <i class="fas fa-lock"></i> {{ selected_role.display_name }} - {% trans "permissions_suffix" context "profile.permission_editor" %}
+    </div>
+
+    <div class="permission-editor-search-wrap">
+        <i class="fas fa-search"></i>
+        <input
+            type="search"
+            class="form-control"
+            placeholder="Search permission (key/label)"
+            autocomplete="off"
+            data-permission-search>
     </div>
 
     <div class="mb-4">
@@ -56,43 +66,127 @@
         </div>
     </div>
 
-    {% for category, perms in permission_categories.items %}
-    <div class="pending-group">
-        <div class="section-title pending-group-header">
-            <i class="fas fa-folder"></i> {{ category|title }}
-        </div>
-        <div class="pending-group-body">
-            {% for perm in perms %}
-            <div class="post-item">
-                <div class="post-info">
-                    <div class="post-title">{{ perm }}</div>
+    <p class="permission-editor-empty" data-permission-empty hidden>Nəticə tapılmadı.</p>
+
+    <div class="permission-modules" data-permission-modules>
+        {% for category, perms in permission_categories.items %}
+        <details class="permission-module" data-permission-module>
+            <summary class="permission-module-summary">
+                <div class="permission-module-summary-main">
+                    <i class="fas fa-folder"></i>
+                    <span class="permission-module-title">
+                        {% if category == "organization" %}
+                        Organization
+                        {% elif category == "structure" %}
+                        Structure
+                        {% elif category == "members" %}
+                        Members
+                        {% elif category == "roles" %}
+                        Roles
+                        {% elif category == "courses" %}
+                        Courses
+                        {% elif category == "grading" %}
+                        Grading
+                        {% elif category == "exams" %}
+                        Exams
+                        {% elif category == "appeal" %}
+                        Appeal
+                        {% elif category == "analytics" %}
+                        Analytics
+                        {% elif category == "qa" %}
+                        QA
+                        {% elif category == "audit" %}
+                        Audit
+                        {% else %}
+                        {{ category|title }}
+                        {% endif %}
+                    </span>
                 </div>
-                <div>
-                    {% if perm in selected_role.permissions or '*' in selected_role.permissions %}
-                    <form method="post" action="{% url 'accounts:permission_editor' %}" style="display:inline-flex; gap: 8px; align-items: center;">
-                        {% csrf_token %}
-                        <input type="hidden" name="role_id" value="{{ selected_role.id }}">
-                        <input type="hidden" name="permission" value="{{ perm }}">
-                        <input type="hidden" name="action" value="remove">
-                        <span class="role-badge admin"><i class="fas fa-check"></i> {% trans "status_active" context "profile.permission_editor" %}</span>
-                        <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "remove" context "profile.permission_editor" %}</button>
-                    </form>
-                    {% else %}
-                    <form method="post" action="{% url 'accounts:permission_editor' %}" style="display:inline-flex; gap: 8px; align-items: center;">
-                        {% csrf_token %}
-                        <input type="hidden" name="role_id" value="{{ selected_role.id }}">
-                        <input type="hidden" name="permission" value="{{ perm }}">
-                        <input type="hidden" name="action" value="add">
-                        <span class="role-badge student"><i class="fas fa-times"></i> {% trans "status_inactive" context "profile.permission_editor" %}</span>
-                        <button type="submit" class="btn btn-sm btn-outline-success">{% trans "add" context "profile.permission_editor" %}</button>
-                    </form>
+                <span class="permission-module-count">{{ perms|length }}</span>
+            </summary>
+
+            <div class="permission-module-body">
+                <div class="permission-module-toolbar">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-module-select-all>
+                        Select all
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-module-deselect-all>
+                        Deselect all
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" data-module-bulk-add disabled>
+                        Bulk Add
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" data-module-bulk-remove disabled>
+                        Bulk Remove
+                    </button>
+                </div>
+
+                <form method="post"
+                      action="{% url 'accounts:permission_editor' %}"
+                      class="permission-bulk-form"
+                      data-permission-bulk-form>
+                    {% csrf_token %}
+                    <input type="hidden" name="role_id" value="{{ selected_role.id }}">
+                    {% if embedded_in_profile %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ selected_role.id }}">
                     {% endif %}
+                    <input type="hidden" name="action" value="" data-permission-bulk-action>
+                    <div data-permission-bulk-values></div>
+                </form>
+
+                <div class="permission-list">
+                    {% for perm in perms %}
+                    <div class="permission-row {% if perm in selected_role.permissions or '*' in selected_role.permissions %}is-active{% else %}is-inactive{% endif %}"
+                         data-permission-row
+                         data-permission-key="{{ perm|lower }}">
+                        <div class="permission-row-main">
+                            <label class="permission-select-wrap" aria-label="Permission seç">
+                                <input type="checkbox"
+                                       class="permission-select-checkbox"
+                                       value="{{ perm }}"
+                                       data-permission-select>
+                            </label>
+                            <div class="permission-row-text">
+                                <div class="permission-key">{{ perm }}</div>
+                                <div class="permission-label" data-permission-label>{{ perm }}</div>
+                            </div>
+                        </div>
+
+                        <div class="permission-row-actions">
+                            <span class="permission-status-badge {% if perm in selected_role.permissions or '*' in selected_role.permissions %}is-active{% else %}is-inactive{% endif %}"
+                                  data-permission-status>
+                                {% if perm in selected_role.permissions or '*' in selected_role.permissions %}Aktiv{% else %}Deaktiv{% endif %}
+                            </span>
+
+                            <form method="post"
+                                  action="{% url 'accounts:permission_editor' %}"
+                                  class="permission-toggle-form"
+                                  data-permission-toggle-form>
+                                {% csrf_token %}
+                                <input type="hidden" name="role_id" value="{{ selected_role.id }}">
+                                <input type="hidden" name="permission" value="{{ perm }}">
+                                {% if embedded_in_profile %}
+                                <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ selected_role.id }}">
+                                {% endif %}
+                                <input type="hidden"
+                                       name="action"
+                                       value="{% if perm in selected_role.permissions or '*' in selected_role.permissions %}remove{% else %}add{% endif %}"
+                                       data-permission-action>
+                                <label class="permission-switch" aria-label="Permission vəziyyətini dəyiş">
+                                    <input type="checkbox"
+                                           {% if perm in selected_role.permissions or '*' in selected_role.permissions %}checked{% endif %}
+                                           data-permission-switch>
+                                    <span class="permission-switch-slider"></span>
+                                </label>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
-        </div>
+        </details>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endif %}
 {% else %}

@@ -274,14 +274,22 @@ def _assignable_profile_roles_for_user(user):
 def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin):
     for profile in profiles:
         current_roles = _extract_profile_roles_for_user(profile.user)
+        primary_role_name = max(current_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
         profile.current_roles = current_roles
         profile.current_role_items = [
             {
                 "name": role_name,
                 "label": PROFILE_ROLE_LABELS.get(role_name, role_name),
+                "level": ProfileRole.LEVELS.get(role_name, 0),
+                "is_primary": role_name == primary_role_name,
             }
             for role_name in current_roles
         ]
+        profile.primary_role = {
+            "name": primary_role_name,
+            "label": PROFILE_ROLE_LABELS.get(primary_role_name, primary_role_name),
+            "level": ProfileRole.LEVELS.get(primary_role_name, 0),
+        }
 
         target_level = profile.user._highest_role_level() if hasattr(profile.user, "_highest_role_level") else 0
         profile.can_edit_roles = is_superadmin or actor_level > target_level
@@ -2922,6 +2930,7 @@ def user_profile(request):
         "members_pagination_query": "",
         "unassigned_page_param": "role_pending_page",
         "unassigned_pagination_query": "",
+        "post_next_url": "",
     }
     student_org_management_section = {
         "organization": None,
@@ -3024,7 +3033,7 @@ def user_profile(request):
     if "role-assignment" in allowed_sections:
         from apps.organizations.models import Membership, Role
 
-        role_assignment_search = request.GET.get("search", "")
+        role_assignment_search = request.GET.get("q", request.GET.get("search", ""))
         role_assignment_unassigned_search = request.GET.get("unassigned_search", "")
         role_assignment_section.update(
             {
@@ -3032,6 +3041,14 @@ def user_profile(request):
                 "search_query": role_assignment_search,
                 "unassigned_search_query": role_assignment_unassigned_search,
                 "can_assign_roles": management_can_assign_roles or management_user_level >= 50,
+                "post_next_url": _append_query_params(
+                    reverse("accounts:profile"),
+                    section="role-assignment",
+                    q=role_assignment_search,
+                    unassigned_search=role_assignment_unassigned_search,
+                    role_members_page=request.GET.get("role_members_page", ""),
+                    role_pending_page=request.GET.get("role_pending_page", ""),
+                ),
             }
         )
 
@@ -3102,12 +3119,12 @@ def user_profile(request):
             role_assignment_section["unassigned_users"] = role_assignment_pending_page_obj
             role_assignment_section["members_pagination_query"] = _query_string(
                 section="role-assignment",
-                search=role_assignment_search,
+                q=role_assignment_search,
                 unassigned_search=role_assignment_unassigned_search,
             )
             role_assignment_section["unassigned_pagination_query"] = _query_string(
                 section="role-assignment",
-                search=role_assignment_search,
+                q=role_assignment_search,
                 unassigned_search=role_assignment_unassigned_search,
             )
 
@@ -4302,21 +4319,36 @@ def role_assignment(request):
         messages.error(request, pgettext_lazy("accounts.role_assignment.message", "teacher_or_higher_only"))
         return redirect("accounts:profile")
 
+    search = request.GET.get("q", request.GET.get("search", ""))
+    unassigned_search = request.GET.get("unassigned_search", "")
+    profile_section_url = _append_query_params(
+        reverse("accounts:profile"),
+        section="role-assignment",
+        q=search,
+        unassigned_search=unassigned_search,
+        role_members_page=request.GET.get("role_members_page", ""),
+        role_pending_page=request.GET.get("role_pending_page", ""),
+    )
+
+    if request.method != "POST":
+        return redirect(profile_section_url)
+
     if request.method == "POST":
         action = request.POST.get("action", "update_member")
+        next_url = _resolve_next_url(request, profile_section_url)
         role_id = request.POST.get("role_id")
         target_role = get_object_or_404(Role, id=role_id, organization=org, is_active=True)
 
         if not is_superadmin and target_role.level >= user_level:
             messages.error(request, pgettext_lazy("accounts.role_assignment.message", "assign_lower_roles_only"))
-            return redirect("accounts:role_assignment")
+            return redirect(next_url)
 
         # Teacher+ can assign student/member even without explicit role.assign permission.
         teacher_can_assign_basic = not is_superadmin and user_level >= 50 and target_role.name in {"student", "member"}
 
         if not (can_assign_roles or teacher_can_assign_basic):
             messages.error(request, pgettext_lazy("accounts.role_assignment.message", "missing_role_assign_permission"))
-            return redirect("accounts:role_assignment")
+            return redirect(next_url)
 
         if action == "attach_user":
             user_id = request.POST.get("user_id")
@@ -4325,7 +4357,7 @@ def role_assignment(request):
 
             if target_profile.organization and target_profile.organization != org:
                 messages.error(request, pgettext_lazy("accounts.role_assignment.message", "user_bound_to_other_org"))
-                return redirect("accounts:role_assignment")
+                return redirect(next_url)
 
             if not is_superadmin:
                 is_requested_for_org = _pending_student_request_queryset(
@@ -4344,7 +4376,7 @@ def role_assignment(request):
                         request,
                         pgettext_lazy("accounts.role_assignment.message", "user_did_not_select_this_org_on_signup"),
                     )
-                    return redirect("accounts:role_assignment")
+                    return redirect(next_url)
 
             membership, created = Membership.objects.get_or_create(
                 user=target_user,
@@ -4362,7 +4394,7 @@ def role_assignment(request):
                         request,
                         pgettext_lazy("accounts.role_assignment.message", "not_allowed_to_change_user_role"),
                     )
-                    return redirect("accounts:role_assignment")
+                    return redirect(next_url)
                 membership.role = target_role
                 membership.assigned_by = request.user
                 membership.is_active = True
@@ -4418,10 +4450,9 @@ def role_assignment(request):
 
             messages.success(
                 request,
-                pgettext_lazy("accounts.role_assignment.message", "user_added_to_org_with_role")
-                % {"username": target_user.username, "role_display": target_role.display_name},
+                f"Uğurla əlavə edildi: {target_user.username} → {target_role.display_name}.",
             )
-            return redirect("accounts:role_assignment")
+            return redirect(next_url)
 
         # Default action: update existing org membership
         membership_id = request.POST.get("membership_id")
@@ -4434,7 +4465,7 @@ def role_assignment(request):
 
         if not is_superadmin and target_membership.role.level >= user_level:
             messages.error(request, pgettext_lazy("accounts.role_assignment.message", "change_lower_level_users_only"))
-            return redirect("accounts:role_assignment")
+            return redirect(next_url)
 
         old_role_name = target_membership.role.name
         target_membership.role = target_role
@@ -4492,86 +4523,11 @@ def role_assignment(request):
 
         messages.success(
             request,
-            pgettext_lazy("accounts.role_assignment.message", "role_updated_for_user")
-            % {"username": target_membership.user.username, "role_display": target_role.display_name},
+            f"Uğurla yeniləndi: {target_membership.user.username} → {target_role.display_name}.",
         )
-        return redirect("accounts:role_assignment")
+        return redirect(next_url)
 
-    members = (
-        Membership.objects.filter(organization=org, is_active=True)
-        .select_related("user", "role")
-        .order_by("-role__level", "user__username")
-    )
-    if not is_superadmin:
-        members = members.filter(role__level__lt=user_level)
-
-    assignable_roles = Role.objects.filter(organization=org, is_active=True).order_by("-level")
-    if not is_superadmin:
-        assignable_roles = assignable_roles.filter(level__lt=user_level)
-
-    search = request.GET.get("search", "")
-    if search:
-        members = members.filter(
-            Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
-
-    unassigned_search = request.GET.get("unassigned_search", "")
-    unassigned_users = UserProfile.objects.filter(user__is_active=True, organization__isnull=True).select_related(
-        "user",
-        "requested_organization",
-    )
-    if not is_superadmin:
-        pending_request_user_ids = _pending_student_request_queryset(
-            organization=org,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
-        ).values_list("user_id", flat=True)
-        unassigned_users = unassigned_users.filter(
-            Q(user_id__in=pending_request_user_ids)
-            | Q(requested_organization=org)
-            | Q(
-                requested_organization__isnull=True,
-                requested_organization_name__iexact=org.name,
-            )
-        )
-    if unassigned_search:
-        unassigned_users = unassigned_users.filter(
-            Q(user__username__icontains=unassigned_search)
-            | Q(user__email__icontains=unassigned_search)
-            | Q(user__first_name__icontains=unassigned_search)
-            | Q(user__last_name__icontains=unassigned_search)
-        )
-
-    members_page = request.GET.get("role_members_page")
-    members_page_obj = Paginator(members, 12).get_page(members_page)
-
-    pending_page = request.GET.get("role_pending_page")
-    unassigned_users_page_obj = Paginator(unassigned_users.order_by("user__username"), 12).get_page(pending_page)
-
-    context = {
-        "organization": org,
-        "members": members_page_obj,
-        "assignable_roles": assignable_roles,
-        "user_level": user_level,
-        "search_query": search,
-        "unassigned_search_query": unassigned_search,
-        "unassigned_users": unassigned_users_page_obj,
-        "is_superadmin": is_superadmin,
-        "can_assign_roles": can_assign_roles or user_level >= 50,
-        "members_page_param": "role_members_page",
-        "members_pagination_query": _query_string(
-            search=search,
-            unassigned_search=unassigned_search,
-        ),
-        "unassigned_page_param": "role_pending_page",
-        "unassigned_pagination_query": _query_string(
-            search=search,
-            unassigned_search=unassigned_search,
-        ),
-    }
-    return render(request, "accounts/role_assignment.html", context)
+    return redirect(profile_section_url)
 
 
 @login_required
@@ -4927,7 +4883,7 @@ def student_organization_management(request):
             if not is_ok:
                 messages.error(request, error_message)
                 return redirect(next_url)
-            messages.success(request, f"{target_profile.user.username} tələbə olaraq təsdiqləndi.")
+            messages.success(request, f"Uğurla əlavə edildi: {target_profile.user.username}.")
             return redirect(next_url)
 
         if action == "bulk_approve_requested_students":
@@ -4972,14 +4928,14 @@ def student_organization_management(request):
             if processed_count:
                 if bulk_reject_mode or is_single_reject:
                     if is_single_reject and processed_count == 1:
-                        messages.success(request, "Tələbə müraciəti silindi.")
+                        messages.success(request, "Uğurla yeniləndi: tələbə müraciəti silindi.")
                     else:
-                        messages.success(request, f"{processed_count} tələbənin müraciəti silindi.")
+                        messages.success(request, f"Uğurla yeniləndi: {processed_count} tələbənin müraciəti silindi.")
                 else:
                     if is_single_approve and processed_count == 1:
-                        messages.success(request, "Tələbə uğurla təşkilata əlavə edildi.")
+                        messages.success(request, "Uğurla əlavə edildi: 1 tələbə əlavə edildi.")
                     else:
-                        messages.success(request, f"{processed_count} tələbə uğurla təşkilata əlavə edildi.")
+                        messages.success(request, f"Uğurla əlavə edildi: {processed_count} tələbə əlavə edildi.")
             if failed_usernames:
                 messages.warning(
                     request,
@@ -5020,10 +4976,10 @@ def student_organization_management(request):
                 if is_single_invite and processed_count == 1:
                     messages.success(
                         request,
-                        f"{target_users.first().username} üçün dəvət göndərildi. Tələbə kabinetində qəbul etməlidir.",
+                        f"Uğurla əlavə edildi: {target_users.first().username} üçün dəvət göndərildi.",
                     )
                 else:
-                    messages.success(request, f"{processed_count} tələbəyə dəvət göndərildi.")
+                    messages.success(request, f"Uğurla əlavə edildi: {processed_count} tələbəyə dəvət göndərildi.")
             if failed_usernames:
                 messages.warning(
                     request,
@@ -5150,7 +5106,7 @@ def student_organization_management(request):
                 request=request,
             )
 
-            messages.success(request, f"{target_user.username} təşkilatdan uzaqlaşdırıldı.")
+            messages.success(request, f"Uğurla uzaqlaşdırıldı: {target_user.username}.")
             return redirect(next_url)
 
         messages.error(request, "Naməlum əməliyyat.")
@@ -5574,9 +5530,9 @@ def permission_editor(request):
     selected_role_id = request.GET.get("role")
     if request.method == "POST":
         selected_role_id = request.POST.get("role_id")
-        selected_permission = request.POST.get("permission")
         action = request.POST.get("action")
         selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
+        next_url = (request.POST.get("next") or "").strip()
 
         if not is_superadmin and selected_role.level >= user_level:
             messages.error(
@@ -5585,36 +5541,88 @@ def permission_editor(request):
             return redirect(f"{request.path}?role={selected_role.id}")
 
         all_permissions = set(get_all_permissions())
-        if selected_permission not in all_permissions:
-            messages.error(request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection"))
-            return redirect(f"{request.path}?role={selected_role.id}")
-
         role_permissions = list(selected_role.permissions or [])
         role_permissions_set = set(role_permissions)
         old_permissions = sorted(role_permissions_set)
+        result_message = ""
 
-        if action == "add":
-            if (
-                not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
-                and not is_superadmin
-            ):
-                messages.error(
-                    request,
-                    pgettext_lazy("accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"),
-                )
-                return redirect(f"{request.path}?role={selected_role.id}")
-            role_permissions_set.add(selected_permission)
-            result_message = pgettext_lazy("accounts.permission_editor.message", "permission_added") % {
-                "permission": selected_permission
-            }
-        elif action == "remove":
-            role_permissions_set.discard(selected_permission)
-            result_message = pgettext_lazy("accounts.permission_editor.message", "permission_removed") % {
-                "permission": selected_permission
-            }
+        if next_url and not url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            next_url = ""
+
+        def _safe_redirect():
+            return redirect(next_url or f"{request.path}?role={selected_role.id}")
+
+        if action in {"add", "remove"}:
+            selected_permission = request.POST.get("permission")
+            if selected_permission not in all_permissions:
+                messages.error(request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection"))
+                return _safe_redirect()
+
+            if action == "add":
+                if (
+                    not _permission_is_grantable(selected_permission, actor_permissions, grantable_permissions)
+                    and not is_superadmin
+                ):
+                    messages.error(
+                        request,
+                        pgettext_lazy("accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"),
+                    )
+                    return _safe_redirect()
+                role_permissions_set.add(selected_permission)
+                result_message = pgettext_lazy("accounts.permission_editor.message", "permission_added") % {
+                    "permission": selected_permission
+                }
+            else:
+                role_permissions_set.discard(selected_permission)
+                result_message = pgettext_lazy("accounts.permission_editor.message", "permission_removed") % {
+                    "permission": selected_permission
+                }
+        elif action in {"bulk_add", "bulk_remove"}:
+            selected_permissions = [perm for perm in request.POST.getlist("permissions") if perm]
+            selected_permissions = list(dict.fromkeys(selected_permissions))
+            if not selected_permissions:
+                messages.error(request, "Əməliyyat üçün ən azı bir permission seçin.")
+                return _safe_redirect()
+
+            invalid_permissions = [perm for perm in selected_permissions if perm not in all_permissions]
+            if invalid_permissions:
+                messages.error(request, pgettext_lazy("accounts.permission_editor.message", "invalid_permission_selection"))
+                return _safe_redirect()
+
+            if action == "bulk_add":
+                if not is_superadmin:
+                    not_grantable = [
+                        perm
+                        for perm in selected_permissions
+                        if not _permission_is_grantable(perm, actor_permissions, grantable_permissions)
+                    ]
+                    if not_grantable:
+                        messages.error(
+                            request,
+                            pgettext_lazy("accounts.permission_editor.message", "grant_only_owned_or_grantable_permissions"),
+                        )
+                        return _safe_redirect()
+
+                before_count = len(role_permissions_set)
+                role_permissions_set.update(selected_permissions)
+                changed_count = len(role_permissions_set) - before_count
+                result_message = f"{changed_count} permission əlavə edildi."
+            else:
+                before_count = len(role_permissions_set)
+                role_permissions_set.difference_update(selected_permissions)
+                changed_count = before_count - len(role_permissions_set)
+                result_message = f"{changed_count} permission silindi."
         else:
             messages.error(request, pgettext_lazy("accounts.permission_editor.message", "unknown_action"))
-            return redirect(f"{request.path}?role={selected_role.id}")
+            return _safe_redirect()
+
+        if sorted(role_permissions_set) == old_permissions:
+            messages.success(request, result_message)
+            return _safe_redirect()
 
         selected_role.permissions = sorted(role_permissions_set)
         selected_role.save(update_fields=["permissions", "updated_at"])
@@ -5632,8 +5640,8 @@ def permission_editor(request):
         )
 
         messages.success(request, result_message)
-        return redirect(f"{request.path}?role={selected_role.id}")
-
+        return _safe_redirect()
+ 
     if selected_role_id:
         selected_role = roles.filter(id=selected_role_id).first()
     if selected_role is None:

@@ -1,0 +1,247 @@
+.profile-section--permission-editor .section-card {
+    overflow: hidden;
+}
+
+.permission-editor-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #fff;
+}
+
+.permission-editor-search-wrap i {
+    color: var(--text-muted);
+}
+
+.permission-editor-search-wrap .form-control {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+.permission-editor-search-wrap .form-control:focus {
+    box-shadow: none;
+}
+
+.permission-editor-empty {
+    margin: 0 0 1rem;
+    padding: 0.8rem 0.95rem;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.permission-modules {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.permission-module {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #fff;
+}
+
+.permission-module-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+}
+
+.permission-module-summary::-webkit-details-marker {
+    display: none;
+}
+
+.permission-module-summary-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.permission-module-title {
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.permission-module-count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-page);
+    border-radius: 999px;
+    padding: 0.25rem 0.55rem;
+}
+
+.permission-module-body {
+    border-top: 1px solid var(--border-color);
+    padding: 0.85rem 1rem 1rem;
+}
+
+.permission-module-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.8rem;
+}
+
+.permission-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.permission-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.85rem;
+    background: #fff;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.permission-row.is-active {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.permission-row.is-inactive {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.permission-row-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.permission-select-wrap {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.permission-select-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.permission-row-text {
+    min-width: 0;
+}
+
+.permission-key {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    overflow-wrap: anywhere;
+}
+
+.permission-label {
+    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.permission-row-actions {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.permission-status-badge {
+    min-width: 76px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.27rem 0.55rem;
+}
+
+.permission-status-badge.is-active {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.permission-status-badge.is-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.permission-switch {
+    position: relative;
+    display: inline-flex;
+    width: 42px;
+    height: 24px;
+    margin: 0;
+}
+
+.permission-switch input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+}
+
+.permission-switch-slider {
+    width: 100%;
+    height: 100%;
+    background: #cbd5e1;
+    border-radius: 999px;
+    transition: background 0.2s ease;
+}
+
+.permission-switch-slider::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.permission-switch input:checked + .permission-switch-slider {
+    background: #22c55e;
+}
+
+.permission-switch input:checked + .permission-switch-slider::before {
+    transform: translateX(18px);
+}
+
+@media (max-width: 768px) {
+    .permission-module-toolbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .permission-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .permission-row-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

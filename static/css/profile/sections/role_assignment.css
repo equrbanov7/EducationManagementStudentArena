@@ -1,0 +1,117 @@
+.role-assignment-search-form {
+    align-items: stretch;
+}
+
+.role-assignment-search-input-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.role-assignment-search-input {
+    padding-right: 2.5rem;
+}
+
+.role-assignment-search-clear {
+    position: absolute;
+    top: 50%;
+    right: 0.55rem;
+    transform: translateY(-50%);
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.role-assignment-search-clear:hover {
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--text-default);
+}
+
+.role-assignment-search-clear[hidden] {
+    display: none !important;
+}
+
+.role-assignment-search-submit {
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.role-assignment-search-spinner {
+    display: none;
+}
+
+.role-assignment-search-form.is-loading .role-assignment-search-submit-label {
+    display: none;
+}
+
+.role-assignment-search-form.is-loading .role-assignment-search-spinner {
+    display: inline-block;
+}
+
+.role-assignment-result-count {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.role-assignment-empty-state {
+    padding-top: 2.25rem;
+    padding-bottom: 2.25rem;
+}
+
+.role-concept-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.role-concept-info-btn {
+    padding: 0;
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.role-concept-info-btn:hover {
+    color: var(--text-default);
+}
+
+.role-assignment-current-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.role-assignment-primary-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.16rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.role-assignment-primary-hint {
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.role-assignment-confirm-context li {
+    margin-bottom: 0.2rem;
+    font-size: 0.92rem;
+}

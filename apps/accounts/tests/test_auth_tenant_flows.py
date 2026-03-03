@@ -511,6 +511,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.client.force_login(self.admin_user)
 
     def test_org_admin_can_assign_roles_only_inside_own_tenant(self):
+        fallback_next = f"{reverse('accounts:profile')}?section=role-assignment"
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -519,7 +520,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 "role_id": str(self.org_a_teacher_role.id),
             },
         )
-        self.assertRedirects(response, reverse("accounts:role_assignment"))
+        self.assertRedirects(response, fallback_next)
         self.target_membership.refresh_from_db()
         self.assertEqual(self.target_membership.role, self.org_a_teacher_role)
 
@@ -533,13 +534,38 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_role_assignment_post_respects_next_url(self):
+        next_url = f"{reverse('accounts:profile')}?section=role-assignment&q={self.target_user.username}"
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.target_membership.id),
+                "role_id": str(self.org_a_teacher_role.id),
+                "next": next_url,
+            },
+        )
+        self.assertRedirects(response, next_url)
+        self.target_membership.refresh_from_db()
+        self.assertEqual(self.target_membership.role, self.org_a_teacher_role)
+
     def test_role_assignment_page_shows_only_same_tenant_users(self):
-        response = self.client.get(reverse("accounts:role_assignment"))
+        standalone_response = self.client.get(reverse("accounts:role_assignment"))
+        expected_profile_url = f"{reverse('accounts:profile')}?section=role-assignment"
+        self.assertRedirects(standalone_response, expected_profile_url)
+
+        response = self.client.get(expected_profile_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.target_user.username)
         self.assertNotContains(response, self.external_user.username)
         self.assertContains(response, self.unassigned_user.username)
         self.assertNotContains(response, self.unassigned_other.username)
+        self.assertContains(response, "Rolu yenilə")
+        self.assertContains(response, "Təşkilata əlavə et")
+        self.assertContains(response, "js-role-assignment-action-confirm")
+        self.assertContains(response, "roleAssignmentActionConfirmModal")
+        self.assertContains(response, "Dəyişəcək rol")
+        self.assertContains(response, "Təşkilat")
 
     def test_org_admin_can_bulk_approve_pending_students(self):
         free_profile = self.unassigned_user.profile
@@ -553,6 +579,14 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.unassigned_user.username)
+        self.assertContains(response, "Təşkilatdan uzaqlaşdır")
+        self.assertContains(response, "Təşkilata əlavə et")
+        self.assertContains(response, "Dəvət et")
+        self.assertContains(response, "removeStudentConfirmModal")
+        self.assertContains(response, "pendingAddConfirmModal")
+        self.assertContains(response, "inviteConfirmModal")
+        self.assertContains(response, "Dəyişəcək rol")
+        self.assertContains(response, "Təşkilat")
 
         response = self.client.post(
             reverse("accounts:student_organization_management"),
@@ -561,8 +595,12 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 "selected_pending_user_ids": [str(self.unassigned_user.id)],
                 "next": reverse("accounts:student_organization_management"),
             },
+            follow=True,
         )
         self.assertRedirects(response, reverse("accounts:student_organization_management"))
+        self.assertContains(response, "Uğurla əlavə edildi: 1 tələbə əlavə edildi.")
+        pending_user_ids = {item.user_id for item in response.context["pending_requested_students"].object_list}
+        self.assertNotIn(self.unassigned_user.id, pending_user_ids)
 
         self.assertTrue(
             Membership.objects.filter(
@@ -576,6 +614,25 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.unassigned_user.profile.refresh_from_db()
         self.assertEqual(self.unassigned_user.profile.organization, self.org_a)
         self.assertEqual(self.unassigned_user.profile.role, ProfileRole.STUDENT)
+
+    def test_pending_students_empty_state_outside_table_and_bulk_disabled(self):
+        self.unassigned_user.profile.requested_organization = None
+        self.unassigned_user.profile.requested_organization_name = ""
+        self.unassigned_user.profile.save(update_fields=["requested_organization", "requested_organization_name", "updated_at"])
+
+        StudentOrganizationRequest.objects.filter(
+            user=self.unassigned_user,
+            organization=self.org_a,
+        ).delete()
+
+        response = self.client.get(reverse("accounts:student_organization_management"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
+        self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
+        self.assertContains(response, "js-pending-add-bulk-label")
+        self.assertContains(response, "data-selected-label=\"Seçilənləri təşkilata əlavə et ({count} seçildi)\"")
+        self.assertContains(response, "data-disabled-tooltip=\"Ən az 1 tələbə seçin\"")
+        self.assertContains(response, "id=\"selectAllPendingStudents\"")
 
     def test_org_admin_can_reject_pending_student_request(self):
         free_profile = self.unassigned_user.profile
@@ -1130,7 +1187,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 "role_id": str(self.org_a_student_role.id),
             },
         )
-        self.assertRedirects(response, reverse("accounts:role_assignment"))
+        self.assertRedirects(response, f"{reverse('accounts:profile')}?section=role-assignment")
 
         self.assertTrue(
             Membership.objects.filter(
@@ -1347,3 +1404,95 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 is_active=True,
             ).exists()
         )
+
+    def test_permission_editor_bulk_add_and_remove(self):
+        role_target = Role.objects.create(
+            organization=self.org_a,
+            name="bulk_perm_role",
+            display_name="Bulk Perm Role",
+            level=30,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=[],
+            is_active=True,
+        )
+
+        response = self.client.post(
+            reverse("accounts:permission_editor"),
+            {
+                "role_id": str(role_target.id),
+                "action": "bulk_add",
+                "permissions": ["member.view", "member.invite"],
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        role_target.refresh_from_db()
+        self.assertIn("member.view", role_target.permissions)
+        self.assertIn("member.invite", role_target.permissions)
+
+        response = self.client.post(
+            reverse("accounts:permission_editor"),
+            {
+                "role_id": str(role_target.id),
+                "action": "bulk_remove",
+                "permissions": ["member.view"],
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        role_target.refresh_from_db()
+        self.assertNotIn("member.view", role_target.permissions)
+        self.assertIn("member.invite", role_target.permissions)
+
+    def test_permission_editor_bulk_add_rejects_non_grantable_permissions(self):
+        constrained_admin = User.objects.create_user(
+            username="bulk_limited_admin",
+            email="bulk_limited_admin@example.com",
+            password="StrongPass123!",
+        )
+        role_manager = Role.objects.create(
+            organization=self.org_a,
+            name="bulk_limited_manager",
+            display_name="Bulk Limited Manager",
+            level=85,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["role.assign", "exam.view"],
+            is_active=True,
+        )
+        role_target = Role.objects.create(
+            organization=self.org_a,
+            name="bulk_limited_target",
+            display_name="Bulk Limited Target",
+            level=30,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=[],
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=constrained_admin,
+            organization=self.org_a,
+            role=role_manager,
+            is_primary=True,
+            is_active=True,
+        )
+        constrained_profile = constrained_admin.profile
+        constrained_profile.organization = self.org_a
+        constrained_profile.organization_type = self.org_a.org_type
+        constrained_profile.role = ProfileRole.ORG_ADMIN
+        constrained_profile.save()
+
+        self.client.force_login(constrained_admin)
+        response = self.client.post(
+            reverse("accounts:permission_editor"),
+            {
+                "role_id": str(role_target.id),
+                "action": "bulk_add",
+                "permissions": ["member.invite", "member.view"],
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Yalnız özünüzdə olan və ya grant edilə bilən permission-ları verə bilərsiniz")
+        role_target.refresh_from_db()
+        self.assertNotIn("member.invite", role_target.permissions)
+        self.assertNotIn("member.view", role_target.permissions)

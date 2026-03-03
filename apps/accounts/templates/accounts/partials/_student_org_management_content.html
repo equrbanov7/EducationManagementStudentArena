@@ -55,9 +55,13 @@
                             data-bs-toggle="modal"
                             data-bs-target="#removeStudentConfirmModal"
                             data-student-user-id="{{ student.user.id }}"
+                            data-student-full-name="{{ student.user.get_full_name|default:student.user.username }}"
                             data-student-username="@{{ student.user.username }}"
+                            data-student-email="{{ student.user.email }}"
+                            data-student-org="{{ organization.name }}"
+                            data-student-role="Tələbə"
                             {% if not can_manage_students %}disabled{% endif %}>
-                            <i class="fas fa-user-minus"></i> Uzaqlaşdır
+                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
                         </button>
                     </td>
                 </tr>
@@ -104,12 +108,23 @@
         <input type="hidden" name="action" value="bulk_approve_requested_students">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <label class="form-check d-flex align-items-center gap-2 mb-0">
-                <input type="checkbox" id="selectAllPendingStudents" class="form-check-input mt-0">
+                <input type="checkbox"
+                       id="selectAllPendingStudents"
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
                 <span class="form-check-label">Hamısını seç</span>
             </label>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-success btn-sm" {% if not can_manage_students %}disabled{% endif %}>
-                    <i class="fas fa-check-double"></i> Seçilənləri əlavə et
+                <button type="button"
+                        class="btn btn-success btn-sm js-pending-add-confirm-bulk"
+                        data-default-label="Seçilənləri təşkilata əlavə et"
+                        data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"
+                        data-disabled-tooltip="Ən az 1 tələbə seçin"
+                        data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                        title="Ən az 1 tələbə seçin"
+                        {% if not can_manage_students or not pending_requested_students.paginator.count %}disabled{% endif %}>
+                    <i class="fas fa-check-double"></i>
+                    <span class="js-pending-add-bulk-label">Seçilənləri təşkilata əlavə et</span>
                 </button>
                 <button type="submit"
                         name="bulk_reject"
@@ -121,6 +136,7 @@
             </div>
         </div>
 
+        {% if pending_requested_students.paginator.count %}
         <div class="table-responsive profile-section-table-scroll">
             <table class="table">
                 <thead>
@@ -143,6 +159,10 @@
                                    class="pending-student-checkbox form-check-input"
                                    name="selected_pending_user_ids"
                                    value="{{ pending_request.user.id }}"
+                                   data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
+                                   data-user-username="@{{ pending_request.user.username }}"
+                                   data-user-email="{{ pending_request.user.email }}"
+                                   data-target-role="Tələbə"
                                    {% if not pending_request.request_is_actionable %}disabled{% endif %}>
                         </td>
                         <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>
@@ -167,12 +187,15 @@
                         <td>
                             <div class="d-flex gap-2">
                                 {% if pending_request.request_is_actionable %}
-                                <button type="submit"
-                                        name="single_user_id"
-                                        value="{{ pending_request.user.id }}"
-                                        class="btn btn-success btn-sm"
+                                <button type="button"
+                                        class="btn btn-success btn-sm js-pending-add-confirm"
+                                        data-single-user-id="{{ pending_request.user.id }}"
+                                        data-user-full-name="{{ pending_request.user.get_full_name|default:pending_request.user.username }}"
+                                        data-user-username="@{{ pending_request.user.username }}"
+                                        data-user-email="{{ pending_request.user.email }}"
+                                        data-target-role="Tələbə"
                                         {% if not can_manage_students %}disabled{% endif %}>
-                                    <i class="fas fa-user-check"></i> Əlavə et
+                                    <i class="fas fa-user-check"></i> Təşkilata əlavə et
                                 </button>
                                 {% endif %}
                                 <button type="submit"
@@ -185,14 +208,16 @@
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="empty-state py-4">
+            <i class="fas fa-user-clock"></i>
+            <p class="mb-0">Təsdiq gözləyən tələbə yoxdur.</p>
+        </div>
+        {% endif %}
     </form>
     {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
 </div>
@@ -231,8 +256,10 @@
                 <input type="checkbox" id="selectAllUnassignedStudents" class="form-check-input mt-0">
                 <span class="form-check-label">Hamısını seç</span>
             </label>
-            <button type="submit" class="btn btn-success btn-sm" {% if not can_manage_students %}disabled{% endif %}>
-                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət göndər
+            <button type="button"
+                    class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    {% if not can_manage_students %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
             </button>
         </div>
 
@@ -254,16 +281,23 @@
                             <input type="checkbox"
                                    class="unassigned-student-checkbox form-check-input"
                                    name="selected_unassigned_user_ids"
-                                   value="{{ profile.user.id }}">
+                                   value="{{ profile.user.id }}"
+                                   data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                   data-user-username="@{{ profile.user.username }}"
+                                   data-user-email="{{ profile.user.email }}"
+                                   data-target-role="Tələbə">
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
                         <td>@{{ profile.user.username }}</td>
                         <td>{{ profile.user.email }}</td>
                         <td>
-                            <button type="submit"
-                                    name="single_invite_user_id"
-                                    value="{{ profile.user.id }}"
-                                    class="btn btn-success btn-sm"
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-single-invite-user-id="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="Tələbə"
                                     {% if not can_manage_students %}disabled{% endif %}>
                                 <i class="fas fa-paper-plane"></i> Dəvət et
                             </button>
@@ -413,13 +447,18 @@
                 <input type="hidden" name="action" value="remove_student">
                 <input type="hidden" name="user_id" id="removeStudentModalUserId">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>Tələbəni uzaqlaşdır</h5>
+                    <h5 class="modal-title"><i class="fas fa-user-minus me-2"></i>Təşkilatdan uzaqlaşdır</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0">
-                        <strong id="removeStudentModalUsername"></strong> istifadəçisini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin.
-                    </p>
+                    <p class="mb-3">Aşağıdakı istifadəçini təşkilatdan uzaqlaşdırmaq istədiyinizi təsdiqləyin.</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Ad:</strong> <span id="removeStudentModalFullName">-</span></li>
+                        <li><strong>Username:</strong> <span id="removeStudentModalUsername">-</span></li>
+                        <li><strong>Email:</strong> <span id="removeStudentModalEmail">-</span></li>
+                        <li><strong>Təşkilat:</strong> <span id="removeStudentModalOrg">-</span></li>
+                        <li><strong>Dəyişəcək rol:</strong> <span id="removeStudentModalRole">-</span></li>
+                    </ul>
                     <label for="removeStudentReasonInput" class="form-label mt-3">Qısa qeyd (opsional)</label>
                     <textarea
                         id="removeStudentReasonInput"
@@ -432,7 +471,77 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-user-minus"></i> Uzaqlaşdır
+                        <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pendingAddConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}" id="pendingAddConfirmForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="bulk_approve_requested_students">
+                <input type="hidden" name="single_user_id" id="pendingAddSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="pendingAddSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Təşkilata əlavə et</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3" id="pendingAddLeadText">Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin.</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Ad:</strong> <span id="pendingAddModalFullName">-</span></li>
+                        <li><strong>Username:</strong> <span id="pendingAddModalUsername">-</span></li>
+                        <li><strong>Email:</strong> <span id="pendingAddModalEmail">-</span></li>
+                        <li><strong>Təşkilat:</strong> <span id="pendingAddModalOrg">{{ organization.name }}</span></li>
+                        <li><strong>Dəyişəcək rol:</strong> <span id="pendingAddModalRole">Tələbə</span></li>
+                    </ul>
+                    <small class="text-muted d-block mt-2" id="pendingAddModalHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-success" id="pendingAddConfirmBtn">
+                        <i class="fas fa-user-check"></i> Təşkilata əlavə et
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="inviteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% url 'accounts:student_organization_management' %}" id="inviteConfirmForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ post_next_url }}">
+                <input type="hidden" name="action" value="bulk_invite_students">
+                <input type="hidden" name="single_invite_user_id" id="inviteConfirmSingleUserId">
+                <input type="hidden" name="selected_user_ids" id="inviteConfirmSelectedUserIds">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>Dəvət et</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3" id="inviteConfirmLeadText">Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin.</p>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Ad:</strong> <span id="inviteConfirmFullName">-</span></li>
+                        <li><strong>Username:</strong> <span id="inviteConfirmUsername">-</span></li>
+                        <li><strong>Email:</strong> <span id="inviteConfirmEmail">-</span></li>
+                        <li><strong>Təşkilat:</strong> <span id="inviteConfirmOrg">{{ organization.name }}</span></li>
+                        <li><strong>Dəyişəcək rol:</strong> <span id="inviteConfirmRole">Tələbə</span></li>
+                    </ul>
+                    <small class="text-muted d-block mt-2" id="inviteConfirmHint"></small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                    <button type="submit" class="btn btn-success" id="inviteConfirmBtn">
+                        <i class="fas fa-paper-plane"></i> Dəvət et
                     </button>
                 </div>
             </form>
@@ -442,16 +551,81 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     var selectAll = document.getElementById("selectAllPendingStudents");
+    var pendingCheckboxes = Array.from(document.querySelectorAll(".pending-student-checkbox"));
+    var pendingSelectableCheckboxes = pendingCheckboxes.filter(function (checkbox) {
+        return !checkbox.disabled;
+    });
+    var pendingAddBulkBtn = document.querySelector(".js-pending-add-confirm-bulk");
+    var pendingAddBulkLabel = document.querySelector(".js-pending-add-bulk-label");
+    var pendingAddDefaultLabel = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-default-label") || "Seçilənləri təşkilata əlavə et")
+        : "Seçilənləri təşkilata əlavə et";
+    var pendingAddSelectedLabelTemplate = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-selected-label") || "Seçilənləri təşkilata əlavə et ({count} seçildi)")
+        : "Seçilənləri təşkilata əlavə et ({count} seçildi)";
+    var pendingAddDisabledTooltip = pendingAddBulkBtn
+        ? (pendingAddBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 tələbə seçin")
+        : "Ən az 1 tələbə seçin";
+    var pendingAddPermissionDisabled = pendingAddBulkBtn
+        ? pendingAddBulkBtn.getAttribute("data-permission-disabled") === "1"
+        : false;
+
+    function syncPendingBulkSelectionUi() {
+        var selectedPendingCount = pendingSelectableCheckboxes.filter(function (checkbox) {
+            return checkbox.checked;
+        }).length;
+        var hasPendingRows = pendingSelectableCheckboxes.length > 0;
+
+        if (pendingAddBulkLabel) {
+            pendingAddBulkLabel.textContent = selectedPendingCount > 0
+                ? pendingAddSelectedLabelTemplate.replace("{count}", String(selectedPendingCount))
+                : pendingAddDefaultLabel;
+        }
+
+        if (pendingAddBulkBtn) {
+            var shouldDisable = pendingAddPermissionDisabled || !hasPendingRows || selectedPendingCount === 0;
+            pendingAddBulkBtn.disabled = shouldDisable;
+            if (!pendingAddPermissionDisabled && (selectedPendingCount === 0 || !hasPendingRows)) {
+                pendingAddBulkBtn.setAttribute("title", pendingAddDisabledTooltip);
+            } else {
+                pendingAddBulkBtn.removeAttribute("title");
+            }
+        }
+
+        if (selectAll) {
+            var canToggleAll = hasPendingRows && !pendingAddPermissionDisabled;
+            selectAll.disabled = !canToggleAll;
+            if (!canToggleAll) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+                return;
+            }
+
+            if (selectedPendingCount === 0) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            } else if (selectedPendingCount === pendingSelectableCheckboxes.length) {
+                selectAll.checked = true;
+                selectAll.indeterminate = false;
+            } else {
+                selectAll.checked = false;
+                selectAll.indeterminate = true;
+            }
+        }
+    }
+
     if (selectAll) {
         selectAll.addEventListener("change", function () {
-            document.querySelectorAll(".pending-student-checkbox").forEach(function (checkbox) {
-                if (checkbox.disabled) {
-                    return;
-                }
+            pendingSelectableCheckboxes.forEach(function (checkbox) {
                 checkbox.checked = selectAll.checked;
             });
+            syncPendingBulkSelectionUi();
         });
     }
+    pendingSelectableCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", syncPendingBulkSelectionUi);
+    });
+    syncPendingBulkSelectionUi();
     var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
     if (selectAllUnassigned) {
         selectAllUnassigned.addEventListener("change", function () {
@@ -473,6 +647,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 checkbox.checked = selectAllSentInvites.checked;
             });
         });
+    }
+
+    function getSelectedUsers(selector) {
+        return Array.from(document.querySelectorAll(selector + ":checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
+            .map(function (checkbox) {
+                return {
+                    id: checkbox.value || "",
+                    fullName: checkbox.getAttribute("data-user-full-name") || "-",
+                    username: checkbox.getAttribute("data-user-username") || "-",
+                    email: checkbox.getAttribute("data-user-email") || "-",
+                    role: checkbox.getAttribute("data-target-role") || "Tələbə",
+                };
+            })
+            .filter(function (entry) {
+                return entry.id !== "";
+            });
     }
 
     function getSelectedSentInviteUserIds() {
@@ -551,7 +744,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var removeStudentModal = document.getElementById("removeStudentConfirmModal");
     if (removeStudentModal) {
         var userIdInput = document.getElementById("removeStudentModalUserId");
+        var fullNameNode = document.getElementById("removeStudentModalFullName");
         var usernameNode = document.getElementById("removeStudentModalUsername");
+        var emailNode = document.getElementById("removeStudentModalEmail");
+        var orgNode = document.getElementById("removeStudentModalOrg");
+        var roleNode = document.getElementById("removeStudentModalRole");
         var reasonInput = document.getElementById("removeStudentReasonInput");
         removeStudentModal.addEventListener("show.bs.modal", function (event) {
             var trigger = event.relatedTarget;
@@ -559,13 +756,174 @@ document.addEventListener("DOMContentLoaded", function () {
             if (userIdInput) {
                 userIdInput.value = trigger.getAttribute("data-student-user-id") || "";
             }
+            if (fullNameNode) {
+                fullNameNode.textContent = trigger.getAttribute("data-student-full-name") || "-";
+            }
             if (usernameNode) {
                 usernameNode.textContent = trigger.getAttribute("data-student-username") || "Bu istifadəçi";
+            }
+            if (emailNode) {
+                emailNode.textContent = trigger.getAttribute("data-student-email") || "-";
+            }
+            if (orgNode) {
+                orgNode.textContent = trigger.getAttribute("data-student-org") || "-";
+            }
+            if (roleNode) {
+                roleNode.textContent = trigger.getAttribute("data-student-role") || "Tələbə";
             }
             if (reasonInput) {
                 reasonInput.value = "";
             }
         });
+    }
+
+    var pendingAddModal = document.getElementById("pendingAddConfirmModal");
+    if (pendingAddModal && window.bootstrap) {
+        var pendingAddModalInstance = new window.bootstrap.Modal(pendingAddModal);
+        var pendingAddSingleInput = document.getElementById("pendingAddSingleUserId");
+        var pendingAddSelectedInput = document.getElementById("pendingAddSelectedUserIds");
+        var pendingAddLeadText = document.getElementById("pendingAddLeadText");
+        var pendingAddFullName = document.getElementById("pendingAddModalFullName");
+        var pendingAddUsername = document.getElementById("pendingAddModalUsername");
+        var pendingAddEmail = document.getElementById("pendingAddModalEmail");
+        var pendingAddRole = document.getElementById("pendingAddModalRole");
+        var pendingAddHint = document.getElementById("pendingAddModalHint");
+        var pendingAddConfirmBtn = document.getElementById("pendingAddConfirmBtn");
+
+        function fillPendingAddModal(users, mode) {
+            var firstUser = users.length ? users[0] : null;
+            if (pendingAddSingleInput) {
+                pendingAddSingleInput.value = mode === "single" && firstUser ? firstUser.id : "";
+            }
+            if (pendingAddSelectedInput) {
+                pendingAddSelectedInput.value = mode === "bulk"
+                    ? users.map(function (entry) { return entry.id; }).join(",")
+                    : "";
+            }
+            if (pendingAddFullName) {
+                pendingAddFullName.textContent = firstUser ? firstUser.fullName : "-";
+            }
+            if (pendingAddUsername) {
+                pendingAddUsername.textContent = firstUser ? firstUser.username : "-";
+            }
+            if (pendingAddEmail) {
+                pendingAddEmail.textContent = firstUser ? firstUser.email : "-";
+            }
+            if (pendingAddRole) {
+                pendingAddRole.textContent = firstUser ? firstUser.role : "Tələbə";
+            }
+            if (pendingAddLeadText) {
+                pendingAddLeadText.textContent = mode === "bulk"
+                    ? "Seçilən istifadəçi(lər)i təşkilata əlavə etməyi təsdiqləyin."
+                    : "İstifadəçini təşkilata əlavə etməyi təsdiqləyin.";
+            }
+            if (pendingAddHint) {
+                pendingAddHint.textContent = users.length > 1
+                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    : "";
+            }
+            if (pendingAddConfirmBtn) {
+                pendingAddConfirmBtn.disabled = users.length === 0;
+            }
+        }
+
+        document.querySelectorAll(".js-pending-add-confirm").forEach(function (button) {
+            button.addEventListener("click", function () {
+                fillPendingAddModal(
+                    [{
+                        id: button.getAttribute("data-single-user-id") || "",
+                        fullName: button.getAttribute("data-user-full-name") || "-",
+                        username: button.getAttribute("data-user-username") || "-",
+                        email: button.getAttribute("data-user-email") || "-",
+                        role: button.getAttribute("data-target-role") || "Tələbə",
+                    }],
+                    "single"
+                );
+                pendingAddModalInstance.show();
+            });
+        });
+
+        if (pendingAddBulkBtn) {
+            pendingAddBulkBtn.addEventListener("click", function () {
+                fillPendingAddModal(getSelectedUsers(".pending-student-checkbox"), "bulk");
+                pendingAddModalInstance.show();
+            });
+        }
+    }
+
+    var inviteModal = document.getElementById("inviteConfirmModal");
+    if (inviteModal && window.bootstrap) {
+        var inviteModalInstance = new window.bootstrap.Modal(inviteModal);
+        var inviteSingleInput = document.getElementById("inviteConfirmSingleUserId");
+        var inviteSelectedInput = document.getElementById("inviteConfirmSelectedUserIds");
+        var inviteLeadText = document.getElementById("inviteConfirmLeadText");
+        var inviteFullName = document.getElementById("inviteConfirmFullName");
+        var inviteUsername = document.getElementById("inviteConfirmUsername");
+        var inviteEmail = document.getElementById("inviteConfirmEmail");
+        var inviteRole = document.getElementById("inviteConfirmRole");
+        var inviteHint = document.getElementById("inviteConfirmHint");
+        var inviteConfirmBtn = document.getElementById("inviteConfirmBtn");
+
+        function fillInviteModal(users, mode) {
+            var firstUser = users.length ? users[0] : null;
+            if (inviteSingleInput) {
+                inviteSingleInput.value = mode === "single" && firstUser ? firstUser.id : "";
+            }
+            if (inviteSelectedInput) {
+                inviteSelectedInput.value = mode === "bulk"
+                    ? users.map(function (entry) { return entry.id; }).join(",")
+                    : "";
+            }
+            if (inviteFullName) {
+                inviteFullName.textContent = firstUser ? firstUser.fullName : "-";
+            }
+            if (inviteUsername) {
+                inviteUsername.textContent = firstUser ? firstUser.username : "-";
+            }
+            if (inviteEmail) {
+                inviteEmail.textContent = firstUser ? firstUser.email : "-";
+            }
+            if (inviteRole) {
+                inviteRole.textContent = firstUser ? firstUser.role : "Tələbə";
+            }
+            if (inviteLeadText) {
+                inviteLeadText.textContent = mode === "bulk"
+                    ? "Seçilən istifadəçi(lər)ə dəvət göndərməyi təsdiqləyin."
+                    : "İstifadəçiyə dəvət göndərməyi təsdiqləyin.";
+            }
+            if (inviteHint) {
+                inviteHint.textContent = users.length > 1
+                    ? "Seçilən istifadəçi sayı: " + String(users.length)
+                    : "";
+            }
+            if (inviteConfirmBtn) {
+                inviteConfirmBtn.disabled = users.length === 0;
+            }
+        }
+
+        document.querySelectorAll(".js-invite-confirm-single").forEach(function (button) {
+            button.addEventListener("click", function () {
+                fillInviteModal(
+                    [{
+                        id: button.getAttribute("data-single-invite-user-id") || "",
+                        fullName: button.getAttribute("data-user-full-name") || "-",
+                        username: button.getAttribute("data-user-username") || "-",
+                        email: button.getAttribute("data-user-email") || "-",
+                        role: button.getAttribute("data-target-role") || "Tələbə",
+                    }],
+                    "single"
+                );
+                inviteModalInstance.show();
+            });
+        });
+
+        var inviteBulkBtn = document.querySelector(".js-invite-confirm-bulk");
+        if (inviteBulkBtn) {
+            inviteBulkBtn.addEventListener("click", function () {
+                fillInviteModal(getSelectedUsers(".unassigned-student-checkbox"), "bulk");
+                inviteModalInstance.show();
+            });
+        }
     }
 });
 </script>
