@@ -78,23 +78,31 @@
 }
 
 .profile-section--manage-roles .search-box {
-    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0.6rem;
     max-width: 560px;
+}
+
+.profile-section--manage-roles .manage-roles-search-input-wrap {
+    position: relative;
+    flex: 1;
 }
 
 .profile-section--manage-roles .search-icon {
     position: absolute;
-    left: 0.9rem;
+    left: 0.85rem;
     top: 50%;
     transform: translateY(-50%);
     color: #60a5fa;
+    z-index: 1;
 }
 
 .profile-section--manage-roles .search-input {
     width: 100%;
     border: 1px solid #bfdbfe;
     border-radius: 10px;
-    padding: 0.65rem 1rem 0.65rem 2.5rem;
+    padding: 0.65rem 2.5rem 0.65rem 2.35rem;
     background: #ffffff;
     color: #1f2937;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -106,12 +114,40 @@
     outline: none;
 }
 
+.profile-section--manage-roles .manage-roles-search-clear {
+    position: absolute;
+    right: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.profile-section--manage-roles .manage-roles-search-clear:hover {
+    background: rgba(30, 64, 175, 0.12);
+    color: #1e3a8a;
+}
+
+.profile-section--manage-roles .manage-roles-search-clear[hidden] {
+    display: none !important;
+}
+
 .profile-section--manage-roles .search-section .btn-primary {
     background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
     border: 1px solid #2563eb;
     color: #ffffff;
     border-radius: 10px;
-    padding-inline: 1rem;
+    padding-inline: 1.1rem;
+    white-space: nowrap;
 }
 
 .profile-section--manage-roles .search-section .btn-primary:hover {
@@ -230,6 +266,11 @@
     cursor: pointer;
     background: #ffffff;
     border: 1px solid #e2e8f0;
+}
+
+.profile-section--manage-roles .role-check-option.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
 }
 
 .profile-section--manage-roles .role-check-option input[type="checkbox"] {

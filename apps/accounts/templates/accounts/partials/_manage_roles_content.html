@@ -42,22 +42,34 @@
 <div class="users-card section-card">
     <div class="search-section">
         <form method="get"
-              class="search-box d-flex gap-2"
+              class="search-box d-flex gap-2 role-assignment-search-form"
+              data-standard-search-form
               action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:manage_roles' %}{% endif %}">
             {% if embedded_in_profile %}
             <input type="hidden" name="section" value="manage-roles">
             {% endif %}
-            <i class="fas fa-search search-icon"></i>
-            <input
-                type="text"
-                class="search-input"
-                id="searchInput"
-                name="{% if embedded_in_profile %}manage_roles_search{% else %}search{% endif %}"
-                placeholder="{% trans 'search_user_placeholder' context 'profile.manage_roles' %}"
-                value="{{ search_query }}"
-            >
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-search"></i>
+            <div class="manage-roles-search-input-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input
+                    type="text"
+                    class="search-input"
+                    id="searchInput"
+                    name="{% if embedded_in_profile %}manage_roles_search{% else %}search{% endif %}"
+                    placeholder="{% trans 'search_user_placeholder' context 'profile.manage_roles' %}"
+                    value="{{ search_query }}"
+                    autocomplete="off"
+                    data-standard-search-input
+                >
+                <button type="button"
+                        class="manage-roles-search-clear"
+                        data-standard-search-clear
+                        aria-label="Axtarışı təmizlə"
+                        hidden>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <button type="submit" class="btn btn-primary" data-standard-search-submit>
+                <i class="fas fa-search"></i> Axtar
             </button>
         </form>
     </div>
@@ -106,13 +118,14 @@
                         {% endif %}
                     </td>
                     <td>
-                        <form method="post" action="{% url 'accounts:manage_roles' %}" class="role-actions">
+                        <form method="post" action="{% url 'accounts:manage_roles' %}" class="role-actions js-manage-roles-form">
                             {% csrf_token %}
                             <input type="hidden" name="user_id" value="{{ p.user.id }}">
                             <input type="hidden" name="next" value="{{ post_next_url }}">
                             <div class="role-checkbox-grid">
                                 {% for role_val, role_label in assignable_roles %}
-                                <label class="role-check-option">
+                                <label class="role-check-option{% if not p.can_edit_roles %} is-disabled{% endif %}"
+                                       {% if not p.can_edit_roles %}title="{% trans 'level_limit' context 'profile.manage_roles' %}"{% endif %}>
                                     <input
                                         type="checkbox"
                                         name="role_names"
@@ -129,12 +142,18 @@
                                 name="action"
                                 value="assign"
                                 class="role-btn role-btn-assign"
+                                data-manage-roles-save-btn
+                                data-default-label="{% trans 'save' context 'profile.manage_roles' %}"
+                                data-saving-label="Saving..."
+                                {% if not p.can_edit_roles %}title="{% trans 'level_limit' context 'profile.manage_roles' %}"{% endif %}
                                 {% if not p.can_edit_roles %}disabled{% endif %}
                             >
                                 <i class="fas fa-check"></i> {% trans "save" context "profile.manage_roles" %}
                             </button>
                             {% if not p.can_edit_roles %}
-                            <span class="role-edit-locked">{% trans "level_limit" context "profile.manage_roles" %}</span>
+                            <span class="role-edit-locked" title="{% trans 'level_limit' context 'profile.manage_roles' %}">
+                                {% trans "level_limit" context "profile.manage_roles" %}
+                            </span>
                             {% endif %}
                         </form>
                     </td>

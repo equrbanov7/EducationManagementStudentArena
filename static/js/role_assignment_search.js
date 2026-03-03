@@ -54,7 +54,11 @@ document.addEventListener("DOMContentLoaded", function () {
             clearButton.addEventListener("click", function () {
                 input.value = "";
                 syncClearButtonVisibility();
-                input.focus();
+                if (typeof form.requestSubmit === "function") {
+                    form.requestSubmit(submitButton || undefined);
+                    return;
+                }
+                form.submit();
             });
         }
 

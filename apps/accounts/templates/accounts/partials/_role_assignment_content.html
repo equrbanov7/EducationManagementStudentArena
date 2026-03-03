@@ -41,7 +41,7 @@
             </button>
         </div>
         <button type="submit" class="btn btn-primary role-assignment-search-submit" data-role-assignment-submit>
-            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i></span>
+            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i> Axtar</span>
             <span class="spinner-border spinner-border-sm role-assignment-search-spinner" role="status" aria-hidden="true"></span>
         </button>
     </form>
@@ -105,6 +105,7 @@
                                 data-user-username="@{{ member.user.username }}"
                                 data-user-email="{{ member.user.email }}"
                                 data-organization-name="{{ organization.name }}"
+                                data-current-role="{{ member.role.display_name }} ({{ member.role.level }})"
                                 {% if not can_assign_roles %}disabled{% endif %}>
                             Rolu yenilə
                         </button>
@@ -165,65 +166,67 @@
             </button>
         </div>
         <button type="submit" class="btn btn-primary role-assignment-search-submit" data-role-assignment-submit>
-            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i></span>
+            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i> Axtar</span>
             <span class="spinner-border spinner-border-sm role-assignment-search-spinner" role="status" aria-hidden="true"></span>
         </button>
     </form>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>{% trans "table_user" context "profile.role_assignment" %}</th>
-                <th>{% trans "table_email" context "profile.role_assignment" %}</th>
-                <th>{% trans "table_requested_organization" context "profile.role_assignment" %}</th>
-                <th>{% trans "table_role_add" context "profile.role_assignment" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for profile in unassigned_users %}
-            <tr>
-                <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
-                <td>{{ profile.user.email }}</td>
-                <td>
-                    {% if profile.requested_organization %}
-                        {{ profile.requested_organization.name }}
-                    {% elif profile.requested_organization_name %}
-                        {{ profile.requested_organization_name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    <form method="post" action="{% url 'accounts:role_assignment' %}" class="d-flex gap-2 align-items-center">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="attach_user">
-                        <input type="hidden" name="user_id" value="{{ profile.user.id }}">
-                        <input type="hidden" name="next" value="{{ post_next_url }}">
-                        <select name="role_id" class="form-control" required>
-                            {% for role in assignable_roles %}
-                            <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
-                            {% endfor %}
-                        </select>
-                        <button type="button"
-                                class="btn btn-success btn-sm js-role-assignment-action-confirm"
-                                data-confirm-action-type="add-to-org"
-                                data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
-                                data-user-username="@{{ profile.user.username }}"
-                                data-user-email="{{ profile.user.email }}"
-                                data-organization-name="{{ organization.name }}"
-                                {% if not can_assign_roles %}disabled{% endif %}>
-                            Təşkilata əlavə et
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center">{% trans "pending_users_not_found" context "profile.role_assignment" %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans "table_user" context "profile.role_assignment" %}</th>
+                    <th>{% trans "table_email" context "profile.role_assignment" %}</th>
+                    <th>{% trans "table_requested_organization" context "profile.role_assignment" %}</th>
+                    <th>{% trans "table_role_add" context "profile.role_assignment" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in unassigned_users %}
+                <tr>
+                    <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>
+                        {% if profile.requested_organization %}
+                            {{ profile.requested_organization.name }}
+                        {% elif profile.requested_organization_name %}
+                            {{ profile.requested_organization_name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'accounts:role_assignment' %}" class="d-flex gap-2 align-items-center">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="attach_user">
+                            <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                            <input type="hidden" name="next" value="{{ post_next_url }}">
+                            <select name="role_id" class="form-control" required>
+                                {% for role in assignable_roles %}
+                                <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-role-assignment-action-confirm"
+                                    data-confirm-action-type="add-to-org"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-organization-name="{{ organization.name }}"
+                                    data-current-role="-"
+                                    {% if not can_assign_roles %}disabled{% endif %}>
+                                Təşkilata əlavə et
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">{% trans "pending_users_not_found" context "profile.role_assignment" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% include "partials/_pagination.html" with page_obj=unassigned_users extra_query=unassigned_pagination_query page_param=unassigned_page_param %}
 </div>
 {% endif %}
@@ -262,7 +265,8 @@
                     <li><strong>Username:</strong> <span id="roleAssignmentConfirmUsername">-</span></li>
                     <li><strong>Email:</strong> <span id="roleAssignmentConfirmEmail">-</span></li>
                     <li><strong>Təşkilat:</strong> <span id="roleAssignmentConfirmOrg">-</span></li>
-                    <li><strong>Dəyişəcək rol:</strong> <span id="roleAssignmentConfirmRole">-</span></li>
+                    <li><strong>Cari rol:</strong> <span id="roleAssignmentConfirmOldRole">-</span></li>
+                    <li><strong>Yeni rol:</strong> <span id="roleAssignmentConfirmRole">-</span></li>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -300,10 +304,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var usernameNode = document.getElementById("roleAssignmentConfirmUsername");
     var emailNode = document.getElementById("roleAssignmentConfirmEmail");
     var orgNode = document.getElementById("roleAssignmentConfirmOrg");
+    var oldRoleNode = document.getElementById("roleAssignmentConfirmOldRole");
     var roleNode = document.getElementById("roleAssignmentConfirmRole");
     var confirmBtn = document.getElementById("roleAssignmentConfirmSubmitBtn");
     var modalInstance = window.bootstrap ? new window.bootstrap.Modal(actionModal) : null;
     var pendingForm = null;
+    var pendingActionType = "";
+    var confirmDefaultLabel = confirmBtn ? confirmBtn.textContent : "Təsdiqlə";
 
     function selectedRoleLabel(form) {
         if (!form) {
@@ -317,6 +324,18 @@ document.addEventListener("DOMContentLoaded", function () {
         return option ? option.textContent.trim() : "-";
     }
 
+    function fallbackText(row, selectorIndex) {
+        if (!row || typeof selectorIndex !== "number") {
+            return "-";
+        }
+        var cell = row.cells && row.cells.length > selectorIndex ? row.cells[selectorIndex] : null;
+        if (!cell) {
+            return "-";
+        }
+        var text = (cell.textContent || "").trim();
+        return text || "-";
+    }
+
     document.querySelectorAll(".js-role-assignment-action-confirm").forEach(function (button) {
         button.addEventListener("click", function () {
             var form = button.closest("form");
@@ -324,24 +343,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             pendingForm = form;
+            pendingActionType = button.getAttribute("data-confirm-action-type") || "";
+            var row = button.closest("tr");
 
-            var actionType = button.getAttribute("data-confirm-action-type") || "";
             if (leadNode) {
-                leadNode.textContent = actionType === "add-to-org"
+                leadNode.textContent = pendingActionType === "add-to-org"
                     ? "İstifadəçini təşkilata əlavə etməyi təsdiqləyin."
                     : "İstifadəçinin rolunu yeniləməyi təsdiqləyin.";
             }
             if (fullNameNode) {
-                fullNameNode.textContent = button.getAttribute("data-user-full-name") || "-";
+                fullNameNode.textContent = button.getAttribute("data-user-full-name") || fallbackText(row, 0);
             }
             if (usernameNode) {
                 usernameNode.textContent = button.getAttribute("data-user-username") || "-";
             }
             if (emailNode) {
-                emailNode.textContent = button.getAttribute("data-user-email") || "-";
+                emailNode.textContent = button.getAttribute("data-user-email") || fallbackText(row, 1);
             }
             if (orgNode) {
                 orgNode.textContent = button.getAttribute("data-organization-name") || "-";
+            }
+            if (oldRoleNode) {
+                oldRoleNode.textContent = button.getAttribute("data-current-role")
+                    || (pendingActionType === "update-role" ? fallbackText(row, 2) : "-");
             }
             if (roleNode) {
                 roleNode.textContent = selectedRoleLabel(form);
@@ -357,6 +381,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>'
+                + (pendingActionType === "add-to-org" ? "Əlavə olunur..." : "Updating...");
             pendingForm.submit();
         });
     }
@@ -364,8 +390,10 @@ document.addEventListener("DOMContentLoaded", function () {
     actionModal.addEventListener("hidden.bs.modal", function () {
         if (confirmBtn) {
             confirmBtn.disabled = false;
+            confirmBtn.textContent = confirmDefaultLabel;
         }
         pendingForm = null;
+        pendingActionType = "";
     });
 });
 </script>
