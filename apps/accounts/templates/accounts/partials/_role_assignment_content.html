@@ -2,18 +2,48 @@
 {% trans "organization_not_found_choose_in_profile" context "profile.role_assignment" as role_assignment_org_not_found %}
 {% if organization %}
 <div class="section-card">
+    <div class="section-title role-concept-heading">
+        <span><i class="fas fa-user-shield"></i> Rol təyin et</span>
+        <button type="button"
+                class="btn btn-link btn-sm role-concept-info-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#roleAssignmentInfoModal"
+                aria-label="Rol təyini haqqında">
+            <i class="fas fa-circle-question"></i>
+        </button>
+    </div>
+    <p class="text-muted small mb-3">Təşkilat daxili rol (səviyyəli rol)</p>
     <div class="section-title">
         <i class="fas fa-building"></i> {{ organization.name }}
     </div>
     <form method="get"
-          class="search-form"
+          class="search-form role-assignment-search-form"
+          data-role-assignment-search-form
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:role_assignment' %}{% endif %}">
         {% if embedded_in_profile %}
         <input type="hidden" name="section" value="role-assignment">
         {% endif %}
         <input type="hidden" name="unassigned_search" value="{{ unassigned_search_query }}">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_user_placeholder' context 'profile.role_assignment' %}" class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="q"
+                   value="{{ search_query }}"
+                   placeholder="Ad / username / email üzrə axtar"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-role-assignment-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-role-assignment-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit" class="btn btn-primary role-assignment-search-submit" data-role-assignment-submit>
+            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i></span>
+            <span class="spinner-border spinner-border-sm role-assignment-search-spinner" role="status" aria-hidden="true"></span>
+        </button>
     </form>
 </div>
 
@@ -24,6 +54,8 @@
 </div>
 {% else %}
 <div class="section-card">
+    <div class="role-assignment-result-count">Nəticə: {{ members.paginator.count|default:0 }}</div>
+    {% if members.paginator.count %}
     <table class="table">
         <thead>
             <tr>
@@ -39,13 +71,26 @@
             <tr>
                 <td>{{ member.user.get_full_name|default:member.user.username }}</td>
                 <td>{{ member.user.email }}</td>
-                <td><span class="role-badge">{{ member.role.display_name }}</span></td>
-                <td>{{ member.role.level }}</td>
+                <td>
+                    <div class="role-assignment-current-role">
+                        <span class="role-badge">{{ member.role.display_name }}</span>
+                        {% if member.is_primary %}
+                        <span class="role-assignment-primary-badge" title="Primary = ən yüksək səviyyə">Primary</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    {{ member.role.level }}
+                    {% if member.is_primary %}
+                    <div class="role-assignment-primary-hint">Primary = ən yüksək səviyyə</div>
+                    {% endif %}
+                </td>
                 <td>
                     <form method="post" action="{% url 'accounts:role_assignment' %}" class="d-flex gap-2 align-items-center">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="update_member">
                         <input type="hidden" name="membership_id" value="{{ member.id }}">
+                        <input type="hidden" name="next" value="{{ post_next_url }}">
                         <select name="role_id" class="form-control" required>
                             {% for role in assignable_roles %}
                             <option value="{{ role.id }}" {% if role.id == member.role.id %}selected{% endif %}>
@@ -53,17 +98,38 @@
                             </option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn btn-primary btn-sm" {% if not can_assign_roles %}disabled{% endif %}>{% trans "update" context "profile.role_assignment" %}</button>
+                        <button type="button"
+                                class="btn btn-primary btn-sm js-role-assignment-action-confirm"
+                                data-confirm-action-type="update-role"
+                                data-user-full-name="{{ member.user.get_full_name|default:member.user.username }}"
+                                data-user-username="@{{ member.user.username }}"
+                                data-user-email="{{ member.user.email }}"
+                                data-organization-name="{{ organization.name }}"
+                                {% if not can_assign_roles %}disabled{% endif %}>
+                            Rolu yenilə
+                        </button>
                     </form>
                 </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">{% trans "members_not_found" context "profile.role_assignment" %}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <div class="empty-state role-assignment-empty-state">
+        <i class="fas fa-search"></i>
+        <p>Nəticə tapılmadı</p>
+        <form method="get"
+              action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:role_assignment' %}{% endif %}">
+            {% if embedded_in_profile %}
+            <input type="hidden" name="section" value="role-assignment">
+            {% endif %}
+            {% if unassigned_search_query %}
+            <input type="hidden" name="unassigned_search" value="{{ unassigned_search_query }}">
+            {% endif %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Filtri təmizlə</button>
+        </form>
+    </div>
+    {% endif %}
     {% include "partials/_pagination.html" with page_obj=members extra_query=members_pagination_query page_param=members_page_param %}
 </div>
 
@@ -75,14 +141,33 @@
         {% trans "pending_users_description" context "profile.role_assignment" %}
     </p>
     <form method="get"
-          class="search-form mb-3"
+          class="search-form mb-3 role-assignment-search-form"
+          data-role-assignment-search-form
           action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:role_assignment' %}{% endif %}">
         {% if embedded_in_profile %}
         <input type="hidden" name="section" value="role-assignment">
         {% endif %}
-        <input type="hidden" name="search" value="{{ search_query }}">
-        <input type="text" name="unassigned_search" value="{{ unassigned_search_query }}" placeholder="{% trans 'search_unassigned_user_placeholder' context 'profile.role_assignment' %}" class="form-control">
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <input type="hidden" name="q" value="{{ search_query }}">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="unassigned_search"
+                   value="{{ unassigned_search_query }}"
+                   placeholder="{% trans 'search_unassigned_user_placeholder' context 'profile.role_assignment' %}"
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-role-assignment-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-role-assignment-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit" class="btn btn-primary role-assignment-search-submit" data-role-assignment-submit>
+            <span class="role-assignment-search-submit-label"><i class="fas fa-search"></i></span>
+            <span class="spinner-border spinner-border-sm role-assignment-search-spinner" role="status" aria-hidden="true"></span>
+        </button>
     </form>
 
     <table class="table">
@@ -113,12 +198,22 @@
                         {% csrf_token %}
                         <input type="hidden" name="action" value="attach_user">
                         <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                        <input type="hidden" name="next" value="{{ post_next_url }}">
                         <select name="role_id" class="form-control" required>
                             {% for role in assignable_roles %}
                             <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn btn-success btn-sm" {% if not can_assign_roles %}disabled{% endif %}>{% trans "add" context "profile.role_assignment" %}</button>
+                        <button type="button"
+                                class="btn btn-success btn-sm js-role-assignment-action-confirm"
+                                data-confirm-action-type="add-to-org"
+                                data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                data-user-username="@{{ profile.user.username }}"
+                                data-user-email="{{ profile.user.email }}"
+                                data-organization-name="{{ organization.name }}"
+                                {% if not can_assign_roles %}disabled{% endif %}>
+                            Təşkilata əlavə et
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -133,8 +228,144 @@
 </div>
 {% endif %}
 {% else %}
-<div class="empty-state">
-    <i class="fas fa-building"></i>
-    <p>{{ access_denied_message|default:role_assignment_org_not_found }}</p>
+<div class="section-card">
+    <div class="section-title role-concept-heading">
+        <span><i class="fas fa-user-shield"></i> Rol təyin et</span>
+        <button type="button"
+                class="btn btn-link btn-sm role-concept-info-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#roleAssignmentInfoModal"
+                aria-label="Rol təyini haqqında">
+            <i class="fas fa-circle-question"></i>
+        </button>
+    </div>
+    <p class="text-muted small mb-3">Təşkilat daxili rol (səviyyəli rol)</p>
+
+    <div class="empty-state role-assignment-empty-state">
+        <i class="fas fa-building"></i>
+        <p>{{ access_denied_message|default:role_assignment_org_not_found }}</p>
+    </div>
 </div>
 {% endif %}
+
+<div class="modal fade" id="roleAssignmentActionConfirmModal" tabindex="-1" aria-labelledby="roleAssignmentActionConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleAssignmentActionConfirmModalLabel">Əməliyyatı təsdiqlə</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3" id="roleAssignmentConfirmLeadText"></p>
+                <ul class="list-unstyled mb-0 role-assignment-confirm-context">
+                    <li><strong>Ad:</strong> <span id="roleAssignmentConfirmFullName">-</span></li>
+                    <li><strong>Username:</strong> <span id="roleAssignmentConfirmUsername">-</span></li>
+                    <li><strong>Email:</strong> <span id="roleAssignmentConfirmEmail">-</span></li>
+                    <li><strong>Təşkilat:</strong> <span id="roleAssignmentConfirmOrg">-</span></li>
+                    <li><strong>Dəyişəcək rol:</strong> <span id="roleAssignmentConfirmRole">-</span></li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <button type="button" class="btn btn-primary" id="roleAssignmentConfirmSubmitBtn">Təsdiqlə</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="roleAssignmentInfoModal" tabindex="-1" aria-labelledby="roleAssignmentInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleAssignmentInfoModalLabel">Bu rol nə edir?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2"><strong>Rol təyin et</strong> təşkilat üzvlüyünün rolunu dəyişir.</p>
+                <p class="mb-2">Bu rol səviyyəyə bağlıdır və təşkilat daxilində səlahiyyətləri müəyyən edir.</p>
+                <p class="mb-0"><strong>Primary</strong> badge-i həmin üzvlük üçün əsas (ən yüksək səviyyə) rolu göstərir.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var actionModal = document.getElementById("roleAssignmentActionConfirmModal");
+    if (!actionModal) {
+        return;
+    }
+
+    var leadNode = document.getElementById("roleAssignmentConfirmLeadText");
+    var fullNameNode = document.getElementById("roleAssignmentConfirmFullName");
+    var usernameNode = document.getElementById("roleAssignmentConfirmUsername");
+    var emailNode = document.getElementById("roleAssignmentConfirmEmail");
+    var orgNode = document.getElementById("roleAssignmentConfirmOrg");
+    var roleNode = document.getElementById("roleAssignmentConfirmRole");
+    var confirmBtn = document.getElementById("roleAssignmentConfirmSubmitBtn");
+    var modalInstance = window.bootstrap ? new window.bootstrap.Modal(actionModal) : null;
+    var pendingForm = null;
+
+    function selectedRoleLabel(form) {
+        if (!form) {
+            return "-";
+        }
+        var select = form.querySelector('select[name="role_id"]');
+        if (!select) {
+            return "-";
+        }
+        var option = select.options[select.selectedIndex];
+        return option ? option.textContent.trim() : "-";
+    }
+
+    document.querySelectorAll(".js-role-assignment-action-confirm").forEach(function (button) {
+        button.addEventListener("click", function () {
+            var form = button.closest("form");
+            if (!form || !modalInstance) {
+                return;
+            }
+            pendingForm = form;
+
+            var actionType = button.getAttribute("data-confirm-action-type") || "";
+            if (leadNode) {
+                leadNode.textContent = actionType === "add-to-org"
+                    ? "İstifadəçini təşkilata əlavə etməyi təsdiqləyin."
+                    : "İstifadəçinin rolunu yeniləməyi təsdiqləyin.";
+            }
+            if (fullNameNode) {
+                fullNameNode.textContent = button.getAttribute("data-user-full-name") || "-";
+            }
+            if (usernameNode) {
+                usernameNode.textContent = button.getAttribute("data-user-username") || "-";
+            }
+            if (emailNode) {
+                emailNode.textContent = button.getAttribute("data-user-email") || "-";
+            }
+            if (orgNode) {
+                orgNode.textContent = button.getAttribute("data-organization-name") || "-";
+            }
+            if (roleNode) {
+                roleNode.textContent = selectedRoleLabel(form);
+            }
+
+            modalInstance.show();
+        });
+    });
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener("click", function () {
+            if (!pendingForm) {
+                return;
+            }
+            confirmBtn.disabled = true;
+            pendingForm.submit();
+        });
+    }
+
+    actionModal.addEventListener("hidden.bs.modal", function () {
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+        }
+        pendingForm = null;
+    });
+});
+</script>

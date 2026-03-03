@@ -478,11 +478,13 @@ class ProfileViewTest(TestCase):
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, reverse("accounts:role_assignment"))
+        self.assertContains(response, f"{reverse('accounts:profile')}?section=role-assignment")
         self.assertContains(response, reverse("accounts:student_organization_management"))
         self.assertContains(response, reverse("accounts:permission_editor"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         self.assertContains(response, reverse("exams:teacher_group_list"))
+        self.assertContains(response, "Təşkilat daxili rol (səviyyəli rol)")
+        self.assertContains(response, "Profil rolları (multi-role / checkbox)")
 
     def test_manage_roles_table_shows_username(self):
         superuser = User.objects.create_superuser(
@@ -494,6 +496,25 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:manage_roles"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f"@{self.user.username}")
+
+    def test_manage_roles_shows_primary_role_summary_for_multi_role_user(self):
+        from django.contrib.auth.models import Group
+
+        from apps.accounts.models import ProfileRole
+
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_primary",
+            email="profile_superadmin_primary@example.com",
+            password="adminpass123",
+        )
+        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
+        self.user.groups.add(teacher_group)
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("accounts:manage_roles"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Primary:")
+        self.assertContains(response, "Müəllim (60)")
 
     def test_org_owner_with_teacher_secondary_role_sees_teacher_navigation(self):
         from django.contrib.auth.models import Group
