@@ -63,6 +63,33 @@ document.addEventListener("DOMContentLoaded", function () {
   let originalFormData = {};
   let hasUnsavedChanges = false;
   let pendingClose = false;
+  const allowedImageExtensions = new Set(["jpg", "jpeg", "jfif", "png", "gif", "webp"]);
+  const maxImageSizeBytes = 25 * 1024 * 1024;
+
+  function getFileExtension(fileName) {
+    if (!fileName || typeof fileName !== "string") {
+      return "";
+    }
+    const parts = fileName.split(".");
+    return parts.length > 1 ? parts.pop().toLowerCase() : "";
+  }
+
+  function getImageValidationError(file) {
+    if (!file) {
+      return "";
+    }
+
+    const extension = getFileExtension(file.name || "");
+    if (!allowedImageExtensions.has(extension)) {
+      return "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları dəstəklənir.";
+    }
+
+    if (file.size > maxImageSizeBytes) {
+      return "Şəkil ölçüsü maksimum 25 MB ola bilər.";
+    }
+
+    return "";
+  }
 
   // ============= CREATE FUNKSIONALLARI =============
   function showCreateError(message) {
@@ -115,6 +142,16 @@ document.addEventListener("DOMContentLoaded", function () {
     createForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       hideCreateError();
+
+      const selectedCreateImage =
+        createImage && createImage.files && createImage.files.length
+          ? createImage.files[0]
+          : null;
+      const createImageError = getImageValidationError(selectedCreateImage);
+      if (createImageError) {
+        showCreateError(createImageError);
+        return;
+      }
 
       const formData = new FormData(createForm);
       const publishValue =
@@ -170,6 +207,22 @@ document.addEventListener("DOMContentLoaded", function () {
         hideModal(createModal);
       }
     });
+
+    if (createImage) {
+      createImage.addEventListener("change", function () {
+        const selectedFile =
+          createImage.files && createImage.files.length
+            ? createImage.files[0]
+            : null;
+        const imageError = getImageValidationError(selectedFile);
+        if (imageError) {
+          createImage.value = "";
+          showCreateError(imageError);
+          return;
+        }
+        hideCreateError();
+      });
+    }
 
     window.openCreatePostModal = openCreateModal;
   }
@@ -287,6 +340,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Yeni şəkil seçiləndə də dəyişiklik say
   if (editImage) {
     editImage.addEventListener("change", function () {
+      const selectedFile =
+        editImage.files && editImage.files.length ? editImage.files[0] : null;
+      const imageError = getImageValidationError(selectedFile);
+      if (imageError) {
+        editImage.value = "";
+        alert(imageError);
+        return;
+      }
       hasUnsavedChanges = true;
       updateSaveButtonState();
     });

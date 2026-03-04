@@ -16,6 +16,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -25,12 +26,47 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import Course, CourseMembership
+from core.permissions import request_has_permission
+from core.tenancy import scoped_by_organization_id
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Project, ProjectSubmission
 
 User = get_user_model()
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
 REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+
+
+def _tenant_scoped_courses(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Course.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="owner__profile__organization",
+    )
+
+
+def _tenant_scoped_projects(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Project.objects.all()
+    return base_queryset.filter(course__in=_tenant_scoped_courses(request))
+
+
+def _tenant_scoped_submissions(request, queryset=None):
+    base_queryset = queryset if queryset is not None else ProjectSubmission.objects.all()
+    return base_queryset.filter(project__in=_tenant_scoped_projects(request))
+
+
+def _get_tenant_course_or_404(request, course_id):
+    return get_object_or_404(_tenant_scoped_courses(request), id=course_id)
+
+
+def _get_tenant_project_or_404(request, project_id):
+    return get_object_or_404(_tenant_scoped_projects(request), id=project_id)
+
+
+def _get_tenant_submission_or_404(request, submission_id):
+    return get_object_or_404(_tenant_scoped_submissions(request), id=submission_id)
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -100,7 +136,7 @@ def create_project(request, course_id):
     │ Təyin etmə: group_names[] və ya students[]                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
 
     # İcazə yoxlaması - yalnız kurs sahibi
     if not request.user.is_teacher_or_above or course.owner != request.user:
@@ -160,7 +196,7 @@ def edit_project(request, pk):
     │ POST /projects/<pk>/edit/ → Yeniləyir                                   │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or project.course.owner != request.user:
@@ -256,7 +292,7 @@ def delete_project(request, pk):
     │ POST /projects/<pk>/delete/                                             │
     └─────────────────────────────��───────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     if not request.user.is_teacher_or_above or project.course.owner != request.user:
         return JsonResponse(
@@ -290,7 +326,7 @@ def project_detail(request, pk):
     │ - Yeni cavab göndərə bilir (cəhd varsa)                                 │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     # ─────────────────────────────────────────────────────────────────────────
     # İcazə yoxlaması - tələbə yalnız özünə təyin olunmuşlara baxa bilər
@@ -328,7 +364,7 @@ def submit_project(request, pk):
     │ Form data: content (text), file (optional)                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     # Cavab göndərə bilərmi yoxla
     if not project.can_user_submit(request.user):
@@ -340,6 +376,29 @@ def submit_project(request, pk):
             status=400,
         )
 
+    uploaded_file = request.FILES.get("file")
+    if uploaded_file is not None:
+        try:
+            validate_uploaded_file(
+                uploaded_file,
+                allowed_extensions={
+                    ".zip",
+                    ".rar",
+                    ".7z",
+                    ".pdf",
+                    ".txt",
+                    ".doc",
+                    ".docx",
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                },
+                max_size_mb=25,
+            )
+            randomize_uploaded_filename(uploaded_file)
+        except ValidationError as exc:
+            return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+
     try:
         submission = ProjectSubmission.objects.create(
             project=project,
@@ -348,8 +407,8 @@ def submit_project(request, pk):
         )
 
         # Fayl yükləmə
-        if "file" in request.FILES:
-            submission.file = request.FILES["file"]
+        if uploaded_file is not None:
+            submission.file = uploaded_file
             submission.save()
 
         messages.success(request, pgettext("projects.views.message", "project_submitted"))
@@ -379,7 +438,7 @@ def my_submissions(request, pk):
     │ - Qalan cəhd sayını görür                                               │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     # ─────────────────────────────────────────────────────────────────────────
     # İcazə yoxlaması - yalnız özünə təyin olunmuş project-lərə baxa bilər
@@ -421,7 +480,7 @@ def review_submissions(request, pk):
     │ - Rəy yaza bilir                                                        │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    project = get_object_or_404(Project, id=pk)
+    project = _get_tenant_project_or_404(request, pk)
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or project.course.owner != request.user:
@@ -453,7 +512,13 @@ def grade_submission(request, pk):
     │ Form data: grade, feedback (optional)                                   │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    submission = get_object_or_404(ProjectSubmission, id=pk)
+    submission = _get_tenant_submission_or_404(request, pk)
+
+    if not request_has_permission(request, "grade.input"):
+        return JsonResponse(
+            {"success": False, "error": pgettext("projects.views.message", "permission_denied")},
+            status=403,
+        )
 
     # İcazə yoxlaması
     if not request.user.is_teacher_or_above or submission.project.course.owner != request.user:
@@ -506,7 +571,7 @@ def api_get_groups(request):
     if not course_id:
         return JsonResponse({"groups": []})
 
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
 
     # Unique qrup adlarını tap
     groups = (
@@ -535,7 +600,7 @@ def api_get_students(request):
     if not course_id or not groups_param:
         return JsonResponse({"students": []})
 
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
     group_names = [g.strip() for g in groups_param.split(",") if g.strip()]
 
     if not group_names:

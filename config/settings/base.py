@@ -107,11 +107,17 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/blog/"
 LOGOUT_REDIRECT_URL = "/blog/"
 
+# Keep CSRF cookie in Lax mode to reduce cross-site request risks on POST endpoints.
+CSRF_COOKIE_SAMESITE = "Lax"
+
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     "apps.accounts.backends.EmailOrUsernameBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+# Password reset token expiry (seconds), default: 24 hours.
+PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", "86400"))
 
 # Internationalization
 LANGUAGE_CODE = "az"
@@ -139,6 +145,7 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 SERVE_MEDIA = False
+FILE_UPLOAD_SECURITY_MAX_SIZE_MB = int(os.getenv("FILE_UPLOAD_SECURITY_MAX_SIZE_MB", "25"))
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

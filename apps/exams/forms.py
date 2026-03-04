@@ -6,6 +6,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 
 class ExamForm(forms.ModelForm):
@@ -329,6 +330,28 @@ class ExamQuestionCreateForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         answer_mode = cleaned_data.get("answer_mode")
+        image = cleaned_data.get("image")
+        video = cleaned_data.get("video")
+
+        if image and not getattr(image, "_committed", False):
+            validate_uploaded_file(
+                image,
+                allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+                max_size_mb=10,
+                allowed_mime_types=set(),
+                allowed_mime_prefixes=("image/",),
+            )
+            randomize_uploaded_filename(image)
+
+        if video and not getattr(video, "_committed", False):
+            validate_uploaded_file(
+                video,
+                allowed_extensions={".mp4", ".webm", ".mov"},
+                max_size_mb=30,
+                allowed_mime_types={"video/mp4", "video/webm", "video/quicktime", "application/octet-stream"},
+                allowed_mime_prefixes=("video/",),
+            )
+            randomize_uploaded_filename(video)
 
         # Yazılı imtahanda options validasiyasını skip edirik
         if self.exam_type == "written":

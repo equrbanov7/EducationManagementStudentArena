@@ -1,7 +1,14 @@
 {% load static i18n %}
 <article class="blog-card">
 
-    <div class="card-img" style="background-image: url('{{ post.get_image }}')"></div>
+    <div class="card-img">
+        <img
+            src="{{ post.get_image }}"
+            alt="{{ post.title }}"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='{% static 'images/tech-placeholder.svg' %}';"
+        >
+    </div>
     <div class="card-body">
         <span class="card-category">{{ post.category }}</span>
         <h2 class="card-title">

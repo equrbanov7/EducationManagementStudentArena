@@ -1,11 +1,12 @@
 # blog/views.py
 
+import logging
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
@@ -19,6 +20,8 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
+
 from .forms import CommentForm, PostForm, QuestionForm, RegisterForm, SubscriptionForm
 from .models import Category, Comment, EmailOTP, Post, PostApprovalLog, Question, Subscriber
 from .services import author_requires_post_approval, can_user_review_post
@@ -26,6 +29,7 @@ from .utils import generate_otp, send_verify_email
 
 User = get_user_model()
 signer = TimestampSigner()
+logger = logging.getLogger(__name__)
 
 
 def _can_manage_blog_content(user):
@@ -198,13 +202,13 @@ def subscribe_page(request):
                         request, pgettext("blog.subscribe.message", "already_subscribed").format(email=email)
                     )
 
-            except Exception as e:
+            except Exception:
                 # Hər hansı bir xəta (məsələn, SMTP xətası) olarsa
                 messages.error(
                     request,
                     pgettext("blog.subscribe.message", "send_error"),
                 )
-                print(f"EMAIL ERROR: {e}")  # Xətanı konsolda göstər
+                logger.exception("Subscription email delivery failed")
 
             return redirect("subscribe")
         else:
@@ -352,6 +356,17 @@ def post_edit_ajax(request, pk):
     # Şəkil faylı
     image_file = request.FILES.get("image")
     if image_file:
+        try:
+            validate_uploaded_file(
+                image_file,
+                allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+                max_size_mb=int(getattr(settings, "FILE_UPLOAD_SECURITY_MAX_SIZE_MB", 25)),
+                allowed_mime_types=set(),
+                allowed_mime_prefixes=("image/",),
+            )
+        except ValidationError as exc:
+            return JsonResponse({"success": False, "message": exc.messages[0]}, status=400)
+        randomize_uploaded_filename(image_file)
         post.image = image_file
 
     # Şəkil URL

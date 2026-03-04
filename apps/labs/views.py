@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -19,11 +20,104 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.courses.models import Course, CourseMembership
+from core.permissions import request_has_permission
+from core.tenancy import scoped_by_organization_id
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
 ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
 REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
+DEFAULT_LAB_ALLOWED_EXTENSIONS = {
+    ".zip",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".txt",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".py",
+    ".java",
+    ".cpp",
+    ".c",
+    ".rar",
+    ".7z",
+}
+
+
+def _normalize_extensions(raw_extensions):
+    extensions = {f".{ext.strip().lstrip('.').lower()}" for ext in (raw_extensions or "").split(",") if ext.strip()}
+    return extensions or set(DEFAULT_LAB_ALLOWED_EXTENSIONS)
+
+
+def _parse_max_size_mb(raw_value, *, fallback=25):
+    try:
+        parsed = int(raw_value)
+    except (TypeError, ValueError):
+        parsed = fallback
+    return max(1, parsed)
+
+
+def _validate_and_prepare_lab_upload(uploaded_file, *, allowed_extensions, max_size_mb):
+    validate_uploaded_file(
+        uploaded_file,
+        allowed_extensions=allowed_extensions,
+        max_size_mb=max_size_mb,
+    )
+    randomize_uploaded_filename(uploaded_file)
+    return uploaded_file
+
+
+def _tenant_scoped_courses(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Course.objects.all()
+    return scoped_by_organization_id(
+        base_queryset,
+        request,
+        org_id_field="organization_id",
+        fallback_org_field="owner__profile__organization",
+    )
+
+
+def _tenant_scoped_labs(request, queryset=None):
+    base_queryset = queryset if queryset is not None else Lab.objects.all()
+    return base_queryset.filter(course__in=_tenant_scoped_courses(request))
+
+
+def _tenant_scoped_blocks(request, queryset=None):
+    base_queryset = queryset if queryset is not None else LabBlock.objects.all()
+    return base_queryset.filter(lab__in=_tenant_scoped_labs(request))
+
+
+def _tenant_scoped_questions(request, queryset=None):
+    base_queryset = queryset if queryset is not None else LabQuestion.objects.all()
+    return base_queryset.filter(block__in=_tenant_scoped_blocks(request))
+
+
+def _tenant_scoped_submissions(request, queryset=None):
+    base_queryset = queryset if queryset is not None else LabSubmission.objects.all()
+    return base_queryset.filter(assignment__lab__in=_tenant_scoped_labs(request))
+
+
+def _get_tenant_course_or_404(request, course_id):
+    return get_object_or_404(_tenant_scoped_courses(request), id=course_id)
+
+
+def _get_tenant_lab_or_404(request, lab_id):
+    return get_object_or_404(_tenant_scoped_labs(request), id=lab_id)
+
+
+def _get_tenant_block_or_404(request, block_id):
+    return get_object_or_404(_tenant_scoped_blocks(request), id=block_id)
+
+
+def _get_tenant_question_or_404(request, question_id):
+    return get_object_or_404(_tenant_scoped_questions(request), id=question_id)
+
+
+def _get_tenant_submission_or_404(request, submission_id):
+    return get_object_or_404(_tenant_scoped_submissions(request), id=submission_id)
 
 
 def _lab_back_url(request, lab):
@@ -48,7 +142,7 @@ def _lab_back_url(request, lab):
 def create_lab(request, course_id):
     """Lab yarat"""
 
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
 
     if course.owner != request.user:
         return JsonResponse(
@@ -56,6 +150,16 @@ def create_lab(request, course_id):
         )
 
     try:
+        allowed_extensions = _normalize_extensions(request.POST.get("allowed_extensions", ""))
+        max_file_size_mb = _parse_max_size_mb(request.POST.get("max_file_size_mb", 50), fallback=50)
+        teacher_file = request.FILES.get("teacher_files")
+        if teacher_file is not None:
+            _validate_and_prepare_lab_upload(
+                teacher_file,
+                allowed_extensions=allowed_extensions,
+                max_size_mb=max_file_size_mb,
+            )
+
         # Seçilmiş qruplar və tələbələr
         group_names = request.POST.getlist("group_names[]")
         student_ids = request.POST.getlist("student_ids[]")
@@ -74,20 +178,22 @@ def create_lab(request, course_id):
             late_penalty_percent=request.POST.get("late_penalty_percent", 0),
             allow_file_upload=request.POST.get("allow_file_upload") == "on",
             allow_link_submission=request.POST.get("allow_link_submission") == "on",
-            max_file_size_mb=request.POST.get("max_file_size_mb", 50),
-            allowed_extensions=request.POST.get("allowed_extensions", ""),
+            max_file_size_mb=max_file_size_mb,
+            allowed_extensions=",".join(ext.lstrip(".") for ext in sorted(allowed_extensions)),
             teacher_instructions=request.POST.get("teacher_instructions", ""),
             allowed_groups=",".join(group_names) if group_names else "",
             allowed_students=",".join(student_ids) if student_ids else "",
             created_by=request.user,
         )
 
-        if "teacher_files" in request.FILES:
-            lab.teacher_files = request.FILES["teacher_files"]
+        if teacher_file is not None:
+            lab.teacher_files = teacher_file
             lab.save()
 
         return JsonResponse({"success": True, "lab_id": lab.id})
 
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception as e:
         import traceback
 
@@ -99,7 +205,7 @@ def create_lab(request, course_id):
 @require_http_methods(["GET", "POST"])
 def edit_lab(request, pk):
     """Lab redaktə et"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         return JsonResponse(
@@ -161,18 +267,27 @@ def edit_lab(request, pk):
         lab.late_penalty_percent = int(request.POST.get("late_penalty_percent", 0) or 0)
         lab.allow_file_upload = request.POST.get("allow_file_upload") == "on"
         lab.allow_link_submission = request.POST.get("allow_link_submission") == "on"
-        lab.max_file_size_mb = int(request.POST.get("max_file_size_mb", 50) or 50)
+        lab.max_file_size_mb = _parse_max_size_mb(request.POST.get("max_file_size_mb", 50), fallback=50)
         lab.allowed_extensions = request.POST.get("allowed_extensions", "")
         lab.teacher_instructions = request.POST.get("teacher_instructions", "")
         lab.allowed_groups = ",".join(group_names) if group_names else ""
         lab.allowed_students = ",".join(student_ids) if student_ids else ""
 
-        if "teacher_files" in request.FILES:
-            lab.teacher_files = request.FILES["teacher_files"]
+        teacher_file = request.FILES.get("teacher_files")
+        if teacher_file is not None:
+            allowed_extensions = _normalize_extensions(lab.allowed_extensions)
+            _validate_and_prepare_lab_upload(
+                teacher_file,
+                allowed_extensions=allowed_extensions,
+                max_size_mb=lab.max_file_size_mb,
+            )
+            lab.teacher_files = teacher_file
 
         lab.save()
         return JsonResponse({"success": True})
 
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception as e:
         import traceback
 
@@ -184,7 +299,7 @@ def edit_lab(request, pk):
 @require_POST
 def delete_lab(request, pk):
     """Lab sil"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         return JsonResponse(
@@ -206,7 +321,7 @@ def delete_lab(request, pk):
 @require_POST
 def publish_lab(request, pk):
     """Lab yayımla"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         return JsonResponse(
@@ -227,7 +342,7 @@ def publish_lab(request, pk):
 @login_required
 def manage_blocks(request, pk):
     """Blokları idarə et"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
@@ -247,7 +362,7 @@ def manage_blocks(request, pk):
 @require_POST
 def create_block(request, pk):
     """Blok yarat"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         return JsonResponse(
@@ -277,7 +392,7 @@ def create_block(request, pk):
 @require_http_methods(["GET", "POST"])
 def edit_block(request, pk):
     """Blok redaktə et"""
-    block = get_object_or_404(LabBlock, id=pk)
+    block = _get_tenant_block_or_404(request, pk)
 
     if block.lab.created_by != request.user:
         return JsonResponse(
@@ -313,7 +428,7 @@ def edit_block(request, pk):
 @require_POST
 def delete_block(request, pk):
     """Blok sil"""
-    block = get_object_or_404(LabBlock, id=pk)
+    block = _get_tenant_block_or_404(request, pk)
 
     if block.lab.created_by != request.user:
         return JsonResponse(
@@ -333,7 +448,7 @@ def delete_block(request, pk):
 @require_POST
 def create_question(request, block_id):
     """Sual yarat"""
-    block = get_object_or_404(LabBlock, id=block_id)
+    block = _get_tenant_block_or_404(request, block_id)
 
     if block.lab.created_by != request.user:
         return JsonResponse(
@@ -341,6 +456,15 @@ def create_question(request, block_id):
         )
 
     try:
+        attachment = request.FILES.get("attachment")
+        if attachment is not None:
+            allowed_extensions = _normalize_extensions(block.lab.allowed_extensions)
+            _validate_and_prepare_lab_upload(
+                attachment,
+                allowed_extensions=allowed_extensions,
+                max_size_mb=block.lab.max_file_size_mb or 25,
+            )
+
         question = LabQuestion.objects.create(
             block=block,
             question_number=block.questions.count() + 1,
@@ -348,12 +472,14 @@ def create_question(request, block_id):
             points=request.POST.get("points", 0),
         )
 
-        if "attachment" in request.FILES:
-            question.attachment = request.FILES["attachment"]
+        if attachment is not None:
+            question.attachment = attachment
             question.save()
 
         return JsonResponse({"success": True, "question_id": question.id})
 
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
@@ -362,7 +488,7 @@ def create_question(request, block_id):
 @require_http_methods(["GET", "POST"])
 def edit_question(request, pk):
     """Sual redaktə et"""
-    question = get_object_or_404(LabQuestion, id=pk)
+    question = _get_tenant_question_or_404(request, pk)
 
     if question.block.lab.created_by != request.user:
         return JsonResponse(
@@ -392,7 +518,7 @@ def edit_question(request, pk):
 @require_POST
 def delete_question(request, pk):
     """Sual sil"""
-    question = get_object_or_404(LabQuestion, id=pk)
+    question = _get_tenant_question_or_404(request, pk)
 
     if question.block.lab.created_by != request.user:
         return JsonResponse(
@@ -417,7 +543,7 @@ def import_questions(request, block_id):
     """
     import re
 
-    block = get_object_or_404(LabBlock, id=block_id)
+    block = _get_tenant_block_or_404(request, block_id)
 
     if block.lab.created_by != request.user:
         return JsonResponse(
@@ -503,7 +629,7 @@ def import_questions(request, block_id):
 @login_required
 def lab_submissions(request, pk):
     """Lab cavablarını göstər - müəllim üçün"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
@@ -568,8 +694,12 @@ def lab_submissions(request, pk):
 @login_required
 def grade_submission_page(request, pk):
     """Qiymətləndirmə səhifəsi"""
-    submission = get_object_or_404(LabSubmission, id=pk)
+    submission = _get_tenant_submission_or_404(request, pk)
     lab = submission.assignment.lab
+
+    if not request_has_permission(request, "grade.input"):
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
+        return redirect("labs:lab_submissions", pk=lab.id)
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
@@ -678,7 +808,7 @@ def grade_submission_page(request, pk):
 @login_required
 def preview_randomization(request, pk):
     """Randomizasiyanı önizlə"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
@@ -720,7 +850,7 @@ def preview_randomization(request, pk):
 @require_POST
 def update_questions_per_student(request, pk):
     """Lab üçün tələbə başına sual sayını yenilə"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
@@ -752,7 +882,7 @@ def update_questions_per_student(request, pk):
 @login_required
 def lab_detail(request, pk):
     """Lab detalları - Tələbə görünüşü"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     assignment = None
     questions = []
@@ -839,7 +969,7 @@ def lab_detail(request, pk):
 @require_POST
 def auto_save_answer(request, pk):
     """Cavabı avtomatik saxla - cari cəhd üçün"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
@@ -873,7 +1003,7 @@ def auto_save_answer(request, pk):
             # yalnız real mətn gələndə answer sahəsini yenilə.
             update_answer_text = bool((answer or "").strip())
 
-        question = get_object_or_404(LabQuestion, id=question_id)
+        question = get_object_or_404(_tenant_scoped_questions(request), id=question_id, block__lab=lab)
 
         # Bu cəhd üçün cavab yarat/yenilə
         lab_answer, created = LabAnswer.objects.get_or_create(
@@ -890,12 +1020,20 @@ def auto_save_answer(request, pk):
             lab_answer.is_draft = True
 
         if answer_file:
+            allowed_extensions = _normalize_extensions(lab.allowed_extensions)
+            _validate_and_prepare_lab_upload(
+                answer_file,
+                allowed_extensions=allowed_extensions,
+                max_size_mb=lab.max_file_size_mb or 25,
+            )
             lab_answer.answer_file = answer_file
 
         lab_answer.save()
 
         return JsonResponse({"success": True})
 
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception as e:
 
         traceback.print_exc()
@@ -906,7 +1044,7 @@ def auto_save_answer(request, pk):
 @require_POST
 def submit_lab(request, pk):
     """Labı göndər"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     now = timezone.now()
     if lab.start_datetime and lab.end_datetime:
@@ -965,7 +1103,7 @@ def submit_lab(request, pk):
 def api_get_groups(request, course_id):
     """Kurs qruplarını qaytarır"""
 
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
 
     groups = (
         CourseMembership.objects.filter(course=course, role="student")
@@ -982,7 +1120,7 @@ def api_get_groups(request, course_id):
 def api_get_students(request, course_id):
     """Kurs tələbələrini qaytarır"""
 
-    course = get_object_or_404(Course, id=course_id)
+    course = _get_tenant_course_or_404(request, course_id)
     groups = request.GET.get("groups", "").split(",")
     groups = [g.strip() for g in groups if g.strip()]
 
@@ -1007,7 +1145,7 @@ def api_get_students(request, course_id):
 @login_required
 def submission_answers(request, pk):
     """Submission-un cavablarını JSON olaraq qaytar"""
-    submission = get_object_or_404(LabSubmission, id=pk)
+    submission = _get_tenant_submission_or_404(request, pk)
 
     if submission.assignment.lab.created_by != request.user:
         return JsonResponse(
@@ -1043,7 +1181,7 @@ def submission_answers(request, pk):
 @login_required
 def my_lab_answers(request, pk):
     """Tələbənin öz cavablarını görmək"""
-    lab = get_object_or_404(Lab, id=pk)
+    lab = _get_tenant_lab_or_404(request, pk)
 
     assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
     if not assignment:

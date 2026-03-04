@@ -17,12 +17,12 @@ def health_check(request):
     # Database check
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT 1")
+            cursor.execute("SELECT %s", [1])
             health_status["checks"]["database"] = "connected"
-    except Exception as e:
-        logger.error(f"Database health check failed: {str(e)}")
+    except Exception:
+        logger.exception("Database health check failed")
         health_status["status"] = "unhealthy"
-        health_status["checks"]["database"] = f"error: {str(e)}"
+        health_status["checks"]["database"] = "error"
 
     # Debug mode check
     health_status["checks"]["debug_mode"] = settings.DEBUG

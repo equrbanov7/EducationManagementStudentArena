@@ -70,6 +70,8 @@ class AuditLog(models.Model):
             models.Index(fields=["organization", "-created_at"]),
             models.Index(fields=["action", "-created_at"]),
             models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["resource_type", "resource_id"]),
+            models.Index(fields=["request_id"]),
         ]
         verbose_name = "Audit Log"
         verbose_name_plural = "Audit Logs"

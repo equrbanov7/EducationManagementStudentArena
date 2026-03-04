@@ -10,6 +10,9 @@ PERMISSION_CATEGORIES = {
         "org.view",
         "org.edit",
         "org.settings",
+        "org.manage_members",
+        "org.admin.assign",
+        "org.owner.assign",
         "org.delete",
     ],
     "structure": [

@@ -244,14 +244,13 @@
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if not pending_requested_students.paginator.count %}
+        <p class="text-center text-muted mt-2 mb-0">Təsdiq gözləyən tələbə yoxdur.</p>
+        {% endif %}
     </form>
     {% include "partials/_pagination.html" with page_obj=pending_requested_students extra_query=pending_pagination_query page_param=pending_page_param %}
 </div>

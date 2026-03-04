@@ -161,7 +161,7 @@ class Post(models.Model):
         elif self.image_url:
             return self.image_url
         else:
-            return static("img/default-post.jpg")  # Default şəklin yeri
+            return static("images/tech-placeholder.svg")  # Default placeholder image
 
     @property
     def is_pending_approval(self):

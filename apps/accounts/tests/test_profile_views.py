@@ -148,6 +148,39 @@ class ProfileViewTest(TestCase):
         self.assertEqual(profile.student_school_identifier, "AZ-123")
         self.assertEqual(profile.bio, "Bio test text")
 
+    def test_edit_profile_ignores_privilege_fields_from_post(self):
+        from apps.accounts.models import ProfileRole, UserProfile
+
+        profile = UserProfile.objects.get(user=self.user)
+        profile.role = ProfileRole.MEMBER
+        profile.save(update_fields=["role", "updated_at"])
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=edit-profile",
+            data={
+                "profile_form": "edit-profile",
+                "first_name": "Safe",
+                "last_name": "User",
+                "email": "safe_user@example.com",
+                "role": ProfileRole.ORG_ADMIN,
+                "is_superuser": "1",
+                "is_staff": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile"))
+
+        self.user.refresh_from_db()
+        profile.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Safe")
+        self.assertEqual(self.user.last_name, "User")
+        self.assertEqual(self.user.email, "safe_user@example.com")
+        self.assertFalse(self.user.is_superuser)
+        self.assertFalse(self.user.is_staff)
+        self.assertEqual(profile.role, ProfileRole.MEMBER)
+
     def test_superuser_is_teacher_and_admin(self):
         """Test that superusers always pass role checks."""
         superuser = User.objects.create_superuser(

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.views.shared.tenant import exam_in_active_tenant, tenant_scoped_exams
+from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
@@ -18,9 +18,7 @@ def exam_result(request, slug, attempt_id):
     Student üçün konkret attempt-in nəticə səhifəsi.
     Yalnız həmin attempt üçün seçilmiş suallar göstərilir.
     """
-    exam = get_object_or_404(Exam, slug=slug)
-    if not exam_in_active_tenant(request, exam):
-        return render(request, "403_forbidden.html", status=403)
+    exam = get_object_or_404(tenant_scoped_exams(request), slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
 
     if (
