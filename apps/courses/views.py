@@ -28,6 +28,7 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView, V
 
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
+from core.permissions import request_has_permission
 from core.tenancy import get_organization_int_id, get_request_organization, scoped_by_organization_id
 
 from .forms import CourseForm, CourseResourceForm, CourseTopicForm
@@ -87,23 +88,32 @@ def _safe_same_origin_redirect_path(request, candidate_url):
     return f"{path}{query}{fragment}"
 
 
+def _require_org_permission(request, permission):
+    if request_has_permission(request, permission):
+        return
+    raise PermissionDenied(
+        pgettext("courses.view.permission", "required_permission_missing").format(permission=permission)
+    )
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Mixin: Müəllim İcazə Yoxlaması
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class IsTeacherMixin(UserPassesTestMixin):
+class IsTeacherMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər."""
 
     def test_func(self):
         return getattr(self.request.user, "is_teacher_or_above", False)
 
     def handle_no_permission(self):
-        messages.error(self.request, pgettext_lazy("courses.view.message", "teachers_only_action"))
-        return redirect("home")
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        raise PermissionDenied(pgettext("courses.view.permission", "teachers_only_action"))
 
 
-class IsCourseOwnerMixin(UserPassesTestMixin):
+class IsCourseOwnerMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Yalnız kursun sahibi (owner) redaktə edə bilər."""
 
     def test_func(self):
@@ -111,8 +121,9 @@ class IsCourseOwnerMixin(UserPassesTestMixin):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def handle_no_permission(self):
-        messages.error(self.request, pgettext_lazy("courses.view.message", "no_permission_edit_course"))
-        return redirect("home")
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        raise PermissionDenied(pgettext("courses.view.permission", "no_permission_edit_course"))
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -145,6 +156,7 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
+        _require_org_permission(self.request, "course.create")
         form.instance.owner = self.request.user
         form.instance.status = "draft"
         organization = get_request_organization(self.request)
@@ -900,6 +912,12 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         )
 
     def post(self, request, *args, **kwargs):
+        if not request_has_permission(request, "course.edit"):
+            return JsonResponse(
+                {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+                status=403,
+            )
+
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
@@ -957,6 +975,9 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
         return JsonResponse({"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403)
 
     def post(self, request, *args, **kwargs):
+        if not request_has_permission(request, "course.edit"):
+            return JsonResponse({"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403)
+
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
@@ -1028,6 +1049,12 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         )
 
     def post(self, request, *args, **kwargs):
+        if not request_has_permission(request, "course.edit"):
+            return JsonResponse(
+                {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+                status=403,
+            )
+
         course_id = kwargs.get("course_id")
         member_id = kwargs.get("member_id")
 
@@ -1058,6 +1085,9 @@ class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
     def post(self, request, *args, **kwargs):
+        if not request_has_permission(request, "course.edit"):
+            raise PermissionDenied(pgettext("courses.view.permission", "no_permission_edit_course"))
+
         course_id = kwargs.get("course_id")
         group_name = request.POST.get("group_name")
 
@@ -1092,6 +1122,10 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
     template_name = "courses/edit_course.html"
     context_object_name = "course"
     pk_url_kwarg = "course_id"
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_org_permission(request, "course.edit")
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         messages.success(

@@ -14,6 +14,7 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
+from core.permissions import request_has_permission
 
 
 def _append_query_params(url, **params):
@@ -98,6 +99,13 @@ def teacher_exam_results(request, slug):
 
     # ---------- POST: müəllim bal + feedback saxlayır ----------
     if request.method == "POST":
+        if not request_has_permission(request, "grade.input"):
+            messages.error(
+                request,
+                pgettext_lazy("exams.view.results.message", "grading_permission_required"),
+            )
+            return redirect(request.path)
+
         attempt_id = request.POST.get("attempt_id")
         score_raw = request.POST.get("teacher_score", "").strip()
         feedback = request.POST.get("teacher_feedback", "").strip()
@@ -339,6 +347,13 @@ def teacher_check_attempt(request, slug, attempt_id):
     qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
 
     if request.method == "POST":
+        if not request_has_permission(request, "grade.input"):
+            messages.error(
+                request,
+                pgettext_lazy("exams.view.results.message", "grading_permission_required"),
+            )
+            return redirect(view_attempt_url)
+
         # ✅ DOUBLE-CHECK: POST zamanı da yoxla
         if attempt.checked_by_teacher and attempt.teacher_checked_at:
             minutes_passed = int((timezone.now() - attempt.teacher_checked_at).total_seconds() / 60)

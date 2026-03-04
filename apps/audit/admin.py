@@ -19,13 +19,15 @@ class AuditLogAdmin(admin.ModelAdmin):
         "organization",
         "ip_address",
     ]
-    list_filter = ["action", "created_at", "organization"]
+    list_filter = ["action", "organization", "resource_type", "created_at"]
     search_fields = [
         "user__username",
         "user__email",
         "resource_type",
         "resource_id",
         "resource_repr",
+        "reason",
+        "request_id",
         "ip_address",
     ]
     readonly_fields = [

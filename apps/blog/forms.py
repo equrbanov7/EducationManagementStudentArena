@@ -1,7 +1,10 @@
 # blog/forms.py
+from django.conf import settings
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.translation import pgettext_lazy
+
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Comment, Post, Question
 
@@ -132,6 +135,7 @@ class PostForm(forms.ModelForm):
             "image": forms.ClearableFileInput(
                 attrs={
                     "class": "form-control",
+                    "accept": ".jpg,.jpeg,.jfif,.png,.gif,.webp",
                 }
             ),
         }
@@ -142,6 +146,21 @@ class PostForm(forms.ModelForm):
         self.fields["category"].empty_label = pgettext_lazy("blog.form.post", "category_empty_label")
         self.fields["image"].required = False
         self.fields["image_url"].required = False
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        if not image:
+            return image
+
+        validate_uploaded_file(
+            image,
+            allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+            max_size_mb=int(getattr(settings, "FILE_UPLOAD_SECURITY_MAX_SIZE_MB", 25)),
+            allowed_mime_types=set(),
+            allowed_mime_prefixes=("image/",),
+        )
+        randomize_uploaded_filename(image)
+        return image
 
 
 class CommentForm(forms.ModelForm):

@@ -3,7 +3,11 @@ Tenant isolation services for organization-scoped queries.
 All business logic that needs org-scoping should use these utilities.
 """
 
+from uuid import UUID
+
 from django.db.models import QuerySet
+
+from core.utils import get_client_ip
 
 
 def get_user_organization(user):
@@ -90,6 +94,19 @@ def create_audit_log(
     """Create an audit log entry."""
     from apps.audit.models import AuditLog
 
+    request_id = None
+    if request:
+        raw_request_id = (
+            getattr(request, "request_id", None)
+            or request.META.get("HTTP_X_REQUEST_ID")
+            or request.META.get("HTTP_X_CORRELATION_ID")
+        )
+        if raw_request_id:
+            try:
+                request_id = UUID(str(raw_request_id))
+            except (TypeError, ValueError, AttributeError):
+                request_id = None
+
     kwargs = {
         "user": user,
         "organization": organization,
@@ -100,9 +117,10 @@ def create_audit_log(
         "old_values": old_values,
         "new_values": new_values,
         "reason": reason,
+        "request_id": request_id,
     }
     if request:
-        kwargs["ip_address"] = request.META.get("REMOTE_ADDR")
+        kwargs["ip_address"] = get_client_ip(request)
         kwargs["user_agent"] = request.META.get("HTTP_USER_AGENT", "")[:500]
 
     return AuditLog.objects.create(**kwargs)

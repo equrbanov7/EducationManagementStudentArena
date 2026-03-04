@@ -111,9 +111,16 @@
 
 {% block extra_js %}
 <script src="{% static 'js/assignment_modal.js' %}"></script>
+{{ all_groups|json_script:"all-groups-data" }}
 <script>
     const COURSE_ID = {{ course.id }};
-    const ALL_GROUPS = {{ all_groups|safe }};
+    let ALL_GROUPS = [];
+    try {
+        const allGroupsPayload = JSON.parse(document.getElementById("all-groups-data").textContent);
+        ALL_GROUPS = typeof allGroupsPayload === "string" ? JSON.parse(allGroupsPayload) : allGroupsPayload;
+    } catch (error) {
+        console.warn("Unable to parse group payload.", error);
+    }
     const COURSE_STUDENTS = [
         {% for m in course_students %}
         {

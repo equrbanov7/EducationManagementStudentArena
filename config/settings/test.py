@@ -3,13 +3,17 @@ Test settings for EMS Arena project.
 Fast, isolated configuration for running tests.
 """
 
+import os
+
+from django.core.management.utils import get_random_secret_key
+
 from .base import *
 
 # STATICFILES_DIRS bəzən tuple olur; append üçün list-ə çeviririk
 STATICFILES_DIRS = list(STATICFILES_DIRS)
 
-# Use a fast secret key for tests
-SECRET_KEY = "test-secret-key-for-testing-only-not-for-production-use"
+# Use environment secret for tests when provided; otherwise generate ephemeral key.
+SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
 
 # Debug should be False for tests to catch issues
 DEBUG = False

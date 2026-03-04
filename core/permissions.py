@@ -1,35 +1,28 @@
 """
-Core permission utilities for EMS Arena project.
-Helper functions and decorators for permission checks.
+Shared permission helpers for org-scoped request authorization.
 """
+
+from __future__ import annotations
 
 from functools import wraps
 
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
+from django.utils.translation import pgettext
+
+from apps.organizations.permissions import has_permission
 
 
 def is_teacher(user):
-    """
-    Check if user is a teacher or higher role.
-    Uses group-based role system with is_teacher_or_above property.
-    """
     return getattr(user, "is_teacher_or_above", False)
 
 
 def is_student(user):
-    """
-    Check if user is a student.
-    Uses group-based role system with is_student property.
-    """
     return getattr(user, "is_student", False)
 
 
 def teacher_required(view_func):
-    """
-    Decorator that requires the user to be a teacher.
-    """
-
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -44,10 +37,6 @@ def teacher_required(view_func):
 
 
 def student_required(view_func):
-    """
-    Decorator that requires the user to be a student.
-    """
-
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -59,3 +48,35 @@ def student_required(view_func):
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
+
+
+def is_superadmin_user(user) -> bool:
+    return bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
+
+
+def request_has_permission(request, permission: str) -> bool:
+    """
+    Permission policy:
+    - superadmin/superuser: always allowed
+    - user with active-org memberships: must have the requested permission
+    - no active-org membership context: allow (legacy profile-scoped fallback)
+    """
+    if is_superadmin_user(getattr(request, "user", None)):
+        return True
+
+    memberships = list(getattr(request, "org_memberships", []) or [])
+    if not memberships:
+        return True
+
+    org_permissions = list(getattr(request, "org_permissions", []) or [])
+    return has_permission(org_permissions, permission)
+
+
+def ensure_request_permission(request, permission: str, message: str | None = None) -> None:
+    if request_has_permission(request, permission):
+        return
+
+    raise PermissionDenied(
+        message
+        or pgettext("core.permission.error", "required_permission_missing").format(permission=permission)
+    )

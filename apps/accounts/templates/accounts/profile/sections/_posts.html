@@ -167,7 +167,8 @@
 
                     <div class="form-group">
                         <label for="createImage">{% trans "label_upload_image" context "profile.posts" %}</label>
-                        <input type="file" id="createImage" name="image" class="form-control" accept="image/*">
+                        <input type="file" id="createImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
+                        <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
                     </div>
 
                     {% if post_creation_requires_approval %}
@@ -179,13 +180,13 @@
                             <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
                         </div>
                     {% else %}
-                        <div class="form-group form-check">
-                            <label class="checkbox-label">
+                        <div class="form-group form-check publish-toggle">
+                            <label class="checkbox-label checkbox-label--prominent">
                                 <input type="checkbox"
                                        id="createIsPublished"
                                        name="is_published"
                                        checked>
-                                {% trans "publish_article" context "profile.posts" %}
+                                <span class="checkbox-label-text">{% trans "publish_article" context "profile.posts" %}</span>
                             </label>
                         </div>
                     {% endif %}
@@ -254,7 +255,8 @@
 
                     <div class="form-group">
                         <label for="editImage">{% trans "label_upload_new_image" context "profile.posts" %}</label>
-                        <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
+                        <input type="file" id="editImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
+                        <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
                     </div>
 
                     <div class="form-group">

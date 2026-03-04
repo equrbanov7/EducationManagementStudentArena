@@ -10,6 +10,7 @@ import os
 import dj_database_url
 import sentry_sdk
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
@@ -33,6 +34,8 @@ DEBUG = False
 
 # ALLOWED_HOSTS must be properly configured
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+if not ALLOWED_HOSTS:
+    raise ImproperlyConfigured("ALLOWED_HOSTS must not be empty in production settings.")
 
 # Database - PostgreSQL required for production
 DATABASES = {
@@ -51,6 +54,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", True)
+SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
 
@@ -89,9 +93,15 @@ SITE_URL = os.getenv("SITE_URL", "https://emsarena.az")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "mask_sensitive": {
+            "()": "core.logging_filters.SensitiveDataFilter",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "filters": ["mask_sensitive"],
         },
     },
     "root": {

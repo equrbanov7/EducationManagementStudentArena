@@ -7,6 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
+from apps.audit.models import AuditLog
 from apps.blog.models import EmailOTP
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Country, Membership, Organization, Role
@@ -466,7 +467,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             is_primary=True,
             is_active=True,
         )
-        Membership.objects.create(
+        self.admin_membership = Membership.objects.create(
             user=self.admin_user,
             organization=self.org_a,
             role=self.org_a_admin_role,
@@ -523,6 +524,21 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertRedirects(response, fallback_next)
         self.target_membership.refresh_from_db()
         self.assertEqual(self.target_membership.role, self.org_a_teacher_role)
+        success_entry = AuditLog.objects.filter(
+            user=self.admin_user,
+            organization=self.org_a,
+            resource_type="membership",
+            resource_id=str(self.target_membership.id),
+            new_values__status="success",
+            new_values__action_type="update_member",
+        ).first()
+        self.assertIsNotNone(success_entry)
+        self.assertEqual(success_entry.new_values.get("actor_user_id"), str(self.admin_user.id))
+        self.assertEqual(success_entry.new_values.get("org_id"), str(self.org_a.id))
+        self.assertEqual(success_entry.new_values.get("target_user_id"), str(self.target_user.id))
+        self.assertEqual(success_entry.new_values.get("membership_id"), str(self.target_membership.id))
+        self.assertEqual(success_entry.new_values.get("old_role_id"), str(self.org_a_member_role.id))
+        self.assertEqual(success_entry.new_values.get("new_role_id"), str(self.org_a_teacher_role.id))
 
         response = self.client.post(
             reverse("accounts:role_assignment"),
@@ -532,7 +548,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 "role_id": str(self.org_a_teacher_role.id),
             },
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_role_assignment_post_respects_next_url(self):
         next_url = f"{reverse('accounts:profile')}?section=role-assignment&q={self.target_user.username}"
@@ -548,6 +564,229 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertRedirects(response, next_url)
         self.target_membership.refresh_from_db()
         self.assertEqual(self.target_membership.role, self.org_a_teacher_role)
+
+    def test_role_assignment_prepare_operation_returns_operation_token(self):
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "prepare_operation",
+                "target_action": "update_member",
+                "membership_id": str(self.target_membership.id),
+                "new_role_id": str(self.org_a_teacher_role.id),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload.get("success"))
+        self.assertTrue(payload.get("operation_token"))
+        self.assertEqual(payload.get("action"), "update_member")
+
+    def test_role_assignment_rejects_mismatched_operation_token(self):
+        prepare_response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "prepare_operation",
+                "target_action": "update_member",
+                "membership_id": str(self.target_membership.id),
+                "new_role_id": str(self.org_a_teacher_role.id),
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(prepare_response.status_code, 200)
+        operation_token = prepare_response.json().get("operation_token")
+        self.assertTrue(operation_token)
+
+        submit_response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.target_membership.id),
+                "role_id": str(self.org_a_student_role.id),
+                "operation_token": operation_token,
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(submit_response.status_code, 403)
+        submit_payload = submit_response.json()
+        self.assertFalse(submit_payload.get("success"))
+        self.assertEqual(submit_payload.get("reason_code"), "operation_token_mismatch")
+
+        self.target_membership.refresh_from_db()
+        self.assertEqual(self.target_membership.role, self.org_a_member_role)
+
+    def test_role_assignment_denied_attempt_writes_audit_event(self):
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.external_membership.id),
+                "role_id": str(self.org_a_teacher_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        denied_entry = AuditLog.objects.filter(
+            user=self.admin_user,
+            organization=self.org_a,
+            resource_type="membership",
+            resource_id=str(self.external_membership.id),
+            new_values__reason_code="membership_outside_active_organization",
+        ).first()
+        self.assertIsNotNone(denied_entry)
+        self.assertEqual(denied_entry.new_values.get("status"), "denied")
+        self.assertEqual(denied_entry.new_values.get("action_type"), "update_member")
+        self.assertEqual(denied_entry.new_values.get("actor_user_id"), str(self.admin_user.id))
+        self.assertEqual(denied_entry.new_values.get("org_id"), str(self.org_a.id))
+        self.assertEqual(denied_entry.new_values.get("new_role_id"), str(self.org_a_teacher_role.id))
+
+    def test_role_assignment_denies_self_role_update(self):
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.admin_membership.id),
+                "role_id": str(self.org_a_teacher_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.admin_membership.refresh_from_db()
+        self.assertEqual(self.admin_membership.role, self.org_a_admin_role)
+
+    def test_role_assignment_denies_assigning_role_at_or_above_actor_level(self):
+        high_actor = User.objects.create_user(
+            username="vice_actor",
+            email="vice_actor@example.com",
+            password="StrongPass123!",
+        )
+        vice_role = Role.objects.create(
+            organization=self.org_a,
+            name="vice_secure_actor",
+            display_name="Vice Secure Actor",
+            level=90,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["role.assign", "org.manage_members"],
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=high_actor,
+            organization=self.org_a,
+            role=vice_role,
+            is_primary=True,
+            is_active=True,
+        )
+        high_actor_profile = high_actor.profile
+        high_actor_profile.organization = self.org_a
+        high_actor_profile.organization_type = self.org_a.org_type
+        high_actor_profile.role = ProfileRole.ORG_ADMIN
+        high_actor_profile.save()
+
+        self.client.force_login(high_actor)
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.target_membership.id),
+                "role_id": str(vice_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.target_membership.refresh_from_db()
+        self.assertEqual(self.target_membership.role, self.org_a_member_role)
+
+    def test_role_assignment_denies_updating_user_with_higher_or_equal_level(self):
+        higher_target = User.objects.create_user(
+            username="higher_target",
+            email="higher_target@example.com",
+            password="StrongPass123!",
+        )
+        top_role = Role.objects.create(
+            organization=self.org_a,
+            name="top_secure_role",
+            display_name="Top Secure Role",
+            level=95,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["org.manage_members"],
+            is_active=True,
+        )
+        higher_membership = Membership.objects.create(
+            user=higher_target,
+            organization=self.org_a,
+            role=top_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        actor = User.objects.create_user(
+            username="mid_actor",
+            email="mid_actor@example.com",
+            password="StrongPass123!",
+        )
+        actor_role = Role.objects.create(
+            organization=self.org_a,
+            name="mid_secure_actor",
+            display_name="Mid Secure Actor",
+            level=90,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["role.assign", "org.manage_members"],
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=actor,
+            organization=self.org_a,
+            role=actor_role,
+            is_primary=True,
+            is_active=True,
+        )
+        actor_profile = actor.profile
+        actor_profile.organization = self.org_a
+        actor_profile.organization_type = self.org_a.org_type
+        actor_profile.role = ProfileRole.ORG_ADMIN
+        actor_profile.save()
+
+        self.client.force_login(actor)
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(higher_membership.id),
+                "role_id": str(self.org_a_member_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        higher_membership.refresh_from_db()
+        self.assertEqual(higher_membership.role, top_role)
+
+    def test_role_assignment_blocks_demoting_last_owner(self):
+        superadmin = User.objects.create_superuser(
+            username="owner_guard_super",
+            email="owner_guard_super@example.com",
+            password="StrongPass123!",
+        )
+        super_profile = superadmin.profile
+        super_profile.organization = self.org_a
+        super_profile.organization_type = self.org_a.org_type
+        super_profile.role = ProfileRole.SUPERADMIN
+        super_profile.save()
+
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+        self.client.force_login(superadmin)
+
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "update_member",
+                "membership_id": str(self.admin_membership.id),
+                "role_id": str(self.org_a_member_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 409)
+        self.admin_membership.refresh_from_db()
+        self.assertEqual(self.admin_membership.role, self.org_a_admin_role)
 
     def test_role_assignment_page_shows_only_same_tenant_users(self):
         standalone_response = self.client.get(reverse("accounts:role_assignment"))
@@ -1165,10 +1404,19 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             email="teacher1@example.com",
             password="StrongPass123!",
         )
+        teacher_role = Role.objects.create(
+            organization=self.org_a,
+            name="teacher_attach_allowed",
+            display_name="Teacher Attach Allowed",
+            level=50,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["role.assign", "org.manage_members"],
+            is_active=True,
+        )
         Membership.objects.create(
             user=teacher_user,
             organization=self.org_a,
-            role=self.org_a_teacher_role,
+            role=teacher_role,
             is_primary=True,
             is_active=True,
         )
@@ -1201,6 +1449,65 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.unassigned_user.profile.refresh_from_db()
         self.assertEqual(self.unassigned_user.profile.organization, self.org_a)
         self.assertEqual(self.unassigned_user.profile.role, ProfileRole.STUDENT)
+        attached_membership = Membership.objects.filter(
+            user=self.unassigned_user,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            is_active=True,
+        ).first()
+        self.assertIsNotNone(attached_membership)
+        success_entry = AuditLog.objects.filter(
+            user=teacher_user,
+            organization=self.org_a,
+            resource_type="membership",
+            resource_id=str(attached_membership.id),
+            new_values__status="success",
+            new_values__action_type="attach_user",
+        ).first()
+        self.assertIsNotNone(success_entry)
+        self.assertEqual(success_entry.new_values.get("actor_user_id"), str(teacher_user.id))
+        self.assertEqual(success_entry.new_values.get("org_id"), str(self.org_a.id))
+        self.assertEqual(success_entry.new_values.get("target_user_id"), str(self.unassigned_user.id))
+        self.assertEqual(success_entry.new_values.get("membership_id"), str(attached_membership.id))
+        self.assertEqual(success_entry.new_values.get("new_role_id"), str(self.org_a_student_role.id))
+
+    def test_attach_user_requires_manage_members_permission(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_no_assign",
+            email="teacher_no_assign@example.com",
+            password="StrongPass123!",
+        )
+        Membership.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            role=self.org_a_teacher_role,
+            is_primary=True,
+            is_active=True,
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.save()
+
+        self.client.force_login(teacher_user)
+        response = self.client.post(
+            reverse("accounts:role_assignment"),
+            {
+                "action": "attach_user",
+                "user_id": str(self.unassigned_user.id),
+                "role_id": str(self.org_a_student_role.id),
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=self.unassigned_user,
+                organization=self.org_a,
+                role=self.org_a_student_role,
+                is_active=True,
+            ).exists()
+        )
 
     def test_attach_unassigned_user_rejected_when_requested_other_tenant(self):
         teacher_user = User.objects.create_user(
@@ -1208,10 +1515,19 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             email="teacher_blocked@example.com",
             password="StrongPass123!",
         )
+        teacher_role = Role.objects.create(
+            organization=self.org_a,
+            name="teacher_attach_block_check",
+            display_name="Teacher Attach Block Check",
+            level=50,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["role.assign", "org.manage_members"],
+            is_active=True,
+        )
         Membership.objects.create(
             user=teacher_user,
             organization=self.org_a,
-            role=self.org_a_teacher_role,
+            role=teacher_role,
             is_primary=True,
             is_active=True,
         )

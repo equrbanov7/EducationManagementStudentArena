@@ -12,6 +12,8 @@ Nə üçün:
 from django import forms
 from django.utils.translation import pgettext_lazy
 
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
+
 from .models import Course, CourseResource, CourseTopic
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -79,6 +81,21 @@ class CourseForm(forms.ModelForm):
             raise forms.ValidationError(pgettext_lazy("courses.form.course.error", "title_max_length"))
 
         return title
+
+    def clean_cover_image(self):
+        cover_image = self.cleaned_data.get("cover_image")
+        if not cover_image:
+            return cover_image
+
+        validate_uploaded_file(
+            cover_image,
+            allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+            max_size_mb=10,
+            allowed_mime_types=set(),
+            allowed_mime_prefixes=("image/",),
+        )
+        randomize_uploaded_filename(cover_image)
+        return cover_image
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -201,3 +218,35 @@ class CourseResourceForm(forms.ModelForm):
             raise forms.ValidationError(pgettext_lazy("courses.form.resource.error", "file_and_url_mutually_exclusive"))
 
         return cleaned_data
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+        if not file:
+            return file
+
+        validate_uploaded_file(
+            file,
+            allowed_extensions={
+                ".pdf",
+                ".zip",
+                ".rar",
+                ".7z",
+                ".txt",
+                ".doc",
+                ".docx",
+                ".xls",
+                ".xlsx",
+                ".ppt",
+                ".pptx",
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".webp",
+                ".mp4",
+                ".webm",
+                ".mov",
+            },
+            max_size_mb=50,
+        )
+        randomize_uploaded_filename(file)
+        return file

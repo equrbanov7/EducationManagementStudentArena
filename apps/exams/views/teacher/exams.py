@@ -3,7 +3,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -14,6 +14,7 @@ from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from core.permissions import request_has_permission
 from core.tenancy import get_organization_int_id
 
 
@@ -68,6 +69,29 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     return profile_return_url, requested_profile_section, urlencode(nav_params)
 
 
+def _is_superadmin(user):
+    return user.is_superuser or getattr(user, "is_superadmin", False)
+
+
+def _ensure_exam_permission(request, permission):
+    if request_has_permission(request, permission):
+        return
+    raise PermissionDenied(
+        pgettext("exams.view.exams.permission", "missing_required_permission").format(permission=permission)
+    )
+
+
+def _get_editable_exam_or_404(request, slug):
+    exam = tenant_scoped_exams(request, Exam.objects.filter(slug=slug)).first()
+    if exam is None:
+        raise Http404
+
+    if exam.author_id != request.user.id and not _is_superadmin(request.user):
+        raise PermissionDenied(pgettext("exams.view.exams.permission", "not_exam_owner"))
+
+    return exam
+
+
 @login_required
 def teacher_exam_list(request):
     """
@@ -95,11 +119,13 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
+    required_permission = "exam.edit" if slug else "exam.create"
+    _ensure_exam_permission(request, required_permission)
     organization = get_active_organization(request)
 
     # Əgər slug varsa -> Edit mode
     if slug:
-        exam = get_teacher_exam_or_404(request, slug=slug)
+        exam = _get_editable_exam_or_404(request, slug)
         is_editing = True
     else:
         exam = None
@@ -208,6 +234,7 @@ def toggle_exam_active(request, slug):
     Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
     """
     _ensure_teacher(request.user)
+    _ensure_exam_permission(request, "exam.edit")
     exam = get_teacher_exam_or_404(request, slug=slug)
 
     if request.method == "POST":
@@ -223,7 +250,8 @@ def delete_exam(request, slug):
     Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
     """
     _ensure_teacher(request.user)
-    exam = get_teacher_exam_or_404(request, slug=slug)
+    _ensure_exam_permission(request, "exam.delete")
+    exam = _get_editable_exam_or_404(request, slug)
 
     if exam.attempts.exists():
         # sadə variant: hazırda cəhd varsa silməyə icazə vermirik

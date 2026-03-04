@@ -2,17 +2,20 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import pgettext, pgettext_lazy
+from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamAnswer, ExamAnswerFile, ExamAttempt, ExamQuestionOption
 from apps.exams.services.attempts import _start_or_resume_attempt, generate_random_questions_for_attempt
 from apps.exams.services.randomizer import build_shuffled_options
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
-from apps.exams.views.shared.tenant import exam_in_active_tenant
+from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
+from apps.exams.views.shared.tenant import tenant_scoped_exams
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 
 @login_required
@@ -20,10 +23,7 @@ def start_exam(request, slug):
     """
     İmtahan başlatma view-ı
     """
-    exam = get_object_or_404(Exam, slug=slug, is_active=True)
-    if not exam_in_active_tenant(request, exam):
-        messages.error(request, pgettext_lazy("exams.view.access.message", "no_exam_access"))
-        return redirect("exams:student_exam_list")
+    exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.filter(is_active=True)), slug=slug)
 
     # İcazə yoxlaması
     can_start, reason = exam.can_user_start(request.user, code=None)
@@ -39,13 +39,11 @@ def take_exam(request, slug, attempt_id):
     attempt = get_object_or_404(
         ExamAttempt,
         id=attempt_id,
+        exam__in=tenant_scoped_exams(request),
         exam__slug=slug,
         user=request.user,
     )
     exam = attempt.exam
-    if not exam_in_active_tenant(request, exam):
-        messages.error(request, pgettext_lazy("exams.view.access.message", "no_exam_access"))
-        return redirect("exams:student_exam_list")
 
     if attempt.is_finished:
         return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)
@@ -150,6 +148,18 @@ def take_exam(request, slug, attempt_id):
                 if files:
                     ans.files.all().delete()
                     for f in files:
+                        try:
+                            validate_uploaded_file(
+                                f,
+                                allowed_extensions=EXAM_ALLOWED_EXTENSIONS,
+                                max_size_mb=10,
+                            )
+                        except ValidationError as exc:
+                            if is_ajax:
+                                return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+                            messages.error(request, exc.messages[0])
+                            return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
+                        randomize_uploaded_filename(f)
                         ExamAnswerFile.objects.create(answer=ans, file=f)
 
                 # Paint hissəsi

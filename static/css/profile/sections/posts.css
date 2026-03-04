@@ -417,6 +417,43 @@ textarea.form-control {
     cursor: pointer;
 }
 
+.publish-toggle {
+    margin-top: 0.5rem;
+}
+
+.checkbox-label--prominent {
+    padding: 0.55rem 0.72rem;
+    border: 1px solid #c7dbff;
+    border-radius: 0.72rem;
+    background: linear-gradient(180deg, #f8fbff 0%, #f1f7ff 100%);
+    font-weight: 700;
+    color: #1e3a8a;
+}
+
+.checkbox-label--prominent:hover {
+    border-color: #8cb6ff;
+    background: linear-gradient(180deg, #f3f8ff 0%, #eaf3ff 100%);
+}
+
+.checkbox-label--prominent input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: #2563eb;
+}
+
+.checkbox-label--prominent .checkbox-label-text {
+    font-size: 1.02rem;
+    letter-spacing: 0.01em;
+}
+
+.image-format-help {
+    display: inline-block;
+    margin-top: 0.35rem;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
 .modal-buttons {
     margin-top: 1.25rem;
     padding-top: 0.875rem;

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
@@ -24,11 +25,10 @@ STATICFILES_DIRS = list(STATICFILES_DIRS)
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-g7=xgk^f!8x4871@^gsnvg0cl&)+@mug5+!j8%58dv2nt-#8xs",
-)
+# SECURITY WARNING: SECRET_KEY must come from environment for local/dev too.
+SECRET_KEY = (os.getenv("SECRET_KEY") or "").strip()
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY is required. Set it in your local environment (.env).")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
@@ -129,4 +129,29 @@ LOGS_DIR = BASE_DIR / "logs"
 # Create logs directory if it doesn't exist
 Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
 
-# (Səndə logging block kommentdədir — istəsən elə saxla)
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "mask_sensitive": {
+            "()": "core.logging_filters.SensitiveDataFilter",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["mask_sensitive"],
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}

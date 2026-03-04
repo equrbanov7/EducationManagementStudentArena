@@ -7,18 +7,20 @@ from decimal import Decimal, InvalidOperation
 from pathlib import PurePosixPath
 from urllib.parse import urlencode
 import mimetypes
+from uuid import UUID
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.core.paginator import Paginator
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Count, Q
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -38,6 +40,7 @@ from apps.projects.models import Project, ProjectSubmission
 from apps.notifications.services import build_profile_notification_state
 from core.constants import OrganizationType
 from core.tenancy import get_request_organization, scoped_by_organization_id
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from .forms import CustomLoginForm, RegisterForm
 from .models import ProfileRole, UserProfile
@@ -59,6 +62,8 @@ STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH = 280
 MAX_PROFILE_AVATAR_SIZE_BYTES = 10 * 1024 * 1024
 PROFILE_AVATAR_ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT = 50
+ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT = "accounts.role_assignment.operation"
+ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS = 60 * 5
 
 
 def _is_superadmin_user(user):
@@ -2527,16 +2532,16 @@ def user_profile(request):
             max_size_mb = MAX_PROFILE_AVATAR_SIZE_BYTES // (1024 * 1024)
             return f"Profil şəkli maksimum {max_size_mb} MB ola bilər."
 
-        content_type = (getattr(uploaded_avatar, "content_type", "") or "").strip().lower()
-        if content_type and not content_type.startswith("image/"):
-            return "Yalnız şəkil faylı yükləyə bilərsiniz."
-
-        extension = PurePosixPath((getattr(uploaded_avatar, "name", "") or "").lower()).suffix
-        if extension and extension not in PROFILE_AVATAR_ALLOWED_EXTENSIONS:
-            return "Yalnız JPG, PNG, GIF və WEBP formatları dəstəklənir."
-
-        if not content_type and not extension:
-            return "Yüklənən fayl şəkil formatında olmalıdır."
+        try:
+            validate_uploaded_file(
+                uploaded_avatar,
+                allowed_extensions=PROFILE_AVATAR_ALLOWED_EXTENSIONS,
+                max_size_mb=MAX_PROFILE_AVATAR_SIZE_BYTES // (1024 * 1024),
+                allowed_mime_types=set(),
+                allowed_mime_prefixes=("image/",),
+            )
+        except ValidationError as exc:
+            return exc.messages[0]
 
         try:
             width, height = get_image_dimensions(uploaded_avatar)
@@ -2565,6 +2570,7 @@ def user_profile(request):
                 messages.error(request, avatar_error)
                 return redirect(f"{reverse('accounts:profile')}?section=profile-info")
 
+            randomize_uploaded_filename(uploaded_avatar)
             profile.avatar = uploaded_avatar
             profile.save(update_fields=["avatar", "updated_at"])
             messages.success(request, "Profil şəkli uğurla yeniləndi.")
@@ -2576,9 +2582,15 @@ def user_profile(request):
                 target_section = "profile-info"
             return redirect(f"{reverse('accounts:profile')}?section={target_section}")
 
-        first_name = (request.POST.get("first_name", request.user.first_name) or "").strip()
-        last_name = (request.POST.get("last_name", request.user.last_name) or "").strip()
-        new_email = (request.POST.get("email", request.user.email) or "").strip().lower()
+        allowed_user_fields = ["first_name", "last_name", "email"]
+        user_update_payload = {
+            "first_name": (request.POST.get("first_name", request.user.first_name) or "").strip(),
+            "last_name": (request.POST.get("last_name", request.user.last_name) or "").strip(),
+            "email": (request.POST.get("email", request.user.email) or "").strip().lower(),
+        }
+        first_name = user_update_payload["first_name"]
+        last_name = user_update_payload["last_name"]
+        new_email = user_update_payload["email"]
         student_university_name = (
             request.POST.get("student_university_name", profile.student_university_name) or ""
         ).strip()
@@ -2595,10 +2607,9 @@ def user_profile(request):
             return redirect("accounts:profile" + "?section=edit-profile")
 
         # Update user info
-        request.user.first_name = first_name
-        request.user.last_name = last_name
-        request.user.email = new_email
-        request.user.save()
+        for field_name, field_value in user_update_payload.items():
+            setattr(request.user, field_name, field_value)
+        request.user.save(update_fields=allowed_user_fields)
 
         # Update profile
         profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
@@ -2614,6 +2625,7 @@ def user_profile(request):
             if avatar_error:
                 messages.error(request, avatar_error)
                 return redirect("accounts:profile" + "?section=edit-profile")
+            randomize_uploaded_filename(uploaded_avatar)
             profile.avatar = uploaded_avatar
 
         # Only admins can change supervisor_code
@@ -3027,6 +3039,9 @@ def user_profile(request):
             management_can_assign_roles = capabilities["is_superadmin"] or has_permission(
                 list(management_actor_permissions),
                 "role.assign",
+            ) or has_permission(
+                list(management_actor_permissions),
+                "org.manage_members",
             )
             management_min_level_ok = capabilities["is_superadmin"] or management_user_level >= 50
 
@@ -3040,7 +3055,7 @@ def user_profile(request):
                 "organization": management_org,
                 "search_query": role_assignment_search,
                 "unassigned_search_query": role_assignment_unassigned_search,
-                "can_assign_roles": management_can_assign_roles or management_user_level >= 50,
+                "can_assign_roles": management_can_assign_roles,
                 "post_next_url": _append_query_params(
                     reverse("accounts:profile"),
                     section="role-assignment",
@@ -4326,13 +4341,528 @@ def role_assignment(request):
     _ensure_profile_admin_membership(request.user, org)
 
     is_superadmin = _is_superadmin_user(request.user)
-    user_level = 999 if is_superadmin else get_user_org_role_level(request.user, org)
+    actor_memberships = Membership.objects.filter(user=request.user, organization=org, is_active=True).select_related("role")
+    actor_primary_membership = actor_memberships.order_by("-role__level").first()
+    actor_primary_level = 999 if is_superadmin else (actor_primary_membership.role.level if actor_primary_membership else 0)
     actor_permissions, _ = _collect_actor_permissions(request.user, org)
-    can_assign_roles = is_superadmin or has_permission(list(actor_permissions), "role.assign")
+    actor_permission_list = list(actor_permissions)
+    can_manage_members = (
+        is_superadmin
+        or has_permission(actor_permission_list, "role.assign")
+        or has_permission(actor_permission_list, "org.manage_members")
+    )
+    can_assign_owner_roles = is_superadmin or has_permission(actor_permission_list, "org.owner.assign")
+    can_assign_admin_roles = (
+        is_superadmin or can_assign_owner_roles or has_permission(actor_permission_list, "org.admin.assign")
+    )
 
-    # Teacher+ can at least assign Student/Member roles.
-    # Default teacher membership level is 50 in org role templates.
-    if not is_superadmin and user_level < 50:
+    def _parse_uuid(raw_value):
+        try:
+            return UUID(str(raw_value))
+        except (TypeError, ValueError, AttributeError):
+            return None
+
+    def _is_owner_role(role):
+        if role is None:
+            return False
+        role_name = (role.name or "").strip().lower()
+        return role.level >= 100 or "owner" in role_name or role_name in {"rector", "director", "manager"}
+
+    def _is_admin_role(role):
+        if role is None:
+            return False
+        role_name = (role.name or "").strip().lower()
+        return _is_owner_role(role) or role.level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80) or "admin" in role_name
+
+    def _owner_membership_queryset():
+        return Membership.objects.filter(
+            organization=org,
+            is_active=True,
+            role__is_active=True,
+        ).filter(
+            Q(role__level__gte=100)
+            | Q(role__name__icontains="owner")
+            | Q(role__name__iexact="rector")
+            | Q(role__name__iexact="director")
+            | Q(role__name__iexact="manager")
+        )
+
+    def _wants_json_response():
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return True
+        accepted = request.headers.get("Accept", "")
+        return "application/json" in accepted.lower()
+
+    def _resolve_request_id():
+        raw_request_id = (
+            getattr(request, "request_id", None)
+            or request.META.get("HTTP_X_REQUEST_ID")
+            or request.META.get("HTTP_X_CORRELATION_ID")
+        )
+        return str(raw_request_id).strip() if raw_request_id else ""
+
+    def _build_role_assignment_audit_values(
+        *,
+        status,
+        action_name,
+        target_role=None,
+        target_membership=None,
+        target_user=None,
+        old_role=None,
+        reason_code="",
+        extra=None,
+    ):
+        resolved_target_user = target_user or (target_membership.user if target_membership is not None else None)
+        resolved_old_role = old_role or (target_membership.role if target_membership is not None else None)
+
+        values = {
+            "status": status,
+            "action_type": action_name or request.POST.get("action", ""),
+            "actor_user_id": str(request.user.id),
+            "org_id": str(org.id),
+            "target_user_id": str(resolved_target_user.id) if resolved_target_user is not None else "",
+            "membership_id": str(target_membership.id) if target_membership is not None else "",
+            "old_role_id": str(resolved_old_role.id) if resolved_old_role is not None else "",
+            "old_role_name": (
+                resolved_old_role.display_name if resolved_old_role is not None else ""
+            ),
+            "new_role_id": str(target_role.id) if target_role is not None else "",
+            "new_role_name": (target_role.display_name if target_role is not None else ""),
+            "reason_code": reason_code or "",
+            "request_id": _resolve_request_id(),
+        }
+        if extra:
+            values.update(extra)
+        return values
+
+    def _deny_assignment(
+        reason_code,
+        reason_message,
+        *,
+        status=403,
+        action_name=None,
+        target_membership=None,
+        target_user=None,
+        target_role=None,
+        extra=None,
+        force_json=False,
+    ):
+        resource_type = "role_assignment"
+        resource_id = ""
+        resource_repr = action_name or (request.POST.get("action", "") if request.method == "POST" else "")
+
+        if target_membership is not None:
+            resource_type = "membership"
+            resource_id = str(target_membership.id)
+            resource_repr = str(target_membership)
+        elif target_user is not None:
+            resource_type = "user"
+            resource_id = str(target_user.id)
+            resource_repr = target_user.username
+
+        denied_values = _build_role_assignment_audit_values(
+            status="denied",
+            action_name=action_name,
+            target_role=target_role,
+            target_membership=target_membership,
+            target_user=target_user,
+            old_role=(target_membership.role if target_membership is not None else None),
+            reason_code=reason_code,
+            extra={
+                "action": action_name or request.POST.get("action", ""),
+                "active_organization_id": str(org.id),
+                "requested_membership_id": request.POST.get("membership_id"),
+                "requested_user_id": request.POST.get("user_id"),
+                "requested_role_id": request.POST.get("role_id"),
+                "reason": reason_message,
+            },
+        )
+        if target_role is not None:
+            denied_values["requested_role_name"] = target_role.name
+            denied_values["requested_role_level"] = target_role.level
+        if extra:
+            denied_values.update(extra)
+
+        create_audit_log(
+            user=request.user,
+            organization=org,
+            action="update",
+            resource_type=resource_type,
+            resource_id=resource_id,
+            resource_repr=resource_repr,
+            old_values=None,
+            new_values=denied_values,
+            reason=reason_message,
+            request=request,
+        )
+
+        if force_json or _wants_json_response():
+            payload = {
+                "success": False,
+                "reason_code": reason_code,
+                "message": reason_message,
+            }
+            if extra:
+                payload["details"] = extra
+            return JsonResponse(payload, status=status)
+
+        if status == 403:
+            return HttpResponseForbidden(reason_message)
+        return HttpResponse(reason_message, status=status)
+
+    def _validate_operation_token(*, action_name, target_role, target_membership=None, target_user=None):
+        raw_token = (request.POST.get("operation_token") or "").strip()
+        if not raw_token:
+            return None
+
+        try:
+            operation_signer = TimestampSigner(salt=ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT)
+            payload = operation_signer.unsign_object(
+                raw_token,
+                max_age=ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS,
+            )
+        except SignatureExpired:
+            return _deny_assignment(
+                "operation_token_expired",
+                "Əməliyyat tokeninin vaxtı bitib. Yenidən təsdiqləyin.",
+                status=409,
+                action_name=action_name,
+                target_membership=target_membership,
+                target_user=target_user,
+                target_role=target_role,
+            )
+        except BadSignature:
+            return _deny_assignment(
+                "operation_token_invalid",
+                "Əməliyyat tokeni etibarsızdır.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        expected_target_id = str(target_membership.id if target_membership is not None else target_user.id)
+        if (
+            str(payload.get("actor_user_id")) != str(request.user.id)
+            or str(payload.get("organization_id")) != str(org.id)
+            or str(payload.get("target_action")) != str(action_name)
+            or str(payload.get("target_id")) != expected_target_id
+            or str(payload.get("role_id")) != str(target_role.id)
+        ):
+            return _deny_assignment(
+                "operation_token_mismatch",
+                "Təsdiq tokeni seçilmiş əməliyyatla uyğun gəlmir.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        return None
+
+    def _enforce_role_change_guards(*, action_name, target_membership, target_role):
+        if target_membership.user_id == request.user.id:
+            return _deny_assignment(
+                "self_role_change_forbidden",
+                "Öz rolunuzu dəyişdirə bilməzsiniz.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+            )
+
+        target_primary_level = get_user_org_role_level(target_membership.user, org)
+        if not is_superadmin and target_primary_level >= actor_primary_level:
+            return _deny_assignment(
+                "target_level_not_lower_than_actor",
+                "Yalnız sizdən aşağı səviyyəli üzvlərin rolunu dəyişə bilərsiniz.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+                extra={"target_primary_level": target_primary_level, "actor_primary_level": actor_primary_level},
+            )
+
+        if not is_superadmin and target_role.level >= actor_primary_level:
+            return _deny_assignment(
+                "requested_role_not_lower_than_actor",
+                "Yalnız sizdən aşağı səviyyəli rolları təyin edə bilərsiniz.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+                extra={"actor_primary_level": actor_primary_level},
+            )
+
+        if (_is_owner_role(target_membership.role) or _is_owner_role(target_role)) and not can_assign_owner_roles:
+            return _deny_assignment(
+                "owner_role_assignment_permission_required",
+                "`org.owner.assign` icazəsi olmadan owner səviyyəli rol təyini/dəyişimi qadağandır.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+            )
+
+        if (
+            (_is_admin_role(target_membership.role) or _is_admin_role(target_role))
+            and not _is_owner_role(target_membership.role)
+            and not _is_owner_role(target_role)
+            and not can_assign_admin_roles
+        ):
+            return _deny_assignment(
+                "admin_role_assignment_permission_required",
+                "`org.admin.assign` icazəsi olmadan admin səviyyəli rol təyini/dəyişimi qadağandır.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+            )
+
+        if _is_owner_role(target_membership.role) and not _is_owner_role(target_role):
+            has_other_owner = _owner_membership_queryset().exclude(id=target_membership.id).exists()
+            if not has_other_owner:
+                return _deny_assignment(
+                    "last_owner_must_remain",
+                    "Təşkilatda ən az bir owner qalmalıdır.",
+                    status=409,
+                    action_name=action_name,
+                    target_membership=target_membership,
+                    target_role=target_role,
+                )
+
+        return None
+
+    def _resolve_target_role(*, action_name, role_id):
+        target_role_uuid = _parse_uuid(role_id)
+        if target_role_uuid is None:
+            return None, _deny_assignment("invalid_role_id", "Düzgün `role_id` göndərilməyib.", action_name=action_name)
+
+        target_role = Role.objects.filter(id=target_role_uuid, is_active=True).first()
+        if target_role is None:
+            return None, _deny_assignment("role_not_found", "Rol tapılmadı və ya deaktivdir.", action_name=action_name)
+
+        if target_role.organization_id != org.id:
+            return None, _deny_assignment(
+                "role_outside_active_organization",
+                "Rol yalnız aktiv təşkilat scope-u daxilində təyin oluna bilər.",
+                action_name=action_name,
+                target_role=target_role,
+            )
+
+        return target_role, None
+
+    def _resolve_attach_target(*, action_name, target_role):
+        user_id = request.POST.get("user_id")
+        try:
+            target_user_id = int(str(user_id))
+        except (TypeError, ValueError):
+            return None, None, None, _deny_assignment(
+                "invalid_user_id",
+                "Düzgün `user_id` göndərilməyib.",
+                action_name=action_name,
+                target_role=target_role,
+            )
+
+        target_user = User.objects.filter(id=target_user_id, is_active=True).first()
+        if target_user is None:
+            return None, None, None, _deny_assignment(
+                "target_user_not_found",
+                "İstifadəçi tapılmadı.",
+                action_name=action_name,
+                target_role=target_role,
+            )
+
+        if target_user.id == request.user.id:
+            return None, None, None, _deny_assignment(
+                "self_role_change_forbidden",
+                "Öz rolunuzu dəyişdirə bilməzsiniz.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+
+        if target_profile.organization and target_profile.organization != org:
+            return None, None, None, _deny_assignment(
+                "user_bound_to_other_org",
+                "İstifadəçi başqa təşkilata bağlıdır.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        if Membership.objects.filter(user=target_user, is_active=True).exclude(organization=org).exists():
+            return None, None, None, _deny_assignment(
+                "user_has_membership_in_other_org",
+                "İstifadəçi başqa təşkilat üzvlüyünə malikdir.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        target_primary_level = get_user_org_role_level(target_user, org)
+        if not is_superadmin and target_primary_level >= actor_primary_level:
+            return None, None, None, _deny_assignment(
+                "target_level_not_lower_than_actor",
+                "Yalnız sizdən aşağı səviyyəli üzvlərin rolunu dəyişə bilərsiniz.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+                extra={"target_primary_level": target_primary_level, "actor_primary_level": actor_primary_level},
+            )
+
+        if not is_superadmin and target_role.level >= actor_primary_level:
+            return None, None, None, _deny_assignment(
+                "requested_role_not_lower_than_actor",
+                "Yalnız sizdən aşağı səviyyəli rolları təyin edə bilərsiniz.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+                extra={"actor_primary_level": actor_primary_level},
+            )
+
+        if _is_owner_role(target_role) and not can_assign_owner_roles:
+            return None, None, None, _deny_assignment(
+                "owner_role_assignment_permission_required",
+                "`org.owner.assign` icazəsi olmadan owner səviyyəli rol təyin etmək olmaz.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        if _is_admin_role(target_role) and not _is_owner_role(target_role) and not can_assign_admin_roles:
+            return None, None, None, _deny_assignment(
+                "admin_role_assignment_permission_required",
+                "`org.admin.assign` icazəsi olmadan admin səviyyəli rol təyin etmək olmaz.",
+                action_name=action_name,
+                target_user=target_user,
+                target_role=target_role,
+            )
+
+        if not is_superadmin:
+            is_requested_for_org = _pending_student_request_queryset(
+                user=target_user,
+                organization=org,
+                statuses=[StudentOrganizationRequestStatus.PENDING],
+            ).exists()
+            if not is_requested_for_org:
+                requested_org = target_profile.requested_organization
+                requested_name = _normalized_org_name(target_profile.requested_organization_name)
+                is_requested_for_org = (requested_org is not None and requested_org == org) or (
+                    requested_org is None and requested_name and requested_name == _normalized_org_name(org.name)
+                )
+            if not is_requested_for_org:
+                signup_mismatch_message = pgettext_lazy(
+                    "accounts.role_assignment.message",
+                    "user_did_not_select_this_org_on_signup",
+                )
+                if _wants_json_response() or request.POST.get("action") == "prepare_operation":
+                    return None, None, None, _deny_assignment(
+                        "user_did_not_select_this_org_on_signup",
+                        signup_mismatch_message,
+                        action_name=action_name,
+                        target_user=target_user,
+                        target_role=target_role,
+                    )
+                create_audit_log(
+                    user=request.user,
+                    organization=org,
+                    action="update",
+                    resource_type="user",
+                    resource_id=target_user.id,
+                    resource_repr=target_user.username,
+                    old_values=None,
+                    new_values=_build_role_assignment_audit_values(
+                        status="denied",
+                        action_name=action_name,
+                        target_role=target_role,
+                        target_user=target_user,
+                        reason_code="user_did_not_select_this_org_on_signup",
+                        extra={
+                            "requested_membership_id": request.POST.get("membership_id"),
+                            "requested_user_id": request.POST.get("user_id"),
+                            "requested_role_id": request.POST.get("role_id"),
+                            "reason": str(signup_mismatch_message),
+                        },
+                    ),
+                    reason=str(signup_mismatch_message),
+                    request=request,
+                )
+                messages.error(request, signup_mismatch_message)
+                return None, None, None, redirect(next_url)
+
+        existing_membership = (
+            Membership.objects.filter(user=target_user, organization=org).select_related("role", "organization", "user").first()
+        )
+        if existing_membership is not None:
+            denied_response = _enforce_role_change_guards(
+                action_name=action_name,
+                target_membership=existing_membership,
+                target_role=target_role,
+            )
+            if denied_response:
+                return None, None, None, denied_response
+
+        return target_user, target_profile, existing_membership, None
+
+    def _resolve_update_target(*, action_name, target_role):
+        membership_id = request.POST.get("membership_id")
+        target_membership_uuid = _parse_uuid(membership_id)
+        if target_membership_uuid is None:
+            return None, _deny_assignment(
+                "invalid_membership_id",
+                "Düzgün `membership_id` göndərilməyib.",
+                action_name=action_name,
+                target_role=target_role,
+            )
+
+        target_membership = (
+            Membership.objects.select_related("role", "user", "organization")
+            .filter(id=target_membership_uuid, is_active=True)
+            .first()
+        )
+        if target_membership is None:
+            return None, _deny_assignment(
+                "membership_not_found",
+                "Üzvlük tapılmadı.",
+                action_name=action_name,
+                target_role=target_role,
+            )
+
+        if target_membership.organization_id != org.id:
+            return None, _deny_assignment(
+                "membership_outside_active_organization",
+                "Üzvlük yalnız aktiv təşkilat scope-u daxilində idarə oluna bilər.",
+                action_name=action_name,
+                target_membership=target_membership,
+                target_role=target_role,
+            )
+
+        denied_response = _enforce_role_change_guards(
+            action_name=action_name,
+            target_membership=target_membership,
+            target_role=target_role,
+        )
+        if denied_response:
+            return None, denied_response
+
+        return target_membership, None
+
+    def _build_operation_token(*, action_name, target_role, target_membership=None, target_user=None):
+        if target_membership is None and target_user is None:
+            return None
+
+        target_id = str(target_membership.id if target_membership is not None else target_user.id)
+        payload = {
+            "actor_user_id": str(request.user.id),
+            "organization_id": str(org.id),
+            "target_action": action_name,
+            "target_id": target_id,
+            "role_id": str(target_role.id),
+        }
+        operation_signer = TimestampSigner(salt=ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT)
+        return operation_signer.sign_object(payload)
+
+    # Keep legacy minimum-level gate for accessing the assignment endpoint.
+    # Actual assignment authorization is enforced by explicit permission checks below.
+    if not is_superadmin and actor_primary_level < 50:
         messages.error(request, pgettext_lazy("accounts.role_assignment.message", "teacher_or_higher_only"))
         return redirect("accounts:profile")
 
@@ -4353,48 +4883,92 @@ def role_assignment(request):
     if request.method == "POST":
         action = request.POST.get("action", "update_member")
         next_url = _resolve_next_url(request, profile_section_url)
+        requested_action = action
         role_id = request.POST.get("role_id")
-        target_role = get_object_or_404(Role, id=role_id, organization=org, is_active=True)
 
-        if not is_superadmin and target_role.level >= user_level:
-            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "assign_lower_roles_only"))
-            return redirect(next_url)
+        if action == "prepare_operation":
+            requested_action = (request.POST.get("target_action") or "").strip()
+            role_id = request.POST.get("new_role_id") or role_id
 
-        # Teacher+ can assign student/member even without explicit role.assign permission.
-        teacher_can_assign_basic = not is_superadmin and user_level >= 50 and target_role.name in {"student", "member"}
+        if requested_action not in {"attach_user", "update_member"}:
+            return _deny_assignment("unknown_action", "Bilinməyən əməliyyat.", action_name=requested_action or action)
 
-        if not (can_assign_roles or teacher_can_assign_basic):
-            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "missing_role_assign_permission"))
-            return redirect(next_url)
+        if not is_superadmin and actor_primary_membership is None:
+            return _deny_assignment(
+                "actor_not_member_of_active_organization",
+                "Aktiv təşkilatda üzvlük tapılmadı.",
+                action_name=requested_action,
+            )
 
-        if action == "attach_user":
-            user_id = request.POST.get("user_id")
-            target_user = get_object_or_404(User, id=user_id, is_active=True)
-            target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+        if not can_manage_members:
+            return _deny_assignment(
+                "missing_member_management_permission",
+                "`role.assign` və ya `org.manage_members` icazəsi tələb olunur.",
+                action_name=requested_action,
+            )
 
-            if target_profile.organization and target_profile.organization != org:
-                messages.error(request, pgettext_lazy("accounts.role_assignment.message", "user_bound_to_other_org"))
-                return redirect(next_url)
+        target_role, role_error = _resolve_target_role(action_name=requested_action, role_id=role_id)
+        if role_error:
+            return role_error
 
-            if not is_superadmin:
-                is_requested_for_org = _pending_student_request_queryset(
-                    user=target_user,
-                    organization=org,
-                    statuses=[StudentOrganizationRequestStatus.PENDING],
-                ).exists()
-                if not is_requested_for_org:
-                    requested_org = target_profile.requested_organization
-                    requested_name = _normalized_org_name(target_profile.requested_organization_name)
-                    is_requested_for_org = (requested_org is not None and requested_org == org) or (
-                        requested_org is None and requested_name and requested_name == _normalized_org_name(org.name)
-                    )
-                if not is_requested_for_org:
-                    messages.error(
-                        request,
-                        pgettext_lazy("accounts.role_assignment.message", "user_did_not_select_this_org_on_signup"),
-                    )
-                    return redirect(next_url)
+        target_membership = None
+        target_user = None
+        target_profile = None
+        existing_membership = None
 
+        if requested_action == "attach_user":
+            target_user, target_profile, existing_membership, attach_error = _resolve_attach_target(
+                action_name=requested_action,
+                target_role=target_role,
+            )
+            if attach_error:
+                return attach_error
+        else:
+            target_membership, membership_error = _resolve_update_target(
+                action_name=requested_action,
+                target_role=target_role,
+            )
+            if membership_error:
+                return membership_error
+
+        if action == "prepare_operation":
+            operation_token = _build_operation_token(
+                action_name=requested_action,
+                target_role=target_role,
+                target_membership=target_membership,
+                target_user=target_user,
+            )
+            old_role_label = (
+                target_membership.role.display_name
+                if target_membership is not None
+                else (existing_membership.role.display_name if existing_membership is not None else "Üzvlük yoxdur")
+            )
+            return JsonResponse(
+                {
+                    "success": True,
+                    "operation_token": operation_token,
+                    "expires_in_seconds": ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS,
+                    "action": requested_action,
+                    "target": {
+                        "organization_id": str(org.id),
+                        "target_id": str(target_membership.id if target_membership is not None else target_user.id),
+                        "old_role": old_role_label,
+                        "new_role": target_role.display_name,
+                    },
+                }
+            )
+
+        token_error = _validate_operation_token(
+            action_name=requested_action,
+            target_role=target_role,
+            target_membership=target_membership,
+            target_user=target_user,
+        )
+        if token_error:
+            return token_error
+
+        if requested_action == "attach_user":
+            attach_old_role = existing_membership.role if existing_membership is not None else None
             membership, created = Membership.objects.get_or_create(
                 user=target_user,
                 organization=org,
@@ -4406,12 +4980,13 @@ def role_assignment(request):
                 },
             )
             if not created:
-                if not is_superadmin and membership.role.level >= user_level:
-                    messages.error(
-                        request,
-                        pgettext_lazy("accounts.role_assignment.message", "not_allowed_to_change_user_role"),
-                    )
-                    return redirect(next_url)
+                denied_response = _enforce_role_change_guards(
+                    action_name=requested_action,
+                    target_membership=membership,
+                    target_role=target_role,
+                )
+                if denied_response:
+                    return denied_response
                 membership.role = target_role
                 membership.assigned_by = request.user
                 membership.is_active = True
@@ -4460,31 +5035,32 @@ def role_assignment(request):
                 resource_type="membership",
                 resource_id=membership.id,
                 resource_repr=str(membership),
-                old_values=None,
-                new_values={"role": target_role.name, "attached_user": target_user.username},
+                old_values={
+                    "old_role_id": str(attach_old_role.id) if attach_old_role is not None else "",
+                    "old_role_name": (attach_old_role.display_name if attach_old_role is not None else ""),
+                },
+                new_values=_build_role_assignment_audit_values(
+                    status="success",
+                    action_name=requested_action,
+                    target_role=target_role,
+                    target_membership=membership,
+                    target_user=target_user,
+                    old_role=attach_old_role,
+                    reason_code="",
+                    extra={"attached_user": target_user.username},
+                ),
                 request=request,
             )
 
-            messages.success(
-                request,
-                f"Uğurla əlavə edildi: {target_user.username} → {target_role.display_name}.",
-            )
+            success_message = f"Uğurla əlavə edildi: {target_user.username} → {target_role.display_name}."
+            if _wants_json_response():
+                return JsonResponse({"success": True, "message": success_message, "redirect_url": next_url})
+
+            messages.success(request, success_message)
             return redirect(next_url)
 
         # Default action: update existing org membership
-        membership_id = request.POST.get("membership_id")
-        target_membership = get_object_or_404(
-            Membership.objects.select_related("role", "user"),
-            id=membership_id,
-            organization=org,
-            is_active=True,
-        )
-
-        if not is_superadmin and target_membership.role.level >= user_level:
-            messages.error(request, pgettext_lazy("accounts.role_assignment.message", "change_lower_level_users_only"))
-            return redirect(next_url)
-
-        old_role_name = target_membership.role.name
+        old_role = target_membership.role
         target_membership.role = target_role
         target_membership.assigned_by = request.user
         target_membership.save(update_fields=["role", "assigned_by", "updated_at"])
@@ -4533,15 +5109,26 @@ def role_assignment(request):
             resource_type="membership",
             resource_id=target_membership.id,
             resource_repr=str(target_membership),
-            old_values={"role": old_role_name},
-            new_values={"role": target_role.name},
+            old_values={
+                "old_role_id": str(old_role.id) if old_role is not None else "",
+                "old_role_name": (old_role.display_name if old_role is not None else ""),
+            },
+            new_values=_build_role_assignment_audit_values(
+                status="success",
+                action_name=requested_action,
+                target_role=target_role,
+                target_membership=target_membership,
+                target_user=target_membership.user,
+                old_role=old_role,
+            ),
             request=request,
         )
 
-        messages.success(
-            request,
-            f"Uğurla yeniləndi: {target_membership.user.username} → {target_role.display_name}.",
-        )
+        success_message = f"Uğurla yeniləndi: {target_membership.user.username} → {target_role.display_name}."
+        if _wants_json_response():
+            return JsonResponse({"success": True, "message": success_message, "redirect_url": next_url})
+
+        messages.success(request, success_message)
         return redirect(next_url)
 
     return redirect(profile_section_url)

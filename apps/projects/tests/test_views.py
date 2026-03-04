@@ -5,13 +5,16 @@ View tests for projects app.
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course
+from apps.organizations.models import Organization
 from apps.projects.models import Project, ProjectSubmission
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -99,3 +102,126 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["back_url"], return_to)
+
+
+class ProjectUploadSecurityTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("project_upload_teacher", "put@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("project_upload_student", "pus@example.com", "StrongPass123!")
+        self.course = Course.objects.create(owner=self.teacher, title="Project Upload Course", status="published")
+        self.project = Project.objects.create(
+            course=self.course,
+            title="Project Upload Security",
+            description="Upload security test",
+            start_date=timezone.now() - timedelta(days=1),
+            deadline=timezone.now() + timedelta(days=1),
+            status="active",
+        )
+        self.project.assigned_students.add(self.student)
+        self.client.force_login(self.student)
+
+    def test_submit_project_rejects_php_upload(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile("shell.php", b"<?php echo 'pwn';", content_type="application/x-httpd-php"),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
+    def test_submit_project_rejects_exe_upload(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile(
+                "virus.exe",
+                b"MZ\x00\x00\x00\x00",
+                content_type="application/x-msdownload",
+            ),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
+    def test_submit_project_randomizes_filename_for_allowed_file(self):
+        payload = {
+            "content": "safe upload",
+            "file": SimpleUploadedFile("report.pdf", b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n", content_type="application/pdf"),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ProjectSubmission.objects.count(), 1)
+        submission = ProjectSubmission.objects.first()
+        self.assertTrue(submission.file.name.startswith("projects/submissions/"))
+        self.assertTrue(submission.file.name.endswith(".pdf"))
+        self.assertFalse(submission.file.name.endswith("/report.pdf"))
+
+
+class ProjectTenantIsolationTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher_a = User.objects.create_user("project_tenant_teacher_a", "pta@example.com", "StrongPass123!")
+        self.teacher_b = User.objects.create_user("project_tenant_teacher_b", "ptb@example.com", "StrongPass123!")
+        self.student_a = User.objects.create_user("project_tenant_student_a", "psa@example.com", "StrongPass123!")
+        self.student_b = User.objects.create_user("project_tenant_student_b", "psb@example.com", "StrongPass123!")
+
+        self.org_a = Organization.objects.create(
+            name="Project Org A",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher_a,
+            status="active",
+            is_active=True,
+        )
+        self.org_b = Organization.objects.create(
+            name="Project Org B",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher_b,
+            status="active",
+            is_active=True,
+        )
+
+        for user, org, role in (
+            (self.teacher_a, self.org_a, ProfileRole.TEACHER),
+            (self.teacher_b, self.org_b, ProfileRole.TEACHER),
+            (self.student_a, self.org_a, ProfileRole.STUDENT),
+            (self.student_b, self.org_b, ProfileRole.STUDENT),
+        ):
+            profile = user.profile
+            profile.organization = org
+            profile.organization_type = org.org_type
+            profile.role = role
+            profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self.course_a = Course.objects.create(owner=self.teacher_a, title="Project Course A", status="published")
+        self.course_b = Course.objects.create(owner=self.teacher_b, title="Project Course B", status="published")
+
+        self.project_b = Project.objects.create(
+            course=self.course_b,
+            title="Tenant B Project",
+            description="Tenant B project",
+            start_date=timezone.now() - timedelta(days=1),
+            deadline=timezone.now() + timedelta(days=1),
+            status="active",
+        )
+        self.project_b.assigned_students.add(self.student_b)
+
+        self.client.force_login(self.teacher_a)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+    def test_api_get_groups_blocks_cross_tenant_course_id(self):
+        response = self.client.get(reverse("projects:api_get_groups"), {"course_id": self.course_b.id})
+        self.assertEqual(response.status_code, 404)
+
+    def test_project_detail_blocks_cross_tenant_project_id(self):
+        self.client.force_login(self.student_a)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.get(reverse("projects:project_detail", kwargs={"pk": self.project_b.id}))
+        self.assertEqual(response.status_code, 404)

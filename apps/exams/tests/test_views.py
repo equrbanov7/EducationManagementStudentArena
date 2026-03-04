@@ -3,7 +3,7 @@ View tests for exams app.
 """
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
@@ -329,6 +329,11 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             email="teacher_exam_other@example.com",
             password="StrongPass123!",
         )
+        self.student = User.objects.create_user(
+            username="teacher_exam_student",
+            email="teacher_exam_student@example.com",
+            password="StrongPass123!",
+        )
 
         self.org_a = Organization.objects.create(
             name="Exam Org A",
@@ -356,6 +361,12 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         other_profile.organization_type = self.org_a.org_type
         other_profile.role = ProfileRole.TEACHER
         other_profile.save()
+
+        student_profile = self.student.profile
+        student_profile.organization = self.org_a
+        student_profile.organization_type = self.org_a.org_type
+        student_profile.role = ProfileRole.STUDENT
+        student_profile.save()
 
         self.exam_visible = Exam.objects.create(
             author=self.teacher,
@@ -385,6 +396,33 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, self.exam_visible.title)
         self.assertNotContains(response, self.exam_other_tenant.title)
         self.assertNotContains(response, self.exam_other_author.title)
+
+    def test_other_teacher_cannot_edit_or_delete_my_exam(self):
+        self.client.force_login(self.other_teacher)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        edit_response = self.client.get(reverse("exams:edit_exam", args=[self.exam_visible.slug]))
+        delete_response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+
+        self.assertEqual(edit_response.status_code, 403)
+        self.assertEqual(delete_response.status_code, 403)
+        self.assertTrue(Exam.objects.filter(id=self.exam_visible.id).exists())
+
+    def test_student_cannot_delete_exam(self):
+        self.client.force_login(self.student)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Exam.objects.filter(id=self.exam_visible.id).exists())
+
+    def test_edit_other_tenant_exam_is_not_found(self):
+        response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
+        self.assertEqual(response.status_code, 404)
 
 
 class StudentExamVisibilityFilteringTest(TestCase):
@@ -583,6 +621,30 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.code_assigned_exam.attempts.filter(user=self.student).exists())
 
+    def test_exam_code_check_rejects_post_without_csrf_token(self):
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.student)
+        session = csrf_client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = csrf_client.post(
+            reverse("exams:exam_code_check"),
+            {"exam_slug": self.code_assigned_exam.slug, "access_code": "123456"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.code_assigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_exam_code_check_sql_injection_payload_does_not_bypass_lookup(self):
+        response = self.client.post(
+            reverse("exams:exam_code_check"),
+            {"exam_slug": "anything' OR 1=1 --", "access_code": "123456"},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(self.code_assigned_exam.attempts.filter(user=self.student).exists())
+
     def test_unassigned_exam_with_code_cannot_start_even_with_valid_code(self):
         response = self.client.post(
             reverse("exams:exam_code_check"),
@@ -591,6 +653,41 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:student_exam_list"))
         self.assertFalse(self.code_unassigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_other_tenant_exam_cannot_be_started(self):
+        response = self.client.get(reverse("exams:start_exam", args=[self.other_tenant_exam.slug]))
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(self.other_tenant_exam.attempts.filter(user=self.student).exists())
+
+    def test_other_tenant_exam_code_check_is_not_found(self):
+        code_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Other Tenant Code Exam",
+            is_active=True,
+            is_public=False,
+            access_code="654321",
+            organization_id=999,
+        )
+        code_exam.allowed_users.add(self.student)
+
+        response = self.client.post(
+            reverse("exams:exam_code_check"),
+            {"exam_slug": code_exam.slug, "access_code": "654321"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertFalse(code_exam.attempts.filter(user=self.student).exists())
+
+    def test_other_tenant_exam_result_is_not_found(self):
+        other_tenant_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.other_tenant_exam,
+            status="submitted",
+        )
+
+        response = self.client.get(
+            reverse("exams:exam_result", args=[self.other_tenant_exam.slug, other_tenant_attempt.id])
+        )
+        self.assertEqual(response.status_code, 404)
 
     def test_public_exams_are_visible_to_other_authenticated_roles(self):
         self.client.force_login(self.viewer_teacher)

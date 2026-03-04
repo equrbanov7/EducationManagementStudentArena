@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+
 from .models import Project, ProjectSubmission
 
 
@@ -70,6 +72,30 @@ class ProjectSubmissionForm(forms.ModelForm):
             "content": pgettext_lazy("projects.form.submission.label", "content"),
             "file": pgettext_lazy("projects.form.submission.label", "file"),
         }
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+        if not file:
+            return file
+
+        validate_uploaded_file(
+            file,
+            allowed_extensions={
+                ".zip",
+                ".rar",
+                ".7z",
+                ".pdf",
+                ".txt",
+                ".doc",
+                ".docx",
+                ".png",
+                ".jpg",
+                ".jpeg",
+            },
+            max_size_mb=25,
+        )
+        randomize_uploaded_filename(file)
+        return file
 
 
 class GradeProjectSubmissionForm(forms.ModelForm):
