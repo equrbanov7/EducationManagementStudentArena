@@ -374,6 +374,42 @@
     gap: 0.55rem;
     font-weight: 600;
     color: #334155;
+    border-radius: 10px;
+    padding: 0.35rem 0.55rem;
+}
+
+.modal-check-label .form-check-input {
+    margin-top: 0;
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: #2563eb;
+}
+
+.modal-check-label-text {
+    line-height: 1.35;
+}
+
+.modal-check-label--active {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.modal-check-label--active .form-check-input {
+    accent-color: #0ea5e9;
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.modal-check-label--paint {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.modal-check-label--public {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
 }
 
 .create-exam-modal-actions {

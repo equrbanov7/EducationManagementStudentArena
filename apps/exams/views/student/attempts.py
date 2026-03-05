@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -16,6 +17,36 @@ from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+
+
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+    return raw_url
+
+
+def _resolve_exam_failure_redirect(request):
+    explicit_next = _safe_same_origin_redirect_path(request, request.GET.get("next") or request.POST.get("next"))
+    if explicit_next:
+        return explicit_next
+
+    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    if source_section == "assigned-exams":
+        assigned_type = (request.GET.get("assigned_type") or request.POST.get("assigned_type") or "all").strip().lower()
+        allowed_types = {"all", "exams", "courses", "assignments", "labs", "independent"}
+        if assigned_type not in allowed_types:
+            assigned_type = "all"
+        return f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type={assigned_type}"
+
+    return reverse("exams:student_exam_list")
 
 
 @login_required
@@ -29,7 +60,11 @@ def start_exam(request, slug):
     can_start, reason = exam.can_user_start(request.user, code=None)
     if not can_start:
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
-        return redirect("exams:student_exam_list")
+        return redirect(_resolve_exam_failure_redirect(request))
+
+    if not exam.questions.exists():
+        messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
+        return redirect(_resolve_exam_failure_redirect(request))
 
     return _start_or_resume_attempt(request, exam)
 
@@ -69,6 +104,11 @@ def take_exam(request, slug, attempt_id):
             .prefetch_related("question__options", "selected_options", "files")
             .order_by("id")
         )
+
+    if not answers_qs.exists():
+        message_key = "exam_has_no_questions" if not exam.questions.exists() else "exam_start_failed"
+        messages.error(request, pgettext("exams.view.access.message", message_key))
+        return redirect(_resolve_exam_failure_redirect(request))
 
     questions = [a.question for a in answers_qs]
 

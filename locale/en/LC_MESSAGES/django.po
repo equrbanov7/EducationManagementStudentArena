@@ -1685,6 +1685,11 @@ msgctxt "profile.assigned_courses"
 msgid "empty_description"
 msgstr "Empty description"
 
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
+msgctxt "profile.assigned_courses"
+msgid "search_placeholder"
+msgstr "Search courses..."
+
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:9
 msgctxt "profile.assigned_tasks"
 msgid "title"
@@ -1697,13 +1702,18 @@ msgstr "Tab all"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
 msgctxt "profile.assigned_tasks"
+msgid "tab_exams"
+msgstr "Exams"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
+msgctxt "profile.assigned_tasks"
 msgid "tab_courses"
 msgstr "Tab courses"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Tab assignments"
+msgstr "Coursework"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1734,6 +1744,11 @@ msgstr "Empty title"
 msgctxt "profile.assigned_tasks"
 msgid "empty_description"
 msgstr "Empty description"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:42
+msgctxt "profile.assigned_tasks"
+msgid "search_placeholder"
+msgstr "Search tasks..."
 
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:10
 msgctxt "profile.courses"
@@ -7358,7 +7373,7 @@ msgstr "Exam type"
 #: apps/exams/forms.py:116
 msgctxt "exams.form.exam.label"
 msgid "is_active"
-msgstr "Set active?"
+msgstr "Make exam active (visible to students)?"
 
 #: apps/exams/forms.py:117
 msgctxt "exams.form.exam.label"
@@ -7373,7 +7388,7 @@ msgstr "End date and time"
 #: apps/exams/forms.py:119
 msgctxt "exams.form.exam.label"
 msgid "is_public"
-msgstr "Public for everyone?"
+msgstr "Make exam open to everyone?"
 
 #: apps/exams/forms.py:120
 msgctxt "exams.form.exam.label"
@@ -9011,7 +9026,7 @@ msgstr "First"
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
 msgid "action_next"
-msgstr "Edit"
+msgstr "Next"
 
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
@@ -9856,26 +9871,24 @@ msgstr "Loading"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
-msgstr "Table action"
+msgstr "Enable Paint answers for written exams"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:79
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
-msgstr "Public for everyone?"
+msgstr "Make this exam open to everyone?"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:85
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
-msgstr "Public"
+msgstr "Access settings"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:86
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
-"EMSArena is a unified, scalable, and multifunctional digital education "
-"ecosystem designed for universities, schools, training centers, and "
-"individual instructors. We digitize the learning process and simplify "
-"management."
+"If this exam is open to everyone, group and individual selections below are "
+"ignored. For restricted access, select groups and/or students."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -10912,6 +10925,12 @@ msgstr "The exam could not be started."
 msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "You cannot start this exam."
+
+#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/student/attempts.py:102
+msgctxt "exams.view.access.message"
+msgid "exam_has_no_questions"
+msgstr "No questions have been assigned to this exam yet."
 
 #: apps/exams/views/student/lists.py:69 apps/exams/views/student/lists.py:160
 msgctxt "exams.view.student.list.label"

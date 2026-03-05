@@ -1689,6 +1689,11 @@ msgctxt "profile.assigned_courses"
 msgid "empty_description"
 msgstr "Şu anda size atanan bir dersiniz bulunmamaktadır."
 
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
+msgctxt "profile.assigned_courses"
+msgid "search_placeholder"
+msgstr "Kurs ara..."
+
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:9
 msgctxt "profile.assigned_tasks"
 msgid "title"
@@ -1701,13 +1706,18 @@ msgstr "Hepsi"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
 msgctxt "profile.assigned_tasks"
+msgid "tab_exams"
+msgstr "Sınavlar"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
+msgctxt "profile.assigned_tasks"
 msgid "tab_courses"
 msgstr "Kurslar"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Görevler"
+msgstr "Kurs ödevleri"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1738,6 +1748,11 @@ msgstr "Görev bulunamadı"
 msgctxt "profile.assigned_tasks"
 msgid "empty_description"
 msgstr "Şu anda atanmış göreviniz yok."
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:42
+msgctxt "profile.assigned_tasks"
+msgid "search_placeholder"
+msgstr "Görev ara..."
 
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:10
 msgctxt "profile.courses"
@@ -7372,7 +7387,7 @@ msgstr "Sınav tipi"
 #: apps/exams/forms.py:116
 msgctxt "exams.form.exam.label"
 msgid "is_active"
-msgstr "Aktif olsun mu?"
+msgstr "Sınav aktif olsun (öğrencilere görünsün)?"
 
 #: apps/exams/forms.py:117
 msgctxt "exams.form.exam.label"
@@ -7387,7 +7402,7 @@ msgstr "Bitiş tarihi ve saati"
 #: apps/exams/forms.py:119
 msgctxt "exams.form.exam.label"
 msgid "is_public"
-msgstr "Herkese açık mı?"
+msgstr "Sınav herkese açık olsun mu?"
 
 #: apps/exams/forms.py:120
 msgctxt "exams.form.exam.label"
@@ -9027,7 +9042,7 @@ msgstr "Birinci"
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
 msgid "action_next"
-msgstr "Düzenlemek"
+msgstr "Sonraki"
 
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
@@ -9872,25 +9887,24 @@ msgstr "Loading"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
-msgstr "Operasyon"
+msgstr "Yazılı sınavda Paint cevabı aktif olsun"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:79
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
-msgstr "Herkese açık mı?"
+msgstr "Bu sınav herkese açık olsun mu?"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:85
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
-msgstr "Herkese açık"
+msgstr "Erişim ayarları"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:86
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
-"EMSArena; üniversiteler, okullar, eğitim merkezleri ve bireysel eğitmenler "
-"için tasarlanmış birleşik, ölçeklenebilir ve çok işlevli bir dijital eğitim "
-"ekosistemidir. Eğitim sürecini dijitalleştirir ve yönetimi kolaylaştırırız."
+"Sınavı herkese açık yaparsanız aşağıdaki grup ve bireysel kullanıcı "
+"seçimleri göz ardı edilir. Kısıtlı erişim için grup ve/veya öğrenci seçin."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -10927,6 +10941,12 @@ msgstr "Sınav başlatılamadı."
 msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Bu sınava başlayamazsınız."
+
+#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/student/attempts.py:102
+msgctxt "exams.view.access.message"
+msgid "exam_has_no_questions"
+msgstr "Bu sınava henüz soru atanmadı."
 
 #: apps/exams/views/student/lists.py:69 apps/exams/views/student/lists.py:160
 msgctxt "exams.view.student.list.label"

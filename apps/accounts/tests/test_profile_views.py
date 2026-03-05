@@ -626,7 +626,7 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, next_url)
 
-    def test_assigned_tasks_section_lists_course_assignment_lab_and_project(self):
+    def test_assigned_tasks_section_lists_exam_assignment_lab_and_project(self):
         from datetime import timedelta
 
         from django.utils import timezone
@@ -634,6 +634,7 @@ class ProfileViewTest(TestCase):
         from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment
         from apps.courses.models import Course, CourseMembership
+        from apps.exams.models import Exam
         from apps.labs.models import Lab
         from apps.projects.models import Project
 
@@ -694,40 +695,130 @@ class ProfileViewTest(TestCase):
         )
         project.assigned_students.add(self.user)
 
+        exam = Exam.objects.create(
+            author=teacher,
+            title="Task Exam",
+            exam_type="test",
+            is_active=True,
+            is_public=False,
+        )
+        exam.allowed_users.add(self.user)
+
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=assigned-exams")
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təyin olunmuş tapşırıqlar")
-        self.assertContains(response, course.title)
         self.assertContains(response, assignment.title)
         self.assertContains(response, lab.title)
         self.assertContains(response, project.title)
+        self.assertContains(response, exam.title)
         self.assertNotContains(response, unassigned_assignment.title)
+        self.assertNotContains(response, "assigned_type=courses")
 
         self.assertEqual(response.context["assigned_tasks_count"], 4)
+        self.assertEqual(response.context["assigned_task_counts"]["exams"], 1)
         self.assertEqual(response.context["assigned_task_counts"]["courses"], 1)
         self.assertEqual(response.context["assigned_task_counts"]["assignments"], 1)
         self.assertEqual(response.context["assigned_task_counts"]["labs"], 1)
         self.assertEqual(response.context["assigned_task_counts"]["independent"], 1)
 
+        exam_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "exams")
         assignment_item = next(
             item for item in response.context["assigned_task_items"] if item["category"] == "assignments"
         )
-        course_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "courses")
+        self.assertFalse(any(item["category"] == "courses" for item in response.context["assigned_task_items"]))
         lab_item = next(item for item in response.context["assigned_task_items"] if item["category"] == "labs")
         project_item = next(
             item for item in response.context["assigned_task_items"] if item["category"] == "independent"
         )
 
-        self.assertIn("from_section=assigned-exams", course_item["detail_url"])
-        self.assertIn("assigned_type=all", course_item["detail_url"])
         self.assertIn("from_section=assigned-exams", assignment_item["detail_url"])
         self.assertIn("assigned_type=all", assignment_item["detail_url"])
         self.assertIn("from_section=assigned-exams", lab_item["detail_url"])
         self.assertIn("assigned_type=all", lab_item["detail_url"])
         self.assertIn("from_section=assigned-exams", project_item["detail_url"])
         self.assertIn("assigned_type=all", project_item["detail_url"])
+        self.assertIn(reverse("exams:start_exam", kwargs={"slug": exam.slug}), exam_item["detail_url"])
+        self.assertIn("from_section=assigned-exams", exam_item["detail_url"])
+        self.assertIn("assigned_type=all", exam_item["detail_url"])
+
+    def test_assigned_tasks_search_filters_items(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment
+        from apps.courses.models import Course, CourseMembership
+
+        teacher = User.objects.create_user(
+            username="tasks_search_teacher",
+            email="tasks_search_teacher@example.com",
+            password="testpass123",
+        )
+        self.user.profile.role = ProfileRole.STUDENT
+        self.user.profile.save(update_fields=["role", "updated_at"])
+
+        course = Course.objects.create(owner=teacher, title="Search Course", status="published")
+        CourseMembership.objects.create(course=course, user=self.user, role="student")
+
+        keep_item = Assignment.objects.create(
+            course=course,
+            title="Python Search Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=1),
+            status="published",
+        )
+        keep_item.assigned_students.add(self.user)
+
+        hidden_item = Assignment.objects.create(
+            course=course,
+            title="Java Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=1),
+            status="published",
+        )
+        hidden_item.assigned_students.add(self.user)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "assigned-exams", "assigned_search": "python"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["assigned_tasks_search_query"], "python")
+        self.assertContains(response, keep_item.title)
+        self.assertNotContains(response, hidden_item.title)
+
+    def test_assigned_courses_search_filters_items(self):
+        from apps.accounts.models import ProfileRole
+        from apps.courses.models import Course, CourseMembership
+
+        teacher = User.objects.create_user(
+            username="assigned_courses_search_teacher",
+            email="assigned_courses_search_teacher@example.com",
+            password="testpass123",
+        )
+        self.user.profile.role = ProfileRole.STUDENT
+        self.user.profile.save(update_fields=["role", "updated_at"])
+
+        keep_course = Course.objects.create(owner=teacher, title="Python Fundamentals", status="published")
+        hidden_course = Course.objects.create(owner=teacher, title="Rust Advanced", status="published")
+        CourseMembership.objects.create(course=keep_course, user=self.user, role="student")
+        CourseMembership.objects.create(course=hidden_course, user=self.user, role="student")
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {"section": "assigned-courses", "assigned_course_search": "python"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["assigned_courses_search_query"], "python")
+        self.assertEqual(len(response.context["assigned_courses"]), 1)
+        self.assertEqual(response.context["assigned_courses"][0].id, keep_course.id)
 
 
 class AssignedItemsViewTest(TestCase):

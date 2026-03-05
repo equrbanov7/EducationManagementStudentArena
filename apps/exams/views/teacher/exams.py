@@ -92,6 +92,31 @@ def _get_editable_exam_or_404(request, slug):
     return exam
 
 
+def _build_group_student_map(form):
+    """
+    İcazəli qruplardan icazəli istifadəçilərə xəritə qurur.
+    Frontend bu xəritə ilə qrup seçiləndə uyğun tələbələri avtomatik seçir.
+    """
+    group_field = form.fields.get("allowed_groups")
+    user_field = form.fields.get("allowed_users")
+    if not group_field or not user_field:
+        return {}
+
+    allowed_user_ids = set(user_field.queryset.values_list("id", flat=True))
+    group_student_map = {}
+    group_qs = group_field.queryset.prefetch_related("students")
+
+    for group in group_qs:
+        member_ids = [
+            student.id
+            for student in group.students.all()
+            if student.id in allowed_user_ids
+        ]
+        group_student_map[str(group.id)] = [str(member_id) for member_id in member_ids]
+
+    return group_student_map
+
+
 @login_required
 def teacher_exam_list(request):
     """
@@ -162,6 +187,7 @@ def createAndEditExamView(request, slug=None):
             if is_modal_request:
                 return JsonResponse({"success": True, "slug": exam_instance.slug})
             return redirect("exams:teacher_exam_detail", slug=exam_instance.slug)
+        group_student_map = _build_group_student_map(form)
         if is_modal_request:
             html = render_to_string(
                 "exams/teacher/partials/_create_exam_modal_form.html",
@@ -169,6 +195,7 @@ def createAndEditExamView(request, slug=None):
                     "form": form,
                     "is_editing": is_editing,
                     "exam": exam,
+                    "group_student_map": group_student_map,
                 },
                 request=request,
             )
@@ -179,6 +206,7 @@ def createAndEditExamView(request, slug=None):
             form = ExamForm(instance=exam, user=request.user, organization=organization)
         else:
             form = ExamForm(user=request.user, organization=organization)
+    group_student_map = _build_group_student_map(form)
 
     if is_modal_request:
         return render(
@@ -188,6 +216,7 @@ def createAndEditExamView(request, slug=None):
                 "form": form,
                 "exam": exam,
                 "is_editing": is_editing,
+                "group_student_map": group_student_map,
             },
         )
 
@@ -198,6 +227,7 @@ def createAndEditExamView(request, slug=None):
             "form": form,
             "exam": exam,
             "is_editing": is_editing,
+            "group_student_map": group_student_map,
         },
     )
 

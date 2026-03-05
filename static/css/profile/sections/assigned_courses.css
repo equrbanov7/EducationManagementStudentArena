@@ -10,6 +10,40 @@
 .text-emerald { color: var(--emerald-primary) !important; }
 .icon-emerald-light { background: var(--emerald-light) !important; color: var(--emerald-primary) !important; }
 
+.assigned-courses-search-form {
+    margin-bottom: 1.35rem;
+    max-width: 460px;
+}
+
+.assigned-courses-search-input-wrap {
+    position: relative;
+}
+
+.assigned-courses-search-input-wrap i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.assigned-courses-search-input-wrap input {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 0.65rem 0.85rem 0.65rem 2.25rem;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.assigned-courses-search-input-wrap input:focus {
+    border-color: #86efac;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+    outline: none;
+}
+
 /* --- Təyin Olunmuş Kurslar Grid --- */
 .assigned-course-cards-grid {
     display: grid;
@@ -112,6 +146,10 @@
 
 /* Mobil Responsivlik */
 @media (max-width: 640px) {
+    .assigned-courses-search-form {
+        max-width: 100%;
+    }
+
     .assigned-course-cards-grid {
         grid-template-columns: 1fr;
     }

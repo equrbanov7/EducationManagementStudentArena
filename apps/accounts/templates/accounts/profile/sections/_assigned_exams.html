@@ -16,9 +16,9 @@
                class="modern-tab {% if assigned_tasks_active_filter == 'all' %}active{% endif %}">
                 {% trans "tab_all" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.all|default:0 }}</span>
             </a>
-            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=courses"
-               class="modern-tab {% if assigned_tasks_active_filter == 'courses' %}active{% endif %}">
-                {% trans "tab_courses" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.courses|default:0 }}</span>
+            <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=exams"
+               class="modern-tab {% if assigned_tasks_active_filter == 'exams' %}active{% endif %}">
+                {% trans "tab_exams" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.exams|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=assigned-exams&assigned_type=assignments"
                class="modern-tab {% if assigned_tasks_active_filter == 'assignments' %}active{% endif %}">
@@ -33,6 +33,19 @@
                 {% trans "tab_independent" context "profile.assigned_tasks" %} <span class="tab-count">{{ assigned_task_counts.independent|default:0 }}</span>
             </a>
         </div>
+
+        <form method="get" class="assigned-task-search-form js-profile-debounce-search" data-debounce-ms="1000">
+            <input type="hidden" name="section" value="assigned-exams">
+            <input type="hidden" name="assigned_type" value="{{ assigned_tasks_active_filter }}">
+            <div class="assigned-task-search-input-wrap">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search"
+                       name="assigned_search"
+                       value="{{ assigned_tasks_search_query }}"
+                       placeholder="{% trans 'search_placeholder' context 'profile.assigned_tasks' %}"
+                       autocomplete="off">
+            </div>
+        </form>
 
         {% if assigned_task_items %}
         <div class="results-cards-grid assigned-tasks-grid">
@@ -70,10 +83,28 @@
                 {% endif %}
 
                 <div class="result-card-footer task-card-footer">
+                    {% if item.category == "exams" %}
+                    <button type="button"
+                            class="btn-action btn-task-primary js-open-assigned-exam-modal"
+                            data-start-url="{{ item.detail_url }}"
+                            data-exam-slug="{{ item.exam_slug }}"
+                            data-exam-title="{{ item.title }}"
+                            data-exam-kind="{{ item.kind }}"
+                            data-exam-type="{{ item.exam_type_display }}"
+                            data-exam-start="{% if item.exam_start_at %}{{ item.exam_start_at|date:'d.m.Y H:i' }}{% else %}Məhdudiyyət yoxdur (daimi){% endif %}"
+                            data-exam-end="{% if item.exam_end_at %}{{ item.exam_end_at|date:'d.m.Y H:i' }}{% else %}Məhdudiyyət yoxdur (daimi){% endif %}"
+                            data-exam-duration="{% if item.exam_total_duration_minutes %}{{ item.exam_total_duration_minutes }} dəqiqə{% else %}Məhdudiyyət yoxdur{% endif %}"
+                            data-exam-note="{% if item.description %}{{ item.description|striptags|escape }}{% else %}{% endif %}"
+                            data-requires-code="{% if item.exam_requires_code %}1{% else %}0{% endif %}">
+                        <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
+                        <i class="fas fa-arrow-right icon-arrow"></i>
+                    </button>
+                    {% else %}
                     <a href="{{ item.detail_url }}" class="btn-action btn-task-primary">
                         <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
                         <i class="fas fa-arrow-right icon-arrow"></i>
                     </a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -90,4 +121,59 @@
         {% endif %}
     </div>
 </section>
+
+<div id="assignedExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
+    <div class="assigned-exam-info-modal" role="dialog" aria-modal="true" aria-labelledby="assignedExamInfoTitle">
+        <button type="button" class="assigned-exam-info-close" id="assignedExamInfoClose" aria-label="Bağla">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <h3 id="assignedExamInfoTitle" class="assigned-exam-info-title">İmtahan məlumatı</h3>
+        <p class="assigned-exam-info-subtitle" id="assignedExamInfoExamName"></p>
+
+        <div class="assigned-exam-info-grid">
+            <div class="assigned-exam-info-row">
+                <span class="label">Növ</span>
+                <span class="value" id="assignedExamInfoType">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">Müddət</span>
+                <span class="value" id="assignedExamInfoDuration">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">Başlama vaxtı</span>
+                <span class="value" id="assignedExamInfoStart">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">Son təhvil vaxtı</span>
+                <span class="value" id="assignedExamInfoEnd">-</span>
+            </div>
+        </div>
+
+        <div class="assigned-exam-info-note-wrap">
+            <div class="label">Qeyd</div>
+            <p id="assignedExamInfoNote">Qeyd yoxdur.</p>
+        </div>
+
+        <form method="post" action="{% url 'exams:exam_code_check' %}" id="assignedExamCodeForm" class="assigned-exam-code-form is-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="exam_slug" id="assignedExamCodeSlug">
+            <input type="hidden" name="from_section" value="assigned-exams">
+            <input type="hidden" name="assigned_type" value="{{ assigned_tasks_active_filter }}">
+            <label for="assignedExamAccessCodeInput" class="assigned-exam-code-label">Giriş kodu</label>
+            <input type="text"
+                   id="assignedExamAccessCodeInput"
+                   name="access_code"
+                   class="assigned-exam-code-input"
+                   maxlength="6"
+                   inputmode="numeric"
+                   placeholder="6 rəqəmli kod">
+        </form>
+
+        <div class="assigned-exam-info-actions">
+            <button type="button" class="btn-action btn-task-secondary" id="assignedExamInfoCancelBtn">Ləğv et</button>
+            <button type="button" class="btn-action btn-task-primary" id="assignedExamInfoStartBtn">İmtahana başla</button>
+        </div>
+    </div>
+</div>
 {% endif %}

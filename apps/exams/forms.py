@@ -139,6 +139,11 @@ class ExamForm(forms.ModelForm):
         self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
         self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M"]
 
+        # Yeni imtahan yaradılarkən "aktiv" default seçili gəlsin.
+        if not self.instance.pk and not self.is_bound:
+            self.fields["is_active"].initial = True
+            self.initial.setdefault("is_active", True)
+
         # Default querysets
         self.fields["allowed_users"].queryset = User.objects.filter(is_active=True).order_by("username")
         self.fields["allowed_groups"].queryset = StudentGroup.objects.none()
