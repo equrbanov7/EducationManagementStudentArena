@@ -9,6 +9,7 @@
             {{ form.non_field_errors }}
         </div>
     {% endif %}
+    {{ group_student_map|json_script:"createExamGroupStudentMap" }}
 
     <div class="create-exam-form-grid">
         <div class="form-group form-group-full">
@@ -66,17 +67,26 @@
         </div>
 
         <div class="form-group">
-            <label class="modal-check-label">{{ form.is_active }} {{ form.is_active.label }}</label>
+            <label class="modal-check-label modal-check-label--active">
+                {{ form.is_active }}
+                <span class="modal-check-label-text">{{ form.is_active.label }}</span>
+            </label>
             {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="form-group">
-            <label class="modal-check-label">{{ form.enable_paint }} {% trans "enable_paint" context "exams.template.create_exam_modal_form" %}</label>
+            <label class="modal-check-label modal-check-label--paint">
+                {{ form.enable_paint }}
+                <span class="modal-check-label-text">{% trans "enable_paint" context "exams.template.create_exam_modal_form" %}</span>
+            </label>
             {% if form.enable_paint.errors %}<div class="field-error">{{ form.enable_paint.errors.0 }}</div>{% endif %}
         </div>
 
         <div class="form-group form-group-full">
-            <label class="modal-check-label">{{ form.is_public }} {% trans "is_public" context "exams.template.create_exam_modal_form" %}</label>
+            <label class="modal-check-label modal-check-label--public">
+                {{ form.is_public }}
+                <span class="modal-check-label-text">{% trans "is_public" context "exams.template.create_exam_modal_form" %}</span>
+            </label>
             {% if form.is_public.errors %}<div class="field-error">{{ form.is_public.errors.0 }}</div>{% endif %}
         </div>
 

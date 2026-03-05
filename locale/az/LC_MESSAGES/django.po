@@ -1690,6 +1690,11 @@ msgctxt "profile.assigned_courses"
 msgid "empty_description"
 msgstr "Hazırda sizə təyin olunmuş kurs yoxdur."
 
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
+msgctxt "profile.assigned_courses"
+msgid "search_placeholder"
+msgstr "Kurs axtar..."
+
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:9
 msgctxt "profile.assigned_tasks"
 msgid "title"
@@ -1702,13 +1707,18 @@ msgstr "Hamısı"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
 msgctxt "profile.assigned_tasks"
+msgid "tab_exams"
+msgstr "İmtahanlar"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
+msgctxt "profile.assigned_tasks"
 msgid "tab_courses"
 msgstr "Kurslar"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Tapşırıqlar"
+msgstr "Kurs işləri"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1739,6 +1749,11 @@ msgstr "Tapşırıq tapılmadı"
 msgctxt "profile.assigned_tasks"
 msgid "empty_description"
 msgstr "Hazırda sizə təyin olunmuş tapşırıq yoxdur."
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:42
+msgctxt "profile.assigned_tasks"
+msgid "search_placeholder"
+msgstr "Tapşırıq axtar..."
 
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:10
 msgctxt "profile.courses"
@@ -7379,7 +7394,7 @@ msgstr "İmtahan tipi"
 #: apps/exams/forms.py:116
 msgctxt "exams.form.exam.label"
 msgid "is_active"
-msgstr "Aktiv olsun?"
+msgstr "İmtahan aktiv olsun (tələbələr görə bilsin)?"
 
 #: apps/exams/forms.py:117
 msgctxt "exams.form.exam.label"
@@ -7394,7 +7409,7 @@ msgstr "Bitmə tarixi və vaxtı"
 #: apps/exams/forms.py:119
 msgctxt "exams.form.exam.label"
 msgid "is_public"
-msgstr "Hamı üçün açıqdır?"
+msgstr "İmtahan hamı üçün açıq olsun?"
 
 #: apps/exams/forms.py:120
 msgctxt "exams.form.exam.label"
@@ -9033,7 +9048,7 @@ msgstr "Əvvəl"
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
 msgid "action_next"
-msgstr "Redaktə et"
+msgstr "Növbəti"
 
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
@@ -9885,26 +9900,24 @@ msgstr "Loading"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
-msgstr "Əməliyyat"
+msgstr "Yazılı imtahanda Paint cavabı aktiv olsun"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:79
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
-msgstr "Hamı üçün açıqdır?"
+msgstr "İmtahan hamı üçün açıq olsun?"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:85
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
-msgstr "Hamı üçün açıq"
+msgstr "Giriş ayarları"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:86
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
-"EMSArena – universitetlər, məktəblər, təlim mərkəzləri və fərdi təlimçilər "
-"üçün nəzərdə tutulmuş vahid, miqyaslana bilən və çoxfunksiyalı rəqəmsal "
-"təhsil ekosistemidir. Biz tədris prosesini rəqəmsallaşdırır və idarəetməni "
-"asanlaşdırırıq."
+"İmtahan hamı üçün açıq olarsa, aşağıdakı qrup və fərdi istifadəçi seçimləri "
+"nəzərə alınmır. Məhdud giriş üçün qrup və ya tələbə seçin."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -10941,6 +10954,12 @@ msgstr "İmtahana başlamaq mümkün olmadı."
 msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Bu imtahana başlaya bilmirsiniz."
+
+#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/student/attempts.py:102
+msgctxt "exams.view.access.message"
+msgid "exam_has_no_questions"
+msgstr "Bu imtahana hələ sual təyin olunmayıb."
 
 #: apps/exams/views/student/lists.py:69 apps/exams/views/student/lists.py:160
 msgctxt "exams.view.student.list.label"

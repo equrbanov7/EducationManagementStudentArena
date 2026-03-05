@@ -500,6 +500,12 @@ class StudentExamVisibilityFilteringTest(TestCase):
             is_public=False,
             course=self.assigned_course,
         )
+        ExamQuestion.objects.create(
+            exam=self.course_assigned_exam,
+            text="Course question",
+            order=1,
+            points=1,
+        )
 
         self.assigned_public_exam = Exam.objects.create(
             author=self.teacher,
@@ -517,6 +523,21 @@ class StudentExamVisibilityFilteringTest(TestCase):
             access_code="123456",
         )
         self.code_assigned_exam.allowed_users.add(self.student)
+        ExamQuestion.objects.create(
+            exam=self.code_assigned_exam,
+            text="Code-protected question",
+            order=1,
+            points=1,
+        )
+
+        self.code_assigned_no_questions_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Code Assigned No Questions Exam",
+            is_active=True,
+            is_public=False,
+            access_code="654321",
+        )
+        self.code_assigned_no_questions_exam.allowed_users.add(self.student)
 
         self.code_unassigned_exam = Exam.objects.create(
             author=self.teacher,
@@ -607,6 +628,15 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.url, reverse("exams:student_exam_list"))
         self.assertFalse(self.unassigned_private_exam.attempts.filter(user=self.student).exists())
 
+    def test_unassigned_private_exam_redirects_back_to_profile_assigned_section_when_requested(self):
+        response = self.client.get(
+            reverse("exams:start_exam", args=[self.unassigned_private_exam.slug]),
+            {"from_section": "assigned-exams", "assigned_type": "exams"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=exams")
+        self.assertFalse(self.unassigned_private_exam.attempts.filter(user=self.student).exists())
+
     def test_assigned_exam_with_code_requires_code_before_start(self):
         response = self.client.get(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
         self.assertEqual(response.status_code, 302)
@@ -620,6 +650,35 @@ class StudentExamVisibilityFilteringTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.code_assigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_assigned_exam_without_questions_cannot_be_started(self):
+        response = self.client.get(
+            reverse("exams:start_exam", args=[self.assigned_exam.slug]),
+            {"from_section": "assigned-exams", "assigned_type": "exams"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=exams")
+        self.assertFalse(self.assigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_assigned_code_exam_without_questions_cannot_be_started(self):
+        response = self.client.post(
+            reverse("exams:exam_code_check"),
+            {"exam_slug": self.code_assigned_no_questions_exam.slug, "access_code": "654321"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:student_exam_list"))
+        self.assertFalse(self.code_assigned_no_questions_exam.attempts.filter(user=self.student).exists())
+
+    def test_take_exam_redirects_when_attempt_has_no_questions(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.assigned_exam,
+            status="in_progress",
+        )
+
+        response = self.client.get(reverse("exams:take_exam", args=[self.assigned_exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("exams:student_exam_list"))
 
     def test_exam_code_check_rejects_post_without_csrf_token(self):
         csrf_client = Client(enforce_csrf_checks=True)
@@ -652,6 +711,20 @@ class StudentExamVisibilityFilteringTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:student_exam_list"))
+        self.assertFalse(self.code_unassigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_unassigned_exam_with_code_redirects_back_to_profile_assigned_section_when_requested(self):
+        response = self.client.post(
+            reverse("exams:exam_code_check"),
+            {
+                "exam_slug": self.code_unassigned_exam.slug,
+                "access_code": "123456",
+                "from_section": "assigned-exams",
+                "assigned_type": "exams",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=exams")
         self.assertFalse(self.code_unassigned_exam.attempts.filter(user=self.student).exists())
 
     def test_other_tenant_exam_cannot_be_started(self):

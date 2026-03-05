@@ -318,16 +318,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function initCreateExamSearchableSelect(form, config) {
         if (!form || !config) {
-            return;
+            return null;
         }
 
         var hiddenSelect = form.querySelector('select[name="' + config.selectName + '"]');
         var listContainer = form.querySelector(config.listSelector);
         var searchInput = form.querySelector(config.searchSelector);
         var counter = form.querySelector(config.counterSelector);
+        var optionMap = Object.create(null);
+        var checkboxMap = Object.create(null);
+        var selectionChangeHandlers = [];
+        var itemToggleHandlers = [];
 
         if (!hiddenSelect || !listContainer) {
-            return;
+            return null;
         }
 
         function updateCounter() {
@@ -336,9 +340,53 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        function getSelectedValues() {
+            return Array.from(hiddenSelect.selectedOptions || []).map(function (option) {
+                return String(option.value);
+            });
+        }
+
+        function notifySelectionChange(meta) {
+            selectionChangeHandlers.forEach(function (handler) {
+                handler(meta || {});
+            });
+        }
+
+        function notifyItemToggle(meta) {
+            itemToggleHandlers.forEach(function (handler) {
+                handler(meta || {});
+            });
+        }
+
+        function setValueSelected(value, isSelected, source) {
+            var normalizedValue = String(value);
+            var option = optionMap[normalizedValue];
+            if (!option || option.selected === isSelected) {
+                return false;
+            }
+
+            option.selected = isSelected;
+            var checkbox = checkboxMap[normalizedValue];
+            if (checkbox) {
+                checkbox.checked = isSelected;
+            }
+
+            updateCounter();
+            var meta = {
+                value: normalizedValue,
+                isSelected: isSelected,
+                source: source || "programmatic"
+            };
+            notifyItemToggle(meta);
+            notifySelectionChange(meta);
+            return true;
+        }
+
         function renderList() {
             var options = Array.from(hiddenSelect.options || []);
             listContainer.innerHTML = "";
+            checkboxMap = Object.create(null);
+            optionMap = Object.create(null);
 
             if (!options.length) {
                 listContainer.innerHTML = '<div class="create-exam-list-empty">Məlumat tapılmadı.</div>';
@@ -347,6 +395,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             options.forEach(function (option) {
+                optionMap[String(option.value)] = option;
+
                 var row = document.createElement("div");
                 row.className = "create-exam-list-item";
                 row.setAttribute("data-search", (option.textContent || "").toLowerCase());
@@ -366,9 +416,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 if (checkbox) {
+                    checkboxMap[String(option.value)] = checkbox;
                     checkbox.addEventListener("change", function () {
-                        option.selected = checkbox.checked;
-                        updateCounter();
+                        setValueSelected(option.value, checkbox.checked, "user");
                     });
                 }
 
@@ -379,9 +429,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (event.target === checkbox || event.target === label) {
                         return;
                     }
-                    checkbox.checked = !checkbox.checked;
-                    option.selected = checkbox.checked;
-                    updateCounter();
+                    var nextChecked = !checkbox.checked;
+                    checkbox.checked = nextChecked;
+                    setValueSelected(option.value, nextChecked, "user");
                 });
 
                 listContainer.appendChild(row);
@@ -409,6 +459,117 @@ document.addEventListener("DOMContentLoaded", function () {
         if (searchInput && searchInput.value) {
             filterList(searchInput.value);
         }
+
+        return {
+            getSelectedValues: getSelectedValues,
+            setValueSelected: setValueSelected,
+            onSelectionChange: function (handler) {
+                if (typeof handler === "function") {
+                    selectionChangeHandlers.push(handler);
+                }
+            },
+            onItemToggle: function (handler) {
+                if (typeof handler === "function") {
+                    itemToggleHandlers.push(handler);
+                }
+            }
+        };
+    }
+
+    function parseCreateExamGroupStudentMap(form) {
+        if (!form) {
+            return {};
+        }
+
+        var mapScript = form.querySelector("#createExamGroupStudentMap");
+        if (!mapScript || !mapScript.textContent) {
+            return {};
+        }
+
+        try {
+            var parsedMap = JSON.parse(mapScript.textContent);
+            if (!parsedMap || typeof parsedMap !== "object") {
+                return {};
+            }
+            return parsedMap;
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function initCreateExamGroupUserSelectionSync(form, groupSelector, userSelector) {
+        if (!form || !groupSelector || !userSelector) {
+            return;
+        }
+
+        var groupStudentMap = parseCreateExamGroupStudentMap(form);
+        if (!Object.keys(groupStudentMap).length) {
+            return;
+        }
+
+        var manuallyDeselectedUserIds = new Set();
+
+        function getAutoSelectedUserIds() {
+            var selectedGroupIds = groupSelector.getSelectedValues();
+            var userIds = new Set();
+
+            selectedGroupIds.forEach(function (groupId) {
+                var mappedUserIds = groupStudentMap[String(groupId)] || [];
+                mappedUserIds.forEach(function (userId) {
+                    userIds.add(String(userId));
+                });
+            });
+
+            return userIds;
+        }
+
+        function syncUsersFromSelectedGroups() {
+            var autoSelectedUserIds = getAutoSelectedUserIds();
+            var staleManualIds = [];
+
+            manuallyDeselectedUserIds.forEach(function (userId) {
+                if (!autoSelectedUserIds.has(userId)) {
+                    staleManualIds.push(userId);
+                }
+            });
+            staleManualIds.forEach(function (userId) {
+                manuallyDeselectedUserIds.delete(userId);
+            });
+
+            autoSelectedUserIds.forEach(function (userId) {
+                if (!manuallyDeselectedUserIds.has(userId)) {
+                    userSelector.setValueSelected(userId, true, "group-sync");
+                }
+            });
+        }
+
+        groupSelector.onSelectionChange(function () {
+            syncUsersFromSelectedGroups();
+        });
+
+        userSelector.onItemToggle(function (meta) {
+            if (!meta || meta.source !== "user") {
+                return;
+            }
+
+            var userId = String(meta.value || "");
+            if (!userId) {
+                return;
+            }
+
+            var autoSelectedUserIds = getAutoSelectedUserIds();
+            if (!autoSelectedUserIds.has(userId)) {
+                return;
+            }
+
+            if (meta.isSelected) {
+                manuallyDeselectedUserIds.delete(userId);
+            } else {
+                manuallyDeselectedUserIds.add(userId);
+            }
+        });
+
+        syncUsersFromSelectedGroups();
     }
 
     function initCreateExamAccessToggle(form) {
@@ -448,18 +609,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         initCreateExamAccessToggle(form);
-        initCreateExamSearchableSelect(form, {
+        var groupSelector = initCreateExamSearchableSelect(form, {
             selectName: "allowed_groups",
             listSelector: "#createExamGroupsList",
             searchSelector: "#createExamGroupsSearch",
             counterSelector: "#createExamGroupsCount"
         });
-        initCreateExamSearchableSelect(form, {
+        var userSelector = initCreateExamSearchableSelect(form, {
             selectName: "allowed_users",
             listSelector: "#createExamUsersList",
             searchSelector: "#createExamUsersSearch",
             counterSelector: "#createExamUsersCount"
         });
+        initCreateExamGroupUserSelectionSync(form, groupSelector, userSelector);
 
         form.addEventListener("submit", async function (event) {
             event.preventDefault();
@@ -653,6 +815,191 @@ document.addEventListener("DOMContentLoaded", function () {
         openCreateExamModal(trigger.getAttribute("data-create-exam-url"));
     });
 
+    var assignedExamInfoBackdrop = document.getElementById("assignedExamInfoBackdrop");
+    var assignedExamInfoCloseBtn = document.getElementById("assignedExamInfoClose");
+    var assignedExamInfoCancelBtn = document.getElementById("assignedExamInfoCancelBtn");
+    var assignedExamInfoStartBtn = document.getElementById("assignedExamInfoStartBtn");
+    var assignedExamInfoExamName = document.getElementById("assignedExamInfoExamName");
+    var assignedExamInfoType = document.getElementById("assignedExamInfoType");
+    var assignedExamInfoDuration = document.getElementById("assignedExamInfoDuration");
+    var assignedExamInfoStart = document.getElementById("assignedExamInfoStart");
+    var assignedExamInfoEnd = document.getElementById("assignedExamInfoEnd");
+    var assignedExamInfoNote = document.getElementById("assignedExamInfoNote");
+    var assignedExamCodeForm = document.getElementById("assignedExamCodeForm");
+    var assignedExamCodeSlug = document.getElementById("assignedExamCodeSlug");
+    var assignedExamAccessCodeInput = document.getElementById("assignedExamAccessCodeInput");
+    var assignedExamModalStartUrl = "";
+    var assignedExamModalRequiresCode = false;
+
+    function openAssignedExamInfoModal(trigger) {
+        if (!assignedExamInfoBackdrop || !trigger) {
+            return;
+        }
+
+        assignedExamModalStartUrl = trigger.getAttribute("data-start-url") || "";
+        assignedExamModalRequiresCode = trigger.getAttribute("data-requires-code") === "1";
+
+        if (assignedExamInfoExamName) {
+            assignedExamInfoExamName.textContent = trigger.getAttribute("data-exam-title") || "";
+        }
+        if (assignedExamInfoType) {
+            assignedExamInfoType.textContent = trigger.getAttribute("data-exam-type") || "-";
+        }
+        if (assignedExamInfoDuration) {
+            assignedExamInfoDuration.textContent = trigger.getAttribute("data-exam-duration") || "-";
+        }
+        if (assignedExamInfoStart) {
+            assignedExamInfoStart.textContent = trigger.getAttribute("data-exam-start") || "-";
+        }
+        if (assignedExamInfoEnd) {
+            assignedExamInfoEnd.textContent = trigger.getAttribute("data-exam-end") || "-";
+        }
+        if (assignedExamInfoNote) {
+            var noteText = trigger.getAttribute("data-exam-note") || "";
+            assignedExamInfoNote.textContent = noteText || "Qeyd yoxdur.";
+        }
+
+        if (assignedExamCodeSlug) {
+            assignedExamCodeSlug.value = trigger.getAttribute("data-exam-slug") || "";
+        }
+        if (assignedExamCodeForm) {
+            assignedExamCodeForm.classList.toggle("is-hidden", !assignedExamModalRequiresCode);
+        }
+        if (assignedExamAccessCodeInput) {
+            assignedExamAccessCodeInput.value = "";
+        }
+        if (assignedExamInfoStartBtn) {
+            assignedExamInfoStartBtn.textContent = assignedExamModalRequiresCode
+                ? "Kodu təsdiqlə və başla"
+                : "İmtahana başla";
+        }
+
+        assignedExamInfoBackdrop.classList.add("is-open");
+        assignedExamInfoBackdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        if (assignedExamModalRequiresCode && assignedExamAccessCodeInput) {
+            window.setTimeout(function () {
+                assignedExamAccessCodeInput.focus();
+            }, 40);
+        }
+    }
+
+    function closeAssignedExamInfoModal() {
+        if (!assignedExamInfoBackdrop) {
+            return;
+        }
+        assignedExamInfoBackdrop.classList.remove("is-open");
+        assignedExamInfoBackdrop.setAttribute("aria-hidden", "true");
+        if (!createExamModal || !createExamModal.classList.contains("active")) {
+            document.body.style.overflow = "";
+        }
+    }
+
+    document.addEventListener("click", function (event) {
+        var trigger = event.target.closest(".js-open-assigned-exam-modal");
+        if (!trigger) {
+            return;
+        }
+        event.preventDefault();
+        openAssignedExamInfoModal(trigger);
+    });
+
+    if (assignedExamInfoBackdrop) {
+        assignedExamInfoBackdrop.addEventListener("click", function (event) {
+            if (event.target === assignedExamInfoBackdrop) {
+                closeAssignedExamInfoModal();
+            }
+        });
+    }
+    if (assignedExamInfoCloseBtn) {
+        assignedExamInfoCloseBtn.addEventListener("click", closeAssignedExamInfoModal);
+    }
+    if (assignedExamInfoCancelBtn) {
+        assignedExamInfoCancelBtn.addEventListener("click", closeAssignedExamInfoModal);
+    }
+    if (assignedExamAccessCodeInput) {
+        assignedExamAccessCodeInput.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+        });
+    }
+    if (assignedExamInfoStartBtn) {
+        assignedExamInfoStartBtn.addEventListener("click", function () {
+            if (assignedExamModalRequiresCode) {
+                if (!assignedExamCodeForm || !assignedExamAccessCodeInput) {
+                    return;
+                }
+                var codeValue = (assignedExamAccessCodeInput.value || "").trim();
+                if (!codeValue) {
+                    assignedExamAccessCodeInput.focus();
+                    return;
+                }
+                assignedExamCodeForm.submit();
+                return;
+            }
+
+            if (assignedExamModalStartUrl) {
+                window.location.href = assignedExamModalStartUrl;
+            }
+        });
+    }
+
+    function initDebouncedSearchForms() {
+        var forms = document.querySelectorAll("form.js-profile-debounce-search");
+        forms.forEach(function (form) {
+            if (form.getAttribute("data-debounce-ready") === "1") {
+                return;
+            }
+
+            var input = form.querySelector('input[type="search"]');
+            if (!input) {
+                return;
+            }
+
+            var rawDebounceMs = parseInt(form.getAttribute("data-debounce-ms"), 10);
+            var debounceMs = Number.isFinite(rawDebounceMs) && rawDebounceMs >= 0 ? rawDebounceMs : 1000;
+            var timerId = null;
+            var lastSubmittedValue = (input.value || "").trim();
+
+            function submitSearch() {
+                var currentValue = (input.value || "").trim();
+                if (currentValue === lastSubmittedValue) {
+                    return;
+                }
+                lastSubmittedValue = currentValue;
+
+                if (typeof form.requestSubmit === "function") {
+                    form.requestSubmit();
+                    return;
+                }
+                form.submit();
+            }
+
+            input.addEventListener("input", function () {
+                window.clearTimeout(timerId);
+                timerId = window.setTimeout(submitSearch, debounceMs);
+            });
+
+            input.addEventListener("keydown", function (event) {
+                if (event.key !== "Enter") {
+                    return;
+                }
+                event.preventDefault();
+                window.clearTimeout(timerId);
+                submitSearch();
+            });
+
+            form.addEventListener("submit", function () {
+                window.clearTimeout(timerId);
+                lastSubmittedValue = (input.value || "").trim();
+            });
+
+            form.setAttribute("data-debounce-ready", "1");
+        });
+    }
+
+    initDebouncedSearchForms();
+
     var resolvedSection = resolveSectionFromUrl();
     if (!setActiveSection(resolvedSection, false)) {
         setActiveSection(defaultSection, false);
@@ -668,6 +1015,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape" && createExamModal && createExamModal.classList.contains("active")) {
             closeCreateExamModal(true);
+            return;
+        }
+
+        if (event.key === "Escape" && assignedExamInfoBackdrop && assignedExamInfoBackdrop.classList.contains("is-open")) {
+            closeAssignedExamInfoModal();
             return;
         }
 

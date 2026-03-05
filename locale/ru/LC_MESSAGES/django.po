@@ -1692,6 +1692,11 @@ msgctxt "profile.assigned_courses"
 msgid "empty_description"
 msgstr "В настоящее время вам не назначен курс."
 
+#: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
+msgctxt "profile.assigned_courses"
+msgid "search_placeholder"
+msgstr "Поиск курса..."
+
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:9
 msgctxt "profile.assigned_tasks"
 msgid "title"
@@ -1704,13 +1709,18 @@ msgstr "Все они"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
 msgctxt "profile.assigned_tasks"
+msgid "tab_exams"
+msgstr "Экзамены"
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:21
+msgctxt "profile.assigned_tasks"
 msgid "tab_courses"
 msgstr "Курсы"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Задачи"
+msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1741,6 +1751,11 @@ msgstr "Задача не найдена"
 msgctxt "profile.assigned_tasks"
 msgid "empty_description"
 msgstr "В настоящее время у вас нет назначенных задач."
+
+#: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:42
+msgctxt "profile.assigned_tasks"
+msgid "search_placeholder"
+msgstr "Поиск задания..."
 
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:10
 msgctxt "profile.courses"
@@ -7382,7 +7397,7 @@ msgstr "Тип экзамена"
 #: apps/exams/forms.py:116
 msgctxt "exams.form.exam.label"
 msgid "is_active"
-msgstr "Сделать активным?"
+msgstr "Сделать экзамен активным (видимым для студентов)?"
 
 #: apps/exams/forms.py:117
 msgctxt "exams.form.exam.label"
@@ -7397,7 +7412,7 @@ msgstr "Дата и время окончания"
 #: apps/exams/forms.py:119
 msgctxt "exams.form.exam.label"
 msgid "is_public"
-msgstr "Открыт для всех?"
+msgstr "Сделать экзамен открытым для всех?"
 
 #: apps/exams/forms.py:120
 msgctxt "exams.form.exam.label"
@@ -9040,7 +9055,7 @@ msgstr "Первый"
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
 msgid "action_next"
-msgstr "Редактировать"
+msgstr "Далее"
 
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
@@ -9889,26 +9904,25 @@ msgstr "Loading"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
 msgid "enable_paint"
-msgstr "Операция"
+msgstr "Включить Paint-ответы для письменного экзамена"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:79
 msgctxt "exams.template.create_exam_modal_form"
 msgid "is_public"
-msgstr "Открыт для всех?"
+msgstr "Сделать этот экзамен открытым для всех?"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:85
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights"
-msgstr "Открытый"
+msgstr "Настройки доступа"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:86
 msgctxt "exams.template.create_exam_modal_form"
 msgid "access_rights_description"
 msgstr ""
-"EMSArena — это единая, масштабируемая и многофункциональная цифровая "
-"образовательная экосистема для университетов, школ, учебных центров и "
-"индивидуальных преподавателей. Мы цифровизируем учебный процесс и упрощаем "
-"управление."
+"Если экзамен открыт для всех, ограничения по группам и отдельным "
+"пользователям ниже не применяются. Для закрытого экзамена выберите группы "
+"и/или студентов."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:93
 msgctxt "exams.template.create_exam_modal_form"
@@ -10945,6 +10959,12 @@ msgstr "Не удалось начать экзамен."
 msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Вы не можете начать этот экзамен."
+
+#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/student/attempts.py:102
+msgctxt "exams.view.access.message"
+msgid "exam_has_no_questions"
+msgstr "К этому экзамену пока не назначены вопросы."
 
 #: apps/exams/views/student/lists.py:69 apps/exams/views/student/lists.py:160
 msgctxt "exams.view.student.list.label"

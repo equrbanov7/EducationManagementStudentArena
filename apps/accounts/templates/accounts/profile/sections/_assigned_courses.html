@@ -12,6 +12,18 @@
             </div>
         </div>
 
+        <form method="get" class="assigned-courses-search-form js-profile-debounce-search" data-debounce-ms="1000">
+            <input type="hidden" name="section" value="assigned-courses">
+            <div class="assigned-courses-search-input-wrap">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search"
+                       name="assigned_course_search"
+                       value="{{ assigned_courses_search_query }}"
+                       placeholder="{% trans 'search_placeholder' context 'profile.assigned_courses' %}"
+                       autocomplete="off">
+            </div>
+        </form>
+
         {% if assigned_courses %}
         {% trans "uncategorized" context "profile.assigned_courses" as assigned_uncategorized %}
         <div class="assigned-course-cards-grid">

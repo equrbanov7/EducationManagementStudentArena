@@ -48,7 +48,7 @@ from .models import ProfileRole, UserProfile
 User = get_user_model()
 signer = TimestampSigner()
 RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
-ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "exams", "assignments", "labs", "independent"}
 PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES
 PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
@@ -1315,13 +1315,15 @@ def _standard_item_type_meta(raw_type):
     return mapping.get(normalized, ("Tapşırıq", "fas fa-file"))
 
 
-def _collect_assigned_tasks(request, filter_type=None):
+def _collect_assigned_tasks(request, filter_type=None, search=None):
     """
-    Build a unified assigned task list across courses, assignments, labs, and projects.
+    Build a unified assigned task list across exams, assignments, labs, and projects.
     """
     user = request.user
     selected_filter = filter_type if filter_type is not None else request.GET.get("assigned_type")
     filter_type = _normalize_assigned_tasks_filter(selected_filter)
+    search_query = (search if search is not None else request.GET.get("assigned_search", "")).strip()
+    search_token = search_query.lower()
     now = timezone.now()
 
     assigned_courses_qs = _assigned_courses_queryset(request, user).select_related("owner").order_by("-created_at")
@@ -1340,7 +1342,15 @@ def _collect_assigned_tasks(request, filter_type=None):
         course_groups.setdefault(course_id, set()).add(normalized_group)
 
     items = []
-    counts = {"courses": 0, "assignments": 0, "labs": 0, "independent": 0}
+    counts = {"exams": 0, "courses": 0, "assignments": 0, "labs": 0, "independent": 0}
+
+    def matches_search(*values):
+        if not search_token:
+            return True
+        for value in values:
+            if search_token in (value or "").lower():
+                return True
+        return False
 
     def append_item(
         *,
@@ -1353,41 +1363,69 @@ def _collect_assigned_tasks(request, filter_type=None):
         deadline=None,
         state="open",
         description="",
+        extra=None,
     ):
         state_label, state_badge = _task_state_badge_data(state)
-        items.append(
-            {
-                "category": category,
-                "title": title,
-                "kind": kind,
-                "icon": icon,
-                "type_label": _standard_item_type_meta(category)[0],
-                "detail_url": detail_url,
-                "assigned_at": assigned_at,
-                "deadline": deadline,
-                "state_label": state_label,
-                "state_badge": state_badge,
-                "description": description,
-                "sort_at": assigned_at or deadline or now,
-            }
-        )
+        payload = {
+            "category": category,
+            "title": title,
+            "kind": kind,
+            "icon": icon,
+            "type_label": _standard_item_type_meta(category)[0],
+            "detail_url": detail_url,
+            "assigned_at": assigned_at,
+            "deadline": deadline,
+            "state_label": state_label,
+            "state_badge": state_badge,
+            "description": description,
+            "sort_at": assigned_at or deadline or now,
+        }
+        if extra:
+            payload.update(extra)
+        items.append(payload)
 
     counts["courses"] = assigned_courses_qs.count()
-    if filter_type in {"all", "courses"}:
-        for course in assigned_courses_qs:
+
+    assigned_exams_qs = _assigned_exams_queryset(request, user, active_only=True).order_by("-start_datetime", "-created_at")
+    counts["exams"] = assigned_exams_qs.count()
+    if filter_type in {"all", "exams"}:
+        for exam in assigned_exams_qs:
+            if not matches_search(
+                exam.title,
+                exam.description,
+                exam.course.title if exam.course else "",
+            ):
+                continue
+
+            if exam.start_datetime and now < exam.start_datetime:
+                state = "upcoming"
+            elif exam.end_datetime and now > exam.end_datetime:
+                state = "closed"
+            else:
+                state = "open"
+
             append_item(
-                category="courses",
-                title=course.title,
-                kind="Kurs",
-                icon=_standard_item_type_meta("courses")[1],
+                category="exams",
+                title=exam.title,
+                kind=f"İmtahan - {exam.get_exam_type_display()}",
+                icon=_standard_item_type_meta("exams")[1],
                 detail_url=_append_query_params(
-                    reverse("courses:course_dashboard", kwargs={"course_id": course.id}),
+                    reverse("exams:start_exam", kwargs={"slug": exam.slug}),
                     from_section="assigned-exams",
                     assigned_type=filter_type,
                 ),
-                assigned_at=course.created_at,
-                state="open" if course.status == "published" else "closed",
-                description=course.description,
+                assigned_at=exam.start_datetime or exam.created_at,
+                deadline=exam.end_datetime,
+                state=state,
+                description=exam.description,
+                extra={
+                    "exam_slug": exam.slug,
+                    "exam_type_display": exam.get_exam_type_display(),
+                    "exam_total_duration_minutes": exam.total_duration_minutes,
+                    "exam_start_at": exam.start_datetime,
+                    "exam_end_at": exam.end_datetime,
+                    "exam_requires_code": bool(exam.access_code),
+                },
             )
 
     assignments_qs = (
@@ -1403,6 +1441,9 @@ def _collect_assigned_tasks(request, filter_type=None):
     counts["assignments"] = assignments_qs.count()
     if filter_type in {"all", "assignments"}:
         for assignment in assignments_qs:
+            if not matches_search(assignment.title, assignment.description, assignment.course.title):
+                continue
+
             if assignment.start_date and assignment.start_date > now:
                 state = "upcoming"
             elif assignment.due_date and now > assignment.due_date and not assignment.allow_late:
@@ -1451,6 +1492,9 @@ def _collect_assigned_tasks(request, filter_type=None):
     counts["labs"] = len(assigned_labs)
     if filter_type in {"all", "labs"}:
         for lab in assigned_labs:
+            if not matches_search(lab.title, lab.description, lab.course.title):
+                continue
+
             if lab.start_datetime and now < lab.start_datetime:
                 state = "upcoming"
             elif lab.end_datetime and now > lab.end_datetime and not lab.allow_late_submission:
@@ -1487,6 +1531,9 @@ def _collect_assigned_tasks(request, filter_type=None):
     counts["independent"] = projects_qs.count()
     if filter_type in {"all", "independent"}:
         for project in projects_qs:
+            if not matches_search(project.title, project.description, project.course.title):
+                continue
+
             if project.start_date and project.start_date > now:
                 state = "upcoming"
             elif project.deadline and now > project.deadline:
@@ -1516,7 +1563,7 @@ def _collect_assigned_tasks(request, filter_type=None):
     for item in items:
         item.pop("sort_at", None)
 
-    counts["all"] = counts["courses"] + counts["assignments"] + counts["labs"] + counts["independent"]
+    counts["all"] = counts["exams"] + counts["assignments"] + counts["labs"] + counts["independent"]
     return items, counts, filter_type
 
 
@@ -2695,13 +2742,16 @@ def user_profile(request):
     assigned_task_items = []
     assigned_task_counts = {
         "all": 0,
+        "exams": 0,
         "courses": 0,
         "assignments": 0,
         "labs": 0,
         "independent": 0,
     }
     assigned_tasks_active_filter = "all"
+    assigned_tasks_search_query = ""
     assigned_courses = []
+    assigned_courses_search_query = ""
     my_result_items = []
     my_result_counts = {
         "all": 0,
@@ -2731,10 +2781,20 @@ def user_profile(request):
         assigned_task_items, assigned_task_counts, assigned_tasks_active_filter = _collect_assigned_tasks(
             request,
             filter_type=request.GET.get("assigned_type"),
+            search=request.GET.get("assigned_search"),
         )
         assigned_tasks_count = assigned_task_counts.get("all", 0)
-        assigned_courses_count = assigned_task_counts.get("courses", 0)
-        assigned_courses = list(enrolled_courses_qs[:20])
+        assigned_tasks_search_query = (request.GET.get("assigned_search", "") or "").strip()
+
+        assigned_courses_count = enrolled_courses_qs.count()
+        assigned_courses_search_query = (request.GET.get("assigned_course_search", "") or "").strip()
+        assigned_courses_qs = enrolled_courses_qs
+        if assigned_courses_search_query:
+            assigned_courses_qs = assigned_courses_qs.filter(
+                Q(title__icontains=assigned_courses_search_query)
+                | Q(description__icontains=assigned_courses_search_query)
+            )
+        assigned_courses = list(assigned_courses_qs[:20])
 
         my_result_items, my_result_counts, my_results_active_filter = _collect_my_results(
             request,
@@ -3366,7 +3426,9 @@ def user_profile(request):
         "assigned_task_items": assigned_task_items,
         "assigned_task_counts": assigned_task_counts,
         "assigned_tasks_active_filter": assigned_tasks_active_filter,
+        "assigned_tasks_search_query": assigned_tasks_search_query,
         "assigned_courses": assigned_courses,
+        "assigned_courses_search_query": assigned_courses_search_query,
         "my_results_count": my_results_count,
         "my_result_items": my_result_items,
         "my_result_counts": my_result_counts,

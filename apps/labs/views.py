@@ -26,7 +26,7 @@ from core.upload_security import randomize_uploaded_filename, validate_uploaded_
 
 from .models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
-ASSIGNED_TASK_FILTER_CHOICES = {"all", "courses", "assignments", "labs", "independent"}
+ASSIGNED_TASK_FILTER_CHOICES = {"all", "exams", "courses", "assignments", "labs", "independent"}
 REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 DEFAULT_LAB_ALLOWED_EXTENSIONS = {
     ".zip",
