@@ -2,18 +2,23 @@
 Role management views: manage roles, role assignment, permission editor.
 """
 
+from uuid import UUID
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.core.signing import BadSignature
+from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext_lazy
 
+from apps.notifications.models import StudentOrganizationRequestStatus
 from apps.organizations.models import Membership, Role
 
 from ._helpers import (
@@ -21,7 +26,9 @@ from ._helpers import (
     PROFILE_ROLE_NAMES,
     ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS,
     ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT,
+    _append_query_params,
     _assignable_profile_roles_for_user,
+    _close_other_pending_student_requests,
     _collect_actor_permissions,
     _decorate_manage_role_profiles,
     _ensure_profile_admin_membership,
@@ -29,7 +36,11 @@ from ._helpers import (
     _get_active_organization,
     _is_superadmin_user,
     _map_org_role_to_profile_role,
+    _normalized_org_name,
+    _pending_student_request_queryset,
     _permission_is_grantable,
+    _query_string,
+    _resolve_next_url,
     _role_capabilities,
     _sync_user_role_groups,
     signer,
@@ -39,6 +50,7 @@ from ..models import ProfileRole, UserProfile
 
 User = get_user_model()
 
+@login_required
 def manage_roles(request):
     """
     Multi-role assignment view for admin-level users.

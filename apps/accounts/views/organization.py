@@ -7,22 +7,31 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Membership
+from core.constants import OrganizationType
 
 from ._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
+    STUDENT_PENDING_INVITE_TITLE,
+    STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
     _build_student_org_management_section,
     _build_student_org_request_section,
     _close_other_pending_student_requests,
+    _csv_to_int_set,
+    _ensure_profile_admin_membership,
     _get_active_organization,
     _is_superadmin_user,
+    _map_org_role_to_profile_role,
+    _normalized_org_name,
     _pending_student_request_queryset,
     _resolve_next_url,
+    _resolve_membership_role,
     _role_capabilities,
     _set_student_org_request_status,
     _sync_profile_pending_request_snapshot,
@@ -33,6 +42,7 @@ from ..models import ProfileRole, UserProfile
 
 User = get_user_model()
 
+@login_required
 def student_organization_management(request):
     """Manage student membership add/remove operations for high-level organization roles."""
     from apps.organizations.models import Membership

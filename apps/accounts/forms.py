@@ -105,6 +105,9 @@ class RegisterForm(forms.ModelForm):
         queryset=Organization.objects.none(),
         required=False,
         empty_label=pgettext_lazy("accounts.form.register.choice", "organization_empty"),
+        error_messages={
+            "invalid_choice": "Düzgün seçim edin. Bu seçim mövcud seçimlərdən biri deyil.",
+        },
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
