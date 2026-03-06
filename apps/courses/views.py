@@ -266,11 +266,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             self.request,
             self.request.GET.get("return_to") or self.request.GET.get("next"),
         )
-        if not explicit_return_url:
-            explicit_return_url = _safe_same_origin_redirect_path(
-                self.request,
-                self.request.META.get("HTTP_REFERER"),
-            )
         if explicit_return_url == self.request.get_full_path():
             explicit_return_url = ""
 
@@ -1165,6 +1160,34 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
             return redirect(return_to)
 
         return redirect(f"{reverse('accounts:profile')}?section=my-courses")
+
+
+@login_required
+@require_POST
+def update_course_status(request, course_id):
+    _require_org_permission(request, "course.edit")
+    course = _get_owner_course_or_404(request, course_id)
+
+    requested_status = (request.POST.get("status") or "").strip().lower()
+    normalized_status = {"active": "published", "published": "published", "draft": "draft"}.get(requested_status)
+
+    if normalized_status is None:
+        messages.error(request, pgettext("courses.view.message", "invalid_course_status"))
+    else:
+        course.status = normalized_status
+        course.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            pgettext("courses.view.message", "course_status_updated").format(status=course.get_status_display()),
+        )
+
+    redirect_target = _safe_same_origin_redirect_path(
+        request,
+        request.POST.get("next") or request.GET.get("next"),
+    )
+    if redirect_target:
+        return redirect(redirect_target)
+    return redirect("courses:course_dashboard", course_id=course.id)
 
 
 # ════════════════════════════════════════════════════════════════════════════

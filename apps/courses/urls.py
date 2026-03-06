@@ -43,6 +43,11 @@ urlpatterns = [
         views.DeleteCourseView.as_view(),
         name="delete_course",
     ),
+    path(
+        "<int:course_id>/status/update/",
+        views.update_course_status,
+        name="update_course_status",
+    ),
     # ════════════════════════════════════════════════════════════════════════
     # Mövzular (Topics)
     # ════════════════════════════════════════════════════════════════════════

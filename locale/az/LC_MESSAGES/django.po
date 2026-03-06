@@ -1718,7 +1718,7 @@ msgstr "Kurslar"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Kurs işləri"
+msgstr "Sərbəst iş"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1728,7 +1728,7 @@ msgstr "Laboratoriyalar"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
-msgstr "Müstəqil"
+msgstr "Kurs işləri"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
 msgctxt "profile.assigned_tasks"
@@ -15256,4 +15256,27 @@ msgstr "Geri"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "İrəli"
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Kursun yayımı"
 
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "Bu kurs draft rejimindədir, tələbələr bu kursu görmür."
+
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "Bu kurs yayımdadır, tələbələr kursu görə bilir."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Kurs statusu yeniləndi: {status}."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "Seçilən kurs statusu düzgün deyil."

@@ -1719,7 +1719,7 @@ msgstr "Курсы"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Курсовые работы"
+msgstr "Свободная работа"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1729,7 +1729,7 @@ msgstr "Лаборатории"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
-msgstr "Независимый"
+msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
 msgctxt "profile.assigned_tasks"
@@ -15267,4 +15267,27 @@ msgstr "Назад"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Далее"
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Публикация курса"
 
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "Курс в режиме черновика, студенты не видят этот курс."
+
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "Курс опубликован и виден студентам."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Статус курса обновлен: {status}."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "Выбран некорректный статус курса."

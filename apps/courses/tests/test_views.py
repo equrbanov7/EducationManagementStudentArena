@@ -146,6 +146,44 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["profile_return_url"], return_to)
 
+    def test_course_dashboard_ignores_non_profile_referer_for_back_link(self):
+        self.client.force_login(self.student)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+            {"from_section": "assigned-courses"},
+            HTTP_REFERER="/labs/1/some-internal-page/",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["profile_return_url"],
+            f"{reverse('accounts:profile')}?section=assigned-courses",
+        )
+
+    def test_owner_can_update_course_status_from_dashboard(self):
+        self.client.force_login(self.owner)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        self.course_a.status = "draft"
+        self.course_a.save(update_fields=["status"])
+
+        next_url = f"{reverse('courses:course_dashboard', kwargs={'course_id': self.course_a.id})}?from_section=my-courses"
+        response = self.client.post(
+            reverse("courses:update_course_status", kwargs={"course_id": self.course_a.id}),
+            {"status": "published", "next": next_url},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+        self.course_a.refresh_from_db()
+        self.assertEqual(self.course_a.status, "published")
+
     def test_delete_course_redirects_to_new_profile_page(self):
         self.client.force_login(self.owner)
         session = self.client.session
