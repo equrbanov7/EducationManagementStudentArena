@@ -189,8 +189,19 @@
         const title = button.getAttribute("data-exam-title");
         
         slugInput.value = slug;
-        titleEl.textContent = I18N_STUDENT_EXAM_LIST.modalAccessCodeTitle; 
-        textEl.innerHTML = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescriptionWithTitle.replace("{title}", `<strong>"${title}"</strong>`);
+        titleEl.textContent = I18N_STUDENT_EXAM_LIST.modalAccessCodeTitle;
+
+        // Safely build the description text with escaped title
+        textEl.textContent = '';
+        const textParts = I18N_STUDENT_EXAM_LIST.modalAccessCodeDescriptionWithTitle.split("{title}");
+        textEl.appendChild(document.createTextNode(textParts[0]));
+        const strongEl = document.createElement('strong');
+        strongEl.textContent = `"${title}"`;
+        textEl.appendChild(strongEl);
+        if (textParts[1]) {
+            textEl.appendChild(document.createTextNode(textParts[1]));
+        }
+
         codeInput.value = "";
         
         // Modalı göstər

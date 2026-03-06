@@ -39,10 +39,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('modalTitle').textContent = `${t.modalTitleDetails} #${qId}`;
         document.getElementById('modalQuestionText').innerText = dataStore.getAttribute('data-q-text');
-        
+
         const ansText = dataStore.getAttribute('data-ans-text');
-        document.getElementById('modalAnswerText').innerHTML = ansText ? ansText : `<i class="text-danger">${t.noAnswer}</i>`;
-        
+        const modalAnswerEl = document.getElementById('modalAnswerText');
+        if (ansText) {
+            modalAnswerEl.textContent = ansText;
+        } else {
+            // Use DOM manipulation to safely add italic element
+            modalAnswerEl.innerHTML = '';
+            const italicEl = document.createElement('i');
+            italicEl.className = 'text-danger';
+            italicEl.textContent = t.noAnswer;
+            modalAnswerEl.appendChild(italicEl);
+        }
+
         document.getElementById('modalScoreInput').value = currentScore;
         document.getElementById('modalFeedbackInput').value = currentFeedback;
         document.getElementById('currentQuestionId').value = qId;

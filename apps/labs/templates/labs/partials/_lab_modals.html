@@ -343,7 +343,14 @@
         buttonSave: '{% trans "button_save" context "labs.js.lab_modals" %}',
         stateError: '{% trans "state_error" context "labs.js.lab_modals" %}'
     };
-    
+
+    // Helper function to escape HTML to prevent XSS
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
     function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
         var normalizedIds = (initialSelectedIds || []).map(function(id) {
             return String(id);
@@ -499,9 +506,10 @@
             for (var i = 0; i < groups.length; i++) {
                 var g = groups[i];
                 var checked = checkedGroups.indexOf(g.name) > -1 ? 'checked' : '';
+                var escapedName = escapeHtml(g.name);
                 html += '<div class="lab-chk-row">' +
-                    '<input type="checkbox" id="' + mode + 'LabG_' + g.name + '" name="group_names[]" value="' + g.name + '" data-group="' + g.name + '" ' + checked + '>' +
-                    '<label for="' + mode + 'LabG_' + g.name + '">' + g.name + '</label>' +
+                    '<input type="checkbox" id="' + escapeHtml(mode) + 'LabG_' + escapedName + '" name="group_names[]" value="' + escapedName + '" data-group="' + escapedName + '" ' + checked + '>' +
+                    '<label for="' + escapeHtml(mode) + 'LabG_' + escapedName + '">' + escapedName + '</label>' +
                     '</div>';
             }
             container.innerHTML = html;
@@ -555,10 +563,12 @@
                 var s = students[i];
                 var studentId = String(s.id);
                 var isChecked = state.selectedStudentIds.has(studentId) ? 'checked' : '';
+                var escapedName = escapeHtml(s.name);
+                var escapedGroupName = escapeHtml(s.group_name || '');
                 html += '<div class="lab-chk-row">' +
-                    '<input type="checkbox" id="' + mode + 'LabS' + s.id + '" name="student_ids[]" value="' + s.id + '" ' + isChecked + '>' +
-                    '<label for="' + mode + 'LabS' + s.id + '">' + s.name + '</label>' +
-                    '<span class="badge bg-secondary">' + (s.group_name || '') + '</span>' +
+                    '<input type="checkbox" id="' + escapeHtml(mode) + 'LabS' + studentId + '" name="student_ids[]" value="' + studentId + '" ' + isChecked + '>' +
+                    '<label for="' + escapeHtml(mode) + 'LabS' + studentId + '">' + escapedName + '</label>' +
+                    '<span class="badge bg-secondary">' + escapedGroupName + '</span>' +
                     '</div>';
             }
             container.innerHTML = html;

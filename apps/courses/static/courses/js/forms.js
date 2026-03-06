@@ -15,6 +15,17 @@ const PLEASE_WAIT = COURSES_I18N.pleaseWait || "Please wait...";
 const RETRY_ERROR = COURSES_I18N.retryError || "An error occurred. Please try again.";
 
 /**
+ * Escape HTML to prevent XSS
+ * @param {string} str - String to escape
+ * @returns {string} - Escaped string
+ */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+/**
  * Form error-larını göstər
  * 
  * @param {string} containerId - Error container ID
@@ -30,10 +41,10 @@ function showFormErrors(containerId, errors) {
         const messages = errors[field];
         if (Array.isArray(messages)) {
             messages.forEach(msg => {
-                errorHtml += `<li>${msg}</li>`;
+                errorHtml += `<li>${escapeHtml(msg)}</li>`;
             });
         } else {
-            errorHtml += `<li>${messages}</li>`;
+            errorHtml += `<li>${escapeHtml(messages)}</li>`;
         }
     });
     
