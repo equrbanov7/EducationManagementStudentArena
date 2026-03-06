@@ -39,13 +39,79 @@
                     </div>
                     
                     <div class="mb-3">
-                        {% if course.status == 'published' %}
-                            <span class="badge bg-success"><i class="fas fa-globe"></i> {% trans "status_published" context "courses.dashboard" %}</span>
-                        {% elif course.status == 'draft' %}
-                            <span class="badge bg-warning"><i class="fas fa-edit"></i> {% trans "status_draft" context "courses.dashboard" %}</span>
-                        {% else %}
-                            <span class="badge bg-secondary"><i class="fas fa-archive"></i> {% trans "status_archived" context "courses.dashboard" %}</span>
-                        {% endif %}
+                        <div class="accordion course-status-accordion" id="courseVisibilityAccordion">
+                            <div class="accordion-item course-status-item">
+                                <h2 class="accordion-header" id="courseVisibilityHeading">
+                                    <button
+                                        class="accordion-button course-status-toggle {% if course.status == 'published' %}collapsed{% endif %}"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#courseVisibilityCollapse"
+                                        aria-expanded="{% if course.status == 'published' %}false{% else %}true{% endif %}"
+                                        aria-controls="courseVisibilityCollapse"
+                                    >
+                                        <span class="course-status-heading">
+                                            <i class="fas fa-broadcast-tower"></i>
+                                            {% trans "label_course_visibility" context "courses.dashboard" %}
+                                        </span>
+                                        <span class="course-status-current course-status-current--{{ course.status }}">
+                                            {% if course.status == 'published' %}
+                                                {% trans "status_published" context "courses.dashboard" %}
+                                            {% elif course.status == 'draft' %}
+                                                {% trans "status_draft" context "courses.dashboard" %}
+                                            {% else %}
+                                                {% trans "status_archived" context "courses.dashboard" %}
+                                            {% endif %}
+                                        </span>
+                                    </button>
+                                </h2>
+                                <div
+                                    id="courseVisibilityCollapse"
+                                    class="accordion-collapse collapse {% if course.status != 'published' %}show{% endif %}"
+                                    aria-labelledby="courseVisibilityHeading"
+                                    data-bs-parent="#courseVisibilityAccordion"
+                                >
+                                    <div class="accordion-body course-status-body">
+                                        {% if is_owner %}
+                                            <form method="post" action="{% url 'courses:update_course_status' course.id %}" class="course-status-switch-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                <div class="course-status-switch" role="group" aria-label="{% trans 'label_course_visibility' context 'courses.dashboard' %}">
+                                                    <button
+                                                        type="submit"
+                                                        name="status"
+                                                        value="draft"
+                                                        class="course-status-option course-status-option--draft {% if course.status == 'draft' %}is-active{% endif %}"
+                                                    >
+                                                        <i class="fas fa-eye-slash"></i> {% trans "status_draft" context "courses.dashboard" %}
+                                                    </button>
+                                                    <button
+                                                        type="submit"
+                                                        name="status"
+                                                        value="published"
+                                                        class="course-status-option course-status-option--published {% if course.status == 'published' %}is-active{% endif %}"
+                                                    >
+                                                        <i class="fas fa-globe"></i> {% trans "status_published" context "courses.dashboard" %}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        {% endif %}
+
+                                        {% if course.status == 'draft' %}
+                                            <div class="course-status-warning">
+                                                <i class="fas fa-triangle-exclamation"></i>
+                                                {% trans "message_draft_hidden_students" context "courses.dashboard" %}
+                                            </div>
+                                        {% elif course.status == 'published' %}
+                                            <div class="course-status-note">
+                                                <i class="fas fa-circle-check"></i>
+                                                {% trans "message_published_visible_students" context "courses.dashboard" %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="row text-center border-top pt-3">

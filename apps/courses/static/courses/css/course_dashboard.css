@@ -85,6 +85,128 @@
     background-color: #ffffff;
 }
 
+.course-status-item {
+    border-radius: 12px;
+    overflow: hidden;
+    border-color: #dbe6ff;
+}
+
+.course-status-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: linear-gradient(135deg, #f3f8ff 0%, #eef8f3 100%);
+    padding: 0.85rem 0.95rem;
+}
+
+.course-status-toggle:not(.collapsed) {
+    background: linear-gradient(135deg, #e8f1ff 0%, #e7f8ee 100%);
+}
+
+.course-status-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #1f2937;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.course-status-current {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.course-status-current--published {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.course-status-current--draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.course-status-current--archived {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.course-status-body {
+    padding: 0.85rem 0.95rem;
+}
+
+.course-status-switch-form {
+    margin-bottom: 0.7rem;
+}
+
+.course-status-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.course-status-option {
+    border: 1px solid #dbe6ff;
+    background: #fff;
+    color: #334155;
+    border-radius: 10px;
+    padding: 0.55rem 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.course-status-option:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+.course-status-option--draft.is-active {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+}
+
+.course-status-option--published.is-active {
+    background: #ecfdf5;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.course-status-warning,
+.course-status-note {
+    border-radius: 10px;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.35;
+}
+
+.course-status-warning {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.course-status-note {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
 /* ════════════════════════════════════════════════════════════════════════════
    BADGE STYLING
    ════════════════════════════════════════════════════════════════════════════ */
@@ -307,6 +429,10 @@
     .btn {
         padding: 0.5rem 0.75rem;
         font-size: 0.875rem;
+    }
+
+    .course-status-switch {
+        grid-template-columns: 1fr;
     }
 }
 

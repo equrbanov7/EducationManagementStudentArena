@@ -1713,7 +1713,7 @@ msgstr "Tab courses"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Coursework"
+msgstr "Free work"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1723,7 +1723,7 @@ msgstr "Tab labs"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
-msgstr "Tab independent"
+msgstr "Coursework"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
 msgctxt "profile.assigned_tasks"
@@ -15233,4 +15233,27 @@ msgstr "Previous"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Next"
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Course visibility"
 
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "This course is in draft mode and is not visible to students."
+
+#: apps/courses/templates/courses/course_dashboard.html
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "This course is published and visible to students."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Course status updated: {status}."
+
+#: apps/courses/views.py
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "Selected course status is invalid."
