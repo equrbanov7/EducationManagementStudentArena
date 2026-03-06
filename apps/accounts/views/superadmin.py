@@ -2,9 +2,12 @@
 Superadmin views for organization oversight.
 """
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 from apps.organizations.models import Organization
 
@@ -20,6 +23,54 @@ def superadmin_organizations(request):
         from django.http import HttpResponseForbidden
 
         return HttpResponseForbidden("Bu bölməyə yalnız superadminlər daxil ola bilər.")
+
+    if request.method == "POST":
+        organization = get_object_or_404(Organization, id=request.POST.get("organization_id"))
+        action = request.POST.get("action")
+        reason = (request.POST.get("reason") or "").strip()
+
+        if action == "suspend":
+            organization.status = "suspended"
+            organization.is_active = False
+            organization.suspended_at = timezone.now()
+            organization.suspension_reason = reason
+            organization.save(
+                update_fields=[
+                    "status",
+                    "is_active",
+                    "suspended_at",
+                    "suspension_reason",
+                    "updated_at",
+                ]
+            )
+            messages.success(
+                request,
+                pgettext_lazy("accounts.superadmin_orgs.message", "organization_suspended")
+                % {"organization_name": organization.name},
+            )
+        elif action == "unsuspend":
+            organization.status = "active"
+            organization.is_active = True
+            organization.suspended_at = None
+            organization.suspension_reason = ""
+            organization.save(
+                update_fields=[
+                    "status",
+                    "is_active",
+                    "suspended_at",
+                    "suspension_reason",
+                    "updated_at",
+                ]
+            )
+            messages.success(
+                request,
+                pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
+                % {"organization_name": organization.name},
+            )
+        else:
+            messages.error(request, pgettext_lazy("accounts.superadmin_orgs.message", "unknown_action"))
+
+        return redirect("accounts:superadmin_organizations")
 
     search_query = request.GET.get("search", "").strip()
     org_type_filter = request.GET.get("org_type", "").strip().lower()

@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Assignment, Submission
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAttempt
 from apps.labs.models import Lab, LabAnswer, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
@@ -33,6 +33,7 @@ from ._helpers import (
     _is_result_visible_to_student,
     _is_review_window_closed,
     _is_review_window_open,
+    _normalize_assigned_tasks_filter,
     _normalize_pending_answers_filter,
     _normalize_results_filter,
     _parse_decimal_score,
@@ -1195,5 +1196,4 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
 
     items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
     return items, search_query, normalized_type, selected_group, available_groups
-
 
