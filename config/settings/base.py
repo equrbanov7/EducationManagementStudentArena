@@ -4,13 +4,9 @@ Common settings shared across all environments.
 """
 
 import os
-import ssl
 from pathlib import Path
 
 from django.contrib.messages import constants as messages
-
-if hasattr(ssl, "_create_unverified_context"):
-    ssl._create_default_https_context = ssl._create_unverified_context
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent

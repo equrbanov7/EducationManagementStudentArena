@@ -568,8 +568,17 @@ def live_join_enter(request, pin):
     wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
-    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax")
-    resp.set_cookie(PLAYER_COOKIE_NAME, token, max_age=60 * 60 * 6, samesite="Lax", httponly=True)
+    # Set cookies with appropriate security flags
+    secure_cookie = getattr(settings, "SESSION_COOKIE_SECURE", False)
+    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax", secure=secure_cookie)
+    resp.set_cookie(
+        PLAYER_COOKIE_NAME,
+        token,
+        max_age=60 * 60 * 6,
+        samesite="Lax",
+        httponly=True,
+        secure=secure_cookie,
+    )
 
     return resp
 

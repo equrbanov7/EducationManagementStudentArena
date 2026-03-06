@@ -5,6 +5,7 @@ Views for the organizations app.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from .models import Organization
@@ -59,8 +60,14 @@ def switch_organization(request, slug):
         pgettext("organizations.views.message", "switched_to_org").format(organization=organization.name),
     )
 
-    # Redirect to next or home
+    # Redirect to next or home (with validation to prevent open redirect)
     next_url = request.GET.get("next", "/")
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        next_url = "/"
     return redirect(next_url)
 
 
