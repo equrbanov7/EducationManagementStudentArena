@@ -1124,6 +1124,10 @@ def api_get_groups(request, course_id):
 
     course = _get_tenant_course_or_404(request, course_id)
 
+    # Authorization check: Only course owner can access roster data
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
     groups = (
         CourseMembership.objects.filter(course=course, role="student")
         .exclude(group_name="")
@@ -1140,6 +1144,11 @@ def api_get_students(request, course_id):
     """Kurs tələbələrini qaytarır"""
 
     course = _get_tenant_course_or_404(request, course_id)
+
+    # Authorization check: Only course owner can access roster data
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
     groups = request.GET.get("groups", "").split(",")
     groups = [g.strip() for g in groups if g.strip()]
 

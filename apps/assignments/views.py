@@ -735,6 +735,10 @@ def search_students(request):
 
     course = _get_tenant_course_or_404(request, course_id)
 
+    # Authorization check: Only course owner can access roster data
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
     # Kursda olan tələbələri axtar
     student_memberships = (
         course.memberships.filter(role="student")
@@ -776,6 +780,10 @@ def search_groups(request):
 
     course = _get_tenant_course_or_404(request, course_id)
 
+    # Authorization check: Only course owner can access roster data
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
     # Unique qrup adlarını tap
     group_names = (
         CourseMembership.objects.filter(course=course, group_name__icontains=query)
@@ -806,6 +814,11 @@ def students_by_groups(request):
         return JsonResponse({"students": []})
 
     course = _get_tenant_course_or_404(request, course_id)
+
+    # Authorization check: Only course owner can access roster data
+    if not request.user.is_teacher_or_above or course.owner != request.user:
+        return JsonResponse({"error": "Permission denied"}, status=403)
+
     group_names = [g.strip() for g in groups_param.split(",") if g.strip()]
 
     if not group_names:
