@@ -13,9 +13,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
-"%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
 #: apps/accounts/forms.py:22
 msgctxt "accounts.form.register.label"
@@ -737,7 +735,8 @@ msgstr "Ищу учителя..."
 msgctxt "profile.groups"
 msgid "help_assigned_teachers"
 msgstr ""
-"Дополнительные преподаватели, которые могут видеть эту группу и управлять ею."
+"Дополнительные преподаватели, которые могут видеть эту группу и управлять "
+"ею."
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:5
 msgctxt "profile.groups"
@@ -2561,7 +2560,8 @@ msgstr "Выберите тип аккаунта"
 #: apps/accounts/templates/accounts/register.html:79
 msgctxt "accounts.register"
 msgid "individual_org_required_help"
-msgstr "Для индивидуального аккаунта выбор готовой организации больше не нужен."
+msgstr ""
+"Для индивидуального аккаунта выбор готовой организации больше не нужен."
 
 #: apps/accounts/templates/accounts/register.html:86
 msgctxt "accounts.register"
@@ -3345,12 +3345,15 @@ msgstr "Неизвестная транзакция."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Регистрация завершена, заявка в организацию сохранена. Подтвердите код из email, чтобы продолжить."
+msgstr ""
+"Регистрация завершена, заявка в организацию сохранена. Подтвердите код из "
+"email, чтобы продолжить."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
+msgstr ""
+"Регистрация завершена. Подтвердите код из email, чтобы активировать аккаунт."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -4027,7 +4030,7 @@ msgstr "Макс попробуй"
 #: apps/assignments/templates/assignments/assignment_section.html:73
 msgctxt "assignment.section"
 msgid "review_answers"
-msgstr "Посмотреть ответы"
+msgstr "Смотреть результаты"
 
 #: apps/assignments/templates/assignments/assignment_section.html:77
 msgctxt "assignment.section"
@@ -4768,12 +4771,12 @@ msgstr "Вакансий не найдено"
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
 msgid "page_title_suffix"
-msgstr "Ответы"
+msgstr "Результаты"
 
 #: apps/assignments/templates/assignments/review_submissions.html:13
 msgctxt "assignment.review_submissions"
 msgid "title_suffix"
-msgstr "Ответы предоставлены"
+msgstr "Отправленные ответы"
 
 #: apps/assignments/templates/assignments/review_submissions.html:16
 msgctxt "assignment.review_submissions"
@@ -4793,7 +4796,7 @@ msgstr "Студент"
 #: apps/assignments/templates/assignments/review_submissions.html:33
 msgctxt "assignment.review_submissions"
 msgid "table_submitted_at"
-msgstr "Дата подачи"
+msgstr "Дата отправки"
 
 #: apps/assignments/templates/assignments/review_submissions.html:34
 msgctxt "assignment.review_submissions"
@@ -4803,37 +4806,37 @@ msgstr "Статус"
 #: apps/assignments/templates/assignments/review_submissions.html:35
 msgctxt "assignment.review_submissions"
 msgid "table_grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 #: apps/assignments/templates/assignments/review_submissions.html:36
 msgctxt "assignment.review_submissions"
 msgid "table_actions"
-msgstr "Операции"
+msgstr "Действия"
 
 #: apps/assignments/templates/assignments/review_submissions.html:49
 msgctxt "assignment.review_submissions"
 msgid "status_pending"
-msgstr "Он ждет"
+msgstr "Ожидает"
 
 #: apps/assignments/templates/assignments/review_submissions.html:51
 msgctxt "assignment.review_submissions"
 msgid "status_graded"
-msgstr "Рейтинг"
+msgstr "Проверено"
 
 #: apps/assignments/templates/assignments/review_submissions.html:74
 msgctxt "assignment.review_submissions"
 msgid "view"
-msgstr "Смотреть"
+msgstr "Просмотр"
 
 #: apps/assignments/templates/assignments/review_submissions.html:85
 msgctxt "assignment.review_submissions"
 msgid "empty_submissions"
-msgstr "Ответ еще не отправлен"
+msgstr "Пока нет отправленных ответов."
 
 #: apps/assignments/templates/assignments/review_submissions.html:100
 msgctxt "assignment.review_submissions"
 msgid "modal_title"
-msgstr "Посмотреть ответ"
+msgstr "Просмотр ответа"
 
 #: apps/assignments/templates/assignments/review_submissions.html:108
 msgctxt "assignment.review_submissions"
@@ -4859,28 +4862,28 @@ msgstr "Скачать"
 #: apps/assignments/templates/assignments/review_submissions.html:136
 msgctxt "assignment.review_submissions"
 msgid "grade"
-msgstr "Цена"
+msgstr "Оценка"
 
 #: apps/assignments/templates/assignments/review_submissions.html:138
 msgctxt "assignment.review_submissions"
 msgid "grade_placeholder"
-msgstr "Введите цену"
+msgstr "Введите оценку"
 
 #: apps/assignments/templates/assignments/review_submissions.html:142
 msgctxt "assignment.review_submissions"
 msgid "feedback"
-msgstr "Мнение"
+msgstr "Комментарий"
 
 #: apps/assignments/templates/assignments/review_submissions.html:144
 msgctxt "assignment.review_submissions"
 msgid "feedback_placeholder"
-msgstr "Напишите отзыв ученику..."
+msgstr "Напишите комментарий студенту..."
 
 #: apps/assignments/templates/assignments/review_submissions.html:148
 #: apps/assignments/templates/assignments/review_submissions.html:166
 msgctxt "assignment.review_submissions"
 msgid "grade_submit"
-msgstr "Назовите цену"
+msgstr "Сохранить оценку"
 
 #: apps/assignments/templates/assignments/review_submissions.html:160
 msgctxt "assignment.review_submissions"
@@ -5174,8 +5177,8 @@ msgstr "Многоформатная оценка"
 msgctxt "blog.about_page"
 msgid "feature_4_text"
 msgstr ""
-"Проведение тестовых, письменных, практических и экзаменов в реальном времени "
-"(live). Возможность создавать обширный банк вопросов и пробные экзамены "
+"Проведение тестовых, письменных, практических и экзаменов в реальном времени"
+" (live). Возможность создавать обширный банк вопросов и пробные экзамены "
 "(mock exams)."
 
 #: apps/blog/templates/blog/about.html:72
@@ -5372,8 +5375,8 @@ msgstr "Недействительная ссылка"
 msgctxt "blog.password_reset_confirm_page"
 msgid "subheading_invalid"
 msgstr ""
-"Эта ссылка уже использована или истек срок ее действия. В целях безопасности "
-"ссылки одноразовые."
+"Эта ссылка уже использована или истек срок ее действия. В целях безопасности"
+" ссылки одноразовые."
 
 #: apps/blog/templates/blog/password_reset_confirm.html:62
 msgctxt "blog.password_reset_confirm_page"
@@ -5862,8 +5865,8 @@ msgstr "Здравствуйте"
 msgctxt "blog.email.welcome_email"
 msgid "body"
 msgstr ""
-"Мы рады видеть вас среди наших подписчиков! Теперь вы будете получать свежие "
-"статьи, новости и эксклюзивный контент о технологиях, программировании и "
+"Мы рады видеть вас среди наших подписчиков! Теперь вы будете получать свежие"
+" статьи, новости и эксклюзивный контент о технологиях, программировании и "
 "цифровом мире прямо на вашу почту."
 
 #: apps/blog/templates/email_templates/welcome_email.html:24
@@ -6012,8 +6015,8 @@ msgstr ""
 msgctxt "blog.subscribe.message"
 msgid "confirmation_email_sent"
 msgstr ""
-"На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте "
-"почту."
+"На адрес '{email}' отправлено письмо с подтверждением. Пожалуйста, проверьте"
+" почту."
 
 #: apps/blog/views.py:197
 msgctxt "blog.subscribe.message"
@@ -6506,8 +6509,8 @@ msgstr ""
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Важность статуса: вы можете легко работать над курсом, сохранив его в режиме "
-"«Черновик». Не забудьте «Опубликовать», когда будете готовы."
+"Важность статуса: вы можете легко работать над курсом, сохранив его в режиме"
+" «Черновик». Не забудьте «Опубликовать», когда будете готовы."
 
 #: apps/courses/templates/courses/edit_course.html:406
 msgctxt "courses.edit_page"
@@ -7041,8 +7044,7 @@ msgstr "Добавьте свою первую тему"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:351
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
-msgstr ""
-"Вы хотели удалить эту тему?\\n\\nВсе ресурсы по теме также будут удалены!"
+msgstr "Вы хотели удалить эту тему?\\n\\nВсе ресурсы по теме также будут удалены!"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:370
 msgctxt "courses.partial.topic_accordion"
@@ -8558,12 +8560,12 @@ msgstr "Отмеченный правильным вариант {option} отс
 #: apps/exams/templates/exams/components/_exam_modals.html:9
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
-msgstr "Редактировать курс"
+msgstr "Связать экзамен с курсом"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:15
 msgctxt "exams.partial.exam_modals"
 msgid "placeholder_search_by_exam_name"
-msgstr "Ищу учителя..."
+msgstr "Найти экзамен..."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:25
 msgctxt "exams.partial.exam_modals"
@@ -8573,32 +8575,32 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/components/_exam_modals.html:27
 msgctxt "exams.partial.exam_modals"
 msgid "label_linked_to_course"
-msgstr "Назначенные преподаватели"
+msgstr "привязан к курсу"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:35
 msgctxt "exams.partial.exam_modals"
 msgid "status_linked"
-msgstr "Закрыто"
+msgstr "Привязан"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:37
 msgctxt "exams.partial.exam_modals"
 msgid "action_link"
-msgstr "Редактировать"
+msgstr "Связать"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:45
 msgctxt "exams.partial.exam_modals"
 msgid "empty_no_exam_to_link"
-msgstr "Вакансий для проверки не найдено."
+msgstr "Подходящий экзамен для привязки не найден."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:47
 msgctxt "exams.partial.exam_modals"
 msgid "action_create_new_exam"
-msgstr "Создать курс"
+msgstr "Создать новый экзамен"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:54
 msgctxt "exams.partial.exam_modals"
 msgid "action_close"
-msgstr "открыть"
+msgstr "Закрыть"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:65
 msgctxt "exams.partial.exam_modals"
@@ -8608,7 +8610,7 @@ msgstr "Ошибка:"
 #: apps/exams/templates/exams/components/_exam_modals.html:66
 msgctxt "exams.partial.exam_modals"
 msgid "confirm_unlink_exam"
-msgstr "Вы уверены, что хотите удалить?"
+msgstr "Вы уверены, что хотите удалить связь между курсом и экзаменом?"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
@@ -9322,17 +9324,17 @@ msgstr "Видео будет удалено. Нажмите «Сохранит�
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:6
 msgctxt "exams.template.create_edit_exam"
 msgid "title_edit"
-msgstr "Редактировать тему"
+msgstr "Редактировать экзамен"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:8
 msgctxt "exams.template.create_edit_exam"
 msgid "title_create"
-msgstr "Создать группу"
+msgstr "Создать экзамен"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:22
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
-msgstr "Внештатная работа"
+msgstr "Редактирование экзамена"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:23
 #, python-format
@@ -9343,12 +9345,12 @@ msgstr "Обновите экзамен «%(exam_title)s»."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:25
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Создание нового экзамена"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:26
 msgctxt "exams.template.create_edit_exam"
 msgid "subtitle_create_exam"
-msgstr "Создать группу"
+msgstr "Создайте новый экзамен и настройте его параметры."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:54
 msgctxt "exams.template.create_edit_exam"
@@ -9368,12 +9370,12 @@ msgstr "Включите, чтобы ученики могли давать от
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:100
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits"
-msgstr "Преимущества и возможности платформы"
+msgstr "Настройки даты и времени"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:101
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits_help"
-msgstr "Преимущества и возможности платформы"
+msgstr "Укажите, когда экзамен начинается и когда заканчивается."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:109
 msgctxt "exams.template.create_edit_exam"
@@ -9383,17 +9385,17 @@ msgstr "Начало"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:116
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_1"
-msgstr "Start exam"
+msgstr "Если оставить пустым, студенты смогут начать в любое время."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:117
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_2"
-msgstr "Start exam"
+msgstr "До этой даты студенты не смогут начать экзамен."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:132
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_end"
-msgstr "Английский"
+msgstr "Крайний срок"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:139
 msgctxt "exams.template.create_edit_exam"
@@ -9408,12 +9410,12 @@ msgstr "После этой даты студенты не смогут нача
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:151
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings"
-msgstr "Студенты"
+msgstr "Настройки длительности и попыток"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:152
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings_help"
-msgstr "Преимущества и возможности платформы"
+msgstr "Настройте длительность экзамена, время на вопрос и лимит попыток."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:162
 msgctxt "exams.template.create_edit_exam"
@@ -9428,12 +9430,12 @@ msgstr "Пример: 60 (секунд)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:190
 msgctxt "exams.template.create_edit_exam"
 msgid "max_attempt_help"
-msgstr "Максимальное усилие"
+msgstr "Пример: 1, 2, 3..."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:199
 msgctxt "exams.template.create_edit_exam"
 msgid "section_access_rights"
-msgstr "Учитель"
+msgstr "Права доступа"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:200
 msgctxt "exams.template.create_edit_exam"
@@ -9496,7 +9498,7 @@ msgstr "Сохранить изменения"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:271
 msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
-msgstr "Создать курс"
+msgstr "Создать экзамен"
 
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
@@ -9744,7 +9746,7 @@ msgstr "Группа не выбрана."
 #: apps/exams/templates/exams/teacher/exam_section.html:7
 msgctxt "exams.partial.exam_section"
 msgid "section_exams"
-msgstr "Exams"
+msgstr "Экзамены"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:24
 #: apps/exams/templates/exams/teacher/exam_section.html:119
@@ -9755,7 +9757,7 @@ msgstr "Привязать существующий экзамен"
 #: apps/exams/templates/exams/teacher/exam_section.html:27
 msgctxt "exams.partial.exam_section"
 msgid "action_create_new_exam"
-msgstr "Создать курс"
+msgstr "Создать новый экзамен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:47
 #: apps/exams/templates/exams/teacher/exam_section.html:147
@@ -9767,7 +9769,7 @@ msgstr "Экзамен еще не начался. Начало: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:149
 msgctxt "exams.partial.exam_section"
 msgid "status_finished"
-msgstr "Status published"
+msgstr "Завершен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:51
 msgctxt "exams.partial.exam_section"
@@ -9802,12 +9804,12 @@ msgstr "%(attempts)s попыток"
 #: apps/exams/templates/exams/teacher/exam_section.html:97
 msgctxt "exams.partial.exam_section"
 msgid "action_view"
-msgstr "Посмотреть все"
+msgstr "Подробно"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "My Results"
+msgstr "Смотреть результаты"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -9817,12 +9819,12 @@ msgstr "Редактировать"
 #: apps/exams/templates/exams/teacher/exam_section.html:107
 msgctxt "exams.partial.exam_section"
 msgid "action_unlink"
-msgstr "Отменить это"
+msgstr "Удалить связь"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:116
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_in_course"
-msgstr "Empty active courses"
+msgstr "В этом курсе нет экзаменов."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:141
 msgctxt "exams.partial.exam_section"
@@ -9832,7 +9834,7 @@ msgstr "Закрыто"
 #: apps/exams/templates/exams/teacher/exam_section.html:151
 msgctxt "exams.partial.exam_section"
 msgid "status_open"
-msgstr "Pending"
+msgstr "Открыт"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:178
 #, python-format
@@ -9849,17 +9851,17 @@ msgstr "Попытки: %(attempt_count)s / %(max_attempts)s"
 #: apps/exams/templates/exams/teacher/exam_section.html:200
 msgctxt "exams.partial.exam_section"
 msgid "action_view_my_results"
-msgstr "Посмотреть все"
+msgstr "Мои результаты"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:205
 msgctxt "exams.partial.exam_section"
 msgid "action_restart_exam"
-msgstr "Start exam"
+msgstr "Начать заново"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:211
 msgctxt "exams.partial.exam_section"
 msgid "action_start_exam"
-msgstr "Start exam"
+msgstr "Начать экзамен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:216
 msgctxt "exams.partial.exam_section"
@@ -9869,37 +9871,37 @@ msgstr "Экзамен еще не начался. Начало: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:221
 msgctxt "exams.partial.exam_section"
 msgid "status_time_is_over"
-msgstr "Активный"
+msgstr "Время вышло"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:226
 msgctxt "exams.partial.exam_section"
 msgid "status_no_attempt_left"
-msgstr "Заполните форму, чтобы начать новую попытку"
+msgstr "Попытки закончились"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:237
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_assigned_to_student"
-msgstr "Студенты без групп"
+msgstr "Вам не назначен ни один экзамен."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:244
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam"
-msgstr "Empty upcoming exams"
+msgstr "Экзаменов нет."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:6
 msgctxt "exams.template.create_exam_modal"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Новый экзамен"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7
 msgctxt "exams.template.create_exam_modal"
 msgid "aria_close"
-msgstr "Закрой это"
+msgstr "Закрыть"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "loading_form"
-msgstr "Loading"
+msgstr "Загрузка формы..."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
@@ -9953,7 +9955,7 @@ msgstr "Username or email"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:128
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:129
 msgctxt "exams.template.create_exam_modal_form"
@@ -9963,7 +9965,7 @@ msgstr "Сохранить"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:129
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
-msgstr "Создать курс"
+msgstr "Создать экзамен"
 
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
@@ -10164,12 +10166,12 @@ msgstr "Попытки"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:61
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_start_live"
-msgstr "Сохранить в память"
+msgstr "Запустить Live-квиз"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:71
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_question"
-msgstr "Добавить студента"
+msgstr "Добавить один вопрос"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:79
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:85
@@ -10180,17 +10182,17 @@ msgstr "Банк вопросов / Блоки"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:90
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_results"
-msgstr "Посмотреть все"
+msgstr "Смотреть результаты"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:99
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_deactivate"
-msgstr "Удалить"
+msgstr "Деактивировать"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:103
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_activate"
-msgstr "Сохранить в память"
+msgstr "Активировать"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:109
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:150
@@ -10263,32 +10265,32 @@ msgstr "Empty upcoming exams"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
 msgctxt "exams.template.teacher_exam_results"
 msgid "title_results"
-msgstr "Посмотреть результат"
+msgstr "Результаты"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "Результаты экзамена"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_type"
-msgstr "Type"
+msgstr "Тип"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_status"
-msgstr "Status"
+msgstr "Статус"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_active_upper"
-msgstr "Активный"
+msgstr "АКТИВЕН"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_inactive"
-msgstr "Неактивный"
+msgstr "НЕАКТИВЕН"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
 msgctxt "exams.template.teacher_exam_results"
@@ -10308,7 +10310,7 @@ msgstr "Статус"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_correct"
-msgstr "Верно?"
+msgstr "Верно"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
 msgctxt "exams.template.teacher_exam_results"
@@ -10318,7 +10320,7 @@ msgstr "Неверно"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Результат (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -10328,53 +10330,53 @@ msgstr "Дата начала"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_finished_at"
-msgstr "Время завершения"
+msgstr "Дата завершения"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_duration_sec"
-msgstr "Пример: 30 (минут)"
+msgstr "Длительность (сек.)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_action"
-msgstr "Операция"
+msgstr "Действие"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_checked"
-msgstr "В архиве"
+msgstr "Проверено"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_view"
-msgstr "Посмотреть все"
+msgstr "Подробно"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_recheck"
-msgstr "Назад"
+msgstr "Проверить снова"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_locked"
-msgstr "Закрыто"
+msgstr "Только просмотр"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_check"
-msgstr "Назад"
+msgstr "Проверить"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
 msgctxt "exams.template.teacher_exam_results"
 msgid "empty_no_attempt"
-msgstr "No courses assigned yet."
+msgstr "Попытки не найдены."
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_back_to_exam"
-msgstr "Вернуться в профиль"
+msgstr "К экзамену"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -10782,12 +10784,12 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:30
 msgctxt "exams.template.test_question_bank"
 msgid "label_default_points"
-msgstr "Крайний срок"
+msgstr "Балл по умолчанию"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:36
 msgctxt "exams.template.test_question_bank"
 msgid "stat_total_questions"
-msgstr "Total students"
+msgstr "Всего вопросов"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:45
 msgctxt "exams.template.test_question_bank"
@@ -10887,7 +10889,36 @@ msgstr "Ответ: A,C"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:149
 msgctxt "exams.template.test_question_bank"
 msgid "placeholder_editor_sample"
-msgstr "Пример: Неделя 1: Введение"
+msgstr ""
+"Пример 1 (Стандартно — верный A):\n"
+"1. Чем в основном занимается Data Science?\n"
+"A) Анализом данных и поддержкой решений\n"
+"B) Ремонтом компьютеров\n"
+"C) Только созданием игр\n"
+"D) Прокладкой интернета\n"
+"\n"
+"Пример 2 (Отметьте верный вариант *):\n"
+"2. Где в основном используется Python?\n"
+"A) Ремонт автомобилей\n"
+"*B) Веб- и backend-разработка\n"
+"C) Вокал\n"
+"D) Сборка принтеров\n"
+"\n"
+"Пример 3 (Ответ в конце):\n"
+"3. Что такое HTML?\n"
+"A) Язык программирования\n"
+"B) Язык разметки\n"
+"C) Операционная система\n"
+"D) Антивирус\n"
+"Ответ: B\n"
+"\n"
+"Пример 4 (Несколько правильных ответов):\n"
+"4. Какие из них языки программирования?\n"
+"A) Python\n"
+"B) JavaScript\n"
+"C) Word\n"
+"D) Java\n"
+"Ответ: A,B,D"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:160
 msgctxt "exams.template.test_question_bank"
@@ -10902,12 +10933,12 @@ msgstr "Это будет проверено"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:165
 msgctxt "exams.template.test_question_bank"
 msgid "action_select_all"
-msgstr "Посмотреть все"
+msgstr "Выбрать все"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:168
 msgctxt "exams.template.test_question_bank"
 msgid "action_deselect_all"
-msgstr "Удалить"
+msgstr "Снять выбор"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:191
 msgctxt "exams.template.test_question_bank"
@@ -10917,7 +10948,7 @@ msgstr "Context"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:232
 msgctxt "exams.template.test_question_bank"
 msgid "action_save_selected"
-msgstr "Удалить"
+msgstr "Добавить выбранные"
 
 #: apps/exams/validators.py:32
 msgctxt "exams.validator.error"
@@ -10944,7 +10975,8 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "В ZIP обнаружен запрещенный файл: {filename}"
 
-#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22
+#: apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -10960,7 +10992,8 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Вы не можете начать этот экзамен."
 
-#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60
+#: apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -11232,7 +11265,8 @@ msgstr "Вы уже отправили эту лабораторную рабо�
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Попытка: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -13191,7 +13225,8 @@ msgstr "Количество вопросов должно быть больше
 #: apps/live_exam/views.py:604
 msgctxt "live_exam.view.message"
 msgid "question_count_exceeds_total"
-msgstr "В этом экзамене только {total_in_exam} вопросов. Нельзя выбрать {desired}."
+msgstr ""
+"В этом экзамене только {total_in_exam} вопросов. Нельзя выбрать {desired}."
 
 #: apps/live_exam/views.py:643
 msgctxt "live_exam.view.message"
@@ -13626,7 +13661,8 @@ msgstr "У вас нет разрешения: {permission}"
 #: apps/organizations/decorators.py:74
 msgctxt "organizations.decorators.error"
 msgid "insufficient_role_level"
-msgstr "Недостаточный уровень роли. Требуется: {required}, Ваш уровень: {current}"
+msgstr ""
+"Недостаточный уровень роли. Требуется: {required}, Ваш уровень: {current}"
 
 #: apps/organizations/decorators.py:102
 msgctxt "organizations.decorators.error"
@@ -13761,7 +13797,9 @@ msgstr "Членства"
 #: apps/organizations/models.py:387
 msgctxt "organizations.model.membership.error"
 msgid "scope_unit_must_match_org"
-msgstr "Подразделение области должно принадлежать той же организации, что и членство."
+msgstr ""
+"Подразделение области должно принадлежать той же организации, что и "
+"членство."
 
 #: apps/organizations/unit_types.py:11
 msgctxt "organizations.unit_type"
@@ -14081,7 +14119,7 @@ msgstr "Макс. попыток:"
 
 msgctxt "projects.section"
 msgid "view_submissions"
-msgstr "Смотреть ответы"
+msgstr "Смотреть результаты"
 
 msgctxt "projects.section"
 msgid "edit"
@@ -14501,11 +14539,11 @@ msgstr "Отправить первый проект"
 
 msgctxt "projects.review"
 msgid "page_title"
-msgstr "Проекты"
+msgstr "Результаты"
 
 msgctxt "projects.review"
 msgid "header_title"
-msgstr "Отправленные проекты"
+msgstr "Отправленные ответы"
 
 msgctxt "projects.review"
 msgid "course_label"
@@ -14541,7 +14579,7 @@ msgstr "Ожидает"
 
 msgctxt "projects.review"
 msgid "status_graded"
-msgstr "Оценено"
+msgstr "Проверено"
 
 msgctxt "projects.review"
 msgid "status_rejected"
@@ -14553,11 +14591,11 @@ msgstr "Просмотр"
 
 msgctxt "projects.review"
 msgid "empty_title"
-msgstr "Пока нет отправленных проектов"
+msgstr "Пока нет отправленных ответов."
 
 msgctxt "projects.review"
 msgid "modal_title"
-msgstr "Просмотр проекта"
+msgstr "Просмотр ответа"
 
 msgctxt "projects.review"
 msgid "student"
@@ -14565,11 +14603,11 @@ msgstr "Студент:"
 
 msgctxt "projects.review"
 msgid "explanation"
-msgstr "Пояснение к проекту:"
+msgstr "Содержание ответа:"
 
 msgctxt "projects.review"
 msgid "file"
-msgstr "Файл проекта:"
+msgstr "Файл:"
 
 msgctxt "projects.review"
 msgid "download"
@@ -14585,15 +14623,15 @@ msgstr "Комментарий:"
 
 msgctxt "projects.review"
 msgid "feedback_placeholder"
-msgstr "Напишите отзыв студенту..."
+msgstr "Напишите комментарий студенту..."
 
 msgctxt "projects.review"
 msgid "grade_button"
-msgstr "Поставить оценку"
+msgstr "Сохранить оценку"
 
 msgctxt "projects.review.js"
 msgid "no_content"
-msgstr "(Текста нет)"
+msgstr "(Нет текста)"
 
 msgctxt "projects.review.js"
 msgid "download"
@@ -14617,14 +14655,14 @@ msgstr "Ошибка сервера"
 
 msgctxt "projects.review.js"
 msgid "grade_button"
-msgstr "Поставить оценку"
-
+msgstr "Сохранить оценку"
 
 # Added for auth/signup localization updates
-
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
-msgstr "Для индивидуального аккаунта роль автоматически будет администратор организации."
+msgstr ""
+"Для индивидуального аккаунта роль автоматически будет администратор "
+"организации."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student"
@@ -14632,14 +14670,16 @@ msgstr "Для этого типа аккаунта роль автоматич�
 
 msgctxt "accounts.register"
 msgid "individual_owner_help"
-msgstr "Для индивидуального аккаунта личный workspace создается автоматически, и вы становитесь администратором."
-
+msgstr ""
+"Для индивидуального аккаунта личный workspace создается автоматически, и вы "
+"становитесь администратором."
 
 # Added for updated register searchable select and org-role copy
-
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
-msgstr "Для этого типа организации роль автоматически будет администратор организации."
+msgstr ""
+"Для этого типа организации роль автоматически будет администратор "
+"организации."
 
 msgctxt "accounts.register.js"
 msgid "no_results"
@@ -14675,4 +14715,556 @@ msgstr "Выбранная организация не соответствуе�
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
-msgstr "После подтверждения email вы будете добавлены в выбранную организацию как студент."
+msgstr ""
+"После подтверждения email вы будете добавлены в выбранную организацию как "
+"студент."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_search_placeholder"
+msgstr "Поиск по студенту или тексту ответа..."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_all"
+msgstr "Все статусы"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_submitted"
+msgstr "Отправлено"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_grading"
+msgstr "На проверке"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_returned"
+msgstr "Возвращено"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_from_date"
+msgstr "Дата начала"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_to_date"
+msgstr "Дата окончания"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_submit"
+msgstr "Применить"
+
+msgctxt "assignment.review_submissions"
+msgid "selected_count_label"
+msgstr "Выбрано"
+
+msgctxt "assignment.review_submissions"
+msgid "action_select_all"
+msgstr "Выбрать все"
+
+msgctxt "assignment.review_submissions"
+msgid "action_clear"
+msgstr "Сбросить выбор"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete"
+msgstr "Удалить"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_title"
+msgstr "Удалить ответы"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_body"
+msgstr "Вы уверены, что хотите удалить выбранные ответы?"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_note"
+msgstr "Это действие нельзя отменить."
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_submit"
+msgstr "Подтвердить удаление"
+
+msgctxt "assignment.review_submissions"
+msgid "delete_select_first"
+msgstr "Выберите хотя бы один ответ для удаления."
+
+msgctxt "assignment.message"
+msgid "select_submission_to_delete"
+msgstr "Выберите хотя бы один ответ для удаления."
+
+msgctxt "assignment.message"
+msgid "submission_not_found"
+msgstr "Выбранные ответы не найдены."
+
+msgctxt "assignment.message"
+msgid "submissions_deleted"
+msgstr "Удалено ответов: {count}."
+
+msgctxt "projects.review"
+msgid "filter_search_placeholder"
+msgstr "Поиск по студенту или тексту ответа..."
+
+msgctxt "projects.review"
+msgid "filter_status_all"
+msgstr "Все статусы"
+
+msgctxt "projects.review"
+msgid "filter_from_date"
+msgstr "Дата начала"
+
+msgctxt "projects.review"
+msgid "filter_to_date"
+msgstr "Дата окончания"
+
+msgctxt "projects.review"
+msgid "filter_submit"
+msgstr "Применить"
+
+msgctxt "projects.review"
+msgid "selected_count_label"
+msgstr "Выбрано"
+
+msgctxt "projects.review"
+msgid "action_select_all"
+msgstr "Выбрать все"
+
+msgctxt "projects.review"
+msgid "action_clear"
+msgstr "Сбросить выбор"
+
+msgctxt "projects.review"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "projects.review"
+msgid "action_delete"
+msgstr "Удалить"
+
+msgctxt "projects.review"
+msgid "confirm_delete_title"
+msgstr "Удалить ответы"
+
+msgctxt "projects.review"
+msgid "confirm_delete_body"
+msgstr "Вы уверены, что хотите удалить выбранные ответы?"
+
+msgctxt "projects.review"
+msgid "confirm_delete_note"
+msgstr "Это действие нельзя отменить."
+
+msgctxt "projects.review"
+msgid "confirm_delete_submit"
+msgstr "Подтвердить удаление"
+
+msgctxt "projects.review"
+msgid "delete_select_first"
+msgstr "Выберите хотя бы один ответ для удаления."
+
+msgctxt "projects.views.message"
+msgid "select_submission_to_delete"
+msgstr "Выберите хотя бы один ответ для удаления."
+
+msgctxt "projects.views.message"
+msgid "submission_not_found"
+msgstr "Выбранные ответы не найдены."
+
+msgctxt "projects.views.message"
+msgid "submissions_deleted"
+msgstr "Удалено ответов: {count}."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_back"
+msgstr "Назад"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_search_placeholder"
+msgstr "Поиск пользователя..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_all"
+msgstr "Все статусы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Черновик"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "В процессе"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Отправлено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Время истекло"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_all"
+msgstr "Проверка: все"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_yes"
+msgstr "Проверенные"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_no"
+msgstr "Непроверенные"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_from_date"
+msgstr "Дата начала"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_to_date"
+msgstr "Дата окончания"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_submit"
+msgstr "Применить"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "selected_count_label"
+msgstr "Выбрано"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Выбрать все"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear"
+msgstr "Сбросить выбор"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Удалить"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_title"
+msgstr "Удалить попытки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_body"
+msgstr "Вы уверены, что хотите удалить выбранные попытки?"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_note"
+msgstr "Ответы по удалённым попыткам тоже будут удалены."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_submit"
+msgstr "Подтвердить удаление"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "delete_select_first"
+msgstr "Выберите хотя бы одну попытку для удаления."
+
+msgctxt "exams.view.results.message"
+msgid "delete_permission_required"
+msgstr "У вас нет прав на удаление."
+
+msgctxt "exams.view.results.message"
+msgid "select_attempt_to_delete"
+msgstr "Выберите хотя бы одну попытку для удаления."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_found"
+msgstr "Выбранные попытки не найдены."
+
+msgctxt "exams.view.results.message"
+msgid "attempts_deleted"
+msgstr "Удалено попыток: {count}."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_bulk_add_blocks"
+msgstr "Массовое добавление вопросов / Блоки"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_questions_bank"
+msgstr "Банк вопросов"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "title_questions_bank"
+msgstr "Банк вопросов"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "subtitle_questions_bank"
+msgstr "Ищите, выбирайте, временно отключайте и управляйте всеми добавленными вопросами."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_back_exam_detail"
+msgstr "Назад к экзамену"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_add_question"
+msgstr "Добавить один вопрос"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_total_questions"
+msgstr "Всего вопросов"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_active_questions"
+msgstr "Активные вопросы"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_inactive_questions"
+msgstr "Неактивные вопросы"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "placeholder_search_questions"
+msgstr "Поиск по тексту вопроса, блоку или варианту..."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_filter_status"
+msgstr "Фильтр статуса"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_all"
+msgstr "Все"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_active"
+msgstr "Активные"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_inactive"
+msgstr "Неактивные"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_select_all_page"
+msgstr "Выбрать все на странице"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_clear_selection"
+msgstr "Снять выбор"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count"
+msgstr "Выбрано вопросов: {count}"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count_zero"
+msgstr "Выбрано вопросов: 0"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate_selected"
+msgstr "Деактивировать выбранные"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate_selected"
+msgstr "Активировать выбранные"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_question"
+msgstr "Вопрос"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_block"
+msgstr "Блок"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_status"
+msgstr "Статус"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_actions"
+msgstr "Действия"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_no_block"
+msgstr "Без блока"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_active"
+msgstr "Актив"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_inactive"
+msgstr "Неактив"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_edit"
+msgstr "Редактировать"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_results"
+msgstr "По вашему запросу вопросы не найдены."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_questions"
+msgstr "В этом экзамене пока нет вопросов."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_pagination"
+msgstr "Пагинация"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_prev"
+msgstr "Назад"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_next"
+msgstr "Далее"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "confirm_delete_selected"
+msgstr "Вы уверены, что хотите удалить выбранные вопросы?"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "select_at_least_one"
+msgstr "Выберите хотя бы один вопрос."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "select_at_least_one"
+msgstr "Выберите хотя бы один вопрос."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deactivated_selected"
+msgstr "Деактивировано вопросов: {count}."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "activated_selected"
+msgstr "Активировано вопросов: {count}."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deleted_selected"
+msgstr "Удалено вопросов: {count}."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "invalid_bulk_action"
+msgstr "Недопустимое массовое действие."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_bulk_add_blocks"
+msgstr "Массовое добавление вопросов / Блоки"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_sort"
+msgstr "Сортировка"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_newest"
+msgstr "Дата добавления (сначала новые)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_oldest"
+msgstr "Дата добавления (сначала старые)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_az"
+msgstr "По алфавиту (A-Z)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_za"
+msgstr "По алфавиту (Z-A)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_added_at"
+msgstr "Дата добавления"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate"
+msgstr "Деактивировать"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate"
+msgstr "Активировать"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete"
+msgstr "Удалить"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_title"
+msgstr "Удалить вопрос"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_cancel"
+msgstr "Отмена"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_confirm_delete"
+msgstr "Подтвердить удаление"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_question_body"
+msgstr "Вы уверены, что хотите удалить этот вопрос? {question}"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_prev"
+msgstr "Назад"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_next"
+msgstr "Далее"
+

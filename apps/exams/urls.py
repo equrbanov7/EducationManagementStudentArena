@@ -76,6 +76,7 @@ urlpatterns = [
     # SLUG - Teacher Questions
     # ==========================
     path("<slug:slug>/add-question/", views.add_exam_question, name="add_exam_question"),
+    path("<slug:slug>/questions-bank/", views.teacher_questions_bank, name="teacher_questions_bank"),
     path(
         "<slug:slug>/questions/<int:question_id>/edit/",
         views.edit_exam_question,
@@ -90,6 +91,11 @@ urlpatterns = [
     # SLUG - Teacher Exam Ops
     # ==========================
     path("<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
+    path(
+        "<slug:slug>/results/delete-attempts/",
+        views.delete_exam_attempts,
+        name="delete_exam_attempts",
+    ),
     path(
         "<slug:slug>/toggle-active/",
         views.toggle_exam_active,

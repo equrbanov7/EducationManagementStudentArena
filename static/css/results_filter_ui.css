@@ -1,0 +1,117 @@
+.results-filter-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.results-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.results-filter-grid > * {
+    min-width: 0;
+}
+
+.results-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.results-filter-field--wide {
+    grid-column: span 2;
+}
+
+.results-filter-label {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.results-filter-submit {
+    background: #0d6efd;
+    border-color: #0d6efd;
+    color: #ffffff;
+    font-weight: 700;
+    min-width: 0;
+    width: 100%;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    line-height: 1.2;
+}
+
+.results-filter-submit:hover {
+    background: #0b5ed7;
+    border-color: #0b5ed7;
+    color: #ffffff;
+}
+
+.results-filter-clear {
+    min-width: 0;
+    width: 100%;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    line-height: 1.2;
+}
+
+.results-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.results-toolbar .selected-counter {
+    margin-inline-end: auto;
+    color: #475569;
+    font-weight: 600;
+}
+
+.results-toolbar .btn {
+    min-width: 132px;
+}
+
+.results-table-checkbox {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: #2563eb;
+}
+
+.results-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+    .results-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .results-filter-field--wide {
+        grid-column: span 1;
+    }
+
+    .results-filter-submit,
+    .results-filter-clear {
+        width: 100%;
+    }
+
+    .results-toolbar .btn {
+        min-width: initial;
+        flex: 1 1 auto;
+    }
+}

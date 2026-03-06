@@ -45,7 +45,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
     total_needed = _effective_needed_count(exam)
 
     # bütün sualları al (DB hit az olsun)
-    all_qs = list(exam.questions.all())
+    all_qs = list(exam.questions.filter(is_active=True))
 
     if not all_qs:
         return
@@ -71,7 +71,7 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
             for i, block in enumerate(blocks):
                 take = base + (1 if i < rem else 0)
 
-                block_qs = list(block.questions.all())
+                block_qs = list(block.questions.filter(is_active=True))
                 random.shuffle(block_qs)
 
                 for q in block_qs:

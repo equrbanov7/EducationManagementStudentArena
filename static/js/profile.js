@@ -508,6 +508,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var manuallyDeselectedUserIds = new Set();
+        var previousAutoSelectedUserIds = new Set();
 
         function getAutoSelectedUserIds() {
             var selectedGroupIds = groupSelector.getSelectedValues();
@@ -536,11 +537,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 manuallyDeselectedUserIds.delete(userId);
             });
 
+            previousAutoSelectedUserIds.forEach(function (userId) {
+                if (!autoSelectedUserIds.has(userId)) {
+                    userSelector.setValueSelected(userId, false, "group-sync");
+                }
+            });
+
             autoSelectedUserIds.forEach(function (userId) {
                 if (!manuallyDeselectedUserIds.has(userId)) {
                     userSelector.setValueSelected(userId, true, "group-sync");
                 }
             });
+
+            previousAutoSelectedUserIds = new Set(autoSelectedUserIds);
         }
 
         groupSelector.onSelectionChange(function () {
@@ -568,6 +577,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 manuallyDeselectedUserIds.add(userId);
             }
         });
+
+        var initialSelectedUserIds = new Set(userSelector.getSelectedValues());
+        var initialAutoSelectedUserIds = getAutoSelectedUserIds();
+        initialAutoSelectedUserIds.forEach(function (userId) {
+            if (!initialSelectedUserIds.has(userId)) {
+                manuallyDeselectedUserIds.add(userId);
+            }
+        });
+        previousAutoSelectedUserIds = new Set(initialAutoSelectedUserIds);
 
         syncUsersFromSelectedGroups();
     }

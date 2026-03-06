@@ -1,14 +1,17 @@
 import hashlib
+from datetime import datetime
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
@@ -76,6 +79,16 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     return profile_return_url, navigation_params
 
 
+def _parse_filter_date(raw_value):
+    raw_date = (raw_value or "").strip()
+    if not raw_date:
+        return "", None
+    try:
+        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
+    except ValueError:
+        return "", None
+
+
 @login_required
 def teacher_exam_results(request, slug):
     """
@@ -92,7 +105,7 @@ def teacher_exam_results(request, slug):
         **navigation_params,
     )
 
-    attempts = exam.attempts.select_related("user").order_by("-started_at")
+    attempts = exam.attempts.select_related("user")
 
     selected_attempt = None
     selected_answers = None
@@ -153,6 +166,41 @@ def teacher_exam_results(request, slug):
                 )
             )
 
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        attempts = attempts.filter(
+            Q(user__username__icontains=search_query)
+            | Q(user__first_name__icontains=search_query)
+            | Q(user__last_name__icontains=search_query)
+        )
+
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}
+    if status_filter not in allowed_status_filters:
+        status_filter = "all"
+    if status_filter != "all":
+        attempts = attempts.filter(status=status_filter)
+
+    checked_filter = (request.GET.get("checked") or "all").strip().lower()
+    if checked_filter == "checked":
+        attempts = attempts.filter(checked_by_teacher=True)
+    elif checked_filter == "unchecked":
+        attempts = attempts.filter(checked_by_teacher=False)
+    else:
+        checked_filter = "all"
+
+    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+    if date_from:
+        attempts = attempts.filter(started_at__date__gte=date_from)
+    if date_to:
+        attempts = attempts.filter(started_at__date__lte=date_to)
+
+    attempts = attempts.order_by("-started_at")
+    paginator = Paginator(attempts, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    attempts_page = list(page_obj.object_list)
+
     # ---------- GET: hansı attempt seçilib? ----------
     if selected_attempt is None:
         attempt_param = request.GET.get("attempt")
@@ -169,7 +217,7 @@ def teacher_exam_results(request, slug):
     now = timezone.now()
     attempts_data = []
 
-    for att in attempts:
+    for att in attempts_page:
         # Anonim ad (deterministic)
         hash_input = f"{att.id}-{att.user.id}-{exam.id}"
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
@@ -202,18 +250,37 @@ def teacher_exam_results(request, slug):
     # ═══════════════════════════════════════════════════════════════════
     # Statistikalar (əvvəlki kimi)
     # ═══════════════════════════════════════════════════════════════════
-    fastest_attempts = sorted([a for a in attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[:5]
+    filtered_attempts = list(attempts)
+    fastest_attempts = sorted([a for a in filtered_attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[:5]
 
     questions = exam.questions.all()
     hardest_questions = sorted(questions, key=lambda q: q.correct_ratio)[:5]
+
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "checked": checked_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
+                "attempt": (request.GET.get("attempt") or "").strip(),
+                "from_section": (request.GET.get("from_section") or "").strip(),
+                "return_to": (request.GET.get("return_to") or "").strip(),
+            }.items()
+            if value not in ("", None)
+        }
+    )
 
     return render(
         request,
         "exams/teacher/teacher_exam_results.html",
         {
             "exam": exam,
-            "attempts": attempts,
+            "attempts": page_obj.object_list,
             "attempts_data": attempts_data,  # ✅ YENİ
+            "page_obj": page_obj,
             "fastest_attempts": fastest_attempts,
             "hardest_questions": hardest_questions,
             "selected_attempt": selected_attempt,
@@ -221,8 +288,62 @@ def teacher_exam_results(request, slug):
             "profile_return_url": profile_return_url,
             "exam_detail_url": exam_detail_url,
             "exam_navigation_query": exam_navigation_query,
+            "search_query": search_query,
+            "status_filter": status_filter,
+            "checked_filter": checked_filter,
+            "date_from": date_from_raw,
+            "date_to": date_to_raw,
+            "pagination_query": pagination_query,
+            "can_delete_attempts": request_has_permission(request, "exam.delete"),
         },
     )
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_exam_attempts(request, slug):
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+    redirect_url = _safe_same_origin_redirect_path(request, request.POST.get("next"))
+    if not redirect_url:
+        nav_params = {}
+        from_section = (request.POST.get("from_section") or "").strip()
+        return_to = _safe_same_origin_redirect_path(request, request.POST.get("return_to"))
+        if from_section:
+            nav_params["from_section"] = from_section
+        if return_to:
+            nav_params["return_to"] = return_to
+        redirect_url = _append_query_params(
+            reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}),
+            **nav_params,
+        )
+
+    if not request_has_permission(request, "exam.delete"):
+        messages.error(request, pgettext_lazy("exams.view.results.message", "delete_permission_required"))
+        return redirect(redirect_url)
+
+    raw_ids = request.POST.getlist("attempt_ids")
+    single_attempt_id = (request.POST.get("attempt_id") or "").strip()
+    if single_attempt_id:
+        raw_ids.append(single_attempt_id)
+
+    attempt_ids = sorted({int(raw_id) for raw_id in raw_ids if str(raw_id).isdigit()})
+    if not attempt_ids:
+        messages.warning(request, pgettext_lazy("exams.view.results.message", "select_attempt_to_delete"))
+        return redirect(redirect_url)
+
+    attempts_qs = exam.attempts.filter(id__in=attempt_ids)
+    attempt_count = attempts_qs.count()
+    if attempt_count == 0:
+        messages.warning(request, pgettext_lazy("exams.view.results.message", "attempt_not_found"))
+        return redirect(redirect_url)
+
+    attempts_qs.delete()
+    messages.success(
+        request,
+        pgettext_lazy("exams.view.results.message", "attempts_deleted").format(count=attempt_count),
+    )
+    return redirect(redirect_url)
 
 
 @login_required

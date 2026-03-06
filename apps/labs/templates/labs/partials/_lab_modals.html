@@ -344,7 +344,67 @@
         stateError: '{% trans "state_error" context "labs.js.lab_modals" %}'
     };
     
-    let editSavedStudentIds = new Set();
+    function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
+        var normalizedIds = (initialSelectedIds || []).map(function(id) {
+            return String(id);
+        });
+        var normalizedDeselectedIds = (initialManuallyDeselectedAutoIds || []).map(function(id) {
+            return String(id);
+        });
+        return {
+            selectedStudentIds: new Set(normalizedIds),
+            autoSelectedStudentIds: new Set(),
+            manuallyDeselectedAutoStudentIds: new Set(normalizedDeselectedIds),
+        };
+    }
+
+    var modeSelectionState = {
+        add: createSelectionState(),
+        edit: createSelectionState(),
+    };
+
+    function getModeState(mode) {
+        if (!modeSelectionState[mode]) {
+            modeSelectionState[mode] = createSelectionState();
+        }
+        return modeSelectionState[mode];
+    }
+
+    function resetRemovedAutoSelections(mode) {
+        var state = getModeState(mode);
+        state.autoSelectedStudentIds.forEach(function(studentId) {
+            state.selectedStudentIds.delete(studentId);
+        });
+        state.autoSelectedStudentIds.clear();
+        state.manuallyDeselectedAutoStudentIds.clear();
+    }
+
+    function syncSelectedStudentsFromGroups(mode, students) {
+        var state = getModeState(mode);
+        var nextAutoSelectedIds = new Set((students || []).map(function(student) {
+            return String(student.id);
+        }));
+
+        state.autoSelectedStudentIds.forEach(function(studentId) {
+            if (!nextAutoSelectedIds.has(studentId)) {
+                state.selectedStudentIds.delete(studentId);
+            }
+        });
+
+        Array.from(state.manuallyDeselectedAutoStudentIds).forEach(function(studentId) {
+            if (!nextAutoSelectedIds.has(studentId)) {
+                state.manuallyDeselectedAutoStudentIds.delete(studentId);
+            }
+        });
+
+        nextAutoSelectedIds.forEach(function(studentId) {
+            if (!state.manuallyDeselectedAutoStudentIds.has(studentId)) {
+                state.selectedStudentIds.add(studentId);
+            }
+        });
+
+        state.autoSelectedStudentIds = nextAutoSelectedIds;
+    }
 
     window.openEditLabModal = function(url) {
         const modalEl = $('editLabModal');
@@ -353,6 +413,7 @@
             return;
         }
 
+        modeSelectionState.edit = createSelectionState();
         $('editLabGroupList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
         $('editLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.loading + '</p>';
 
@@ -392,7 +453,10 @@
                 $('editCurrentFile').innerHTML = '';
             }
 
-            editSavedStudentIds = new Set(d.student_ids || []);
+            modeSelectionState.edit = createSelectionState(
+                d.student_ids || [],
+                d.group_excluded_student_ids || []
+            );
             loadGroups('edit', d.group_names || []);
         })
         .catch(function() {
@@ -460,12 +524,14 @@
     function loadStudents(mode) {
         const container = $(mode + 'LabStudentList');
         if (!container) return;
+        var state = getModeState(mode);
 
         var groupInputs = document.querySelectorAll('#' + mode + 'LabGroupList input:checked');
         var groups = [];
         groupInputs.forEach(function(cb) { groups.push(cb.dataset.group); });
 
         if (!groups.length) {
+            resetRemovedAutoSelections(mode);
             container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
             updateCount(mode);
             return;
@@ -477,6 +543,7 @@
         .then(r => r.json())
         .then(function(data) {
             const students = data.students || [];
+            syncSelectedStudentsFromGroups(mode, students);
             if (!students.length) {
                 container.innerHTML = '<p class="text-muted text-center py-3">' + I18N.noStudents + '</p>';
                 updateCount(mode);
@@ -486,7 +553,8 @@
             var html = '';
             for (var i = 0; i < students.length; i++) {
                 var s = students[i];
-                var isChecked = (mode === 'edit' && editSavedStudentIds.has(s.id)) ? 'checked' : '';
+                var studentId = String(s.id);
+                var isChecked = state.selectedStudentIds.has(studentId) ? 'checked' : '';
                 html += '<div class="lab-chk-row">' +
                     '<input type="checkbox" id="' + mode + 'LabS' + s.id + '" name="student_ids[]" value="' + s.id + '" ' + isChecked + '>' +
                     '<label for="' + mode + 'LabS' + s.id + '">' + s.name + '</label>' +
@@ -496,7 +564,24 @@
             container.innerHTML = html;
 
             container.querySelectorAll('input').forEach(function(cb) {
-                cb.addEventListener('change', function() { updateCount(mode); });
+                cb.addEventListener('change', function() {
+                    var studentId = String(cb.value);
+                    if (cb.checked) {
+                        state.selectedStudentIds.add(studentId);
+                    } else {
+                        state.selectedStudentIds.delete(studentId);
+                    }
+
+                    if (state.autoSelectedStudentIds.has(studentId)) {
+                        if (cb.checked) {
+                            state.manuallyDeselectedAutoStudentIds.delete(studentId);
+                        } else {
+                            state.manuallyDeselectedAutoStudentIds.add(studentId);
+                        }
+                    }
+
+                    updateCount(mode);
+                });
             });
 
             updateCount(mode);
@@ -516,12 +601,14 @@
     var addModal = $('addLabModal');
     if (addModal) {
         addModal.addEventListener('shown.bs.modal', function() {
+            modeSelectionState.add = createSelectionState();
             $('addLabStudentList').innerHTML = '<p class="text-muted text-center py-3">' + I18N.selectGroupFirst + '</p>';
             loadGroups('add');
         });
 
         addModal.addEventListener('hidden.bs.modal', function() {
             $('createLabForm').reset();
+            modeSelectionState.add = createSelectionState();
         });
     }
 

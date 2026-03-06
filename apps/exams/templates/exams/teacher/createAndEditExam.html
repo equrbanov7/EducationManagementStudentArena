@@ -35,6 +35,7 @@
                         {{ form.non_field_errors }}
                     </div>
                 {% endif %}
+                {{ group_student_map|json_script:"examGroupStudentMap" }}
 
                 <div class="form-grid">
                     {# --- Başlıq --- #}
@@ -282,6 +283,12 @@
             // PUBLIC / PRIVATE TOGGLE
             const isPublicCheckbox = document.getElementById("{{ form.is_public.id_for_label }}");
             const accessBlock = document.getElementById("access-restrictions");
+            const groupSelect = document.getElementById("{{ form.allowed_groups.id_for_label }}");
+            const userSelect = document.getElementById("{{ form.allowed_users.id_for_label }}");
+            const groupList = document.getElementById("groupSelector_list");
+            const userList = document.getElementById("userSelector_list");
+            const userCounter = document.getElementById("userSelector_count");
+            const groupStudentMapScript = document.getElementById("examGroupStudentMap");
     
             function toggleAccessBlock() {
                 if (!isPublicCheckbox || !accessBlock) return;
@@ -297,6 +304,137 @@
                 toggleAccessBlock();
                 isPublicCheckbox.addEventListener("change", toggleAccessBlock);
             }
+
+            if (!groupSelect || !userSelect || !groupList || !userList || !groupStudentMapScript) {
+                return;
+            }
+
+            let groupStudentMap = {};
+            try {
+                groupStudentMap = JSON.parse(groupStudentMapScript.textContent || "{}");
+            } catch (error) {
+                groupStudentMap = {};
+            }
+
+            if (!groupStudentMap || typeof groupStudentMap !== "object") {
+                return;
+            }
+
+            let manuallyDeselectedUserIds = new Set();
+            let previousAutoSelectedUserIds = new Set();
+
+            function updateUserCounter() {
+                if (!userCounter) return;
+                userCounter.textContent = String(userSelect.selectedOptions.length);
+            }
+
+            function getSelectedGroupIds() {
+                return Array.from(groupSelect.selectedOptions || []).map(function(option) {
+                    return String(option.value);
+                });
+            }
+
+            function getAutoSelectedUserIds() {
+                const selectedGroupIds = getSelectedGroupIds();
+                const autoSelectedUserIds = new Set();
+
+                selectedGroupIds.forEach(function(groupId) {
+                    const mappedUserIds = groupStudentMap[String(groupId)] || [];
+                    mappedUserIds.forEach(function(userId) {
+                        autoSelectedUserIds.add(String(userId));
+                    });
+                });
+
+                return autoSelectedUserIds;
+            }
+
+            function getUserOptionById(userId) {
+                return userSelect.querySelector('option[value="' + userId + '"]');
+            }
+
+            function getUserCheckboxById(userId) {
+                return userList.querySelector('input.custom-item-checkbox[value="' + userId + '"]');
+            }
+
+            function setUserSelected(userId, isSelected) {
+                const option = getUserOptionById(userId);
+                if (!option) return;
+
+                const nextValue = Boolean(isSelected);
+                if (option.selected === nextValue) return;
+
+                option.selected = nextValue;
+
+                const checkbox = getUserCheckboxById(userId);
+                if (checkbox) {
+                    checkbox.checked = nextValue;
+                }
+            }
+
+            function syncUsersFromSelectedGroups() {
+                const autoSelectedUserIds = getAutoSelectedUserIds();
+
+                Array.from(manuallyDeselectedUserIds).forEach(function(userId) {
+                    if (!autoSelectedUserIds.has(userId)) {
+                        manuallyDeselectedUserIds.delete(userId);
+                    }
+                });
+
+                previousAutoSelectedUserIds.forEach(function(userId) {
+                    if (!autoSelectedUserIds.has(userId)) {
+                        setUserSelected(userId, false);
+                    }
+                });
+
+                autoSelectedUserIds.forEach(function(userId) {
+                    if (!manuallyDeselectedUserIds.has(userId)) {
+                        setUserSelected(userId, true);
+                    }
+                });
+
+                previousAutoSelectedUserIds = new Set(autoSelectedUserIds);
+                updateUserCounter();
+            }
+
+            groupList.addEventListener("change", function(event) {
+                if (!event.target || !event.target.classList.contains("custom-item-checkbox")) return;
+                syncUsersFromSelectedGroups();
+            });
+
+            userList.addEventListener("change", function(event) {
+                if (!event.target || !event.target.classList.contains("custom-item-checkbox")) return;
+
+                const userId = String(event.target.value || "");
+                if (!userId) return;
+
+                const autoSelectedUserIds = getAutoSelectedUserIds();
+                if (!autoSelectedUserIds.has(userId)) {
+                    updateUserCounter();
+                    return;
+                }
+
+                if (event.target.checked) {
+                    manuallyDeselectedUserIds.delete(userId);
+                } else {
+                    manuallyDeselectedUserIds.add(userId);
+                }
+                updateUserCounter();
+            });
+
+            const initialSelectedUserIds = new Set(
+                Array.from(userSelect.selectedOptions || []).map(function(option) {
+                    return String(option.value);
+                })
+            );
+            const initialAutoSelectedUserIds = getAutoSelectedUserIds();
+            initialAutoSelectedUserIds.forEach(function(userId) {
+                if (!initialSelectedUserIds.has(userId)) {
+                    manuallyDeselectedUserIds.add(userId);
+                }
+            });
+            previousAutoSelectedUserIds = new Set(initialAutoSelectedUserIds);
+
+            syncUsersFromSelectedGroups();
         });
     </script>
 

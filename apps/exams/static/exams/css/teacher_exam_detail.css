@@ -191,6 +191,30 @@
     color: white;
 }
 
+.bank-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.32);
+}
+
+.bank-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.library-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.28);
+}
+
+.library-btn:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
 .warning-btn {
     background-color: #f59e0b;
     color: white;

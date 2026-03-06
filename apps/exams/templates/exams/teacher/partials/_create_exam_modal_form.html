@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<form id="createExamModalForm" method="post" action="{{ request.path }}?modal=1" novalidate>
+<form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate>
     {% csrf_token %}
     <input type="hidden" name="modal" value="1">
 

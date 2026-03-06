@@ -1,10 +1,146 @@
+from urllib.parse import urlencode
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.translation import pgettext
+from django.views.decorators.http import require_http_methods
 
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def teacher_questions_bank(request, slug):
+    _ensure_teacher(request.user)
+    exam = get_teacher_exam_or_404(request, slug=slug)
+
+    allowed_statuses = {"all", "active", "inactive"}
+    allowed_sorts = {"newest", "oldest", "az", "za"}
+
+    if request.method == "POST":
+        action = (request.POST.get("bulk_action") or "").strip().lower()
+        selected_ids = [int(item) for item in request.POST.getlist("selected_question_ids") if item.isdigit()]
+        selected_qs = ExamQuestion.objects.filter(exam=exam, id__in=selected_ids)
+        selected_count = selected_qs.count()
+
+        if selected_count == 0:
+            messages.warning(request, pgettext("exams.view.questions_bank.message", "select_at_least_one"))
+        elif action == "deactivate":
+            updated = selected_qs.update(is_active=False)
+            messages.success(
+                request,
+                pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
+            )
+        elif action == "activate":
+            updated = selected_qs.update(is_active=True)
+            messages.success(
+                request,
+                pgettext("exams.view.questions_bank.message", "activated_selected").format(count=updated),
+            )
+        elif action == "delete":
+            deleted = selected_count
+            selected_qs.delete()
+            messages.success(
+                request,
+                pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
+            )
+        else:
+            messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
+
+        redirect_params = {}
+        redirect_q = (request.POST.get("q") or "").strip()
+        redirect_status = (request.POST.get("status") or "all").strip().lower()
+        redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
+        redirect_page = (request.POST.get("page") or "").strip()
+
+        if redirect_q:
+            redirect_params["q"] = redirect_q
+        if redirect_status in {"active", "inactive"}:
+            redirect_params["status"] = redirect_status
+        if redirect_sort in allowed_sorts:
+            redirect_params["sort"] = redirect_sort
+        if redirect_page.isdigit():
+            redirect_params["page"] = redirect_page
+
+        redirect_url = reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug})
+        if redirect_params:
+            redirect_url = f"{redirect_url}?{urlencode(redirect_params)}"
+        return redirect(redirect_url)
+
+    search_query = (request.GET.get("q") or "").strip()
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    sort_filter = (request.GET.get("sort") or "newest").strip().lower()
+    if status_filter not in allowed_statuses:
+        status_filter = "all"
+    if sort_filter not in allowed_sorts:
+        sort_filter = "newest"
+
+    questions = exam.questions.select_related("block").prefetch_related("options")
+
+    if search_query:
+        matched_ids = (
+            exam.questions.filter(
+                Q(text__icontains=search_query)
+                | Q(block__name__icontains=search_query)
+                | Q(options__text__icontains=search_query)
+            )
+            .values_list("id", flat=True)
+            .distinct()
+        )
+        questions = questions.filter(id__in=matched_ids)
+
+    if status_filter == "active":
+        questions = questions.filter(is_active=True)
+    elif status_filter == "inactive":
+        questions = questions.filter(is_active=False)
+
+    if sort_filter == "oldest":
+        questions = questions.order_by("created_at", "id")
+    elif sort_filter == "az":
+        questions = questions.order_by(Lower("text"), "id")
+    elif sort_filter == "za":
+        questions = questions.order_by(Lower("text").desc(), "id")
+    else:
+        questions = questions.order_by("-created_at", "-id")
+
+    paginator = Paginator(questions, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    total_questions = exam.questions.count()
+    active_questions = exam.questions.filter(is_active=True).count()
+    inactive_questions = max(total_questions - active_questions, 0)
+
+    base_query_params = {}
+    if search_query:
+        base_query_params["q"] = search_query
+    if status_filter != "all":
+        base_query_params["status"] = status_filter
+    if sort_filter != "newest":
+        base_query_params["sort"] = sort_filter
+
+    return render(
+        request,
+        "exams/teacher/teacher_questions_bank.html",
+        {
+            "exam": exam,
+            "page_obj": page_obj,
+            "search_query": search_query,
+            "status_filter": status_filter,
+            "sort_filter": sort_filter,
+            "total_questions": total_questions,
+            "active_questions": active_questions,
+            "inactive_questions": inactive_questions,
+            "pagination_query": urlencode(base_query_params),
+        },
+    )
 
 
 @login_required

@@ -167,7 +167,7 @@ def test_question_bank(request, slug):
 
     # >>> YENİ: UI dəyərləri (Preview klikində sıfırlanmasın deyə)
     # NOTE: 0 = hamısı; None/boş = default 10 göstər
-    total_q = exam.questions.count()
+    total_q = exam.questions.filter(is_active=True).count()
     exam_rq = getattr(exam, "random_question_count", None)
     rq_default = min(10, total_q) if exam_rq is None else exam_rq
 

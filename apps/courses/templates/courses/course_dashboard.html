@@ -5,6 +5,10 @@
 
 {% block title %}{{ course.title }} - {% trans "page_suffix_dashboard" context "courses.dashboard" %}{% endblock %}
 
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-5">
     <div class="row">
@@ -142,6 +146,8 @@
     {% include "assignments/partials/_assignment_modals.html" %}
     {% include "projects/partials/_project_modals.html" %}
     {% include "labs/partials/_lab_modals.html" %}  
+{% endif %}
+{% if is_owner or is_teacher %}
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}
 

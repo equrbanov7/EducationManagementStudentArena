@@ -62,7 +62,7 @@ def start_exam(request, slug):
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_not_allowed"))
         return redirect(_resolve_exam_failure_redirect(request))
 
-    if not exam.questions.exists():
+    if not exam.questions.filter(is_active=True).exists():
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
         return redirect(_resolve_exam_failure_redirect(request))
 
@@ -106,7 +106,7 @@ def take_exam(request, slug, attempt_id):
         )
 
     if not answers_qs.exists():
-        message_key = "exam_has_no_questions" if not exam.questions.exists() else "exam_start_failed"
+        message_key = "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         messages.error(request, pgettext("exams.view.access.message", message_key))
         return redirect(_resolve_exam_failure_redirect(request))
 

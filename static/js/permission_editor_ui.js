@@ -32,6 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
             member: "Üzvlər",
             role: "Rollar",
             course: "Kurslar",
+            assignment: "Sərbəst işlər",
+            project: "Kurs işləri",
+            lab: "Lab işləri",
             grade: "Qiymətləndirmə",
             exam: "İmtahanlar",
             appeal: "Apellyasiya",
@@ -45,6 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
             member: "Members",
             role: "Roles",
             course: "Courses",
+            assignment: "Assignments",
+            project: "Coursework",
+            lab: "Lab Work",
             grade: "Grading",
             exam: "Exams",
             appeal: "Appeals",
@@ -58,6 +64,9 @@ document.addEventListener("DOMContentLoaded", function () {
             member: "Участники",
             role: "Роли",
             course: "Курсы",
+            assignment: "Задания",
+            project: "Курсовые работы",
+            lab: "Лабораторные работы",
             grade: "Оценивание",
             exam: "Экзамены",
             appeal: "Апелляции",
@@ -71,6 +80,9 @@ document.addEventListener("DOMContentLoaded", function () {
             member: "Üyeler",
             role: "Roller",
             course: "Kurslar",
+            assignment: "Ödevler",
+            project: "Kurs projeleri",
+            lab: "Laboratuvar çalışmaları",
             grade: "Değerlendirme",
             exam: "Sınavlar",
             appeal: "İtirazlar",
@@ -484,7 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function syncRowActionButton(row, isActive) {
+    function syncRowActionButton(row, isActive, options) {
         if (!row) {
             return;
         }
@@ -493,7 +505,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var form = row.querySelector("[data-permission-toggle-form]");
         var actionInput = form ? form.querySelector("[data-permission-action]") : null;
-        if (actionInput) {
+        var syncActionInput = !(options && options.syncActionInput === false);
+        if (actionInput && syncActionInput) {
             actionInput.value = isActive ? "remove" : "add";
         }
 
@@ -517,9 +530,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 var row = button.closest("[data-permission-row]");
                 var wasActive = row && row.getAttribute("data-permission-active") === "1";
                 var shouldEnable = !wasActive;
+                var actionInput = form ? form.querySelector("[data-permission-action]") : null;
+                var requestedAction = wasActive ? "remove" : "add";
+                if (actionInput) {
+                    actionInput.value = requestedAction;
+                }
 
                 syncRowActiveState(row, shouldEnable);
-                syncRowActionButton(row, shouldEnable);
+                syncRowActionButton(row, shouldEnable, { syncActionInput: false });
 
                 if (form) {
                     button.disabled = true;

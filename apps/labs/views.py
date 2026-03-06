@@ -132,6 +132,10 @@ def _lab_back_url(request, lab):
     return reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
 
 
+def _can_delete_lab_content(request):
+    return request_has_permission(request, "lab.delete") or request_has_permission(request, "course.delete")
+
+
 # ════════════════��══════════════════════════════════════════════════════════════
 # LAB CRUD
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -222,6 +226,15 @@ def edit_lab(request, pk):
         student_ids = []
         if lab.allowed_students:
             student_ids = [int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()]
+        selected_student_ids_set = set(student_ids)
+        group_student_ids = set(
+            CourseMembership.objects.filter(
+                course=lab.course,
+                role="student",
+                group_name__in=group_names,
+            ).values_list("user_id", flat=True)
+        )
+        group_excluded_student_ids = sorted(group_student_ids - selected_student_ids_set)
 
         data = {
             "id": lab.id,
@@ -243,6 +256,7 @@ def edit_lab(request, pk):
             "teacher_files_url": lab.teacher_files.url if lab.teacher_files else None,
             "group_names": group_names,
             "student_ids": student_ids,
+            "group_excluded_student_ids": group_excluded_student_ids,
         }
         return JsonResponse({"success": True, "data": data})
 
@@ -302,6 +316,11 @@ def delete_lab(request, pk):
     lab = _get_tenant_lab_or_404(request, pk)
 
     if lab.created_by != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
+        )
+
+    if not _can_delete_lab_content(request):
         return JsonResponse(
             {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
         )

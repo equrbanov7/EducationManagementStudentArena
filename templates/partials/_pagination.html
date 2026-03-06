@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if page_obj.has_other_pages %}
 {% with page_key=page_param|default:'page' %}
 <div class="pagination-wrapper">
@@ -6,13 +7,13 @@
         {% if page_obj.has_previous %}
             <li>
                 <a href="?{% if extra_query %}{{ extra_query }}&{% endif %}{{ page_key }}={{ page_obj.previous_page_number }}" class="page-link prev-next">
-                    <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                    <i class="fas fa-chevron-left"></i> <span>{% trans "action_prev" context "partials.pagination" %}</span>
                 </a>
             </li>
         {% else %}
             <li>
                 <span class="page-link prev-next disabled">
-                    <i class="fas fa-chevron-left"></i> <span>Geri</span>
+                    <i class="fas fa-chevron-left"></i> <span>{% trans "action_prev" context "partials.pagination" %}</span>
                 </span>
             </li>
         {% endif %}
@@ -35,13 +36,13 @@
         {% if page_obj.has_next %}
             <li>
                 <a href="?{% if extra_query %}{{ extra_query }}&{% endif %}{{ page_key }}={{ page_obj.next_page_number }}" class="page-link prev-next">
-                    <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                    <span>{% trans "action_next" context "partials.pagination" %}</span> <i class="fas fa-chevron-right"></i>
                 </a>
             </li>
         {% else %}
             <li>
                 <span class="page-link prev-next disabled">
-                    <span>İrəli</span> <i class="fas fa-chevron-right"></i>
+                    <span>{% trans "action_next" context "partials.pagination" %}</span> <i class="fas fa-chevron-right"></i>
                 </span>
             </li>
         {% endif %}

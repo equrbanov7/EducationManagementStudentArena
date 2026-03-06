@@ -621,6 +621,7 @@ class QuestionBlock(models.Model):
 
 
 class ExamQuestion(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     points = models.PositiveIntegerField(default=1)
     fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
     ANSWER_MODE_CHOICES = (
@@ -633,6 +634,11 @@ class ExamQuestion(models.Model):
         on_delete=models.CASCADE,
         related_name="questions",
         verbose_name=pgettext_lazy("exams.model.question.field", "exam"),
+    )
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.question.field", "is_active"),
     )
 
     # --- BURANI ƏLAVƏ EDİN (START) ---

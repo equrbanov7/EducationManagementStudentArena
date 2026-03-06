@@ -58,3 +58,6 @@ class PermissionSystemTest(TestCase):
         self.assertGreater(len(all_perms), 0)
         self.assertIn("course.create", all_perms)
         self.assertIn("exam.view", all_perms)
+        self.assertIn("assignment.delete", all_perms)
+        self.assertIn("project.delete", all_perms)
+        self.assertIn("lab.delete", all_perms)

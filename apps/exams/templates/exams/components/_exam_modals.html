@@ -1,5 +1,7 @@
-{% load i18n %}
+{% load i18n static %}
 {% if is_owner or is_teacher %}
+
+{% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
 
 <!-- LINK EXAM MODAL -->
 <div class="modal fade" id="linkExamModal" tabindex="-1" aria-hidden="true">
@@ -28,7 +30,7 @@
                                     {% endif %}
                                 </small>
                             </div>
-                            <button type="button" class="btn btn-sm btn-info js-link-exam" 
+                            <button type="button" class="btn btn-sm btn-info js-link-exam"
                                     data-exam-id="{{ exam.id }}"
                                     {% if exam.course %}disabled{% endif %}>
                                 {% if exam.course %}
@@ -43,7 +45,10 @@
                         <div class="text-center py-4 text-muted">
                             <i class="fas fa-info-circle fa-2x mb-2"></i>
                             <p>{% trans "empty_no_exam_to_link" context "exams.partial.exam_modals" %}</p>
-                            <a href="{% url 'exams:create_exam' %}?course={{ course.id }}" class="btn btn-success btn-sm">
+                            <a href="{% url 'exams:create_exam' %}?course={{ course.id }}"
+                               class="btn btn-success btn-sm js-open-exam-form-modal"
+                               data-exam-modal-mode="create"
+                               data-exam-modal-url="{% url 'exams:create_exam' %}?course={{ course.id }}">
                                 <i class="fas fa-plus"></i> {% trans "action_create_new_exam" context "exams.partial.exam_modals" %}
                             </a>
                         </div>
@@ -57,79 +62,154 @@
     </div>
 </div>
 
+<!-- UNLINK EXAM CONFIRM MODAL -->
+<div class="modal fade" id="unlinkExamConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-unlink me-2"></i> {% trans "action_unlink" context "exams.partial.exam_section" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" id="unlinkExamConfirmMessage">
+                    {% trans "confirm_unlink_exam" context "exams.partial.exam_modals" %}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "action_close" context "exams.partial.exam_modals" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmUnlinkExamBtn">
+                    {% trans "action_unlink" context "exams.partial.exam_section" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 (function(){
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    const unlinkModalElement = document.getElementById('unlinkExamConfirmModal');
+    const confirmUnlinkBtn = document.getElementById('confirmUnlinkExamBtn');
+    let pendingUnlinkExamId = null;
     const I18N_EXAM_MODALS = {
         errorPrefix: "{% trans 'msg_error_prefix' context 'exams.partial.exam_modals'|escapejs %}",
         unlinkConfirm: "{% trans 'confirm_unlink_exam' context 'exams.partial.exam_modals'|escapejs %}"
     };
-    
-    // Link exam
+
+    function getUnlinkModal() {
+        if (!unlinkModalElement || !window.bootstrap || !window.bootstrap.Modal) {
+            return null;
+        }
+        return window.bootstrap.Modal.getOrCreateInstance(unlinkModalElement);
+    }
+
+    function debounce(fn, delayMs) {
+        let timeoutId = null;
+        return function debounced(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => fn.apply(this, args), delayMs);
+        };
+    }
+
+    async function sendRelationRequest(url, examId) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': CSRF,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ exam_id: examId })
+        });
+        return response.json();
+    }
+
     document.querySelectorAll('.js-link-exam').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', async function() {
             const examId = this.dataset.examId;
-            
-            fetch('/courses/' + COURSE_ID + '/link-exam/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': CSRF,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({exam_id: examId})
-            })
-            .then(r => r.json())
-            .then(data => {
+            if (!examId) return;
+
+            try {
+                const data = await sendRelationRequest('/courses/' + COURSE_ID + '/link-exam/', examId);
                 if (data.success) {
                     location.reload();
-                } else {
-                    alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
+                    return;
                 }
-            });
+                alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
+            } catch (error) {
+                alert(I18N_EXAM_MODALS.errorPrefix);
+            }
         });
     });
-    
-    // Unlink exam
+
     document.querySelectorAll('.js-unlink-exam').forEach(btn => {
         btn.addEventListener('click', function() {
-            if (!confirm(I18N_EXAM_MODALS.unlinkConfirm)) return;
-            
             const examId = this.dataset.examId;
-            
-            fetch('/courses/' + COURSE_ID + '/unlink-exam/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': CSRF,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({exam_id: examId})
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
-                }
-            });
+            if (!examId) return;
+
+            pendingUnlinkExamId = examId;
+            const unlinkModal = getUnlinkModal();
+            if (!unlinkModal) {
+                alert(I18N_EXAM_MODALS.errorPrefix);
+                return;
+            }
+            unlinkModal.show();
         });
     });
-    
-    // Search
+
+    if (confirmUnlinkBtn) {
+        confirmUnlinkBtn.addEventListener('click', async function() {
+            if (!pendingUnlinkExamId) return;
+
+            const examId = pendingUnlinkExamId;
+            pendingUnlinkExamId = null;
+
+            confirmUnlinkBtn.disabled = true;
+            try {
+                const data = await sendRelationRequest('/courses/' + COURSE_ID + '/unlink-exam/', examId);
+                if (data.success) {
+                    const unlinkModal = getUnlinkModal();
+                    if (unlinkModal) unlinkModal.hide();
+                    location.reload();
+                    return;
+                }
+                alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
+            } catch (error) {
+                alert(I18N_EXAM_MODALS.errorPrefix);
+            } finally {
+                confirmUnlinkBtn.disabled = false;
+            }
+        });
+    }
+
     const searchInput = document.getElementById('examSearchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        const applySearch = function() {
             const q = this.value.toLowerCase();
             document.querySelectorAll('.exam-search-item').forEach(item => {
                 const text = item.textContent.toLowerCase();
                 item.style.display = text.includes(q) ? '' : 'none';
             });
-        });
+        };
+
+        searchInput.addEventListener('input', debounce(applySearch, 1000));
     }
 })();
 </script>
+
+<script>
+window.EXAM_CREATE_EDIT_MODAL_I18N = {
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
+    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
+    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+};
+</script>
+<script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
 
 {% endif %}

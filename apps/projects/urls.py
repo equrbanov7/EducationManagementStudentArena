@@ -25,6 +25,11 @@ urlpatterns = [
         views.review_submissions,
         name="review_project_submissions",
     ),
+    path(
+        "<int:pk>/submissions/delete/",
+        views.delete_submissions,
+        name="delete_project_submissions",
+    ),
     path("submission/<int:pk>/grade/", views.grade_submission, name="grade_submission"),
     # ═══════════════════════════════════════════════════════════════════════
     # API

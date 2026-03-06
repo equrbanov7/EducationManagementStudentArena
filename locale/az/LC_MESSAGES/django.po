@@ -3343,12 +3343,16 @@ msgstr "Naməlum əməliyyat."
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email kodunu təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı və müraciətiniz qeydə alındı. Davam etmək üçün email "
+"kodunu təsdiqləyin."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu təsdiqləyin."
+msgstr ""
+"Qeydiyyat tamamlandı. Hesabı aktivləşdirmək üçün emailə göndərilən kodu "
+"təsdiqləyin."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -4024,7 +4028,7 @@ msgstr "Maks cəhd"
 #: apps/assignments/templates/assignments/assignment_section.html:73
 msgctxt "assignment.section"
 msgid "review_answers"
-msgstr "Cavabları gör"
+msgstr "Nəticələrə bax"
 
 #: apps/assignments/templates/assignments/assignment_section.html:77
 msgctxt "assignment.section"
@@ -4765,7 +4769,7 @@ msgstr "Heç bir sərbəst iş tapılmadı"
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
 msgid "page_title_suffix"
-msgstr "Cavablar"
+msgstr "Nəticələr"
 
 #: apps/assignments/templates/assignments/review_submissions.html:13
 msgctxt "assignment.review_submissions"
@@ -4780,7 +4784,7 @@ msgstr "Kurs"
 #: apps/assignments/templates/assignments/review_submissions.html:20
 msgctxt "assignment.review_submissions"
 msgid "back"
-msgstr "Geriyə"
+msgstr "Geri"
 
 #: apps/assignments/templates/assignments/review_submissions.html:32
 msgctxt "assignment.review_submissions"
@@ -4825,7 +4829,7 @@ msgstr "Bax"
 #: apps/assignments/templates/assignments/review_submissions.html:85
 msgctxt "assignment.review_submissions"
 msgid "empty_submissions"
-msgstr "Hələ ki cavab təqdim olunmayıb"
+msgstr "Hələ cavab təqdim edilməyib."
 
 #: apps/assignments/templates/assignments/review_submissions.html:100
 msgctxt "assignment.review_submissions"
@@ -4877,7 +4881,7 @@ msgstr "Tələbəyə rəy yazın..."
 #: apps/assignments/templates/assignments/review_submissions.html:166
 msgctxt "assignment.review_submissions"
 msgid "grade_submit"
-msgstr "Qiymət ver"
+msgstr "Qiymətləndir"
 
 #: apps/assignments/templates/assignments/review_submissions.html:160
 msgctxt "assignment.review_submissions"
@@ -4954,7 +4958,8 @@ msgstr "Bu tapşırığa giriş icazəniz yoxdur"
 #: apps/assignments/views.py:313
 msgctxt "assignment.message"
 msgid "submission_not_allowed_attempts_or_deadline"
-msgstr "Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib."
+msgstr ""
+"Cavab göndərmək mümkün deyil. Cəhd limitiniz bitib və ya müddət keçib."
 
 #: apps/assignments/views.py:330
 msgctxt "assignment.message"
@@ -5160,8 +5165,8 @@ msgstr "Fərdi portallar və panellər"
 msgctxt "blog.about_page"
 msgid "feature_3_text"
 msgstr ""
-"Müəllimlər, tələbələr və rəhbərlik üçün xüsusi idarəetmə panelləri. E-"
-"jurnal, qiymətləndirmə, davamiyyət və nəticələrin analitik monitorinqi "
+"Müəllimlər, tələbələr və rəhbərlik üçün xüsusi idarəetmə panelləri. "
+"E-jurnal, qiymətləndirmə, davamiyyət və nəticələrin analitik monitorinqi "
 "daxildir."
 
 #: apps/blog/templates/blog/about.html:62
@@ -6025,8 +6030,8 @@ msgstr "'{email}' ünvanı artıq abunəçilərimizdədir."
 msgctxt "blog.subscribe.message"
 msgid "send_error"
 msgstr ""
-"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd "
-"edin."
+"Email göndərilərkən xəta baş verdi. Zəhmət olmasa, bir az sonra yenidən cəhd"
+" edin."
 
 #: apps/blog/views.py:209
 msgctxt "blog.subscribe.message"
@@ -6300,8 +6305,8 @@ msgid ""
 "Do you want to delete this group?\\n\\nAll students in %(group_name)s group "
 "will be removed from the course!"
 msgstr ""
-"Bu qrupu silmək istəyirsiniz?\\n\\n%(group_name)s qrupundakı bütün tələbələr "
-"kursdan çıxarılacaq!"
+"Bu qrupu silmək istəyirsiniz?\\n\\n%(group_name)s qrupundakı bütün tələbələr"
+" kursdan çıxarılacaq!"
 
 #: apps/courses/templates/courses/course_members.html:85
 msgctxt "courses.members_page"
@@ -6505,8 +6510,8 @@ msgstr ""
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Statusun Önəmi: Kursu \"Draft\" rejimində saxlayaraq üzərində rahatca işləyə "
-"bilərsiniz. Hazır olduqda \"Published\" etməyi unutmayın."
+"Statusun Önəmi: Kursu \"Draft\" rejimində saxlayaraq üzərində rahatca işləyə"
+" bilərsiniz. Hazır olduqda \"Published\" etməyi unutmayın."
 
 #: apps/courses/templates/courses/edit_course.html:406
 msgctxt "courses.edit_page"
@@ -8551,12 +8556,12 @@ msgstr "Düz cavab kimi işarələnən {option} variantı yoxdur."
 #: apps/exams/templates/exams/components/_exam_modals.html:9
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
-msgstr "Kursu Redaktə Et"
+msgstr "İmtahanı Kursa Əlaqələndir"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:15
 msgctxt "exams.partial.exam_modals"
 msgid "placeholder_search_by_exam_name"
-msgstr "Müəllim axtar..."
+msgstr "İmtahan axtar..."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:25
 msgctxt "exams.partial.exam_modals"
@@ -8566,32 +8571,32 @@ msgstr "Sual"
 #: apps/exams/templates/exams/components/_exam_modals.html:27
 msgctxt "exams.partial.exam_modals"
 msgid "label_linked_to_course"
-msgstr "Təyin olunmuş müəllimlər"
+msgstr "Kursa bağlıdır"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:35
 msgctxt "exams.partial.exam_modals"
 msgid "status_linked"
-msgstr "Bağlı"
+msgstr "Əlaqələndirilib"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:37
 msgctxt "exams.partial.exam_modals"
 msgid "action_link"
-msgstr "Redaktə et"
+msgstr "Əlaqələndir"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:45
 msgctxt "exams.partial.exam_modals"
 msgid "empty_no_exam_to_link"
-msgstr "Yoxlanılacaq iş tapılmadı."
+msgstr "Əlaqələndirmək üçün imtahan tapılmadı."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:47
 msgctxt "exams.partial.exam_modals"
 msgid "action_create_new_exam"
-msgstr "Kurs Yarat"
+msgstr "Yeni imtahan əlavə et"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:54
 msgctxt "exams.partial.exam_modals"
 msgid "action_close"
-msgstr "Aç"
+msgstr "Bağla"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:65
 msgctxt "exams.partial.exam_modals"
@@ -8601,7 +8606,7 @@ msgstr "Xəta: "
 #: apps/exams/templates/exams/components/_exam_modals.html:66
 msgctxt "exams.partial.exam_modals"
 msgid "confirm_unlink_exam"
-msgstr "Silmək istədiyinizə əminsiniz?"
+msgstr "Bu əlaqəni silmək istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
@@ -9318,17 +9323,17 @@ msgstr ""
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:6
 msgctxt "exams.template.create_edit_exam"
 msgid "title_edit"
-msgstr "Mövzunu Redaktə Et"
+msgstr "İmtahanı redaktə et"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:8
 msgctxt "exams.template.create_edit_exam"
 msgid "title_create"
-msgstr "Qrupu yarat"
+msgstr "İmtahan yarat"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:22
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
-msgstr "Sərbəst İşlər"
+msgstr "İmtahanı redaktə et"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:23
 #, python-format
@@ -9339,12 +9344,12 @@ msgstr "\"%(exam_title)s\" imtahanını yeniləyin."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:25
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Yeni imtahan"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:26
 msgctxt "exams.template.create_edit_exam"
 msgid "subtitle_create_exam"
-msgstr "Qrupu yarat"
+msgstr "Yeni imtahan yaradın və parametrləri təyin edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:54
 msgctxt "exams.template.create_edit_exam"
@@ -9364,12 +9369,12 @@ msgstr "Paint cavabı yalnız Yazılı / praktiki imtahanlarda aktiv edilə bil�
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:100
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "Tarix və vaxt ayarları"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:101
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "İmtahanın başlanğıc və son tarixini təyin edin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:109
 msgctxt "exams.template.create_edit_exam"
@@ -9379,17 +9384,17 @@ msgstr "Başlanğıc"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:116
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_1"
-msgstr "Start exam"
+msgstr "Başlanğıc tarixi boş saxlanarsa, imtahan dərhal başlana bilər."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:117
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_2"
-msgstr "Start exam"
+msgstr "Bu tarixdən əvvəl tələbələr imtahana başlaya bilməz."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:132
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_end"
-msgstr "İngilis dili"
+msgstr "Son tarix"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:139
 msgctxt "exams.template.create_edit_exam"
@@ -9404,12 +9409,12 @@ msgstr "Bu tarixdən sonra tələbələr imtahana başlaya bilməz."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:151
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings"
-msgstr "Tələbələr"
+msgstr "Müddət və cəhd ayarları"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:152
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings_help"
-msgstr "Platformanın üstünlükləri və imkanları"
+msgstr "İmtahanın müddətini, sual vaxtını və maksimum cəhdi tənzimləyin."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:162
 msgctxt "exams.template.create_edit_exam"
@@ -9424,12 +9429,12 @@ msgstr "Məs: 60 (saniyə)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:190
 msgctxt "exams.template.create_edit_exam"
 msgid "max_attempt_help"
-msgstr "Maksimum cəhd"
+msgstr "Məs: 1, 2, 3..."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:199
 msgctxt "exams.template.create_edit_exam"
 msgid "section_access_rights"
-msgstr "Müəllim"
+msgstr "Giriş hüquqları"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:200
 msgctxt "exams.template.create_edit_exam"
@@ -9492,7 +9497,7 @@ msgstr "Dəyişiklikləri Yadda Saxla"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:271
 msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
-msgstr "Kurs Yarat"
+msgstr "İmtahan yarat"
 
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
@@ -9740,7 +9745,7 @@ msgstr "Qrup seçilməyib."
 #: apps/exams/templates/exams/teacher/exam_section.html:7
 msgctxt "exams.partial.exam_section"
 msgid "section_exams"
-msgstr "Exams"
+msgstr "İmtahanlar"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:24
 #: apps/exams/templates/exams/teacher/exam_section.html:119
@@ -9751,7 +9756,7 @@ msgstr "Mövcud İmtahanı Əlaqələndir"
 #: apps/exams/templates/exams/teacher/exam_section.html:27
 msgctxt "exams.partial.exam_section"
 msgid "action_create_new_exam"
-msgstr "Kurs Yarat"
+msgstr "Yeni imtahan əlavə et"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:47
 #: apps/exams/templates/exams/teacher/exam_section.html:147
@@ -9763,7 +9768,7 @@ msgstr "İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:149
 msgctxt "exams.partial.exam_section"
 msgid "status_finished"
-msgstr "Status published"
+msgstr "Bitib"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:51
 msgctxt "exams.partial.exam_section"
@@ -9798,12 +9803,12 @@ msgstr "%(attempts)s cəhd"
 #: apps/exams/templates/exams/teacher/exam_section.html:97
 msgctxt "exams.partial.exam_section"
 msgid "action_view"
-msgstr "Hamısını Gör"
+msgstr "Ətraflı bax"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "My Results"
+msgstr "Nəticələrə bax"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -9813,12 +9818,12 @@ msgstr "Redaktə et"
 #: apps/exams/templates/exams/teacher/exam_section.html:107
 msgctxt "exams.partial.exam_section"
 msgid "action_unlink"
-msgstr "Ləğv et"
+msgstr "Əlaqəni sil"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:116
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_in_course"
-msgstr "Empty active courses"
+msgstr "Bu kursda imtahan yoxdur."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:141
 msgctxt "exams.partial.exam_section"
@@ -9828,7 +9833,7 @@ msgstr "Bağlı"
 #: apps/exams/templates/exams/teacher/exam_section.html:151
 msgctxt "exams.partial.exam_section"
 msgid "status_open"
-msgstr "Pending"
+msgstr "Açıq"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:178
 #, python-format
@@ -9845,17 +9850,17 @@ msgstr "Cəhd: %(attempt_count)s / %(max_attempts)s"
 #: apps/exams/templates/exams/teacher/exam_section.html:200
 msgctxt "exams.partial.exam_section"
 msgid "action_view_my_results"
-msgstr "Hamısını Gör"
+msgstr "Nəticələrimə bax"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:205
 msgctxt "exams.partial.exam_section"
 msgid "action_restart_exam"
-msgstr "Start exam"
+msgstr "İmtahanı yenidən başlat"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:211
 msgctxt "exams.partial.exam_section"
 msgid "action_start_exam"
-msgstr "Start exam"
+msgstr "İmtahana başla"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:216
 msgctxt "exams.partial.exam_section"
@@ -9865,27 +9870,27 @@ msgstr "İmtahan hələ başlamayıb. Başlama tarixi: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:221
 msgctxt "exams.partial.exam_section"
 msgid "status_time_is_over"
-msgstr "Aktiv"
+msgstr "Vaxt bitib"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:226
 msgctxt "exams.partial.exam_section"
 msgid "status_no_attempt_left"
-msgstr "Yeni cəhd başlamaq üçün formanı doldurun"
+msgstr "Cəhd haqqı qalmayıb"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:237
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_assigned_to_student"
-msgstr "Qrupsuz Tələbələr"
+msgstr "Sizə təyin olunmuş imtahan yoxdur."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:244
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam"
-msgstr "Empty upcoming exams"
+msgstr "İmtahan yoxdur."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:6
 msgctxt "exams.template.create_exam_modal"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Yeni imtahan"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7
 msgctxt "exams.template.create_exam_modal"
@@ -9895,7 +9900,7 @@ msgstr "Bağla"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "loading_form"
-msgstr "Loading"
+msgstr "Form yüklənir..."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
@@ -9958,7 +9963,7 @@ msgstr "Yadda saxla"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:129
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
-msgstr "Kurs Yarat"
+msgstr "İmtahanı yarat"
 
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
@@ -10159,12 +10164,12 @@ msgstr "Cəhdlər"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:61
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_start_live"
-msgstr "Yadda Saxla"
+msgstr "Canlı Quiz Başlat"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:71
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_question"
-msgstr "Tələbə Əlavə Et"
+msgstr "Tək Sual Əlavə Et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:79
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:85
@@ -10175,17 +10180,17 @@ msgstr "Sual Bankı / Bloklar"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:90
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_results"
-msgstr "Hamısını Gör"
+msgstr "Nəticələrə bax"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:99
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_deactivate"
-msgstr "Sil"
+msgstr "Deaktiv et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:103
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_activate"
-msgstr "Yadda Saxla"
+msgstr "Aktiv et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:109
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:150
@@ -10258,17 +10263,17 @@ msgstr "Empty upcoming exams"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
 msgctxt "exams.template.teacher_exam_results"
 msgid "title_results"
-msgstr "Nəticəyə bax"
+msgstr "Nəticələr"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "İmtahan nəticələri"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
 msgid "label_type"
-msgstr "Type"
+msgstr "Tip"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:28
 msgctxt "exams.template.teacher_exam_results"
@@ -10278,12 +10283,12 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_active_upper"
-msgstr "Aktiv"
+msgstr "AKTİV"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_inactive"
-msgstr "Deaktiv"
+msgstr "DEAKTİV"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
 msgctxt "exams.template.teacher_exam_results"
@@ -10303,7 +10308,7 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_correct"
-msgstr "Düzgün?"
+msgstr "Düzgün"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
 msgctxt "exams.template.teacher_exam_results"
@@ -10313,7 +10318,7 @@ msgstr "Səhv"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Nəticə (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -10323,12 +10328,12 @@ msgstr "Başlama tarixi"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_finished_at"
-msgstr "Bitirmə vaxtı"
+msgstr "Bitmə tarixi"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_duration_sec"
-msgstr "Məs: 30 (dəqiqə)"
+msgstr "Müddət (san.)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
 msgctxt "exams.template.teacher_exam_results"
@@ -10338,38 +10343,38 @@ msgstr "Əməliyyat"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_checked"
-msgstr "Arxivləndi"
+msgstr "Yoxlanıb"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_view"
-msgstr "Hamısını Gör"
+msgstr "Ətraflı bax"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_recheck"
-msgstr "Geri"
+msgstr "Yenidən yoxla"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_locked"
-msgstr "Bağlı"
+msgstr "Yalnız baxış"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_check"
-msgstr "Geri"
+msgstr "Yoxla"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
 msgctxt "exams.template.teacher_exam_results"
 msgid "empty_no_attempt"
-msgstr "No courses assigned yet."
+msgstr "Nəticə tapılmadı."
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_back_to_exam"
-msgstr "Profilə Qayıt"
+msgstr "İmtahana qayıt"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -10777,12 +10782,12 @@ msgstr "Sual"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:30
 msgctxt "exams.template.test_question_bank"
 msgid "label_default_points"
-msgstr "Son tarix"
+msgstr "Standart bal"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:36
 msgctxt "exams.template.test_question_bank"
 msgid "stat_total_questions"
-msgstr "Total students"
+msgstr "Ümumi sual"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:45
 msgctxt "exams.template.test_question_bank"
@@ -10882,7 +10887,36 @@ msgstr "Cavab: A,C"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:149
 msgctxt "exams.template.test_question_bank"
 msgid "placeholder_editor_sample"
-msgstr "Məs: Həftə 1: Giriş"
+msgstr ""
+"Nümunə 1 (Standart - A düzgündür):\n"
+"1. Data Science əsasən nə ilə məşğul olur?\n"
+"A) Məlumatların analizi və qərar vermə\n"
+"B) Kompüter təmiri\n"
+"C) Oyun hazırlamaq\n"
+"D) İnternet qurmaq\n"
+"\n"
+"Nümunə 2 (* ilə işarələ):\n"
+"2. Python əsasən harada istifadə olunur?\n"
+"A) Avtomobil təmiri\n"
+"*B) Veb və backend inkişafı\n"
+"C) Musiqi ifası\n"
+"D) Printer yığılması\n"
+"\n"
+"Nümunə 3 (Sonda cavab yaz):\n"
+"3. HTML nədir?\n"
+"A) Proqramlaşdırma dili\n"
+"B) İşarələmə dili\n"
+"C) Əməliyyat sistemi\n"
+"D) Antivirüs\n"
+"Cavab: B\n"
+"\n"
+"Nümunə 4 (Çoxseçimli):\n"
+"4. Hansılar proqramlaşdırma dilidir?\n"
+"A) Python\n"
+"B) JavaScript\n"
+"C) Word\n"
+"D) Java\n"
+"Cavab: A,B,D"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:160
 msgctxt "exams.template.test_question_bank"
@@ -10897,12 +10931,12 @@ msgstr "Yoxlanılacaq"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:165
 msgctxt "exams.template.test_question_bank"
 msgid "action_select_all"
-msgstr "Hamısını Gör"
+msgstr "Hamısını seç"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:168
 msgctxt "exams.template.test_question_bank"
 msgid "action_deselect_all"
-msgstr "Sil"
+msgstr "Seçimi sıfırla"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:191
 msgctxt "exams.template.test_question_bank"
@@ -10912,7 +10946,7 @@ msgstr "Context"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:232
 msgctxt "exams.template.test_question_bank"
 msgid "action_save_selected"
-msgstr "Sil"
+msgstr "Əlavə et"
 
 #: apps/exams/validators.py:32
 msgctxt "exams.validator.error"
@@ -10939,7 +10973,8 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "ZIP içində təhlükəli fayl aşkarlandı: {filename}"
 
-#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22
+#: apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -10955,7 +10990,8 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "Bu imtahana başlaya bilmirsiniz."
 
-#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60
+#: apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -11227,7 +11263,8 @@ msgstr "Siz artıq bu laboratoriyanı təqdim etmisiniz!"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Cəhd: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -12550,8 +12587,7 @@ msgstr "Boş mətn təqdim edildi"
 #: apps/labs/views.py:430
 msgctxt "labs.view.error"
 msgid "import_no_questions_found_format"
-msgstr ""
-"Heç bir sual tapılmadı. Format: \"1. Sual mətni\" və ya \"1) Sual mətni\""
+msgstr "Heç bir sual tapılmadı. Format: \"1. Sual mətni\" və ya \"1) Sual mətni\""
 
 #: apps/labs/views.py:451
 msgctxt "labs.view.message"
@@ -13621,7 +13657,9 @@ msgstr "Bu icazə yoxdur: {permission}"
 #: apps/organizations/decorators.py:74
 msgctxt "organizations.decorators.error"
 msgid "insufficient_role_level"
-msgstr "Rol səviyyəsi yetərli deyil. Tələb olunur: {required}, Sənin səviyyən: {current}"
+msgstr ""
+"Rol səviyyəsi yetərli deyil. Tələb olunur: {required}, Sənin səviyyən: "
+"{current}"
 
 #: apps/organizations/decorators.py:102
 msgctxt "organizations.decorators.error"
@@ -14076,7 +14114,7 @@ msgstr "Maks cəhd:"
 
 msgctxt "projects.section"
 msgid "view_submissions"
-msgstr "Cavablara bax"
+msgstr "Nəticələrə bax"
 
 msgctxt "projects.section"
 msgid "edit"
@@ -14496,11 +14534,11 @@ msgstr "İlk layihəni təqdim et"
 
 msgctxt "projects.review"
 msgid "page_title"
-msgstr "Layihələr"
+msgstr "Nəticələr"
 
 msgctxt "projects.review"
 msgid "header_title"
-msgstr "Təqdim olunan layihələr"
+msgstr "Təqdim olunan cavablar"
 
 msgctxt "projects.review"
 msgid "course_label"
@@ -14508,7 +14546,7 @@ msgstr "Kurs:"
 
 msgctxt "projects.review"
 msgid "back"
-msgstr "Geriyə"
+msgstr "Geri"
 
 msgctxt "projects.review"
 msgid "table_student"
@@ -14540,7 +14578,7 @@ msgstr "Qiymətləndirilib"
 
 msgctxt "projects.review"
 msgid "status_rejected"
-msgstr "Rədd"
+msgstr "Rədd edilib"
 
 msgctxt "projects.review"
 msgid "view"
@@ -14548,11 +14586,11 @@ msgstr "Bax"
 
 msgctxt "projects.review"
 msgid "empty_title"
-msgstr "Hələ ki layihə təqdim olunmayıb"
+msgstr "Hələ cavab təqdim edilməyib."
 
 msgctxt "projects.review"
 msgid "modal_title"
-msgstr "Layihəyə bax"
+msgstr "Cavaba bax"
 
 msgctxt "projects.review"
 msgid "student"
@@ -14560,11 +14598,11 @@ msgstr "Tələbə:"
 
 msgctxt "projects.review"
 msgid "explanation"
-msgstr "Layihə izahatı:"
+msgstr "Cavab məzmunu:"
 
 msgctxt "projects.review"
 msgid "file"
-msgstr "Layihə faylı:"
+msgstr "Fayl:"
 
 msgctxt "projects.review"
 msgid "download"
@@ -14584,7 +14622,7 @@ msgstr "Tələbəyə rəy yazın..."
 
 msgctxt "projects.review"
 msgid "grade_button"
-msgstr "Qiymət ver"
+msgstr "Qiymətləndir"
 
 msgctxt "projects.review.js"
 msgid "no_content"
@@ -14612,11 +14650,9 @@ msgstr "Server xətası"
 
 msgctxt "projects.review.js"
 msgid "grade_button"
-msgstr "Qiymət ver"
-
+msgstr "Qiymətləndir"
 
 # Added for auth/signup localization updates
-
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
 msgstr "Fərdi hesab üçün rol avtomatik olaraq təşkilat admini olacaq."
@@ -14627,11 +14663,11 @@ msgstr "Bu hesab növü üçün rol avtomatik olaraq tələbə olacaq."
 
 msgctxt "accounts.register"
 msgid "individual_owner_help"
-msgstr "Fərdi hesab seçildikdə şəxsi workspace avtomatik yaradılır və siz təşkilat admini olursunuz."
-
+msgstr ""
+"Fərdi hesab seçildikdə şəxsi workspace avtomatik yaradılır və siz təşkilat "
+"admini olursunuz."
 
 # Added for updated register searchable select and org-role copy
-
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
 msgstr "Seçilən qurum tipi üçün rol avtomatik olaraq təşkilat admini olacaq."
@@ -14671,3 +14707,553 @@ msgstr "Seçilən təşkilat seçilən ölkəyə uyğun deyil."
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqsınız."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_search_placeholder"
+msgstr "Tələbə və ya cavab mətni axtar..."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_all"
+msgstr "Bütün statuslar"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_grading"
+msgstr "Yoxlanılır"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_returned"
+msgstr "Qaytarılıb"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_from_date"
+msgstr "Başlama tarixi"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_to_date"
+msgstr "Bitmə tarixi"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_submit"
+msgstr "Tətbiq et"
+
+msgctxt "assignment.review_submissions"
+msgid "selected_count_label"
+msgstr "Seçilib"
+
+msgctxt "assignment.review_submissions"
+msgid "action_select_all"
+msgstr "Hamısını seç"
+
+msgctxt "assignment.review_submissions"
+msgid "action_clear"
+msgstr "Seçimi sıfırla"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_title"
+msgstr "Cavabları sil"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_body"
+msgstr "Seçilmiş cavabları silmək istədiyinizə əminsiniz?"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_note"
+msgstr "Bu əməliyyat geri qaytarılmır."
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_submit"
+msgstr "Silməni təsdiqlə"
+
+msgctxt "assignment.review_submissions"
+msgid "delete_select_first"
+msgstr "Silmək üçün ən azı bir cavab seçin."
+
+msgctxt "assignment.message"
+msgid "select_submission_to_delete"
+msgstr "Silmək üçün ən azı bir cavab seçin."
+
+msgctxt "assignment.message"
+msgid "submission_not_found"
+msgstr "Seçilmiş cavablar tapılmadı."
+
+msgctxt "assignment.message"
+msgid "submissions_deleted"
+msgstr "{count} cavab silindi."
+
+msgctxt "projects.review"
+msgid "filter_search_placeholder"
+msgstr "Tələbə və ya cavab mətni axtar..."
+
+msgctxt "projects.review"
+msgid "filter_status_all"
+msgstr "Bütün statuslar"
+
+msgctxt "projects.review"
+msgid "filter_from_date"
+msgstr "Başlama tarixi"
+
+msgctxt "projects.review"
+msgid "filter_to_date"
+msgstr "Bitmə tarixi"
+
+msgctxt "projects.review"
+msgid "filter_submit"
+msgstr "Tətbiq et"
+
+msgctxt "projects.review"
+msgid "selected_count_label"
+msgstr "Seçilib"
+
+msgctxt "projects.review"
+msgid "action_select_all"
+msgstr "Hamısını seç"
+
+msgctxt "projects.review"
+msgid "action_clear"
+msgstr "Seçimi sıfırla"
+
+msgctxt "projects.review"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "projects.review"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "projects.review"
+msgid "confirm_delete_title"
+msgstr "Cavabları sil"
+
+msgctxt "projects.review"
+msgid "confirm_delete_body"
+msgstr "Seçilmiş cavabları silmək istədiyinizə əminsiniz?"
+
+msgctxt "projects.review"
+msgid "confirm_delete_note"
+msgstr "Bu əməliyyat geri qaytarılmır."
+
+msgctxt "projects.review"
+msgid "confirm_delete_submit"
+msgstr "Silməni təsdiqlə"
+
+msgctxt "projects.review"
+msgid "delete_select_first"
+msgstr "Silmək üçün ən azı bir cavab seçin."
+
+msgctxt "projects.views.message"
+msgid "select_submission_to_delete"
+msgstr "Silmək üçün ən azı bir cavab seçin."
+
+msgctxt "projects.views.message"
+msgid "submission_not_found"
+msgstr "Seçilmiş cavablar tapılmadı."
+
+msgctxt "projects.views.message"
+msgid "submissions_deleted"
+msgstr "{count} cavab silindi."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_back"
+msgstr "Geri"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_search_placeholder"
+msgstr "İstifadəçi axtar..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_all"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Qaralama"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "Davam edir"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Müddət bitib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_all"
+msgstr "Yoxlama: hamısı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_yes"
+msgstr "Yoxlananlar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_no"
+msgstr "Yoxlanmayanlar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_from_date"
+msgstr "Başlama tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_to_date"
+msgstr "Bitmə tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_submit"
+msgstr "Tətbiq et"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "selected_count_label"
+msgstr "Seçilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Hamısını seç"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear"
+msgstr "Seçimi sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_title"
+msgstr "Cəhdləri sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_body"
+msgstr "Seçilmiş cəhdləri silmək istədiyinizə əminsiniz?"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_note"
+msgstr "Silinən cəhdlərin cavabları da silinəcək."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_submit"
+msgstr "Silməni təsdiqlə"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "delete_select_first"
+msgstr "Silmək üçün ən azı bir cəhd seçin."
+
+msgctxt "exams.view.results.message"
+msgid "delete_permission_required"
+msgstr "Silmə icazəniz yoxdur."
+
+msgctxt "exams.view.results.message"
+msgid "select_attempt_to_delete"
+msgstr "Silmək üçün ən azı bir cəhd seçin."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_found"
+msgstr "Seçilmiş cəhdlər tapılmadı."
+
+msgctxt "exams.view.results.message"
+msgid "attempts_deleted"
+msgstr "{count} cəhd silindi."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_bulk_add_blocks"
+msgstr "Toplu sual əlavə et / Bloklar"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_questions_bank"
+msgstr "Suallar bankı"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "title_questions_bank"
+msgstr "Suallar bankı"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "subtitle_questions_bank"
+msgstr "Əlavə etdiyiniz sualları axtarın, seçin, deaktiv edin və idarə edin."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_back_exam_detail"
+msgstr "İmtahana qayıt"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_add_question"
+msgstr "Tək sual əlavə et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_total_questions"
+msgstr "Ümumi sual"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_active_questions"
+msgstr "Aktiv sual"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_inactive_questions"
+msgstr "Deaktiv sual"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "placeholder_search_questions"
+msgstr "Sual mətni, blok və ya variant üzrə axtar..."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_filter_status"
+msgstr "Status filtri"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_all"
+msgstr "Hamısı"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_active"
+msgstr "Aktiv"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_inactive"
+msgstr "Deaktiv"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_select_all_page"
+msgstr "Səhifədə hamısını seç"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_clear_selection"
+msgstr "Seçimi sıfırla"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count"
+msgstr "{count} sual seçildi"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count_zero"
+msgstr "0 sual seçildi"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate_selected"
+msgstr "Seçilənləri deaktiv et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate_selected"
+msgstr "Seçilənləri aktiv et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_question"
+msgstr "Sual"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_block"
+msgstr "Blok"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_status"
+msgstr "Status"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_actions"
+msgstr "Əməliyyat"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_no_block"
+msgstr "Blok yoxdur"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_active"
+msgstr "Aktiv"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_inactive"
+msgstr "Deaktiv"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_edit"
+msgstr "Redaktə et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_results"
+msgstr "Axtarışa uyğun sual tapılmadı."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_questions"
+msgstr "Hələ bu imtahanda sual yoxdur."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_pagination"
+msgstr "Səhifələmə"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_prev"
+msgstr "Əvvəlki"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_next"
+msgstr "Növbəti"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "confirm_delete_selected"
+msgstr "Seçilən sualları silmək istədiyinizə əminsiniz?"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "select_at_least_one"
+msgstr "Ən azı bir sual seçin."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "select_at_least_one"
+msgstr "Ən azı bir sual seçin."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deactivated_selected"
+msgstr "{count} sual deaktiv edildi."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "activated_selected"
+msgstr "{count} sual aktiv edildi."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deleted_selected"
+msgstr "{count} sual silindi."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "invalid_bulk_action"
+msgstr "Yanlış toplu əməliyyat."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_bulk_add_blocks"
+msgstr "Toplu sual əlavə et / Bloklar"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_sort"
+msgstr "Sıralama"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_newest"
+msgstr "Əlavə olunma tarixi (yenidən köhnəyə)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_oldest"
+msgstr "Əlavə olunma tarixi (köhnədən yeniyə)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_az"
+msgstr "Əlifba (A-Z)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_za"
+msgstr "Əlifba (Z-A)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_added_at"
+msgstr "Əlavə olunma tarixi"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate"
+msgstr "Deaktiv et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate"
+msgstr "Aktiv et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete"
+msgstr "Sil"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_title"
+msgstr "Sualı sil"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_confirm_delete"
+msgstr "Silməyi təsdiqlə"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_question_body"
+msgstr "Bu sualı silmək istədiyinizə əminsiniz? {question}"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_prev"
+msgstr "Geri"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_next"
+msgstr "İrəli"
+
