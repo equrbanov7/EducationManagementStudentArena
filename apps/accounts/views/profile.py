@@ -4,19 +4,23 @@ Profile views: user profile management and avatar serving.
 
 import mimetypes
 
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import FileResponse, Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.http import http_date
+from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_GET
 
 from apps.blog.models import Post
 from apps.courses.models import Course
 from apps.exams.models import ExamAttempt
+from apps.notifications.services import build_profile_notification_state
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from ..models import UserProfile
@@ -24,6 +28,7 @@ from ._helpers import (
     MAX_PROFILE_AVATAR_SIZE_BYTES,
     PROFILE_AVATAR_ALLOWED_EXTENSIONS,
     _assigned_exams_queryset,
+    _role_capabilities,
 )
 
 User = get_user_model()
