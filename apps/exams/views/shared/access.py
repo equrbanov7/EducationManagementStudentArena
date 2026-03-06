@@ -54,7 +54,7 @@ def exam_code_check(request):
         messages.error(request, reason or pgettext("exams.view.access.message", "exam_start_failed"))
         return redirect(_resolve_exam_failure_redirect(request))
 
-    if not exam.questions.exists():
+    if not exam.questions.filter(is_active=True).exists():
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
         return redirect(_resolve_exam_failure_redirect(request))
 

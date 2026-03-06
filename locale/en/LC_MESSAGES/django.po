@@ -2554,7 +2554,8 @@ msgstr "Choose account type"
 #: apps/accounts/templates/accounts/register.html:79
 msgctxt "accounts.register"
 msgid "individual_org_required_help"
-msgstr "Individual accounts no longer require selecting an existing organization."
+msgstr ""
+"Individual accounts no longer require selecting an existing organization."
 
 #: apps/accounts/templates/accounts/register.html:86
 msgctxt "accounts.register"
@@ -3329,12 +3330,15 @@ msgstr "Unknown action"
 #: apps/accounts/views.py:2714
 msgctxt "accounts.auth.message"
 msgid "registration_completed_request_recorded"
-msgstr "Registration completed and your organization request is recorded. Verify the email code to continue."
+msgstr ""
+"Registration completed and your organization request is recorded. Verify the"
+" email code to continue."
 
 #: apps/accounts/views.py:2719
 msgctxt "accounts.auth.message"
 msgid "registration_completed_you_can_login_now"
-msgstr "Registration completed. Verify the email code to activate your account."
+msgstr ""
+"Registration completed. Verify the email code to activate your account."
 
 #: apps/accounts/views.py:2739
 msgctxt "accounts.auth.message"
@@ -4010,7 +4014,7 @@ msgstr "Max attempts"
 #: apps/assignments/templates/assignments/assignment_section.html:73
 msgctxt "assignment.section"
 msgid "review_answers"
-msgstr "Review answers"
+msgstr "View results"
 
 #: apps/assignments/templates/assignments/assignment_section.html:77
 msgctxt "assignment.section"
@@ -4751,17 +4755,17 @@ msgstr "No vacancies found"
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
 msgid "page_title_suffix"
-msgstr "Page title suffix"
+msgstr "Results"
 
 #: apps/assignments/templates/assignments/review_submissions.html:13
 msgctxt "assignment.review_submissions"
 msgid "title_suffix"
-msgstr "Title suffix"
+msgstr "Submitted answers"
 
 #: apps/assignments/templates/assignments/review_submissions.html:16
 msgctxt "assignment.review_submissions"
 msgid "course_label"
-msgstr "Course label"
+msgstr "Course"
 
 #: apps/assignments/templates/assignments/review_submissions.html:20
 msgctxt "assignment.review_submissions"
@@ -4771,37 +4775,37 @@ msgstr "Back"
 #: apps/assignments/templates/assignments/review_submissions.html:32
 msgctxt "assignment.review_submissions"
 msgid "table_student"
-msgstr "Table student"
+msgstr "Student"
 
 #: apps/assignments/templates/assignments/review_submissions.html:33
 msgctxt "assignment.review_submissions"
 msgid "table_submitted_at"
-msgstr "Table submitted at"
+msgstr "Submitted at"
 
 #: apps/assignments/templates/assignments/review_submissions.html:34
 msgctxt "assignment.review_submissions"
 msgid "table_status"
-msgstr "Table status"
+msgstr "Status"
 
 #: apps/assignments/templates/assignments/review_submissions.html:35
 msgctxt "assignment.review_submissions"
 msgid "table_grade"
-msgstr "Table grade"
+msgstr "Grade"
 
 #: apps/assignments/templates/assignments/review_submissions.html:36
 msgctxt "assignment.review_submissions"
 msgid "table_actions"
-msgstr "Table actions"
+msgstr "Actions"
 
 #: apps/assignments/templates/assignments/review_submissions.html:49
 msgctxt "assignment.review_submissions"
 msgid "status_pending"
-msgstr "Status pending"
+msgstr "Pending"
 
 #: apps/assignments/templates/assignments/review_submissions.html:51
 msgctxt "assignment.review_submissions"
 msgid "status_graded"
-msgstr "Status graded"
+msgstr "Graded"
 
 #: apps/assignments/templates/assignments/review_submissions.html:74
 msgctxt "assignment.review_submissions"
@@ -4811,12 +4815,12 @@ msgstr "View"
 #: apps/assignments/templates/assignments/review_submissions.html:85
 msgctxt "assignment.review_submissions"
 msgid "empty_submissions"
-msgstr "Empty submissions"
+msgstr "No submissions yet."
 
 #: apps/assignments/templates/assignments/review_submissions.html:100
 msgctxt "assignment.review_submissions"
 msgid "modal_title"
-msgstr "Modal title"
+msgstr "Review submission"
 
 #: apps/assignments/templates/assignments/review_submissions.html:108
 msgctxt "assignment.review_submissions"
@@ -4847,7 +4851,7 @@ msgstr "Grade"
 #: apps/assignments/templates/assignments/review_submissions.html:138
 msgctxt "assignment.review_submissions"
 msgid "grade_placeholder"
-msgstr "Grade placeholder"
+msgstr "Enter grade"
 
 #: apps/assignments/templates/assignments/review_submissions.html:142
 msgctxt "assignment.review_submissions"
@@ -4857,13 +4861,13 @@ msgstr "Feedback"
 #: apps/assignments/templates/assignments/review_submissions.html:144
 msgctxt "assignment.review_submissions"
 msgid "feedback_placeholder"
-msgstr "Feedback placeholder"
+msgstr "Write feedback for the student..."
 
 #: apps/assignments/templates/assignments/review_submissions.html:148
 #: apps/assignments/templates/assignments/review_submissions.html:166
 msgctxt "assignment.review_submissions"
 msgid "grade_submit"
-msgstr "Grade submit"
+msgstr "Save grade"
 
 #: apps/assignments/templates/assignments/review_submissions.html:160
 msgctxt "assignment.review_submissions"
@@ -4873,12 +4877,12 @@ msgstr "No text"
 #: apps/assignments/templates/assignments/review_submissions.html:162
 msgctxt "assignment.review_submissions"
 msgid "submitting"
-msgstr "Submitting"
+msgstr "Submitting..."
 
 #: apps/assignments/templates/assignments/review_submissions.html:163
 msgctxt "assignment.review_submissions"
 msgid "error_prefix"
-msgstr "Error prefix"
+msgstr "Error"
 
 #: apps/assignments/templates/assignments/review_submissions.html:164
 msgctxt "assignment.review_submissions"
@@ -5144,8 +5148,8 @@ msgstr "Personalized Portals and Dashboards"
 msgctxt "blog.about_page"
 msgid "feature_3_text"
 msgstr ""
-"Dedicated dashboards for teachers, students, and administrators. Includes e-"
-"journal, grading, attendance, and analytics-based performance monitoring."
+"Dedicated dashboards for teachers, students, and administrators. Includes "
+"e-journal, grading, attendance, and analytics-based performance monitoring."
 
 #: apps/blog/templates/blog/about.html:62
 msgctxt "blog.about_page"
@@ -5315,8 +5319,8 @@ msgstr "Password changed successfully!"
 msgctxt "blog.password_reset_complete_page"
 msgid "message"
 msgstr ""
-"Great! Your account security has been restored. You can now log in with your "
-"new password."
+"Great! Your account security has been restored. You can now log in with your"
+" new password."
 
 #: apps/blog/templates/blog/password_reset_complete.html:27
 msgctxt "blog.password_reset_complete_page"
@@ -5985,8 +5989,8 @@ msgstr "Welcome to subscription! [Your Blog Name]"
 msgctxt "blog.subscribe.email"
 msgid "plain_text_body"
 msgstr ""
-"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for "
-"the latest updates."
+"Hello, {email}! You have successfully subscribed to our blog. Stay tuned for"
+" the latest updates."
 
 #: apps/blog/views.py:193
 msgctxt "blog.subscribe.message"
@@ -6377,7 +6381,8 @@ msgstr "After Creating a Course"
 #: apps/courses/templates/courses/create_course.html:131
 msgctxt "courses.create_page"
 msgid "after_create_item_1"
-msgstr "After the course is created, you are redirected to the dashboard page."
+msgstr ""
+"After the course is created, you are redirected to the dashboard page."
 
 #: apps/courses/templates/courses/create_course.html:132
 msgctxt "courses.create_page"
@@ -6480,8 +6485,8 @@ msgstr ""
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Status Importance: You can easily work on the course by saving it in \"Draft"
-"\" mode. Don't forget to \"Publish\" when ready."
+"Status Importance: You can easily work on the course by saving it in "
+"\"Draft\" mode. Don't forget to \"Publish\" when ready."
 
 #: apps/courses/templates/courses/edit_course.html:406
 msgctxt "courses.edit_page"
@@ -8529,12 +8534,12 @@ msgstr "Marked correct option {option} does not exist."
 #: apps/exams/templates/exams/components/_exam_modals.html:9
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
-msgstr "Edit Course"
+msgstr "Link Exam to Course"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:15
 msgctxt "exams.partial.exam_modals"
 msgid "placeholder_search_by_exam_name"
-msgstr "Placeholder search teacher"
+msgstr "Search exam..."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:25
 msgctxt "exams.partial.exam_modals"
@@ -8544,32 +8549,32 @@ msgstr "Question"
 #: apps/exams/templates/exams/components/_exam_modals.html:27
 msgctxt "exams.partial.exam_modals"
 msgid "label_linked_to_course"
-msgstr "Label assigned teachers"
+msgstr "linked to a course"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:35
 msgctxt "exams.partial.exam_modals"
 msgid "status_linked"
-msgstr "Closed"
+msgstr "Linked"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:37
 msgctxt "exams.partial.exam_modals"
 msgid "action_link"
-msgstr "Edit"
+msgstr "Link"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:45
 msgctxt "exams.partial.exam_modals"
 msgid "empty_no_exam_to_link"
-msgstr "Empty not found"
+msgstr "No exam found to link."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:47
 msgctxt "exams.partial.exam_modals"
 msgid "action_create_new_exam"
-msgstr "Create Course"
+msgstr "Create New Exam"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:54
 msgctxt "exams.partial.exam_modals"
 msgid "action_close"
-msgstr "open"
+msgstr "Close"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:65
 msgctxt "exams.partial.exam_modals"
@@ -8579,7 +8584,7 @@ msgstr "Error:"
 #: apps/exams/templates/exams/components/_exam_modals.html:66
 msgctxt "exams.partial.exam_modals"
 msgid "confirm_unlink_exam"
-msgstr "Confirm delete"
+msgstr "Are you sure you want to remove this course-exam link?"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
@@ -9290,17 +9295,17 @@ msgstr "The video will be deleted. Click \"Save\" to apply changes."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:6
 msgctxt "exams.template.create_edit_exam"
 msgid "title_edit"
-msgstr "Edit Topic"
+msgstr "Edit Exam"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:8
 msgctxt "exams.template.create_edit_exam"
 msgid "title_create"
-msgstr "Submit create"
+msgstr "Create Exam"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:22
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
-msgstr "Freelance Jobs"
+msgstr "Edit Exam"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:23
 #, python-format
@@ -9311,12 +9316,12 @@ msgstr "Update the exam \"%(exam_title)s\"."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:25
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Create New Exam"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:26
 msgctxt "exams.template.create_edit_exam"
 msgid "subtitle_create_exam"
-msgstr "Submit create"
+msgstr "Create a new exam and configure its settings."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:54
 msgctxt "exams.template.create_edit_exam"
@@ -9336,32 +9341,32 @@ msgstr "Paint answer can only be enabled for written/practical exams."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:100
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits"
-msgstr "Platform Advantages and Capabilities"
+msgstr "Date and Time Settings"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:101
 msgctxt "exams.template.create_edit_exam"
 msgid "section_date_limits_help"
-msgstr "Platform Advantages and Capabilities"
+msgstr "Set when the exam can start and when it ends."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:109
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_start"
-msgstr "Label start"
+msgstr "Start"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:116
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_1"
-msgstr "Start exam"
+msgstr "If left empty, students can start at any time."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:117
 msgctxt "exams.template.create_edit_exam"
 msgid "start_help_2"
-msgstr "Start exam"
+msgstr "Students cannot start before this date."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:132
 msgctxt "exams.template.create_edit_exam"
 msgid "badge_end"
-msgstr "English"
+msgstr "Deadline"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:139
 msgctxt "exams.template.create_edit_exam"
@@ -9376,12 +9381,12 @@ msgstr "Students cannot start after this date."
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:151
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings"
-msgstr "Students"
+msgstr "Duration and Attempt Settings"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:152
 msgctxt "exams.template.create_edit_exam"
 msgid "section_time_settings_help"
-msgstr "Platform Advantages and Capabilities"
+msgstr "Configure exam duration, per-question time, and attempt limit."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:162
 msgctxt "exams.template.create_edit_exam"
@@ -9396,12 +9401,12 @@ msgstr "Example: 60 (seconds)"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:190
 msgctxt "exams.template.create_edit_exam"
 msgid "max_attempt_help"
-msgstr "Max attempts"
+msgstr "Example: 1, 2, 3..."
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:199
 msgctxt "exams.template.create_edit_exam"
 msgid "section_access_rights"
-msgstr "Teacher"
+msgstr "Access Rights"
 
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:200
 msgctxt "exams.template.create_edit_exam"
@@ -9463,7 +9468,7 @@ msgstr "Save Changes"
 #: apps/exams/templates/exams/teacher/createAndEditExam.html:271
 msgctxt "exams.template.create_edit_exam"
 msgid "action_create"
-msgstr "Create Course"
+msgstr "Create Exam"
 
 #: apps/exams/templates/exams/teacher/create_question.html:4
 msgctxt "exams.template.create_question"
@@ -9530,8 +9535,8 @@ msgstr "Label group name"
 msgctxt "exams.template.create_question_bank"
 msgid "label_block_time_minutes"
 msgstr ""
-"Warning: A block named '{block_name}' already exists. Please use a different "
-"name."
+"Warning: A block named '{block_name}' already exists. Please use a different"
+" name."
 
 #: apps/exams/templates/exams/teacher/create_question_bank.html:279
 #: apps/exams/templates/exams/teacher/create_question_bank.html:307
@@ -9612,8 +9617,8 @@ msgstr "Ex: Lab 1"
 msgctxt "exams.template.create_question_bank"
 msgid "alert_duplicate_block_name"
 msgstr ""
-"Warning: A block named '{block_name}' already exists. Please use a different "
-"name."
+"Warning: A block named '{block_name}' already exists. Please use a different"
+" name."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:4
 msgctxt "exams.template.create_student_group"
@@ -9722,7 +9727,7 @@ msgstr "Link Existing Exam"
 #: apps/exams/templates/exams/teacher/exam_section.html:27
 msgctxt "exams.partial.exam_section"
 msgid "action_create_new_exam"
-msgstr "Create Course"
+msgstr "Create New Exam"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:47
 #: apps/exams/templates/exams/teacher/exam_section.html:147
@@ -9734,17 +9739,17 @@ msgstr "This exam has not started yet. Start date: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:149
 msgctxt "exams.partial.exam_section"
 msgid "status_finished"
-msgstr "Status published"
+msgstr "Finished"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:51
 msgctxt "exams.partial.exam_section"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:54
 msgctxt "exams.partial.exam_section"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:68
 #: apps/exams/templates/exams/teacher/exam_section.html:166
@@ -9769,12 +9774,12 @@ msgstr "%(attempts)s attempts"
 #: apps/exams/templates/exams/teacher/exam_section.html:97
 msgctxt "exams.partial.exam_section"
 msgid "action_view"
-msgstr "See all"
+msgstr "Detailed view"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "My Results"
+msgstr "View results"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -9784,12 +9789,12 @@ msgstr "Edit"
 #: apps/exams/templates/exams/teacher/exam_section.html:107
 msgctxt "exams.partial.exam_section"
 msgid "action_unlink"
-msgstr "Cancel it"
+msgstr "Remove link"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:116
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_in_course"
-msgstr "Empty active courses"
+msgstr "No exams in this course."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:141
 msgctxt "exams.partial.exam_section"
@@ -9799,7 +9804,7 @@ msgstr "Closed"
 #: apps/exams/templates/exams/teacher/exam_section.html:151
 msgctxt "exams.partial.exam_section"
 msgid "status_open"
-msgstr "Pending"
+msgstr "Open"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:178
 #, python-format
@@ -9816,17 +9821,17 @@ msgstr "Attempts: %(attempt_count)s / %(max_attempts)s"
 #: apps/exams/templates/exams/teacher/exam_section.html:200
 msgctxt "exams.partial.exam_section"
 msgid "action_view_my_results"
-msgstr "See all"
+msgstr "View My Results"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:205
 msgctxt "exams.partial.exam_section"
 msgid "action_restart_exam"
-msgstr "Start exam"
+msgstr "Restart Exam"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:211
 msgctxt "exams.partial.exam_section"
 msgid "action_start_exam"
-msgstr "Start exam"
+msgstr "Start Exam"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:216
 msgctxt "exams.partial.exam_section"
@@ -9836,37 +9841,37 @@ msgstr "This exam has not started yet. Start date: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:221
 msgctxt "exams.partial.exam_section"
 msgid "status_time_is_over"
-msgstr "Status active"
+msgstr "Time is over"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:226
 msgctxt "exams.partial.exam_section"
 msgid "status_no_attempt_left"
-msgstr "Fill out the form to start a new attempt"
+msgstr "No attempts left"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:237
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_assigned_to_student"
-msgstr "Students without groups"
+msgstr "No exam assigned to you."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:244
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam"
-msgstr "Empty upcoming exams"
+msgstr "No exams."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:6
 msgctxt "exams.template.create_exam_modal"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Create New Exam"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7
 msgctxt "exams.template.create_exam_modal"
 msgid "aria_close"
-msgstr "Close it"
+msgstr "Close"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "loading_form"
-msgstr "Loading"
+msgstr "Loading form..."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:74
 msgctxt "exams.template.create_exam_modal_form"
@@ -9919,7 +9924,7 @@ msgstr "Username or email"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:128
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:129
 msgctxt "exams.template.create_exam_modal_form"
@@ -9929,7 +9934,7 @@ msgstr "Save"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:129
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
-msgstr "Create Course"
+msgstr "Create Exam"
 
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:4
 msgctxt "exams.template.questions_i_can_see"
@@ -10130,12 +10135,12 @@ msgstr "Attempts"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:61
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_start_live"
-msgstr "Save to memory"
+msgstr "Start Live Quiz"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:71
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_question"
-msgstr "Add Student"
+msgstr "Add Single Question"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:79
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:85
@@ -10146,17 +10151,17 @@ msgstr "Question Bank / Blocks"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:90
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_results"
-msgstr "See all"
+msgstr "View results"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:99
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_deactivate"
-msgstr "Delete"
+msgstr "Deactivate"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:103
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_activate"
-msgstr "Save to memory"
+msgstr "Activate"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:109
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:150
@@ -10229,12 +10234,12 @@ msgstr "Empty upcoming exams"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:5
 msgctxt "exams.template.teacher_exam_results"
 msgid "title_results"
-msgstr "View result"
+msgstr "Results"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:24
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_results"
-msgstr "Subheading posts"
+msgstr "Exam results"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:27
 msgctxt "exams.template.teacher_exam_results"
@@ -10249,22 +10254,22 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:30
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_active_upper"
-msgstr "Status active"
+msgstr "ACTIVE"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:32
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "INACTIVE"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:38
 msgctxt "exams.template.teacher_exam_results"
 msgid "heading_participant_results"
-msgstr "Participant Results"
+msgstr "Participant results"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:45
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_user"
-msgstr "Table user"
+msgstr "User"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:46
 msgctxt "exams.template.teacher_exam_results"
@@ -10274,7 +10279,7 @@ msgstr "Status"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:47
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_correct"
-msgstr "Correct?"
+msgstr "Correct"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:48
 msgctxt "exams.template.teacher_exam_results"
@@ -10284,7 +10289,7 @@ msgstr "Wrong"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:49
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_score_percent"
-msgstr "Score"
+msgstr "Score (%)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:50
 msgctxt "exams.template.teacher_exam_results"
@@ -10294,53 +10299,53 @@ msgstr "Start date"
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:51
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_finished_at"
-msgstr "Finished At"
+msgstr "Finish date"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:52
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_duration_sec"
-msgstr "Example: 30 (minutes)"
+msgstr "Duration (sec)"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:53
 msgctxt "exams.template.teacher_exam_results"
 msgid "col_action"
-msgstr "Table action"
+msgstr "Action"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:77
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_checked"
-msgstr "Status archived"
+msgstr "Checked"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:111
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:133
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_view"
-msgstr "See all"
+msgstr "Detailed view"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:123
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_recheck"
-msgstr "Back"
+msgstr "Recheck"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:136
 msgctxt "exams.template.teacher_exam_results"
 msgid "status_locked"
-msgstr "Closed"
+msgstr "View only"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:143
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_check"
-msgstr "Back"
+msgstr "Check"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:157
 msgctxt "exams.template.teacher_exam_results"
 msgid "empty_no_attempt"
-msgstr "No courses assigned yet."
+msgstr "No attempts found."
 
 #: apps/exams/templates/exams/teacher/teacher_exam_results.html:162
 msgctxt "exams.template.teacher_exam_results"
 msgid "action_back_to_exam"
-msgstr "Back to profile"
+msgstr "Back to exam"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
@@ -10748,12 +10753,12 @@ msgstr "Question"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:30
 msgctxt "exams.template.test_question_bank"
 msgid "label_default_points"
-msgstr "Label deadline"
+msgstr "Default points"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:36
 msgctxt "exams.template.test_question_bank"
 msgid "stat_total_questions"
-msgstr "Total students"
+msgstr "Total questions"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:45
 msgctxt "exams.template.test_question_bank"
@@ -10853,7 +10858,36 @@ msgstr "Answer: A,C"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:149
 msgctxt "exams.template.test_question_bank"
 msgid "placeholder_editor_sample"
-msgstr "Ex: Week 1: Introduction"
+msgstr ""
+"Example 1 (Default - A is correct):\n"
+"1. What does Data Science mainly do?\n"
+"A) Analyze data and support decisions\n"
+"B) Repair computers\n"
+"C) Build random games only\n"
+"D) Install internet cables\n"
+"\n"
+"Example 2 (Mark correct with *):\n"
+"2. Where is Python mainly used?\n"
+"A) Car repair\n"
+"*B) Web and backend development\n"
+"C) Singing songs\n"
+"D) Printer assembly\n"
+"\n"
+"Example 3 (Write answer at the end):\n"
+"3. What is HTML?\n"
+"A) Programming language\n"
+"B) Markup language\n"
+"C) Operating system\n"
+"D) Antivirus\n"
+"Answer: B\n"
+"\n"
+"Example 4 (Multiple correct answers):\n"
+"4. Which are programming languages?\n"
+"A) Python\n"
+"B) JavaScript\n"
+"C) Word\n"
+"D) Java\n"
+"Answer: A,B,D"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:160
 msgctxt "exams.template.test_question_bank"
@@ -10868,12 +10902,12 @@ msgstr "Pending reviews"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:165
 msgctxt "exams.template.test_question_bank"
 msgid "action_select_all"
-msgstr "See all"
+msgstr "Select all"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:168
 msgctxt "exams.template.test_question_bank"
 msgid "action_deselect_all"
-msgstr "Delete"
+msgstr "Clear selection"
 
 #: apps/exams/templates/exams/teacher/test_question_bank.html:191
 msgctxt "exams.template.test_question_bank"
@@ -10883,7 +10917,7 @@ msgstr "Context"
 #: apps/exams/templates/exams/teacher/test_question_bank.html:232
 msgctxt "exams.template.test_question_bank"
 msgid "action_save_selected"
-msgstr "Delete"
+msgstr "Add selected"
 
 #: apps/exams/validators.py:32
 msgctxt "exams.validator.error"
@@ -10910,7 +10944,8 @@ msgctxt "exams.validator.error"
 msgid "blocked_extension_in_zip"
 msgstr "Blocked file detected inside ZIP: {filename}"
 
-#: apps/exams/views/shared/access.py:22 apps/exams/views/student/attempts.py:25
+#: apps/exams/views/shared/access.py:22
+#: apps/exams/views/student/attempts.py:25
 #: apps/exams/views/student/attempts.py:47
 msgctxt "exams.view.access.message"
 msgid "no_exam_access"
@@ -10926,7 +10961,8 @@ msgctxt "exams.view.access.message"
 msgid "exam_start_not_allowed"
 msgstr "You cannot start this exam."
 
-#: apps/exams/views/shared/access.py:60 apps/exams/views/student/attempts.py:35
+#: apps/exams/views/shared/access.py:60
+#: apps/exams/views/student/attempts.py:35
 #: apps/exams/views/student/attempts.py:102
 msgctxt "exams.view.access.message"
 msgid "exam_has_no_questions"
@@ -11198,7 +11234,8 @@ msgstr "You have already submitted this lab!"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid ""
-"label_submission_info %(submitted_at)s · %(attempt_count)s / %(max_attempts)s"
+"label_submission_info %(submitted_at)s · %(attempt_count)s / "
+"%(max_attempts)s"
 msgstr "%(submitted_at)s · Attempt: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_detail.html:62
@@ -12521,8 +12558,7 @@ msgstr "Empty text submitted"
 #: apps/labs/views.py:430
 msgctxt "labs.view.error"
 msgid "import_no_questions_found_format"
-msgstr ""
-"No questions found. Format: \"1. Question text\" or \"1) Question text\""
+msgstr "No questions found. Format: \"1. Question text\" or \"1) Question text\""
 
 #: apps/labs/views.py:451
 msgctxt "labs.view.message"
@@ -13157,7 +13193,9 @@ msgstr "Question count must be greater than 0."
 #: apps/live_exam/views.py:604
 msgctxt "live_exam.view.message"
 msgid "question_count_exceeds_total"
-msgstr "There are only {total_in_exam} questions in this exam. {desired} cannot be selected."
+msgstr ""
+"There are only {total_in_exam} questions in this exam. {desired} cannot be "
+"selected."
 
 #: apps/live_exam/views.py:643
 msgctxt "live_exam.view.message"
@@ -14047,7 +14085,7 @@ msgstr "Max attempts:"
 
 msgctxt "projects.section"
 msgid "view_submissions"
-msgstr "View Submissions"
+msgstr "View results"
 
 msgctxt "projects.section"
 msgid "edit"
@@ -14467,11 +14505,11 @@ msgstr "Submit First Project"
 
 msgctxt "projects.review"
 msgid "page_title"
-msgstr "Submissions"
+msgstr "Results"
 
 msgctxt "projects.review"
 msgid "header_title"
-msgstr "Submitted Projects"
+msgstr "Submitted answers"
 
 msgctxt "projects.review"
 msgid "course_label"
@@ -14487,7 +14525,7 @@ msgstr "Student"
 
 msgctxt "projects.review"
 msgid "table_submitted_at"
-msgstr "Submitted At"
+msgstr "Submitted at"
 
 msgctxt "projects.review"
 msgid "table_status"
@@ -14519,11 +14557,11 @@ msgstr "View"
 
 msgctxt "projects.review"
 msgid "empty_title"
-msgstr "No project has been submitted yet"
+msgstr "No submissions yet."
 
 msgctxt "projects.review"
 msgid "modal_title"
-msgstr "Review Project"
+msgstr "Review submission"
 
 msgctxt "projects.review"
 msgid "student"
@@ -14531,11 +14569,11 @@ msgstr "Student:"
 
 msgctxt "projects.review"
 msgid "explanation"
-msgstr "Project Explanation:"
+msgstr "Answer content:"
 
 msgctxt "projects.review"
 msgid "file"
-msgstr "Project File:"
+msgstr "File:"
 
 msgctxt "projects.review"
 msgid "download"
@@ -14555,7 +14593,7 @@ msgstr "Write feedback for the student..."
 
 msgctxt "projects.review"
 msgid "grade_button"
-msgstr "Submit Grade"
+msgstr "Save grade"
 
 msgctxt "projects.review.js"
 msgid "no_content"
@@ -14583,14 +14621,14 @@ msgstr "Server error"
 
 msgctxt "projects.review.js"
 msgid "grade_button"
-msgstr "Submit Grade"
-
+msgstr "Save grade"
 
 # Added for auth/signup localization updates
-
 msgctxt "accounts.register"
 msgid "auto_role_info_owner"
-msgstr "For individual account, role will be set to organization admin automatically."
+msgstr ""
+"For individual account, role will be set to organization admin "
+"automatically."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student"
@@ -14598,14 +14636,16 @@ msgstr "For this account type, role will be set to student automatically."
 
 msgctxt "accounts.register"
 msgid "individual_owner_help"
-msgstr "For an individual account, your personal workspace is created automatically and you become the admin."
-
+msgstr ""
+"For an individual account, your personal workspace is created automatically "
+"and you become the admin."
 
 # Added for updated register searchable select and org-role copy
-
 msgctxt "accounts.register"
 msgid "auto_role_info_org"
-msgstr "For this organization type, role will be set to organization admin automatically."
+msgstr ""
+"For this organization type, role will be set to organization admin "
+"automatically."
 
 msgctxt "accounts.register.js"
 msgid "no_results"
@@ -14641,4 +14681,556 @@ msgstr "Selected organization does not match the selected country."
 
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
-msgstr "After email verification, you will join the selected organization as a student."
+msgstr ""
+"After email verification, you will join the selected organization as a "
+"student."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_search_placeholder"
+msgstr "Search student or answer text..."
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_all"
+msgstr "All statuses"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_submitted"
+msgstr "Submitted"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_grading"
+msgstr "In review"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_status_returned"
+msgstr "Returned"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_from_date"
+msgstr "Start date"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_to_date"
+msgstr "End date"
+
+msgctxt "assignment.review_submissions"
+msgid "filter_submit"
+msgstr "Apply"
+
+msgctxt "assignment.review_submissions"
+msgid "selected_count_label"
+msgstr "Selected"
+
+msgctxt "assignment.review_submissions"
+msgid "action_select_all"
+msgstr "Select all"
+
+msgctxt "assignment.review_submissions"
+msgid "action_clear"
+msgstr "Clear selection"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete_selected"
+msgstr "Delete selected"
+
+msgctxt "assignment.review_submissions"
+msgid "action_delete"
+msgstr "Delete"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_title"
+msgstr "Delete submissions"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_body"
+msgstr "Are you sure you want to delete selected submissions?"
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_note"
+msgstr "This action cannot be undone."
+
+msgctxt "assignment.review_submissions"
+msgid "confirm_delete_submit"
+msgstr "Confirm delete"
+
+msgctxt "assignment.review_submissions"
+msgid "delete_select_first"
+msgstr "Select at least one submission to delete."
+
+msgctxt "assignment.message"
+msgid "select_submission_to_delete"
+msgstr "Select at least one submission to delete."
+
+msgctxt "assignment.message"
+msgid "submission_not_found"
+msgstr "Selected submissions were not found."
+
+msgctxt "assignment.message"
+msgid "submissions_deleted"
+msgstr "{count} submissions deleted."
+
+msgctxt "projects.review"
+msgid "filter_search_placeholder"
+msgstr "Search student or answer text..."
+
+msgctxt "projects.review"
+msgid "filter_status_all"
+msgstr "All statuses"
+
+msgctxt "projects.review"
+msgid "filter_from_date"
+msgstr "Start date"
+
+msgctxt "projects.review"
+msgid "filter_to_date"
+msgstr "End date"
+
+msgctxt "projects.review"
+msgid "filter_submit"
+msgstr "Apply"
+
+msgctxt "projects.review"
+msgid "selected_count_label"
+msgstr "Selected"
+
+msgctxt "projects.review"
+msgid "action_select_all"
+msgstr "Select all"
+
+msgctxt "projects.review"
+msgid "action_clear"
+msgstr "Clear selection"
+
+msgctxt "projects.review"
+msgid "action_delete_selected"
+msgstr "Delete selected"
+
+msgctxt "projects.review"
+msgid "action_delete"
+msgstr "Delete"
+
+msgctxt "projects.review"
+msgid "confirm_delete_title"
+msgstr "Delete submissions"
+
+msgctxt "projects.review"
+msgid "confirm_delete_body"
+msgstr "Are you sure you want to delete selected submissions?"
+
+msgctxt "projects.review"
+msgid "confirm_delete_note"
+msgstr "This action cannot be undone."
+
+msgctxt "projects.review"
+msgid "confirm_delete_submit"
+msgstr "Confirm delete"
+
+msgctxt "projects.review"
+msgid "delete_select_first"
+msgstr "Select at least one submission to delete."
+
+msgctxt "projects.views.message"
+msgid "select_submission_to_delete"
+msgstr "Select at least one submission to delete."
+
+msgctxt "projects.views.message"
+msgid "submission_not_found"
+msgstr "Selected submissions were not found."
+
+msgctxt "projects.views.message"
+msgid "submissions_deleted"
+msgstr "{count} submissions deleted."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_back"
+msgstr "Back"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_search_placeholder"
+msgstr "Search user..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_all"
+msgstr "All statuses"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_draft"
+msgstr "Draft"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_in_progress"
+msgstr "In progress"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Submitted"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Expired"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_all"
+msgstr "Review: all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_yes"
+msgstr "Checked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_no"
+msgstr "Unchecked"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_from_date"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_to_date"
+msgstr "End date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_submit"
+msgstr "Apply"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "selected_count_label"
+msgstr "Selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_select_all"
+msgstr "Select all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_clear"
+msgstr "Clear selection"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete_selected"
+msgstr "Delete selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "action_delete"
+msgstr "Delete"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_title"
+msgstr "Delete attempts"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_body"
+msgstr "Are you sure you want to delete selected attempts?"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_note"
+msgstr "Answers of deleted attempts will also be removed."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "confirm_delete_submit"
+msgstr "Confirm delete"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "delete_select_first"
+msgstr "Select at least one attempt to delete."
+
+msgctxt "exams.view.results.message"
+msgid "delete_permission_required"
+msgstr "You do not have permission to delete."
+
+msgctxt "exams.view.results.message"
+msgid "select_attempt_to_delete"
+msgstr "Select at least one attempt to delete."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_found"
+msgstr "Selected attempts were not found."
+
+msgctxt "exams.view.results.message"
+msgid "attempts_deleted"
+msgstr "{count} attempts deleted."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_bulk_add_blocks"
+msgstr "Bulk add questions / Blocks"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_questions_bank"
+msgstr "Questions bank"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "title_questions_bank"
+msgstr "Questions bank"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "subtitle_questions_bank"
+msgstr "Search, select, deactivate, and manage all added questions."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_back_exam_detail"
+msgstr "Back to exam"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_add_question"
+msgstr "Add single question"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_total_questions"
+msgstr "Total questions"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_active_questions"
+msgstr "Active questions"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_inactive_questions"
+msgstr "Inactive questions"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "placeholder_search_questions"
+msgstr "Search by question text, block, or option..."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_filter_status"
+msgstr "Status filter"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_all"
+msgstr "All"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_active"
+msgstr "Active"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_inactive"
+msgstr "Inactive"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_select_all_page"
+msgstr "Select all on page"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_clear_selection"
+msgstr "Clear selection"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count"
+msgstr "{count} questions selected"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count_zero"
+msgstr "0 questions selected"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate_selected"
+msgstr "Deactivate selected"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate_selected"
+msgstr "Activate selected"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete_selected"
+msgstr "Delete selected"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_question"
+msgstr "Question"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_block"
+msgstr "Block"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_status"
+msgstr "Status"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_actions"
+msgstr "Actions"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_no_block"
+msgstr "No block"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_active"
+msgstr "Active"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_inactive"
+msgstr "Inactive"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_edit"
+msgstr "Edit"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_results"
+msgstr "No questions matched your search."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_questions"
+msgstr "There are no questions in this exam yet."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_pagination"
+msgstr "Pagination"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_prev"
+msgstr "Previous"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_next"
+msgstr "Next"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "confirm_delete_selected"
+msgstr "Are you sure you want to delete selected questions?"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "select_at_least_one"
+msgstr "Select at least one question."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "select_at_least_one"
+msgstr "Select at least one question."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deactivated_selected"
+msgstr "{count} questions were deactivated."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "activated_selected"
+msgstr "{count} questions were activated."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "deleted_selected"
+msgstr "{count} questions were deleted."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.view.questions_bank.message"
+msgid "invalid_bulk_action"
+msgstr "Invalid bulk action."
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_bulk_add_blocks"
+msgstr "Bulk add questions / Blocks"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_sort"
+msgstr "Sort"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_newest"
+msgstr "Added date (newest first)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_oldest"
+msgstr "Added date (oldest first)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_az"
+msgstr "Alphabetical (A-Z)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_za"
+msgstr "Alphabetical (Z-A)"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_added_at"
+msgstr "Added at"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate"
+msgstr "Deactivate"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate"
+msgstr "Activate"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete"
+msgstr "Delete"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_title"
+msgstr "Delete question"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_cancel"
+msgstr "Cancel"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_confirm_delete"
+msgstr "Confirm delete"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_question_body"
+msgstr "Are you sure you want to delete this question? {question}"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_prev"
+msgstr "Previous"
+
+#: apps/exams/templates/exams/teacher/teacher_questions_bank.html
+msgctxt "partials.pagination"
+msgid "action_next"
+msgstr "Next"
+

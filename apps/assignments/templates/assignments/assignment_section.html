@@ -68,7 +68,7 @@
                             </div>
 
                             <div class="btn-group btn-group-sm gap-2">
-                                <a href="{% url 'assignments:review_assignment_submissions' a.id %}"
+                                <a href="{% url 'assignments:review_assignment_submissions' a.id %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
                                    class="btn btn-sm btn-outline-info">
                                     <i class="fa-solid fa-eye"></i> {% trans "review_answers" context "assignment.section" %}
                                 </a>

@@ -39,6 +39,9 @@ PERMISSION_CATEGORIES = {
         "course.create",
         "course.edit",
         "course.delete",
+        "assignment.delete",
+        "project.delete",
+        "lab.delete",
     ],
     "grading": [
         "grade.view",

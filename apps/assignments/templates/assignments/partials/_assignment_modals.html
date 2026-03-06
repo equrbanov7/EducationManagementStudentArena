@@ -178,7 +178,20 @@
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     const $ = id => document.getElementById(id);
 
-    let editSavedStudentIds = new Set();
+    function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
+        return {
+            selectedStudentIds: new Set((initialSelectedIds || []).map(id => String(id))),
+            autoSelectedStudentIds: new Set(),
+            manuallyDeselectedAutoStudentIds: new Set(
+                (initialManuallyDeselectedAutoIds || []).map(id => String(id))
+            ),
+        };
+    }
+
+    const modeSelectionState = {
+        add: createSelectionState(),
+        edit: createSelectionState(),
+    };
 
     const esc = s => s ? String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]) : '';
 
@@ -196,6 +209,47 @@
         if($(mode+'AsnGroupCount')) $(mode+'AsnGroupCount').textContent = gc;
         if($(mode+'AsnStudentCount')) $(mode+'AsnStudentCount').textContent = sc;
     };
+
+    function getModeState(mode) {
+        if (!modeSelectionState[mode]) {
+            modeSelectionState[mode] = createSelectionState();
+        }
+        return modeSelectionState[mode];
+    }
+
+    function resetRemovedAutoSelections(mode) {
+        const state = getModeState(mode);
+        state.autoSelectedStudentIds.forEach(studentId => {
+            state.selectedStudentIds.delete(studentId);
+        });
+        state.autoSelectedStudentIds.clear();
+        state.manuallyDeselectedAutoStudentIds.clear();
+    }
+
+    function syncSelectedStudentsFromGroups(mode, students) {
+        const state = getModeState(mode);
+        const nextAutoSelectedIds = new Set((students || []).map(student => String(student.id)));
+
+        state.autoSelectedStudentIds.forEach(studentId => {
+            if (!nextAutoSelectedIds.has(studentId)) {
+                state.selectedStudentIds.delete(studentId);
+            }
+        });
+
+        Array.from(state.manuallyDeselectedAutoStudentIds).forEach(studentId => {
+            if (!nextAutoSelectedIds.has(studentId)) {
+                state.manuallyDeselectedAutoStudentIds.delete(studentId);
+            }
+        });
+
+        nextAutoSelectedIds.forEach(studentId => {
+            if (!state.manuallyDeselectedAutoStudentIds.has(studentId)) {
+                state.selectedStudentIds.add(studentId);
+            }
+        });
+
+        state.autoSelectedStudentIds = nextAutoSelectedIds;
+    }
 
     function loadingHtml(cssClass = 'text-muted') {
         return `<p class="${cssClass} text-center py-3">${I18N.loading}</p>`;
@@ -239,11 +293,13 @@
 
     function loadStudents(mode) {
         const container = $(mode + 'AsnStudentList');
+        const state = getModeState(mode);
 
         const groups = Array.from(document.querySelectorAll(`#${mode}AsnGroupList input:checked`))
                            .map(cb => cb.dataset.group);
 
         if(!groups.length) {
+            resetRemovedAutoSelections(mode);
             container.innerHTML = `<p class="text-muted text-center py-3">${I18N.selectGroupFirst}</p>`;
             updateCount(mode);
             return;
@@ -255,6 +311,8 @@
             .then(r => r.json())
             .then(data => {
                 const students = data.students || [];
+                syncSelectedStudentsFromGroups(mode, students);
+
                 if(!students.length) {
                     container.innerHTML = `<p class="text-muted text-center py-3">${I18N.noStudent}</p>`;
                     updateCount(mode);
@@ -262,10 +320,8 @@
                 }
 
                 container.innerHTML = students.map(s => {
-                    let isChecked = '';
-                    if(mode === 'edit' && editSavedStudentIds.has(s.id)) {
-                        isChecked = 'checked';
-                    }
+                    const studentId = String(s.id);
+                    const isChecked = state.selectedStudentIds.has(studentId) ? 'checked' : '';
 
                     return `
                         <div class="asn-chk-row">
@@ -277,7 +333,24 @@
                 }).join('');
 
                 container.querySelectorAll('input').forEach(cb => {
-                    cb.addEventListener('change', () => updateCount(mode));
+                    cb.addEventListener('change', () => {
+                        const studentId = String(cb.value);
+                        if (cb.checked) {
+                            state.selectedStudentIds.add(studentId);
+                        } else {
+                            state.selectedStudentIds.delete(studentId);
+                        }
+
+                        if (state.autoSelectedStudentIds.has(studentId)) {
+                            if (cb.checked) {
+                                state.manuallyDeselectedAutoStudentIds.delete(studentId);
+                            } else {
+                                state.manuallyDeselectedAutoStudentIds.add(studentId);
+                            }
+                        }
+
+                        updateCount(mode);
+                    });
                 });
 
                 updateCount(mode);
@@ -303,12 +376,14 @@
     });
 
     $('addAssignmentModal')?.addEventListener('shown.bs.modal', () => {
+        modeSelectionState.add = createSelectionState();
         $('addAsnStudentList').innerHTML = `<p class="text-muted text-center py-3">${I18N.selectGroupFirst}</p>`;
         loadGroups('add');
     });
 
     $('addAssignmentModal')?.addEventListener('hidden.bs.modal', () => {
         $('createAssignmentForm').reset();
+        modeSelectionState.add = createSelectionState();
     });
 
     $('createAssignmentForm')?.addEventListener('submit', e => {
@@ -338,7 +413,7 @@
 
         const url = btn.dataset.url;
 
-        editSavedStudentIds.clear();
+        modeSelectionState.edit = createSelectionState();
         $('editAsnGroupList').innerHTML = loadingHtml();
         $('editAsnStudentList').innerHTML = loadingHtml();
 
@@ -359,7 +434,10 @@
                 $('editAsnMaxAttempts').value = d.max_attempts || 3;
                 $('editAsnStatus').value = d.status || 'active';
 
-                editSavedStudentIds = new Set(d.student_ids || []);
+                modeSelectionState.edit = createSelectionState(
+                    d.student_ids || [],
+                    d.group_excluded_student_ids || []
+                );
 
                 loadGroups('edit', d.group_names || []);
             })

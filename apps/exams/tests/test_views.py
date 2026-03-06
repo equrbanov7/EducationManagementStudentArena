@@ -926,3 +926,130 @@ class StudentExamResultVisibilityWindowTest(TestCase):
 
         response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
         self.assertEqual(response.status_code, 200)
+
+
+class TeacherQuestionsBankViewTest(TestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="questions_bank_teacher",
+            email="questions_bank_teacher@example.com",
+            password="StrongPass123!",
+        )
+
+        profile = self.teacher.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            author=self.teacher,
+            title="Questions Bank Exam",
+            exam_type="test",
+            is_active=True,
+        )
+
+        self.questions = []
+        for index in range(1, 15):
+            q = ExamQuestion.objects.create(
+                exam=self.exam,
+                text=f"Alpha Question {index}",
+                order=index,
+                points=1,
+                is_active=True,
+            )
+            self.questions.append(q)
+
+        self.questions[2].is_active = False
+        self.questions[2].save(update_fields=["is_active"])
+
+        self.client.force_login(self.teacher)
+
+    def test_questions_bank_supports_search_status_filter_and_pagination(self):
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"q": "Alpha", "status": "active", "page": 1},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "exams/teacher/teacher_questions_bank.html")
+        self.assertEqual(response.context["status_filter"], "active")
+        self.assertEqual(response.context["search_query"], "Alpha")
+        self.assertEqual(response.context["page_obj"].paginator.num_pages, 2)
+        self.assertContains(response, "questionSearchInput")
+
+    def test_questions_bank_bulk_deactivate_selected(self):
+        selected = [str(self.questions[0].id), str(self.questions[1].id)]
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "deactivate",
+                "selected_question_ids": selected,
+                "status": "all",
+                "q": "",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ExamQuestion.objects.get(id=self.questions[0].id).is_active)
+        self.assertFalse(ExamQuestion.objects.get(id=self.questions[1].id).is_active)
+
+    def test_questions_bank_bulk_delete_selected(self):
+        to_delete = [str(self.questions[3].id), str(self.questions[4].id)]
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "delete",
+                "selected_question_ids": to_delete,
+                "status": "all",
+                "q": "",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ExamQuestion.objects.filter(id=self.questions[3].id).exists())
+        self.assertFalse(ExamQuestion.objects.filter(id=self.questions[4].id).exists())
+
+    def test_questions_bank_search_matches_option_text_without_duplicates(self):
+        ExamQuestionOption.objects.create(
+            question=self.questions[0],
+            label="A",
+            text="Variant debounce açar sözü",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=self.questions[0],
+            label="B",
+            text="Variant debounce açar sözü ikinci",
+            is_correct=False,
+        )
+
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"q": "debounce açar", "sort": "az"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["sort_filter"], "az")
+        object_ids = [q.id for q in response.context["page_obj"].object_list]
+        self.assertEqual(object_ids, [self.questions[0].id])
+
+    def test_questions_bank_bulk_redirect_preserves_sort_filter(self):
+        selected = [str(self.questions[0].id)]
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "deactivate",
+                "selected_question_ids": selected,
+                "status": "active",
+                "q": "Alpha",
+                "sort": "za",
+                "page": "2",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("q=Alpha", response.url)
+        self.assertIn("status=active", response.url)
+        self.assertIn("sort=za", response.url)
+        self.assertIn("page=2", response.url)

@@ -10,13 +10,14 @@ Sərbəst işlər üçün bütün view-lar:
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -95,16 +96,28 @@ def _safe_same_origin_redirect_path(request, candidate_url):
 def _teacher_review_back_url(request, assignment):
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next"),
+        request.GET.get("return_to")
+        or request.GET.get("next")
+        or request.POST.get("return_to")
+        or request.POST.get("next"),
     )
     if explicit_return_url:
         return explicit_return_url
 
-    source_section = (request.GET.get("from_section") or "").strip()
-    if source_section in {"pending-review", "review-results"}:
+    source_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    if source_section in {
+        "pending-review",
+        "review-results",
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+    }:
         return f"{reverse('accounts:profile')}?section={source_section}"
 
-    return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
+    return reverse("accounts:profile")
 
 
 def _assignment_back_url(request, assignment):
@@ -117,6 +130,25 @@ def _assignment_back_url(request, assignment):
         return f"{reverse('accounts:profile')}?{urlencode(params)}"
 
     return reverse("courses:course_dashboard", kwargs={"course_id": assignment.course.id})
+
+
+def _can_delete_assignment_content(request):
+    return request_has_permission(request, "assignment.delete") or request_has_permission(request, "course.delete")
+
+
+def _can_delete_assignment_submissions(request):
+    # Keep `exam.delete` as a backward-compatible fallback for existing roles.
+    return _can_delete_assignment_content(request) or request_has_permission(request, "exam.delete")
+
+
+def _parse_filter_date(raw_value):
+    raw_date = (raw_value or "").strip()
+    if not raw_date:
+        return "", None
+    try:
+        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
+    except ValueError:
+        return "", None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -214,6 +246,7 @@ def edit_assignment(request, pk):
     if request.method == "GET":
         assigned_students = list(assignment.assigned_students.values("id", "username", "first_name", "last_name"))
         assigned_student_ids = [s["id"] for s in assigned_students]
+        assigned_student_ids_set = set(assigned_student_ids)
 
         # Tələbələrin qruplarını tap
         assigned_groups = list(
@@ -226,6 +259,14 @@ def edit_assignment(request, pk):
             .values_list("group_name", flat=True)
             .distinct()
         )
+        group_student_ids = set(
+            CourseMembership.objects.filter(
+                course=assignment.course,
+                role="student",
+                group_name__in=assigned_groups,
+            ).values_list("user_id", flat=True)
+        )
+        group_excluded_student_ids = sorted(group_student_ids - assigned_student_ids_set)
 
         data = {
             "id": assignment.id,
@@ -237,6 +278,7 @@ def edit_assignment(request, pk):
             "status": assignment.status,
             "group_names": assigned_groups,
             "student_ids": assigned_student_ids,
+            "group_excluded_student_ids": group_excluded_student_ids,
             "students": [
                 {
                     "id": s["id"],
@@ -305,6 +347,12 @@ def delete_assignment(request, pk):
     assignment = _get_tenant_assignment_or_404(request, pk)
 
     if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        return JsonResponse(
+            {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
+            status=403,
+        )
+
+    if not _can_delete_assignment_content(request):
         return JsonResponse(
             {"success": False, "error": pgettext_lazy("assignment.message", "permission_denied")},
             status=403,
@@ -503,19 +551,110 @@ def review_submissions(request, pk):
         messages.error(request, pgettext_lazy("assignment.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
-    submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
+    submissions = assignment.submissions.select_related("user")
+
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        submissions = submissions.filter(
+            Q(user__username__icontains=search_query)
+            | Q(user__first_name__icontains=search_query)
+            | Q(user__last_name__icontains=search_query)
+            | Q(content__icontains=search_query)
+        )
+
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    allowed_status_filters = {"all", "submitted", "grading", "graded", "returned"}
+    if status_filter not in allowed_status_filters:
+        status_filter = "all"
+    if status_filter != "all":
+        submissions = submissions.filter(status=status_filter)
+
+    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+    if date_from:
+        submissions = submissions.filter(submitted_at__date__gte=date_from)
+    if date_to:
+        submissions = submissions.filter(submitted_at__date__lte=date_to)
+
+    submissions = submissions.order_by("-submitted_at")
+    paginator = Paginator(submissions, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     selected_submission_raw = (request.GET.get("submission") or "").strip()
     selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
 
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
+                "submission": selected_submission_id,
+                "from_section": (request.GET.get("from_section") or "").strip(),
+                "return_to": (request.GET.get("return_to") or "").strip(),
+            }.items()
+            if value not in ("", None)
+        }
+    )
+
     context = {
         "assignment": assignment,
-        "submissions": submissions,
+        "submissions": page_obj.object_list,
+        "page_obj": page_obj,
         "selected_submission_id": selected_submission_id,
         "back_url": _teacher_review_back_url(request, assignment),
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "date_from": date_from_raw,
+        "date_to": date_to_raw,
+        "pagination_query": pagination_query,
+        "can_delete_submissions": _can_delete_assignment_submissions(request),
     }
 
     return render(request, "assignments/review_submissions.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_submissions(request, pk):
+    assignment = _get_tenant_assignment_or_404(request, pk)
+
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        messages.error(request, pgettext_lazy("assignment.message", "permission_denied"))
+        return redirect(_teacher_review_back_url(request, assignment))
+
+    if not _can_delete_assignment_submissions(request):
+        messages.error(request, pgettext_lazy("assignment.message", "permission_denied"))
+        return redirect(_teacher_review_back_url(request, assignment))
+
+    redirect_url = _safe_same_origin_redirect_path(request, request.POST.get("next"))
+    if not redirect_url:
+        redirect_url = reverse("assignments:review_assignment_submissions", kwargs={"pk": assignment.id})
+
+    raw_ids = request.POST.getlist("submission_ids")
+    single_submission_id = (request.POST.get("submission_id") or "").strip()
+    if single_submission_id:
+        raw_ids.append(single_submission_id)
+
+    submission_ids = sorted({int(raw_id) for raw_id in raw_ids if str(raw_id).isdigit()})
+    if not submission_ids:
+        messages.warning(request, pgettext_lazy("assignment.message", "select_submission_to_delete"))
+        return redirect(redirect_url)
+
+    submissions_qs = assignment.submissions.filter(id__in=submission_ids)
+    submission_count = submissions_qs.count()
+    if submission_count == 0:
+        messages.warning(request, pgettext_lazy("assignment.message", "submission_not_found"))
+        return redirect(redirect_url)
+
+    submissions_qs.delete()
+    messages.success(
+        request,
+        pgettext_lazy("assignment.message", "submissions_deleted").format(count=submission_count),
+    )
+    return redirect(redirect_url)
 
 
 @login_required

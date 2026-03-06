@@ -9,7 +9,7 @@ from .groups import (
     teacher_update_group,
 )
 from .question_bank import create_question_bank, process_question_bank, test_question_bank
-from .questions import add_exam_question, delete_exam_question, edit_exam_question
+from .questions import add_exam_question, delete_exam_question, edit_exam_question, teacher_questions_bank
 from .results import teacher_check_attempt, teacher_exam_results, teacher_pending_attempts, teacher_view_attempt
 
 __all__ = [
@@ -26,6 +26,7 @@ __all__ = [
     "add_exam_question",
     "edit_exam_question",
     "delete_exam_question",
+    "teacher_questions_bank",
     "create_question_bank",
     "process_question_bank",
     "test_question_bank",

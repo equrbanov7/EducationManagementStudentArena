@@ -17,6 +17,11 @@ urlpatterns = [
         views.review_submissions,
         name="review_assignment_submissions",
     ),
+    path(
+        "<int:pk>/submissions/delete/",
+        views.delete_submissions,
+        name="delete_assignment_submissions",
+    ),
     path("submission/<int:pk>/grade/", views.grade_submission, name="grade_submission"),
     path("<int:pk>/my-submissions/", views.my_submissions, name="my_submissions"),
     # AJAX endpoints

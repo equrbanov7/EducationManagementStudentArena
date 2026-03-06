@@ -5,6 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -74,17 +75,19 @@
                     {# Sual Bankı Düyməsi #}
                     {% if exam.exam_type == "test" %}
                         <a href="{% url 'exams:test_question_bank' exam.slug %}"
-                           class="action-btn info-btn"
-                           style="background-color: #6c5ce7; color: white;">
-                            <i class="fas fa-layer-group"></i> {% trans "action_question_bank_blocks" context "exams.template.teacher_exam_detail" %}
+                           class="action-btn bank-btn">
+                            <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% else %}
                         <a href="{% url 'exams:create_question_bank' exam.slug %}"
-                           class="action-btn info-btn"
-                           style="background-color: #6c5ce7; color: white;">
-                            <i class="fas fa-layer-group"></i> {% trans "action_question_bank_blocks" context "exams.template.teacher_exam_detail" %}
+                           class="action-btn bank-btn">
+                            <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% endif %}
+
+                    <a href="{% url 'exams:teacher_questions_bank' exam.slug %}" class="action-btn library-btn">
+                        <i class="fas fa-database"></i> {% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}
+                    </a>
 
                     <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}" class="action-btn secondary-btn">
                         <i class="fas fa-poll"></i> {% trans "action_view_results" context "exams.template.teacher_exam_detail" %}
@@ -105,7 +108,10 @@
                         {% endif %}
                     </form>
 
-                    <a href="{% url 'exams:edit_exam' exam.slug %}" class="action-btn outline-btn">
+                    <a href="{% url 'exams:edit_exam' exam.slug %}"
+                       class="action-btn outline-btn js-open-exam-form-modal"
+                       data-exam-modal-mode="edit"
+                       data-exam-modal-url="{% url 'exams:edit_exam' exam.slug %}">
                         <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                     </a>
 
@@ -174,4 +180,18 @@
         </div>
     </div>
 </div>
+
+{% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
+{% endblock %}
+
+{% block extraJs %}
+<script>
+window.EXAM_CREATE_EDIT_MODAL_I18N = {
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
+    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
+    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+};
+</script>
+<script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
 {% endblock %}

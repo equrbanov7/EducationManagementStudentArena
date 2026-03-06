@@ -26,7 +26,7 @@ def _effective_needed_count(exam) -> int:
     10 -> 10
     boş/None -> 10 (default)
     """
-    total = exam.questions.count()
+    total = exam.questions.filter(is_active=True).count()
 
     val = getattr(exam, "random_question_count", None)
     if val is None:
