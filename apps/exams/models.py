@@ -753,6 +753,17 @@ class ExamQuestion(models.Model):
         help_text=pgettext_lazy("exams.model.question.help", "enable_paint"),
     )
 
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.question.field", "is_active"),
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=pgettext_lazy("exams.model.question.field", "created_at"),
+    )
+
     class Meta:
         verbose_name = pgettext_lazy("exams.model.question.meta", "singular")
         verbose_name_plural = pgettext_lazy("exams.model.question.meta", "plural")
