@@ -82,6 +82,21 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Cache configuration (used for rate limiting and sessions)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "db": 1,  # Use database 1 for cache (0 is used by Channels)
+        },
+    }
+}
+
+# Rate limiting configuration
+RATELIMIT_ENABLE = True  # Can be set to False in development if needed
+RATELIMIT_USE_CACHE = "default"
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
