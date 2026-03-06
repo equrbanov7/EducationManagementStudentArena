@@ -24,9 +24,11 @@ from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidd
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.http import http_date, url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_GET
+from django_ratelimit.decorators import ratelimit
 
 from apps.assignments.models import Assignment, Submission
 from apps.blog.models import EmailOTP
@@ -6402,6 +6404,7 @@ def superadmin_organizations(request):
 # ------------------- AUTHENTICATION VIEWS ------------------- #
 
 
+@method_decorator(ratelimit(key='ip', rate='5/5m', method='POST', block=True), name='dispatch')
 class CustomLoginView(LoginView):
     """Login view with custom form and suspended-organization checks."""
 
@@ -6410,6 +6413,7 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
 
+@ratelimit(key='ip', rate='3/1h', method='POST', block=True)
 def register_view(request):
     """User registration with organization bootstrap and email verification."""
     if request.method == "POST":
@@ -6574,6 +6578,7 @@ def register_view(request):
     )
 
 
+@ratelimit(key='session', rate='5/5m', method='POST', block=True)
 def verify_code_view(request):
     """Verify email using OTP code."""
     email = request.session.get("pending_verify_email")
@@ -6629,6 +6634,7 @@ def verify_email_link_view(request):
         return redirect("accounts:register")
 
 
+@ratelimit(key='session', rate='3/10m', method='POST', block=True)
 def resend_code_view(request):
     """Resend email verification code."""
     email = request.session.get("pending_verify_email")

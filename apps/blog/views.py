@@ -19,6 +19,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
+from django_ratelimit.decorators import ratelimit
 
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
@@ -526,6 +527,7 @@ def search_posts(request):
 # ------------------- USER REGISTER / PROFILE / LOGOUT ------------------- #
 
 
+@ratelimit(key='ip', rate='3/1h', method='POST', block=True)
 def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -557,6 +559,7 @@ def register_view(request):
     return render(request, "blog/register.html", {"form": form})
 
 
+@ratelimit(key='session', rate='5/5m', method='POST', block=True)
 def verify_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
@@ -602,6 +605,7 @@ def verify_email_link_view(request):
         return redirect("register")
 
 
+@ratelimit(key='session', rate='3/10m', method='POST', block=True)
 def resend_code_view(request):
     email = request.session.get("pending_verify_email")
     if not email:
