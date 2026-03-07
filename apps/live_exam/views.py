@@ -569,15 +569,14 @@ def live_join_enter(request, pin):
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
     # Set cookies with appropriate security flags
-    secure_cookie = getattr(settings, "SESSION_COOKIE_SECURE", False)
-    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax", secure=secure_cookie)
+    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax", secure=request.is_secure())
     resp.set_cookie(
         PLAYER_COOKIE_NAME,
         token,
         max_age=60 * 60 * 6,
         samesite="Lax",
         httponly=True,
-        secure=secure_cookie,
+        secure=request.is_secure(),
     )
 
     return resp

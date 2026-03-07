@@ -5,8 +5,9 @@ Views for the organizations app.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
+
+from core.helpers import _safe_same_origin_redirect_path
 
 from .models import Organization
 
@@ -61,14 +62,11 @@ def switch_organization(request, slug):
     )
 
     # Redirect to next or home (with validation to prevent open redirect)
-    next_url = request.GET.get("next", "/")
-    if not url_has_allowed_host_and_scheme(
-        next_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        next_url = "/"
-    return redirect(next_url)
+    next_url = request.GET.get("next", "")
+    safe_path = _safe_same_origin_redirect_path(request, next_url)
+    if safe_path:
+        return redirect(safe_path)
+    return redirect("/")
 
 
 # Sprint 6: Dashboard and Management Views
