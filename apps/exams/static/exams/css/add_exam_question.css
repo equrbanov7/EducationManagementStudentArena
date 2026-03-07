@@ -97,6 +97,30 @@ textarea {
     margin-bottom: 20px;
 }
 
+.media-help {
+    margin: 18px 0 10px;
+    padding: 14px 16px;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #f8fbff;
+}
+
+.media-help-title {
+    display: block;
+    margin-bottom: 6px;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.media-help-text,
+.help-text {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
 .variant-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
@@ -268,4 +292,68 @@ button:active {
     color: #dc2626;
     font-size: 12px;
     margin-top: 5px;
+}
+
+.question-form-modal-intro {
+    display: none;
+}
+
+.media-preview {
+    margin-top: 15px;
+    padding: 15px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.media-preview img,
+.media-preview video {
+    max-width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.media-preview video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+.media-preview-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.clear-media-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.clear-media-btn:hover {
+    background: #dc2626;
+}
+
+.file-input-wrapper {
+    position: relative;
+}
+
+.file-name-display {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f0f9ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1e40af;
 }

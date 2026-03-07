@@ -7528,7 +7528,7 @@ msgstr "Yazılı/praktiki üçün ideal cavab (istəyə görə)..."
 #: apps/exams/forms.py:296
 msgctxt "exams.form.question.label"
 msgid "text"
-msgstr "Sual"
+msgstr "Sual mətni"
 
 #: apps/exams/forms.py:297
 msgctxt "exams.form.question.label"
@@ -7553,12 +7553,12 @@ msgstr "Yazılı/praktiki üçün ideal cavab"
 #: apps/exams/forms.py:301
 msgctxt "exams.form.question.label"
 msgid "image"
-msgstr "Sual şəkli (optional)"
+msgstr "Sual şəkli (istəyə görə)"
 
 #: apps/exams/forms.py:302
 msgctxt "exams.form.question.label"
 msgid "video"
-msgstr "Sual videosu (optional)"
+msgstr "Sual videosu (istəyə görə)"
 
 #: apps/exams/forms.py:319
 msgctxt "exams.form.question.select"
@@ -9161,17 +9161,17 @@ msgstr "Təqdim olunan cavablar"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:8
 msgctxt "exams.template.add_exam_question"
 msgid "title_suffix_new_question"
-msgstr "Təqdim olunan cavablar"
+msgstr "Yeni sual"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:69
 msgctxt "exams.template.add_exam_question"
 msgid "heading_edit_question"
-msgstr "Sual"
+msgstr "Sualı redaktə et"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:72
 msgctxt "exams.template.add_exam_question"
 msgid "heading_add_new_question"
-msgstr "Yeni Mövzu Əlavə Et"
+msgstr "Yeni sual əlavə et"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:75
 msgctxt "exams.template.add_exam_question"
@@ -9181,17 +9181,17 @@ msgstr "Test imtahanı üçün yeni sual əlavə edirsiniz."
 #: apps/exams/templates/exams/teacher/add_exam_question.html:77
 msgctxt "exams.template.add_exam_question"
 msgid "info_adding_question_for_written_exam"
-msgstr "Yazılı imtahanı üçün yeni sual əlavə edirsiniz."
+msgstr "Yazılı imtahan üçün yeni sual əlavə edirsiniz."
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:93
 msgctxt "exams.template.add_exam_question"
 msgid "label_question_text"
-msgstr "Sual"
+msgstr "Sual mətni"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:100
 msgctxt "exams.template.add_exam_question"
 msgid "label_image_optional"
-msgstr "New image optional"
+msgstr "Şəkil (istəyə görə)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:109
 msgctxt "exams.template.add_exam_question"
@@ -9206,37 +9206,37 @@ msgstr "Sual"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:112
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_image"
-msgstr "Şəkil Seç"
+msgstr "Şəkli sil"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:118
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_image"
-msgstr "Yeni şəkil yüklə"
+msgstr "Seçilmiş şəklin önizləməsi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:125
 msgctxt "exams.template.add_exam_question"
 msgid "label_video_optional"
-msgstr "School optional"
+msgstr "Video (istəyə görə)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:134
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_video"
-msgstr "Mövcud şəkil"
+msgstr "Mövcud video"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:139
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_video"
-msgstr "Şəkil Seç"
+msgstr "Videonu sil"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:145
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_video"
-msgstr "Yeni kateqoriya"
+msgstr "Seçilmiş videonun önizləməsi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
-msgstr "Cavab"
+msgstr "Rəsm cavabını aktiv et"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:168
 msgctxt "exams.template.add_exam_question"
@@ -9246,28 +9246,28 @@ msgstr "Mövzu Bloku (Fənn/Bölmə)"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:171
 msgctxt "exams.template.add_exam_question"
 msgid "help_block_optional"
-msgstr "Opsional: Resursu konkret mövzuya bağlayın"
+msgstr "İstəyə görə: sualı konkret mövzu blokuna bağlayın"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:178
 msgctxt "exams.template.add_exam_question"
 msgid "label_answer_mode"
-msgstr "Cavab"
+msgstr "Cavab rejimi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:183
 #: apps/exams/templates/exams/teacher/add_exam_question.html:190
 msgctxt "exams.template.add_exam_question"
 msgid "label_time_limit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "Vaxt limiti (saniyə)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
 msgid "label_sample_correct_answer"
-msgstr "Yazılı/praktiki üçün ideal cavab (istəyə görə)..."
+msgstr "Nümunə düzgün cavab (istəyə görə)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:204
 msgctxt "exams.template.add_exam_question"
 msgid "heading_options"
-msgstr "Subheading posts"
+msgstr "Cavab variantları"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:205
 msgctxt "exams.template.add_exam_question"
@@ -9310,7 +9310,7 @@ msgstr "Yadda saxla"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:270
 msgctxt "exams.template.add_exam_question"
 msgid "action_save_and_add_new_question"
-msgstr "Yeni Mövzu Əlavə Et"
+msgstr "Yadda saxla və yeni sual əlavə et"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:273
 msgctxt "exams.template.add_exam_question"
@@ -9320,12 +9320,12 @@ msgstr "Ləğv et"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:281
 msgctxt "exams.template.add_exam_question"
 msgid "confirm_delete_image"
-msgstr "Silinməni təsdiqlə"
+msgstr "Şəkli silmək istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:282
 msgctxt "exams.template.add_exam_question"
 msgid "confirm_delete_video"
-msgstr "Silinməni təsdiqlə"
+msgstr "Videonu silmək istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:283
 msgctxt "exams.template.add_exam_question"

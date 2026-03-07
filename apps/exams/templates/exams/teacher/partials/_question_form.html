@@ -1,0 +1,247 @@
+{% load i18n %}
+
+<div class="{% if is_modal %}question-form-shell question-form-shell--modal{% else %}question-container question-form-shell{% endif %} js-exam-question-form-root"
+     data-confirm-delete-image="{% trans 'confirm_delete_image' context 'exams.template.add_exam_question' %}"
+     data-confirm-delete-video="{% trans 'confirm_delete_video' context 'exams.template.add_exam_question' %}"
+     data-alert-image-will-be-deleted="{% trans 'alert_image_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}"
+     data-alert-video-will-be-deleted="{% trans 'alert_video_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}">
+    {% if not is_modal %}
+        <div class="form-header">
+            {% if editing %}
+                 <h1>Suali redakte et</h1>
+                 <p class="subtitle">{{ exam.title }}</p>
+            {% else %}
+                 <h1>Yeni sual elave et</h1>
+
+                 {% if exam.exam_type == "test" %}
+                     <p class="info-text">{% trans "info_adding_question_for_test_exam" context "exams.template.add_exam_question" %}</p>
+                 {% else %}
+                     <p class="info-text">{% trans "info_adding_question_for_written_exam" context "exams.template.add_exam_question" %}</p>
+                 {% endif %}
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="question-form-modal-intro">
+            <p class="question-form-modal-context">{{ exam.title }}</p>
+            {% if editing %}
+                <p class="info-text">Suali redakte edirsiniz.</p>
+            {% else %}
+                <p class="info-text">Yeni sual elave edirsiniz.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="question-form" action="{{ request.get_full_path }}">
+        {% csrf_token %}
+        {% if is_modal %}
+            <input type="hidden" name="modal" value="1">
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.text.id_for_label }}">{{ form.text.label }}:</label>
+            {{ form.text }}
+            <div class="error-msg">{{ form.text.errors }}</div>
+
+            <div class="media-help">
+                <strong class="media-help-title">Media elavesi (isteye gore)</strong>
+                <p class="media-help-text">Soldaki sahə sekil, sagdaki sahə ise video ucundur. Lazim deyilsə, her ikisini de bos saxlaya bilersiniz.</p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="{{ form.image.id_for_label }}">{{ form.image.label }}:</label>
+                    <div class="file-input-wrapper">
+                        {{ form.image }}
+                        <div class="file-name-display" data-question-image-file-name hidden></div>
+                    </div>
+                    <div class="error-msg">{{ form.image.errors }}</div>
+
+                    {% if editing and form.instance.image %}
+                        <div class="media-preview" data-current-image-preview>
+                            <span class="media-preview-label">Movcud sekil:</span>
+                            <img src="{{ form.instance.image.url }}" alt="Sual sekli" data-current-image>
+                            <button type="button" class="clear-media-btn" data-question-clear-media="image">
+                                Sekli sil
+                            </button>
+                        </div>
+                    {% endif %}
+
+                    <div class="media-preview" data-new-image-preview hidden>
+                        <span class="media-preview-label">Secilmis sekil onizlemesi:</span>
+                        <img src="" alt="Preview" data-new-image>
+                    </div>
+                </div>
+
+                <div class="form-group half">
+                    <label for="{{ form.video.id_for_label }}">{{ form.video.label }}:</label>
+                    <div class="file-input-wrapper">
+                        {{ form.video }}
+                        <div class="file-name-display" data-question-video-file-name hidden></div>
+                    </div>
+                    <div class="error-msg">{{ form.video.errors }}</div>
+
+                    {% if editing and form.instance.video %}
+                        <div class="media-preview" data-current-video-preview>
+                            <span class="media-preview-label">Movcud video:</span>
+                            <video controls style="width:100%; border-radius:8px;" data-current-video>
+                                <source src="{{ form.instance.video.url }}">
+                            </video>
+                            <button type="button" class="clear-media-btn" data-question-clear-media="video">
+                                Videonu sil
+                            </button>
+                        </div>
+                    {% endif %}
+
+                    <div class="media-preview" data-new-video-preview hidden>
+                        <span class="media-preview-label">Secilmis video onizlemesi:</span>
+                        <video controls style="width:100%; border-radius:8px;" data-new-video>
+                            <source src="" data-new-video-source>
+                        </video>
+                    </div>
+                </div>
+
+                {% if form.enable_paint %}
+                    <div class="form-check mt-2">
+                        {{ form.enable_paint }}
+                        <label class="form-check-label" for="{{ form.enable_paint.id_for_label }}">
+                            {% trans "label_enable_paint_answer" context "exams.template.add_exam_question" %}
+                        </label>
+                        {% if form.enable_paint.errors %}
+                            <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if exam.exam_type == "written" %}
+        <div class="form-group">
+            <label for="{{ form.block.id_for_label }}">{{ form.block.label }}:</label>
+            {{ form.block }}
+            <div class="error-msg">{{ form.block.errors }}</div>
+            <p class="help-text" style="font-size: 0.85em; color: #666;">{% trans "help_block_optional" context "exams.template.add_exam_question" %}</p>
+        </div>
+        {% endif %}
+
+        {% if exam.exam_type == "test" %}
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}:</label>
+                    {{ form.answer_mode }}
+                    <div class="error-msg">{{ form.answer_mode.errors }}</div>
+                </div>
+                <div class="form-group half">
+                    <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
+                    {{ form.time_limit_seconds }}
+                    <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
+                    <p class="help-text">Meselen: 60 saniye. Bos qalarsa imtahanin default vaxti istifade olunacaq.</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
+                {{ form.time_limit_seconds }}
+                <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
+                <p class="help-text">Meselen: 60 saniye. Bos qalarsa imtahanin default vaxti istifade olunacaq.</p>
+            </div>
+        {% endif %}
+
+        {% if exam.exam_type == "written" %}
+            <div class="form-group">
+                <label for="{{ form.correct_answer.id_for_label }}">{{ form.correct_answer.label }}:</label>
+                {{ form.correct_answer }}
+                <div class="error-msg">{{ form.correct_answer.errors }}</div>
+            </div>
+        {% else %}
+            <div class="variants-section">
+                <h4>Cavab variantlari</h4>
+                <p class="info-text">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>{{ form.option1_text.label }}:</label>
+                        {{ form.option1_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option1_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>{{ form.option2_text.label }}:</label>
+                        {{ form.option2_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option2_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>{{ form.option3_text.label }}:</label>
+                        {{ form.option3_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option3_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="variant-card">
+                    <div class="variant-input">
+                        <label>{{ form.option4_text.label }}:</label>
+                        {{ form.option4_text }}
+                    </div>
+                    <div class="variant-check">
+                        <label class="custom-checkbox-container">
+                            {{ form.option4_is_correct }}
+                            <span class="checkmark"></span>
+                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if is_modal %}
+            <div class="modal-buttons question-form-modal-actions">
+                <button type="button" class="modal-cancel-btn js-close-question-form-modal">
+                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
+                </button>
+                <button type="submit" name="save" class="modal-confirm-btn">
+                    {% trans "action_save" context "exams.template.add_exam_question" %}
+                </button>
+            </div>
+        {% else %}
+            <div class="form-actions">
+                <button type="submit" name="save" class="btn-save">
+                    {% trans "action_save" context "exams.template.add_exam_question" %}
+                </button>
+                <button type="submit" name="save_and_continue" class="btn-save-add">
+                    Yadda saxla ve yeni sual elave et
+                </button>
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel">
+                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
+                </a>
+            </div>
+        {% endif %}
+    </form>
+</div>

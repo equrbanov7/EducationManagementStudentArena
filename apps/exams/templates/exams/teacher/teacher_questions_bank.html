@@ -5,6 +5,8 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
@@ -29,7 +31,10 @@
                         <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_questions_bank" %}
                     </a>
                 {% endif %}
-                <a href="{% url 'exams:add_exam_question' exam.slug %}" class="qb-btn qb-btn-blue">
+                <a href="{% url 'exams:add_exam_question' exam.slug %}"
+                   class="qb-btn qb-btn-blue js-open-question-form-modal"
+                   data-question-modal-mode="create"
+                   data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">
                     <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_questions_bank" %}
                 </a>
             </div>
@@ -113,18 +118,19 @@
                     </span>
                 </div>
                 <div class="qb-bulk-actions">
-                    <button type="submit" name="bulk_action" value="deactivate" class="qb-btn qb-btn-amber">
+                    <button type="submit" name="bulk_action" value="deactivate" class="qb-btn qb-btn-amber js-bulk-action-btn" disabled>
                         <i class="fas fa-pause-circle"></i> {% trans "action_deactivate_selected" context "exams.template.teacher_questions_bank" %}
                     </button>
-                    <button type="submit" name="bulk_action" value="activate" class="qb-btn qb-btn-green">
+                    <button type="submit" name="bulk_action" value="activate" class="qb-btn qb-btn-green js-bulk-action-btn" disabled>
                         <i class="fas fa-play-circle"></i> {% trans "action_activate_selected" context "exams.template.teacher_questions_bank" %}
                     </button>
                     <button
                         type="submit"
                         name="bulk_action"
                         value="delete"
-                        class="qb-btn qb-btn-red"
+                        class="qb-btn qb-btn-red js-bulk-action-btn"
                         data-confirm-message="{% trans 'confirm_delete_selected' context 'exams.template.teacher_questions_bank' %}"
+                        disabled
                     >
                         <i class="fas fa-trash-alt"></i> {% trans "action_delete_selected" context "exams.template.teacher_questions_bank" %}
                     </button>
@@ -182,26 +188,27 @@
                                 </td>
                                 <td>
                                     <div class="qb-row-actions">
-                                        <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}" class="qb-btn qb-btn-inline">
+                                        <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
+                                           class="qb-btn qb-btn-inline js-open-question-form-modal"
+                                           data-question-modal-mode="edit"
+                                           data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
                                             <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_questions_bank" %}
                                         </a>
-                                        <form method="post" class="qb-inline-form">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="q" value="{{ search_query }}">
-                                            <input type="hidden" name="status" value="{{ status_filter }}">
-                                            <input type="hidden" name="sort" value="{{ sort_filter }}">
-                                            <input type="hidden" name="page" value="{{ page_obj.number }}">
-                                            <input type="hidden" name="selected_question_ids" value="{{ q.id }}">
-                                            {% if q.is_active %}
-                                                <button type="submit" name="bulk_action" value="deactivate" class="qb-btn qb-btn-inline qb-btn-inline-warn">
-                                                    <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_questions_bank" %}
-                                                </button>
-                                            {% else %}
-                                                <button type="submit" name="bulk_action" value="activate" class="qb-btn qb-btn-inline qb-btn-inline-success">
-                                                    <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_questions_bank" %}
-                                                </button>
-                                            {% endif %}
-                                        </form>
+                                        {% if q.is_active %}
+                                            <button type="button"
+                                                    class="qb-btn qb-btn-inline qb-btn-inline-warn js-single-question-action"
+                                                    data-action-value="deactivate"
+                                                    data-question-id="{{ q.id }}">
+                                                <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_questions_bank" %}
+                                            </button>
+                                        {% else %}
+                                            <button type="button"
+                                                    class="qb-btn qb-btn-inline qb-btn-inline-success js-single-question-action"
+                                                    data-action-value="activate"
+                                                    data-question-id="{{ q.id }}">
+                                                <i class="fas fa-play-circle"></i> {% trans "action_activate" context "exams.template.teacher_questions_bank" %}
+                                            </button>
+                                        {% endif %}
                                         <button
                                             type="button"
                                             class="qb-btn qb-btn-inline qb-btn-inline-danger js-open-delete-modal"
@@ -240,6 +247,16 @@
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
         </form>
+
+        <form method="post" id="singleQuestionActionForm" class="qb-hidden-form">
+            {% csrf_token %}
+            <input type="hidden" name="bulk_action" id="singleQuestionActionValue" value="">
+            <input type="hidden" name="selected_question_ids" id="singleQuestionActionQuestionId" value="">
+            <input type="hidden" name="q" value="{{ search_query }}">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <input type="hidden" name="sort" value="{{ sort_filter }}">
+            <input type="hidden" name="page" value="{{ page_obj.number }}">
+        </form>
     </div>
 </div>
 
@@ -258,6 +275,8 @@
         </div>
     </div>
 </div>
+
+{% include "exams/teacher/partials/_question_form_bs_modal.html" %}
 {% endblock %}
 
 {% block extraJs %}
@@ -267,8 +286,13 @@ window.TEACHER_QUESTIONS_BANK_I18N = {
     selectedCount: "{% trans 'selected_count' context 'exams.template.teacher_questions_bank'|escapejs %}",
     selectedCountZero: "{% trans 'selected_count_zero' context 'exams.template.teacher_questions_bank'|escapejs %}",
     selectAtLeastOne: "{% trans 'select_at_least_one' context 'exams.template.teacher_questions_bank'|escapejs %}",
-    deleteQuestionBody: "{% trans 'modal_delete_question_body' context 'exams.template.teacher_questions_bank'|escapejs %}"
+    deleteQuestionBody: "{% trans 'modal_delete_question_body' context 'exams.template.teacher_questions_bank'|escapejs %}",
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal'|escapejs %}",
+    questionCreateTitle: "Yeni sual elave et",
+    questionEditTitle: "Suali redakte et",
+    submitError: "{% trans 'retry_error' context 'courses.common.js'|escapejs %}"
 };
 </script>
+<script src="{% static 'exams/js/question_form.js' %}"></script>
 <script src="{% static 'exams/js/teacher_questions_bank.js' %}"></script>
 {% endblock %}
