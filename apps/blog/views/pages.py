@@ -2,7 +2,6 @@
 
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import HttpResponse
 from django.shortcuts import render
 
 from ..models import Category, Post
@@ -64,7 +63,3 @@ def technology(request):
     page_obj = paginator.get_page(page_number)
 
     return render(request, "blog/technology.html", {"page_obj": page_obj})
-
-
-def contact(request):
-    return HttpResponse("Contact Us Page (demo)")

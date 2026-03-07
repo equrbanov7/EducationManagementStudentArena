@@ -1,16 +1,9 @@
 # blog/views/__init__.py
 # Re-export all views to maintain backward compatibility with urls.py
 
-from .auth import (
-    logout_view,
-    register_view,
-    resend_code_view,
-    verify_code_view,
-    verify_email_link_view,
-)
 from .categories import category_detail
 from .comments import post_detail
-from .pages import about, contact, home, technology
+from .pages import about, home, technology
 from .posts import (
     create_post,
     delete_post,
@@ -28,13 +21,6 @@ __all__ = [
     "home",
     "about",
     "technology",
-    "contact",
-    # Auth
-    "register_view",
-    "verify_code_view",
-    "verify_email_link_view",
-    "resend_code_view",
-    "logout_view",
     # Posts
     "create_post",
     "post_edit_ajax",

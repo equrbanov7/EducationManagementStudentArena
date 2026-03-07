@@ -20,6 +20,7 @@ from apps.courses.models import Course
 from apps.exams.models import Exam
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from core.constants import OrganizationType
+from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW
 from core.tenancy import get_request_organization, scoped_by_organization_id
 
 from ..models import ProfileRole
@@ -29,14 +30,12 @@ signer = TimestampSigner()
 
 # Constants
 RESULT_FILTER_CHOICES = {"all", "exams", "courses", "labs", "independent"}
-ASSIGNED_TASK_FILTER_CHOICES = {"all", "exams", "assignments", "labs", "independent"}
 PENDING_ANSWER_FILTER_CHOICES = RESULT_FILTER_CHOICES
 PENDING_REVIEW_TYPE_CHOICES = {"all", "exams", "assignments", "projects", "labs"}
 PENDING_REVIEW_STATUS_CHOICES = {"all", "submitted", "expired", "pending", "late"}
 PROFILE_ROLE_LABELS = dict(ProfileRole.CHOICES)
 PROFILE_ROLE_NAMES = set(PROFILE_ROLE_LABELS.keys())
-REVIEW_EDIT_WINDOW_MINUTES = 5
-REVIEW_EDIT_WINDOW = timedelta(minutes=REVIEW_EDIT_WINDOW_MINUTES)
+REVIEW_EDIT_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 STUDENT_ORG_MANAGEMENT_MIN_LEVEL = ProfileRole.LEVELS.get(ProfileRole.HR, 65)
 STUDENT_PENDING_INVITE_TITLE = "__student_pending_invite__"
 STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH = 280
