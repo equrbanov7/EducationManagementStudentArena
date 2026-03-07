@@ -222,6 +222,25 @@ jobs:
           echo "::endgroup::"
         continue-on-error: true
 
+      # ───────────────────────────────────────────────────────────────────
+      # Django deployment check
+      # ───────────────────────────────────────────────────────────────────
+      # 📌 NİYƏ?: Production deployment üçün Django təhlükəsizlik yoxlaması
+      # 📌 BEST PRACTICE: CSP və digər security header-lərin konfiqurasiyasını yoxlayır
+      - name: 🔐 Django deployment security check
+        env:
+          SECRET_KEY: test-secret-key-for-deploy-check-only
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          DATABASE_URL: sqlite:///db.sqlite3
+        run: |
+          echo "::group::🔐 Django Deployment Check"
+          python manage.py check --deploy --fail-level WARNING || {
+            echo "::warning::⚠️ Django deployment check found issues"
+          }
+          echo "::endgroup::"
+        continue-on-error: true
+
   # ──────────────────────────────────���──────────────────────────────────────
   # JOB 3: TESTS
   # ─────────────────────────────────────────────────────────────────────────
