@@ -63,13 +63,22 @@
                         </div>
                     </div>
                     {% if submission.status == 'graded' %}
+                        {% if show_review_data and submission.score is not None %}
                         <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">{{ submission.score }}/{{ lab.max_score }}</span>
+                        {% elif show_review_data %}
+                        <span class="badge bg-white text-primary-green border border-success px-3 py-2 ms-3 rounded-pill fs-6">Qiymətləndirilib</span>
+                        {% else %}
+                        <span class="badge bg-white text-secondary border border-secondary px-3 py-2 ms-3 rounded-pill">
+                            Nəticə:
+                            <span data-review-countdown="{{ review_available_in_seconds }}">--:--:--</span>
+                        </span>
+                        {% endif %}
                     {% else %}
                         <span class="badge bg-white text-warning border border-warning px-3 py-2 ms-3 rounded-pill">{% trans "status_not_graded" context "labs.template.lab_detail" %}</span>
                     {% endif %}
                 </div>
-                <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-gradient-success rounded-pill px-4">
-                    <i class="fas fa-eye me-2"></i> {% trans "action_view_my_answers" context "labs.template.lab_detail" %}
+                <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4">
+                    <i class="fas fa-eye me-2"></i> Cavablarım
                 </a>
             </div>
         </div>
@@ -315,8 +324,8 @@
                     <p class="text-secondary mb-4 fw-medium">
                         {% blocktrans trimmed context "labs.template.lab_detail" with attempt_count=attempt_count max_attempts=lab.max_attempts %}notice_attempts_exhausted {{ attempt_count }} / {{ max_attempts }}{% endblocktrans %}
                     </p>
-                    <a href="{% url 'labs:my_lab_answers' lab.id %}" class="btn btn-gradient-success rounded-pill px-4 py-2">
-                        <i class="fas fa-eye me-2"></i> {% trans "action_view_my_answers" context "labs.template.lab_detail" %}
+                    <a href="{{ answers_url }}" class="btn btn-gradient-success rounded-pill px-4 py-2">
+                        <i class="fas fa-eye me-2"></i> Cavablarım
                     </a>
                 </div>
                 
@@ -374,5 +383,6 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 <script src="{% static 'labs/js/lab_detail_template.js' %}"></script>
 {% endblock %}

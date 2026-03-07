@@ -54,6 +54,14 @@ def _get_tenant_submission_or_404(request, submission_id):
 
 def _project_back_url(request, project):
     """Generate the back URL for a project (for students)."""
+    dashboard_url = reverse("courses:course_dashboard", kwargs={"course_id": project.course.id})
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if explicit_return_url:
+        return f"{dashboard_url}?{urlencode({'return_to': explicit_return_url})}"
+
     source_section = (request.GET.get("from_section") or "").strip()
     if source_section == "assigned-exams":
         params = {"section": "assigned-exams"}
@@ -62,7 +70,21 @@ def _project_back_url(request, project):
             params["assigned_type"] = assigned_type
         return f"{reverse('accounts:profile')}?{urlencode(params)}"
 
-    return reverse("courses:course_dashboard", kwargs={"course_id": project.course.id})
+    return dashboard_url
+
+
+def _student_return_to(request):
+    return _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+
+
+def _append_return_to(url, return_to):
+    if not return_to:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode({'return_to': return_to})}"
 
 
 def _teacher_review_back_url(request, project):

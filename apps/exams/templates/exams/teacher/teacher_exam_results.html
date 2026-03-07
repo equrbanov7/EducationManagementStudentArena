@@ -5,12 +5,12 @@
 {% block title %}{{ exam.title }} - {% trans "title_results" context "exams.template.teacher_exam_results" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
+    <link rel="stylesheet" href="{% static 'css/answers_workspace.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
     <style>
         .countdown-timer {
             font-family: 'Courier New', monospace;
-            font-weight: bold;
+            font-weight: 700;
             color: #dc3545;
         }
 
@@ -22,22 +22,78 @@
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1 class="h3 mb-3">{{ exam.title }} - {% trans "heading_results" context "exams.template.teacher_exam_results" %}</h1>
+<div class="container py-5 answers-workspace">
+    <div class="answers-toolbar">
+        <div class="answers-toolbar__copy">
+            <nav class="answers-breadcrumb" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% if exam.course_id %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' exam.course_id %}">{{ exam.course.title }}</a>
+                    </li>
+                    {% endif %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ exam.title }}</li>
+                </ol>
+            </nav>
+            <h1 class="answers-title">
+                <span class="answers-title__icon"><i class="fas fa-list-check"></i></span>
+                <span>{{ exam.title }} - {% trans "heading_results" context "exams.template.teacher_exam_results" %}</span>
+            </h1>
+            <p class="answers-subtitle">
+                {% trans "label_type" context "exams.template.teacher_exam_results" %}: <strong>{{ exam.get_exam_type_display }}</strong>
+            </p>
+        </div>
+        <div class="answers-toolbar__actions">
+            <a href="{{ exam_detail_url }}" class="answers-secondary-btn">
+                <i class="fas fa-arrow-left"></i> {% trans "action_back_to_exam" context "exams.template.teacher_exam_results" %}
+            </a>
+            <a href="{{ profile_return_url }}" class="answers-back-btn">
+                <i class="fas fa-arrow-left"></i> {{ source_back_label }}
+            </a>
+        </div>
+    </div>
 
-    <p>
-        {% trans "label_type" context "exams.template.teacher_exam_results" %}: <strong>{{ exam.get_exam_type_display }}</strong><br>
-        {% trans "label_status" context "exams.template.teacher_exam_results" %}:
-        {% if exam.is_active %}
-            <span class="badge bg-success">{% trans "status_active_upper" context "exams.template.teacher_exam_results" %}</span>
-        {% else %}
-            <span class="badge bg-secondary">{% trans "status_inactive" context "exams.template.teacher_exam_results" %}</span>
-        {% endif %}
-    </p>
+    <div class="answers-stat-grid">
+        <article class="answers-stat-card answers-stat-card--blue">
+            <div class="answers-stat-card__icon"><i class="fas fa-inbox"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.total }}</div>
+            <div class="answers-stat-card__label">Cəmi cəhd</div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--green">
+            <div class="answers-stat-card__icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.pending }}</div>
+            <div class="answers-stat-card__label">Gözləyən</div>
+            <div class="answers-stat-card__meta">
+                <i class="fas fa-check"></i> Qiymətləndirilib: {{ review_stats.graded }}
+            </div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--blue">
+            <div class="answers-stat-card__icon"><i class="fas fa-star"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.max_score }}</div>
+            <div class="answers-stat-card__label">Maksimum bal</div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--white">
+            <div class="answers-stat-card__icon"><i class="fas fa-calendar-alt"></i></div>
+            {% if exam.is_active %}
+                <span class="answers-meta-badge answers-meta-badge--active"><i class="fas fa-lock-open"></i> {% trans "status_active_upper" context "exams.template.teacher_exam_results" %}</span>
+            {% else %}
+                <span class="answers-meta-badge answers-meta-badge--inactive"><i class="fas fa-lock"></i> {% trans "status_inactive" context "exams.template.teacher_exam_results" %}</span>
+            {% endif %}
+            <div class="answers-stat-card__label">Tarix</div>
+            <div class="answers-stat-card__meta">
+                <i class="far fa-clock"></i>
+                {% if exam.start_datetime %}
+                    {{ exam.start_datetime|date:"d.m.Y H:i" }}
+                {% elif exam.end_datetime %}
+                    {{ exam.end_datetime|date:"d.m.Y H:i" }}
+                {% else %}
+                    Məhdudiyyətsiz
+                {% endif %}
+            </div>
+        </article>
+    </div>
 
-    <hr>
-
-    <div class="results-filter-card">
+    <div class="results-filter-card mb-4">
         <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
             {% if request.GET.from_section %}
                 <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
@@ -133,7 +189,7 @@
     </div>
 
     {% if can_delete_attempts %}
-        <div class="results-toolbar">
+        <div class="results-toolbar mb-4">
             <span class="selected-counter">
                 {% trans "selected_count_label" context "exams.template.teacher_exam_results" %}: <span id="selectedAttemptCount">0</span>
             </span>
@@ -149,140 +205,151 @@
         </div>
     {% endif %}
 
-    <h3>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
-    {% if attempts_data %}
-        <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle">
-                <thead>
-                    <tr>
-                        {% if can_delete_attempts %}
-                            <th></th>
-                        {% endif %}
-                        <th>#</th>
-                        <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_correct" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_wrong" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_score_percent" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_started_at" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_finished_at" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_duration_sec" context "exams.template.teacher_exam_results" %}</th>
-                        <th>{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in attempts_data %}
-                        {% with att=item.attempt %}
-                        <tr data-attempt-id="{{ att.id }}"
-                            data-seconds-remaining="{{ item.seconds_remaining|default:0 }}"
-                            data-real-name="{{ item.real_name }}"
-                            data-anonymous-name="{{ item.anonymous_name }}">
+    <div class="answers-table-card">
+        <div class="answers-table-card__header">
+            <i class="fas fa-user-check"></i>
+            <span>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</span>
+        </div>
+
+        {% if attempts_data %}
+            <div class="table-responsive">
+                <table class="table answers-table mb-0">
+                    <thead>
+                        <tr>
                             {% if can_delete_attempts %}
-                                <td>
-                                    <input type="checkbox"
-                                           class="results-table-checkbox js-attempt-checkbox"
-                                           value="{{ att.id }}">
-                                </td>
+                                <th></th>
                             {% endif %}
-                            <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
-                            <td class="student-name-cell">
-                                {% if item.can_view_name %}
-                                    <strong>{{ item.real_name }}</strong>
-                                {% else %}
-                                    <span class="anonymous-name">{{ item.anonymous_name }}</span>
+                            <th>#</th>
+                            <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_correct" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_wrong" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_score_percent" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_started_at" context "exams.template.teacher_exam_results" %}</th>
+                            <th>{% trans "col_finished_at" context "exams.template.teacher_exam_results" %}</th>
+                            <th class="text-end">{% trans "col_action" context "exams.template.teacher_exam_results" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in attempts_data %}
+                            {% with att=item.attempt %}
+                            <tr data-attempt-id="{{ att.id }}"
+                                data-seconds-remaining="{{ item.seconds_remaining|default:0 }}"
+                                data-real-name="{{ item.real_name }}"
+                                data-anonymous-name="{{ item.anonymous_name }}">
+                                {% if can_delete_attempts %}
+                                    <td>
+                                        <input type="checkbox"
+                                               class="results-table-checkbox js-attempt-checkbox"
+                                               value="{{ att.id }}">
+                                    </td>
                                 {% endif %}
-                            </td>
-                            <td>
-                                {{ att.get_status_display }}
-                                {% if att.checked_by_teacher %}
-                                    <span class="badge bg-info text-dark ms-1">{% trans "status_checked" context "exams.template.teacher_exam_results" %}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ att.correct_count }}</td>
-                            <td>{{ att.wrong_count }}</td>
-                            <td>
-                                {% if att.teacher_score is not None %}
-                                    {{ att.teacher_score }}%
-                                {% else %}
-                                    {{ att.score_percent }}%
-                                {% endif %}
-                            </td>
-                            <td>{{ att.started_at|date:"d.m.Y H:i" }}</td>
-                            <td>
-                                {% if att.finished_at %}
-                                    {{ att.finished_at|date:"d.m.Y H:i" }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if att.duration_seconds %}
-                                    {{ att.duration_seconds }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="action-cell">
-                                <div class="results-action-buttons">
+                                <td class="fw-bold text-muted">{{ forloop.counter0|add:page_obj.start_index }}</td>
+                                <td class="student-name-cell">
+                                    <div class="answers-person">
+                                        <div class="answers-avatar">{{ item.real_name|slice:":1"|upper }}</div>
+                                        <div>
+                                            {% if item.can_view_name %}
+                                                <div class="answers-person__name">{{ item.real_name }}</div>
+                                                <div class="answers-person__meta">@{{ att.user.username }}</div>
+                                            {% else %}
+                                                <div class="answers-person__name anonymous-name">{{ item.anonymous_name }}</div>
+                                                <div class="answers-person__meta">Anonim görünüş</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column gap-2 align-items-start">
+                                        {% if att.status == 'expired' %}
+                                            <span class="answers-status answers-status--danger">{{ att.get_status_display }}</span>
+                                        {% elif exam.exam_type == 'test' or att.checked_by_teacher %}
+                                            <span class="answers-status answers-status--graded">{{ att.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="answers-status answers-status--pending">{{ att.get_status_display }}</span>
+                                        {% endif %}
+                                        {% if att.checked_by_teacher %}
+                                            <span class="answers-status answers-status--neutral">{% trans "status_checked" context "exams.template.teacher_exam_results" %}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ att.correct_count }}</td>
+                                <td>{{ att.wrong_count }}</td>
+                                <td>
+                                    {% if att.teacher_score is not None %}
+                                        <span class="answers-score">{{ att.teacher_score }}%</span>
+                                    {% else %}
+                                        <span class="answers-score">{{ att.score_percent }}%</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="answers-date__value">{{ att.started_at|date:"d.m.Y H:i" }}</div>
+                                    {% if att.duration_seconds %}
+                                    <div class="answers-date__meta">{% trans "col_duration_sec" context "exams.template.teacher_exam_results" %}: {{ att.duration_seconds }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if att.finished_at %}
+                                        <div class="answers-date__value">{{ att.finished_at|date:"d.m.Y H:i" }}</div>
+                                    {% else %}
+                                        <span class="answers-score__muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end action-cell">
                                     {% if exam.exam_type == 'test' %}
                                         <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                           class="btn btn-outline-primary btn-sm">
+                                           class="answers-action-btn answers-action-btn--filled">
                                             <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.teacher_exam_results" %}
                                         </a>
                                     {% else %}
                                         {% if att.checked_by_teacher %}
                                             {% if item.seconds_remaining %}
                                                 <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                                   class="btn btn-outline-warning btn-sm">
+                                                   class="answers-action-btn answers-action-btn--warning">
                                                     <i class="fas fa-edit"></i> {% trans "action_recheck" context "exams.template.teacher_exam_results" %}
                                                 </a>
-                                                <div class="countdown-timer mt-1">
+                                                <div class="countdown-timer mt-2">
                                                     <i class="fas fa-clock"></i>
                                                     <span class="timer-display">--:--</span>
                                                 </div>
                                             {% else %}
                                                 <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                                   class="btn btn-outline-success btn-sm">
+                                                   class="answers-action-btn answers-action-btn--success">
                                                     <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.teacher_exam_results" %}
                                                 </a>
-                                                <small class="d-block text-muted mt-1">
+                                                <small class="d-block text-muted mt-2">
                                                     <i class="fas fa-lock"></i> {% trans "status_locked" context "exams.template.teacher_exam_results" %}
                                                 </small>
                                             {% endif %}
                                         {% else %}
                                             <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                               class="btn btn-outline-warning btn-sm">
+                                               class="answers-action-btn answers-action-btn--warning">
                                                 <i class="fas fa-clipboard-check"></i> {% trans "action_check" context "exams.template.teacher_exam_results" %}
                                             </a>
                                         {% endif %}
                                     {% endif %}
                                     {% if can_delete_attempts %}
                                         <button type="button"
-                                                class="btn btn-outline-danger btn-sm js-single-delete-attempt"
+                                                class="btn btn-outline-danger btn-sm js-single-delete-attempt ms-2"
                                                 data-attempt-id="{{ att.id }}">
                                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.teacher_exam_results" %}
                                         </button>
                                     {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endwith %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
-    {% else %}
-        <p class="text-muted text-center py-4">
-            <i class="fas fa-inbox fa-3x d-block mb-2"></i>
-            {% trans "empty_no_attempt" context "exams.template.teacher_exam_results" %}
-        </p>
-    {% endif %}
-
-    <div class="d-flex gap-2 flex-wrap mt-3">
-        <a href="{{ profile_return_url }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> {% trans "action_back" context "exams.template.teacher_exam_results" %}
-        </a>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
+        {% else %}
+            <div class="answers-empty">
+                <div class="answers-empty__icon"><i class="fas fa-inbox"></i></div>
+                <h4>{% trans "empty_no_attempt" context "exams.template.teacher_exam_results" %}</h4>
+                <p>Bu imtahan üzrə hələ cəhd yoxdur.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -330,12 +397,14 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const rows = document.querySelectorAll('tr[data-seconds-remaining]');
 
     rows.forEach(row => {
         let secondsLeft = parseInt(row.dataset.secondsRemaining, 10) || 0;
+
         if (secondsLeft <= 0) return;
 
         const timerDisplay = row.querySelector('.timer-display');
@@ -346,9 +415,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.reload();
                 return;
             }
+
             const minutes = Math.floor(secondsLeft / 60);
             const seconds = secondsLeft % 60;
             timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
             secondsLeft--;
         };
 
@@ -394,6 +465,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    const prepareDelete = ids => {
+        pendingDeleteIds = ids;
+        if (pendingDeleteIds.length === 0) return;
+        confirmModal?.show();
+    };
+
     checkboxes.forEach(cb => cb.addEventListener('change', updateSelectedCount));
     updateSelectedCount();
 
@@ -411,41 +488,27 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSelectedCount();
     });
 
-    const openDeleteConfirm = (ids) => {
-        pendingDeleteIds = ids.filter(Boolean);
-        if (!pendingDeleteIds.length) {
-            return;
-        }
-        if (confirmModal) {
-            confirmModal.show();
-        }
-    };
-
     deleteSelectedBtn?.addEventListener('click', () => {
-        openDeleteConfirm(getSelectedIds());
+        prepareDelete(getSelectedIds());
     });
 
     singleDeleteButtons.forEach(button => {
         button.addEventListener('click', () => {
-            openDeleteConfirm([button.dataset.attemptId]);
+            const attemptId = button.dataset.attemptId;
+            if (attemptId) {
+                prepareDelete([attemptId]);
+            }
         });
     });
 
     confirmBtn?.addEventListener('click', () => {
-        if (!pendingDeleteIds.length) return;
-
-        deleteInputs.innerHTML = '';
-        pendingDeleteIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'attempt_ids';
-            input.value = id;
-            deleteInputs.appendChild(input);
-        });
+        if (pendingDeleteIds.length === 0) return;
+        deleteInputs.innerHTML = pendingDeleteIds
+            .map(id => `<input type="hidden" name="attempt_ids" value="${id}">`)
+            .join('');
         deleteForm.submit();
     });
 })();
 {% endif %}
 </script>
-<script src="{% static 'js/results_filter_ui.js' %}"></script>
 {% endblock %}

@@ -7,6 +7,9 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
+{% if is_student %}
+<link rel="stylesheet" href="{% static 'css/profile/sections/assigned_exams.css' %}">
+{% endif %}
 {% endblock %}
 
 {% block content %}

@@ -1,10 +1,30 @@
+from pathlib import PurePosixPath
+
 from django.contrib.auth import get_user_model
+from django.core.files.storage import default_storage
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
 from apps.courses.models import Course
 
 User = get_user_model()
+
+
+class _SubmissionStoredFile:
+    """Lightweight compatibility wrapper for legacy single-file access."""
+
+    def __init__(self, *, path, name="", size=None):
+        self.path = path or ""
+        self.name = name or PurePosixPath(self.path).name
+        self.size = size
+
+    @property
+    def url(self):
+        if not self.path:
+            return ""
+        if self.path.startswith(("http://", "https://", "/")):
+            return self.path
+        return default_storage.url(self.path)
 
 
 class Assignment(models.Model):
@@ -142,6 +162,15 @@ class Assignment(models.Model):
         self.due_date = value
 
     @property
+    def max_points(self):
+        """Backward-compatible alias for legacy scoring UIs."""
+        return self.max_score
+
+    @max_points.setter
+    def max_points(self, value):
+        self.max_score = value
+
+    @property
     def is_deadline_passed(self):
         from django.utils import timezone
 
@@ -272,6 +301,66 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.assignment.title} (Cəhd #{self.attempt_number})"
+
+    @property
+    def student(self):
+        """Backward-compatible alias for legacy code paths."""
+        return self.user
+
+    @student.setter
+    def student(self, value):
+        self.user = value
+
+    @property
+    def file(self):
+        """Backward-compatible single-file accessor backed by the JSON payload."""
+        if not isinstance(self.files, list) or not self.files:
+            return None
+
+        primary_file = self.files[0]
+        if isinstance(primary_file, str):
+            clean_path = primary_file.strip()
+            if not clean_path:
+                return None
+            return _SubmissionStoredFile(path=clean_path)
+
+        if not isinstance(primary_file, dict):
+            return None
+
+        candidate_path = (primary_file.get("path") or primary_file.get("url") or primary_file.get("file") or "").strip()
+        if not candidate_path:
+            return None
+
+        candidate_name = (primary_file.get("name") or primary_file.get("filename") or "").strip()
+        return _SubmissionStoredFile(
+            path=candidate_path,
+            name=candidate_name,
+            size=primary_file.get("size"),
+        )
+
+    @property
+    def text_submission(self):
+        """Backward-compatible alias for legacy text-submission UIs."""
+        return self.content
+
+    @text_submission.setter
+    def text_submission(self, value):
+        self.content = value
+
+    def attach_uploaded_file(self, uploaded_file, *, original_name=""):
+        """Persist an uploaded file into the JSON-backed storage payload."""
+        if uploaded_file is None:
+            return
+
+        stored_path = default_storage.save(f"assignments/submissions/{uploaded_file.name}", uploaded_file)
+        display_name = (original_name or getattr(uploaded_file, "name", "") or "").strip()
+        self.files = [
+            {
+                "name": display_name or PurePosixPath(stored_path).name,
+                "path": stored_path,
+                "size": getattr(uploaded_file, "size", 0),
+            }
+        ]
 
     def save(self, *args, **kwargs):
         """Calculate if late on save"""

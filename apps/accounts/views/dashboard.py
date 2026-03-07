@@ -131,9 +131,10 @@ def student_dashboard(request):
     # Get pending assignments
     pending_assignments = Assignment.objects.filter(
         course__in=enrolled_courses,
+        assigned_students=request.user,
         due_date__gte=timezone.now(),
         status__in=["published", "active"],
-    ).order_by("due_date")[:5]
+    ).distinct().order_by("due_date")[:5]
 
     # Get upcoming exams
     upcoming_exams = (
@@ -172,11 +173,25 @@ def grading_queue(request):
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
 
+    def _format_average_grading_time(seconds):
+        if not seconds:
+            return "0m"
+
+        minutes = int(round(seconds / 60))
+        hours, remaining_minutes = divmod(minutes, 60)
+        if hours:
+            return f"{hours}h {remaining_minutes}m"
+        return f"{remaining_minutes}m"
+
     # Base query
     submissions = Submission.objects.filter(
         assignment__course__in=teacher_courses,
         status="submitted",
     ).select_related("assignment", "user", "assignment__course")
+
+    assignments = Assignment.objects.filter(course__in=teacher_courses).select_related("course").order_by("title")
+    if course_id:
+        assignments = assignments.filter(course_id=course_id)
 
     # Apply filters
     if course_id:
@@ -187,14 +202,33 @@ def grading_queue(request):
     # Order by oldest first
     submissions = submissions.order_by("submitted_at")
 
-    # Get courses for filter dropdown
-    courses = teacher_courses
+    graded_submissions = Submission.objects.filter(
+        assignment__course__in=teacher_courses,
+        status="graded",
+        graded_at__isnull=False,
+    )
+    if course_id:
+        graded_submissions = graded_submissions.filter(assignment__course_id=course_id)
+    if assignment_id:
+        graded_submissions = graded_submissions.filter(assignment_id=assignment_id)
+
+    grading_durations = [
+        max(0, (submission.graded_at - submission.submitted_at).total_seconds())
+        for submission in graded_submissions.only("submitted_at", "graded_at")[:100]
+        if submission.graded_at and submission.submitted_at
+    ]
 
     context = {
         "submissions": submissions,
-        "courses": courses,
+        "courses": teacher_courses,
+        "assignments": assignments,
         "selected_course": course_id,
         "selected_assignment": assignment_id,
+        "total_pending": submissions.count(),
+        "graded_today": graded_submissions.filter(graded_at__date=timezone.localdate()).count(),
+        "avg_grading_time": _format_average_grading_time(
+            (sum(grading_durations) / len(grading_durations)) if grading_durations else 0
+        ),
     }
 
     return render(request, "accounts/grading_queue.html", context)

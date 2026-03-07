@@ -22,7 +22,7 @@
                 {# Kartın özü #}
                 <article class="exam-card">
                     {# Bütün kartı əhatə edən link #}
-                    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="exam-card-link">
+                    <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?return_to={{ request.get_full_path|urlencode }}" class="exam-card-link">
                         
                         {# Kartın yuxarı hissəsi: Məlumatlar #}
                         <div class="exam-card-body">

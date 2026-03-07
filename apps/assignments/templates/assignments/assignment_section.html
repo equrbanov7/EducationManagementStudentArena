@@ -142,14 +142,14 @@
 
                             <div class="btn-group btn-group-sm gap-2">
                                 {% if item.user_attempts > 0 %}
-                                    <a href="{% url 'assignments:my_submissions' a.id %}"
+                                    <a href="{% url 'assignments:my_submissions' a.id %}?return_to={{ profile_return_url|urlencode }}"
                                        class="btn btn-sm btn-outline-warning">
-                                        <i class="fa-solid fa-list-check"></i> {% trans "my_answers" context "assignment.section" %} ({{ item.user_attempts }})
+                                        <i class="fa-solid fa-list-check"></i> Cavablarım ({{ item.user_attempts }})
                                     </a>
                                 {% endif %}
 
                                 {% if item.can_submit %}
-                                    <a href="{% url 'assignments:assignment_detail' a.id %}"
+                                    <a href="{% url 'assignments:assignment_detail' a.id %}?return_to={{ profile_return_url|urlencode }}"
                                        class="btn btn-sm btn-warning">
                                         <i class="fa-solid fa-arrow-right"></i> {% trans "submit_answer" context "assignment.section" %}
                                     </a>

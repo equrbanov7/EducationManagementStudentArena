@@ -11,7 +11,7 @@ This allows the existing urls.py to continue working with:
 # ═══════════════════════════════════════════════════════════════
 # CRUD Views
 # ═══════════════════════════════════════════════════════════════
-from .crud import CreateCourseView, DeleteCourseView, EditCourseView, MyCoursesListView
+from .crud import CreateCourseView, DeleteCourseView, EditCourseView, MyCoursesListView, update_course_status
 
 # ═══════════════════════════════════════════════════════════════
 # Dashboard
@@ -52,6 +52,7 @@ __all__ = [
     "EditCourseView",
     "DeleteCourseView",
     "MyCoursesListView",
+    "update_course_status",
     # Dashboard
     "CourseDashboardView",
     # Topics

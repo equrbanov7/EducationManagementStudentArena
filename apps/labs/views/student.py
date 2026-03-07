@@ -15,7 +15,7 @@ from django.utils.translation import pgettext
 from apps.courses.models import CourseMembership
 
 from ..models import LabAnswer, LabAssignment, LabQuestion, LabSubmission
-from ._helpers import _get_tenant_lab_or_404, _lab_back_url
+from ._helpers import _append_return_to, _get_tenant_lab_or_404, _lab_back_url, _lab_return_to
 
 REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
@@ -31,6 +31,8 @@ def lab_detail(request, pk):
     submission = None
     attempt_count = 0
     can_retry = True
+    show_review_data = False
+    review_available_in_seconds = 0
 
     if request.user.is_authenticated:
         # Müəllim üçün bütün sualları göstər
@@ -70,6 +72,13 @@ def lab_detail(request, pk):
             attempt_count = submissions.count()
             has_submitted = attempt_count > 0
             submission = submissions.first() if has_submitted else None
+            if submission and submission.status == "graded":
+                show_review_data = not submission.graded_at or (
+                    timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+                )
+                if submission.graded_at and not show_review_data:
+                    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+                    review_available_in_seconds = max(0, int((reveal_at - timezone.now()).total_seconds()))
 
             max_attempts = lab.max_attempts or 1
             can_retry = attempt_count < max_attempts
@@ -100,6 +109,10 @@ def lab_detail(request, pk):
         "submission": submission,
         "attempt_count": attempt_count,
         "can_retry": can_retry,
+        "show_review_data": show_review_data,
+        "review_available_in_seconds": review_available_in_seconds,
+        "review_window_minutes": int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60),
+        "answers_url": _append_return_to(f"/labs/{lab.id}/my-answers/", _lab_return_to(request)),
         "back_url": _lab_back_url(request, lab),
     }
 
@@ -208,6 +221,7 @@ def my_lab_answers(request, pk):
         "show_review_data": show_review_data,
         "review_available_in_seconds": review_available_in_seconds,
         "review_reveal_at": review_reveal_at,
+        "back_url": _lab_back_url(request, lab),
     }
 
     return render(request, "labs/my_lab_answers.html", context)

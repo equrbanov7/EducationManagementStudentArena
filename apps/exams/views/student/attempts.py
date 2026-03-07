@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -17,24 +16,18 @@ from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
-
-
-def _safe_same_origin_redirect_path(request, candidate_url):
-    raw_url = (candidate_url or "").strip()
-    if not raw_url:
-        return ""
-
-    if not url_has_allowed_host_and_scheme(
-        raw_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        return ""
-    return raw_url
+from ._helpers import (
+    annotate_attempt_result_visibility,
+    append_return_to,
+    build_exam_history_url,
+    build_exam_result_url,
+    current_return_to,
+    safe_same_origin_redirect_path,
+)
 
 
 def _resolve_exam_failure_redirect(request):
-    explicit_next = _safe_same_origin_redirect_path(request, request.GET.get("next") or request.POST.get("next"))
+    explicit_next = safe_same_origin_redirect_path(request, request.GET.get("next") or request.POST.get("next"))
     if explicit_next:
         return explicit_next
 
@@ -79,9 +72,11 @@ def take_exam(request, slug, attempt_id):
         user=request.user,
     )
     exam = attempt.exam
+    return_to = current_return_to(request)
+    history_url = build_exam_history_url(exam, return_to=return_to)
 
     if attempt.is_finished:
-        return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)
+        return redirect(build_exam_result_url(attempt, return_to=return_to))
 
     # Sualları Attempt-ə bağlanmış cavablardan götürürük
     answers_qs = (
@@ -109,6 +104,21 @@ def take_exam(request, slug, attempt_id):
         message_key = "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         messages.error(request, pgettext("exams.view.access.message", message_key))
         return redirect(_resolve_exam_failure_redirect(request))
+
+    previous_attempts = annotate_attempt_result_visibility(
+        list(
+            ExamAttempt.objects.filter(
+                exam=exam,
+                user=request.user,
+                status__in=["submitted", "graded", "expired"],
+            )
+            .exclude(id=attempt.id)
+            .order_by("-started_at")
+        )
+    )
+    current_path = request.get_full_path()
+    for previous_attempt in previous_attempts:
+        previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=current_path)
 
     questions = [a.question for a in answers_qs]
 
@@ -198,7 +208,7 @@ def take_exam(request, slug, attempt_id):
                             if is_ajax:
                                 return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
                             messages.error(request, exc.messages[0])
-                            return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
+                            return redirect(append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to))
                         randomize_uploaded_filename(f)
                         ExamAnswerFile.objects.create(answer=ans, file=f)
 
@@ -230,13 +240,10 @@ def take_exam(request, slug, attempt_id):
                     {
                         "success": True,
                         "finished": True,
-                        "redirect_url": reverse(
-                            "exams:exam_result",
-                            kwargs={"slug": exam.slug, "attempt_id": attempt.id},
-                        ),
+                        "redirect_url": build_exam_result_url(attempt, return_to=return_to),
                     }
                 )
-            return redirect("exams:exam_result", slug=exam.slug, attempt_id=attempt.id)
+            return redirect(build_exam_result_url(attempt, return_to=return_to))
 
         # ✅ Draft olaraq saxla (autosave və ya manual save_draft)
         if action in ("autosave", "save_draft"):
@@ -247,7 +254,7 @@ def take_exam(request, slug, attempt_id):
             return JsonResponse({"success": True, "finished": False})
 
         # ✅ Normal POST (AJAX deyilsə) - səhifəni yenilə
-        return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
+        return redirect(append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to))
 
     # GET sorğusu
     context = {
@@ -257,5 +264,8 @@ def take_exam(request, slug, attempt_id):
         "q_payload": q_payload,
         "answers_by_qid": answers_by_qid,
         "remaining_seconds": remaining_seconds,
+        "history_url": history_url,
+        "previous_attempts": previous_attempts,
+        "previous_attempts_count": len(previous_attempts),
     }
     return render(request, "exams/student/take_exam.html", context)

@@ -331,6 +331,9 @@ class RegisterForm(forms.ModelForm):
         )
         if selected_org_type in ORGANIZATION_CREATOR_TYPES:
             join_orgs = join_orgs.filter(org_type=selected_org_type)
+        submitted_join_organization = (self.data.get("join_organization") or "").strip()
+        if submitted_join_organization:
+            join_orgs = (join_orgs | Organization.objects.filter(pk=submitted_join_organization)).distinct()
         self.fields["join_organization"].queryset = join_orgs.order_by("name")
 
         self.fields["first_name"].required = True

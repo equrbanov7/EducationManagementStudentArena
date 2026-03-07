@@ -49,6 +49,7 @@ CACHES = {
 
 # Use console email backend for tests
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+SITE_URL = "http://testserver"
 
 # Static files - simple storage for tests
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"

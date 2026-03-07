@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Sum
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -68,7 +69,7 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next"),
+        request.GET.get("return_to") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
     )
     profile_return_url = explicit_return_url or fallback_profile_return_url
 
@@ -197,6 +198,15 @@ def teacher_exam_results(request, slug):
         attempts = attempts.filter(started_at__date__lte=date_to)
 
     attempts = attempts.order_by("-started_at")
+    max_score = 100 if exam.exam_type == "test" else exam.questions.aggregate(total=Sum("points")).get("total") or 0
+    pending_count = 0 if exam.exam_type == "test" else attempts.filter(checked_by_teacher=False).count()
+    graded_count = attempts.count() if exam.exam_type == "test" else attempts.filter(checked_by_teacher=True).count()
+    review_stats = {
+        "total": attempts.count(),
+        "pending": pending_count,
+        "graded": graded_count,
+        "max_score": max_score,
+    }
     paginator = Paginator(attempts, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     attempts_page = list(page_obj.object_list)
@@ -288,6 +298,8 @@ def teacher_exam_results(request, slug):
             "profile_return_url": profile_return_url,
             "exam_detail_url": exam_detail_url,
             "exam_navigation_query": exam_navigation_query,
+            "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
+            "review_stats": review_stats,
             "search_query": search_query,
             "status_filter": status_filter,
             "checked_filter": checked_filter,
@@ -412,6 +424,7 @@ def teacher_view_attempt(request, slug, attempt_id):
         "qa_clear_search_url": clear_search_url,
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
         "profile_return_url": profile_return_url,
+        "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)

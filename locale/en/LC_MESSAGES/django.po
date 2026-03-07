@@ -10087,6 +10087,11 @@ msgctxt "exams.template.teacher_exam_detail"
 msgid "action_back_profile"
 msgstr "Back to profile"
 
+#: apps/exams/templates/exams/teacher/teacher_exam_detail.html:20
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_back"
+msgstr "Back"
+
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:27
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_type"

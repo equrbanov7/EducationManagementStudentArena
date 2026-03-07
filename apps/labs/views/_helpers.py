@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from apps.courses.models import Course
+from core.helpers import _safe_same_origin_redirect_path
 from core.tenancy import scoped_by_organization_id
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
@@ -109,6 +110,14 @@ def _get_tenant_submission_or_404(request, submission_id):
 
 
 def _lab_back_url(request, lab):
+    dashboard_url = reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
+    explicit_return_url = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+    if explicit_return_url:
+        return f"{dashboard_url}?{urlencode({'return_to': explicit_return_url})}"
+
     source_section = (request.GET.get("from_section") or "").strip()
     if source_section == "assigned-exams":
         params = {"section": "assigned-exams"}
@@ -117,4 +126,18 @@ def _lab_back_url(request, lab):
             params["assigned_type"] = assigned_type
         return f"{reverse('accounts:profile')}?{urlencode(params)}"
 
-    return reverse("courses:course_dashboard", kwargs={"course_id": lab.course.id})
+    return dashboard_url
+
+
+def _lab_return_to(request):
+    return _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.GET.get("next"),
+    )
+
+
+def _append_return_to(url, return_to):
+    if not return_to:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode({'return_to': return_to})}"

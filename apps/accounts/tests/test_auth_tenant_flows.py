@@ -203,7 +203,7 @@ class SignupAndLoginFlowTest(TestCase):
             ),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Düzgün seçim edin")
+        self.assertContains(response, "Seçilən təşkilat aktiv deyil və ya dayandırılıb.")
 
     def test_student_join_rejects_type_mismatch(self):
         owner = User.objects.create_user(
@@ -228,7 +228,7 @@ class SignupAndLoginFlowTest(TestCase):
             ),
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Düzgün seçim edin")
+        self.assertContains(response, "Seçilən təşkilat qeydiyyat növünə uyğun deyil.")
 
     def test_student_join_stays_pending_after_email_verification(self):
         owner = User.objects.create_user(

@@ -103,11 +103,6 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             self.request,
             self.request.GET.get("return_to") or self.request.GET.get("next"),
         )
-        if not explicit_return_url:
-            explicit_return_url = _safe_same_origin_redirect_path(
-                self.request,
-                self.request.META.get("HTTP_REFERER"),
-            )
         if explicit_return_url == self.request.get_full_path():
             explicit_return_url = ""
 
@@ -261,6 +256,10 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     last_attempt = attempts.first()
                     attempt_count = attempts.count()
                     attempts_left = exam.attempts_left_for(user)
+                    can_start_without_code, _ = exam.can_user_start(user, code=None)
+                    is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
+                    has_attempts_left = attempts_left is None or attempts_left > 0
+                    requires_code = bool(exam.access_code and is_exam_window_open and has_attempts_left)
 
                     exams_with_data.append(
                         {
@@ -268,7 +267,8 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                             "last_attempt": last_attempt,
                             "attempt_count": attempt_count,
                             "attempts_left": attempts_left,
-                            "can_start": exam.can_user_start(user)[0],
+                            "can_start": can_start_without_code or requires_code,
+                            "requires_code": requires_code,
                         }
                     )
 

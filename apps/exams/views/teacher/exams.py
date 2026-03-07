@@ -58,7 +58,7 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next"),
+        request.GET.get("return_to") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
     )
 
     profile_return_url = explicit_return_url or fallback_profile_return_url
@@ -245,6 +245,7 @@ def teacher_exam_detail(request, slug):
     exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
     profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
+    exam_back_label = pgettext("exams.template.teacher_exam_detail", "action_back")
 
     return render(
         request,
@@ -254,6 +255,7 @@ def teacher_exam_detail(request, slug):
             "questions": questions,
             "profile_return_url": profile_return_url,
             "exam_navigation_query": nav_query,
+            "exam_back_label": exam_back_label,
         },
     )
 

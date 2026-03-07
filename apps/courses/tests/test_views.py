@@ -2,12 +2,15 @@
 View tests for courses app.
 """
 
+from urllib.parse import quote
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
+from apps.exams.models import Exam
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -87,6 +90,12 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             status="published",
             organization_id=999,
         )
+        self.course_exam = Exam.objects.create(
+            author=self.owner,
+            course=self.course_a,
+            title="Tenant A Course Exam",
+            is_active=True,
+        )
 
         CourseMembership.objects.create(course=self.course_a, user=self.student, role="student")
         CourseMembership.objects.create(course=self.course_b, user=self.student, role="student")
@@ -146,7 +155,24 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["profile_return_url"], return_to)
 
-    def test_course_dashboard_ignores_non_profile_referer_for_back_link(self):
+    def test_course_dashboard_exam_links_return_back_to_current_dashboard_path(self):
+        self.client.force_login(self.owner)
+        session = self.client.session
+        session["active_organization"] = self.org_a.slug
+        session.save()
+
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+            {"from_section": "my-courses", "return_to": f"{reverse('accounts:profile')}?section=my-courses"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'{reverse("exams:teacher_exam_detail", args=[self.course_exam.slug])}?from_section=my-courses')
+        self.assertContains(response, f'{reverse("exams:teacher_exam_results", args=[self.course_exam.slug])}?from_section=my-courses')
+        expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
+        self.assertContains(response, f"return_to={expected_return_to}")
+
+    def test_course_dashboard_ignores_referer_when_no_explicit_return_to_is_provided(self):
         self.client.force_login(self.student)
         session = self.client.session
         session["active_organization"] = self.org_a.slug
@@ -154,8 +180,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
 
         response = self.client.get(
             reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
-            {"from_section": "assigned-courses"},
-            HTTP_REFERER="/labs/1/some-internal-page/",
+            HTTP_REFERER="/assignments/5/my-submissions/",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -183,7 +208,6 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.url, next_url)
         self.course_a.refresh_from_db()
         self.assertEqual(self.course_a.status, "published")
-
     def test_delete_course_redirects_to_new_profile_page(self):
         self.client.force_login(self.owner)
         session = self.client.session

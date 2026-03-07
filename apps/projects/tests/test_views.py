@@ -91,6 +91,8 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["selected_submission_id"], str(self.submission.id))
+        self.assertContains(response, "answers-stat-grid")
+        self.assertContains(response, "answers-table-card__header")
 
     def test_review_submissions_prefers_explicit_return_to_for_back_url(self):
         self.client.login(username="project_review_teacher", password="StrongPass123!")
@@ -225,3 +227,63 @@ class ProjectTenantIsolationTest(TestCase):
 
         response = self.client.get(reverse("projects:project_detail", kwargs={"pk": self.project_b.id}))
         self.assertEqual(response.status_code, 404)
+
+
+class ProjectReviewVisibilityTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("project_visibility_teacher", "pvt@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("project_visibility_student", "pvs@example.com", "StrongPass123!")
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+
+        self.course = Course.objects.create(owner=self.teacher, title="Project Visibility Course", status="published")
+        self.project = Project.objects.create(
+            course=self.course,
+            title="Project Visibility",
+            description="Visibility test",
+            start_date=timezone.now() - timedelta(days=1),
+            deadline=timezone.now() + timedelta(days=1),
+            status="active",
+            max_score=100,
+        )
+        self.project.assigned_students.add(self.student)
+        self.submission = ProjectSubmission.objects.create(
+            project=self.project,
+            student=self.student,
+            content="Visibility answer",
+            status="graded",
+            grade="88.25",
+            feedback="Project feedback should wait",
+            graded_at=timezone.now(),
+        )
+
+    def test_student_views_hide_project_result_until_review_window_closes(self):
+        self.client.force_login(self.student)
+
+        hidden_detail_response = self.client.get(reverse("projects:project_detail", kwargs={"pk": self.project.id}))
+        self.assertEqual(hidden_detail_response.status_code, 200)
+        self.assertFalse(hidden_detail_response.context["user_submissions"][0].show_review_data)
+        self.assertNotContains(hidden_detail_response, "88.25")
+        self.assertContains(hidden_detail_response, 'data-review-countdown="')
+
+        hidden_submissions_response = self.client.get(reverse("projects:my_submissions", kwargs={"pk": self.project.id}))
+        self.assertEqual(hidden_submissions_response.status_code, 200)
+        self.assertFalse(hidden_submissions_response.context["submissions"][0].show_review_data)
+        self.assertNotContains(hidden_submissions_response, "Project feedback should wait")
+        self.assertNotContains(hidden_submissions_response, "88.25")
+        self.assertContains(hidden_submissions_response, 'data-review-countdown="')
+
+        self.submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["graded_at"])
+
+        visible_detail_response = self.client.get(reverse("projects:project_detail", kwargs={"pk": self.project.id}))
+        self.assertEqual(visible_detail_response.status_code, 200)
+        self.assertTrue(visible_detail_response.context["user_submissions"][0].show_review_data)
+        self.assertContains(visible_detail_response, "88,25")
+
+        visible_submissions_response = self.client.get(reverse("projects:my_submissions", kwargs={"pk": self.project.id}))
+        self.assertEqual(visible_submissions_response.status_code, 200)
+        self.assertTrue(visible_submissions_response.context["submissions"][0].show_review_data)
+        self.assertContains(visible_submissions_response, "Project feedback should wait")
+        self.assertContains(visible_submissions_response, "88,25")

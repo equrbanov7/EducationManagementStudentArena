@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
-from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 
 from ._helpers import _get_tenant_assignment_or_404, _get_tenant_submission_or_404, _teacher_review_back_url
@@ -47,15 +47,22 @@ def review_submissions(request, pk):
         messages.error(request, pgettext("assignments.views.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=assignment.course.id)
 
-    submissions = assignment.submissions.select_related("student").order_by("-submitted_at")
+    submissions = assignment.submissions.select_related("user").order_by("-submitted_at")
     selected_submission_raw = (request.GET.get("submission") or "").strip()
     selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
+    review_stats = {
+        "total": assignment.submissions.count(),
+        "pending": assignment.submissions.filter(status__in=["submitted", "grading"]).count(),
+        "graded": assignment.submissions.filter(status="graded").count(),
+        "max_score": assignment.max_score,
+    }
 
     context = {
         "assignment": assignment,
         "submissions": submissions,
         "selected_submission_id": selected_submission_id,
         "back_url": _teacher_review_back_url(request, assignment),
+        "review_stats": review_stats,
     }
 
     return render(request, "assignments/review_submissions.html", context)
@@ -64,6 +71,51 @@ def review_submissions(request, pk):
 # ════════════════════════════════════════════════════════════════════════════
 # Grade Submission
 # ════════════════════════════════════════════════════════════════════════════
+
+
+@login_required
+@require_http_methods(["POST"])
+def delete_submissions(request, pk):
+    assignment = _get_tenant_assignment_or_404(request, pk)
+
+    if not request.user.is_teacher_or_above or assignment.course.owner != request.user:
+        messages.error(request, pgettext("assignments.views.message", "permission_denied"))
+        return redirect(_teacher_review_back_url(request, assignment))
+
+    if not (
+        request_has_permission(request, "assignment.delete")
+        or request_has_permission(request, "course.delete")
+        or request_has_permission(request, "exam.delete")
+    ):
+        messages.error(request, pgettext("assignments.views.message", "permission_denied"))
+        return redirect(_teacher_review_back_url(request, assignment))
+
+    redirect_url = _safe_same_origin_redirect_path(request, request.POST.get("next")) or _teacher_review_back_url(
+        request, assignment
+    )
+
+    raw_ids = request.POST.getlist("submission_ids")
+    single_submission_id = (request.POST.get("submission_id") or "").strip()
+    if single_submission_id:
+        raw_ids.append(single_submission_id)
+
+    submission_ids = sorted({int(raw_id) for raw_id in raw_ids if str(raw_id).isdigit()})
+    if not submission_ids:
+        messages.warning(request, pgettext("assignments.views.message", "submission_not_found"))
+        return redirect(redirect_url)
+
+    submissions_qs = assignment.submissions.filter(id__in=submission_ids)
+    if not submissions_qs.exists():
+        messages.warning(request, pgettext("assignments.views.message", "submission_not_found"))
+        return redirect(redirect_url)
+
+    deleted_count = submissions_qs.count()
+    submissions_qs.delete()
+    messages.success(
+        request,
+        pgettext("assignments.views.message", "submissions_deleted").format(count=deleted_count),
+    )
+    return redirect(redirect_url)
 
 
 @login_required

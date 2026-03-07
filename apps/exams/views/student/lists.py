@@ -7,6 +7,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import Exam
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from ._helpers import build_exam_history_url
 
 
 @login_required
@@ -76,8 +77,10 @@ def assigned_student_exam_list(request):
             {
                 "exam": exam,
                 "left": left,
+                "attempt_count": exam.attempts.filter(user=user).exclude(status="draft").count(),
                 "requires_code": requires_code,
                 "access_label": access_label,
+                "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
             }
         )
 
@@ -167,8 +170,10 @@ def student_exam_list(request):
             {
                 "exam": exam,
                 "left": left,
+                "attempt_count": exam.attempts.filter(user=user).exclude(status="draft").count(),
                 "requires_code": requires_code,
                 "access_label": access_label,
+                "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
             }
         )
 

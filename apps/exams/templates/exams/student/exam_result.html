@@ -262,15 +262,71 @@
         {% endfor %}
     </div>
 
+    {% if previous_attempts %}
+    <div class="section-divider"></div>
+    <h3 class="section-title">Digər cəhdlər</h3>
+    <div class="summary-card">
+        <div class="summary-body pt-4">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tarix</th>
+                            <th>Status</th>
+                            <th>Nəticə</th>
+                            <th class="text-end">Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for previous_attempt in previous_attempts %}
+                        <tr>
+                            <td>{{ previous_attempt.attempt_number }}</td>
+                            <td>{{ previous_attempt.started_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ previous_attempt.get_status_display }}</td>
+                            <td>
+                                {% if previous_attempt.exam.exam_type == "test" %}
+                                    {{ previous_attempt.score_percent }}%
+                                {% elif previous_attempt.checked_by_teacher and previous_attempt.can_view_result %}
+                                    {{ previous_attempt.teacher_score|default:"-" }}
+                                {% elif previous_attempt.review_available_in_seconds > 0 %}
+                                    <span class="text-muted small">
+                                        <i class="far fa-clock me-1"></i>
+                                        <span data-review-countdown="{{ previous_attempt.review_available_in_seconds }}">--:--:--</span>
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">Yoxlanır</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if previous_attempt.can_view_result %}
+                                <a href="{{ previous_attempt.result_url }}" class="btn btn-sm btn-outline-primary">Bax</a>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gözləyir</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="action-footer">
-        <a href="{% url 'exams:student_exam_list' %}" class="btn custom-blue-btn">
+        <a href="{{ back_url }}" class="btn custom-blue-btn">
             <i class="fas fa-arrow-left me-2"></i> {% trans "action_back_to_exams" context "exams.template.student_exam_result" %}
         </a>
 
-        <a href="{% url 'exams:student_exam_history' %}" class="btn custom-blue-btn">
-             {% trans "action_back_to_history" context "exams.template.student_exam_result" %}  <i class="fas fa-history ms-2"></i>
+        <a href="{{ history_url }}" class="btn custom-blue-btn">
+             Cavablarım ({{ previous_attempts_count }}) <i class="fas fa-history ms-2"></i>
         </a>
     </div>
 
 </div> 
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 {% endblock %}

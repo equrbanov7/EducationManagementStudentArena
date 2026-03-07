@@ -23,7 +23,7 @@
         {% trans "exam" context "profile.my_exams" as profile_exam_default %}
         <div class="exam-cards-grid">
             {% for exam in my_exams %}
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams" class="modern-exam-card">
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}" class="modern-exam-card">
                 <div class="exam-card-icon">
                     <i class="fas fa-file-alt"></i>
                 </div>

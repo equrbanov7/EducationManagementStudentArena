@@ -203,21 +203,41 @@
                             
                             <div class="btn-group btn-group-sm gap-2">
                                 {% if item.last_attempt %}
-                                    <a href="{% url 'exams:exam_result' exam.slug item.last_attempt.id %}" 
+                                    <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}" 
                                        class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-chart-bar"></i> {% trans "action_view_my_results" context "exams.partial.exam_section" %}
+                                        <i class="fas fa-chart-bar"></i> Cavablarım ({{ item.attempt_count }})
                                     </a>
                                     
                                     {% if item.can_start and item.attempts_left != 0 %}
-                                        <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                        <button type="button"
+                                                class="btn btn-sm btn-info js-open-course-exam-modal"
+                                                data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                                data-exam-slug="{{ exam.slug }}"
+                                                data-exam-title="{{ exam.title }}"
+                                                data-exam-type="{{ exam.get_exam_type_display }}"
+                                                data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                                data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                                data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                                                data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                                data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
                                             <i class="fas fa-redo"></i> {% trans "action_restart_exam" context "exams.partial.exam_section" %}
-                                        </a>
+                                        </button>
                                     {% endif %}
                                     
                                 {% elif item.can_start %}
-                                    <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-sm btn-info">
+                                    <button type="button"
+                                            class="btn btn-sm btn-info js-open-course-exam-modal"
+                                            data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                            data-exam-slug="{{ exam.slug }}"
+                                            data-exam-title="{{ exam.title }}"
+                                            data-exam-type="{{ exam.get_exam_type_display }}"
+                                            data-exam-start="{% if exam.start_datetime %}{{ exam.start_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                            data-exam-end="{% if exam.end_datetime %}{{ exam.end_datetime|date:'d.m.Y H:i' }}{% else %}{% trans 'modal_value_always_available' context 'exams.partial.exam_section' %}{% endif %}"
+                                            data-exam-duration="{% if exam.total_duration_minutes %}{{ exam.total_duration_minutes }} {% trans 'label_duration_unit_minutes' context 'exams.partial.exam_section' %}{% else %}{% trans 'modal_value_unlimited' context 'exams.partial.exam_section' %}{% endif %}"
+                                            data-exam-note="{% if exam.description %}{{ exam.description|striptags|escape }}{% endif %}"
+                                            data-requires-code="{% if item.requires_code %}1{% else %}0{% endif %}">
                                         <i class="fas fa-play"></i> {% trans "action_start_exam" context "exams.partial.exam_section" %}
-                                    </a>
+                                    </button>
                                     
                                 {% elif exam.is_before_start %}
                                     <button class="btn btn-sm btn-secondary" disabled>
@@ -256,3 +276,205 @@
         </div>
     </div>
 </div>
+{% if is_student %}
+<div id="courseExamInfoBackdrop" class="assigned-exam-info-backdrop" aria-hidden="true">
+    <div class="assigned-exam-info-modal" role="dialog" aria-modal="true" aria-labelledby="courseExamInfoTitle">
+        <button type="button"
+                class="assigned-exam-info-close"
+                id="courseExamInfoClose"
+                aria-label="{% trans 'modal_aria_close' context 'exams.partial.exam_section' %}">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <h3 id="courseExamInfoTitle" class="assigned-exam-info-title">
+            {% trans "modal_title_exam_info" context "exams.partial.exam_section" %}
+        </h3>
+        <p class="assigned-exam-info-subtitle" id="courseExamInfoExamName"></p>
+
+        <div class="assigned-exam-info-grid">
+            <div class="assigned-exam-info-row">
+                <span class="label">{% trans "modal_label_type" context "exams.partial.exam_section" %}</span>
+                <span class="value" id="courseExamInfoType">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">{% trans "modal_label_duration" context "exams.partial.exam_section" %}</span>
+                <span class="value" id="courseExamInfoDuration">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">{% trans "modal_label_start" context "exams.partial.exam_section" %}</span>
+                <span class="value" id="courseExamInfoStart">-</span>
+            </div>
+            <div class="assigned-exam-info-row">
+                <span class="label">{% trans "modal_label_end" context "exams.partial.exam_section" %}</span>
+                <span class="value" id="courseExamInfoEnd">-</span>
+            </div>
+        </div>
+
+        <div class="assigned-exam-info-note-wrap">
+            <div class="label">{% trans "modal_label_note" context "exams.partial.exam_section" %}</div>
+            <p id="courseExamInfoNote">{% trans "modal_note_empty" context "exams.partial.exam_section" %}</p>
+        </div>
+
+        <form method="post"
+              action="{% url 'exams:exam_code_check' %}"
+              id="courseExamCodeForm"
+              class="assigned-exam-code-form is-hidden">
+            {% csrf_token %}
+            <input type="hidden" name="exam_slug" id="courseExamCodeSlug">
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label for="courseExamAccessCodeInput" class="assigned-exam-code-label">
+                {% trans "modal_access_code_label" context "exams.partial.exam_section" %}
+            </label>
+            <input type="text"
+                   id="courseExamAccessCodeInput"
+                   name="access_code"
+                   class="assigned-exam-code-input"
+                   maxlength="6"
+                   inputmode="numeric"
+                   placeholder="{% trans 'modal_access_code_placeholder' context 'exams.partial.exam_section' %}">
+        </form>
+
+        <div class="assigned-exam-info-actions">
+            <button type="button"
+                    class="btn-action btn-task-secondary"
+                    id="courseExamInfoCancelBtn">
+                {% trans "modal_action_cancel" context "exams.partial.exam_section" %}
+            </button>
+            <button type="button"
+                    class="btn-action btn-task-primary"
+                    id="courseExamInfoStartBtn">
+                {% trans "modal_action_start" context "exams.partial.exam_section" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var backdrop = document.getElementById("courseExamInfoBackdrop");
+    var closeBtn = document.getElementById("courseExamInfoClose");
+    var cancelBtn = document.getElementById("courseExamInfoCancelBtn");
+    var startBtn = document.getElementById("courseExamInfoStartBtn");
+    var titleEl = document.getElementById("courseExamInfoExamName");
+    var typeEl = document.getElementById("courseExamInfoType");
+    var durationEl = document.getElementById("courseExamInfoDuration");
+    var startEl = document.getElementById("courseExamInfoStart");
+    var endEl = document.getElementById("courseExamInfoEnd");
+    var noteEl = document.getElementById("courseExamInfoNote");
+    var codeForm = document.getElementById("courseExamCodeForm");
+    var codeSlug = document.getElementById("courseExamCodeSlug");
+    var codeInput = document.getElementById("courseExamAccessCodeInput");
+    var startUrl = "";
+    var requiresCode = false;
+    var emptyNoteText = "{% trans 'modal_note_empty' context 'exams.partial.exam_section'|escapejs %}";
+    var directStartText = "{% trans 'modal_action_start' context 'exams.partial.exam_section'|escapejs %}";
+    var confirmCodeText = "{% trans 'modal_action_confirm_code' context 'exams.partial.exam_section'|escapejs %}";
+
+    function closeModal() {
+        if (!backdrop) {
+            return;
+        }
+        backdrop.classList.remove("is-open");
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function openModal(trigger) {
+        if (!backdrop || !trigger) {
+            return;
+        }
+
+        startUrl = trigger.getAttribute("data-start-url") || "";
+        requiresCode = trigger.getAttribute("data-requires-code") === "1";
+
+        if (titleEl) {
+            titleEl.textContent = trigger.getAttribute("data-exam-title") || "";
+        }
+        if (typeEl) {
+            typeEl.textContent = trigger.getAttribute("data-exam-type") || "-";
+        }
+        if (durationEl) {
+            durationEl.textContent = trigger.getAttribute("data-exam-duration") || "-";
+        }
+        if (startEl) {
+            startEl.textContent = trigger.getAttribute("data-exam-start") || "-";
+        }
+        if (endEl) {
+            endEl.textContent = trigger.getAttribute("data-exam-end") || "-";
+        }
+        if (noteEl) {
+            noteEl.textContent = trigger.getAttribute("data-exam-note") || emptyNoteText;
+        }
+        if (codeSlug) {
+            codeSlug.value = trigger.getAttribute("data-exam-slug") || "";
+        }
+        if (codeForm) {
+            codeForm.classList.toggle("is-hidden", !requiresCode);
+        }
+        if (codeInput) {
+            codeInput.value = "";
+        }
+        if (startBtn) {
+            startBtn.textContent = requiresCode ? confirmCodeText : directStartText;
+        }
+
+        backdrop.classList.add("is-open");
+        backdrop.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        if (requiresCode && codeInput) {
+            window.setTimeout(function () {
+                codeInput.focus();
+            }, 40);
+        }
+    }
+
+    document.addEventListener("click", function (event) {
+        var trigger = event.target.closest(".js-open-course-exam-modal");
+        if (!trigger) {
+            return;
+        }
+        event.preventDefault();
+        openModal(trigger);
+    });
+
+    if (backdrop) {
+        backdrop.addEventListener("click", function (event) {
+            if (event.target === backdrop) {
+                closeModal();
+            }
+        });
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener("click", closeModal);
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", closeModal);
+    }
+    if (codeInput) {
+        codeInput.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+        });
+    }
+    if (startBtn) {
+        startBtn.addEventListener("click", function () {
+            if (requiresCode) {
+                if (!codeForm || !codeInput) {
+                    return;
+                }
+                if (!(codeInput.value || "").trim()) {
+                    codeInput.focus();
+                    return;
+                }
+                codeForm.submit();
+                return;
+            }
+
+            if (startUrl) {
+                window.location.href = startUrl;
+            }
+        });
+    }
+})();
+</script>
+{% endif %}
