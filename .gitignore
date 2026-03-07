@@ -55,6 +55,7 @@ redis_data/
 *.swp
 *.swo
 *~
+*.bak
 
 # =========================
 # Test / Coverage
