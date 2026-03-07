@@ -10228,7 +10228,7 @@ msgstr "Geri"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:27
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_type"
-msgstr "Type"
+msgstr "Növ"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:31
 msgctxt "exams.template.teacher_exam_detail"
@@ -10243,7 +10243,7 @@ msgstr "Aktiv"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:35
 msgctxt "exams.template.teacher_exam_detail"
 msgid "status_passive"
-msgstr "Aktiv"
+msgstr "Passiv"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:40
 msgctxt "exams.template.teacher_exam_detail"
@@ -10258,12 +10258,12 @@ msgstr "dəqiqə"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:46
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_question_time"
-msgstr "Sual"
+msgstr "Sual vaxtı"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:47
 msgctxt "exams.template.teacher_exam_detail"
 msgid "unit_seconds"
-msgstr "Məs: 60 (saniyə). Boş qalsa default istifadə olunur."
+msgstr "saniyə"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:52
 msgctxt "exams.template.teacher_exam_detail"
@@ -10273,33 +10273,41 @@ msgstr "Cəhdlər"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:61
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_start_live"
-msgstr "Yadda Saxla"
+msgstr "Canlı imtahanı başlat"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:71
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_question"
-msgstr "Tələbə Əlavə Et"
+msgstr "Sual əlavə et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:79
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:85
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_question_bank_blocks"
-msgstr "Sual Bankı / Bloklar"
+msgstr "Blok / sual əlavə et"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_bulk_add_blocks"
+msgstr "Blok / sual əlavə et"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_questions_bank"
+msgstr "Sual bankı"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:90
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_results"
-msgstr "Hamısını Gör"
+msgstr "Nəticələrə bax"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:99
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_deactivate"
-msgstr "Sil"
+msgstr "Deaktiv et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:103
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_activate"
-msgstr "Yadda Saxla"
+msgstr "Aktiv et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:109
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:150
@@ -10310,7 +10318,7 @@ msgstr "Redaktə et"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:113
 msgctxt "exams.template.teacher_exam_detail"
 msgid "confirm_delete_exam"
-msgstr "Əminsiniz ki"
+msgstr "Bu imtahanı silmək istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:116
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:158
@@ -10326,17 +10334,17 @@ msgstr "Mövcud suallar"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:155
 msgctxt "exams.template.teacher_exam_detail"
 msgid "confirm_delete_question"
-msgstr "Bu istifadəçini kursdan silmək istəyirsən?"
+msgstr "Bu sualı silmək istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:168
 msgctxt "exams.template.teacher_exam_detail"
 msgid "empty_no_questions"
-msgstr "Empty posts"
+msgstr "Bu imtahanda hələ sual yoxdur."
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:170
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_first_question"
-msgstr "Birinci mövzunuzu əlavə edin"
+msgstr "İlk sualı əlavə et"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_list.html:3
 #: apps/exams/templates/exams/teacher/teacher_exam_list.html:12
@@ -14785,3 +14793,215 @@ msgstr "Seçilən təşkilat seçilən ölkəyə uyğun deyil."
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqsınız."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "title_questions_bank"
+msgstr "Sual bankı"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "subtitle_questions_bank"
+msgstr "İmtahana əlavə olunmuş sualları axtarın, seçin, aktiv/deaktiv edin və idarə edin."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_back_exam_detail"
+msgstr "İmtahana qayıt"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_add_question"
+msgstr "Sual əlavə et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_total_questions"
+msgstr "Ümumi sual sayı"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_active_questions"
+msgstr "Aktiv suallar"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_inactive_questions"
+msgstr "Deaktiv suallar"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "placeholder_search_questions"
+msgstr "Sual mətni, blok və ya cavab variantı üzrə axtarın..."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_filter_status"
+msgstr "Status filtri"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_all"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_active"
+msgstr "Aktiv"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_inactive"
+msgstr "Deaktiv"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_select_all_page"
+msgstr "Səhifədəkiləri seç"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_clear_selection"
+msgstr "Seçimi təmizlə"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count"
+msgstr "{count} sual seçilib"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count_zero"
+msgstr "0 sual seçilib"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate_selected"
+msgstr "Seçilənləri deaktiv et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate_selected"
+msgstr "Seçilənləri aktiv et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_question"
+msgstr "Sual"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_block"
+msgstr "Blok"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_actions"
+msgstr "Əməliyyatlar"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_no_block"
+msgstr "Bloksuz"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_active"
+msgstr "Aktiv"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_inactive"
+msgstr "Deaktiv"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_edit"
+msgstr "Redaktə et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_results"
+msgstr "Axtarışa uyğun sual tapılmadı."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_questions"
+msgstr "Bu imtahanda hələ sual yoxdur."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_pagination"
+msgstr "Səhifələmə"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_prev"
+msgstr "Əvvəlki"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_next"
+msgstr "Növbəti"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "confirm_delete_selected"
+msgstr "Seçilmiş sualları silmək istədiyinizə əminsiniz?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "select_at_least_one"
+msgstr "Ən azı bir sual seçin."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "select_at_least_one"
+msgstr "Ən azı bir sual seçin."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "deactivated_selected"
+msgstr "{count} sual deaktiv edildi."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "activated_selected"
+msgstr "{count} sual aktiv edildi."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "deleted_selected"
+msgstr "{count} sual silindi."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "invalid_bulk_action"
+msgstr "Yanlış toplu əməliyyat."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_bulk_add_blocks"
+msgstr "Blok / sual əlavə et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_sort"
+msgstr "Sıralama"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_newest"
+msgstr "Əlavə olunma tarixi (yenidən köhnəyə)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_oldest"
+msgstr "Əlavə olunma tarixi (köhnədən yeniyə)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_az"
+msgstr "Əlifba sırası (A-Z)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_za"
+msgstr "Əlifba sırası (Z-A)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_added_at"
+msgstr "Əlavə edilib"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate"
+msgstr "Deaktiv et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate"
+msgstr "Aktiv et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete"
+msgstr "Sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_title"
+msgstr "Sualı sil"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_cancel"
+msgstr "Ləğv et"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_confirm_delete"
+msgstr "Silməni təsdiqlə"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_question_body"
+msgstr "Bu sualı silmək istədiyinizə əminsiniz? {question}"
