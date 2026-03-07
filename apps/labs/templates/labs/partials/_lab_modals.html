@@ -318,6 +318,7 @@
 .lab-chk-row label{margin:0;flex:1;cursor:pointer;font-weight:500}
 .lab-chk-row .badge{margin-left:auto;flex-shrink:0}
 </style>
+<script src="{% static 'js/utils/escape.js' %}"></script>
 <script src="{% static 'labs/js/lab_modals.js' %}"></script>
 
 <script>
@@ -344,12 +345,7 @@
         stateError: '{% trans "state_error" context "labs.js.lab_modals" %}'
     };
 
-    // Helper function to escape HTML to prevent XSS
-    function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
+    // escapeHtml is now provided by the shared /static/js/utils/escape.js utility
 
     function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
         var normalizedIds = (initialSelectedIds || []).map(function(id) {

@@ -71,34 +71,59 @@ function closeModal(modalId) {
 }
 
 /**
+ * Escape HTML to prevent XSS attacks
+ *
+ * @param {string} text - Text to escape
+ * @returns {string} - Escaped text
+ */
+function escapeHtml(text) {
+    if (text === null || text === undefined) {
+        return '';
+    }
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+/**
  * Modal form-inda error göstər
- * 
+ *
  * @param {string} modalId - Modal ID
  * @param {object} errors - Errors object {field: [messages]}
  */
 function showModalErrors(modalId, errors) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
-    
+
     const errorContainer = modal.querySelector('.alert-danger');
     if (!errorContainer) return;
-    
-    let errorHtml = '<strong>' + MODAL_ERRORS_LABEL + ':</strong><ul class="mb-0">';
-    
+
+    // Clear previous content
+    errorContainer.innerHTML = '';
+
+    // Create strong element for label
+    const strongEl = document.createElement('strong');
+    strongEl.textContent = MODAL_ERRORS_LABEL + ':';
+    errorContainer.appendChild(strongEl);
+
+    // Create ul element
+    const ulEl = document.createElement('ul');
+    ulEl.className = 'mb-0';
+
     Object.keys(errors).forEach(field => {
         const messages = errors[field];
         if (Array.isArray(messages)) {
             messages.forEach(msg => {
-                errorHtml += `<li>${msg}</li>`;
+                const liEl = document.createElement('li');
+                liEl.textContent = msg; // Safe - uses textContent instead of innerHTML
+                ulEl.appendChild(liEl);
             });
         }
     });
-    
-    errorHtml += '</ul>';
-    
-    errorContainer.innerHTML = errorHtml;
+
+    errorContainer.appendChild(ulEl);
     errorContainer.classList.remove('d-none');
-    
+
     // Scroll to error
     errorContainer.scrollIntoView({ behavior: 'smooth' });
 }
