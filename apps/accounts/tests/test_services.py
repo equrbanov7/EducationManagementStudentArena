@@ -1,3 +1,115 @@
 """
 Service tests for accounts app.
 """
+
+from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+
+from apps.accounts import services
+from apps.accounts.models import ProfileRole, UserProfile
+from apps.blog.models import EmailOTP
+from apps.courses.models import Course, CourseMembership
+from apps.organizations.models import Country
+from core.constants import OrganizationType
+
+User = get_user_model()
+
+
+class RoleManagementServicesTest(TestCase):
+    """Test role management service functions."""
+
+    def setUp(self):
+        self.superuser = User.objects.create_superuser(
+            username="superadmin",
+            email="super@example.com",
+            password="pass123"
+        )
+        self.teacher = User.objects.create_user(
+            username="teacher1",
+            email="teacher@example.com",
+            password="pass123"
+        )
+        UserProfile.objects.create(user=self.teacher, role=ProfileRole.TEACHER)
+
+        self.student = User.objects.create_user(
+            username="student1",
+            email="student@example.com",
+            password="pass123"
+        )
+        UserProfile.objects.create(user=self.student, role=ProfileRole.STUDENT)
+
+    def test_is_superadmin_user(self):
+        """Test superadmin detection."""
+        self.assertTrue(services.is_superadmin_user(self.superuser))
+        self.assertFalse(services.is_superadmin_user(self.teacher))
+        self.assertFalse(services.is_superadmin_user(self.student))
+
+    def test_get_user_role_level(self):
+        """Test role level retrieval."""
+        self.assertEqual(services.get_user_role_level(self.superuser), 999)
+        teacher_level = services.get_user_role_level(self.teacher)
+        self.assertGreater(teacher_level, 0)
+        student_level = services.get_user_role_level(self.student)
+        self.assertGreater(student_level, 0)
+
+    def test_user_has_any_role(self):
+        """Test role checking."""
+        self.assertTrue(services.user_has_any_role(self.teacher, [ProfileRole.TEACHER]))
+        self.assertFalse(services.user_has_any_role(self.student, [ProfileRole.TEACHER]))
+
+
+class OTPServicesTest(TestCase):
+    """Test OTP and email verification services."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="test@example.com",
+            password="pass123",
+            is_active=False
+        )
+
+    def test_send_verification_otp(self):
+        """Test sending verification OTP."""
+        code = services.send_verification_otp(self.user)
+
+        self.assertIsNotNone(code)
+        self.assertEqual(len(code), 6)
+
+        otp = EmailOTP.objects.filter(user=self.user, is_used=False).first()
+        self.assertIsNotNone(otp)
+        self.assertEqual(otp.code, code)
+
+    def test_verify_otp_code_success(self):
+        """Test successful OTP verification."""
+        code = services.send_verification_otp(self.user)
+        success, otp = services.verify_otp_code(self.user, code)
+
+        self.assertTrue(success)
+        self.assertIsNotNone(otp)
+
+    def test_verify_otp_code_invalid(self):
+        """Test invalid OTP verification."""
+        services.send_verification_otp(self.user)
+        success, otp = services.verify_otp_code(self.user, "999999")
+
+        self.assertFalse(success)
+        self.assertIsNone(otp)
+
+
+class ScoreParsingServicesTest(TestCase):
+    """Test score parsing services."""
+
+    def test_parse_decimal_score_valid(self):
+        """Test parsing valid score values."""
+        self.assertEqual(services.parse_decimal_score("95.5"), Decimal("95.5"))
+        self.assertEqual(services.parse_decimal_score(85), Decimal("85"))
+        self.assertEqual(services.parse_decimal_score(Decimal("75.25")), Decimal("75.25"))
+
+    def test_parse_decimal_score_invalid(self):
+        """Test parsing invalid score values."""
+        self.assertIsNone(services.parse_decimal_score("invalid"))
+        self.assertIsNone(services.parse_decimal_score(None))
+        self.assertEqual(services.parse_decimal_score("invalid", default=Decimal("0")), Decimal("0"))
