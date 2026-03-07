@@ -19,9 +19,11 @@ Clean Code Prinsipləri:
 
 import itertools
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.text import slugify
+
+User = get_user_model()
 
 # ════════════════════════════════════════════════════════════════════════════
 # 1. COURSE MODEL
