@@ -3,8 +3,6 @@ Labs Views - Student Views
 Tələbə görünüşü və cavablar
 """
 
-from datetime import timedelta
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -13,11 +11,10 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.courses.models import CourseMembership
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 from ..models import LabAnswer, LabAssignment, LabQuestion, LabSubmission
 from ._helpers import _append_return_to, _get_tenant_lab_or_404, _lab_back_url, _lab_return_to
-
-REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
 
 @login_required
