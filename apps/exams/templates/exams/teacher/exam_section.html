@@ -218,12 +218,14 @@
                             </div>
                             
                             <div class="btn-group btn-group-sm gap-2">
-                                {% if item.last_attempt %}
-                                    <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}" 
+                                {% if item.attempt_count > 0 %}
+                                    <a href="{% url 'exams:student_exam_history' %}?exam={{ exam.slug }}&return_to={{ request.get_full_path|urlencode }}"
                                        class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-chart-bar"></i> Cavablarım ({{ item.attempt_count }})
                                     </a>
-                                    
+                                {% endif %}
+
+                                {% if item.last_attempt %}
                                     {% if item.can_start and item.attempts_left != 0 %}
                                         <button type="button"
                                                 class="btn btn-sm btn-info js-open-course-exam-modal"
