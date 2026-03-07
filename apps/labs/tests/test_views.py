@@ -92,8 +92,8 @@ class LabDetailBackUrlTest(TestCase):
         response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "answers-stat-grid")
-        self.assertContains(response, "answers-table-card__header")
+        self.assertContains(response, "content-card")
+        self.assertContains(response, "filters-toolbar")
 
 
 class LabTenantIsolationTest(TestCase):

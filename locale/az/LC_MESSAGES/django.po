@@ -6198,6 +6198,21 @@ msgctxt "courses.dashboard"
 msgid "status_archived"
 msgstr "Arxivləndi"
 
+#: apps/courses/templates/courses/course_dashboard.html:53
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Kursun yayımı"
+
+#: apps/courses/templates/courses/course_dashboard.html:78
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "Bu kurs draft rejimindədir, tələbələr bu kursu görmür."
+
+#: apps/courses/templates/courses/course_dashboard.html:83
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "Bu kurs yayımdadır, tələbələr kursu görə bilir."
+
 #: apps/courses/templates/courses/course_dashboard.html:50
 msgctxt "courses.dashboard"
 msgid "stat_topics"

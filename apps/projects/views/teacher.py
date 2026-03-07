@@ -8,8 +8,13 @@ Contains:
 - grade_submission
 """
 
+from datetime import datetime
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -20,6 +25,16 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_pat
 from core.permissions import request_has_permission
 
 from ._helpers import _get_tenant_project_or_404, _get_tenant_submission_or_404, _teacher_review_back_url
+
+
+def _parse_filter_date(raw_value):
+    raw_date = (raw_value or "").strip()
+    if not raw_date:
+        return "", None
+    try:
+        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
+    except ValueError:
+        return "", None
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -47,22 +62,62 @@ def review_submissions(request, pk):
         messages.error(request, pgettext("projects.views.message", "permission_denied"))
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
-    submissions = project.submissions.select_related("student").order_by("-submitted_at")
+    submissions = project.submissions.select_related("student")
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        submissions = submissions.filter(
+            Q(student__username__icontains=search_query)
+            | Q(student__first_name__icontains=search_query)
+            | Q(student__last_name__icontains=search_query)
+            | Q(content__icontains=search_query)
+        )
+
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    allowed_status_filters = {"all", "pending", "graded", "rejected"}
+    if status_filter not in allowed_status_filters:
+        status_filter = "all"
+    if status_filter != "all":
+        submissions = submissions.filter(status=status_filter)
+
+    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+    if date_from:
+        submissions = submissions.filter(submitted_at__date__gte=date_from)
+    if date_to:
+        submissions = submissions.filter(submitted_at__date__lte=date_to)
+
+    submissions = submissions.order_by("-submitted_at")
+    page_obj = Paginator(submissions, 12).get_page(request.GET.get("page"))
     selected_submission_raw = (request.GET.get("submission") or "").strip()
     selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
-    review_stats = {
-        "total": project.submissions.count(),
-        "pending": project.submissions.filter(status="pending").count(),
-        "graded": project.submissions.filter(status="graded").count(),
-        "max_score": project.max_score,
-    }
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
+                "submission": selected_submission_id,
+                "from_section": (request.GET.get("from_section") or "").strip(),
+                "return_to": (request.GET.get("return_to") or "").strip(),
+            }.items()
+            if value not in ("", None)
+        }
+    )
 
     context = {
         "project": project,
-        "submissions": submissions,
+        "submissions": page_obj.object_list,
+        "page_obj": page_obj,
         "selected_submission_id": selected_submission_id,
         "back_url": _teacher_review_back_url(request, project),
-        "review_stats": review_stats,
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "date_from": date_from_raw,
+        "date_to": date_to_raw,
+        "pagination_query": pagination_query,
+        "can_delete_submissions": False,
     }
 
     return render(request, "projects/review_submissions.html", context)

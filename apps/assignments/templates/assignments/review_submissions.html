@@ -1,136 +1,148 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static i18n %}
 
 {% block title %}{{ assignment.title }} - {% trans "page_title_suffix" context "assignment.review_submissions" %}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'css/answers_workspace.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
+    <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
+    <style>
+        .results-modal-answer {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.9rem;
+            background: #f8fafc;
+            white-space: pre-wrap;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 answers-workspace">
-    <div class="answers-toolbar">
-        <div class="answers-toolbar__copy">
-            <nav class="answers-breadcrumb" aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' assignment.course.id %}">{{ assignment.course.title }}</a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ assignment.title }}</li>
-                </ol>
-            </nav>
-            <h1 class="answers-title">
-                <span class="answers-title__icon"><i class="fa-solid fa-clipboard-check"></i></span>
-                <span>{{ assignment.title }} - {% trans "title_suffix" context "assignment.review_submissions" %}</span>
-            </h1>
-            <p class="answers-subtitle">
-                {% trans "course_label" context "assignment.review_submissions" %}: <strong>{{ assignment.course.title }}</strong>
-            </p>
-        </div>
-        <div class="answers-toolbar__actions">
-            <a href="{{ back_url }}" class="answers-back-btn">
-                <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "assignment.review_submissions" %}
-            </a>
-        </div>
-    </div>
+<div class="container my-4">
+    <h1 class="h3 mb-3">{{ assignment.title }} - {% trans "title_suffix" context "assignment.review_submissions" %}</h1>
 
-    <div class="answers-stat-grid">
-        <article class="answers-stat-card answers-stat-card--blue">
-            <div class="answers-stat-card__icon"><i class="fa-solid fa-inbox"></i></div>
-            <div class="answers-stat-card__value">{{ review_stats.total }}</div>
-            <div class="answers-stat-card__label">Cəmi cavab</div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--green">
-            <div class="answers-stat-card__icon"><i class="fa-solid fa-hourglass-half"></i></div>
-            <div class="answers-stat-card__value">{{ review_stats.pending }}</div>
-            <div class="answers-stat-card__label">Gözləyən</div>
-            <div class="answers-stat-card__meta">
-                <i class="fa-solid fa-check"></i> Qiymətləndirilib: {{ review_stats.graded }}
-            </div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--blue">
-            <div class="answers-stat-card__icon"><i class="fa-solid fa-star"></i></div>
-            <div class="answers-stat-card__value">{{ review_stats.max_score|floatformat:"-2" }}</div>
-            <div class="answers-stat-card__label">Maksimum bal</div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--white">
-            <div class="answers-stat-card__icon"><i class="fa-regular fa-calendar"></i></div>
-            {% if assignment.is_deadline_passed %}
-                <span class="answers-meta-badge answers-meta-badge--inactive"><i class="fa-solid fa-lock"></i> Vaxt bitib</span>
-            {% elif assignment.is_open_status %}
-                <span class="answers-meta-badge answers-meta-badge--active"><i class="fa-solid fa-lock-open"></i> Aktiv</span>
-            {% else %}
-                <span class="answers-meta-badge answers-meta-badge--pending"><i class="fa-solid fa-hourglass-start"></i> Draft</span>
+    <p>
+        {% trans "course_label" context "assignment.review_submissions" %}: <strong>{{ assignment.course.title }}</strong><br>
+        {% trans "table_status" context "assignment.review_submissions" %}: <strong>{{ assignment.get_status_display }}</strong>
+    </p>
+
+    <hr>
+
+    <div class="results-filter-card">
+        <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
+            {% if request.GET.from_section %}
+                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
             {% endif %}
-            <div class="answers-stat-card__label">Son tarix</div>
-            <div class="answers-stat-card__meta">
-                <i class="fa-regular fa-clock"></i>
-                {% if assignment.due_date %}{{ assignment.due_date|date:"d.m.Y H:i" }}{% else %}Məhdudiyyətsiz{% endif %}
+            {% if request.GET.return_to %}
+                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% endif %}
+            <div class="results-filter-field results-filter-field--wide">
+                <label class="results-filter-label" for="resultsFilterSearchInput">
+                    Tələbə və ya cavab mətni axtar
+                </label>
+                <input type="text"
+                       id="resultsFilterSearchInput"
+                       name="q"
+                       value="{{ search_query }}"
+                       class="form-control js-filter-resettable js-auto-filter-search"
+                       autocomplete="off"
+                       placeholder="Tələbə və ya cavab mətni axtar">
             </div>
-        </article>
+            <div class="results-filter-field">
+                <label class="results-filter-label" for="resultsFilterStatusSelect">
+                    {% trans "table_status" context "assignment.review_submissions" %}
+                </label>
+                <select name="status"
+                        id="resultsFilterStatusSelect"
+                        class="form-select js-auto-filter js-filter-resettable"
+                        data-reset-value="all">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
+                        Bütün statuslar
+                    </option>
+                    <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>
+                        Təqdim edilib
+                    </option>
+                    <option value="grading" {% if status_filter == 'grading' %}selected{% endif %}>
+                        Yoxlanır
+                    </option>
+                    <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
+                        Qiymətləndirilib
+                    </option>
+                    <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>
+                        Geri qaytarılıb
+                    </option>
+                </select>
+            </div>
+            <div class="results-filter-field">
+                <label class="results-filter-label" for="resultsFilterDateFromInput">
+                    Başlanğıc tarix
+                </label>
+                <input type="date"
+                       id="resultsFilterDateFromInput"
+                       name="date_from"
+                       value="{{ date_from }}"
+                       class="form-control js-auto-filter js-filter-resettable"
+                       aria-label="Başlanğıc tarix">
+            </div>
+            <div class="results-filter-field">
+                <label class="results-filter-label" for="resultsFilterDateToInput">
+                    Son tarix
+                </label>
+                <input type="date"
+                       id="resultsFilterDateToInput"
+                       name="date_to"
+                       value="{{ date_to }}"
+                       class="form-control js-auto-filter js-filter-resettable"
+                       aria-label="Son tarix">
+            </div>
+            <button type="submit" class="btn results-filter-submit">
+                <i class="fa-solid fa-filter me-1"></i> Tətbiq et
+            </button>
+            <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
+                <i class="fa-solid fa-eraser me-1"></i> Seçimi sıfırla
+            </button>
+        </form>
     </div>
 
-    <div class="answers-table-card">
-        <div class="answers-table-card__header">
-            <i class="fa-solid fa-list-check"></i>
-            <span>{% trans "title_suffix" context "assignment.review_submissions" %}</span>
-        </div>
-
-        {% if submissions %}
-            <div class="table-responsive">
-                <table class="table answers-table mb-0">
-                    <thead>
-                        <tr>
-                            <th>{% trans "table_student" context "assignment.review_submissions" %}</th>
-                            <th>{% trans "table_submitted_at" context "assignment.review_submissions" %}</th>
-                            <th>{% trans "table_status" context "assignment.review_submissions" %}</th>
-                            <th>{% trans "table_grade" context "assignment.review_submissions" %}</th>
-                            <th class="text-end">{% trans "table_actions" context "assignment.review_submissions" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for submission in submissions %}
-                        <tr>
-                            <td>
-                                <div class="answers-person">
-                                    <div class="answers-avatar">{{ submission.user.username|slice:":1"|upper }}</div>
-                                    <div>
-                                        <div class="answers-person__name">{{ submission.user.get_full_name|default:submission.user.username }}</div>
-                                        <div class="answers-person__meta">@{{ submission.user.username }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="answers-date__value">{{ submission.submitted_at|date:"d.m.Y H:i" }}</div>
-                                <div class="answers-date__meta">Cəhd #{{ submission.attempt_number }}</div>
-                            </td>
-                            <td>
-                                {% if submission.status == 'submitted' or submission.status == 'grading' %}
-                                    <span class="answers-status answers-status--pending">
-                                        <i class="fa-solid fa-hourglass-half"></i> {% trans "status_pending" context "assignment.review_submissions" %}
-                                    </span>
-                                {% elif submission.status == 'graded' %}
-                                    <span class="answers-status answers-status--graded">
-                                        <i class="fa-solid fa-check"></i> {% trans "status_graded" context "assignment.review_submissions" %}
-                                    </span>
-                                {% else %}
-                                    <span class="answers-status answers-status--neutral">
-                                        <i class="fa-solid fa-circle-info"></i> {{ submission.get_status_display }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if submission.grade %}
-                                    <span class="answers-score">
-                                        {{ submission.grade|floatformat:"-2" }}
-                                        <span class="answers-score__muted">/ {{ assignment.max_score|floatformat:"-2" }}</span>
-                                    </span>
-                                {% else %}
-                                    <span class="answers-score__muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end">
-                                <button class="view-submission-btn answers-action-btn answers-action-btn--filled"
+    <h3>{% trans "title_suffix" context "assignment.review_submissions" %}</h3>
+    {% if submissions %}
+        <div class="table-responsive">
+            <table class="table table-striped table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>{% trans "table_student" context "assignment.review_submissions" %}</th>
+                        <th>{% trans "table_submitted_at" context "assignment.review_submissions" %}</th>
+                        <th>{% trans "table_status" context "assignment.review_submissions" %}</th>
+                        <th>{% trans "table_grade" context "assignment.review_submissions" %}</th>
+                        <th>{% trans "table_actions" context "assignment.review_submissions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    <tr>
+                        <td><strong>{{ submission.user.get_full_name|default:submission.user.username }}</strong></td>
+                        <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if submission.status == 'submitted' %}
+                                <span class="badge bg-warning text-dark">{% trans "status_pending" context "assignment.review_submissions" %}</span>
+                            {% elif submission.status == 'graded' %}
+                                <span class="badge bg-success">{% trans "status_graded" context "assignment.review_submissions" %}</span>
+                            {% elif submission.status == 'grading' %}
+                                <span class="badge bg-info text-dark">{% trans "filter_status_grading" context "assignment.review_submissions" %}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ submission.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.grade %}
+                                <strong>{{ submission.grade }}</strong>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="results-action-buttons">
+                                <button class="btn btn-sm btn-outline-primary view-submission-btn"
                                         data-bs-toggle="modal"
                                         data-bs-target="#submissionModal"
                                         data-id="{{ submission.id }}"
@@ -142,59 +154,66 @@
                                         data-feedback="{{ submission.feedback }}">
                                     <i class="fa-solid fa-eye"></i> {% trans "view" context "assignment.review_submissions" %}
                                 </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="answers-empty">
-                <div class="answers-empty__icon"><i class="fa-solid fa-inbox"></i></div>
-                <h4>{% trans "empty_submissions" context "assignment.review_submissions" %}</h4>
-                <p>Bu tapşırıq üzrə hələ cavab təqdim olunmayıb.</p>
-            </div>
-        {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
+    {% else %}
+        <p class="text-muted text-center py-4">
+            <i class="fa-solid fa-inbox fa-3x d-block mb-2"></i>
+            {% trans "empty_submissions" context "assignment.review_submissions" %}
+        </p>
+    {% endif %}
+
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        <a href="{{ back_url }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "assignment.review_submissions" %}
+        </a>
     </div>
 </div>
 
-<div class="modal fade answers-modal" id="submissionModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-warning text-dark">
                 <h5 class="modal-title">
                     <i class="fa-solid fa-file-lines"></i> {% trans "modal_title" context "assignment.review_submissions" %}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body">
-                <div class="answers-modal__block">
-                    <span class="answers-modal__label">{% trans "student" context "assignment.review_submissions" %}</span>
-                    <div id="modal-student" class="answers-modal__content"></div>
+                <div class="mb-3">
+                    <strong>{% trans "student" context "assignment.review_submissions" %}:</strong>
+                    <p id="modal-student" class="mb-0"></p>
                 </div>
 
-                <div class="answers-modal__block">
-                    <span class="answers-modal__label">{% trans "answer_text" context "assignment.review_submissions" %}</span>
-                    <div class="answers-modal__content">
-                        <p id="modal-content" class="mb-0" style="white-space: pre-wrap;"></p>
+                <div class="mb-3">
+                    <strong>{% trans "answer_text" context "assignment.review_submissions" %}:</strong>
+                    <div id="modal-content" class="results-modal-answer"></div>
+                </div>
+
+                <div class="mb-3" id="modal-file-container" style="display: none;">
+                    <strong>{% trans "file" context "assignment.review_submissions" %}:</strong>
+                    <div class="mt-2">
+                        <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-download me-1"></i>
+                            <span id="modal-file-name">{% trans "download" context "assignment.review_submissions" %}</span>
+                        </a>
                     </div>
                 </div>
 
-                <div class="answers-modal__block" id="modal-file-container" style="display: none;">
-                    <span class="answers-modal__label">{% trans "file" context "assignment.review_submissions" %}</span>
-                    <a id="modal-file-link" href="#" target="_blank" class="answers-modal__file-link">
-                        <i class="fa-solid fa-download"></i>
-                        <span id="modal-file-name">{% trans "download" context "assignment.review_submissions" %}</span>
-                    </a>
-                </div>
+                <hr>
 
                 <form id="gradeForm" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="submission-id" name="submission_id">
 
-                    <div class="answers-modal__block">
-                        <label class="answers-modal__label" for="grade-input">{% trans "grade" context "assignment.review_submissions" %}</label>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "grade" context "assignment.review_submissions" %}:</label>
                         <input type="number"
                                id="grade-input"
                                name="grade"
@@ -204,8 +223,8 @@
                                placeholder="{% trans 'grade_placeholder' context 'assignment.review_submissions' %}">
                     </div>
 
-                    <div class="answers-modal__block">
-                        <label class="answers-modal__label" for="feedback-input">{% trans "feedback" context "assignment.review_submissions" %}</label>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "feedback" context "assignment.review_submissions" %}:</label>
                         <textarea id="feedback-input"
                                   name="feedback"
                                   class="form-control"
@@ -213,7 +232,7 @@
                                   placeholder="{% trans 'feedback_placeholder' context 'assignment.review_submissions' %}"></textarea>
                     </div>
 
-                    <button type="submit" class="answers-modal__submit" id="gradeSubmitButton">
+                    <button type="submit" class="btn btn-success" id="gradeSubmitButton">
                         <i class="fa-solid fa-check-circle"></i> {% trans "grade_submit" context "assignment.review_submissions" %}
                     </button>
                 </form>
@@ -221,7 +240,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extraJs %}
 <script>
 const reviewI18n = {
     noText: "{% trans 'no_text' context 'assignment.review_submissions' %}",
@@ -230,14 +251,8 @@ const reviewI18n = {
     errorPrefix: "{% trans 'error_prefix' context 'assignment.review_submissions' %}",
     unknownError: "{% trans 'unknown_error' context 'assignment.review_submissions' %}",
     serverError: "{% trans 'server_error' context 'assignment.review_submissions' %}",
-    gradeSubmit: "{% trans 'grade_submit' context 'assignment.review_submissions' %}",
+    gradeSubmit: "{% trans 'grade_submit' context 'assignment.review_submissions' %}"
 };
-
-document.querySelectorAll('.view-submission-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        openSubmission(this);
-    });
-});
 
 function openSubmission(button) {
     if (!button) return;
@@ -264,6 +279,12 @@ function openSubmission(button) {
         document.getElementById('modal-file-container').style.display = 'none';
     }
 }
+
+document.querySelectorAll('.view-submission-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        openSubmission(this);
+    });
+});
 
 const selectedSubmissionId = "{{ selected_submission_id }}";
 if (selectedSubmissionId) {
@@ -297,23 +318,23 @@ document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
         },
         body: formData
     })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(reviewI18n.errorPrefix + ': ' + (data.error || reviewI18n.unknownError));
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(reviewI18n.errorPrefix + ': ' + (data.error || reviewI18n.unknownError));
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + reviewI18n.gradeSubmit;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert(reviewI18n.serverError);
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + reviewI18n.gradeSubmit;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert(reviewI18n.serverError);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + reviewI18n.gradeSubmit;
-    });
+        });
 });
 </script>
-
+<script src="{% static 'js/results_filter_ui.js' %}"></script>
 {% endblock %}
