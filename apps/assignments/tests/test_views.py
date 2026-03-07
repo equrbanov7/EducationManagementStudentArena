@@ -225,8 +225,8 @@ class AssignmentSubmissionRegressionTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["selected_submission_id"], str(submission.id))
-        self.assertContains(response, "answers-stat-grid")
-        self.assertContains(response, "answers-table-card__header")
+        self.assertContains(response, "results-filter-card")
+        self.assertContains(response, "resultsFilterSearchInput")
 
     def test_student_submit_then_teacher_grade_flow_hides_results_until_review_window_closes(self):
         self.client.force_login(self.student)

@@ -1,178 +1,194 @@
 {% extends 'base.html' %}
-{% load static i18n %}
+{% load static %}
+{% load i18n %}
 {% load lab_filters %}
 
 {% block title %}{{ lab.title }} - {% trans "title_suffix_answers" context "labs.template.lab_submissions" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/answers_workspace.css' %}">
+    <link rel="stylesheet" href="{% static 'labs/css/lab_submissions.css' %}">
+    <link rel="stylesheet" href="{% static 'labs/css/lab_submissions_template.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 answers-workspace">
-    <div class="answers-toolbar">
-        <div class="answers-toolbar__copy">
-            <nav class="answers-breadcrumb" aria-label="breadcrumb">
-                <ol class="breadcrumb">
+<div class="container-fluid py-4 submissions-page-wrapper">
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">{{ lab.course.title }}</a>
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}">
+                            <i class="fas fa-layer-group"></i> {{ lab.course.title }}
+                        </a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ lab.title }}</li>
+                    <li class="breadcrumb-item">{{ lab.title }}</li>
+                    <li class="breadcrumb-item active">{% trans "breadcrumb_results" context "labs.template.lab_submissions" %}</li>
                 </ol>
             </nav>
-            <h1 class="answers-title">
-                <span class="answers-title__icon"><i class="fas fa-flask"></i></span>
-                <span>{% trans "heading_student_answers" context "labs.template.lab_submissions" %}</span>
+            <h1 class="h3 fw-bold text-dark mb-0">
+                {% trans "heading_student_answers" context "labs.template.lab_submissions" %}
             </h1>
-            <p class="answers-subtitle">
-                {% trans "breadcrumb_results" context "labs.template.lab_submissions" %} · <strong>{{ lab.course.title }}</strong>
-            </p>
         </div>
-        <div class="answers-toolbar__actions">
-            <a href="{{ back_url }}" class="answers-back-btn">
-                <i class="fas fa-arrow-left"></i> Geri
-            </a>
-            <a href="{% url 'labs:manage_blocks' lab.id %}" class="answers-secondary-btn">
-                <i class="fas fa-cubes"></i> {% trans "action_manage_blocks" context "labs.template.lab_submissions" %}
+        <div class="header-actions">
+            <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-primary action-btn">
+                <i class="fas fa-cubes me-2"></i> {% trans "action_manage_blocks" context "labs.template.lab_submissions" %}
             </a>
         </div>
     </div>
 
-    <div class="answers-stat-grid">
-        <article class="answers-stat-card answers-stat-card--blue">
-            <div class="answers-stat-card__icon"><i class="fas fa-inbox"></i></div>
-            <div class="answers-stat-card__value">{{ stats.total }}</div>
-            <div class="answers-stat-card__label">{% trans "stat_total_answers" context "labs.template.lab_submissions" %}</div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--green">
-            <div class="answers-stat-card__icon"><i class="fas fa-hourglass-half"></i></div>
-            <div class="answers-stat-card__value">{{ stats.pending }}</div>
-            <div class="answers-stat-card__label">{% trans "stat_pending" context "labs.template.lab_submissions" %}</div>
-            <div class="answers-stat-card__meta">
-                <i class="fas fa-check"></i> {% trans "stat_graded" context "labs.template.lab_submissions" %}: {{ stats.graded }}
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.total }}</h3>
+                    <p>{% trans "stat_total_answers" context "labs.template.lab_submissions" %}</p>
+                </div>
             </div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--blue">
-            <div class="answers-stat-card__icon"><i class="fas fa-star"></i></div>
-            <div class="answers-stat-card__value">{{ lab.max_score }}</div>
-            <div class="answers-stat-card__label">Maksimum bal</div>
-        </article>
-        <article class="answers-stat-card answers-stat-card--white">
-            <div class="answers-stat-card__icon"><i class="fas fa-calendar-alt"></i></div>
-            {% if lab.is_open %}
-                <span class="answers-meta-badge answers-meta-badge--active"><i class="fas fa-lock-open"></i> Aktiv</span>
-            {% elif lab.is_upcoming %}
-                <span class="answers-meta-badge answers-meta-badge--pending"><i class="fas fa-hourglass-start"></i> Gözləyir</span>
-            {% else %}
-                <span class="answers-meta-badge answers-meta-badge--inactive"><i class="fas fa-lock"></i> Bağlı</span>
-            {% endif %}
-            <div class="answers-stat-card__label">Son tarix</div>
-            <div class="answers-stat-card__meta">
-                <i class="far fa-clock"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.pending }}</h3>
+                    <p>{% trans "stat_pending" context "labs.template.lab_submissions" %}</p>
+                </div>
             </div>
-        </article>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.graded }}</h3>
+                    <p>{% trans "stat_graded" context "labs.template.lab_submissions" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card danger">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ stats.late }}</h3>
+                    <p>{% trans "stat_late" context "labs.template.lab_submissions" %}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="answers-table-card">
-        <div class="answers-table-card__header">
-            <i class="fas fa-list-check"></i>
-            <span>{% trans "heading_student_answers" context "labs.template.lab_submissions" %}</span>
-        </div>
-
-        <div class="answers-table-card__toolbar">
-            <form method="GET" id="filterForm" class="answers-filter-grid">
-                <div class="answers-field">
-                    <label for="statusFilter">{% trans "filter_by_status" context "labs.template.lab_submissions" %}</label>
-                    <select id="statusFilter" name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">{% trans "filter_all_statuses" context "labs.template.lab_submissions" %}</option>
-                        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>{% trans "status_pending" context "labs.template.lab_submissions" %}</option>
-                        <option value="late" {% if status_filter == 'late' %}selected{% endif %}>{% trans "status_late" context "labs.template.lab_submissions" %}</option>
-                        <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>{% trans "status_graded" context "labs.template.lab_submissions" %}</option>
-                    </select>
+    <div class="content-card shadow-sm">
+        <div class="filters-toolbar border-bottom p-3">
+            <form method="GET" id="filterForm" class="row g-3 align-items-center">
+                <div class="col-md-4 col-sm-6">
+                    <label class="filter-label">{% trans "filter_by_status" context "labs.template.lab_submissions" %}</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-filter"></i>
+                        <select name="status" class="form-select custom-select" onchange="this.form.submit()">
+                            <option value="">{% trans "filter_all_statuses" context "labs.template.lab_submissions" %}</option>
+                            <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>{% trans "status_pending" context "labs.template.lab_submissions" %}</option>
+                            <option value="late" {% if status_filter == 'late' %}selected{% endif %}>{% trans "status_late" context "labs.template.lab_submissions" %}</option>
+                            <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>{% trans "status_graded" context "labs.template.lab_submissions" %}</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="answers-field">
-                    <label for="groupFilter">{% trans "filter_by_group" context "labs.template.lab_submissions" %}</label>
-                    <select id="groupFilter" name="group" class="form-select" onchange="this.form.submit()">
-                        <option value="">{% trans "filter_all_groups" context "labs.template.lab_submissions" %}</option>
-                        {% for g in groups %}
-                        <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="col-md-4 col-sm-6">
+                    <label class="filter-label">{% trans "filter_by_group" context "labs.template.lab_submissions" %}</label>
+                    <div class="input-icon-wrapper">
+                        <i class="fas fa-users-cog"></i>
+                        <select name="group" class="form-select custom-select" onchange="this.form.submit()">
+                            <option value="">{% trans "filter_all_groups" context "labs.template.lab_submissions" %}</option>
+                            {% for g in groups %}
+                            <option value="{{ g }}" {% if group_filter == g %}selected{% endif %}>{{ g }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="answers-filter-actions">
+                <div class="col-md-4 col-sm-12 text-md-end mt-4 mt-md-3">
                     {% if status_filter or group_filter %}
-                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="answers-secondary-btn">
-                        <i class="fas fa-rotate-left"></i> {% trans "action_clear_filter" context "labs.template.lab_submissions" %}
+                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-light text-danger border">
+                        <i class="fas fa-times me-1"></i> {% trans "action_clear_filter" context "labs.template.lab_submissions" %}
                     </a>
                     {% endif %}
                 </div>
             </form>
         </div>
 
-        {% if submissions %}
+        <div class="card-body p-0">
+            {% if submissions %}
             <div class="table-responsive">
-                <table class="table answers-table mb-0">
+                <table class="table custom-table mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th>{% trans "table_student" context "labs.template.lab_submissions" %}</th>
+                            <th class="ps-4">{% trans "table_student" context "labs.template.lab_submissions" %}</th>
                             <th>{% trans "table_group" context "labs.template.lab_submissions" %}</th>
                             <th>{% trans "table_date" context "labs.template.lab_submissions" %}</th>
                             <th>{% trans "table_attempt" context "labs.template.lab_submissions" %}</th>
                             <th>{% trans "table_status" context "labs.template.lab_submissions" %}</th>
                             <th>{% trans "table_score" context "labs.template.lab_submissions" %}</th>
-                            <th class="text-end">{% trans "table_action" context "labs.template.lab_submissions" %}</th>
+                            <th class="text-end pe-4">{% trans "table_action" context "labs.template.lab_submissions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sub in submissions %}
                         <tr>
-                            <td>
-                                <div class="answers-person">
-                                    <div class="answers-avatar">{{ sub.assignment.student.username|slice:":1"|upper }}</div>
-                                    <div>
-                                        <div class="answers-person__name">{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</div>
-                                        <div class="answers-person__meta">{{ sub.assignment.student.email }}</div>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3">
+                                        {{ sub.assignment.student.username|slice:":1"|upper }}
+                                    </div>
+                                    <div class="student-info">
+                                        <h6 class="mb-0 fw-bold text-dark">{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</h6>
+                                        <small class="text-muted">{{ sub.assignment.student.email }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 {% with group=student_groups|get_item:sub.assignment.student.id %}
                                     {% if group %}
-                                        <span class="answers-status answers-status--neutral">{{ group }}</span>
+                                    <span class="badge-soft group-badge">{{ group }}</span>
                                     {% else %}
-                                        <span class="answers-score__muted">-</span>
+                                    <span class="text-muted">-</span>
                                     {% endif %}
                                 {% endwith %}
                             </td>
                             <td>
-                                <div class="answers-date__value">{{ sub.submitted_at|date:"d.m.Y H:i" }}</div>
-                                <div class="answers-date__meta">{{ lab.title }}</div>
+                                <div class="date-info">
+                                    <span class="d-block fw-medium">{{ sub.submitted_at|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ sub.submitted_at|date:"H:i" }}</small>
+                                </div>
                             </td>
                             <td>
-                                <span class="answers-status answers-status--neutral">#{{ sub.attempt_number }}</span>
+                                <span class="badge-circle">{{ sub.attempt_number }}</span>
                             </td>
                             <td>
                                 {% if sub.status == 'graded' %}
-                                    <span class="answers-status answers-status--graded"><i class="fas fa-check"></i> {% trans "status_graded" context "labs.template.lab_submissions" %}</span>
+                                    <span class="status-badge success"><i class="fas fa-check me-1"></i> {% trans "status_graded" context "labs.template.lab_submissions" %}</span>
                                 {% elif sub.status == 'late' %}
-                                    <span class="answers-status answers-status--danger"><i class="fas fa-clock"></i> {% trans "status_late" context "labs.template.lab_submissions" %}</span>
+                                    <span class="status-badge danger"><i class="fas fa-clock me-1"></i> {% trans "status_late" context "labs.template.lab_submissions" %}</span>
                                 {% else %}
-                                    <span class="answers-status answers-status--pending"><i class="fas fa-hourglass-half"></i> {% trans "status_pending" context "labs.template.lab_submissions" %}</span>
+                                    <span class="status-badge warning"><i class="fas fa-hourglass-half me-1"></i> {% trans "status_pending" context "labs.template.lab_submissions" %}</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if sub.score is not None %}
-                                    <span class="answers-score">
-                                        {{ sub.score }}
-                                        <span class="answers-score__muted">/ {{ lab.max_score }}</span>
-                                    </span>
+                                    <div class="score-display">
+                                        <span class="score-value">{{ sub.score }}</span>
+                                        <span class="score-max">/ {{ lab.max_score }}</span>
+                                    </div>
                                 {% else %}
-                                    <span class="answers-score__muted">-</span>
+                                    <span class="text-muted fs-5">-</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
-                                <a href="{% url 'labs:grade_submission_page' sub.id %}" class="answers-action-btn {% if sub.status == 'graded' %}answers-action-btn--success{% else %}answers-action-btn--warning{% endif %}">
-                                    {% if sub.status == 'graded' %}Bax{% else %}{% trans "action_grade" context "labs.template.lab_submissions" %}{% endif %}
+                            <td class="text-end pe-4">
+                                <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-action">
+                                    {% trans "action_grade" context "labs.template.lab_submissions" %} <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </td>
                         </tr>
@@ -180,11 +196,13 @@
                     </tbody>
                 </table>
             </div>
-        {% else %}
-            <div class="answers-empty">
-                <div class="answers-empty__icon"><i class="fas fa-inbox"></i></div>
-                <h4>{% trans "empty_no_answers_found" context "labs.template.lab_submissions" %}</h4>
-                <p>
+            {% else %}
+            <div class="empty-state text-center">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h5>{% trans "empty_no_answers_found" context "labs.template.lab_submissions" %}</h5>
+                <p class="text-muted">
                     {% if status_filter or group_filter %}
                         {% trans "empty_no_results_for_filter" context "labs.template.lab_submissions" %}
                     {% else %}
@@ -192,16 +210,16 @@
                     {% endif %}
                 </p>
                 {% if status_filter or group_filter %}
-                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="answers-secondary-btn">
+                    <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-primary mt-2">
                         {% trans "action_show_all_results" context "labs.template.lab_submissions" %}
                     </a>
                 {% endif %}
             </div>
-        {% endif %}
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
-
 {% block extraJs %}
 <script src="{% static 'labs/js/lab_submissions_template.js' %}"></script>
 {% endblock %}

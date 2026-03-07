@@ -6195,6 +6195,21 @@ msgctxt "courses.dashboard"
 msgid "status_archived"
 msgstr "В архиве"
 
+#: apps/courses/templates/courses/course_dashboard.html:53
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Видимость курса"
+
+#: apps/courses/templates/courses/course_dashboard.html:78
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "Этот курс находится в режиме черновика и не виден студентам."
+
+#: apps/courses/templates/courses/course_dashboard.html:83
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "Этот курс опубликован и виден студентам."
+
 #: apps/courses/templates/courses/course_dashboard.html:50
 msgctxt "courses.dashboard"
 msgid "stat_topics"

@@ -91,8 +91,8 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["selected_submission_id"], str(self.submission.id))
-        self.assertContains(response, "answers-stat-grid")
-        self.assertContains(response, "answers-table-card__header")
+        self.assertContains(response, "results-filter-card")
+        self.assertContains(response, "resultsFilterSearchInput")
 
     def test_review_submissions_prefers_explicit_return_to_for_back_url(self):
         self.client.login(username="project_review_teacher", password="StrongPass123!")

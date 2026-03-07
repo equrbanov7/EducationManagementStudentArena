@@ -155,6 +155,17 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["profile_return_url"], return_to)
 
+    def test_course_dashboard_renders_develop_style_visibility_panel(self):
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseVisibilityAccordion")
+        self.assertContains(response, "course-status-toggle")
+        self.assertContains(response, "Kursun yayımı")
+        self.assertContains(response, "Yayımlandı")
+
     def test_course_dashboard_exam_links_return_back_to_current_dashboard_path(self):
         self.client.force_login(self.owner)
         session = self.client.session

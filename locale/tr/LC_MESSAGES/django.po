@@ -6188,6 +6188,21 @@ msgctxt "courses.dashboard"
 msgid "status_archived"
 msgstr "Arşivlendi"
 
+#: apps/courses/templates/courses/course_dashboard.html:53
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Kursun yayını"
+
+#: apps/courses/templates/courses/course_dashboard.html:78
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "Bu kurs taslak modundadır ve öğrenciler tarafından görünmez."
+
+#: apps/courses/templates/courses/course_dashboard.html:83
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "Bu kurs yayımlandı ve öğrenciler tarafından görülebilir."
+
 #: apps/courses/templates/courses/course_dashboard.html:50
 msgctxt "courses.dashboard"
 msgid "stat_topics"

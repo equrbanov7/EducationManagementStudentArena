@@ -6177,6 +6177,21 @@ msgctxt "courses.dashboard"
 msgid "status_archived"
 msgstr "Archived"
 
+#: apps/courses/templates/courses/course_dashboard.html:53
+msgctxt "courses.dashboard"
+msgid "label_course_visibility"
+msgstr "Course visibility"
+
+#: apps/courses/templates/courses/course_dashboard.html:78
+msgctxt "courses.dashboard"
+msgid "message_draft_hidden_students"
+msgstr "This course is in draft mode and is not visible to students."
+
+#: apps/courses/templates/courses/course_dashboard.html:83
+msgctxt "courses.dashboard"
+msgid "message_published_visible_students"
+msgstr "This course is published and visible to students."
+
 #: apps/courses/templates/courses/course_dashboard.html:50
 msgctxt "courses.dashboard"
 msgid "stat_topics"
@@ -15238,20 +15253,6 @@ msgstr "Previous"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Next"
-#: apps/courses/templates/courses/course_dashboard.html
-msgctxt "courses.dashboard"
-msgid "label_course_visibility"
-msgstr "Course visibility"
-
-#: apps/courses/templates/courses/course_dashboard.html
-msgctxt "courses.dashboard"
-msgid "message_draft_hidden_students"
-msgstr "This course is in draft mode and is not visible to students."
-
-#: apps/courses/templates/courses/course_dashboard.html
-msgctxt "courses.dashboard"
-msgid "message_published_visible_students"
-msgstr "This course is published and visible to students."
 
 #: apps/courses/views.py
 msgctxt "courses.view.message"

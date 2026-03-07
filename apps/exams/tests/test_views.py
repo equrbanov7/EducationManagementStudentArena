@@ -474,8 +474,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
         self.assertNotContains(response, "Profile geri dön")
-        self.assertContains(response, "answers-stat-grid")
-        self.assertContains(response, "answers-table-card__header")
+        self.assertContains(response, "results-filter-card")
+        self.assertContains(response, "resultsFilterSearchInput")
 
     def test_teacher_view_attempt_keeps_generic_source_back_label(self):
         attempt = ExamAttempt.objects.create(
