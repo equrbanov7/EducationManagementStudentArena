@@ -2,6 +2,8 @@
 Tests for profile and dashboard views.
 """
 
+from urllib.parse import quote
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
@@ -194,15 +196,37 @@ class ProfileViewTest(TestCase):
     def test_profile_my_exams_context_for_teacher(self):
         """Test that teacher profile includes my_exams context."""
         from apps.accounts.models import ProfileRole, UserProfile
+        from apps.exams.models import Exam
+        from apps.organizations.models import Organization
+        from core.constants import OrganizationType
 
         profile = UserProfile.objects.get(user=self.user)
         profile.role = ProfileRole.TEACHER
+        organization = Organization.objects.create(
+            name="Teacher Profile Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        profile.organization = organization
+        profile.organization_type = organization.org_type
         profile.save()
 
+        exam = Exam.objects.create(author=self.user, title="Profile Exam", is_active=True)
+
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile"))
+        session = self.client.session
+        session["active_organization"] = organization.slug
+        session.save()
+
+        profile_url = reverse("accounts:profile") + "?section=my-exams"
+        response = self.client.get(profile_url)
         self.assertIn("my_exams_count", response.context)
         self.assertIn("my_created_courses_count", response.context)
+        self.assertContains(response, f'{reverse("exams:teacher_exam_detail", args=[exam.slug])}?from_section=my-exams')
+        expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
+        self.assertContains(response, f"return_to={expected_return_to}")
 
     def test_profile_role_field(self):
         """Test that profile has role field with default member role."""
@@ -1252,6 +1276,116 @@ class PendingAnswersViewTest(TestCase):
         self.assertNotContains(response, "Pending Assignment Visible")
 
 
+class StudentDashboardAssignmentVisibilityTest(TestCase):
+    def setUp(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment
+        from apps.courses.models import Course, CourseMembership
+
+        self.client = Client()
+        self.teacher = User.objects.create_user(
+            username="dashboard_teacher",
+            email="dashboard_teacher@example.com",
+            password="testpass123",
+        )
+        self.student = User.objects.create_user(
+            username="dashboard_student",
+            email="dashboard_student@example.com",
+            password="testpass123",
+        )
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+
+        self.course = Course.objects.create(owner=self.teacher, title="Dashboard Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
+
+        self.visible_assignment = Assignment.objects.create(
+            course=self.course,
+            title="Visible Dashboard Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        self.visible_assignment.assigned_students.add(self.student)
+
+        self.hidden_assignment = Assignment.objects.create(
+            course=self.course,
+            title="Hidden Dashboard Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+
+    def test_student_dashboard_only_lists_assignments_assigned_to_student(self):
+        self.client.login(username="dashboard_student", password="testpass123")
+        response = self.client.get(reverse("accounts:student_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Visible Dashboard Assignment")
+        self.assertNotContains(response, "Hidden Dashboard Assignment")
+
+
+class GradingQueueViewTest(TestCase):
+    def setUp(self):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+
+        self.client = Client()
+        self.teacher = User.objects.create_user(
+            username="grading_queue_teacher",
+            email="grading_queue_teacher@example.com",
+            password="testpass123",
+        )
+        self.student = User.objects.create_user(
+            username="grading_queue_student",
+            email="grading_queue_student@example.com",
+            password="testpass123",
+        )
+
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+
+        self.course = Course.objects.create(owner=self.teacher, title="Grading Queue Course", status="published")
+        self.assignment = Assignment.objects.create(
+            course=self.course,
+            title="Queue Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+            max_score=75,
+        )
+        self.submission = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Queue answer body",
+            status="submitted",
+            files=[{"name": "queue-answer.pdf", "path": "assignments/submissions/queue-answer.pdf"}],
+        )
+
+    def test_grading_queue_renders_assignment_review_actions_and_stats(self):
+        self.client.login(username="grading_queue_teacher", password="testpass123")
+        response = self.client.get(reverse("accounts:grading_queue"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Queue Assignment")
+        self.assertContains(response, "Queue answer body")
+        self.assertContains(response, reverse("assignments:grade_submission", kwargs={"pk": self.submission.id}))
+        self.assertContains(response, "/ 75")
+        self.assertContains(response, "/media/assignments/submissions/queue-answer.pdf")
+        self.assertContains(response, "grading_queue_student")
+
+
 class PendingReviewViewTest(TestCase):
     """Tests for pending review view (teacher-only)."""
 
@@ -1484,6 +1618,52 @@ class PendingReviewViewTest(TestCase):
         pending_after_window = self.client.get(reverse("accounts:pending_review"))
         self.assertEqual(pending_after_window.status_code, 200)
         self.assertNotContains(pending_after_window, "Pending Lock Assignment")
+
+    def test_pending_review_detail_deduplicates_assignment_attachments(self):
+        from datetime import timedelta
+
+        from apps.accounts.models import ProfileRole
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["role", "updated_at"])
+
+        student = User.objects.create_user(
+            username="pending_attachment_student",
+            email="pending_attachment_student@example.com",
+            password="testpass123",
+        )
+        course = Course.objects.create(owner=self.user, title="Attachment Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Attachment Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Attachment answer",
+            status="submitted",
+            files=[{"name": "VBS.docx", "path": "assignments/submissions/vbs.docx"}],
+        )
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(
+            reverse(
+                "accounts:pending_review_detail",
+                kwargs={"item_type": "assignment", "item_id": submission.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["attachments"]), 1)
+        self.assertEqual(response.context["attachments"][0]["name"], "VBS.docx")
+        self.assertEqual(response.content.decode("utf-8").count("VBS.docx"), 1)
 
 
 class ReviewResultsViewTest(TestCase):

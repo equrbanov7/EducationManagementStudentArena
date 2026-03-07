@@ -28,7 +28,7 @@
                 <i class="fas fa-flask text-primary-blue me-2"></i> {% trans "heading_my_answers" context "labs.template.my_lab_answers" %}
             </h2>
         </div>
-        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="btn btn-outline-custom mt-2">
+        <a href="{{ back_url }}" class="btn btn-outline-custom mt-2">
             <i class="fas fa-arrow-left me-2"></i> {% trans "action_back" context "labs.template.my_lab_answers" %}
         </a>
     </div>
@@ -36,7 +36,7 @@
     <div class="text-center mb-5">
         <div class="attempt-selector">
             {% if total_attempts > 1 and attempt_number > 1 %}
-            <a href="?attempt={{ attempt_number|add:'-1' }}" class="attempt-nav-btn shadow-sm">
+            <a href="?attempt={{ attempt_number|add:'-1' }}{% if request.GET.return_to %}&amp;return_to={{ request.GET.return_to|urlencode }}{% endif %}" class="attempt-nav-btn shadow-sm">
                 <i class="fas fa-chevron-left"></i>
             </a>
             {% else %}
@@ -52,7 +52,7 @@
             </span>
             
             {% if total_attempts > 1 and attempt_number < total_attempts %}
-            <a href="?attempt={{ attempt_number|add:'1' }}" class="attempt-nav-btn shadow-sm">
+            <a href="?attempt={{ attempt_number|add:'1' }}{% if request.GET.return_to %}&amp;return_to={{ request.GET.return_to|urlencode }}{% endif %}" class="attempt-nav-btn shadow-sm">
                 <i class="fas fa-chevron-right"></i>
             </a>
             {% else %}

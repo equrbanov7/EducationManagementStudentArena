@@ -1,103 +1,209 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block title %}
+{% if exam %}{{ exam.title }} - {% endif %}Mənim cavablarım
+{% endblock %}
+
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/student_exam_history.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/student_exam_history.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="eh-container container">
-    
-    <div class="eh-header-bar">
-        <h3><i class="fas fa-history"></i> {% trans "heading_exam_history" context "exams.template.student_exam_history" %}</h3>
-        <a href="{% url 'exams:student_exam_list' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> {% trans "action_new_exam" context "exams.template.student_exam_history" %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2 small fw-medium">
+                    {% if exam and exam.course_id %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' exam.course_id %}" class="text-decoration-none text-muted">
+                            {{ exam.course.title }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">{{ exam.title }}</li>
+                    {% else %}
+                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">İmtahanlar</li>
+                    {% endif %}
+                </ol>
+            </nav>
+            <h2 class="mb-0 fw-bold text-dark-blue">
+                <i class="fa-solid fa-list-check text-primary-blue me-2"></i> Mənim cavablarım
+            </h2>
+        </div>
+        <a href="{{ back_url }}" class="btn btn-outline-secondary rounded-3 fw-medium">
+            <i class="fa-solid fa-arrow-left me-1"></i> Geri
         </a>
     </div>
 
-    <div class="eh-card card">
-        <div class="card-body p-0">
-            <table class="eh-table table">
-                <thead>
-                    <tr>
-                        <th>{% trans "col_exam_title" context "exams.template.student_exam_history" %}</th>
-                        <th>{% trans "col_date" context "exams.template.student_exam_history" %}</th>
-                        <th>{% trans "col_type" context "exams.template.student_exam_history" %}</th>
-                        <th>{% trans "col_status_score" context "exams.template.student_exam_history" %}</th>
-                        <th>{% trans "col_action" context "exams.template.student_exam_history" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for attempt in attempts %}
-                    <tr>
-                        <td class="eh-exam-title">
-                            {{ attempt.exam.title }}
-                        </td>
-
-                        <td class="text-muted">
-                            {{ attempt.started_at|date:"d.m.Y H:i" }}
-                        </td>
-
-                        <td>
-                            {% if attempt.exam.exam_type == 'test' %}
-                                <span class="eh-badge eh-status-test">{% trans "type_test" context "exams.template.student_exam_history" %}</span>
-                            {% else %}
-                                <span class="eh-badge eh-status-written">{% trans "type_written_practical" context "exams.template.student_exam_history" %}</span>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if attempt.exam.exam_type == 'test' %}
-                                <span class="eh-score {% if attempt.score_percent >= 51 %}eh-score-pass{% else %}eh-score-fail{% endif %}">
-                                    {{ attempt.score_percent }}%
-                                </span>
-                            {% else %}
-                                {% if attempt.checked_by_teacher %}
-                                    <span class="eh-score {% if attempt.teacher_score >= 51 %}eh-score-pass{% else %}eh-score-fail{% endif %}">
-                                        {{ attempt.teacher_score }} {% trans "unit_points" context "exams.template.student_exam_history" %}
-                                    </span>
-                                    <small class="d-block text-muted" style="font-size: 0.75rem;">{% trans "status_graded" context "exams.template.student_exam_history" %}</small>
-                                {% else %}
-                                    <span class="eh-badge eh-status-pending">
-                                        {% trans "status_pending_review" context "exams.template.student_exam_history" %}
-                                    </span>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if attempt.exam.exam_type == 'test' %}
-                                <a href="{% url 'exams:exam_result' slug=attempt.exam.slug attempt_id=attempt.id %}" 
-                                   class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.student_exam_history" %}
-                                </a>
-                            {% else %}
-                                {% if attempt.checked_by_teacher %}
-                                    <a href="{% url 'exams:exam_result' slug=attempt.exam.slug attempt_id=attempt.id %}" 
-                                       class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-eye"></i> {% trans "action_view" context "exams.template.student_exam_history" %}
-                                    </a>
-                                {% else %}
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                                        <i class="fas fa-hourglass-half"></i> {% trans "action_wait" context "exams.template.student_exam_history" %}
-                                    </button>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5">
-                            <div class="eh-no-results">
-                                <i class="far fa-frown fa-2x d-block mb-2"></i>
-                                {% trans "empty_no_exam_attempt" context "exams.template.student_exam_history" %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% if exam %}
+    <div class="row mb-5 g-4">
+        <div class="col-md-3">
+            <div class="stat-card blue">
+                <h2 class="fw-bold text-dark-blue mb-1">
+                    {{ history_attempt_count }}
+                    <span class="fs-5 text-muted fw-normal">/ {% if exam.max_attempts_per_user %}{{ exam.max_attempts_per_user }}{% else %}&infin;{% endif %}</span>
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">İstifadə olunmuş cəhd</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card green">
+                <h2 class="fw-bold mb-1 {% if history_attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
+                    {% if history_attempts_left is None %}&infin;{% else %}{{ history_attempts_left }}{% endif %}
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">Qalan cəhd</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card blue">
+                <h2 class="fw-bold mb-1 text-primary-blue">
+                    {% if history_max_score is not None %}{{ history_max_score }}{% else %}-{% endif %}
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">Maksimum bal</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card white">
+                <div class="mb-2">
+                    {% if exam.is_after_end %}
+                        <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> Bitib</span>
+                    {% elif exam.is_before_start %}
+                        <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-start"></i> Planlanıb</span>
+                    {% elif exam.is_active %}
+                        <span class="status-badge status-active"><i class="fa-solid fa-lock-open"></i> Aktiv</span>
+                    {% else %}
+                        <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> Passiv</span>
+                    {% endif %}
+                </div>
+                <span class="text-muted fw-medium small">
+                    <i class="fa-regular fa-calendar me-1"></i>
+                    {% if exam.start_datetime %}
+                        {{ exam.start_datetime|date:"d.m.Y H:i" }}
+                    {% elif exam.end_datetime %}
+                        {{ exam.end_datetime|date:"d.m.Y H:i" }}
+                    {% else %}
+                        Məhdudiyyətsiz
+                    {% endif %}
+                </span>
+            </div>
         </div>
     </div>
+    {% endif %}
+
+    {% if attempts %}
+    <div class="card card-modern border-0">
+        <div class="table-modern-header d-flex align-items-center">
+            <i class="fa-solid fa-inbox me-2"></i>
+            {% if exam %}Göndərdiyim cavablar{% else %}İmtahan cəhdlərim{% endif %}
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-modern mb-0 history-table">
+                    <thead>
+                        <tr>
+                            {% if exam %}
+                            <th width="6%">#</th>
+                            {% else %}
+                            <th width="24%">İmtahan</th>
+                            {% endif %}
+                            <th width="28%">Göndərilmə tarixi</th>
+                            <th width="22%">Status</th>
+                            <th width="24%">Qiymət</th>
+                            <th width="20%" class="text-end">Əməliyyat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                        <tr>
+                            {% if exam %}
+                            <td class="fw-bold text-muted">{{ attempt.attempt_number }}</td>
+                            {% else %}
+                            <td>
+                                <div class="fw-semibold text-dark">{{ attempt.exam.title }}</div>
+                                <div class="small text-muted mt-1">
+                                    {% if attempt.exam.exam_type == 'test' %}
+                                        Test
+                                    {% else %}
+                                        Yazılı / Praktik
+                                    {% endif %}
+                                    · Cəhd #{{ attempt.attempt_number }}
+                                </div>
+                            </td>
+                            {% endif %}
+                            <td>
+                                <div class="d-flex align-items-center fw-medium text-dark">
+                                    <i class="fa-regular fa-clock text-muted me-2"></i>
+                                    {{ attempt.started_at|date:"d.m.Y H:i" }}
+                                </div>
+                                {% if exam %}
+                                <div class="small text-muted mt-1">Cəhd #{{ attempt.attempt_number }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attempt.exam.exam_type == 'test' or attempt.checked_by_teacher %}
+                                    <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> Qiymətləndirildi</span>
+                                {% elif attempt.status == 'expired' %}
+                                    <span class="status-badge status-expired"><i class="fa-solid fa-hourglass-end"></i> Vaxt bitdi</span>
+                                {% else %}
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> Yoxlanılır</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if attempt.exam.exam_type == 'test' %}
+                                    <span class="fw-bold fs-5 text-primary-green">{{ attempt.score_percent }}%</span>
+                                {% elif attempt.checked_by_teacher and attempt.can_view_result %}
+                                    <span class="fw-bold fs-5 text-primary-green">
+                                        {{ attempt.teacher_score }}
+                                        {% if exam and history_max_score is not None %}
+                                            <span class="fs-6 text-muted fw-medium">/ {{ history_max_score }}</span>
+                                        {% endif %}
+                                    </span>
+                                {% elif attempt.review_available_in_seconds > 0 %}
+                                    <span class="text-muted small">
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        <span data-review-countdown="{{ attempt.review_available_in_seconds }}">--:--:--</span>
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if attempt.can_view_result %}
+                                <a href="{{ attempt.result_url }}" class="btn btn-sm btn-outline-custom px-3">
+                                    <i class="fa-solid fa-eye me-1"></i> Bax
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary px-3" disabled>
+                                    <i class="fa-solid fa-hourglass-half me-1"></i> Gözləyir
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state-card mt-4">
+        <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm history-empty-icon">
+                <i class="fa-solid fa-folder-open fa-2x text-primary-blue"></i>
+            </div>
+        </div>
+        <h4 class="fw-bold text-dark-blue mb-2">Hələ nəticə yoxdur</h4>
+        <p class="text-muted mb-0">
+            {% trans "empty_no_exam_attempt" context "exams.template.student_exam_history" %}
+        </p>
+    </div>
+    {% endif %}
+
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 {% endblock %}

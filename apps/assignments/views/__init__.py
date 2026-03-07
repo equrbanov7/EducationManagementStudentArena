@@ -21,7 +21,7 @@ from .student import assignment_detail, my_submissions, submit_assignment
 # ═══════════════════════════════════════════════════════════════
 # Teacher Views
 # ═══════════════════════════════════════════════════════════════
-from .teacher import grade_submission, review_submissions
+from .teacher import delete_submissions, grade_submission, review_submissions
 
 # ═══════════════════════════════════════════════════════════════
 # API Views
@@ -42,6 +42,7 @@ __all__ = [
     "my_submissions",
     # Teacher
     "review_submissions",
+    "delete_submissions",
     "grade_submission",
     # API
     "search_students",

@@ -5,6 +5,7 @@ View tests for exams app.
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
@@ -384,6 +385,11 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             title="Other Author Exam",
             is_active=True,
         )
+        self.course = Course.objects.create(
+            owner=self.teacher,
+            title="Teacher Exam Course",
+            status="published",
+        )
 
         self.client.force_login(self.teacher)
         session = self.client.session
@@ -423,6 +429,71 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
     def test_edit_other_tenant_exam_is_not_found(self):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_other_tenant.slug]))
         self.assertEqual(response.status_code, 404)
+
+    def test_teacher_exam_detail_defaults_to_generic_back_with_profile_fallback(self):
+        response = self.client.get(reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], f"{reverse('accounts:profile')}?section=my-exams")
+        self.assertContains(response, "Geri")
+        self.assertNotContains(response, "Profilə Qayıt")
+
+    def test_teacher_exam_detail_uses_explicit_course_dashboard_return_url(self):
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            {"return_to": return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], return_to)
+        self.assertContains(response, "Geri")
+        self.assertNotContains(response, "Profilə Qayıt")
+
+    def test_teacher_exam_detail_falls_back_to_safe_referer_when_return_to_missing(self):
+        referer = reverse("exams:teacher_exam_list")
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            HTTP_REFERER=referer,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], referer)
+        self.assertContains(response, "Geri")
+        self.assertNotContains(response, "Profilə Qayıt")
+
+    def test_teacher_exam_results_keeps_generic_source_back_label(self):
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]),
+            {"return_to": return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], return_to)
+        self.assertContains(response, "Geri")
+        self.assertNotContains(response, "Profilə Qayıt")
+        self.assertNotContains(response, "Profile geri dön")
+        self.assertContains(response, "answers-stat-grid")
+        self.assertContains(response, "answers-table-card__header")
+
+    def test_teacher_view_attempt_keeps_generic_source_back_label(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.teacher,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_view_attempt", args=[self.exam_visible.slug, attempt.id]),
+            {"return_to": return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], return_to)
+        self.assertContains(response, "Geri")
+        self.assertNotContains(response, "Profilə Qayıt")
+        self.assertNotContains(response, "Profile geri dön")
 
 
 class StudentExamVisibilityFilteringTest(TestCase):
@@ -503,6 +574,21 @@ class StudentExamVisibilityFilteringTest(TestCase):
         ExamQuestion.objects.create(
             exam=self.course_assigned_exam,
             text="Course question",
+            order=1,
+            points=1,
+        )
+
+        self.course_code_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Course Code Exam",
+            is_active=True,
+            is_public=False,
+            access_code="777777",
+            course=self.assigned_course,
+        )
+        ExamQuestion.objects.create(
+            exam=self.course_code_exam,
+            text="Course code question",
             order=1,
             points=1,
         )
@@ -621,6 +707,37 @@ class StudentExamVisibilityFilteringTest(TestCase):
         response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.course_assigned_exam.attempts.filter(user=self.student).exists())
+
+    def test_course_dashboard_student_exam_actions_use_info_modal(self):
+        response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="courseExamInfoBackdrop"')
+        self.assertContains(response, "js-open-course-exam-modal")
+        self.assertContains(response, f'data-exam-slug="{self.course_assigned_exam.slug}"')
+        self.assertContains(response, f'data-exam-slug="{self.course_code_exam.slug}"')
+        self.assertContains(response, 'data-requires-code="1"')
+        self.assertContains(
+            response,
+            f'name="next" value="{reverse("courses:course_dashboard", args=[self.assigned_course.id])}"',
+        )
+
+    def test_course_dashboard_student_history_button_shows_attempt_count(self):
+        ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+
+        response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cavablarım (1)")
+        self.assertContains(
+            response,
+            f'{reverse("exams:student_exam_history")}?exam={self.course_assigned_exam.slug}',
+        )
 
     def test_unassigned_private_exam_cannot_be_started(self):
         response = self.client.get(reverse("exams:start_exam", args=[self.unassigned_private_exam.slug]))
@@ -775,6 +892,130 @@ class StudentExamVisibilityFilteringTest(TestCase):
         superadmin_response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(superadmin_response.status_code, 200)
         self.assertContains(superadmin_response, self.unassigned_public_exam.title)
+
+    def test_az_student_exam_list_uses_localized_strings(self):
+        with override("az"):
+            response = self.client.get(
+                reverse("exams:student_exam_list"),
+                {"q": self.code_assigned_exam.title},
+                HTTP_ACCEPT_LANGUAGE="az",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "İmtahanlar")
+        self.assertContains(response, "Giriş kodu tələb olunur")
+        self.assertContains(response, "İmtahana başla")
+        self.assertNotContains(response, "Start exam")
+        self.assertNotContains(response, "Bu resurs haqqında qısa məlumat")
+
+    def test_az_exam_result_uses_localized_strings(self):
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Localized Result Exam",
+            is_active=True,
+            is_public=False,
+        )
+        exam.allowed_users.add(self.student)
+        question = ExamQuestion.objects.create(
+            exam=exam,
+            text="Localized question",
+            order=1,
+            points=1,
+        )
+        correct_option = ExamQuestionOption.objects.create(
+            question=question,
+            text="Doğru variant",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=question,
+            text="Yanlış variant",
+            is_correct=False,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=exam,
+            status="submitted",
+        )
+        answer = ExamAnswer.objects.create(
+            attempt=attempt,
+            question=question,
+            is_correct=True,
+        )
+        answer.selected_options.add(correct_option)
+        attempt.recalculate_score()
+
+        with override("az"):
+            response = self.client.get(
+                reverse("exams:exam_result", args=[exam.slug, attempt.id]),
+                HTTP_ACCEPT_LANGUAGE="az",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Nəticəniz")
+        self.assertContains(response, "İmtahan statusu")
+        self.assertContains(response, "Təhvil verilib")
+        self.assertContains(response, "Düzgün")
+        self.assertContains(response, "Səhv")
+        self.assertNotContains(response, "Subheading posts")
+        self.assertNotContains(response, "Submitted")
+
+    def test_filtered_exam_history_shows_only_selected_exam_attempts(self):
+        selected_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+        other_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+        return_to = reverse("courses:course_dashboard", args=[self.assigned_course.id])
+
+        response = self.client.get(
+            reverse("exams:student_exam_history"),
+            {"exam": self.course_assigned_exam.slug, "return_to": return_to},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["exam"], self.course_assigned_exam)
+        self.assertEqual(response.context["back_url"], return_to)
+        attempts = response.context["attempts"]
+        self.assertEqual(len(attempts), 1)
+        self.assertEqual(attempts[0].id, selected_attempt.id)
+        self.assertNotContains(response, other_attempt.exam.title)
+        self.assertContains(response, "Mənim cavablarım")
+        self.assertContains(response, "Göndərdiyim cavablar")
+        self.assertContains(response, "İstifadə olunmuş cəhd")
+        self.assertContains(response, "Bax")
+        self.assertNotContains(response, "İmtahana başla")
+
+    def test_take_exam_shows_previous_attempts_summary_and_history_link(self):
+        previous_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+
+        start_response = self.client.get(
+            reverse("exams:start_exam", args=[self.course_assigned_exam.slug]),
+            {"next": reverse("courses:course_dashboard", args=[self.assigned_course.id])},
+        )
+
+        self.assertEqual(start_response.status_code, 302)
+        take_response = self.client.get(start_response.url)
+
+        self.assertEqual(take_response.status_code, 200)
+        self.assertContains(take_response, "Əvvəlki cəhdlər")
+        self.assertContains(take_response, "Cavablarım (1)")
+        self.assertContains(
+            take_response,
+            reverse("exams:exam_result", args=[self.course_assigned_exam.slug, previous_attempt.id]),
+        )
 
 
 class TeacherViewAttemptSearchPaginationTest(TestCase):

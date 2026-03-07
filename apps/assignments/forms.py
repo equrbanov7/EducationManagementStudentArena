@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import pgettext_lazy
 
 from .models import Assignment, AssignmentSubmission
+from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 
 class AssignmentForm(forms.ModelForm):
@@ -42,9 +43,15 @@ class AssignmentForm(forms.ModelForm):
 class AssignmentSubmissionForm(forms.ModelForm):
     """Cavab göndərmə forması"""
 
+    file = forms.FileField(
+        required=False,
+        label=pgettext_lazy("assignment.form.label", "submission_file_optional"),
+        widget=forms.FileInput(attrs={"class": "form-control", "accept": ".pdf,.doc,.docx,.txt,.zip"}),
+    )
+
     class Meta:
         model = AssignmentSubmission
-        fields = ["content", "file"]
+        fields = ["content"]
         widgets = {
             "content": forms.Textarea(
                 attrs={
@@ -53,13 +60,33 @@ class AssignmentSubmissionForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("assignment.form.placeholder", "submission_content"),
                     "required": True,
                 }
-            ),
-            "file": forms.FileInput(attrs={"class": "form-control", "accept": ".pdf,.doc,.docx,.txt,.zip"}),
+            )
         }
         labels = {
             "content": pgettext_lazy("assignment.form.label", "submission_content"),
-            "file": pgettext_lazy("assignment.form.label", "submission_file_optional"),
         }
+
+    def clean_file(self):
+        uploaded_file = self.cleaned_data.get("file")
+        if uploaded_file is None:
+            self._original_file_name = ""
+            return None
+
+        validate_uploaded_file(
+            uploaded_file,
+            allowed_extensions={".zip", ".rar", ".7z", ".pdf", ".txt", ".doc", ".docx", ".png", ".jpg", ".jpeg"},
+            max_size_mb=25,
+        )
+        self._original_file_name = uploaded_file.name
+        return randomize_uploaded_filename(uploaded_file)
+
+    def save(self, commit=True):
+        submission = super().save(commit=commit)
+        uploaded_file = self.cleaned_data.get("file")
+        if commit and uploaded_file is not None:
+            submission.attach_uploaded_file(uploaded_file, original_name=getattr(self, "_original_file_name", ""))
+            submission.save(update_fields=["files"])
+        return submission
 
 
 class GradeSubmissionForm(forms.ModelForm):

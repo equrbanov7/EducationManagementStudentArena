@@ -398,13 +398,24 @@ def _parse_decimal_score(raw_value):
 
 def _extract_assignment_attachments(submission):
     attachments = []
+    seen_attachments = set()
+
+    def _append_attachment(name, url):
+        clean_name = (name or "").strip()
+        clean_url = (url or "").strip()
+        if not clean_url:
+            return
+        attachment_key = (clean_name, clean_url)
+        if attachment_key in seen_attachments:
+            return
+        seen_attachments.add(attachment_key)
+        attachments.append({"name": clean_name or PurePosixPath(clean_url).name, "url": clean_url})
+
     legacy_file = getattr(submission, "file", None)
     if legacy_file:
-        attachments.append(
-            {
-                "name": PurePosixPath(getattr(legacy_file, "name", "fayl")).name,
-                "url": getattr(legacy_file, "url", ""),
-            }
+        _append_attachment(
+            PurePosixPath(getattr(legacy_file, "name", "fayl")).name,
+            getattr(legacy_file, "url", ""),
         )
 
     files_payload = getattr(submission, "files", None)
@@ -420,7 +431,7 @@ def _extract_assignment_attachments(submission):
         if isinstance(item, str):
             clean = item.strip()
             if clean:
-                attachments.append({"name": PurePosixPath(clean).name, "url": _normalize_url(clean)})
+                _append_attachment(PurePosixPath(clean).name, _normalize_url(clean))
             continue
         if not isinstance(item, dict):
             continue
@@ -429,12 +440,7 @@ def _extract_assignment_attachments(submission):
         if not candidate_url:
             continue
         candidate_name = (item.get("name") or item.get("filename") or "").strip()
-        attachments.append(
-            {
-                "name": candidate_name or PurePosixPath(candidate_url).name,
-                "url": _normalize_url(candidate_url),
-            }
-        )
+        _append_attachment(candidate_name or PurePosixPath(candidate_url).name, _normalize_url(candidate_url))
 
     return attachments
 

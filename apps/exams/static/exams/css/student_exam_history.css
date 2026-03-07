@@ -1,133 +1,147 @@
-/* --- YALNIZ İMTAHAN TARİXÇƏSİ ÜÇÜN UNİKAL STILLƏR (eh- PREFİKSİ İLƏ) --- */
-
-/* Əsas Konteyner və Başlıq */
-.eh-container {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 20px;
+:root {
+    --primary-blue: #2563eb;
+    --dark-blue: #1e40af;
+    --light-blue: #eff6ff;
+    --pale-blue: #bfdbfe;
+    --primary-green: #10b981;
+    --dark-green: #059669;
+    --light-green: #ecfdf5;
 }
 
-.eh-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e9ecef; /* Ayırıcı xətt */
-}
+.text-dark-blue { color: var(--dark-blue) !important; }
+.text-primary-blue { color: var(--primary-blue) !important; }
+.text-primary-green { color: var(--primary-green) !important; }
 
-.eh-header-bar h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #343a40; 
-}
-
-/* Əsas Kart Konteyneri */
-.eh-card {
+.card-modern {
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
     overflow: hidden;
 }
 
-/* --- Cədvəl Stilləri --- */
-
-.eh-table {
-    width: 100%;
-    border-collapse: collapse;
+.stat-card {
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
 }
 
-/* Cədvəl Başlığı (Header) */
-.eh-table thead th {
-    background-color: #f8f9fa; 
-    color: #495057;
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-card.blue { background-color: var(--light-blue); }
+.stat-card.green { background-color: var(--light-green); }
+.stat-card.white {
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.history-tracking-label {
+    letter-spacing: 0.5px;
+}
+
+.btn-outline-custom {
+    color: var(--primary-blue);
+    border: 1px solid var(--pale-blue);
+    background: transparent;
+    font-weight: 500;
+    border-radius: 0.5rem;
+}
+
+.btn-outline-custom:hover {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    border-color: var(--primary-blue);
+}
+
+.table-modern-header {
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
+    color: #fff;
     font-weight: 600;
-    font-size: 0.9rem;
-    padding: 15px 15px;
-    border-bottom: 2px solid #dee2e6;
-    vertical-align: middle;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem 1rem 0 0;
 }
 
-/* Cədvəl Sıraları və Hover */
-.eh-table tbody tr {
+.table-modern thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
+}
+
+.table-modern tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-modern tbody tr:hover {
+    background-color: var(--light-blue);
+}
+
+.status-badge {
+    padding: 0.4rem 0.85rem;
+    font-weight: 600;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-graded {
+    background: var(--light-green);
+    color: var(--dark-green);
+}
+
+.status-active {
+    background: var(--light-green);
+    color: var(--dark-green);
+    border: 1px solid #a7f3d0;
+}
+
+.status-expired {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.empty-state-card {
+    border: 2px dashed var(--pale-blue);
+    background-color: var(--light-blue);
+    border-radius: 1rem;
+    padding: 4rem 2rem;
+    text-align: center;
     transition: background-color 0.3s ease;
 }
 
-.eh-table tbody tr:hover {
-    background-color: #fcfcfc;
+.empty-state-card:hover {
+    background-color: #e0f2fe;
 }
 
-.eh-table tbody td {
-    padding: 12px 15px;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #f1f1f1;
-    vertical-align: middle;
+.history-empty-icon {
+    width: 80px;
+    height: 80px;
 }
 
-/* İmtahan Adı Vurğusu */
-.eh-exam-title {
-    color: #1a1a1a;
-    font-weight: 600;
-}
-
-/* --- Status Badges (Nişanlar) --- */
-
-.eh-badge {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    border-radius: 4px;
-    white-space: nowrap;
-    display: inline-block;
-    min-width: 90px;
-    text-align: center;
-}
-
-/* Xüsusi Status Rəngləri */
-.eh-status-test {
-    background-color: #e0f7fa; /* Açıq Mavi */
-    color: #00796b;
-}
-
-.eh-status-written {
-    background-color: #fff3e0; /* Açıq Sarı */
-    color: #ff8f00;
-}
-
-.eh-status-pending {
-    background-color: #f0f0f0; 
-    color: #6c757d;
-    /* Yoxlanılır üçün yüngül animasiya */
-    animation: eh-pulse 1.5s infinite;
-}
-
-/* Bal Rəngləri */
-.eh-score {
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-
-.eh-score-pass {
-    color: #28a745;
-}
-
-.eh-score-fail {
-    color: #dc3545;
-}
-
-/* --- Animasiya --- */
-@keyframes eh-pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-/* --- Boş Nəticə Hissəsi --- */
-.eh-no-results {
-    padding: 50px 20px;
-    text-align: center;
-    color: #6c757d;
-    font-size: 1.1rem;
-    background-color: #fafafa;
-    border-radius: 10px;
+@media (max-width: 768px) {
+    .history-table {
+        min-width: 780px;
+    }
 }

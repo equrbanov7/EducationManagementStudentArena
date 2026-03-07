@@ -21,7 +21,7 @@ from .student import my_submissions, project_detail, submit_project
 # ═══════════════════════════════════════════════════════════════
 # Teacher Views
 # ═══════════════════════════════════════════════════════════════
-from .teacher import grade_submission, review_submissions
+from .teacher import delete_submissions, grade_submission, review_submissions
 
 # ═══════════════════════════════════════════════════════════════
 # API Views
@@ -42,6 +42,7 @@ __all__ = [
     "my_submissions",
     # Teacher
     "review_submissions",
+    "delete_submissions",
     "grade_submission",
     # API
     "api_get_groups",

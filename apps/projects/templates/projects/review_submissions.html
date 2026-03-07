@@ -1,170 +1,136 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static i18n %}
 
 {% block title %}{{ project.title }} - {% trans "page_title" context "projects.review" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
-    <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
-    <style>
-        .results-modal-answer {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.9rem;
-            background: #f8fafc;
-            white-space: pre-wrap;
-        }
-    </style>
+<link rel="stylesheet" href="{% static 'css/answers_workspace.css' %}">
+<link rel="stylesheet" href="{% static 'projects/css/review_submissions.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1 class="h3 mb-3">{{ project.title }} - {% trans "header_title" context "projects.review" %}</h1>
-
-    <p>
-        {% trans "course_label" context "projects.review" %} <strong>{{ project.course.title }}</strong><br>
-        {% trans "table_status" context "projects.review" %}: <strong>{{ project.get_status_display }}</strong>
-    </p>
-
-    <hr>
-
-    <div class="results-filter-card">
-        <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
-            {% if request.GET.from_section %}
-                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
-            {% endif %}
-            {% if request.GET.return_to %}
-                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
-            {% endif %}
-            <div class="results-filter-field results-filter-field--wide">
-                <label class="results-filter-label" for="resultsFilterSearchInput">
-                    {% trans "filter_search_placeholder" context "projects.review" %}
-                </label>
-                <input type="text"
-                       id="resultsFilterSearchInput"
-                       name="q"
-                       value="{{ search_query }}"
-                       class="form-control js-filter-resettable js-auto-filter-search"
-                       autocomplete="off"
-                       placeholder="{% trans 'filter_search_placeholder' context 'projects.review' %}">
-            </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterStatusSelect">
-                    {% trans "table_status" context "projects.review" %}
-                </label>
-                <select name="status"
-                        id="resultsFilterStatusSelect"
-                        class="form-select js-auto-filter js-filter-resettable"
-                        data-reset-value="all">
-                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
-                        {% trans "filter_status_all" context "projects.review" %}
-                    </option>
-                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>
-                        {% trans "status_pending" context "projects.review" %}
-                    </option>
-                    <option value="graded" {% if status_filter == 'graded' %}selected{% endif %}>
-                        {% trans "status_graded" context "projects.review" %}
-                    </option>
-                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>
-                        {% trans "status_rejected" context "projects.review" %}
-                    </option>
-                </select>
-            </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterDateFromInput">
-                    {% trans "filter_from_date" context "projects.review" %}
-                </label>
-                <input type="date"
-                       id="resultsFilterDateFromInput"
-                       name="date_from"
-                       value="{{ date_from }}"
-                       class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="{% trans 'filter_from_date' context 'projects.review' %}">
-            </div>
-            <div class="results-filter-field">
-                <label class="results-filter-label" for="resultsFilterDateToInput">
-                    {% trans "filter_to_date" context "projects.review" %}
-                </label>
-                <input type="date"
-                       id="resultsFilterDateToInput"
-                       name="date_to"
-                       value="{{ date_to }}"
-                       class="form-control js-auto-filter js-filter-resettable"
-                       aria-label="{% trans 'filter_to_date' context 'projects.review' %}">
-            </div>
-            <button type="submit" class="btn results-filter-submit">
-                <i class="fa-solid fa-filter me-1"></i> {% trans "filter_submit" context "projects.review" %}
-            </button>
-            <button type="button" id="resultsClearFiltersBtn" class="btn btn-outline-secondary results-filter-clear js-clear-results-filters">
-                <i class="fa-solid fa-eraser me-1"></i> {% trans "action_clear" context "projects.review" %}
-            </button>
-        </form>
+<div class="container py-5 answers-workspace">
+    <div class="answers-toolbar">
+        <div class="answers-toolbar__copy">
+            <nav class="answers-breadcrumb" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'courses:course_dashboard' project.course.id %}">{{ project.course.title }}</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ project.title }}</li>
+                </ol>
+            </nav>
+            <h1 class="answers-title">
+                <span class="answers-title__icon"><i class="fa-solid fa-folder-tree"></i></span>
+                <span>{{ project.title }} - {% trans "header_title" context "projects.review" %}</span>
+            </h1>
+            <p class="answers-subtitle">
+                {% trans "course_label" context "projects.review" %} <strong>{{ project.course.title }}</strong>
+            </p>
+        </div>
+        <div class="answers-toolbar__actions">
+            <a href="{{ back_url }}" class="answers-back-btn">
+                <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "projects.review" %}
+            </a>
+        </div>
     </div>
 
-    {% if can_delete_submissions %}
-        <div class="results-toolbar">
-            <span class="selected-counter">
-                {% trans "selected_count_label" context "projects.review" %}: <span id="selectedSubmissionCount">0</span>
-            </span>
-            <button type="button" class="btn btn-sm btn-primary" id="selectAllSubmissionsBtn">
-                {% trans "action_select_all" context "projects.review" %}
-            </button>
-            <button type="button" class="btn btn-sm btn-secondary" id="clearSubmissionsBtn">
-                {% trans "action_clear" context "projects.review" %}
-            </button>
-            <button type="button" class="btn btn-sm btn-danger" id="deleteSelectedSubmissionsBtn">
-                <i class="fa-solid fa-trash me-1"></i> {% trans "action_delete_selected" context "projects.review" %}
-            </button>
-        </div>
-    {% endif %}
+    <div class="answers-stat-grid">
+        <article class="answers-stat-card answers-stat-card--blue">
+            <div class="answers-stat-card__icon"><i class="fa-solid fa-inbox"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.total }}</div>
+            <div class="answers-stat-card__label">Cəmi cavab</div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--green">
+            <div class="answers-stat-card__icon"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.pending }}</div>
+            <div class="answers-stat-card__label">Gözləyən</div>
+            <div class="answers-stat-card__meta">
+                <i class="fa-solid fa-check-circle"></i> Qiymətləndirilib: {{ review_stats.graded }}
+            </div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--blue">
+            <div class="answers-stat-card__icon"><i class="fa-solid fa-star"></i></div>
+            <div class="answers-stat-card__value">{{ review_stats.max_score }}</div>
+            <div class="answers-stat-card__label">Maksimum bal</div>
+        </article>
+        <article class="answers-stat-card answers-stat-card--white">
+            <div class="answers-stat-card__icon"><i class="fa-solid fa-calendar-days"></i></div>
+            {% if project.is_deadline_passed %}
+                <span class="answers-meta-badge answers-meta-badge--inactive"><i class="fa-solid fa-lock"></i> Vaxt bitib</span>
+            {% elif project.status == 'active' %}
+                <span class="answers-meta-badge answers-meta-badge--active"><i class="fa-solid fa-lock-open"></i> Aktiv</span>
+            {% else %}
+                <span class="answers-meta-badge answers-meta-badge--pending"><i class="fa-solid fa-hourglass-start"></i> {{ project.get_status_display }}</span>
+            {% endif %}
+            <div class="answers-stat-card__label">Son tarix</div>
+            <div class="answers-stat-card__meta">
+                <i class="fa-regular fa-clock"></i> {{ project.deadline|date:"d.m.Y H:i" }}
+            </div>
+        </article>
+    </div>
 
-    <h3>{% trans "header_title" context "projects.review" %}</h3>
-    {% if submissions %}
-        <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle">
-                <thead>
-                    <tr>
-                        {% if can_delete_submissions %}
-                            <th></th>
-                        {% endif %}
-                        <th>{% trans "table_student" context "projects.review" %}</th>
-                        <th>{% trans "table_submitted_at" context "projects.review" %}</th>
-                        <th>{% trans "table_status" context "projects.review" %}</th>
-                        <th>{% trans "table_grade" context "projects.review" %}</th>
-                        <th>{% trans "table_actions" context "projects.review" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for submission in submissions %}
-                    <tr>
-                        {% if can_delete_submissions %}
+    <div class="answers-table-card">
+        <div class="answers-table-card__header">
+            <i class="fa-solid fa-list-check"></i>
+            <span>{% trans "header_title" context "projects.review" %}</span>
+        </div>
+
+        {% if submissions %}
+            <div class="table-responsive">
+                <table class="table answers-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% trans "table_student" context "projects.review" %}</th>
+                            <th>{% trans "table_submitted_at" context "projects.review" %}</th>
+                            <th>{% trans "table_status" context "projects.review" %}</th>
+                            <th>{% trans "table_grade" context "projects.review" %}</th>
+                            <th class="text-end">{% trans "table_actions" context "projects.review" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in submissions %}
+                        <tr>
                             <td>
-                                <input type="checkbox"
-                                       class="results-table-checkbox js-submission-checkbox"
-                                       value="{{ submission.id }}">
+                                <div class="answers-person">
+                                    <div class="answers-avatar">{{ submission.student.username|slice:":1"|upper }}</div>
+                                    <div>
+                                        <div class="answers-person__name">{{ submission.student.get_full_name|default:submission.student.username }}</div>
+                                        <div class="answers-person__meta">@{{ submission.student.username }}</div>
+                                    </div>
+                                </div>
                             </td>
-                        {% endif %}
-                        <td><strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong></td>
-                        <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
-                        <td>
-                            {% if submission.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">{% trans "status_pending" context "projects.review" %}</span>
-                            {% elif submission.status == 'graded' %}
-                                <span class="badge bg-success">{% trans "status_graded" context "projects.review" %}</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{% trans "status_rejected" context "projects.review" %}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if submission.grade %}
-                                <strong>{{ submission.grade }}/{{ project.max_score }}</strong>
-                            {% else %}
-                                <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="results-action-buttons">
-                                <button class="btn btn-sm btn-outline-primary view-submission-btn"
+                            <td>
+                                <div class="answers-date__value">{{ submission.submitted_at|date:"d.m.Y H:i" }}</div>
+                                <div class="answers-date__meta">{{ project.course.title }}</div>
+                            </td>
+                            <td>
+                                {% if submission.status == 'pending' %}
+                                    <span class="answers-status answers-status--pending">
+                                        <i class="fa-solid fa-hourglass-half"></i> {% trans "status_pending" context "projects.review" %}
+                                    </span>
+                                {% elif submission.status == 'graded' %}
+                                    <span class="answers-status answers-status--graded">
+                                        <i class="fa-solid fa-check-circle"></i> {% trans "status_graded" context "projects.review" %}
+                                    </span>
+                                {% else %}
+                                    <span class="answers-status answers-status--danger">
+                                        <i class="fa-solid fa-xmark-circle"></i> {% trans "status_rejected" context "projects.review" %}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if submission.grade %}
+                                    <span class="answers-score">
+                                        {{ submission.grade|floatformat:"-2" }}
+                                        <span class="answers-score__muted">/ {{ project.max_score }}</span>
+                                    </span>
+                                {% else %}
+                                    <span class="answers-score__muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <button class="view-submission-btn project-review-view-btn answers-action-btn answers-action-btn--filled"
                                         data-bs-toggle="modal"
                                         data-bs-target="#submissionModal"
                                         data-id="{{ submission.id }}"
@@ -176,74 +142,60 @@
                                         data-feedback="{{ submission.feedback }}">
                                     <i class="fa-solid fa-eye"></i> {% trans "view" context "projects.review" %}
                                 </button>
-                                {% if can_delete_submissions %}
-                                    <button type="button"
-                                            class="btn btn-sm btn-outline-danger js-single-delete-submission"
-                                            data-submission-id="{{ submission.id }}">
-                                        <i class="fa-solid fa-trash"></i> {% trans "action_delete" context "projects.review" %}
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
-    {% else %}
-        <p class="text-muted text-center py-4">
-            <i class="fa-solid fa-inbox fa-3x d-block mb-2"></i>
-            {% trans "empty_title" context "projects.review" %}
-        </p>
-    {% endif %}
-
-    <div class="d-flex gap-2 flex-wrap mt-3">
-        <a href="{{ back_url }}" class="btn btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "projects.review" %}
-        </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="answers-empty">
+                <div class="answers-empty__icon"><i class="fa-solid fa-inbox"></i></div>
+                <h4>{% trans "empty_title" context "projects.review" %}</h4>
+                <p>Bu sərbəst iş üzrə hələ cavab təqdim olunmayıb.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 
-<div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade answers-modal" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
+            <div class="modal-header text-white">
                 <h5 class="modal-title">
-                    <i class="fa-solid fa-file-lines"></i> {% trans "modal_title" context "projects.review" %}
+                    <i class="fa-solid fa-file-lines"></i>
+                    {% trans "modal_title" context "projects.review" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-                <div class="mb-3">
-                    <strong>{% trans "student" context "projects.review" %}</strong>
-                    <p id="modal-student" class="mb-0"></p>
+                <div class="answers-modal__block">
+                    <span class="answers-modal__label">{% trans "student" context "projects.review" %}</span>
+                    <div id="modal-student" class="answers-modal__content"></div>
                 </div>
 
-                <div class="mb-3">
-                    <strong>{% trans "explanation" context "projects.review" %}</strong>
-                    <div id="modal-content" class="results-modal-answer"></div>
-                </div>
-
-                <div class="mb-3" id="modal-file-container" style="display: none;">
-                    <strong>{% trans "file" context "projects.review" %}</strong>
-                    <div class="mt-2">
-                        <a id="modal-file-link" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="fa-solid fa-download me-1"></i>
-                            <span id="modal-file-name">{% trans "download" context "projects.review" %}</span>
-                        </a>
+                <div class="answers-modal__block">
+                    <span class="answers-modal__label">{% trans "explanation" context "projects.review" %}</span>
+                    <div class="answers-modal__content">
+                        <p id="modal-content" class="mb-0" style="white-space: pre-wrap;"></p>
                     </div>
                 </div>
 
-                <hr>
+                <div class="answers-modal__block" id="modal-file-container" style="display: none;">
+                    <span class="answers-modal__label">{% trans "file" context "projects.review" %}</span>
+                    <a id="modal-file-link" href="#" target="_blank" class="answers-modal__file-link">
+                        <i class="fa-solid fa-download"></i>
+                        <span id="modal-file-name">{% trans "download" context "projects.review" %}</span>
+                    </a>
+                </div>
 
                 <form id="gradeForm" method="POST">
                     {% csrf_token %}
                     <input type="hidden" id="submission-id" name="submission_id">
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "grade_label" context "projects.review" %} (0-{{ project.max_score }}):</label>
+                    <div class="answers-modal__block">
+                        <label class="answers-modal__label" for="grade-input">{% trans "grade_label" context "projects.review" %} (0-{{ project.max_score }})</label>
                         <input type="number"
                                id="grade-input"
                                name="grade"
@@ -254,8 +206,8 @@
                                placeholder="0-{{ project.max_score }}">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">{% trans "feedback_label" context "projects.review" %}</label>
+                    <div class="answers-modal__block">
+                        <label class="answers-modal__label" for="feedback-input">{% trans "feedback_label" context "projects.review" %}</label>
                         <textarea id="feedback-input"
                                   name="feedback"
                                   class="form-control"
@@ -263,7 +215,7 @@
                                   placeholder="{% trans 'feedback_placeholder' context 'projects.review' %}"></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success" id="gradeSubmitButton">
+                    <button type="submit" class="answers-modal__submit project-review-grade-btn">
                         <i class="fa-solid fa-check-circle"></i> {% trans "grade_button" context "projects.review" %}
                     </button>
                 </form>
@@ -271,53 +223,8 @@
         </div>
     </div>
 </div>
-
-{% if can_delete_submissions %}
-    <form id="deleteSubmissionsForm"
-          method="post"
-          action="{% url 'projects:delete_project_submissions' project.id %}"
-          class="d-none">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-        {% if request.GET.from_section %}
-            <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
-        {% endif %}
-        {% if request.GET.return_to %}
-            <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
-        {% endif %}
-        <div id="deleteSubmissionsInputs"></div>
-    </form>
-
-    <div class="modal fade" id="deleteSubmissionsConfirmModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fa-solid fa-trash me-2"></i> {% trans "confirm_delete_title" context "projects.review" %}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-2">{% trans "confirm_delete_body" context "projects.review" %}</p>
-                    <small class="text-muted">{% trans "confirm_delete_note" context "projects.review" %}</small>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        {% trans "action_close" context "exams.partial.exam_modals" %}
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteSubmissionsBtn">
-                        {% trans "confirm_delete_submit" context "projects.review" %}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endif %}
-{% endblock %}
-
-{% block extraJs %}
 <script>
-const projectReviewConfig = {
+window.projectReviewConfig = {
     selectedSubmissionId: "{{ selected_submission_id }}",
     gradeUrlTemplate: "/projects/submission/__ID__/grade/",
     csrfToken: "{{ csrf_token }}",
@@ -331,184 +238,8 @@ const projectReviewConfig = {
         gradeButton: `{% trans "grade_button" context "projects.review.js" %}`
     }
 };
-
-(() => {
-    const config = projectReviewConfig;
-    const i18n = config.i18n || {};
-
-    function openSubmission(button) {
-        if (!button) return;
-
-        const submissionId = button.dataset.id;
-        const student = button.dataset.student;
-        const content = button.dataset.content;
-        const file = button.dataset.file;
-        const filename = button.dataset.filename;
-        const grade = button.dataset.grade;
-        const feedback = button.dataset.feedback;
-
-        document.getElementById('submission-id').value = submissionId;
-        document.getElementById('modal-student').textContent = student;
-        document.getElementById('modal-content').textContent = content || i18n.noContent;
-        document.getElementById('grade-input').value = grade;
-        document.getElementById('feedback-input').value = feedback;
-
-        if (file) {
-            document.getElementById('modal-file-container').style.display = 'block';
-            document.getElementById('modal-file-link').href = file;
-            document.getElementById('modal-file-name').textContent = filename || i18n.download;
-        } else {
-            document.getElementById('modal-file-container').style.display = 'none';
-        }
-    }
-
-    document.querySelectorAll('.view-submission-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            openSubmission(this);
-        });
-    });
-
-    if (config.selectedSubmissionId) {
-        const targetButton = document.querySelector('.view-submission-btn[data-id="' + config.selectedSubmissionId + '"]');
-        if (targetButton) {
-            openSubmission(targetButton);
-            if (window.bootstrap && window.bootstrap.Modal) {
-                const modal = window.bootstrap.Modal.getOrCreateInstance(document.getElementById('submissionModal'));
-                modal.show();
-            } else {
-                targetButton.click();
-            }
-        }
-    }
-
-    document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const submissionId = document.getElementById('submission-id').value;
-        const formData = new FormData(this);
-        const btn = document.getElementById('gradeSubmitButton');
-
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> ' + i18n.sending;
-
-        const gradeUrl = (config.gradeUrlTemplate || '').replace('__ID__', submissionId);
-
-        fetch(gradeUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': config.csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(`${i18n.errorPrefix}${data.error || i18n.unknownError}`);
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert(i18n.serverError);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
-            });
-    });
-})();
-
-{% if can_delete_submissions %}
-(() => {
-    const checkboxes = Array.from(document.querySelectorAll('.js-submission-checkbox'));
-    const selectedCountEl = document.getElementById('selectedSubmissionCount');
-    const selectAllBtn = document.getElementById('selectAllSubmissionsBtn');
-    const clearBtn = document.getElementById('clearSubmissionsBtn');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedSubmissionsBtn');
-    const singleDeleteButtons = document.querySelectorAll('.js-single-delete-submission');
-    const deleteForm = document.getElementById('deleteSubmissionsForm');
-    const deleteInputs = document.getElementById('deleteSubmissionsInputs');
-    const confirmBtn = document.getElementById('confirmDeleteSubmissionsBtn');
-    const confirmModalEl = document.getElementById('deleteSubmissionsConfirmModal');
-
-    if (!deleteForm || !confirmModalEl) return;
-
-    const confirmModal = window.bootstrap?.Modal ? window.bootstrap.Modal.getOrCreateInstance(confirmModalEl) : null;
-    let pendingDeleteIds = [];
-
-    const getSelectedIds = () => checkboxes.filter(cb => cb.checked).map(cb => cb.value);
-
-    const updateSelectedCount = () => {
-        const selectedCount = getSelectedIds().length;
-        const hasRows = checkboxes.length > 0;
-        if (selectedCountEl) {
-            selectedCountEl.textContent = String(selectedCount);
-        }
-        if (selectAllBtn) {
-            selectAllBtn.disabled = !hasRows || selectedCount === checkboxes.length;
-        }
-        if (clearBtn) {
-            clearBtn.disabled = selectedCount === 0;
-        }
-        if (deleteSelectedBtn) {
-            deleteSelectedBtn.disabled = selectedCount === 0;
-        }
-    };
-
-    checkboxes.forEach(cb => cb.addEventListener('change', updateSelectedCount));
-    updateSelectedCount();
-
-    selectAllBtn?.addEventListener('click', () => {
-        checkboxes.forEach(cb => {
-            cb.checked = true;
-        });
-        updateSelectedCount();
-    });
-
-    clearBtn?.addEventListener('click', () => {
-        checkboxes.forEach(cb => {
-            cb.checked = false;
-        });
-        updateSelectedCount();
-    });
-
-    const openDeleteConfirm = (ids) => {
-        pendingDeleteIds = ids.filter(Boolean);
-        if (!pendingDeleteIds.length) {
-            return;
-        }
-        if (confirmModal) {
-            confirmModal.show();
-        }
-    };
-
-    deleteSelectedBtn?.addEventListener('click', () => {
-        openDeleteConfirm(getSelectedIds());
-    });
-
-    singleDeleteButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            openDeleteConfirm([button.dataset.submissionId]);
-        });
-    });
-
-    confirmBtn?.addEventListener('click', () => {
-        if (!pendingDeleteIds.length) return;
-
-        deleteInputs.innerHTML = '';
-        pendingDeleteIds.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'submission_ids';
-            input.value = id;
-            deleteInputs.appendChild(input);
-        });
-        deleteForm.submit();
-    });
-})();
-{% endif %}
 </script>
-<script src="{% static 'js/results_filter_ui.js' %}"></script>
+{% endblock %}
+{% block extraJs %}
+<script src="{% static 'projects/js/review_submissions.js' %}"></script>
 {% endblock %}

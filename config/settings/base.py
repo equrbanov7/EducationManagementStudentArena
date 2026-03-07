@@ -167,6 +167,7 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
+SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 
 # Message tags for toast notifications
 MESSAGE_TAGS = {

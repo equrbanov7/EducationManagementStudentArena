@@ -137,14 +137,14 @@
                             
                             <div class="btn-group btn-group-sm gap-2">
                                 {% if item.has_submitted %}
-                                    <a href="{% url 'labs:my_lab_answers' lab.id %}" 
+                                    <a href="{% url 'labs:my_lab_answers' lab.id %}?return_to={{ profile_return_url|urlencode }}" 
                                        class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-list-check"></i>
-                                        {% blocktrans trimmed context "labs.template.lab_section" with attempt_count=item.attempt_count %}action_my_answers {{ attempt_count }}{% endblocktrans %}
+                                        Cavablarım ({{ item.attempt_count }})
                                     </a>
                                     
                                     {% if item.attempts_left > 0 and lab.is_open %}
-                                        <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                        <a href="{% url 'labs:lab_detail' lab.id %}?return_to={{ profile_return_url|urlencode }}" class="btn btn-sm btn-danger">
                                             <i class="fas fa-redo"></i> {% trans "action_resubmit" context "labs.template.lab_section" %}
                                         </a>
                                     {% else %}
@@ -154,7 +154,7 @@
                                     {% endif %}
                                 
                                 {% elif lab.is_open %}
-                                    <a href="{% url 'labs:lab_detail' lab.id %}" class="btn btn-sm btn-danger">
+                                    <a href="{% url 'labs:lab_detail' lab.id %}?return_to={{ profile_return_url|urlencode }}" class="btn btn-sm btn-danger">
                                         <i class="fas fa-arrow-right"></i> {% trans "action_open_lab" context "labs.template.lab_section" %}
                                     </a>
                                 

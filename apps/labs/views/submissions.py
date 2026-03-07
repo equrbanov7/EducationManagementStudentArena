@@ -26,6 +26,7 @@ from ..models import LabAnswer, LabAssignment, LabSubmission
 from ._helpers import (
     _get_tenant_submission_or_404,
     _get_tenant_lab_or_404,
+    _lab_back_url,
     _normalize_extensions,
     _tenant_scoped_questions,
     _validate_and_prepare_lab_upload,
@@ -94,6 +95,7 @@ def lab_submissions(request, pk):
         "group_filter": group_filter,
         "stats": stats,
         "student_groups": student_groups,
+        "back_url": _lab_back_url(request, lab),
     }
 
     return render(request, "labs/lab_submissions.html", context)

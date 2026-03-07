@@ -99,6 +99,12 @@
                             </span>
                         {% endif %}
 
+                        {% if item.attempt_count > 0 %}
+                            <a href="{{ item.history_url }}" class="btn btn-outline-secondary customBtn mb-2">
+                                Cavablarım ({{ item.attempt_count }})
+                            </a>
+                        {% endif %}
+
                         {# Kod tələb olunursa – modal açan düymə #}
                         {% if item.requires_code %}
                             <button type="button"

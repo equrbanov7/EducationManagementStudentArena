@@ -28,11 +28,11 @@
         </div>
         <div class="d-flex gap-2">
             {% if can_submit %}
-            <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-gradient-primary">
+            <a href="{{ detail_url }}" class="btn btn-gradient-primary">
                 <i class="fa-solid fa-plus me-1"></i> {% trans "new_submission" context "assignment.my_submissions" %}
             </a>
             {% endif %}
-            <a href="{% url 'courses:course_dashboard' assignment.course.id %}" class="btn btn-outline-secondary rounded-3 fw-medium">
+            <a href="{{ back_url }}" class="btn btn-outline-secondary rounded-3 fw-medium">
                 <i class="fa-solid fa-arrow-left me-1"></i> {% trans "back" context "assignment.my_submissions" %}
             </a>
         </div>
@@ -97,7 +97,7 @@
                                 </div>
                             </td>
                             <td>
-                                {% if sub.status == 'pending' %}
+                                {% if sub.status == 'submitted' or sub.status == 'grading' %}
                                     <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> {% trans "status_pending" context "assignment.my_submissions" %}</span>
                                 {% elif sub.status == 'graded' %}
                                     <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> {% trans "status_graded" context "assignment.my_submissions" %}</span>
@@ -106,8 +106,13 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if sub.grade %}
+                                {% if sub.show_review_data and sub.has_grade %}
                                     <span class="fw-bold fs-5 text-primary-green">{{ sub.grade }}</span>
+                                {% elif sub.status == 'graded' and not sub.show_review_data %}
+                                    <span class="text-muted small">
+                                        <i class="fa-regular fa-clock me-1"></i>
+                                        <span data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
+                                    </span>
                                 {% else %}
                                     <span class="text-muted"><i class="fa-solid fa-minus"></i></span>
                                 {% endif %}
@@ -163,10 +168,13 @@
                     {% endif %}
 
                     {% if sub.status == 'graded' %}
-                    <div class="bg-light rounded-3 p-4 mt-4 border border-success border-opacity-25">
+                    <div class="bg-light rounded-3 p-4 mt-4 {% if sub.show_review_data %}border border-success border-opacity-25{% else %}border border-warning border-opacity-25{% endif %}">
+                        {% if sub.show_review_data %}
                         <div class="d-flex align-items-center mb-3">
                             <strong class="text-dark-blue fs-5">{% trans "grade" context "assignment.my_submissions" %}:</strong>
-                            <span class="badge bg-success fs-5 ms-3 px-3 py-2 rounded-pill">{{ sub.grade }}</span>
+                            <span class="badge bg-success fs-5 ms-3 px-3 py-2 rounded-pill">
+                                {% if sub.has_grade %}{{ sub.grade }}{% else %}-{% endif %}
+                            </span>
                         </div>
 
                         {% if sub.feedback %}
@@ -175,6 +183,15 @@
                             <div class="bg-white p-3 rounded-3 border-start border-4 border-success shadow-sm text-secondary">
                                 {{ sub.feedback|linebreaks }}
                             </div>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <strong class="text-dark-blue d-block mb-2">
+                            <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> Yoxlama tamamlanıb
+                        </strong>
+                        <div class="text-secondary">
+                            Qiymət və müəllim rəyi görünəcək:
+                            <span class="fw-semibold" data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
                         </div>
                         {% endif %}
                     </div>
@@ -200,7 +217,7 @@
         <p class="text-muted mb-4">Hələ heç bir tapşırıq cavabı göndərməmisiniz.</p>
         
         {% if can_submit %}
-        <a href="{% url 'assignments:assignment_detail' assignment.id %}" class="btn btn-gradient-primary btn-lg px-4 rounded-pill shadow-sm">
+        <a href="{{ detail_url }}" class="btn btn-gradient-primary btn-lg px-4 rounded-pill shadow-sm">
             <i class="fa-solid fa-paper-plane me-2"></i> {% trans "submit_first" context "assignment.my_submissions" %}
         </a>
         {% endif %}
@@ -211,4 +228,5 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 {% endblock %}

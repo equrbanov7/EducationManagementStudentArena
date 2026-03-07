@@ -130,26 +130,34 @@
                             </a>
                             {% endif %}
                             {% if submission.text_submission %}
-                            <a href="#" class="view-link" onclick="viewSubmission({{ submission.id }}); return false;">
+                            <a href="#"
+                               class="view-link js-view-submission"
+                               data-submission-id="{{ submission.id }}"
+                               data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
+                               data-assignment="{{ submission.assignment.title }}">
                                 <i class="fas fa-eye"></i>
                                 {% trans "file_view" context "accounts.grading_queue_page" %}
                             </a>
                             {% endif %}
+                            <template id="submission-content-{{ submission.id }}">{{ submission.text_submission }}</template>
                         </td>
                         <td>
-                            <form class="grade-form" onsubmit="submitGrade(event, {{ submission.id }}, false)">
+                            <form class="grade-form"
+                                  action="{% url 'assignments:grade_submission' submission.id %}"
+                                  onsubmit="submitGrade(event, {{ submission.id }}, false)">
                                 {% csrf_token %}
                                 <div class="grade-input-group">
                                     <input 
                                         type="number" 
                                         class="grade-input" 
-                                        name="score" 
+                                        name="grade" 
                                         placeholder="{% trans 'score_placeholder' context 'accounts.grading_queue_page' %}"
                                         min="0" 
-                                        max="{{ submission.assignment.max_points|default:100 }}"
+                                        max="{{ submission.assignment.max_score|default:100 }}"
+                                        step="0.01"
                                         required
                                     >
-                                    <span style="align-self: center;">/ {{ submission.assignment.max_points|default:100 }}</span>
+                                    <span style="align-self: center;">/ {{ submission.assignment.max_score|default:100 }}</span>
                                 </div>
                                 <textarea 
                                     class="feedback-input" 
@@ -187,6 +195,23 @@
         <p>{% trans "loading" context "accounts.grading_queue_page" %}</p>
     </div>
 </div>
+
+<div class="modal fade" id="submissionPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-1" id="submissionPreviewTitle"></h5>
+                    <small class="text-muted" id="submissionPreviewStudent"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="submissionPreviewContent" class="mb-0" style="white-space: pre-wrap; font-family: inherit;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extraJs %}
@@ -194,7 +219,6 @@
     const gradeQueueSuccessMessage = "{% trans 'toast_success' context 'accounts.grading_queue_page' %}";
     const gradeQueueGenericErrorMessage = "{% trans 'toast_error_generic' context 'accounts.grading_queue_page' %}";
     const gradeQueueErrorPrefix = "{% trans 'toast_error_prefix' context 'accounts.grading_queue_page' %}";
-    const viewSubmissionAlertTemplate = "{% trans 'view_submission_alert_template' context 'accounts.grading_queue_page' %}";
 
     function submitGrade(event, submissionId, goToNext) {
         event.preventDefault();
@@ -202,15 +226,17 @@
         const form = event.target.closest('form');
         const formData = new FormData(form);
         const row = form.closest('tr');
+        const gradeUrl = form.getAttribute('action');
         
         // Show loading
         document.getElementById('loadingSpinner').classList.add('active');
         
         // AJAX submission
-        fetch(`/accounts/grade-submission/${submissionId}/`, {
+        fetch(gradeUrl, {
             method: 'POST',
             body: formData,
             headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
                 'X-Requested-With': 'XMLHttpRequest',
             }
         })
@@ -279,11 +305,27 @@
         }, 3000);
     }
     
-    function viewSubmission(submissionId) {
-        // Open modal to view text submission
-        // This would require a modal implementation
-        alert(viewSubmissionAlertTemplate.replace('{id}', submissionId));
+    function viewSubmission(button) {
+        const submissionId = button.dataset.submissionId;
+        const contentTemplate = document.getElementById(`submission-content-${submissionId}`);
+        const content = contentTemplate ? contentTemplate.textContent.trim() : '';
+
+        document.getElementById('submissionPreviewTitle').textContent = button.dataset.assignment || '';
+        document.getElementById('submissionPreviewStudent').textContent = button.dataset.student || '';
+        document.getElementById('submissionPreviewContent').textContent = content;
+
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const modal = window.bootstrap.Modal.getOrCreateInstance(document.getElementById('submissionPreviewModal'));
+            modal.show();
+        }
     }
+
+    document.querySelectorAll('.js-view-submission').forEach((button) => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            viewSubmission(this);
+        });
+    });
     
     // Auto-submit on course selection change
     document.getElementById('course').addEventListener('change', function() {

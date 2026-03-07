@@ -11,11 +11,13 @@ Contains:
 """
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, ListView, UpdateView, View
 
 from apps.courses.forms import CourseForm
@@ -148,6 +150,41 @@ class DeleteCourseView(IsCourseOwnerMixin, View):
             return redirect(return_to)
 
         return redirect(f"{reverse('accounts:profile')}?section=my-courses")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Update Course Status
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@login_required
+@require_POST
+def update_course_status(request, course_id):
+    """Update the course visibility status from the dashboard panel."""
+
+    _require_org_permission(request, "course.edit")
+    course = _get_owner_course_or_404(request, course_id)
+
+    requested_status = (request.POST.get("status") or "").strip().lower()
+    normalized_status = {"active": "published", "published": "published", "draft": "draft"}.get(requested_status)
+
+    if normalized_status is None:
+        messages.error(request, pgettext("courses.view.message", "invalid_course_status"))
+    else:
+        course.status = normalized_status
+        course.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            pgettext("courses.view.message", "course_status_updated").format(status=course.get_status_display()),
+        )
+
+    redirect_target = _safe_same_origin_redirect_path(
+        request,
+        request.POST.get("next") or request.GET.get("next"),
+    )
+    if redirect_target:
+        return redirect(redirect_target)
+    return redirect("courses:course_dashboard", course_id=course.id)
 
 
 # ════════════════════════════════════════════════════════════════════════════
