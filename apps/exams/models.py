@@ -1,5 +1,5 @@
 # exams/models.py
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -10,6 +10,8 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
+
+User = get_user_model()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HELPER FUNCTIONS
