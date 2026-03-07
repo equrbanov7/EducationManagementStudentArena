@@ -1,0 +1,166 @@
+"""
+courses/views/crud.py
+─────────────────────
+CRUD operations for courses.
+
+Contains:
+- CreateCourseView
+- EditCourseView
+- DeleteCourseView
+- MyCoursesListView
+"""
+
+from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse, reverse_lazy
+from django.utils.translation import pgettext
+from django.views.generic import CreateView, ListView, UpdateView, View
+
+from apps.courses.forms import CourseForm
+from apps.courses.models import Course
+from core.helpers import _safe_same_origin_redirect_path
+from core.tenancy import get_organization_int_id, get_request_organization
+
+from ._helpers import IsCourseOwnerMixin, IsTeacherMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Create Course
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class CreateCourseView(IsTeacherMixin, CreateView):
+    """Kurs yaratma view-u."""
+
+    model = Course
+    form_class = CourseForm
+    template_name = "courses/create_course.html"
+    modal_form_template_name = "courses/partials/_create_course_modal_form.html"
+
+    def _is_modal_request(self):
+        return self.request.GET.get("modal") == "1"
+
+    def get(self, request, *args, **kwargs):
+        if self._is_modal_request():
+            self.object = None
+            form = self.get_form()
+            return render(
+                request,
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+            )
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        _require_org_permission(self.request, "course.create")
+        form.instance.owner = self.request.user
+        form.instance.status = "draft"
+        organization = get_request_organization(self.request)
+        form.instance.organization_id = get_organization_int_id(organization)
+        super().form_valid(form)
+        messages.success(
+            self.request,
+            pgettext("courses.view.message", "course_created_successfully").format(title=form.instance.title),
+        )
+        if self._is_modal_request():
+            return JsonResponse(
+                {
+                    "success": True,
+                    "course_id": self.object.id,
+                    "dashboard_url": str(self.get_success_url()),
+                }
+            )
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        if self._is_modal_request():
+            html = render_to_string(
+                self.modal_form_template_name,
+                {
+                    "form": form,
+                },
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("courses:course_dashboard", args=[self.object.id])
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Edit Course
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class EditCourseView(IsCourseOwnerMixin, UpdateView):
+    """Kurs məlumatını redaktə etmə."""
+
+    model = Course
+    form_class = CourseForm
+    template_name = "courses/edit_course.html"
+    context_object_name = "course"
+    pk_url_kwarg = "course_id"
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_org_permission(request, "course.edit")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        messages.success(
+            self.request,
+            pgettext("courses.view.message", "course_updated").format(title=form.instance.title),
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("courses:course_dashboard", args=[self.object.id])
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Delete Course
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class DeleteCourseView(IsCourseOwnerMixin, View):
+    """Kursun tam silinməsi."""
+
+    def post(self, request, *args, **kwargs):
+        course_id = kwargs.get("course_id")
+        course = _get_owner_course_or_404(request, course_id)
+
+        course_title = course.title
+        course.delete()
+
+        messages.success(
+            request,
+            pgettext("courses.view.message", "course_deleted").format(title=course_title),
+        )
+        return_to = _safe_same_origin_redirect_path(
+            request,
+            request.POST.get("return_to") or request.GET.get("return_to"),
+        )
+        if return_to:
+            return redirect(return_to)
+
+        return redirect(f"{reverse('accounts:profile')}?section=my-courses")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# My Courses List
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class MyCoursesListView(ListView):
+    """Mənim kurslarım (owner)."""
+
+    template_name = "courses/my_courses.html"
+    context_object_name = "courses"
+    paginate_by = 12
+
+    def get_queryset(self):
+        return _owner_courses_queryset(self.request).order_by("-created_at")
