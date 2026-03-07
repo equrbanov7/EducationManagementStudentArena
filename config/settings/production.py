@@ -123,3 +123,15 @@ if sentry_dsn:
         dsn=sentry_dsn,
         send_default_pii=True,
     )
+
+# Content Security Policy (CSP) - Production settings (daha ciddi)
+# Base settings-dəki CSP-ni production üçün daha ciddi edirik
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",)  # unsafe-inline silindi - production üçün daha təhlükəsiz
+CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")  # unsafe-inline silindi
+CSP_IMG_SRC = ("'self'", "data:", "https:")  # HTTPS-dən şəkil yükləməyə icazə
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_CONNECT_SRC = ("'self'",)  # AJAX/WebSocket bağlantıları
+CSP_FRAME_ANCESTORS = ("'none'",)  # Clickjacking-ə qarşı
+CSP_BASE_URI = ("'self'",)  # Base tag-ı məhdudlaşdırır
+CSP_FORM_ACTION = ("'self'",)  # Form submission-ları məhdudlaşdırır

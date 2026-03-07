@@ -46,6 +46,7 @@ MIDDLEWARE = [
     "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
+    "csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -177,3 +178,11 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
+
+# Content Security Policy (CSP) settings
+# XSS hücumlarına qarşı əlavə müdafiə təmin edir
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")  # İlk etapda, sonra unsafe-inline silinməlidir
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
