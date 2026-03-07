@@ -267,7 +267,7 @@ table.table thead th:first-child,
 table.table tbody td:first-child {
     padding-left: 16px;
     padding-right: 8px;
-    width: 40px;
+    min-width: 40px;
 }
 
 /* Cədvəl Gövdəsi (Tbody) */

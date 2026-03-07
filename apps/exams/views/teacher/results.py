@@ -5,10 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
@@ -139,22 +139,13 @@ def teacher_exam_results(request, slug):
     elif checked_filter == "unchecked":
         attempts = attempts.filter(checked_by_teacher=False)
     if date_from:
-        try:
-            from django.utils.dateparse import parse_datetime, parse_date
-            dt_from = parse_date(date_from)
-            if dt_from:
-                from datetime import datetime
-                attempts = attempts.filter(started_at__date__gte=dt_from)
-        except Exception:
-            pass
+        dt_from = parse_date(date_from)
+        if dt_from:
+            attempts = attempts.filter(started_at__date__gte=dt_from)
     if date_to:
-        try:
-            from django.utils.dateparse import parse_date
-            dt_to = parse_date(date_to)
-            if dt_to:
-                attempts = attempts.filter(started_at__date__lte=dt_to)
-        except Exception:
-            pass
+        dt_to = parse_date(date_to)
+        if dt_to:
+            attempts = attempts.filter(started_at__date__lte=dt_to)
 
     selected_attempt = None
     selected_answers = None
@@ -305,7 +296,14 @@ def bulk_delete_attempts(request, slug):
     exam = _get_exam_for_results(request, slug)
 
     raw_ids = request.POST.get("attempt_ids", "")
-    ids_to_delete = [int(x) for x in raw_ids.split(",") if x.strip().isdigit()]
+    ids_to_delete = []
+    for x in raw_ids.split(","):
+        x = x.strip()
+        if x.isdigit():
+            try:
+                ids_to_delete.append(int(x))
+            except ValueError:
+                pass
 
     if not ids_to_delete:
         messages.warning(request, pgettext_lazy("exams.view.results.message", "no_attempts_selected"))
