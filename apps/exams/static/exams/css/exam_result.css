@@ -1,3 +1,18 @@
+/* --- CSS Variables for consistent colors --- */
+:root {
+    --primary-blue: #2563eb;
+    --dark-blue: #1e40af;
+    --light-blue: #eff6ff;
+    --pale-blue: #bfdbfe;
+    --primary-green: #10b981;
+    --dark-green: #059669;
+    --light-green: #ecfdf5;
+}
+
+.text-dark-blue { color: var(--dark-blue) !important; }
+.text-primary-blue { color: var(--primary-blue) !important; }
+.text-primary-green { color: var(--primary-green) !important; }
+
 /* --- Ümumi Konteyner --- */
 .result-container {
     max-width: 900px;
@@ -9,8 +24,8 @@
 .page-title {
     font-size: 2rem;
     font-weight: 800;
-    color: #111827;
-    margin-bottom: 10px; 
+    color: var(--dark-blue);
+    margin-bottom: 10px;
 }
 
 /* --- Nəticə Ümumi Kartı (Summary Card) --- */
@@ -33,7 +48,7 @@
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, #3b82f6, #6366f1);
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
 }
 
 .summary-header {
@@ -94,7 +109,7 @@
 .main-score .stat-value {
     font-size: 3.5rem;
     font-weight: 800;
-    color: #3b82f6; /* Brand Blue */
+    color: var(--primary-blue);
     line-height: 1;
 }
 
@@ -139,7 +154,7 @@
     display: block;
     width: 5px;
     height: 24px;
-    background: #3b82f6;
+    background: var(--primary-blue);
     border-radius: 4px;
 }
 
@@ -167,7 +182,7 @@
 }
 
 .q-number {
-    background: #3b82f6;
+    background: var(--primary-blue);
     color: white;
     width: 34px;
     height: 34px;
@@ -235,7 +250,7 @@
 }
 
 .option-icon { font-size: 1.2rem; margin-right: 12px; color: #d1d5db; }
-.correct-icon { font-size: 1.2rem; margin-right: 12px; color: #10b981; }
+.correct-icon { font-size: 1.2rem; margin-right: 12px; color: var(--primary-green); }
 .wrong-icon { font-size: 1.2rem; margin-right: 12px; color: #ef4444; }
 
 /* Variant rəngləri */
@@ -277,8 +292,8 @@
     white-space: pre-wrap;
     word-break: break-word;
 }
-.user-answer { border-left: 4px solid #3b82f6; }
-.correct-answer { border-left: 4px solid #10b981; background: #f0fdf4; }
+.user-answer { border-left: 4px solid var(--primary-blue); }
+.correct-answer { border-left: 4px solid var(--primary-green); background: var(--light-green); }
 
 /* File list */
 .answer-files {
@@ -297,7 +312,7 @@
     gap: 8px;
 }
 .file-link {
-    color: #2563eb;
+    color: var(--primary-blue);
     text-decoration: none;
     font-weight: 500;
 }
@@ -332,19 +347,19 @@
 }
 .tf-avatar {
     width: 32px; height: 32px;
-    background: #4f46e5;
+    background: var(--primary-blue);
     color: white;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
 }
-.tf-title { color: #3730a3; font-weight: 700; margin-left: 8px; }
+.tf-title { color: var(--dark-blue); font-weight: 700; margin-left: 8px; }
 .tf-score {
     background: #fff;
-    color: #4338ca;
+    color: var(--dark-blue);
     padding: 4px 12px;
     border-radius: 20px;
     font-weight: 700;
-    border: 1px solid #c7d2fe;
+    border: 1px solid var(--pale-blue);
 }
 .tf-body { padding: 20px; color: #1f2937; line-height: 1.6; }
 
@@ -359,7 +374,7 @@
 }
 
 .custom-blue-btn {
-    background-color: #3b82f6;
+    background-color: var(--primary-blue);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -373,10 +388,72 @@
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .custom-blue-btn:hover {
-    background-color: #2563eb;
+    background-color: var(--dark-blue);
     color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* --- Modern Card & Table Design (like history page) --- */
+.card-modern {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.table-modern-header {
+    background: linear-gradient(135deg, var(--dark-blue) 0%, var(--primary-blue) 55%, var(--primary-green) 100%);
+    color: #fff;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.table-modern thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 1rem;
+}
+
+.table-modern tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.table-modern tbody tr:hover {
+    background-color: var(--light-blue);
+}
+
+.status-graded {
+    background: var(--light-green);
+    color: var(--dark-green);
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.btn-outline-custom {
+    color: var(--primary-blue);
+    border: 1px solid var(--pale-blue);
+    background: transparent;
+    font-weight: 500;
+    border-radius: 0.5rem;
+}
+
+.btn-outline-custom:hover {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    border-color: var(--primary-blue);
 }
 
 
