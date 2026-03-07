@@ -43,6 +43,60 @@
         </div>
     </div>
 
+    {# Stat kartları (history səhifəsi kimi) #}
+    <div class="row mb-5 g-4">
+        <div class="col-md-3">
+            <div class="stat-card blue">
+                <h2 class="fw-bold text-dark-blue mb-1">
+                    {{ result_attempt_count }}
+                    <span class="fs-5 text-muted fw-normal">/ {% if exam.max_attempts_per_user %}{{ exam.max_attempts_per_user }}{% else %}&infin;{% endif %}</span>
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">İstifadə olunmuş cəhd</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card green">
+                <h2 class="fw-bold mb-1 {% if result_attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">
+                    {% if result_attempts_left is None %}&infin;{% else %}{{ result_attempts_left }}{% endif %}
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">Qalan cəhd</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card blue">
+                <h2 class="fw-bold mb-1 text-primary-blue">
+                    {% if result_max_score is not None %}{{ result_max_score }}{% else %}-{% endif %}
+                </h2>
+                <span class="text-muted fw-medium text-uppercase small history-tracking-label">Maksimum bal</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card white">
+                <div class="mb-2">
+                    {% if exam.is_after_end %}
+                        <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> Bitib</span>
+                    {% elif exam.is_before_start %}
+                        <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-start"></i> Planlanıb</span>
+                    {% elif exam.is_active %}
+                        <span class="status-badge status-active"><i class="fa-solid fa-lock-open"></i> Aktiv</span>
+                    {% else %}
+                        <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> Passiv</span>
+                    {% endif %}
+                </div>
+                <span class="text-muted fw-medium small">
+                    <i class="fa-regular fa-calendar me-1"></i>
+                    {% if exam.start_datetime %}
+                        {{ exam.start_datetime|date:"d.m.Y H:i" }}
+                    {% elif exam.end_datetime %}
+                        {{ exam.end_datetime|date:"d.m.Y H:i" }}
+                    {% else %}
+                        Məhdudiyyətsiz
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
     <div class="summary-card">
         
         <div class="summary-header">

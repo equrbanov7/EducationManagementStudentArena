@@ -61,6 +61,23 @@ def exam_result(request, slug, attempt_id):
     questions = [a.question for a in answers_qs]
     answers_by_qid = {a.question_id: a for a in answers_qs}
 
+    # Stat kart məlumatları (history səhifəsi kimi)
+    all_attempts = list(
+        ExamAttempt.objects.filter(
+            user=request.user,
+            exam=exam,
+            status__in=["submitted", "graded", "expired"],
+        ).order_by("-started_at")
+    )
+    result_attempt_count = len(all_attempts)
+    result_attempts_left = exam.attempts_left_for(request.user)
+
+    # Maksimum bal
+    if exam.exam_type == "test":
+        result_max_score = 100
+    else:
+        result_max_score = exam.questions.aggregate(total=Sum("points")).get("total") or 0
+
     return render(
         request,
         "exams/student/exam_result.html",
@@ -73,6 +90,9 @@ def exam_result(request, slug, attempt_id):
             "back_url": return_to or history_url,
             "previous_attempts": previous_attempts,
             "previous_attempts_count": len(previous_attempts) + 1,
+            "result_attempt_count": result_attempt_count,
+            "result_attempts_left": result_attempts_left,
+            "result_max_score": result_max_score,
         },
     )
 
