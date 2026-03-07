@@ -4017,7 +4017,7 @@ msgstr "Maksimum deneme"
 #: apps/assignments/templates/assignments/assignment_section.html:73
 msgctxt "assignment.section"
 msgid "review_answers"
-msgstr "Yanıtları görün"
+msgstr "Cevapları gör"
 
 #: apps/assignments/templates/assignments/assignment_section.html:77
 msgctxt "assignment.section"
@@ -6841,6 +6841,10 @@ msgctxt "courses.partial.resource_accordion"
 msgid "Resources (%(count)s)"
 msgstr "Kaynaklar (%(count)s)"
 
+msgctxt "courses.partial.resource_accordion"
+msgid "Resources"
+msgstr "Kaynaklar"
+
 #: apps/courses/templates/courses/partials/_resource_accordion.html:23
 msgctxt "courses.partial.resource_accordion"
 msgid "action_add_resource"
@@ -7343,6 +7347,14 @@ msgstr "✅ \"{title}\" kursu güncellendi."
 msgctxt "courses.view.message"
 msgid "course_deleted"
 msgstr "✅ \"{title}\" kursu ve tüm verileri silindi."
+
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Kurs durumu güncellendi: {status}."
+
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "Seçilen kurs durumu geçersiz."
 
 #: apps/exams/forms.py:34
 msgctxt "exams.form.exam.placeholder"
@@ -9805,7 +9817,7 @@ msgstr "Görüntüle"
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "Sonuçlar"
+msgstr "Cevapları gör"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -11507,7 +11519,7 @@ msgstr "Bloklar"
 #: apps/labs/templates/labs/lab_section.html:69
 msgctxt "labs.template.lab_section"
 msgid "action_answers"
-msgstr "Cevaplar"
+msgstr "Cevapları gör"
 
 #: apps/labs/templates/labs/lab_section.html:73
 msgctxt "labs.template.lab_section"

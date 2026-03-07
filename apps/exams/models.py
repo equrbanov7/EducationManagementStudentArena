@@ -962,6 +962,10 @@ class ExamAttempt(models.Model):
 
     def mark_checked(self):
         self.checked_by_teacher = True
+        if not self.teacher_checked_at:
+            self.teacher_checked_at = timezone.now()
+            self.save(update_fields=["checked_by_teacher", "teacher_checked_at"])
+            return
         self.save(update_fields=["checked_by_teacher"])
 
 

@@ -471,15 +471,38 @@
         const btn = e.target.closest('.js-delete-assignment');
         if(!btn) return;
         e.preventDefault();
-        if(!confirm(I18N.confirmDelete)) return;
 
-        fetch(btn.dataset.url, {
+        const executeDelete = () => fetch(btn.dataset.url, {
             method: 'POST',
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert(I18N.error))
-        .catch(() => alert(I18N.serverError));
+        .then(d => {
+            if (d.success) {
+                location.reload();
+                return true;
+            }
+            alert(I18N.error);
+            return false;
+        })
+        .catch(() => {
+            alert(I18N.serverError);
+            return false;
+        });
+
+        if (typeof window.openActionConfirmModal === 'function') {
+            window.openActionConfirmModal({
+                title: btn.textContent.trim() || I18N.confirmDelete,
+                message: I18N.confirmDelete,
+                confirmLabel: btn.textContent.trim() || I18N.confirmDelete,
+                confirmButtonClass: 'btn btn-danger',
+                onConfirm: executeDelete,
+            });
+            return;
+        }
+
+        if(!confirm(I18N.confirmDelete)) return;
+        executeDelete();
     });
 
 })();

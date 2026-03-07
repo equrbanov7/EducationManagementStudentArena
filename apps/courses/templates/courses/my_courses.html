@@ -126,13 +126,15 @@
       {% for course in courses %}
         <div class="course-card">
           <div class="course-cover">
-            {% if course.cover_image %}
-              <img src="{{ course.cover_image.url }}" alt="{{ course.title }}">
-            {% else %}
-              <div class="no-cover">
-                <i class="fas fa-graduation-cap"></i>
-              </div>
-            {% endif %}
+            {% with cover_image_url=course.cover_image_url %}
+              {% if cover_image_url %}
+                <img src="{{ cover_image_url }}" alt="{{ course.title }}">
+              {% else %}
+                <div class="no-cover">
+                  <i class="fas fa-graduation-cap"></i>
+                </div>
+              {% endif %}
+            {% endwith %}
           </div>
  
           <div class="course-body">

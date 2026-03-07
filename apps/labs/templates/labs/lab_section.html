@@ -69,12 +69,12 @@
                                 <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-eye"></i> {% trans "action_answers" context "labs.template.lab_section" %}
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                        onclick="openEditLabModal('{% url 'labs:edit_lab' lab.id %}')">
+                                <button type="button" class="btn btn-sm btn-outline-primary js-edit-lab"
+                                        data-url="{% url 'labs:edit_lab' lab.id %}">
                                     <i class="fas fa-pen"></i> {% trans "action_edit" context "labs.template.lab_section" %}
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                        onclick="deleteLabConfirm('{% url 'labs:delete_lab' lab.id %}')">
+                                <button type="button" class="btn btn-sm btn-outline-danger js-delete-lab"
+                                        data-url="{% url 'labs:delete_lab' lab.id %}">
                                     <i class="fas fa-trash"></i> {% trans "action_delete" context "labs.template.lab_section" %}
                                 </button>
                             </div>

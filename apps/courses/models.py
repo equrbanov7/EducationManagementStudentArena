@@ -190,6 +190,23 @@ class Course(models.Model):
         return self.owner == user
 
     @property
+    def cover_image_url(self):
+        """Return the cover image URL only when the file still exists in storage."""
+        if not self.cover_image:
+            return ""
+
+        name = getattr(self.cover_image, "name", "")
+        if not name:
+            return ""
+
+        try:
+            if not self.cover_image.storage.exists(name):
+                return ""
+            return self.cover_image.url
+        except Exception:
+            return ""
+
+    @property
     def topic_count(self):
         """Kursda neçə mövzu var?"""
         return self.topics.count()

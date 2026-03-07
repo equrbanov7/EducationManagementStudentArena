@@ -2,16 +2,24 @@
 View tests for courses app.
 """
 
+import tempfile
+from datetime import timedelta
 from urllib.parse import quote
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import override, pgettext
 
 from apps.accounts.models import ProfileRole
+from apps.assignments.models import Assignment
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
+from apps.labs.models import Lab
 from apps.organizations.models import Organization
+from apps.projects.models import Project
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -96,6 +104,30 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             title="Tenant A Course Exam",
             is_active=True,
         )
+        now = timezone.now()
+        self.assignment = Assignment.objects.create(
+            course=self.course_a,
+            title="Tenant A Assignment",
+            start_date=now - timedelta(days=1),
+            due_date=now + timedelta(days=7),
+            status="published",
+            created_by=self.owner,
+        )
+        self.project = Project.objects.create(
+            course=self.course_a,
+            title="Tenant A Project",
+            start_date=now - timedelta(days=1),
+            deadline=now + timedelta(days=7),
+            status="active",
+        )
+        self.lab = Lab.objects.create(
+            course=self.course_a,
+            title="Tenant A Lab",
+            start_datetime=now - timedelta(days=1),
+            end_datetime=now + timedelta(days=7),
+            status="published",
+            created_by=self.owner,
+        )
 
         CourseMembership.objects.create(course=self.course_a, user=self.student, role="student")
         CourseMembership.objects.create(course=self.course_b, user=self.student, role="student")
@@ -163,8 +195,67 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "courseVisibilityAccordion")
         self.assertContains(response, "course-status-toggle")
+        self.assertContains(response, "course-status-switch-form")
         self.assertContains(response, "Kursun yayımı")
         self.assertContains(response, "Yayımlandı")
+
+    def test_owner_can_update_course_status_from_dashboard(self):
+        self.course_a.status = "draft"
+        self.course_a.save(update_fields=["status"])
+
+        next_url = f"{reverse('courses:course_dashboard', kwargs={'course_id': self.course_a.id})}?from_section=my-courses"
+        response = self.client.post(
+            reverse("courses:update_course_status", kwargs={"course_id": self.course_a.id}),
+            {"status": "published", "next": next_url},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+        self.course_a.refresh_from_db()
+        self.assertEqual(self.course_a.status, "published")
+
+    def test_course_dashboard_uses_unified_view_answers_label_and_resource_title(self):
+        expected_answer_labels = {
+            "az": "Cavabları gör",
+            "en": "View answers",
+            "ru": "Посмотреть ответы",
+            "tr": "Cevapları gör",
+        }
+        expected_resource_titles = {
+            "az": "Resurslar",
+            "en": "Resources",
+            "ru": "Ресурсы",
+            "tr": "Kaynaklar",
+        }
+
+        for language_code, expected_label in expected_answer_labels.items():
+            with override(language_code):
+                self.assertEqual(pgettext("assignment.section", "review_answers"), expected_label)
+                self.assertEqual(pgettext("labs.template.lab_section", "action_answers"), expected_label)
+                self.assertEqual(pgettext("exams.partial.exam_section", "action_results"), expected_label)
+                self.assertEqual(pgettext("projects.section", "view_submissions"), expected_label)
+                self.assertEqual(
+                    pgettext("courses.partial.resource_accordion", "Resources"),
+                    expected_resource_titles[language_code],
+                )
+
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Resurslar (")
+
+    def test_course_dashboard_renders_exam_modal_triggers_and_shared_confirm_modal(self):
+        response = self.client.get(
+            reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertContains(response, "courseExamEditorModal")
+        self.assertContains(response, "js-open-course-exam-editor")
+        self.assertContains(response, reverse("exams:edit_exam", args=[self.course_exam.slug]))
+        self.assertContains(response, "Detallı imtahana bax")
 
     def test_course_dashboard_exam_links_return_back_to_current_dashboard_path(self):
         self.client.force_login(self.owner)
@@ -239,6 +330,37 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         response = self.client.get(reverse("courses:edit_course", kwargs={"course_id": self.course_a.id}))
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("accounts:login"), response.url)
+
+    def test_edit_course_clears_missing_cover_image_reference(self):
+        edit_url = reverse("courses:edit_course", kwargs={"course_id": self.course_a.id})
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                self.course_a.cover_image.save(
+                    "cover.png",
+                    SimpleUploadedFile("cover.png", b"fake-image-bytes", content_type="image/png"),
+                    save=True,
+                )
+                missing_name = self.course_a.cover_image.name
+                self.course_a.cover_image.storage.delete(missing_name)
+
+                response = self.client.get(edit_url)
+                self.assertEqual(response.status_code, 200)
+                self.assertNotContains(response, missing_name)
+
+                response = self.client.post(
+                    edit_url,
+                    {
+                        "title": "Tenant A Course Updated",
+                        "description": self.course_a.description,
+                        "status": self.course_a.status,
+                    },
+                )
+
+        self.assertEqual(response.status_code, 302)
+        self.course_a.refresh_from_db()
+        self.assertEqual(self.course_a.title, "Tenant A Course Updated")
+        self.assertFalse(self.course_a.cover_image)
 
     def test_non_owner_teacher_gets_403_on_course_edit(self):
         self.client.force_login(self.other_teacher)

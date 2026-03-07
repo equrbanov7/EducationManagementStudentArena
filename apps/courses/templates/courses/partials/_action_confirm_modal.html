@@ -1,0 +1,32 @@
+{% load i18n static %}
+
+<div
+    class="modal fade"
+    id="courseActionConfirmModal"
+    tabindex="-1"
+    aria-hidden="true"
+    data-default-title="Təsdiq edin"
+    data-default-confirm-label="{% trans 'action_delete' context 'courses.dashboard' %}"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseActionConfirmModalTitle">Təsdiq edin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'action_close' context 'exams.partial.exam_modals' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0 text-muted" id="courseActionConfirmModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "action_close" context "exams.partial.exam_modals" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="courseActionConfirmModalSubmit">
+                    {% trans "action_delete" context "courses.dashboard" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'courses/js/action_confirm_modal.js' %}"></script>

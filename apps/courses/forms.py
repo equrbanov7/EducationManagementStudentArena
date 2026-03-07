@@ -10,6 +10,7 @@ Nə üçün:
 """
 
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import pgettext_lazy
 
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
@@ -38,6 +39,10 @@ class CourseForm(forms.ModelForm):
         <button>Kurs Yarat</button>
     </form>
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._clear_missing_cover_image = False
 
     class Meta:
         model = Course
@@ -87,6 +92,18 @@ class CourseForm(forms.ModelForm):
         if not cover_image:
             return cover_image
 
+        if not isinstance(cover_image, UploadedFile):
+            name = getattr(cover_image, "name", "")
+            if not name:
+                return None
+            try:
+                if cover_image.storage.exists(name):
+                    return cover_image
+            except Exception:
+                pass
+            self._clear_missing_cover_image = True
+            return None
+
         validate_uploaded_file(
             cover_image,
             allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
@@ -96,6 +113,17 @@ class CourseForm(forms.ModelForm):
         )
         randomize_uploaded_filename(cover_image)
         return cover_image
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self._clear_missing_cover_image:
+            instance.cover_image = None
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        return instance
 
 
 # ════════════════════════════════════════════════════════════════════════════

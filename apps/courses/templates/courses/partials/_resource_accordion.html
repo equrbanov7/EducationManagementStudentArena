@@ -8,10 +8,8 @@
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
                 data-bs-target="#resourceCollapse">
             <i class="fas fa-folder-open text-success me-2"></i>
-            <strong>{% blocktrans with count=resources|length context "courses.partial.resource_accordion" %}Resources ({{ count }}){% endblocktrans %}</strong>
-            {% if is_owner %}
-                <span class="badge bg-success ms-2">{{ resources|length }}</span>
-            {% endif %}
+            <strong>{% trans "Resources" context "courses.partial.resource_accordion" %}</strong>
+            <span class="badge bg-success ms-2">{{ resources|length }}</span>
         </button>
     </h2>
     <div id="resourceCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">

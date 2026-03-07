@@ -10,10 +10,12 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.courses.models import CourseMembership
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
+from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
 from core.tenancy import get_organization_int_id
 
@@ -117,6 +119,31 @@ def _build_group_student_map(form):
     return group_student_map
 
 
+def _get_requested_course_for_exam(request):
+    raw_course_id = (
+        request.POST.get("course_id")
+        or request.GET.get("course")
+        or request.GET.get("course_id")
+        or ""
+    ).strip()
+    if not raw_course_id.isdigit():
+        return None
+
+    course = _tenant_scoped_courses(request).filter(id=int(raw_course_id)).first()
+    if course is None:
+        return None
+
+    if course.owner_id == request.user.id:
+        return course
+
+    membership_exists = CourseMembership.objects.filter(
+        course=course,
+        user=request.user,
+        role__in=["teacher", "assistant"],
+    ).exists()
+    return course if membership_exists else None
+
+
 @login_required
 def teacher_exam_list(request):
     """
@@ -155,6 +182,7 @@ def createAndEditExamView(request, slug=None):
     else:
         exam = None
         is_editing = False
+    linked_course = None if is_editing else _get_requested_course_for_exam(request)
     is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
     if request.method == "POST":
@@ -171,6 +199,8 @@ def createAndEditExamView(request, slug=None):
             # Yeni imtahanda author-u set et
             if not is_editing:
                 exam_instance.author = request.user
+                if linked_course is not None:
+                    exam_instance.course = linked_course
             exam_instance.organization_id = get_organization_int_id(organization)
 
             exam_instance.save()
@@ -195,6 +225,7 @@ def createAndEditExamView(request, slug=None):
                     "form": form,
                     "is_editing": is_editing,
                     "exam": exam,
+                    "linked_course": linked_course,
                     "group_student_map": group_student_map,
                 },
                 request=request,
@@ -216,6 +247,7 @@ def createAndEditExamView(request, slug=None):
                 "form": form,
                 "exam": exam,
                 "is_editing": is_editing,
+                "linked_course": linked_course,
                 "group_student_map": group_student_map,
             },
         )
@@ -227,6 +259,7 @@ def createAndEditExamView(request, slug=None):
             "form": form,
             "exam": exam,
             "is_editing": is_editing,
+            "linked_course": linked_course,
             "group_student_map": group_student_map,
         },
     )

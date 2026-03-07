@@ -4014,7 +4014,7 @@ msgstr "Max attempts"
 #: apps/assignments/templates/assignments/assignment_section.html:73
 msgctxt "assignment.section"
 msgid "review_answers"
-msgstr "View results"
+msgstr "View answers"
 
 #: apps/assignments/templates/assignments/assignment_section.html:77
 msgctxt "assignment.section"
@@ -6831,6 +6831,10 @@ msgctxt "courses.partial.resource_accordion"
 msgid "Resources (%(count)s)"
 msgstr "Resources (%(count)s)"
 
+msgctxt "courses.partial.resource_accordion"
+msgid "Resources"
+msgstr "Resources"
+
 #: apps/courses/templates/courses/partials/_resource_accordion.html:23
 msgctxt "courses.partial.resource_accordion"
 msgid "action_add_resource"
@@ -7334,6 +7338,14 @@ msgstr "✅ \"{title}\" course has been updated."
 msgctxt "courses.view.message"
 msgid "course_deleted"
 msgstr "✅ The course \"{title}\" and all its data have been deleted."
+
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Course status updated: {status}."
+
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "The selected course status is invalid."
 
 #: apps/exams/forms.py:34
 msgctxt "exams.form.exam.placeholder"
@@ -9794,7 +9806,7 @@ msgstr "Detailed view"
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "View results"
+msgstr "View answers"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -11528,7 +11540,7 @@ msgstr "Blocks"
 #: apps/labs/templates/labs/lab_section.html:69
 msgctxt "labs.template.lab_section"
 msgid "action_answers"
-msgstr "Answers"
+msgstr "View answers"
 
 #: apps/labs/templates/labs/lab_section.html:73
 msgctxt "labs.template.lab_section"
@@ -14105,7 +14117,7 @@ msgstr "Max attempts:"
 
 msgctxt "projects.section"
 msgid "view_submissions"
-msgstr "View results"
+msgstr "View answers"
 
 msgctxt "projects.section"
 msgid "edit"
@@ -15253,13 +15265,3 @@ msgstr "Previous"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Next"
-
-#: apps/courses/views.py
-msgctxt "courses.view.message"
-msgid "course_status_updated"
-msgstr "Course status updated: {status}."
-
-#: apps/courses/views.py
-msgctxt "courses.view.message"
-msgid "invalid_course_status"
-msgstr "Selected course status is invalid."

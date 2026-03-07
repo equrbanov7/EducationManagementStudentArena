@@ -27,14 +27,16 @@
             <div class="card h-100 shadow-sm course-card">
                 <!-- Cover Image -->
                 <div class="course-cover" style="height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    {% if item.course.cover_image %}
-                        <img src="{{ item.course.cover_image.url }}" alt="{{ item.course.title }}" 
-                             class="w-100 h-100" style="object-fit: cover;">
-                    {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                            <i class="fas fa-book fa-4x text-white opacity-50"></i>
-                        </div>
-                    {% endif %}
+                    {% with cover_image_url=item.course.cover_image_url %}
+                        {% if cover_image_url %}
+                            <img src="{{ cover_image_url }}" alt="{{ item.course.title }}" 
+                                 class="w-100 h-100" style="object-fit: cover;">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-book fa-4x text-white opacity-50"></i>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 </div>
                 
                 <div class="card-body">
