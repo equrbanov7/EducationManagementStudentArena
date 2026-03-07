@@ -413,6 +413,18 @@
         state.autoSelectedStudentIds = nextAutoSelectedIds;
     }
 
+    function openDeleteConfirmation(options) {
+        if (typeof window.openActionConfirmModal === 'function') {
+            window.openActionConfirmModal(options);
+            return;
+        }
+
+        if (!confirm(options.message || I18N.confirmDeleteLab)) return;
+        Promise.resolve(options.onConfirm && options.onConfirm()).catch(function() {
+            alert(I18N.errorServer);
+        });
+    }
+
     window.openEditLabModal = function(url) {
         const modalEl = $('editLabModal');
         if (!modalEl) {
@@ -471,20 +483,48 @@
         });
     };
 
-    window.deleteLabConfirm = function(url) {
-        if (!confirm(I18N.confirmDeleteLab)) return;
-
-        fetch(url, {
-            method: 'POST',
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
-        .then(function(d) {
-            if (d.success) location.reload();
-            else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
-        })
-        .catch(function() { alert(I18N.errorServer); });
+    window.deleteLabConfirm = function(url, trigger) {
+        openDeleteConfirmation({
+            title: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || I18N.confirmDeleteLab,
+            message: I18N.confirmDeleteLab,
+            confirmLabel: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || 'Sil',
+            confirmButtonClass: 'btn btn-danger',
+            onConfirm: function() {
+                return fetch(url, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.success) {
+                        location.reload();
+                        return true;
+                    }
+                    alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
+                    return false;
+                })
+                .catch(function() {
+                    alert(I18N.errorServer);
+                    return false;
+                });
+            }
+        });
     };
+
+    document.addEventListener('click', function(event) {
+        const editBtn = event.target.closest('.js-edit-lab');
+        if (editBtn) {
+            event.preventDefault();
+            window.openEditLabModal(editBtn.dataset.url);
+            return;
+        }
+
+        const deleteBtn = event.target.closest('.js-delete-lab');
+        if (deleteBtn) {
+            event.preventDefault();
+            window.deleteLabConfirm(deleteBtn.dataset.url, deleteBtn);
+        }
+    });
 
     function loadGroups(mode, checkedGroups) {
         checkedGroups = checkedGroups || [];

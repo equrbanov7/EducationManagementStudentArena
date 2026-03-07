@@ -6,10 +6,12 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_dashboard" context "courses.dashboard" %}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
-{% if is_student %}
-<link rel="stylesheet" href="{% static 'css/profile/sections/assigned_exams.css' %}">
-{% endif %}
+    {% if is_student %}
+    <link rel="stylesheet" href="{% static 'css/profile/sections/assigned_exams.css' %}">
+    {% endif %}
+    {% if is_owner or user_role == 'teacher' %}
+    <link rel="stylesheet" href="{% static 'exams/css/course_exam_modal.css' %}">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -20,13 +22,15 @@
         <div class="col-lg-3 mb-4">
             <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
                 <div class="position-relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 200px;">
-                    {% if course.cover_image %}
-                        <img src="{{ course.cover_image.url }}" alt="{{ course.title }}" class="w-100 h-100 object-fit-cover">
-                    {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                            <i class="fas fa-book fa-5x text-white opacity-50"></i>
-                        </div>
-                    {% endif %}
+                    {% with cover_image_url=course.cover_image_url %}
+                        {% if cover_image_url %}
+                            <img src="{{ cover_image_url }}" alt="{{ course.title }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                <i class="fas fa-book fa-5x text-white opacity-50"></i>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 </div>
                 
                 <div class="card-body">
@@ -207,6 +211,10 @@
 </div>
 
 <!-- MODALS -->
+{% if can_manage_course %}
+    {% include "courses/partials/_action_confirm_modal.html" %}
+{% endif %}
+
 {% if is_owner %}
     {% include 'courses/partials/_topic_form_modal.html' %}
     {% include 'courses/partials/_resource_form_modal.html' %}
@@ -214,9 +222,10 @@
     {% include "courses/partials/_topic_edit_modal.html" %}
     {% include "assignments/partials/_assignment_modals.html" %}
     {% include "projects/partials/_project_modals.html" %}
-    {% include "labs/partials/_lab_modals.html" %}  
+    {% include "labs/partials/_lab_modals.html" %}
 {% endif %}
-{% if is_owner or is_teacher %}
+
+{% if is_owner or user_role == 'teacher' %}
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}
 

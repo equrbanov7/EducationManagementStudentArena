@@ -18,6 +18,7 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.permissions import request_has_permission
 
 
@@ -88,6 +89,30 @@ def _parse_filter_date(raw_value):
         return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
     except ValueError:
         return "", None
+
+
+def _resolve_attempt_name_visibility(attempt, *, current_time=None):
+    now = current_time or timezone.now()
+
+    # Test imtahanlarında nəticə dərhal görünür, ad da gizli qalmamalıdır.
+    if attempt.exam.exam_type == "test":
+        return True, None
+
+    # Müəllim hələ yoxlamayıbsa anonimlik qalır.
+    if not attempt.checked_by_teacher:
+        return False, None
+
+    # Köhnə datada timestamp olmaya bilər. Bu halda tələbə balı görə bildiyi üçün
+    # müəllim də real adı görə bilməlidir.
+    if not attempt.teacher_checked_at:
+        return True, None
+
+    reveal_at = attempt.teacher_checked_at + REVIEW_EDIT_LOCK_WINDOW
+    if now >= reveal_at:
+        return True, None
+
+    seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
+    return False, seconds_remaining
 
 
 @login_required
@@ -233,19 +258,7 @@ def teacher_exam_results(request, slug):
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
         anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
 
-        # Vaxt hesablamaları
-        seconds_remaining = None
-        can_view_name = False
-
-        if att.checked_by_teacher and att.teacher_checked_at:
-            diff = now - att.teacher_checked_at
-            total_seconds_passed = int(diff.total_seconds())
-
-            if total_seconds_passed < 300:  # 5 dəqiqə = 300 saniyə
-                seconds_remaining = 300 - total_seconds_passed
-                can_view_name = False  # Ad gizli
-            else:
-                can_view_name = True  # 5+ dəqiqə - ad görünür
+        can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
 
         attempts_data.append(
             {
@@ -573,19 +586,7 @@ def teacher_pending_attempts(request):
         hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
         anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
 
-        # Vaxt hesablamaları
-        seconds_remaining = None
-        can_view_name = False
-
-        if att.checked_by_teacher and att.teacher_checked_at:
-            diff = now - att.teacher_checked_at
-            total_seconds_passed = int(diff.total_seconds())
-
-            if total_seconds_passed < 300:  # 5 dəqiqə = 300 saniyə
-                seconds_remaining = 300 - total_seconds_passed
-                can_view_name = False  # Ad gizli
-            else:
-                can_view_name = True  # 5+ dəqiqə - ad görünür
+        can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
 
         attempts_data.append(
             {

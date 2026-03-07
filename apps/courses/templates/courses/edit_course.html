@@ -344,12 +344,14 @@
                             
                             <div class="image-upload-container">
                                 <div id="imageDisplayArea">
-                                    {% if course.cover_image %}
-                                        <div id="currentImageBlock" class="current-image-wrapper">
-                                            <img src="{{ course.cover_image.url }}" alt="{% trans 'alt_current_cover' context 'courses.edit_page' %}">
-                                            <span class="image-label-tag">{% trans "label_current_image" context "courses.edit_page" %}</span>
-                                        </div>
-                                    {% endif %}
+                                    {% with cover_image_url=course.cover_image_url %}
+                                        {% if cover_image_url %}
+                                            <div id="currentImageBlock" class="current-image-wrapper">
+                                                <img src="{{ cover_image_url }}" alt="{% trans 'alt_current_cover' context 'courses.edit_page' %}">
+                                                <span class="image-label-tag">{% trans "label_current_image" context "courses.edit_page" %}</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
 
                                     <div id="imagePreviewBlock" class="preview-wrapper" style="display: none;">
                                         <img id="previewImg" src="#" alt="{% trans 'alt_new_preview' context 'courses.edit_page' %}">

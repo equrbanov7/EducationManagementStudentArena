@@ -1,11 +1,25 @@
 {% load i18n static %}
-{% if is_owner or is_teacher %}
+{% if is_owner or user_role == 'teacher' %}
 
-{% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
+<div
+    id="courseExamDashboardConfig"
+    data-link-url="{% url 'courses:link_exam' course.id %}"
+    data-unlink-url="{% url 'courses:unlink_exam' course.id %}"
+    data-reload-url="{{ request.get_full_path }}"
+    data-error-prefix="{% trans 'msg_error_prefix' context 'exams.partial.exam_modals' %}"
+    data-unlink-confirm="{% trans 'confirm_unlink_exam' context 'exams.partial.exam_modals' %}"
+    data-unlink-title="{% trans 'action_unlink' context 'exams.partial.exam_section' %}"
+    data-create-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}"
+    data-edit-title="{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}"
+    data-loading-text="{% trans 'loading_form' context 'exams.template.create_exam_modal' %}"
+    data-load-error-text="Form yüklənmədi. Yenidən cəhd edin."
+    data-submitting-text="Yadda saxlanılır..."
+    hidden
+></div>
 
-<!-- LINK EXAM MODAL -->
+{% if is_owner %}
 <div class="modal fade" id="linkExamModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title"><i class="fas fa-link me-2"></i> {% trans "heading_link_exam_to_course" context "exams.partial.exam_modals" %}</h5>
@@ -13,10 +27,10 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="examSearchInput" 
+                    <input type="text" class="form-control" id="examSearchInput"
                            placeholder="{% trans 'placeholder_search_by_exam_name' context 'exams.partial.exam_modals' %}">
                 </div>
-                
+
                 <div id="examSearchResults" style="max-height: 400px; overflow-y: auto;">
                     {% if teacher_exams %}
                         {% for exam in teacher_exams %}
@@ -45,12 +59,12 @@
                         <div class="text-center py-4 text-muted">
                             <i class="fas fa-info-circle fa-2x mb-2"></i>
                             <p>{% trans "empty_no_exam_to_link" context "exams.partial.exam_modals" %}</p>
-                            <a href="{% url 'exams:create_exam' %}?course={{ course.id }}"
-                               class="btn btn-success btn-sm js-open-exam-form-modal"
-                               data-exam-modal-mode="create"
-                               data-exam-modal-url="{% url 'exams:create_exam' %}?course={{ course.id }}">
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-open-course-exam-editor"
+                                    data-url="{% url 'exams:create_exam' %}?course={{ course.id }}"
+                                    data-modal-title="{% trans 'heading_create_exam' context 'exams.template.create_exam_modal' %}">
                                 <i class="fas fa-plus"></i> {% trans "action_create_new_exam" context "exams.partial.exam_modals" %}
-                            </a>
+                            </button>
                         </div>
                     {% endif %}
                 </div>
@@ -61,155 +75,26 @@
         </div>
     </div>
 </div>
+{% endif %}
 
-<!-- UNLINK EXAM CONFIRM MODAL -->
-<div class="modal fade" id="unlinkExamConfirmModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-unlink me-2"></i> {% trans "action_unlink" context "exams.partial.exam_section" %}
+<div class="modal fade" id="courseExamEditorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content course-exam-editor-modal">
+            <div class="modal-header course-exam-editor-modal__header">
+                <h5 class="modal-title" id="courseExamEditorModalTitle">
+                    {% trans "heading_create_exam" context "exams.template.create_exam_modal" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p class="mb-0" id="unlinkExamConfirmMessage">
-                    {% trans "confirm_unlink_exam" context "exams.partial.exam_modals" %}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    {% trans "action_close" context "exams.partial.exam_modals" %}
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmUnlinkExamBtn">
-                    {% trans "action_unlink" context "exams.partial.exam_section" %}
-                </button>
+            <div class="modal-body course-exam-editor-modal__body" id="courseExamEditorModalBody">
+                <div class="create-exam-modal-loading">
+                    {% trans "loading_form" context "exams.template.create_exam_modal" %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-(function(){
-    const COURSE_ID = {{ course.id }};
-    const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-    const unlinkModalElement = document.getElementById('unlinkExamConfirmModal');
-    const confirmUnlinkBtn = document.getElementById('confirmUnlinkExamBtn');
-    let pendingUnlinkExamId = null;
-    const I18N_EXAM_MODALS = {
-        errorPrefix: "{% trans 'msg_error_prefix' context 'exams.partial.exam_modals'|escapejs %}",
-        unlinkConfirm: "{% trans 'confirm_unlink_exam' context 'exams.partial.exam_modals'|escapejs %}"
-    };
-
-    function getUnlinkModal() {
-        if (!unlinkModalElement || !window.bootstrap || !window.bootstrap.Modal) {
-            return null;
-        }
-        return window.bootstrap.Modal.getOrCreateInstance(unlinkModalElement);
-    }
-
-    function debounce(fn, delayMs) {
-        let timeoutId = null;
-        return function debounced(...args) {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => fn.apply(this, args), delayMs);
-        };
-    }
-
-    async function sendRelationRequest(url, examId) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': CSRF,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ exam_id: examId })
-        });
-        return response.json();
-    }
-
-    document.querySelectorAll('.js-link-exam').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const examId = this.dataset.examId;
-            if (!examId) return;
-
-            try {
-                const data = await sendRelationRequest('/courses/' + COURSE_ID + '/link-exam/', examId);
-                if (data.success) {
-                    location.reload();
-                    return;
-                }
-                alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
-            } catch (error) {
-                alert(I18N_EXAM_MODALS.errorPrefix);
-            }
-        });
-    });
-
-    document.querySelectorAll('.js-unlink-exam').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const examId = this.dataset.examId;
-            if (!examId) return;
-
-            pendingUnlinkExamId = examId;
-            const unlinkModal = getUnlinkModal();
-            if (!unlinkModal) {
-                alert(I18N_EXAM_MODALS.errorPrefix);
-                return;
-            }
-            unlinkModal.show();
-        });
-    });
-
-    if (confirmUnlinkBtn) {
-        confirmUnlinkBtn.addEventListener('click', async function() {
-            if (!pendingUnlinkExamId) return;
-
-            const examId = pendingUnlinkExamId;
-            pendingUnlinkExamId = null;
-
-            confirmUnlinkBtn.disabled = true;
-            try {
-                const data = await sendRelationRequest('/courses/' + COURSE_ID + '/unlink-exam/', examId);
-                if (data.success) {
-                    const unlinkModal = getUnlinkModal();
-                    if (unlinkModal) unlinkModal.hide();
-                    location.reload();
-                    return;
-                }
-                alert(I18N_EXAM_MODALS.errorPrefix + (data.error || ''));
-            } catch (error) {
-                alert(I18N_EXAM_MODALS.errorPrefix);
-            } finally {
-                confirmUnlinkBtn.disabled = false;
-            }
-        });
-    }
-
-    const searchInput = document.getElementById('examSearchInput');
-    if (searchInput) {
-        const applySearch = function() {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('.exam-search-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(q) ? '' : 'none';
-            });
-        };
-
-        searchInput.addEventListener('input', debounce(applySearch, 1000));
-    }
-})();
-</script>
-
-<script>
-window.EXAM_CREATE_EDIT_MODAL_I18N = {
-    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
-    createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",
-    editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
-    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
-};
-</script>
-<script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
+<script src="{% static 'exams/js/course_exam_dashboard.js' %}"></script>
 
 {% endif %}

@@ -2,9 +2,12 @@
 View tests for exams app.
 """
 
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import override
 
 from apps.accounts.models import ProfileRole
@@ -403,6 +406,38 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, self.exam_other_tenant.title)
         self.assertNotContains(response, self.exam_other_author.title)
 
+    def test_modal_create_exam_includes_course_hidden_field_when_requested_from_course_dashboard(self):
+        response = self.client.get(
+            reverse("exams:create_exam"),
+            {"modal": "1", "course": str(self.course.id)},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="course_id"')
+        self.assertContains(response, f'value="{self.course.id}"')
+
+    def test_modal_create_exam_links_new_exam_to_requested_course(self):
+        response = self.client.post(
+            reverse("exams:create_exam") + f"?modal=1&course={self.course.id}",
+            {
+                "modal": "1",
+                "course_id": str(self.course.id),
+                "title": "Linked From Course Dashboard",
+                "description": "Created via dashboard modal",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_exam = Exam.objects.get(title="Linked From Course Dashboard")
+        self.assertEqual(created_exam.author, self.teacher)
+        self.assertEqual(created_exam.course, self.course)
+
     def test_other_teacher_cannot_edit_or_delete_my_exam(self):
         self.client.force_login(self.other_teacher)
         session = self.client.session
@@ -476,6 +511,47 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "Profile geri dön")
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "resultsFilterSearchInput")
+
+    def test_teacher_exam_results_reveals_student_name_for_test_attempts(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        attempts_data = response.context["attempts_data"]
+        matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
+        self.assertTrue(matching_item["can_view_name"])
+        self.assertEqual(matching_item["real_name"], self.student.username)
+        self.assertContains(response, self.student.username)
+
+    def test_teacher_exam_results_reveals_student_name_when_written_grade_is_visible_without_timestamp(self):
+        written_exam = Exam.objects.create(
+            author=self.teacher,
+            title="Written Visibility Exam",
+            exam_type="written",
+            is_active=True,
+        )
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=written_exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_score=74,
+            teacher_checked_at=None,
+        )
+
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        attempts_data = response.context["attempts_data"]
+        matching_item = next(item for item in attempts_data if item["attempt"].id == attempt.id)
+        self.assertTrue(matching_item["can_view_name"])
+        self.assertIsNone(matching_item["seconds_remaining"])
+        self.assertEqual(matching_item["real_name"], self.student.username)
 
     def test_teacher_view_attempt_keeps_generic_source_back_label(self):
         attempt = ExamAttempt.objects.create(
@@ -1159,9 +1235,6 @@ class StudentExamResultVisibilityWindowTest(TestCase):
         self.assertIn("section=my-results", response.url)
 
     def test_exam_result_visible_after_teacher_review_window_closes(self):
-        from datetime import timedelta
-        from django.utils import timezone
-
         self.attempt.teacher_checked_at = timezone.now() - timedelta(minutes=6)
         self.attempt.save(update_fields=["teacher_checked_at"])
 

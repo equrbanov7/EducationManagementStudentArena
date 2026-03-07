@@ -6849,6 +6849,11 @@ msgctxt "courses.partial.resource_accordion"
 msgid "Resources (%(count)s)"
 msgstr "Resurslar (%(count)s)"
 
+#: apps/courses/templates/courses/partials/_resource_accordion.html:11
+msgctxt "courses.partial.resource_accordion"
+msgid "Resources"
+msgstr "Resurslar"
+
 #: apps/courses/templates/courses/partials/_resource_accordion.html:23
 msgctxt "courses.partial.resource_accordion"
 msgid "action_add_resource"
@@ -7350,6 +7355,14 @@ msgstr "✅ \"{title}\" kursu yeniləndi."
 msgctxt "courses.view.message"
 msgid "course_deleted"
 msgstr "✅ \"{title}\" kursu və bütün məlumatları silindi."
+
+msgctxt "courses.view.message"
+msgid "course_status_updated"
+msgstr "Kurs statusu yeniləndi: {status}."
+
+msgctxt "courses.view.message"
+msgid "invalid_course_status"
+msgstr "Seçilən kurs statusu düzgün deyil."
 
 #: apps/exams/forms.py:34
 msgctxt "exams.form.exam.placeholder"
@@ -9816,7 +9829,7 @@ msgstr "Ətraflı bax"
 #: apps/exams/templates/exams/teacher/exam_section.html:100
 msgctxt "exams.partial.exam_section"
 msgid "action_results"
-msgstr "Nəticələrə bax"
+msgstr "Cavabları gör"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:103
 msgctxt "exams.partial.exam_section"
@@ -11601,7 +11614,7 @@ msgstr "Bloklar"
 #: apps/labs/templates/labs/lab_section.html:69
 msgctxt "labs.template.lab_section"
 msgid "action_answers"
-msgstr "Cavablar"
+msgstr "Cavabları gör"
 
 #: apps/labs/templates/labs/lab_section.html:73
 msgctxt "labs.template.lab_section"
@@ -14177,7 +14190,7 @@ msgstr "Maks cəhd:"
 
 msgctxt "projects.section"
 msgid "view_submissions"
-msgstr "Cavablara bax"
+msgstr "Cavabları gör"
 
 msgctxt "projects.section"
 msgid "edit"
