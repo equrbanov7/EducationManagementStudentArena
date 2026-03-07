@@ -10151,12 +10151,12 @@ msgstr "Назад"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:27
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_type"
-msgstr "Type"
+msgstr "Тип"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:31
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_status"
-msgstr "Status"
+msgstr "Статус"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:33
 msgctxt "exams.template.teacher_exam_detail"
@@ -10166,7 +10166,7 @@ msgstr "Активный"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:35
 msgctxt "exams.template.teacher_exam_detail"
 msgid "status_passive"
-msgstr "Активный"
+msgstr "Неактивный"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:40
 msgctxt "exams.template.teacher_exam_detail"
@@ -10181,12 +10181,12 @@ msgstr "мин"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:46
 msgctxt "exams.template.teacher_exam_detail"
 msgid "label_question_time"
-msgstr "Вопрос"
+msgstr "Время на вопрос"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:47
 msgctxt "exams.template.teacher_exam_detail"
 msgid "unit_seconds"
-msgstr "Пример: 60 (секунд). Если пусто, используется значение по умолчанию."
+msgstr "сек"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:52
 msgctxt "exams.template.teacher_exam_detail"
@@ -10196,33 +10196,41 @@ msgstr "Попытки"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:61
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_start_live"
-msgstr "Сохранить в память"
+msgstr "Запустить live-сессию"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:71
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_question"
-msgstr "Добавить студента"
+msgstr "Добавить вопрос"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:79
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:85
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_question_bank_blocks"
-msgstr "Банк вопросов / Блоки"
+msgstr "Добавить блоки / вопросы"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_bulk_add_blocks"
+msgstr "Добавить блоки / вопросы"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid "action_questions_bank"
+msgstr "Банк вопросов"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:90
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_view_results"
-msgstr "Посмотреть все"
+msgstr "Посмотреть результаты"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:99
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_deactivate"
-msgstr "Удалить"
+msgstr "Деактивировать"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:103
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_activate"
-msgstr "Сохранить в память"
+msgstr "Активировать"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:109
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:150
@@ -10233,7 +10241,7 @@ msgstr "Редактировать"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:113
 msgctxt "exams.template.teacher_exam_detail"
 msgid "confirm_delete_exam"
-msgstr "Вы уверены?"
+msgstr "Вы уверены, что хотите удалить этот экзамен?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:116
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:158
@@ -10249,17 +10257,17 @@ msgstr "Существующие вопросы"
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:155
 msgctxt "exams.template.teacher_exam_detail"
 msgid "confirm_delete_question"
-msgstr "Вы хотите удалить этого пользователя из курса?"
+msgstr "Вы уверены, что хотите удалить этот вопрос?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:168
 msgctxt "exams.template.teacher_exam_detail"
 msgid "empty_no_questions"
-msgstr "Empty posts"
+msgstr "В этом экзамене пока нет вопросов."
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:170
 msgctxt "exams.template.teacher_exam_detail"
 msgid "action_add_first_question"
-msgstr "Добавьте свою первую тему"
+msgstr "Добавить первый вопрос"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_list.html:3
 #: apps/exams/templates/exams/teacher/teacher_exam_list.html:12
@@ -14708,3 +14716,215 @@ msgstr "Выбранная организация не соответствуе�
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr "После подтверждения email вы будете добавлены в выбранную организацию как студент."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "title_questions_bank"
+msgstr "Банк вопросов"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "subtitle_questions_bank"
+msgstr "Ищите, выбирайте, активируйте, деактивируйте и управляйте вопросами, добавленными в экзамен."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_back_exam_detail"
+msgstr "Назад к экзамену"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_add_question"
+msgstr "Добавить вопрос"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_total_questions"
+msgstr "Всего вопросов"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_active_questions"
+msgstr "Активные вопросы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_inactive_questions"
+msgstr "Неактивные вопросы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "placeholder_search_questions"
+msgstr "Поиск по тексту вопроса, блоку или варианту ответа..."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_filter_status"
+msgstr "Фильтр статуса"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_all"
+msgstr "Все статусы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_active"
+msgstr "Активные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "filter_status_inactive"
+msgstr "Неактивные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_select_all_page"
+msgstr "Выбрать все на странице"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_clear_selection"
+msgstr "Очистить выбор"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count"
+msgstr "Выбрано {count} вопросов"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "selected_count_zero"
+msgstr "Выбрано 0 вопросов"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate_selected"
+msgstr "Деактивировать выбранные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate_selected"
+msgstr "Активировать выбранные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_question"
+msgstr "Вопрос"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_block"
+msgstr "Блок"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_status"
+msgstr "Статус"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "col_actions"
+msgstr "Действия"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_no_block"
+msgstr "Без блока"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_active"
+msgstr "Активный"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "status_inactive"
+msgstr "Неактивный"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_edit"
+msgstr "Редактировать"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_results"
+msgstr "По вашему запросу вопросы не найдены."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "empty_no_questions"
+msgstr "В этом экзамене пока нет вопросов."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_pagination"
+msgstr "Пагинация"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_prev"
+msgstr "Предыдущая"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "pagination_next"
+msgstr "Следующая"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "confirm_delete_selected"
+msgstr "Вы уверены, что хотите удалить выбранные вопросы?"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "select_at_least_one"
+msgstr "Выберите хотя бы один вопрос."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "select_at_least_one"
+msgstr "Выберите хотя бы один вопрос."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "deactivated_selected"
+msgstr "{count} вопросов деактивировано."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "activated_selected"
+msgstr "{count} вопросов активировано."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "deleted_selected"
+msgstr "{count} вопросов удалено."
+
+msgctxt "exams.view.questions_bank.message"
+msgid "invalid_bulk_action"
+msgstr "Некорректное групповое действие."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_bulk_add_blocks"
+msgstr "Добавить блоки / вопросы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_sort"
+msgstr "Сортировка"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_newest"
+msgstr "Дата добавления (сначала новые)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_oldest"
+msgstr "Дата добавления (сначала старые)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_az"
+msgstr "По алфавиту (A-Z)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "sort_za"
+msgstr "По алфавиту (Z-A)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "label_added_at"
+msgstr "Добавлен"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_deactivate"
+msgstr "Деактивировать"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_activate"
+msgstr "Активировать"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_delete"
+msgstr "Удалить"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_title"
+msgstr "Удалить вопрос"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_cancel"
+msgstr "Отмена"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "action_confirm_delete"
+msgstr "Подтвердить удаление"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "modal_delete_question_body"
+msgstr "Вы уверены, что хотите удалить этот вопрос? {question}"
