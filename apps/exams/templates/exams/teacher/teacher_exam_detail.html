@@ -6,6 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -68,7 +69,10 @@
             {# --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- #}
             <section class="exam-actions-section">
                 <div class="action-group">
-                    <a href="{% url 'exams:add_exam_question' exam.slug %}" class="action-btn primary-btn">
+                    <a href="{% url 'exams:add_exam_question' exam.slug %}"
+                       class="action-btn primary-btn js-open-question-form-modal"
+                       data-question-modal-mode="create"
+                       data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">
                         <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_exam_detail" %}
                     </a>
 
@@ -115,13 +119,13 @@
                         <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                     </a>
 
-                    <form method="post" action="{% url 'exams:delete_exam' exam.slug %}"
-                          onsubmit="return confirm('{% trans 'confirm_delete_exam' context 'exams.template.teacher_exam_detail' %}');">
-                        {% csrf_token %}
-                        <button type="submit" class="action-btn danger-btn">
-                            <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
-                        </button>
-                    </form>
+                    <a href="{% url 'exams:delete_exam' exam.slug %}"
+                       class="action-btn danger-btn js-open-delete-confirm-modal"
+                       data-delete-action="{% url 'exams:delete_exam' exam.slug %}"
+                       data-delete-message="{% trans 'confirm_delete_exam' context 'exams.template.teacher_exam_detail' %}"
+                       data-delete-target="{{ exam.title }}">
+                        <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+                    </a>
                 </div>
             </section>
 
@@ -152,18 +156,19 @@
 
                             <div class="question-actions">
                                 <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
-                                   class="action-btn outline-btn-sm">
+                                   class="action-btn outline-btn-sm js-open-question-form-modal"
+                                   data-question-modal-mode="edit"
+                                   data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
                                     <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                                 </a>
 
-                                <form method="post"
-                                      action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
-                                      onsubmit="return confirm('{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="action-btn danger-btn-sm">
-                                        <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
-                                    </button>
-                                </form>
+                                <a href="{% url 'exams:delete_exam_question' exam.slug q.id %}"
+                                   class="action-btn danger-btn-sm js-open-delete-confirm-modal"
+                                   data-delete-action="{% url 'exams:delete_exam_question' exam.slug q.id %}"
+                                   data-delete-message="{% trans 'confirm_delete_question' context 'exams.template.teacher_exam_detail' %}"
+                                   data-delete-target="{{ q.text|truncatechars:140 }}">
+                                    <i class="fas fa-trash-alt"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+                                </a>
                             </div>
                         </li>
                         {% endfor %}
@@ -173,7 +178,9 @@
                         <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
                         <p>{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
                         <a href="{% url 'exams:add_exam_question' exam.slug %}"
-                           class="action-btn primary-btn-sm">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
+                           class="action-btn primary-btn-sm js-open-question-form-modal"
+                           data-question-modal-mode="create"
+                           data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
                     </div>
                 {% endif %}
             </section>
@@ -182,6 +189,35 @@
 </div>
 
 {% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
+{% include "exams/teacher/partials/_question_form_bs_modal.html" %}
+
+<div class="modal fade" id="examDetailDeleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-trash-alt me-2"></i> {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="examDetailDeleteConfirmForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p id="examDetailDeleteConfirmMessage" class="mb-2"></p>
+                    <div id="examDetailDeleteConfirmTarget" class="small text-muted text-break"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        {% trans "action_cancel" context "exams.template.add_exam_question" %}
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        {% trans "action_delete" context "exams.template.teacher_exam_detail" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extraJs %}
@@ -192,6 +228,14 @@ window.EXAM_CREATE_EDIT_MODAL_I18N = {
     editTitle: "{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}",
     submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
 };
+window.TEACHER_EXAM_DETAIL_I18N = {
+    loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
+    questionCreateTitle: "Yeni sual elave et",
+    questionEditTitle: "Suali redakte et",
+    submitError: "{% trans 'retry_error' context 'courses.common.js' %}"
+};
 </script>
+<script src="{% static 'exams/js/question_form.js' %}"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal.js' %}"></script>
+<script src="{% static 'exams/js/teacher_exam_detail.js' %}"></script>
 {% endblock %}

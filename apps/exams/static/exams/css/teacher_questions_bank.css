@@ -62,6 +62,19 @@
     transform: translateY(-1px);
 }
 
+.qb-btn:disabled,
+.qb-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.qb-btn:disabled:hover,
+.qb-btn.is-disabled:hover {
+    transform: none;
+}
+
 .qb-btn-blue {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: #fff;
@@ -334,10 +347,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 7px;
-}
-
-.qb-inline-form {
-    margin: 0;
 }
 
 .qb-btn-inline-warn {

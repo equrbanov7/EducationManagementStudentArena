@@ -1,0 +1,269 @@
+.question-form-modal .modal-dialog {
+    max-width: min(1080px, 96vw);
+}
+
+.question-form-shell--modal {
+    padding: 0.35rem 0.15rem 0.65rem;
+}
+
+.question-form-shell--modal .question-form-modal-intro {
+    margin-bottom: 1.25rem;
+    padding: 0.95rem 1rem;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+}
+
+.question-form-shell--modal .question-form-modal-context {
+    margin: 0 0 0.3rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1d4ed8;
+}
+
+.question-form-shell--modal .info-text {
+    margin: 0;
+    color: #475569;
+    font-size: 0.92rem;
+}
+
+.question-form-shell--modal .media-help {
+    margin: 1rem 0 0.85rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #f8fbff;
+}
+
+.question-form-shell--modal .media-help-title {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #1d4ed8;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.question-form-shell--modal .media-help-text,
+.question-form-shell--modal .help-text {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.question-form-shell--modal .form-group {
+    margin-bottom: 1rem;
+}
+
+.question-form-shell--modal .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.question-form-shell--modal .form-group.half {
+    min-width: 0;
+}
+
+.question-form-shell--modal label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-weight: 700;
+    color: #334155;
+    font-size: 0.92rem;
+}
+
+.question-form-shell--modal input[type="text"],
+.question-form-shell--modal input[type="number"],
+.question-form-shell--modal input[type="file"],
+.question-form-shell--modal textarea,
+.question-form-shell--modal select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.question-form-shell--modal input[type="file"] {
+    padding: 0.7rem 0.8rem;
+}
+
+.question-form-shell--modal input:focus,
+.question-form-shell--modal textarea:focus,
+.question-form-shell--modal select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.question-form-shell--modal textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.question-form-shell--modal .media-preview {
+    margin-top: 0.75rem;
+    padding: 0.9rem;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+}
+
+.question-form-shell--modal .media-preview img,
+.question-form-shell--modal .media-preview video {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.question-form-shell--modal .media-preview-label {
+    display: block;
+    margin-bottom: 0.55rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.question-form-shell--modal .file-name-display {
+    margin-top: 0.55rem;
+    padding: 0.65rem 0.8rem;
+    border-radius: 10px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 0.88rem;
+    word-break: break-word;
+}
+
+.question-form-shell--modal .clear-media-btn {
+    margin-top: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 0.95rem;
+    background: #ef4444;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+
+.question-form-shell--modal .clear-media-btn:hover {
+    background: #dc2626;
+}
+
+.question-form-shell--modal .variants-section {
+    margin-top: 1.4rem;
+}
+
+.question-form-shell--modal .variants-section h4 {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.question-form-shell--modal .variant-card {
+    margin-bottom: 0.85rem;
+    padding: 0.95rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+}
+
+.question-form-shell--modal .variant-card:hover {
+    border-color: #bfdbfe;
+}
+
+.question-form-shell--modal .variant-card input[type="text"] {
+    background: #ffffff;
+}
+
+.question-form-shell--modal .custom-checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    padding-left: 2rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 0;
+}
+
+.question-form-shell--modal .custom-checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.question-form-shell--modal .checkmark {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    background: #f8fafc;
+}
+
+.question-form-shell--modal .custom-checkbox-container input:checked ~ .checkmark {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.question-form-shell--modal .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.question-form-shell--modal .custom-checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.question-form-shell--modal .custom-checkbox-container .checkmark:after {
+    left: 0.4rem;
+    top: 0.12rem;
+    width: 0.35rem;
+    height: 0.75rem;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.question-form-shell--modal .custom-checkbox-container input:checked ~ .label-text {
+    color: #059669;
+    font-weight: 700;
+}
+
+.question-form-shell--modal .alert-error {
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.question-form-shell--modal .error-msg {
+    margin-top: 0.35rem;
+    color: #dc2626;
+    font-size: 0.82rem;
+}
+
+.question-form-shell--modal .question-form-modal-actions {
+    margin-top: 1.35rem;
+}
+
+@media (max-width: 768px) {
+    .question-form-shell--modal .form-row {
+        grid-template-columns: 1fr;
+    }
+}

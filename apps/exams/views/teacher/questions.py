@@ -5,7 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
@@ -14,6 +16,24 @@ from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+
+
+def _is_question_modal_request(request):
+    return request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
+
+
+def _render_question_form_html(request, *, exam, form, editing=False, question=None):
+    return render_to_string(
+        "exams/teacher/partials/_question_form.html",
+        {
+            "exam": exam,
+            "form": form,
+            "editing": editing,
+            "question": question,
+            "is_modal": True,
+        },
+        request=request,
+    )
 
 
 @login_required
@@ -153,6 +173,7 @@ def add_exam_question(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
+    is_modal_request = _is_question_modal_request(request)
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks)
@@ -175,6 +196,9 @@ def add_exam_question(request, slug):
             if exam.exam_type == "test":
                 form.create_options(question)
 
+            if is_modal_request:
+                return JsonResponse({"success": True, "question_id": question.id})
+
             # hansı düyməyə basıldığını yoxlayaq
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
@@ -182,8 +206,28 @@ def add_exam_question(request, slug):
             else:
                 # Sadəcə imtahan detalına qayıt
                 return redirect("exams:teacher_exam_detail", slug=exam.slug)
+        if is_modal_request:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "html": _render_question_form_html(request, exam=exam, form=form, editing=False),
+                },
+                status=400,
+            )
     else:
         form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks)
+
+    if is_modal_request:
+        return render(
+            request,
+            "exams/teacher/partials/_question_form.html",
+            {
+                "exam": exam,
+                "form": form,
+                "editing": False,
+                "is_modal": True,
+            },
+        )
 
     return render(
         request,
@@ -191,6 +235,8 @@ def add_exam_question(request, slug):
         {
             "exam": exam,
             "form": form,
+            "editing": False,
+            "is_modal": False,
         },
     )
 
@@ -203,6 +249,7 @@ def edit_exam_question(request, slug, question_id):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
+    is_modal_request = _is_question_modal_request(request)
 
     # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
@@ -228,15 +275,45 @@ def edit_exam_question(request, slug, question_id):
             if exam.exam_type == "test":
                 form.save_options(q)
 
+            if is_modal_request:
+                return JsonResponse({"success": True, "question_id": q.id})
+
             if "save_and_continue" in request.POST:
                 return redirect("exams:add_exam_question", slug=exam.slug)
 
             return redirect("exams:teacher_exam_detail", slug=exam.slug)
+        if is_modal_request:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "html": _render_question_form_html(
+                        request,
+                        exam=exam,
+                        form=form,
+                        editing=True,
+                        question=question,
+                    ),
+                },
+                status=400,
+            )
     else:
         form = ExamQuestionCreateForm(
             instance=question,
             exam_type=exam.exam_type,
             subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
+        )
+
+    if is_modal_request:
+        return render(
+            request,
+            "exams/teacher/partials/_question_form.html",
+            {
+                "exam": exam,
+                "form": form,
+                "editing": True,
+                "question": question,
+                "is_modal": True,
+            },
         )
 
     return render(
@@ -247,6 +324,7 @@ def edit_exam_question(request, slug, question_id):
             "form": form,
             "editing": True,
             "question": question,
+            "is_modal": False,
         },
     )
 

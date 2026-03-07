@@ -393,6 +393,14 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             title="Teacher Exam Course",
             status="published",
         )
+        self.exam_question = ExamQuestion.objects.create(
+            exam=self.exam_visible,
+            text="What is Python?",
+            order=1,
+            answer_mode="single",
+        )
+        ExamQuestionOption.objects.create(question=self.exam_question, text="Language", is_correct=True)
+        ExamQuestionOption.objects.create(question=self.exam_question, text="Browser", is_correct=False)
 
         self.client.force_login(self.teacher)
         session = self.client.session
@@ -437,6 +445,42 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         created_exam = Exam.objects.get(title="Linked From Course Dashboard")
         self.assertEqual(created_exam.author, self.teacher)
         self.assertEqual(created_exam.course, self.course)
+
+    def test_modal_add_question_returns_partial_markup(self):
+        response = self.client.get(
+            reverse("exams:add_exam_question", args=[self.exam_visible.slug]),
+            {"modal": "1"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="modal" value="1"')
+        self.assertContains(response, 'name="text"')
+
+    def test_modal_edit_question_updates_question_with_json_success(self):
+        response = self.client.post(
+            reverse("exams:edit_exam_question", args=[self.exam_visible.slug, self.exam_question.id]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Python nədir?",
+                "answer_mode": "single",
+                "time_limit_seconds": "45",
+                "option1_text": "Proqramlaşdırma dili",
+                "option1_is_correct": "on",
+                "option2_text": "Brauzer",
+                "option3_text": "",
+                "option4_text": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        self.exam_question.refresh_from_db()
+        self.assertEqual(self.exam_question.text, "Python nədir?")
+        self.assertEqual(self.exam_question.time_limit_seconds, 45)
+        self.assertEqual(self.exam_question.options.filter(is_correct=True).count(), 1)
 
     def test_other_teacher_cannot_edit_or_delete_my_exam(self):
         self.client.force_login(self.other_teacher)
@@ -1289,6 +1333,11 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.context["search_query"], "Alpha")
         self.assertEqual(response.context["page_obj"].paginator.num_pages, 2)
         self.assertContains(response, "questionSearchInput")
+        self.assertContains(response, "js-open-question-form-modal")
+        self.assertContains(response, 'id="questionFormModal"')
+        self.assertContains(response, 'id="singleQuestionActionForm"')
+        self.assertContains(response, "js-bulk-action-btn")
+        self.assertContains(response, "disabled")
 
     def test_questions_bank_bulk_deactivate_selected(self):
         selected = [str(self.questions[0].id), str(self.questions[1].id)]
@@ -1306,6 +1355,25 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(ExamQuestion.objects.get(id=self.questions[0].id).is_active)
         self.assertFalse(ExamQuestion.objects.get(id=self.questions[1].id).is_active)
+
+    def test_questions_bank_single_question_activate_request_works(self):
+        self.questions[2].is_active = False
+        self.questions[2].save(update_fields=["is_active"])
+
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "activate",
+                "selected_question_ids": str(self.questions[2].id),
+                "status": "all",
+                "q": "",
+                "sort": "newest",
+                "page": "1",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(ExamQuestion.objects.get(id=self.questions[2].id).is_active)
 
     def test_questions_bank_bulk_delete_selected(self):
         to_delete = [str(self.questions[3].id), str(self.questions[4].id)]

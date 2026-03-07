@@ -1,0 +1,23 @@
+{% load i18n %}
+
+<div class="modal fade exam-create-edit-modal question-form-modal" id="questionFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="questionFormModalTitle">
+                    Yeni sual elave et
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}"></button>
+            </div>
+
+            <div class="modal-body" id="questionFormModalBody">
+                <div class="create-exam-modal-loading">
+                    {% trans "loading_form" context "exams.template.create_exam_modal" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -7511,7 +7511,7 @@ msgstr "Ideal answer for written/practical (optional)..."
 #: apps/exams/forms.py:296
 msgctxt "exams.form.question.label"
 msgid "text"
-msgstr "Question"
+msgstr "Question text"
 
 #: apps/exams/forms.py:297
 msgctxt "exams.form.question.label"
@@ -9173,52 +9173,52 @@ msgstr "Question"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:100
 msgctxt "exams.template.add_exam_question"
 msgid "label_image_optional"
-msgstr "New image optional"
+msgstr "Image (optional)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:109
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_image"
-msgstr "Label current image"
+msgstr "Current image"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:110
 msgctxt "exams.template.add_exam_question"
 msgid "alt_question_image"
-msgstr "Question"
+msgstr "Question image"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:112
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_image"
-msgstr "Select Image"
+msgstr "Remove image"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:118
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_image"
-msgstr "Label upload new image"
+msgstr "Selected image preview"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:125
 msgctxt "exams.template.add_exam_question"
 msgid "label_video_optional"
-msgstr "School optional"
+msgstr "Video (optional)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:134
 msgctxt "exams.template.add_exam_question"
 msgid "label_current_video"
-msgstr "Label current image"
+msgstr "Current video"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:139
 msgctxt "exams.template.add_exam_question"
 msgid "action_remove_video"
-msgstr "Select Image"
+msgstr "Remove video"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:145
 msgctxt "exams.template.add_exam_question"
 msgid "label_new_video"
-msgstr "Label new category"
+msgstr "Selected video preview"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:156
 msgctxt "exams.template.add_exam_question"
 msgid "label_enable_paint_answer"
-msgstr "Answer"
+msgstr "Enable drawing answer"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:168
 msgctxt "exams.template.add_exam_question"
@@ -9233,13 +9233,13 @@ msgstr "Optional: Link the resource to a specific topic"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:178
 msgctxt "exams.template.add_exam_question"
 msgid "label_answer_mode"
-msgstr "Answer"
+msgstr "Answer mode"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:183
 #: apps/exams/templates/exams/teacher/add_exam_question.html:190
 msgctxt "exams.template.add_exam_question"
 msgid "label_time_limit_seconds"
-msgstr "Example: 60 (seconds). If empty, default is used."
+msgstr "Time limit (seconds)"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:198
 msgctxt "exams.template.add_exam_question"
@@ -9249,7 +9249,7 @@ msgstr "Ideal answer for written/practical (optional)..."
 #: apps/exams/templates/exams/teacher/add_exam_question.html:204
 msgctxt "exams.template.add_exam_question"
 msgid "heading_options"
-msgstr "Subheading posts"
+msgstr "Answer options"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:205
 msgctxt "exams.template.add_exam_question"
@@ -9292,22 +9292,22 @@ msgstr "Save"
 #: apps/exams/templates/exams/teacher/add_exam_question.html:270
 msgctxt "exams.template.add_exam_question"
 msgid "action_save_and_add_new_question"
-msgstr "Add New Topic"
+msgstr "Save and add another question"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:273
 msgctxt "exams.template.add_exam_question"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:281
 msgctxt "exams.template.add_exam_question"
 msgid "confirm_delete_image"
-msgstr "Confirm delete title"
+msgstr "Are you sure you want to remove the image?"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:282
 msgctxt "exams.template.add_exam_question"
 msgid "confirm_delete_video"
-msgstr "Confirm delete title"
+msgstr "Are you sure you want to remove the video?"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:283
 msgctxt "exams.template.add_exam_question"
