@@ -9,13 +9,11 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 from apps.courses.models import Course
-from core.helpers import _safe_same_origin_redirect_path
+from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, _safe_same_origin_redirect_path
 from core.tenancy import scoped_by_organization_id
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from ..models import Lab, LabBlock, LabQuestion, LabSubmission
-
-ASSIGNED_TASK_FILTER_CHOICES = {"all", "exams", "courses", "assignments", "labs", "independent"}
 
 DEFAULT_LAB_ALLOWED_EXTENSIONS = {
     ".zip",

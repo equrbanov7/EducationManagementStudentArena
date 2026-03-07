@@ -6,7 +6,6 @@ Submission idarəetməsi və qiymətləndirmə
 import json
 import os
 import traceback
-from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -20,6 +19,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.courses.models import CourseMembership
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.permissions import request_has_permission
 
 from ..models import LabAnswer, LabAssignment, LabSubmission
@@ -31,8 +31,6 @@ from ._helpers import (
     _tenant_scoped_questions,
     _validate_and_prepare_lab_upload,
 )
-
-REVIEW_EDIT_LOCK_WINDOW = timedelta(minutes=5)
 
 
 @login_required
