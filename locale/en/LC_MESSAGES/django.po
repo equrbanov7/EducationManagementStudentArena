@@ -10342,6 +10342,86 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "action_back_to_exam"
 msgstr "Back to profile"
 
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_search"
+msgstr "Search user..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_placeholder_search"
+msgstr "Search user..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_all"
+msgstr "All statuses"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Submitted"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Expired"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_checked"
+msgstr "Reviewed"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_all"
+msgstr "Review: all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_yes"
+msgstr "Reviewed"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_no"
+msgstr "Not reviewed"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_date_from"
+msgstr "Start date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_date_to"
+msgstr "End date"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_action_apply"
+msgstr "Apply"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_action_reset"
+msgstr "Reset filters"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_selected_label"
+msgstr "Selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_select_all"
+msgstr "Select all"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_reset"
+msgstr "Reset selection"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_delete_selected"
+msgstr "Delete selected"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_no_selection_warning"
+msgstr "Please select at least one attempt"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_delete_confirm"
+msgstr "Delete selected attempts?"
+
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
@@ -11085,6 +11165,14 @@ msgstr "You cannot change this answer after 5 minutes."
 msgctxt "exams.view.results.message"
 msgid "attempt_checked_success"
 msgstr "Exam attempt checked successfully."
+
+msgctxt "exams.view.results.message"
+msgid "no_attempts_selected"
+msgstr "Please select at least one attempt."
+
+msgctxt "exams.view.results.message"
+msgid "attempts_deleted"
+msgstr "{count} attempt(s) deleted."
 
 #: apps/labs/templates/labs/grade_submission.html:6
 msgctxt "labs.template.grade_submission"

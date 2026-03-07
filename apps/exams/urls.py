@@ -90,6 +90,7 @@ urlpatterns = [
     # SLUG - Teacher Exam Ops
     # ==========================
     path("<slug:slug>/results/", views.teacher_exam_results, name="teacher_exam_results"),
+    path("<slug:slug>/results/bulk-delete/", views.bulk_delete_attempts, name="bulk_delete_attempts"),
     path(
         "<slug:slug>/toggle-active/",
         views.toggle_exam_active,

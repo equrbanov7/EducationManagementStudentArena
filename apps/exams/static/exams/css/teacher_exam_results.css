@@ -35,7 +35,7 @@
 }
 
 .container.my-4 h3 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: var(--dark-blue);
     margin-top: 30px;
     margin-bottom: 20px;
@@ -44,15 +44,9 @@
     align-items: center;
     gap: 10px;
 }
-.container.my-4 h3::before {
-    content: '\f0c0'; /* FontAwesome Users Icon */
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-    color: var(--primary-blue);
-}
 
 /* --- Ümumi Məlumat Paneli (P) --- */
-.container.my-4 p {
+.container.my-4 > p {
     font-size: 1rem;
     background: #f8fafc;
     padding: 15px 20px;
@@ -61,18 +55,194 @@
     color: var(--text-dark);
 }
 
+/* ═══════════════════════════════════════════════════════════ */
+/* FİLTR PANELİ                                               */
+/* ═══════════════════════════════════════════════════════════ */
+.filter-panel {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: end;
+}
+
+@media (max-width: 1024px) {
+    .filter-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.filter-input,
+.filter-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-filter-apply {
+    background: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.btn-filter-apply:hover {
+    background: var(--dark-blue);
+    color: #fff;
+}
+
+.btn-filter-reset {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, color 0.2s;
+    text-decoration: none;
+}
+
+.btn-filter-reset:hover {
+    background: var(--light-blue-bg);
+    color: var(--text-dark);
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* TOPLU SEÇİM BARÜ                                           */
+/* ═══════════════════════════════════════════════════════════ */
+.bulk-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.selection-count {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.selection-count strong {
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+.bulk-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-bulk {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-bulk:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.btn-bulk-select-all {
+    background: #3730a3;
+    color: #fff;
+}
+
+.btn-bulk-reset {
+    background: #64748b;
+    color: #fff;
+}
+
+.btn-bulk-delete {
+    background: #f43f5e;
+    color: #fff;
+}
+
 /* --- CƏDVƏL DİZAYNI (ƏSAS HİSSƏ) --- */
 .table-responsive {
-    margin-top: 25px;
+    margin-top: 8px;
     border-radius: 12px;
-
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
 table.table {
     width: 100%;
-    border-collapse: separate; /* Hüceyrələri ayırır */
+    border-collapse: separate;
     border-spacing: 0;
     margin-bottom: 0;
     color: var(--text-dark);
@@ -86,23 +256,31 @@ table.table thead th {
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.05em;
-    padding: 16px 20px; /* Geniş başlıq paddingi */
+    padding: 16px 20px;
     text-align: left;
     border-bottom: 2px solid var(--border-color);
-    white-space: nowrap; /* Başlıqların qırılmaması üçün */
+    white-space: nowrap;
+}
+
+/* Checkbox column */
+table.table thead th:first-child,
+table.table tbody td:first-child {
+    padding-left: 16px;
+    padding-right: 8px;
+    width: 40px;
 }
 
 /* Cədvəl Gövdəsi (Tbody) */
 table.table tbody td {
-    padding: 16px 20px; /* Geniş hüceyrə paddingi */
-    vertical-align: middle; /* Şaquli mərkəzləşdirmə */
+    padding: 16px 20px;
+    vertical-align: middle;
     border-bottom: 1px solid var(--light-blue-bg);
     font-size: 0.95rem;
-    background-color: #fff; /* Defolt fon */
+    background-color: #fff;
     transition: background-color 0.2s ease;
 }
 
-/* Zebra Striping (Cüt sətirlər üçün fərqli fon) */
+/* Zebra Striping */
 table.table tbody tr:nth-of-type(even) td {
     background-color: var(--zebra-bg);
 }
@@ -114,8 +292,6 @@ table.table tbody tr:hover td {
 }
 
 /* --- Cədvəl Daxili Elementlər --- */
-
-/* Adlar */
 .student-name-cell strong {
     font-weight: 700;
     color: var(--dark-blue);
@@ -123,11 +299,6 @@ table.table tbody tr:hover td {
 .anonymous-name {
     font-style: italic;
     color: var(--text-muted);
-}
-
-/* Rəqəmlər və Vurğular */
-td strong {
-    font-weight: 600;
 }
 
 /* Status Etiketləri (Badges) */
@@ -148,7 +319,7 @@ td strong {
     letter-spacing: 0.5px;
 }
 .badge.bg-info.text-dark {
-    background-color: #dbeafe !important; /* Açıq göy */
+    background-color: #dbeafe !important;
     color: var(--dark-blue) !important;
     font-weight: 600;
     padding: 5px 10px;
@@ -177,7 +348,6 @@ td strong {
     color: #fff;
     box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
-/* Digər düymə rəngləri (warning/success) bootstrap defaultlarıdır və bu stilə uyğundur */
 
 /* Countdown Timer */
 .countdown-timer {
@@ -239,16 +409,18 @@ p.text-muted.text-center i {
     .container.my-4 {
         padding: 20px;
     }
-    /* Mobildə paddingləri bir az azaldırıq */
     table.table thead th,
     table.table tbody td {
         padding: 12px 15px;
         font-size: 0.9rem;
     }
-    /* Mobildə düymələr tam en */
     .action-cell .btn-sm {
         width: 100%;
         justify-content: center;
         margin-bottom: 5px;
+    }
+    .bulk-action-bar {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

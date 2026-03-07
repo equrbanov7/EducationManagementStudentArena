@@ -6,17 +6,6 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
-    <style>
-        .countdown-timer {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: #dc3545;
-        }
-        .anonymous-name {
-            font-style: italic;
-            color: #6c757d;
-        }
-    </style>
 {% endblock %}
 
 {% block content %}
@@ -35,12 +24,96 @@
 
     <hr>
 
-    <h3>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
+    {# ═══════════════════════════════════════════════════════════ #}
+    {# FİLTR PANELİ                                               #}
+    {# ═══════════════════════════════════════════════════════════ #}
+    <div class="filter-panel">
+        <form method="get" id="filterForm">
+            <div class="filter-grid">
+                <div class="filter-field">
+                    <label class="filter-label">{% trans "filter_label_search" context "exams.template.teacher_exam_results" %}</label>
+                    <input type="text" name="q" class="filter-input" 
+                           placeholder="{% trans 'filter_placeholder_search' context 'exams.template.teacher_exam_results' %}"
+                           value="{{ filter_q }}">
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label">{% trans "filter_label_status" context "exams.template.teacher_exam_results" %}</label>
+                    <select name="status" class="filter-select">
+                        <option value="">{% trans "filter_status_all" context "exams.template.teacher_exam_results" %}</option>
+                        <option value="submitted" {% if filter_status == 'submitted' %}selected{% endif %}>
+                            {% trans "filter_status_submitted" context "exams.template.teacher_exam_results" %}
+                        </option>
+                        <option value="expired" {% if filter_status == 'expired' %}selected{% endif %}>
+                            {% trans "filter_status_expired" context "exams.template.teacher_exam_results" %}
+                        </option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label">{% trans "filter_label_checked" context "exams.template.teacher_exam_results" %}</label>
+                    <select name="checked" class="filter-select">
+                        <option value="">{% trans "filter_checked_all" context "exams.template.teacher_exam_results" %}</option>
+                        <option value="checked" {% if filter_checked == 'checked' %}selected{% endif %}>
+                            {% trans "filter_checked_yes" context "exams.template.teacher_exam_results" %}
+                        </option>
+                        <option value="unchecked" {% if filter_checked == 'unchecked' %}selected{% endif %}>
+                            {% trans "filter_checked_no" context "exams.template.teacher_exam_results" %}
+                        </option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label">{% trans "filter_label_date_from" context "exams.template.teacher_exam_results" %}</label>
+                    <input type="date" name="date_from" class="filter-input" value="{{ filter_date_from }}">
+                </div>
+                <div class="filter-field">
+                    <label class="filter-label">{% trans "filter_label_date_to" context "exams.template.teacher_exam_results" %}</label>
+                    <input type="date" name="date_to" class="filter-input" value="{{ filter_date_to }}">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter-apply">
+                    <i class="fas fa-filter"></i> {% trans "filter_action_apply" context "exams.template.teacher_exam_results" %}
+                </button>
+                {% if has_active_filters %}
+                <a href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}" class="btn-filter-reset">
+                    <i class="fas fa-undo"></i> {% trans "filter_action_reset" context "exams.template.teacher_exam_results" %}
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {# ═══════════════════════════════════════════════════════════ #}
+    {# TOPLU SEÇİM BARÜ                                           #}
+    {# ═══════════════════════════════════════════════════════════ #}
+    <div class="bulk-action-bar">
+        <span class="selection-count">{% trans "bulk_selected_label" context "exams.template.teacher_exam_results" %}: <strong id="selectedCount">0</strong></span>
+        <div class="bulk-buttons">
+            <button type="button" class="btn-bulk btn-bulk-select-all" onclick="selectAll()">
+                {% trans "bulk_select_all" context "exams.template.teacher_exam_results" %}
+            </button>
+            <button type="button" class="btn-bulk btn-bulk-reset" onclick="resetSelection()">
+                {% trans "bulk_reset" context "exams.template.teacher_exam_results" %}
+            </button>
+            <form method="post" action="{% url 'exams:bulk_delete_attempts' exam.slug %}" id="bulkDeleteForm">
+                {% csrf_token %}
+                <input type="hidden" name="attempt_ids" id="selectedIds">
+                <button type="button" class="btn-bulk btn-bulk-delete" onclick="bulkDelete()">
+                    <i class="fas fa-trash"></i> {% trans "bulk_delete_selected" context "exams.template.teacher_exam_results" %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# ═══════════════════════════════════════════════════════════ #}
+    {# İŞTİRAKÇI NƏTİCƏLƏRİ                                      #}
+    {# ═══════════════════════════════════════════════════════════ #}
+    <h3><i class="fas fa-users me-2"></i>{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h3>
     {% if attempts_data %}
         <div class="table-responsive">
             <table class="table table-striped table-sm align-middle">
                 <thead>
                     <tr>
+                        <th><input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)"></th>
                         <th>#</th>
                         <th>{% trans "col_user" context "exams.template.teacher_exam_results" %}</th>
                         <th>{% trans "col_status" context "exams.template.teacher_exam_results" %}</th>
@@ -60,6 +133,9 @@
                             data-seconds-remaining="{{ item.seconds_remaining|default:0 }}"
                             data-real-name="{{ item.real_name }}"
                             data-anonymous-name="{{ item.anonymous_name }}">
+                            <td>
+                                <input type="checkbox" class="attempt-checkbox" value="{{ att.id }}" onchange="updateCount()">
+                            </td>
                             <td>{{ forloop.counter }}</td>
                             
                             {# ✅ İSTİFADƏÇİ ADI - Anonim/Real #}
@@ -178,18 +254,14 @@ document.addEventListener('DOMContentLoaded', function() {
     rows.forEach(row => {
         let secondsLeft = parseInt(row.dataset.secondsRemaining) || 0;
         
-        if (secondsLeft <= 0) return; // Timer yoxdursa skip et
+        if (secondsLeft <= 0) return;
         
         const timerDisplay = row.querySelector('.timer-display');
-        const nameCell = row.querySelector('.student-name-cell');
-        const actionCell = row.querySelector('.action-cell');
         
         if (!timerDisplay) return;
         
-        // Timer funksiyası
         const updateTimer = () => {
             if (secondsLeft <= 0) {
-                // ✅ Vaxt bitdi - səhifəni yenilə
                 window.location.reload();
                 return;
             }
@@ -201,15 +273,59 @@ document.addEventListener('DOMContentLoaded', function() {
             secondsLeft--;
         };
         
-        // İlk dəfə göstər
         updateTimer();
-        
-        // Hər saniyə yenilə
         const interval = setInterval(updateTimer, 1000);
-        
-        // Cleanup (səhifə yeniləndikdə)
         window.addEventListener('beforeunload', () => clearInterval(interval));
     });
 });
+
+// ═══════════════════════════════════════════════════════════
+// BULK SELECT / DELETE
+// ═══════════════════════════════════════════════════════════
+function updateCount() {
+    const checked = document.querySelectorAll('.attempt-checkbox:checked');
+    document.getElementById('selectedCount').textContent = checked.length;
+    
+    const selectAllCb = document.getElementById('selectAllCheckbox');
+    const allCbs = document.querySelectorAll('.attempt-checkbox');
+    if (selectAllCb) {
+        selectAllCb.checked = checked.length === allCbs.length && allCbs.length > 0;
+        selectAllCb.indeterminate = checked.length > 0 && checked.length < allCbs.length;
+    }
+}
+
+function toggleAll(masterCheckbox) {
+    document.querySelectorAll('.attempt-checkbox').forEach(cb => {
+        cb.checked = masterCheckbox.checked;
+    });
+    updateCount();
+}
+
+function selectAll() {
+    document.querySelectorAll('.attempt-checkbox').forEach(cb => { cb.checked = true; });
+    const selectAllCb = document.getElementById('selectAllCheckbox');
+    if (selectAllCb) selectAllCb.checked = true;
+    updateCount();
+}
+
+function resetSelection() {
+    document.querySelectorAll('.attempt-checkbox').forEach(cb => { cb.checked = false; });
+    const selectAllCb = document.getElementById('selectAllCheckbox');
+    if (selectAllCb) { selectAllCb.checked = false; selectAllCb.indeterminate = false; }
+    updateCount();
+}
+
+function bulkDelete() {
+    const checked = document.querySelectorAll('.attempt-checkbox:checked');
+    if (checked.length === 0) {
+        alert('{% trans "bulk_no_selection_warning" context "exams.template.teacher_exam_results" %}');
+        return;
+    }
+    if (!confirm('{% trans "bulk_delete_confirm" context "exams.template.teacher_exam_results" %}')) return;
+    
+    const ids = Array.from(checked).map(cb => cb.value).join(',');
+    document.getElementById('selectedIds').value = ids;
+    document.getElementById('bulkDeleteForm').submit();
+}
 </script>
 {% endblock %}

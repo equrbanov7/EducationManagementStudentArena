@@ -3,14 +3,18 @@ from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.http import require_POST
 
-from apps.exams.models import ExamAnswer, ExamAttempt
+from apps.courses.models import CourseMembership
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
@@ -76,15 +80,40 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     return profile_return_url, navigation_params
 
 
+def _get_exam_for_results(request, slug):
+    """
+    Exam-i tapır: ya author, ya da kurs manager ola bilər.
+    """
+    qs = tenant_scoped_exams(request, Exam.objects.filter(slug=slug))
+    exam = qs.first()
+    if not exam:
+        raise PermissionDenied
+
+    if exam.author == request.user:
+        return exam
+
+    if exam.course:
+        is_course_manager = exam.course.owner == request.user or CourseMembership.objects.filter(
+            course=exam.course,
+            user=request.user,
+            role__in=["teacher", "assistant"],
+        ).exists()
+        if is_course_manager:
+            return exam
+
+    raise PermissionDenied
+
+
 @login_required
 def teacher_exam_results(request, slug):
     """
     Müəllim üçün imtahan nəticələri:
-    - solda bütün cəhdlər cədvəli
-    - aşağıda/sağda seçilmiş cəhdin cavabları + qiymətləndirmə formu
+    - filter paneli (axtarış, status, yoxlanıb, tarix aralığı)
+    - iştirakçı nəticələri cədvəli (checkbox ilə)
+    - toplu silmə imkanı
     """
     _ensure_teacher(request.user)
-    exam = get_teacher_exam_or_404(request, slug=slug)
+    exam = _get_exam_for_results(request, slug)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     exam_navigation_query = urlencode(navigation_params)
     exam_detail_url = _append_query_params(
@@ -92,7 +121,40 @@ def teacher_exam_results(request, slug):
         **navigation_params,
     )
 
+    # ---------- Filter parametrləri ----------
+    search_query = (request.GET.get("q") or "").strip()
+    status_filter = (request.GET.get("status") or "").strip()
+    checked_filter = (request.GET.get("checked") or "").strip()
+    date_from = (request.GET.get("date_from") or "").strip()
+    date_to = (request.GET.get("date_to") or "").strip()
+
     attempts = exam.attempts.select_related("user").order_by("-started_at")
+
+    if search_query:
+        attempts = attempts.filter(user__username__icontains=search_query)
+    if status_filter in {"submitted", "expired"}:
+        attempts = attempts.filter(status=status_filter)
+    if checked_filter == "checked":
+        attempts = attempts.filter(checked_by_teacher=True)
+    elif checked_filter == "unchecked":
+        attempts = attempts.filter(checked_by_teacher=False)
+    if date_from:
+        try:
+            from django.utils.dateparse import parse_datetime, parse_date
+            dt_from = parse_date(date_from)
+            if dt_from:
+                from datetime import datetime
+                attempts = attempts.filter(started_at__date__gte=dt_from)
+        except Exception:
+            pass
+    if date_to:
+        try:
+            from django.utils.dateparse import parse_date
+            dt_to = parse_date(date_to)
+            if dt_to:
+                attempts = attempts.filter(started_at__date__lte=dt_to)
+        except Exception:
+            pass
 
     selected_attempt = None
     selected_answers = None
@@ -213,7 +275,7 @@ def teacher_exam_results(request, slug):
         {
             "exam": exam,
             "attempts": attempts,
-            "attempts_data": attempts_data,  # ✅ YENİ
+            "attempts_data": attempts_data,
             "fastest_attempts": fastest_attempts,
             "hardest_questions": hardest_questions,
             "selected_attempt": selected_attempt,
@@ -221,8 +283,40 @@ def teacher_exam_results(request, slug):
             "profile_return_url": profile_return_url,
             "exam_detail_url": exam_detail_url,
             "exam_navigation_query": exam_navigation_query,
+            # Filter values for form re-population
+            "filter_q": search_query,
+            "filter_status": status_filter,
+            "filter_checked": checked_filter,
+            "filter_date_from": date_from,
+            "filter_date_to": date_to,
+            "has_active_filters": any([search_query, status_filter, checked_filter, date_from, date_to]),
         },
     )
+
+
+@login_required
+@require_POST
+def bulk_delete_attempts(request, slug):
+    """
+    Seçilmiş cəhdləri toplu silir.
+    POST body: attempt_ids (vergüllə ayrılmış ID-lər)
+    """
+    _ensure_teacher(request.user)
+    exam = _get_exam_for_results(request, slug)
+
+    raw_ids = request.POST.get("attempt_ids", "")
+    ids_to_delete = [int(x) for x in raw_ids.split(",") if x.strip().isdigit()]
+
+    if not ids_to_delete:
+        messages.warning(request, pgettext_lazy("exams.view.results.message", "no_attempts_selected"))
+        return redirect("exams:teacher_exam_results", slug=exam.slug)
+
+    deleted_count, _ = ExamAttempt.objects.filter(exam=exam, id__in=ids_to_delete).delete()
+    messages.success(
+        request,
+        pgettext("exams.view.results.message", "attempts_deleted").format(count=deleted_count),
+    )
+    return redirect("exams:teacher_exam_results", slug=exam.slug)
 
 
 @login_required

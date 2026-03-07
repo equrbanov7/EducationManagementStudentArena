@@ -10371,7 +10371,87 @@ msgctxt "exams.template.teacher_exam_results"
 msgid "action_back_to_exam"
 msgstr "Profilə Qayıt"
 
-#: apps/exams/templates/exams/teacher/teacher_group_list.html:4
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_search"
+msgstr "İstifadəçi axtar..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_placeholder_search"
+msgstr "İstifadəçi axtar..."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_status"
+msgstr "Status"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_all"
+msgstr "Bütün statuslar"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_submitted"
+msgstr "Təqdim edilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_status_expired"
+msgstr "Vaxtı bitib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_checked"
+msgstr "Yoxlanıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_all"
+msgstr "Yoxlama: hamısı"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_yes"
+msgstr "Yoxlanıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_checked_no"
+msgstr "Yoxlanmayıb"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_date_from"
+msgstr "Başlama tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_label_date_to"
+msgstr "Bitmə tarixi"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_action_apply"
+msgstr "Tətbiq et"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "filter_action_reset"
+msgstr "Seçimi sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_selected_label"
+msgstr "Seçilib"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_select_all"
+msgstr "Hamısını seç"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_reset"
+msgstr "Seçimi sıfırla"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_delete_selected"
+msgstr "Seçiləni sil"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_no_selection_warning"
+msgstr "Zəhmət olmasa cəhd seçin"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "bulk_delete_confirm"
+msgstr "Seçilmiş cəhdlər silinsin?"
+
+
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
 msgstr "Yeni Kurs Yaratma"
@@ -11114,6 +11194,14 @@ msgstr "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz."
 msgctxt "exams.view.results.message"
 msgid "attempt_checked_success"
 msgstr "İmtahan cəhdi uğurla yoxlanıldı."
+
+msgctxt "exams.view.results.message"
+msgid "no_attempts_selected"
+msgstr "Zəhmət olmasa cəhd seçin."
+
+msgctxt "exams.view.results.message"
+msgid "attempts_deleted"
+msgstr "{count} cəhd silindi."
 
 #: apps/labs/templates/labs/grade_submission.html:6
 msgctxt "labs.template.grade_submission"
