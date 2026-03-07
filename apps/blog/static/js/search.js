@@ -17,7 +17,7 @@
       const searchInput = document.getElementById('searchInput');
       const query = searchInput.value;
       const gridContainer = document.querySelector('.home-left-column'); // Dəyişəcək hissə
-      
+
       // Vizual effekt: Axtarış gedərkən şəffaflığı azalt
       gridContainer.style.opacity = '0.5';
       gridContainer.style.transition = 'opacity 0.3s';
@@ -37,13 +37,19 @@
               // Gələn HTML mətnini DOM-a çeviririk
               const parser = new DOMParser();
               const doc = parser.parseFromString(html, 'text/html');
-              
+
               // Təzə səhifədən bizə lazım olan hissəni tapırıq
-              const newContent = doc.querySelector('.home-left-column').innerHTML;
-              
-              // Köhnə hissəni təzəsi ilə əvəz edirik
-              gridContainer.innerHTML = newContent;
-              
+              const newContentElement = doc.querySelector('.home-left-column');
+
+              if (newContentElement) {
+                  // Sanitize HTML before inserting - remove script tags and event handlers
+                  const sanitizedContent = sanitizeContent(newContentElement);
+
+                  // Köhnə hissəni təzəsi ilə əvəz edirik
+                  gridContainer.innerHTML = '';
+                  gridContainer.appendChild(sanitizedContent);
+              }
+
               // Vizual effekti qaytarırıq
               gridContainer.style.opacity = '1';
           })
@@ -51,6 +57,35 @@
               console.error('Xəta:', error);
               gridContainer.style.opacity = '1';
           });
+  }
+
+  // Helper function to sanitize HTML content
+  function sanitizeContent(element) {
+      const clone = element.cloneNode(true);
+
+      // Remove all script tags
+      const scripts = clone.querySelectorAll('script');
+      scripts.forEach(script => script.remove());
+
+      // Remove event handlers from all elements
+      const allElements = clone.querySelectorAll('*');
+      allElements.forEach(el => {
+          Array.from(el.attributes).forEach(attr => {
+              if (attr.name.startsWith('on')) {
+                  el.removeAttribute(attr.name);
+              }
+          });
+
+          // Remove javascript: URLs
+          ['href', 'src', 'action', 'formaction'].forEach(attrName => {
+              const attrValue = el.getAttribute(attrName);
+              if (attrValue && attrValue.toLowerCase().trim().startsWith('javascript:')) {
+                  el.removeAttribute(attrName);
+              }
+          });
+      });
+
+      return clone;
   }
 
   // 4. Inputa "dinləyici" qoşuruq
