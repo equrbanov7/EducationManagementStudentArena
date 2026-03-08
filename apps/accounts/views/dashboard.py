@@ -60,6 +60,17 @@ from ..models import ProfileRole
 
 User = get_user_model()
 
+
+@login_required
+def dashboard(request):
+    """Redirect users to the dashboard variant that matches their role."""
+    profile = getattr(request.user, "profile", None)
+    capabilities = _role_capabilities(request.user, profile)
+    if capabilities["can_review_submissions"]:
+        return redirect("accounts:teacher_dashboard")
+    return redirect("accounts:student_dashboard")
+
+
 @login_required
 def teacher_dashboard(request):
     """

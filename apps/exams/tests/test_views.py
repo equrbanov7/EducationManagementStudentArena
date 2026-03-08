@@ -3,6 +3,7 @@ View tests for exams app.
 """
 
 from datetime import timedelta
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -456,6 +457,37 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'name="modal" value="1"')
         self.assertContains(response, 'name="text"')
+        self.assertContains(response, 'name="option1_text"')
+        self.assertContains(response, 'name="option2_text"')
+        self.assertNotContains(response, 'name="option3_text"')
+        self.assertContains(response, "Variant əlavə et")
+
+    def test_modal_add_question_accepts_more_than_four_options(self):
+        response = self.client.post(
+            reverse("exams:add_exam_question", args=[self.exam_visible.slug]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Hansılar proqramlaşdırma dilləridir?",
+                "answer_mode": "multiple",
+                "time_limit_seconds": "60",
+                "option1_text": "Python",
+                "option1_is_correct": "on",
+                "option2_text": "JavaScript",
+                "option2_is_correct": "on",
+                "option3_text": "Brauzer",
+                "option4_text": "Kompilyator",
+                "option5_text": "Go",
+                "option5_is_correct": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        created_question = self.exam_visible.questions.exclude(id=self.exam_question.id).latest("id")
+        self.assertEqual(created_question.options.count(), 5)
+        self.assertEqual(created_question.options.filter(is_correct=True).count(), 3)
 
     def test_modal_edit_question_updates_question_with_json_success(self):
         response = self.client.post(
@@ -481,6 +513,55 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(self.exam_question.text, "Python nədir?")
         self.assertEqual(self.exam_question.time_limit_seconds, 45)
         self.assertEqual(self.exam_question.options.filter(is_correct=True).count(), 1)
+
+    def test_modal_edit_question_can_reduce_option_count_to_two(self):
+        ExamQuestionOption.objects.create(question=self.exam_question, text="Verilənlər bazası", is_correct=False)
+        ExamQuestionOption.objects.create(question=self.exam_question, text="Əməliyyat sistemi", is_correct=False)
+
+        response = self.client.post(
+            reverse("exams:edit_exam_question", args=[self.exam_visible.slug, self.exam_question.id]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Python nədir?",
+                "answer_mode": "single",
+                "time_limit_seconds": "45",
+                "option1_text": "Proqramlaşdırma dili",
+                "option1_is_correct": "on",
+                "option2_text": "Brauzer",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["success"], True)
+
+        self.exam_question.refresh_from_db()
+        self.assertEqual(self.exam_question.options.count(), 2)
+
+    def test_modal_edit_question_rejects_multiple_correct_options_in_single_mode(self):
+        response = self.client.post(
+            reverse("exams:edit_exam_question", args=[self.exam_visible.slug, self.exam_question.id]) + "?modal=1",
+            {
+                "modal": "1",
+                "text": "Python nədir?",
+                "answer_mode": "single",
+                "time_limit_seconds": "45",
+                "option1_text": "Proqramlaşdırma dili",
+                "option1_is_correct": "on",
+                "option2_text": "Brauzer",
+                "option2_is_correct": "on",
+                "option3_text": "",
+                "option4_text": "",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["success"], False)
+        self.assertIn(
+            "Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır.",
+            response.json()["html"],
+        )
 
     def test_other_teacher_cannot_edit_or_delete_my_exam(self):
         self.client.force_login(self.other_teacher)
@@ -529,6 +610,32 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
 
+    def test_teacher_exam_detail_questions_bank_link_preserves_return_to(self):
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:teacher_questions_bank", args=[self.exam_visible.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_teacher_exam_detail_bulk_add_link_preserves_return_to(self):
+        return_to = reverse("courses:course_dashboard", args=[self.course.id])
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:test_question_bank", args=[self.exam_visible.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
     def test_teacher_exam_detail_falls_back_to_safe_referer_when_return_to_missing(self):
         referer = reverse("exams:teacher_exam_list")
         response = self.client.get(
@@ -540,6 +647,17 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertEqual(response.context["profile_return_url"], referer)
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
+
+    def test_teacher_exam_detail_ignores_internal_question_bank_referer(self):
+        referer = reverse("exams:teacher_questions_bank", args=[self.exam_visible.slug])
+        response = self.client.get(
+            reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
+            HTTP_REFERER=referer,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["profile_return_url"], f"{reverse('accounts:profile')}?section=my-exams")
+        self.assertNotEqual(response.context["profile_return_url"], referer)
 
     def test_teacher_exam_results_keeps_generic_source_back_label(self):
         return_to = reverse("courses:course_dashboard", args=[self.course.id])
@@ -555,6 +673,44 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "Profile geri dön")
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "resultsFilterSearchInput")
+
+    def test_teacher_exam_results_renders_bulk_delete_controls(self):
+        ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+
+        response = self.client.get(reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "selectedAttemptCount")
+        self.assertContains(response, "deleteSelectedAttemptsBtn")
+        self.assertContains(response, "js-attempt-checkbox")
+
+    def test_delete_exam_attempts_removes_selected_attempts(self):
+        first_attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam_visible,
+            status="submitted",
+        )
+        second_attempt = ExamAttempt.objects.create(
+            user=self.teacher,
+            exam=self.exam_visible,
+            status="draft",
+        )
+
+        response = self.client.post(
+            reverse("exams:delete_exam_attempts", args=[self.exam_visible.slug]),
+            {
+                "attempt_ids": [str(first_attempt.id), str(second_attempt.id)],
+                "next": reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ExamAttempt.objects.filter(id=first_attempt.id).exists())
+        self.assertFalse(ExamAttempt.objects.filter(id=second_attempt.id).exists())
 
     def test_teacher_exam_results_reveals_student_name_for_test_attempts(self):
         attempt = ExamAttempt.objects.create(
@@ -1435,3 +1591,80 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertIn("status=active", response.url)
         self.assertIn("sort=za", response.url)
         self.assertIn("page=2", response.url)
+
+    def test_questions_bank_back_link_preserves_original_return_to(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:teacher_exam_detail", args=[self.exam.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_questions_bank_bulk_add_link_preserves_original_return_to(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.get(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:test_question_bank", args=[self.exam.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_questions_bank_bulk_redirect_preserves_return_navigation(self):
+        response = self.client.post(
+            reverse("exams:teacher_questions_bank", args=[self.exam.slug]),
+            {
+                "bulk_action": "activate",
+                "selected_question_ids": str(self.questions[2].id),
+                "status": "all",
+                "q": "",
+                "sort": "newest",
+                "page": "1",
+                "from_section": "my-courses",
+                "return_to": f"{reverse('accounts:profile')}?section=my-courses",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("from_section=my-courses", response.url)
+        self.assertIn("return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-courses", response.url)
+
+    def test_create_question_bank_cancel_link_preserves_original_return_to(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.get(
+            reverse("exams:create_question_bank", args=[self.exam.slug]),
+            {"from_section": "my-courses", "return_to": return_to},
+        )
+
+        expected_query = urlencode({"from_section": "my-courses", "return_to": return_to})
+        expected_href = f'{reverse("exams:teacher_exam_detail", args=[self.exam.slug])}?{expected_query}'
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_href.replace("&", "&amp;"), html=False)
+
+    def test_process_question_bank_success_redirect_preserves_return_navigation(self):
+        return_to = f"{reverse('accounts:profile')}?section=my-courses"
+        response = self.client.post(
+            reverse("exams:process_question_bank", args=[self.exam.slug]),
+            {
+                "from_section": "my-courses",
+                "return_to": return_to,
+                "random_question_count": "0",
+                "block_name_1": "Blok 1",
+                "block_content_1": "1. Test sual",
+                "block_time_1": "",
+                "block_db_id_1": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("from_section=my-courses", response.url)
+        self.assertIn("return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-courses", response.url)

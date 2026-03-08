@@ -2,14 +2,16 @@
 Service tests for labs app.
 """
 
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.courses.models import Course
 from apps.labs import services
-from apps.labs.models import Lab, LabAssignment, LabSubmission, LabAnswer, LabQuestion
+from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
 User = get_user_model()
 
@@ -36,8 +38,11 @@ class LabSubmissionServicesTest(TestCase):
         self.lab = Lab.objects.create(
             title="Test Lab",
             course=self.course,
-            created_by=self.teacher
+            created_by=self.teacher,
+            start_datetime=timezone.now(),
+            end_datetime=timezone.now() + timedelta(days=1),
         )
+        self.block = LabBlock.objects.create(lab=self.lab, title="Block 1")
         self.assignment = LabAssignment.objects.create(
             lab=self.lab,
             student=self.student
@@ -55,9 +60,9 @@ class LabSubmissionServicesTest(TestCase):
     def test_auto_save_lab_answers(self):
         """Test auto-saving lab answers."""
         question = LabQuestion.objects.create(
-            lab=self.lab,
+            block=self.block,
             question_text="Test question",
-            max_score=Decimal("10")
+            points=10
         )
 
         answers_data = {
@@ -69,7 +74,8 @@ class LabSubmissionServicesTest(TestCase):
         self.assertEqual(count, 1)
         self.assertTrue(
             LabAnswer.objects.filter(
-                assignment=self.assignment,
+                lab=self.lab,
+                student=self.student,
                 question=question
             ).exists()
         )
@@ -97,7 +103,9 @@ class LabGradingServicesTest(TestCase):
         self.lab = Lab.objects.create(
             title="Test Lab",
             course=self.course,
-            created_by=self.teacher
+            created_by=self.teacher,
+            start_datetime=timezone.now(),
+            end_datetime=timezone.now() + timedelta(days=1),
         )
         self.assignment = LabAssignment.objects.create(
             lab=self.lab,

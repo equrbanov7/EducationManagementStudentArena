@@ -231,6 +231,12 @@
 
     <form method="post" action="{% url 'exams:process_question_bank' exam.slug %}" id="bankForm">
         {% csrf_token %}
+        {% if navigation_from_section %}
+            <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
+        {% endif %}
+        {% if navigation_return_to %}
+            <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
+        {% endif %}
 
         <input type="hidden" name="deleted_block_ids" id="deleted_block_ids">
 
@@ -321,7 +327,7 @@
         </button>
 
         <div class="action-bar">
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel-main">
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}" class="btn-cancel-main">
                 <i class="fas fa-times"></i> {% trans "action_cancel" context "exams.template.create_question_bank" %}
             </a>
 

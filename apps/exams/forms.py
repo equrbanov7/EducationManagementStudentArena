@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -193,8 +195,10 @@ class ExamForm(forms.ModelForm):
 
 class ExamQuestionCreateForm(forms.ModelForm):
     """
-    Bu forma 1 sualı + 3-4 variantı eyni formda yaratmaq/edit edə bilmək üçündür.
+    Bu forma test sualları üçün dinamik sayda variant yaratmaq/edit etmək üçündür.
     """
+
+    MIN_TEST_OPTIONS = 2
 
     # ---- Variant field-ləri ----
     option1_text = forms.CharField(
@@ -307,7 +311,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
         exam_type (test / written) view-dən ötürülür.
         """
         self.exam_type = exam_type
+        data = args[0] if args else None
+        instance = kwargs.get("instance")
+        self.option_indexes = self._resolve_option_indexes(data=data, instance=instance)
         super().__init__(*args, **kwargs)
+
+        self._ensure_option_fields_exist()
 
         # Yazılı imtahanlarda enable_paint field-ini silmə
         if self.exam_type != "written":
@@ -328,9 +337,90 @@ class ExamQuestionCreateForm(forms.ModelForm):
         instance = getattr(self, "instance", None)
         if instance and instance.pk:
             options = list(instance.options.all().order_by("id"))
-            for idx, opt in enumerate(options[:4], start=1):
+            for idx, opt in enumerate(options, start=1):
                 self.fields[f"option{idx}_text"].initial = opt.text
                 self.fields[f"option{idx}_is_correct"].initial = opt.is_correct
+
+        self.option_fields = self._build_option_fields()
+
+    def _resolve_option_indexes(self, *, data=None, instance=None):
+        max_index = self.MIN_TEST_OPTIONS
+
+        if data is not None:
+            for key in data.keys():
+                match = re.match(r"^option(\d+)_(text|is_correct)$", key)
+                if match:
+                    max_index = max(max_index, int(match.group(1)))
+        elif instance is not None and getattr(instance, "pk", None):
+            max_index = max(max_index, instance.options.count())
+
+        return list(range(1, max_index + 1))
+
+    def _option_label(self, index):
+        suffix_map = {
+            0: "cu",
+            1: "ci",
+            2: "ci",
+            3: "cü",
+            4: "cü",
+            5: "ci",
+            6: "cı",
+            7: "ci",
+            8: "ci",
+            9: "cu",
+        }
+        suffix = suffix_map[index % 10]
+        return f"{index}-{suffix} variant"
+
+    def _ensure_option_fields_exist(self):
+        for index in self.option_indexes:
+            text_name = f"option{index}_text"
+            correct_name = f"option{index}_is_correct"
+            label = self._option_label(index)
+
+            if text_name not in self.fields:
+                self.fields[text_name] = forms.CharField(
+                    label=label,
+                    required=False,
+                    widget=forms.TextInput(attrs={"class": "form-control"}),
+                )
+            else:
+                self.fields[text_name].label = label
+
+            if correct_name not in self.fields:
+                self.fields[correct_name] = forms.BooleanField(
+                    label=pgettext_lazy("exams.form.question.label", "option_correct"),
+                    required=False,
+                    widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+                )
+
+    def _build_option_fields(self):
+        option_fields = []
+        for index in self.option_indexes:
+            option_fields.append(
+                {
+                    "index": index,
+                    "label": self._option_label(index),
+                    "text_field": self[f"option{index}_text"],
+                    "is_correct_field": self[f"option{index}_is_correct"],
+                }
+            )
+        return option_fields
+
+    def _get_cleaned_options(self, cleaned_data):
+        options = []
+        for index in self.option_indexes:
+            text = (cleaned_data.get(f"option{index}_text") or "").strip()
+            is_correct = bool(cleaned_data.get(f"option{index}_is_correct"))
+            if text:
+                options.append(
+                    {
+                        "index": index,
+                        "text": text,
+                        "is_correct": is_correct,
+                    }
+                )
+        return options
 
     def clean(self):
         cleaned_data = super().clean()
@@ -363,18 +453,16 @@ class ExamQuestionCreateForm(forms.ModelForm):
             return cleaned_data
 
         # TEST üçün variant validasiyası
-        opts = []
-        for i in range(1, 5):
-            text = cleaned_data.get(f"option{i}_text")
-            is_correct = cleaned_data.get(f"option{i}_is_correct")
-            if text:
-                opts.append((text, is_correct))
+        opts = self._get_cleaned_options(cleaned_data)
 
         if answer_mode in ("single", "multiple") and not opts:
             raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "options_required"))
 
+        if answer_mode in ("single", "multiple") and len(opts) < self.MIN_TEST_OPTIONS:
+            raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "minimum_two_options"))
+
         if answer_mode == "single":
-            correct_count = sum(1 for (_, is_corr) in opts if is_corr)
+            correct_count = sum(1 for option in opts if option["is_correct"])
             if correct_count == 0:
                 raise forms.ValidationError(pgettext_lazy("exams.form.question.error", "single_requires_one_correct"))
             if correct_count > 1:
@@ -386,15 +474,12 @@ class ExamQuestionCreateForm(forms.ModelForm):
         """
         Yeni sual yaradılanda variantları yarat
         """
-        for i in range(1, 5):
-            text = self.cleaned_data.get(f"option{i}_text")
-            is_correct = self.cleaned_data.get(f"option{i}_is_correct")
-            if text:
-                ExamQuestionOption.objects.create(
-                    question=question_instance,
-                    text=text,
-                    is_correct=bool(is_correct),
-                )
+        for option in self._get_cleaned_options(self.cleaned_data):
+            ExamQuestionOption.objects.create(
+                question=question_instance,
+                text=option["text"],
+                is_correct=option["is_correct"],
+            )
 
     def save_options(self, question_instance: ExamQuestion):
         """

@@ -52,7 +52,8 @@ class LiveSession(models.Model):
 
     def _ensure_unique_pin(self):
         tries = 0
-        while LiveSession.objects.filter(pin=self.pin).exists():
+        existing_sessions = LiveSession.objects.exclude(pk=self.pk) if self.pk else LiveSession.objects.all()
+        while existing_sessions.filter(pin=self.pin).exists():
             self.pin = generate_pin()
             tries += 1
             if tries > 10:

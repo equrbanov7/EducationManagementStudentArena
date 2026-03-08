@@ -19,14 +19,20 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="h3 mb-3">{{ project.title }} - {% trans "header_title" context "projects.review" %}</h1>
+    <h1 class="h3">{{ project.title }} - {% trans "header_title" context "projects.review" %}</h1>
 
-    <p>
-        {% trans "course_label" context "projects.review" %} <strong>{{ project.course.title }}</strong><br>
-        {% trans "table_status" context "projects.review" %}: <strong>{{ project.get_status_display }}</strong>
-    </p>
-
-    <hr>
+    <div class="results-summary mb-4">
+        <div class="results-summary__row">
+            <span class="results-summary__label">{% trans "course_label" context "projects.review" %}</span>
+            <strong>{{ project.course.title }}</strong>
+        </div>
+        <div class="results-summary__row">
+            <span class="results-summary__label">{% trans "table_status" context "projects.review" %}:</span>
+            <span class="results-summary__pill results-summary__pill--{% if project.status == 'active' %}success{% elif project.status == 'draft' %}neutral{% else %}warning{% endif %}">
+                {{ project.get_status_display|upper }}
+            </span>
+        </div>
+    </div>
 
     <div class="results-filter-card">
         <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
@@ -101,12 +107,32 @@
         </form>
     </div>
 
+    {% if can_delete_submissions %}
+        <div class="results-toolbar">
+            <span class="selected-counter">Seçilib: <span id="selectedProjectCount">0</span></span>
+            <div class="results-toolbar__actions">
+                <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllProjectsBtn">
+                    <i class="fa-solid fa-check-double"></i> Hamısını seç
+                </button>
+                <button type="button" class="btn results-bulk-btn results-bulk-btn--clear" id="clearProjectsBtn">
+                    <i class="fa-solid fa-eraser"></i> Seçimi sıfırla
+                </button>
+                <button type="button" class="btn results-bulk-btn results-bulk-btn--delete" id="deleteSelectedProjectsBtn">
+                    <i class="fa-solid fa-trash"></i> Seçilənləri sil
+                </button>
+            </div>
+        </div>
+    {% endif %}
+
     <h3>{% trans "header_title" context "projects.review" %}</h3>
     {% if submissions %}
         <div class="table-responsive">
             <table class="table table-striped table-sm align-middle">
                 <thead>
                     <tr>
+                        {% if can_delete_submissions %}
+                            <th></th>
+                        {% endif %}
                         <th>{% trans "table_student" context "projects.review" %}</th>
                         <th>{% trans "table_submitted_at" context "projects.review" %}</th>
                         <th>{% trans "table_status" context "projects.review" %}</th>
@@ -117,11 +143,20 @@
                 <tbody>
                     {% for submission in submissions %}
                     <tr>
-                        <td><strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong></td>
+                        {% if can_delete_submissions %}
+                            <td>
+                                <input type="checkbox"
+                                       class="results-table-checkbox js-project-submission-checkbox"
+                                       value="{{ submission.id }}">
+                            </td>
+                        {% endif %}
+                        <td class="student-name-cell">
+                            <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
+                        </td>
                         <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
                         <td>
                             {% if submission.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">{% trans "status_pending" context "projects.review" %}</span>
+                                <span class="badge bg-info text-dark">{% trans "status_pending" context "projects.review" %}</span>
                             {% elif submission.status == 'graded' %}
                                 <span class="badge bg-success">{% trans "status_graded" context "projects.review" %}</span>
                             {% else %}
@@ -129,7 +164,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if submission.grade %}
+                            {% if submission.grade or submission.grade == 0 %}
                                 <strong>{{ submission.grade }}/{{ project.max_score }}</strong>
                             {% else %}
                                 <span class="text-muted">—</span>
@@ -149,6 +184,13 @@
                                         data-feedback="{{ submission.feedback }}">
                                     <i class="fa-solid fa-eye"></i> {% trans "view" context "projects.review" %}
                                 </button>
+                                {% if can_delete_submissions %}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger js-single-delete-project-submission"
+                                            data-submission-id="{{ submission.id }}">
+                                        <i class="fa-solid fa-trash"></i> Sil
+                                    </button>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -164,12 +206,47 @@
         </p>
     {% endif %}
 
-    <div class="d-flex gap-2 flex-wrap mt-3">
+    <div class="results-page-actions">
         <a href="{{ back_url }}" class="btn btn-secondary">
             <i class="fa-solid fa-arrow-left"></i> {% trans "back" context "projects.review" %}
         </a>
     </div>
 </div>
+
+{% if can_delete_submissions %}
+    <form id="deleteProjectsForm"
+          method="post"
+          action="{% url 'projects:delete_project_submissions' project.id %}"
+          class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% if request.GET.from_section %}
+            <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+        {% endif %}
+        {% if request.GET.return_to %}
+            <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+        {% endif %}
+        <div id="deleteProjectsInputs"></div>
+    </form>
+
+    <div class="modal fade" id="deleteProjectsConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-trash me-2"></i> Seçilən kurs işlərini sil</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Bu seçim geri qaytarılmır. Seçilmiş kurs işi cavabları silinəcək.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteProjectsBtn">Silməni təsdiqlə</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 
 <div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -240,6 +317,8 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'js/results_filter_ui.js' %}"></script>
+<script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script>
 const projectReviewConfig = {
     selectedSubmissionId: "{{ selected_submission_id }}",
@@ -342,7 +421,23 @@ const projectReviewConfig = {
                 btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
             });
     });
+
+    {% if can_delete_submissions %}
+    window.initResultsBulkActions({
+        checkboxSelector: '.js-project-submission-checkbox',
+        selectedCountSelector: '#selectedProjectCount',
+        selectAllSelector: '#selectAllProjectsBtn',
+        clearSelector: '#clearProjectsBtn',
+        deleteSelectedSelector: '#deleteSelectedProjectsBtn',
+        singleDeleteSelector: '.js-single-delete-project-submission',
+        deleteFormSelector: '#deleteProjectsForm',
+        deleteInputsSelector: '#deleteProjectsInputs',
+        confirmButtonSelector: '#confirmDeleteProjectsBtn',
+        confirmModalSelector: '#deleteProjectsConfirmModal',
+        inputName: 'submission_ids',
+        singleDeleteDataAttribute: 'submissionId'
+    });
+    {% endif %}
 })();
 </script>
-<script src="{% static 'js/results_filter_ui.js' %}"></script>
 {% endblock %}

@@ -4,7 +4,12 @@
      data-confirm-delete-image="{% trans 'confirm_delete_image' context 'exams.template.add_exam_question' %}"
      data-confirm-delete-video="{% trans 'confirm_delete_video' context 'exams.template.add_exam_question' %}"
      data-alert-image-will-be-deleted="{% trans 'alert_image_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}"
-     data-alert-video-will-be-deleted="{% trans 'alert_video_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}">
+     data-alert-video-will-be-deleted="{% trans 'alert_video_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}"
+     data-single-answer-warning-message="{% trans 'single_only_one_correct' context 'exams.form.question.error' %}"
+     data-min-option-count="2"
+     data-add-option-label="{% trans 'action_add_option' context 'exams.template.add_exam_question' %}"
+     data-remove-option-label="{% trans 'action_remove_option' context 'exams.template.add_exam_question' %}"
+     data-option-correct-label="{% trans 'label_this_option_is_correct' context 'exams.template.add_exam_question' %}">
     {% if not is_modal %}
         <div class="form-header">
             {% if editing %}
@@ -135,6 +140,7 @@
                     <label for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}:</label>
                     {{ form.answer_mode }}
                     <div class="error-msg">{{ form.answer_mode.errors }}</div>
+                    <div class="single-answer-mode-warning" data-single-answer-warning role="alert" aria-live="polite" hidden></div>
                 </div>
                 <div class="form-group half">
                     <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
@@ -160,64 +166,59 @@
             </div>
         {% else %}
             <div class="variants-section">
-                <h4>Cavab variantlari</h4>
-                <p class="info-text">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
-
-                <div class="variant-card">
-                    <div class="variant-input">
-                        <label>{{ form.option1_text.label }}:</label>
-                        {{ form.option1_text }}
+                <div class="variants-header">
+                    <div>
+                        <h4>Cavab variantlari</h4>
+                        <p class="info-text">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
                     </div>
-                    <div class="variant-check">
-                        <label class="custom-checkbox-container">
-                            {{ form.option1_is_correct }}
-                            <span class="checkmark"></span>
-                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                        </label>
-                    </div>
+                    <button type="button" class="variant-add-btn" data-add-option-btn>
+                        <i class="fas fa-plus"></i> {% trans "action_add_option" context "exams.template.add_exam_question" %}
+                    </button>
                 </div>
 
-                <div class="variant-card">
-                    <div class="variant-input">
-                        <label>{{ form.option2_text.label }}:</label>
-                        {{ form.option2_text }}
-                    </div>
-                    <div class="variant-check">
-                        <label class="custom-checkbox-container">
-                            {{ form.option2_is_correct }}
-                            <span class="checkmark"></span>
-                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                        </label>
-                    </div>
+                <div class="variant-list" data-option-list>
+                    {% for option in form.option_fields %}
+                        <div class="variant-card" data-option-card data-option-index="{{ option.index }}">
+                            <div class="variant-card-header">
+                                <label class="variant-card-title" for="{{ option.text_field.id_for_label }}" data-option-text-label>
+                                    {{ option.label }}:
+                                </label>
+                                <button type="button" class="variant-remove-btn" data-remove-option-btn>
+                                    {% trans "action_remove_option" context "exams.template.add_exam_question" %}
+                                </button>
+                            </div>
+                            <div class="variant-input">
+                                {{ option.text_field }}
+                            </div>
+                            <div class="variant-check">
+                                <label class="custom-checkbox-container">
+                                    {{ option.is_correct_field }}
+                                    <span class="checkmark"></span>
+                                    <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
 
-                <div class="variant-card">
-                    <div class="variant-input">
-                        <label>{{ form.option3_text.label }}:</label>
-                        {{ form.option3_text }}
+                <template data-option-card-template>
+                    <div class="variant-card" data-option-card data-option-index="__INDEX__">
+                        <div class="variant-card-header">
+                            <label class="variant-card-title" for="id_option__INDEX___text" data-option-text-label>__LABEL__:</label>
+                            <button type="button" class="variant-remove-btn" data-remove-option-btn>{% trans "action_remove_option" context "exams.template.add_exam_question" %}</button>
+                        </div>
+                        <div class="variant-input">
+                            <input type="text" name="option__INDEX___text" class="form-control" id="id_option__INDEX___text">
+                        </div>
+                        <div class="variant-check">
+                            <label class="custom-checkbox-container">
+                                <input type="checkbox" name="option__INDEX___is_correct" class="form-check-input" id="id_option__INDEX___is_correct">
+                                <span class="checkmark"></span>
+                                <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="variant-check">
-                        <label class="custom-checkbox-container">
-                            {{ form.option3_is_correct }}
-                            <span class="checkmark"></span>
-                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="variant-card">
-                    <div class="variant-input">
-                        <label>{{ form.option4_text.label }}:</label>
-                        {{ form.option4_text }}
-                    </div>
-                    <div class="variant-check">
-                        <label class="custom-checkbox-container">
-                            {{ form.option4_is_correct }}
-                            <span class="checkmark"></span>
-                            <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                        </label>
-                    </div>
-                </div>
+                </template>
             </div>
         {% endif %}
 
@@ -238,7 +239,7 @@
                 <button type="submit" name="save_and_continue" class="btn-save-add">
                     Yadda saxla ve yeni sual elave et
                 </button>
-                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn-cancel">
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_navigation_query %}?{{ question_navigation_query }}{% endif %}" class="btn-cancel">
                     {% trans "action_cancel" context "exams.template.add_exam_question" %}
                 </a>
             </div>

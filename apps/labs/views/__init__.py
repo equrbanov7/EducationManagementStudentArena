@@ -29,6 +29,7 @@ from .questions import create_question, delete_question, edit_question, import_q
 # ═══════════════════════════════════════════════════════════════════════════════
 from .submissions import (
     auto_save_answer,
+    delete_submissions,
     grade_submission_page,
     lab_submissions,
     submission_answers,
@@ -67,6 +68,7 @@ __all__ = [
     "import_questions",
     # Submissions & Grading
     "lab_submissions",
+    "delete_submissions",
     "grade_submission_page",
     "auto_save_answer",
     "submit_lab",

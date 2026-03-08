@@ -69,27 +69,27 @@
             {# --- İmtahan Hərəkətləri (Düymələr) Hissəsi --- #}
             <section class="exam-actions-section">
                 <div class="action-group">
-                    <a href="{% url 'exams:add_exam_question' exam.slug %}"
+                    <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                        class="action-btn primary-btn js-open-question-form-modal"
                        data-question-modal-mode="create"
-                       data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">
+                       data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
                         <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_exam_detail" %}
                     </a>
 
                     {# Sual Bankı Düyməsi #}
                     {% if exam.exam_type == "test" %}
-                        <a href="{% url 'exams:test_question_bank' exam.slug %}"
+                        <a href="{% url 'exams:test_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn bank-btn">
                             <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% else %}
-                        <a href="{% url 'exams:create_question_bank' exam.slug %}"
+                        <a href="{% url 'exams:create_question_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn bank-btn">
                             <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_exam_detail" %}
                         </a>
                     {% endif %}
 
-                    <a href="{% url 'exams:teacher_questions_bank' exam.slug %}" class="action-btn library-btn">
+                    <a href="{% url 'exams:teacher_questions_bank' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}" class="action-btn library-btn">
                         <i class="fas fa-database"></i> {% trans "action_questions_bank" context "exams.template.teacher_exam_detail" %}
                     </a>
 
@@ -155,10 +155,10 @@
                             </div>
 
                             <div class="question-actions">
-                                <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}"
+                                <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                                    class="action-btn outline-btn-sm js-open-question-form-modal"
                                    data-question-modal-mode="edit"
-                                   data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
+                                   data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">
                                     <i class="fas fa-edit"></i> {% trans "action_edit" context "exams.template.teacher_exam_detail" %}
                                 </a>
 
@@ -177,10 +177,10 @@
                     <div class="empty-state-questions">
                         <div class="empty-icon"><i class="far fa-lightbulb"></i></div>
                         <p>{% trans "empty_no_questions" context "exams.template.teacher_exam_detail" %}</p>
-                        <a href="{% url 'exams:add_exam_question' exam.slug %}"
+                        <a href="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}"
                            class="action-btn primary-btn-sm js-open-question-form-modal"
                            data-question-modal-mode="create"
-                           data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
+                           data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if exam_navigation_query %}?{{ exam_navigation_query }}{% endif %}">{% trans "action_add_first_question" context "exams.template.teacher_exam_detail" %}</a>
                     </div>
                 {% endif %}
             </section>

@@ -44,6 +44,11 @@ urlpatterns = [
     # ═══════════════════════════════════════════════════════════════════
     path("<int:pk>/submissions/", views.lab_submissions, name="lab_submissions"),
     path(
+        "<int:pk>/submissions/delete/",
+        views.delete_submissions,
+        name="delete_submissions",
+    ),
+    path(
         "submissions/<int:pk>/grade-page/",
         views.grade_submission_page,
         name="grade_submission_page",

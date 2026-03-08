@@ -34,6 +34,61 @@
     padding-bottom: 15px;
 }
 
+.results-summary {
+    font-size: 1rem;
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-blue);
+    color: var(--text-dark);
+}
+
+.results-summary__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.results-summary__row + .results-summary__row {
+    margin-top: 0.7rem;
+}
+
+.results-summary__label {
+    font-weight: 700;
+}
+
+.results-summary__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.results-summary__pill--success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.results-summary__pill--warning {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.results-summary__pill--danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.results-summary__pill--neutral {
+    background: #e2e8f0;
+    color: #475569;
+}
+
 .container.my-4 h3 {
     font-size: 1.5rem;
     color: var(--dark-blue);
@@ -59,6 +114,22 @@
     border-radius: 10px;
     border-left: 4px solid var(--primary-blue);
     color: var(--text-dark);
+}
+
+.results-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.results-page-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
 }
 
 /* --- CƏDVƏL DİZAYNI (ƏSAS HİSSƏ) --- */

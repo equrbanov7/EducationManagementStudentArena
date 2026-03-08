@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.labs.models import Lab, LabAssignment, LabSubmission
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -92,8 +92,51 @@ class LabDetailBackUrlTest(TestCase):
         response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "content-card")
-        self.assertContains(response, "filters-toolbar")
+        self.assertContains(response, "results-summary")
+        self.assertContains(response, "results-filter-card")
+        self.assertContains(response, "selectedLabCount")
+
+    def test_lab_submissions_support_bulk_delete_controls(self):
+        assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
+        LabSubmission.objects.create(
+            assignment=assignment,
+            status="submitted",
+            attempt_number=1,
+        )
+
+        self.client.login(username="lab_teacher", password="StrongPass123!")
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["can_delete_submissions"])
+        self.assertContains(response, "deleteSelectedLabsBtn")
+        self.assertContains(response, "js-lab-submission-checkbox")
+
+    def test_delete_lab_submissions_removes_selected_rows(self):
+        assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
+        first = LabSubmission.objects.create(
+            assignment=assignment,
+            status="submitted",
+            attempt_number=1,
+        )
+        second = LabSubmission.objects.create(
+            assignment=assignment,
+            status="late",
+            attempt_number=2,
+        )
+
+        self.client.login(username="lab_teacher", password="StrongPass123!")
+        response = self.client.post(
+            reverse("labs:delete_submissions", kwargs={"pk": self.lab.id}),
+            {
+                "submission_ids": [str(first.id), str(second.id)],
+                "next": reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(LabSubmission.objects.filter(id=first.id).exists())
+        self.assertFalse(LabSubmission.objects.filter(id=second.id).exists())
 
 
 class LabTenantIsolationTest(TestCase):

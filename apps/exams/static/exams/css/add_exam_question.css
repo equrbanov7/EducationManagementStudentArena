@@ -91,10 +91,29 @@ textarea {
     color: #111827;
 }
 
+.variants-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.variants-header h4 {
+    margin-top: 0;
+}
+
+.variant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 .info-text {
     font-size: 13px;
     color: #6b7280;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .media-help {
@@ -121,17 +140,42 @@ textarea {
     line-height: 1.5;
 }
 
+.single-answer-mode-warning {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid #fbbf24;
+    border-radius: 10px;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
 .variant-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 15px;
-    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     transition: all 0.3s ease;
     position: relative;
+}
+
+.variant-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.variant-card-title {
+    margin: 0;
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 /* Variant kartının hover effekti */
@@ -225,6 +269,39 @@ textarea {
     color: #059669; /* Tünd yaşıl mətn */
     font-weight: 700;
     content: "Düzgün cavab";
+}
+
+.variant-add-btn,
+.variant-remove-btn {
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.variant-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+}
+
+.variant-add-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+}
+
+.variant-remove-btn {
+    padding: 10px 14px;
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+}
+
+.variant-remove-btn:hover {
+    background: #ffe4e6;
 }
 
 /* Düymələr */
@@ -356,4 +433,16 @@ button:active {
     border-radius: 6px;
     font-size: 14px;
     color: #1e40af;
+}
+
+@media (max-width: 768px) {
+    .variants-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .variant-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

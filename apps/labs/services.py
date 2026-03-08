@@ -79,14 +79,19 @@ def auto_save_lab_answers(assignment, answers_data):
         int: Number of answers saved
     """
     count = 0
+    active_submission = assignment.submissions.order_by("-attempt_number", "-submitted_at").first()
+    attempt_number = getattr(active_submission, "attempt_number", None) or 1
 
     for question_id, answer_text in answers_data.items():
         LabAnswer.objects.update_or_create(
-            assignment=assignment,
+            lab=assignment.lab,
             question_id=question_id,
+            student=assignment.student,
+            attempt_number=attempt_number,
             defaults={
-                "answer_text": answer_text,
-                "updated_at": timezone.now(),
+                "submission": active_submission,
+                "answer": answer_text,
+                "is_draft": True,
             },
         )
         count += 1

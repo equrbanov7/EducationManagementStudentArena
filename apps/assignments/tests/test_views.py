@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.assignments.models import Assignment, Submission
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -227,6 +227,50 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(response.context["selected_submission_id"], str(submission.id))
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "resultsFilterSearchInput")
+
+    def test_review_submissions_renders_bulk_delete_controls_for_teacher(self):
+        Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Delete me",
+            status="submitted",
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["can_delete_submissions"])
+        self.assertContains(response, "selectedAssignmentCount")
+        self.assertContains(response, "deleteSelectedAssignmentsBtn")
+        self.assertContains(response, "js-assignment-submission-checkbox")
+
+    def test_delete_assignment_submissions_removes_selected_rows(self):
+        first = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="First delete",
+            status="submitted",
+        )
+        second = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Second delete",
+            status="submitted",
+        )
+
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            reverse("assignments:delete_assignment_submissions", kwargs={"pk": self.assignment.id}),
+            {
+                "submission_ids": [str(first.id), str(second.id)],
+                "next": reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Submission.objects.filter(id=first.id).exists())
+        self.assertFalse(Submission.objects.filter(id=second.id).exists())
 
     def test_student_submit_then_teacher_grade_flow_hides_results_until_review_window_closes(self):
         self.client.force_login(self.student)

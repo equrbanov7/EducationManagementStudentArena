@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
@@ -22,7 +23,65 @@ def _is_question_modal_request(request):
     return request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
 
-def _render_question_form_html(request, *, exam, form, editing=False, question=None):
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _resolve_question_bank_navigation(request):
+    requested_profile_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+        "review-results",
+    }
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = ""
+
+    return_to = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.POST.get("return_to"),
+    )
+
+    nav_params = {}
+    if requested_profile_section:
+        nav_params["from_section"] = requested_profile_section
+    if return_to:
+        nav_params["return_to"] = return_to
+
+    return return_to, requested_profile_section, urlencode(nav_params)
+
+
+def _append_navigation_query(path, navigation_query):
+    if not navigation_query:
+        return path
+    separator = "&" if "?" in path else "?"
+    return f"{path}{separator}{navigation_query}"
+
+
+def _render_question_form_html(request, *, exam, form, editing=False, question=None, navigation_query=""):
     return render_to_string(
         "exams/teacher/partials/_question_form.html",
         {
@@ -31,6 +90,7 @@ def _render_question_form_html(request, *, exam, form, editing=False, question=N
             "editing": editing,
             "question": question,
             "is_modal": True,
+            "question_navigation_query": navigation_query,
         },
         request=request,
     )
@@ -41,6 +101,7 @@ def _render_question_form_html(request, *, exam, form, editing=False, question=N
 def teacher_questions_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     allowed_statuses = {"all", "active", "inactive"}
     allowed_sorts = {"newest", "oldest", "az", "za"}
@@ -89,6 +150,11 @@ def teacher_questions_bank(request, slug):
             redirect_params["sort"] = redirect_sort
         if redirect_page.isdigit():
             redirect_params["page"] = redirect_page
+        if request.POST.get("from_section"):
+            redirect_params["from_section"] = request.POST.get("from_section")
+        safe_return_to = _safe_same_origin_redirect_path(request, request.POST.get("return_to"))
+        if safe_return_to:
+            redirect_params["return_to"] = safe_return_to
 
         redirect_url = reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug})
         if redirect_params:
@@ -145,6 +211,11 @@ def teacher_questions_bank(request, slug):
         base_query_params["status"] = status_filter
     if sort_filter != "newest":
         base_query_params["sort"] = sort_filter
+    if request.GET.get("from_section"):
+        base_query_params["from_section"] = request.GET.get("from_section")
+    safe_return_to = _safe_same_origin_redirect_path(request, request.GET.get("return_to"))
+    if safe_return_to:
+        base_query_params["return_to"] = safe_return_to
 
     return render(
         request,
@@ -159,6 +230,7 @@ def teacher_questions_bank(request, slug):
             "active_questions": active_questions,
             "inactive_questions": inactive_questions,
             "pagination_query": urlencode(base_query_params),
+            "question_bank_navigation_query": navigation_query,
         },
     )
 
@@ -174,6 +246,7 @@ def add_exam_question(request, slug):
     exam = get_teacher_exam_or_404(request, slug=slug)
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
     is_modal_request = _is_question_modal_request(request)
+    _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(request.POST, request.FILES, exam_type=exam.exam_type, subject_blocks=blocks)
@@ -202,15 +275,28 @@ def add_exam_question(request, slug):
             # hansı düyməyə basıldığını yoxlayaq
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
-                return redirect("exams:add_exam_question", slug=exam.slug)
+                return redirect(
+                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                )
             else:
                 # Sadəcə imtahan detalına qayıt
-                return redirect("exams:teacher_exam_detail", slug=exam.slug)
+                return redirect(
+                    _append_navigation_query(
+                        reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                        navigation_query,
+                    )
+                )
         if is_modal_request:
             return JsonResponse(
                 {
                     "success": False,
-                    "html": _render_question_form_html(request, exam=exam, form=form, editing=False),
+                    "html": _render_question_form_html(
+                        request,
+                        exam=exam,
+                        form=form,
+                        editing=False,
+                        navigation_query=navigation_query,
+                    ),
                 },
                 status=400,
             )
@@ -226,6 +312,7 @@ def add_exam_question(request, slug):
                 "form": form,
                 "editing": False,
                 "is_modal": True,
+                "question_navigation_query": navigation_query,
             },
         )
 
@@ -237,6 +324,7 @@ def add_exam_question(request, slug):
             "form": form,
             "editing": False,
             "is_modal": False,
+            "question_navigation_query": navigation_query,
         },
     )
 
@@ -250,6 +338,7 @@ def edit_exam_question(request, slug, question_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
     is_modal_request = _is_question_modal_request(request)
+    _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     # --- DÜZƏLİŞ: Dropdown-un dolması üçün blokları çağırırıq ---
     blocks = QuestionBlock.objects.filter(exam=exam).order_by("order")
@@ -279,9 +368,16 @@ def edit_exam_question(request, slug, question_id):
                 return JsonResponse({"success": True, "question_id": q.id})
 
             if "save_and_continue" in request.POST:
-                return redirect("exams:add_exam_question", slug=exam.slug)
+                return redirect(
+                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                )
 
-            return redirect("exams:teacher_exam_detail", slug=exam.slug)
+            return redirect(
+                _append_navigation_query(
+                    reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                    navigation_query,
+                )
+            )
         if is_modal_request:
             return JsonResponse(
                 {
@@ -292,6 +388,7 @@ def edit_exam_question(request, slug, question_id):
                         form=form,
                         editing=True,
                         question=question,
+                        navigation_query=navigation_query,
                     ),
                 },
                 status=400,
@@ -313,6 +410,7 @@ def edit_exam_question(request, slug, question_id):
                 "editing": True,
                 "question": question,
                 "is_modal": True,
+                "question_navigation_query": navigation_query,
             },
         )
 
@@ -325,6 +423,7 @@ def edit_exam_question(request, slug, question_id):
             "editing": True,
             "question": question,
             "is_modal": False,
+            "question_navigation_query": navigation_query,
         },
     )
 
@@ -337,10 +436,16 @@ def delete_exam_question(request, slug, question_id):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     question = get_object_or_404(ExamQuestion, id=question_id, exam=exam)
+    _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
         question.delete()
-        return redirect("exams:teacher_exam_detail", slug=exam.slug)
+        return redirect(
+            _append_navigation_query(
+                reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                navigation_query,
+            )
+        )
 
     return render(
         request,
