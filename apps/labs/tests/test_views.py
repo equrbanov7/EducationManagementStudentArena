@@ -216,3 +216,91 @@ class LabReviewVisibilityTest(TestCase):
         self.assertEqual(visible_response.status_code, 200)
         self.assertTrue(visible_response.context["show_review_data"])
         self.assertContains(visible_response, "17,25")
+
+
+class RosterAPIAuthorizationTest(TestCase):
+    """Test authorization for roster API endpoints"""
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create users
+        self.owner = User.objects.create_user("owner", "owner@example.com", "StrongPass123!")
+        self.teacher = User.objects.create_user("teacher", "teacher@example.com", "StrongPass123!")
+        self.assistant = User.objects.create_user("assistant", "assistant@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("student", "student@example.com", "StrongPass123!")
+        self.unauthorized_user = User.objects.create_user("unauthorized", "unauthorized@example.com", "StrongPass123!")
+
+        # Set roles
+        self.owner.profile.role = ProfileRole.TEACHER
+        self.owner.profile.save(update_fields=["role", "updated_at"])
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.assistant.profile.role = ProfileRole.TEACHER
+        self.assistant.profile.save(update_fields=["role", "updated_at"])
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.unauthorized_user.profile.role = ProfileRole.STUDENT
+        self.unauthorized_user.profile.save(update_fields=["role", "updated_at"])
+
+        # Create course
+        self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published")
+
+        # Add memberships
+        CourseMembership.objects.create(course=self.course, user=self.teacher, role="teacher")
+        CourseMembership.objects.create(course=self.course, user=self.assistant, role="assistant")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="Group A")
+
+    def test_api_get_groups_owner_can_access(self):
+        """Course owner should be able to access groups"""
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("groups", response.json())
+
+    def test_api_get_groups_teacher_can_access(self):
+        """Teacher should be able to access groups"""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("groups", response.json())
+
+    def test_api_get_groups_assistant_can_access(self):
+        """Assistant should be able to access groups"""
+        self.client.force_login(self.assistant)
+        response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("groups", response.json())
+
+    def test_api_get_groups_unauthorized_denied(self):
+        """Unauthorized user should be denied"""
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_api_get_students_owner_can_access(self):
+        """Course owner should be able to access students"""
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("students", response.json())
+
+    def test_api_get_students_teacher_can_access(self):
+        """Teacher should be able to access students"""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("students", response.json())
+
+    def test_api_get_students_assistant_can_access(self):
+        """Assistant should be able to access students"""
+        self.client.force_login(self.assistant)
+        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("students", response.json())
+
+    def test_api_get_students_unauthorized_denied(self):
+        """Unauthorized user should be denied"""
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        self.assertEqual(response.status_code, 403)

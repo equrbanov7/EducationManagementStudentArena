@@ -5,6 +5,7 @@ Tələbə görünüşü və cavablar
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -15,6 +16,22 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 from ..models import LabAnswer, LabAssignment, LabQuestion, LabSubmission
 from ._helpers import _append_return_to, _get_tenant_lab_or_404, _lab_back_url, _lab_return_to
+
+
+def _user_can_access_course_roster(user, course):
+    """
+    Check if user can access course roster (groups/students).
+    User must be course owner OR have teacher/assistant role in the course.
+    """
+    if course.owner == user:
+        return True
+
+    # Check if user has teacher or assistant role in the course
+    return CourseMembership.objects.filter(
+        course=course,
+        user=user,
+        role__in=["teacher", "assistant"]
+    ).exists()
 
 
 @login_required
@@ -231,6 +248,10 @@ def api_get_groups(request, course_id):
 
     course = _get_tenant_course_or_404(request, course_id)
 
+    # Authorization check: user must be course owner or have teacher/assistant role
+    if not _user_can_access_course_roster(request.user, course):
+        raise PermissionDenied("You do not have permission to access this course roster.")
+
     groups = (
         CourseMembership.objects.filter(course=course, role="student")
         .exclude(group_name="")
@@ -248,6 +269,11 @@ def api_get_students(request, course_id):
     from ._helpers import _get_tenant_course_or_404
 
     course = _get_tenant_course_or_404(request, course_id)
+
+    # Authorization check: user must be course owner or have teacher/assistant role
+    if not _user_can_access_course_roster(request.user, course):
+        raise PermissionDenied("You do not have permission to access this course roster.")
+
     groups = request.GET.get("groups", "").split(",")
     groups = [g.strip() for g in groups if g.strip()]
 

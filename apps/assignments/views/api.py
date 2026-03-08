@@ -10,12 +10,29 @@ Contains:
 """
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 
 from apps.courses.models import CourseMembership
 
 from ._helpers import _get_tenant_course_or_404
+
+
+def _user_can_access_course_roster(user, course):
+    """
+    Check if user can access course roster (groups/students).
+    User must be course owner OR have teacher/assistant role in the course.
+    """
+    if course.owner == user:
+        return True
+
+    # Check if user has teacher or assistant role in the course
+    return CourseMembership.objects.filter(
+        course=course,
+        user=user,
+        role__in=["teacher", "assistant"]
+    ).exists()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -40,6 +57,10 @@ def search_students(request):
         return JsonResponse({"results": []})
 
     course = _get_tenant_course_or_404(request, course_id)
+
+    # Authorization check: user must be course owner or have teacher/assistant role
+    if not _user_can_access_course_roster(request.user, course):
+        raise PermissionDenied("You do not have permission to access this course roster.")
 
     # Kursda olan tələbələri axtar
     student_memberships = (
@@ -87,6 +108,10 @@ def search_groups(request):
 
     course = _get_tenant_course_or_404(request, course_id)
 
+    # Authorization check: user must be course owner or have teacher/assistant role
+    if not _user_can_access_course_roster(request.user, course):
+        raise PermissionDenied("You do not have permission to access this course roster.")
+
     # Unique qrup adlarını tap
     group_names = (
         CourseMembership.objects.filter(course=course, group_name__icontains=query)
@@ -122,6 +147,11 @@ def students_by_groups(request):
         return JsonResponse({"students": []})
 
     course = _get_tenant_course_or_404(request, course_id)
+
+    # Authorization check: user must be course owner or have teacher/assistant role
+    if not _user_can_access_course_roster(request.user, course):
+        raise PermissionDenied("You do not have permission to access this course roster.")
+
     group_names = [g.strip() for g in groups_param.split(",") if g.strip()]
 
     if not group_names:
