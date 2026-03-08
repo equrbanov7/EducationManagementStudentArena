@@ -303,3 +303,104 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertTrue(visible_submissions_response.context["submissions"][0].show_review_data)
         self.assertContains(visible_submissions_response, "Looks good")
         self.assertContains(visible_submissions_response, "95")
+
+
+class RosterAPIAuthorizationTest(TestCase):
+    """Test authorization for roster API endpoints"""
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create users
+        self.owner = User.objects.create_user("owner", "owner@example.com", "StrongPass123!")
+        self.teacher = User.objects.create_user("teacher", "teacher@example.com", "StrongPass123!")
+        self.assistant = User.objects.create_user("assistant", "assistant@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("student", "student@example.com", "StrongPass123!")
+        self.unauthorized_user = User.objects.create_user("unauthorized", "unauthorized@example.com", "StrongPass123!")
+
+        # Set roles
+        self.owner.profile.role = ProfileRole.TEACHER
+        self.owner.profile.save(update_fields=["role", "updated_at"])
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.assistant.profile.role = ProfileRole.TEACHER
+        self.assistant.profile.save(update_fields=["role", "updated_at"])
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.unauthorized_user.profile.role = ProfileRole.STUDENT
+        self.unauthorized_user.profile.save(update_fields=["role", "updated_at"])
+
+        # Create course
+        self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published")
+
+        # Add memberships
+        CourseMembership.objects.create(course=self.course, user=self.teacher, role="teacher")
+        CourseMembership.objects.create(course=self.course, user=self.assistant, role="assistant")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="Group A")
+
+    def test_search_students_owner_can_access(self):
+        """Course owner should be able to search students"""
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.json())
+
+    def test_search_students_teacher_can_access(self):
+        """Teacher should be able to search students"""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.json())
+
+    def test_search_students_assistant_can_access(self):
+        """Assistant should be able to search students"""
+        self.client.force_login(self.assistant)
+        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.json())
+
+    def test_search_students_unauthorized_denied(self):
+        """Unauthorized user should be denied"""
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_search_groups_owner_can_access(self):
+        """Course owner should be able to search groups"""
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.json())
+
+    def test_search_groups_teacher_can_access(self):
+        """Teacher should be able to search groups"""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("results", response.json())
+
+    def test_search_groups_unauthorized_denied(self):
+        """Unauthorized user should be denied"""
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_students_by_groups_owner_can_access(self):
+        """Course owner should be able to get students by groups"""
+        self.client.force_login(self.owner)
+        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("students", response.json())
+
+    def test_students_by_groups_teacher_can_access(self):
+        """Teacher should be able to get students by groups"""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("students", response.json())
+
+    def test_students_by_groups_unauthorized_denied(self):
+        """Unauthorized user should be denied"""
+        self.client.force_login(self.unauthorized_user)
+        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        self.assertEqual(response.status_code, 403)
