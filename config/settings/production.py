@@ -121,7 +121,7 @@ sentry_dsn = (os.getenv("SENTRY_DSN") or "").strip()
 if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,
-        send_default_pii=True,
+        send_default_pii=False,
     )
 
 # Content Security Policy (CSP) - Production settings (daha ciddi)

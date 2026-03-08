@@ -35,7 +35,7 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # ALLOWED_HOSTS - read from .env or use default
 ALLOWED_HOSTS = _split_csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
-ENABLE_NGROK = os.getenv("ENABLE_NGROK", "True").lower() == "true"
+ENABLE_NGROK = os.getenv("ENABLE_NGROK", "False").lower() == "true"
 if ENABLE_NGROK:
     ALLOWED_HOSTS.extend([".ngrok-free.dev", ".ngrok-free.app", ".ngrok.io", ".ngrok.app"])
 ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS))
