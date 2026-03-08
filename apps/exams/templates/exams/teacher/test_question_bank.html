@@ -61,6 +61,12 @@
         <form method="post" enctype="multipart/form-data" class="split-layout" onsubmit="return syncBankSettings();">
             {% csrf_token %}
             <input type="hidden" name="action" value="preview"/>
+            {% if navigation_from_section %}
+                <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
+            {% endif %}
+            {% if navigation_return_to %}
+                <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
+            {% endif %}
 
             <!-- ✅ ƏLAVƏ: Preview klikində də sual sayı və default bal POST getsin -->
             <input type="hidden" name="random_question_count" id="rqHiddenPreview" value="{{ rq_value }}">
@@ -201,6 +207,12 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
         <form method="post" id="saveForm" onsubmit="return syncBankSettings();">
             {% csrf_token %}
             <input type="hidden" name="action" value="save"/>
+            {% if navigation_from_section %}
+                <input type="hidden" name="from_section" value="{{ navigation_from_section }}">
+            {% endif %}
+            {% if navigation_return_to %}
+                <input type="hidden" name="return_to" value="{{ navigation_return_to }}">
+            {% endif %}
 
             <!-- ✅ ƏLAVƏ: Save klikində də sual sayı və default bal getsin -->
             <input type="hidden" name="random_question_count" id="rqHiddenSave" value="{{ rq_value }}">

@@ -94,6 +94,37 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "resultsFilterSearchInput")
 
+    def test_review_submissions_renders_bulk_delete_controls(self):
+        self.client.login(username="project_review_teacher", password="StrongPass123!")
+        response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["can_delete_submissions"])
+        self.assertContains(response, "selectedProjectCount")
+        self.assertContains(response, "deleteSelectedProjectsBtn")
+        self.assertContains(response, "js-project-submission-checkbox")
+
+    def test_delete_project_submissions_removes_selected_rows(self):
+        another_submission = ProjectSubmission.objects.create(
+            project=self.project,
+            student=self.student,
+            content="Another delete target",
+            status="pending",
+        )
+
+        self.client.login(username="project_review_teacher", password="StrongPass123!")
+        response = self.client.post(
+            reverse("projects:delete_project_submissions", kwargs={"pk": self.project.id}),
+            {
+                "submission_ids": [str(self.submission.id), str(another_submission.id)],
+                "next": reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(ProjectSubmission.objects.filter(id=self.submission.id).exists())
+        self.assertFalse(ProjectSubmission.objects.filter(id=another_submission.id).exists())
+
     def test_review_submissions_prefers_explicit_return_to_for_back_url(self):
         self.client.login(username="project_review_teacher", password="StrongPass123!")
         return_to = f"{reverse('accounts:profile')}?section=review-results"

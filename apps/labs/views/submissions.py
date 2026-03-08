@@ -6,11 +6,15 @@ Submission idarəetməsi və qiymətləndirmə
 import json
 import os
 import traceback
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -19,7 +23,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.courses.models import CourseMembership
-from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 
 from ..models import LabAnswer, LabAssignment, LabSubmission
@@ -33,6 +37,20 @@ from ._helpers import (
 )
 
 
+def _parse_filter_date(raw_value):
+    raw_date = (raw_value or "").strip()
+    if not raw_date:
+        return "", None
+    try:
+        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
+    except ValueError:
+        return "", None
+
+
+def _can_delete_submissions(request):
+    return request_has_permission(request, "lab.delete") or request_has_permission(request, "course.delete")
+
+
 @login_required
 def lab_submissions(request, pk):
     """Lab cavablarını göstər - müəllim üçün"""
@@ -43,11 +61,7 @@ def lab_submissions(request, pk):
         return redirect("courses:course_dashboard", pk=lab.course.id)
 
     # Bütün submission-lar
-    submissions = (
-        LabSubmission.objects.filter(assignment__lab=lab)
-        .select_related("assignment__student")
-        .order_by("-submitted_at")
-    )
+    submissions = LabSubmission.objects.filter(assignment__lab=lab).select_related("assignment__student")
 
     # Qrupları al - CourseMembership-dən
 
@@ -57,19 +71,45 @@ def lab_submissions(request, pk):
         .exclude(group_name="")
     )
 
-    groups = list(memberships.values_list("group_name", flat=True).distinct())
+    groups = sorted(memberships.values_list("group_name", flat=True).distinct())
 
     # Filters
-    status_filter = request.GET.get("status", "")
-    group_filter = request.GET.get("group", "")
+    search_query = (request.GET.get("q") or "").strip()
+    if search_query:
+        submissions = submissions.filter(
+            Q(assignment__student__username__icontains=search_query)
+            | Q(assignment__student__first_name__icontains=search_query)
+            | Q(assignment__student__last_name__icontains=search_query)
+            | Q(assignment__student__email__icontains=search_query)
+            | Q(submission_text__icontains=search_query)
+            | Q(submission_link__icontains=search_query)
+        )
 
-    if status_filter:
+    status_filter = (request.GET.get("status") or "all").strip().lower()
+    allowed_status_filters = {"all", "submitted", "late", "graded", "returned"}
+    if status_filter not in allowed_status_filters:
+        status_filter = "all"
+
+    group_filter = (request.GET.get("group") or "all").strip()
+    if group_filter != "all" and group_filter not in groups:
+        group_filter = "all"
+    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
+    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
+
+    if status_filter != "all":
         submissions = submissions.filter(status=status_filter)
 
-    if group_filter:
+    if group_filter != "all":
         # Qrup filter - membership üzərindən
         student_ids = memberships.filter(group_name=group_filter).values_list("user_id", flat=True)
         submissions = submissions.filter(assignment__student_id__in=student_ids)
+    if date_from:
+        submissions = submissions.filter(submitted_at__date__gte=date_from)
+    if date_to:
+        submissions = submissions.filter(submitted_at__date__lte=date_to)
+
+    submissions = submissions.order_by("-submitted_at")
+    page_obj = Paginator(submissions, 12).get_page(request.GET.get("page"))
 
     # Statistika
     all_submissions = LabSubmission.objects.filter(assignment__lab=lab)
@@ -85,18 +125,87 @@ def lab_submissions(request, pk):
     for m in memberships:
         student_groups[m.user_id] = m.group_name
 
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "q": search_query,
+                "status": status_filter,
+                "group": group_filter,
+                "date_from": date_from_raw,
+                "date_to": date_to_raw,
+                "from_section": (request.GET.get("from_section") or "").strip(),
+                "return_to": (request.GET.get("return_to") or "").strip(),
+            }.items()
+            if value not in ("", None, "all")
+        }
+    )
+
     context = {
         "lab": lab,
-        "submissions": submissions,
+        "submissions": page_obj.object_list,
+        "page_obj": page_obj,
         "groups": groups,
+        "search_query": search_query,
         "status_filter": status_filter,
         "group_filter": group_filter,
+        "date_from": date_from_raw,
+        "date_to": date_to_raw,
         "stats": stats,
         "student_groups": student_groups,
         "back_url": _lab_back_url(request, lab),
+        "pagination_query": pagination_query,
+        "can_delete_submissions": _can_delete_submissions(request),
     }
 
     return render(request, "labs/lab_submissions.html", context)
+
+
+@login_required
+@require_POST
+def delete_submissions(request, pk):
+    lab = _get_tenant_lab_or_404(request, pk)
+
+    if lab.created_by != request.user:
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
+        return redirect(reverse("labs:lab_submissions", kwargs={"pk": lab.id}))
+
+    if not _can_delete_submissions(request):
+        messages.error(request, pgettext("labs.view.permission", "permission_denied"))
+        return redirect(reverse("labs:lab_submissions", kwargs={"pk": lab.id}))
+
+    redirect_url = _safe_same_origin_redirect_path(request, request.POST.get("next"))
+    if not redirect_url:
+        params = {}
+        from_section = (request.POST.get("from_section") or "").strip()
+        return_to = _safe_same_origin_redirect_path(request, request.POST.get("return_to"))
+        if from_section:
+            params["from_section"] = from_section
+        if return_to:
+            params["return_to"] = return_to
+        redirect_url = reverse("labs:lab_submissions", kwargs={"pk": lab.id})
+        if params:
+            redirect_url = f"{redirect_url}?{urlencode(params)}"
+
+    raw_ids = request.POST.getlist("submission_ids")
+    single_submission_id = (request.POST.get("submission_id") or "").strip()
+    if single_submission_id:
+        raw_ids.append(single_submission_id)
+
+    submission_ids = sorted({int(raw_id) for raw_id in raw_ids if str(raw_id).isdigit()})
+    if not submission_ids:
+        messages.warning(request, "Silmək üçün ən azı bir cavab seçin.")
+        return redirect(redirect_url)
+
+    submissions_qs = LabSubmission.objects.filter(assignment__lab=lab, id__in=submission_ids)
+    deleted_count = submissions_qs.count()
+    if deleted_count == 0:
+        messages.warning(request, "Seçilən cavablar tapılmadı.")
+        return redirect(redirect_url)
+
+    submissions_qs.delete()
+    messages.success(request, f"{deleted_count} cavab silindi.")
+    return redirect(redirect_url)
 
 
 @login_required

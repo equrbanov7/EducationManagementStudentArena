@@ -1,9 +1,12 @@
 import re
+from urllib.parse import urlencode, urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
@@ -13,10 +16,69 @@ from apps.exams.services.utils import _norm
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
+def _safe_same_origin_redirect_path(request, candidate_url):
+    raw_url = (candidate_url or "").strip()
+    if not raw_url:
+        return ""
+
+    if not url_has_allowed_host_and_scheme(
+        raw_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ""
+
+    parsed = urlsplit(raw_url)
+    if parsed.netloc and parsed.netloc != request.get_host():
+        return ""
+
+    path = parsed.path or "/"
+    query = f"?{parsed.query}" if parsed.query else ""
+    fragment = f"#{parsed.fragment}" if parsed.fragment else ""
+    return f"{path}{query}{fragment}"
+
+
+def _resolve_question_bank_navigation(request):
+    requested_profile_section = (request.GET.get("from_section") or request.POST.get("from_section") or "").strip()
+    valid_profile_sections = {
+        "my-exams",
+        "assigned-exams",
+        "profile-info",
+        "my-courses",
+        "assigned-courses",
+        "courses",
+        "pending-review",
+        "review-results",
+    }
+    if requested_profile_section not in valid_profile_sections:
+        requested_profile_section = ""
+
+    return_to = _safe_same_origin_redirect_path(
+        request,
+        request.GET.get("return_to") or request.POST.get("return_to"),
+    )
+
+    nav_params = {}
+    if requested_profile_section:
+        nav_params["from_section"] = requested_profile_section
+    if return_to:
+        nav_params["return_to"] = return_to
+
+    return requested_profile_section, return_to, urlencode(nav_params)
+
+
+def _append_navigation_query(path, navigation_query):
+    if not navigation_query:
+        return path
+    separator = "&" if "?" in path else "?"
+    return f"{path}{separator}{navigation_query}"
+
+
 @login_required
 def create_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    navigation_from_section, navigation_return_to, navigation_query = _resolve_question_bank_navigation(request)
 
     # Mövcud blokları gətiririk ki, ekranda görsənsin
     blocks = exam.question_blocks.all().order_by("order")
@@ -34,7 +96,13 @@ def create_question_bank(request, slug):
     return render(
         request,
         "exams/teacher/create_question_bank.html",
-        {"exam": exam, "blocks_data": blocks_data},
+        {
+            "exam": exam,
+            "blocks_data": blocks_data,
+            "question_bank_navigation_query": navigation_query,
+            "navigation_from_section": navigation_from_section,
+            "navigation_return_to": navigation_return_to,
+        },
     )
 
 
@@ -42,6 +110,7 @@ def create_question_bank(request, slug):
 def process_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
         # 1. Silinməli olan blokları silirik
@@ -76,7 +145,12 @@ def process_question_bank(request, slug):
                             block_name=block_name
                         ),
                     )
-                    return redirect("exams:create_question_bank", slug=exam.slug)
+                    return redirect(
+                        _append_navigation_query(
+                            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
+                            navigation_query,
+                        )
+                    )
                 used_names.add(block_name.lower())
 
                 content_key = f"block_content_{ui_id}"
@@ -98,7 +172,12 @@ def process_question_bank(request, slug):
                             block_name=block_name
                         ),
                     )
-                    return redirect("exams:create_question_bank", slug=exam.slug)
+                    return redirect(
+                        _append_navigation_query(
+                            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
+                            navigation_query,
+                        )
+                    )
 
                 if block_name:
                     # Blok Yaradılması/Yenilənməsi
@@ -142,15 +221,26 @@ def process_question_bank(request, slug):
                             )
 
         messages.success(request, pgettext_lazy("exams.view.question_bank.message", "bank_saved"))
-        return redirect("exams:teacher_exam_detail", slug=exam.slug)
+        return redirect(
+            _append_navigation_query(
+                reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+                navigation_query,
+            )
+        )
 
-    return redirect("exams:create_question_bank", slug=exam.slug)
+    return redirect(
+        _append_navigation_query(
+            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
+            navigation_query,
+        )
+    )
 
 
 @login_required
 def test_question_bank(request, slug):
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    navigation_from_section, navigation_return_to, navigation_query = _resolve_question_bank_navigation(request)
 
     # yalnız test imtahanı üçün
     if exam.exam_type != "test":
@@ -206,6 +296,9 @@ def test_question_bank(request, slug):
                 # >>> YENİ: input-ların value-ları
                 "rq_value": rq_value,
                 "dp_value": dp_value,
+                "question_bank_navigation_query": navigation_query,
+                "navigation_from_section": navigation_from_section,
+                "navigation_return_to": navigation_return_to,
             },
         )
 
@@ -377,7 +470,12 @@ def test_question_bank(request, slug):
                 skipped_count=skipped_count,
             ),
         )
-        return redirect("exams:test_question_bank", slug=exam.slug)
+        return redirect(
+            _append_navigation_query(
+                reverse("exams:test_question_bank", kwargs={"slug": exam.slug}),
+                navigation_query,
+            )
+        )
 
     # PREVIEW və ya parse sonrası eyni səhifəni göstər
     return render(
@@ -394,5 +492,8 @@ def test_question_bank(request, slug):
             # >>> YENİ: Preview refresh olsa da input-lar dolu qalsın
             "rq_value": rq_value,
             "dp_value": dp_value,
+            "question_bank_navigation_query": navigation_query,
+            "navigation_from_section": navigation_from_section,
+            "navigation_return_to": navigation_return_to,
         },
     )

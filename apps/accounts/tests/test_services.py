@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.accounts import services
-from apps.accounts.models import ProfileRole, UserProfile
+from apps.accounts.models import ProfileRole
 from apps.blog.models import EmailOTP
 from apps.courses.models import Course, CourseMembership
 from apps.organizations.models import Country
@@ -31,14 +31,16 @@ class RoleManagementServicesTest(TestCase):
             email="teacher@example.com",
             password="pass123"
         )
-        UserProfile.objects.create(user=self.teacher, role=ProfileRole.TEACHER)
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.student = User.objects.create_user(
             username="student1",
             email="student@example.com",
             password="pass123"
         )
-        UserProfile.objects.create(user=self.student, role=ProfileRole.STUDENT)
+        self.student.profile.role = ProfileRole.STUDENT
+        self.student.profile.save(update_fields=["role", "updated_at"])
 
     def test_is_superadmin_user(self):
         """Test superadmin detection."""

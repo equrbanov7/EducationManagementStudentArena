@@ -88,9 +88,9 @@ class CategoryTest(TestCase):
         self.assertEqual(category.slug, "django-testing")
 
     def test_category_slug_unique(self):
-        """Test that duplicate category names get unique slugs."""
+        """Test that colliding slugs are de-duplicated for distinct names."""
         cat1 = Category.objects.create(name="Test Category")
-        cat2 = Category.objects.create(name="Test Category")
+        cat2 = Category.objects.create(name="Test-Category")
 
         self.assertEqual(cat1.slug, "test-category")
         self.assertNotEqual(cat1.slug, cat2.slug)

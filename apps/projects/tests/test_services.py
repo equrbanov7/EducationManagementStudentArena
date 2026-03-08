@@ -2,10 +2,12 @@
 Service tests for projects app.
 """
 
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.courses.models import Course
 from apps.projects import services
@@ -36,8 +38,9 @@ class ProjectSubmissionServicesTest(TestCase):
         self.project = Project.objects.create(
             title="Test Project",
             course=self.course,
-            created_by=self.teacher,
-            status="published"
+            start_date=timezone.now(),
+            deadline=timezone.now() + timedelta(days=1),
+            status="active",
         )
 
     def test_create_project_submission(self):
@@ -51,8 +54,8 @@ class ProjectSubmissionServicesTest(TestCase):
         self.assertIsNotNone(submission)
         self.assertEqual(submission.project, self.project)
         self.assertEqual(submission.student, self.student)
-        self.assertEqual(submission.submission_text, "Test submission")
-        self.assertEqual(submission.status, "submitted")
+        self.assertEqual(submission.content, "Test submission")
+        self.assertEqual(submission.status, "pending")
 
     def test_update_project_submission(self):
         """Test updating a project submission."""
@@ -67,7 +70,7 @@ class ProjectSubmissionServicesTest(TestCase):
             submission_text="Updated text"
         )
 
-        self.assertEqual(updated.submission_text, "Updated text")
+        self.assertEqual(updated.content, "Updated text")
 
 
 class ProjectGradingServicesTest(TestCase):
@@ -92,13 +95,15 @@ class ProjectGradingServicesTest(TestCase):
         self.project = Project.objects.create(
             title="Test Project",
             course=self.course,
-            created_by=self.teacher,
-            status="published"
+            start_date=timezone.now(),
+            deadline=timezone.now() + timedelta(days=1),
+            status="active",
         )
         self.submission = ProjectSubmission.objects.create(
             project=self.project,
             student=self.student,
-            status="submitted"
+            content="Needs grading",
+            status="pending"
         )
 
     def test_grade_project_submission(self):
@@ -110,7 +115,7 @@ class ProjectGradingServicesTest(TestCase):
             self.teacher
         )
 
-        self.assertEqual(graded.score, Decimal("90"))
+        self.assertEqual(graded.grade, Decimal("90"))
         self.assertEqual(graded.feedback, "Excellent work!")
         self.assertEqual(graded.graded_by, self.teacher)
         self.assertEqual(graded.status, "graded")

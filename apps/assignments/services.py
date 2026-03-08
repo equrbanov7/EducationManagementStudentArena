@@ -14,6 +14,15 @@ from .models import Assignment, Submission
 User = get_user_model()
 
 
+def _merge_submission_content(submission_text="", submission_url=""):
+    parts = []
+    if submission_text:
+        parts.append(str(submission_text).strip())
+    if submission_url:
+        parts.append(str(submission_url).strip())
+    return "\n".join(part for part in parts if part)
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Assignment Submission Services
 # ════════════════════════════════════════════════════════════════════════════
@@ -36,16 +45,14 @@ def create_assignment_submission(assignment, student, submission_file=None, subm
     """
     submission = Submission.objects.create(
         assignment=assignment,
-        student=student,
-        submission_text=submission_text,
-        submission_url=submission_url,
-        submitted_at=timezone.now(),
+        user=student,
+        content=_merge_submission_content(submission_text, submission_url),
         status="submitted",
     )
 
     if submission_file:
-        submission.submission_file = submission_file
-        submission.save()
+        submission.attach_uploaded_file(submission_file)
+        submission.save(update_fields=["files"])
 
     return submission
 
@@ -64,18 +71,22 @@ def update_assignment_submission(submission, submission_file=None, submission_te
     Returns:
         Submission: Updated submission
     """
+    update_fields = ["submitted_at", "status"]
+
     if submission_file is not None:
-        submission.submission_file = submission_file
+        submission.attach_uploaded_file(submission_file)
+        update_fields.append("files")
 
     if submission_text is not None:
-        submission.submission_text = submission_text
-
-    if submission_url is not None:
-        submission.submission_url = submission_url
+        submission.content = _merge_submission_content(submission_text, submission_url or "")
+        update_fields.append("content")
+    elif submission_url is not None:
+        submission.content = _merge_submission_content(submission.content, submission_url)
+        update_fields.append("content")
 
     submission.submitted_at = timezone.now()
     submission.status = "submitted"
-    submission.save()
+    submission.save(update_fields=update_fields)
 
     return submission
 
@@ -102,12 +113,12 @@ def grade_assignment_submission(submission, score, feedback, graded_by):
     if isinstance(score, str):
         score = Decimal(score)
 
-    submission.score = score
+    submission.grade = score
     submission.feedback = feedback
     submission.graded_by = graded_by
     submission.graded_at = timezone.now()
     submission.status = "graded"
-    submission.save()
+    submission.save(update_fields=["grade", "feedback", "graded_by", "graded_at", "status"])
 
     return submission
 
@@ -157,8 +168,8 @@ def assign_to_students(assignment, student_ids):
     count = 0
 
     for user in users:
-        if not assignment.allowed_students.filter(id=user.id).exists():
-            assignment.allowed_students.add(user)
+        if not assignment.assigned_students.filter(id=user.id).exists():
+            assignment.assigned_students.add(user)
             count += 1
 
     return count
@@ -180,8 +191,8 @@ def assign_to_group(assignment, student_group):
     count = 0
 
     for student in students:
-        if not assignment.allowed_students.filter(id=student.id).exists():
-            assignment.allowed_students.add(student)
+        if not assignment.assigned_students.filter(id=student.id).exists():
+            assignment.assigned_students.add(student)
             count += 1
 
     return count
@@ -207,8 +218,8 @@ def get_assignment_submissions(assignment, status=None, group_name=None):
     qs = Submission.objects.filter(
         assignment=assignment
     ).select_related(
-        "student",
-        "student__profile",
+        "user",
+        "user__profile",
         "graded_by"
     )
 
@@ -222,7 +233,7 @@ def get_assignment_submissions(assignment, status=None, group_name=None):
             role="student",
             group_name=group_name,
         ).values_list("user_id", flat=True)
-        qs = qs.filter(student_id__in=student_ids)
+        qs = qs.filter(user_id__in=student_ids)
 
     return qs.order_by("-submitted_at")
 
@@ -241,7 +252,7 @@ def get_pending_assignment_submissions(teacher, organization=None):
     qs = Submission.objects.filter(
         assignment__created_by=teacher,
         status="submitted",
-    ).select_related("assignment", "student")
+    ).select_related("assignment", "user")
 
     if organization is not None:
         qs = qs.filter(assignment__course__organization=organization)
@@ -265,7 +276,7 @@ def can_student_submit_assignment(assignment, student):
         return False, "assignment_not_published"
 
     # Check if student is allowed
-    if not assignment.allowed_students.filter(id=student.id).exists():
+    if not assignment.assigned_students.filter(id=student.id).exists():
         # Check if student is in course
         from apps.courses.models import CourseMembership
         if not CourseMembership.objects.filter(

@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.assignments import services
 from apps.assignments.models import Assignment, Submission
@@ -37,7 +38,8 @@ class AssignmentSubmissionServicesTest(TestCase):
             title="Test Assignment",
             course=self.course,
             created_by=self.teacher,
-            status="published"
+            status="published",
+            start_date=timezone.now(),
         )
 
     def test_create_assignment_submission(self):
@@ -51,7 +53,7 @@ class AssignmentSubmissionServicesTest(TestCase):
         self.assertIsNotNone(submission)
         self.assertEqual(submission.assignment, self.assignment)
         self.assertEqual(submission.student, self.student)
-        self.assertEqual(submission.submission_text, "Test submission")
+        self.assertEqual(submission.content, "Test submission")
         self.assertEqual(submission.status, "submitted")
 
     def test_update_assignment_submission(self):
@@ -67,7 +69,7 @@ class AssignmentSubmissionServicesTest(TestCase):
             submission_text="Updated text"
         )
 
-        self.assertEqual(updated.submission_text, "Updated text")
+        self.assertEqual(updated.content, "Updated text")
 
 
 class AssignmentGradingServicesTest(TestCase):
@@ -93,11 +95,12 @@ class AssignmentGradingServicesTest(TestCase):
             title="Test Assignment",
             course=self.course,
             created_by=self.teacher,
-            status="published"
+            status="published",
+            start_date=timezone.now(),
         )
         self.submission = Submission.objects.create(
             assignment=self.assignment,
-            student=self.student,
+            user=self.student,
             status="submitted"
         )
 
@@ -110,7 +113,7 @@ class AssignmentGradingServicesTest(TestCase):
             self.teacher
         )
 
-        self.assertEqual(graded.score, Decimal("88"))
+        self.assertEqual(graded.grade, Decimal("88"))
         self.assertEqual(graded.feedback, "Great work!")
         self.assertEqual(graded.graded_by, self.teacher)
         self.assertEqual(graded.status, "graded")

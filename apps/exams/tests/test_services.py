@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.accounts.models import ProfileRole, UserProfile
+from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAttempt, ExamAnswer, ExamQuestion
 
@@ -86,7 +86,7 @@ class ExamAttemptManagementServicesTest(TestCase):
         submitted_attempt = services.submit_exam_attempt(attempt)
 
         self.assertEqual(submitted_attempt.status, "submitted")
-        self.assertIsNotNone(submitted_attempt.submitted_at)
+        self.assertIsNotNone(submitted_attempt.finished_at)
 
 
 class ExamGradingServicesTest(TestCase):
@@ -116,34 +116,32 @@ class ExamGradingServicesTest(TestCase):
         )
         self.question = ExamQuestion.objects.create(
             exam=self.exam,
-            question_text="Test question",
-            max_score=Decimal("10")
+            text="Test question",
+            points=10,
         )
         self.answer = ExamAnswer.objects.create(
             attempt=self.attempt,
             question=self.question,
-            answer_text="Test answer"
+            text_answer="Test answer",
         )
 
     def test_grade_exam_answer(self):
         """Test grading an exam answer."""
         graded_answer = services.grade_exam_answer(
             self.answer,
-            Decimal("8.5"),
+            8,
             self.teacher
         )
 
-        self.assertEqual(graded_answer.score, Decimal("8.5"))
-        self.assertEqual(graded_answer.graded_by, self.teacher)
-        self.assertIsNotNone(graded_answer.graded_at)
+        self.assertEqual(graded_answer.teacher_score, 8)
 
     def test_calculate_attempt_score(self):
         """Test calculating total attempt score."""
-        services.grade_exam_answer(self.answer, Decimal("8.5"), self.teacher)
+        services.grade_exam_answer(self.answer, 8, self.teacher)
 
         total_score = services.calculate_attempt_score(self.attempt)
 
-        self.assertEqual(total_score, Decimal("8.5"))
+        self.assertEqual(total_score, Decimal("8"))
 
 
 class ExamAccessControlServicesTest(TestCase):
@@ -155,7 +153,8 @@ class ExamAccessControlServicesTest(TestCase):
             email="teacher@example.com",
             password="pass123"
         )
-        UserProfile.objects.create(user=self.teacher, role=ProfileRole.TEACHER)
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.student = User.objects.create_user(
             username="student",

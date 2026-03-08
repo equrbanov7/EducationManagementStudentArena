@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import Resolver404, resolve, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
@@ -42,6 +42,29 @@ def _safe_same_origin_redirect_path(request, candidate_url):
     return f"{path}{query}{fragment}"
 
 
+def _is_internal_exam_management_path(candidate_path):
+    raw_path = (candidate_path or "").strip()
+    if not raw_path:
+        return False
+
+    try:
+        match = resolve(urlsplit(raw_path).path)
+    except Resolver404:
+        return False
+
+    return match.namespace == "exams" and match.url_name in {
+        "teacher_questions_bank",
+        "test_question_bank",
+        "create_question_bank",
+        "add_exam_question",
+        "edit_exam_question",
+        "delete_exam_question",
+        "teacher_exam_results",
+        "teacher_view_attempt",
+        "teacher_check_attempt",
+    }
+
+
 def _resolve_profile_navigation(request, *, default_section="my-exams"):
     requested_profile_section = (request.GET.get("from_section") or "").strip()
     valid_profile_sections = {
@@ -60,10 +83,13 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
     fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
+        request.GET.get("return_to") or request.GET.get("next"),
     )
+    referer_return_url = _safe_same_origin_redirect_path(request, request.META.get("HTTP_REFERER"))
+    if _is_internal_exam_management_path(referer_return_url):
+        referer_return_url = ""
 
-    profile_return_url = explicit_return_url or fallback_profile_return_url
+    profile_return_url = explicit_return_url or referer_return_url or fallback_profile_return_url
     nav_params = {"from_section": requested_profile_section}
     if profile_return_url:
         nav_params["return_to"] = profile_return_url

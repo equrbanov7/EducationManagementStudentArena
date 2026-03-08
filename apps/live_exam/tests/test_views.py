@@ -87,14 +87,13 @@ class LiveSessionCreationTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("live_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.is_teacher = True
-        self.teacher.profile.save(update_fields=["role", "is_teacher", "updated_at"])
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Live Exam Test",
             slug="live-exam-test",
             author=self.teacher,
-            status="published",
+            is_active=True,
         )
 
     def test_create_session_requires_login(self):
@@ -117,8 +116,7 @@ class LiveSessionCreationTest(TestCase):
         """Test that only exam author can create session."""
         other_teacher = User.objects.create_user("other_teacher", "other@example.com", "StrongPass123!")
         other_teacher.profile.role = ProfileRole.TEACHER
-        other_teacher.profile.is_teacher = True
-        other_teacher.profile.save(update_fields=["role", "is_teacher", "updated_at"])
+        other_teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.client.login(username="other_teacher", password="StrongPass123!")
         response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
@@ -145,14 +143,13 @@ class LiveJoinTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("join_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.is_teacher = True
-        self.teacher.profile.save(update_fields=["role", "is_teacher", "updated_at"])
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Join Test Exam",
             slug="join-test-exam",
             author=self.teacher,
-            status="published",
+            is_active=True,
         )
         self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
 
@@ -210,14 +207,13 @@ class LiveStateAPITest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("state_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.is_teacher = True
-        self.teacher.profile.save(update_fields=["role", "is_teacher", "updated_at"])
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="State Test Exam",
             slug="state-test-exam",
             author=self.teacher,
-            status="published",
+            is_active=True,
         )
         self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
 
@@ -305,14 +301,13 @@ class URLPatternTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("url_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.is_teacher = True
-        self.teacher.profile.save(update_fields=["role", "is_teacher", "updated_at"])
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="URL Test Exam",
             slug="url-test-exam",
             author=self.teacher,
-            status="published",
+            is_active=True,
         )
         self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
 

@@ -26,6 +26,7 @@ from .auth import (
 from .dashboard import (
     assigned_courses,
     assigned_exams,
+    dashboard,
     grading_queue,
     my_result_detail,
     my_results,
@@ -78,6 +79,7 @@ __all__ = [
     "public_user_profile",
     "profile_avatar",
     # Dashboard
+    "dashboard",
     "teacher_dashboard",
     "student_dashboard",
     "grading_queue",

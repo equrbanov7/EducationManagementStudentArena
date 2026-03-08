@@ -36,6 +36,218 @@
         var newVideoSource = root.querySelector("[data-new-video-source]");
         var imageRemoveButton = root.querySelector('[data-question-clear-media="image"]');
         var videoRemoveButton = root.querySelector('[data-question-clear-media="video"]');
+        var form = root.querySelector("form");
+        var answerModeSelect = root.querySelector('select[name="answer_mode"]');
+        var singleAnswerWarning = root.querySelector("[data-single-answer-warning]");
+        var variantsSection = root.querySelector(".variants-section");
+        var optionList = root.querySelector("[data-option-list]");
+        var optionCardTemplate = root.querySelector("[data-option-card-template]");
+        var minOptionCount = parseInt(root.dataset.minOptionCount || "2", 10);
+
+        function getCorrectOptionCheckboxes() {
+            return Array.prototype.slice.call(root.querySelectorAll('input[name$="_is_correct"]'));
+        }
+
+        function getOptionCards() {
+            if (!optionList) {
+                return [];
+            }
+            return Array.prototype.slice.call(optionList.querySelectorAll("[data-option-card]"));
+        }
+
+        function getOptionTextInput(card) {
+            return card ? card.querySelector('input[type="text"]') : null;
+        }
+
+        function getOptionCheckbox(card) {
+            return card ? card.querySelector('input[type="checkbox"]') : null;
+        }
+
+        function getOptionTextLabel(card) {
+            return card ? card.querySelector("[data-option-text-label]") : null;
+        }
+
+        function getOrdinalSuffix(index) {
+            var suffixMap = {
+                0: "cu",
+                1: "ci",
+                2: "ci",
+                3: "cü",
+                4: "cü",
+                5: "ci",
+                6: "cı",
+                7: "ci",
+                8: "ci",
+                9: "cu"
+            };
+            return suffixMap[index % 10] || "ci";
+        }
+
+        function formatOptionLabel(index) {
+            return index + "-" + getOrdinalSuffix(index) + " variant";
+        }
+
+        function getCheckedCorrectCount() {
+            return getCorrectOptionCheckboxes().reduce(function (count, checkbox) {
+                return count + (checkbox.checked ? 1 : 0);
+            }, 0);
+        }
+
+        function hideSingleAnswerWarning() {
+            if (!singleAnswerWarning) {
+                return;
+            }
+            singleAnswerWarning.textContent = "";
+            setHidden(singleAnswerWarning, true);
+        }
+
+        function showSingleAnswerWarning() {
+            if (!singleAnswerWarning) {
+                return;
+            }
+            singleAnswerWarning.textContent =
+                root.dataset.singleAnswerWarningMessage ||
+                "Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır.";
+            setHidden(singleAnswerWarning, false);
+        }
+
+        function isSingleAnswerMode() {
+            return !!answerModeSelect && answerModeSelect.value === "single";
+        }
+
+        function syncSingleAnswerWarning() {
+            if (!answerModeSelect || !getCorrectOptionCheckboxes().length) {
+                return;
+            }
+
+            if (isSingleAnswerMode() && getCheckedCorrectCount() > 1) {
+                showSingleAnswerWarning();
+                return;
+            }
+
+            hideSingleAnswerWarning();
+        }
+
+        function updateRemoveButtons() {
+            var cards = getOptionCards();
+            cards.forEach(function (card) {
+                var button = card.querySelector("[data-remove-option-btn]");
+                if (button) {
+                    button.hidden = cards.length <= minOptionCount;
+                }
+            });
+        }
+
+        function renumberOptionCards() {
+            var cards = getOptionCards();
+            cards.forEach(function (card, position) {
+                var index = position + 1;
+                var label = formatOptionLabel(index);
+                var textInput = getOptionTextInput(card);
+                var checkbox = getOptionCheckbox(card);
+                var textLabel = getOptionTextLabel(card);
+
+                card.dataset.optionIndex = String(index);
+
+                if (textLabel) {
+                    textLabel.textContent = label + ":";
+                    textLabel.setAttribute("for", "id_option" + index + "_text");
+                }
+
+                if (textInput) {
+                    textInput.name = "option" + index + "_text";
+                    textInput.id = "id_option" + index + "_text";
+                }
+
+                if (checkbox) {
+                    checkbox.name = "option" + index + "_is_correct";
+                    checkbox.id = "id_option" + index + "_is_correct";
+                }
+            });
+
+            updateRemoveButtons();
+            syncSingleAnswerWarning();
+        }
+
+        function buildOptionCard(index) {
+            if (!optionCardTemplate) {
+                return null;
+            }
+
+            var label = formatOptionLabel(index);
+            var html = optionCardTemplate.innerHTML
+                .replace(/__INDEX__/g, String(index))
+                .replace(/__LABEL__/g, label);
+
+            var temp = document.createElement("div");
+            temp.innerHTML = html.trim();
+            return temp.firstElementChild;
+        }
+
+        function addOptionCard() {
+            if (!optionList) {
+                return;
+            }
+
+            var nextIndex = getOptionCards().length + 1;
+            var card = buildOptionCard(nextIndex);
+            if (!card) {
+                return;
+            }
+
+            optionList.appendChild(card);
+            renumberOptionCards();
+
+            var textInput = getOptionTextInput(card);
+            if (textInput) {
+                textInput.focus();
+            }
+        }
+
+        function removeOptionCard(button) {
+            var card = button.closest("[data-option-card]");
+            if (!card) {
+                return;
+            }
+
+            if (getOptionCards().length <= minOptionCount) {
+                return;
+            }
+
+            card.remove();
+            renumberOptionCards();
+        }
+
+        function handleCorrectOptionChange(event) {
+            if (!answerModeSelect || !isSingleAnswerMode()) {
+                hideSingleAnswerWarning();
+                return;
+            }
+
+            if (!event.target.checked) {
+                syncSingleAnswerWarning();
+                return;
+            }
+
+            if (getCheckedCorrectCount() > 1) {
+                event.target.checked = false;
+                showSingleAnswerWarning();
+                answerModeSelect.focus();
+                return;
+            }
+
+            hideSingleAnswerWarning();
+        }
+
+        function handleFormSubmit(event) {
+            if (!isSingleAnswerMode() || getCheckedCorrectCount() <= 1) {
+                return;
+            }
+
+            event.preventDefault();
+            showSingleAnswerWarning();
+            answerModeSelect.focus();
+        }
 
         function showFileName(labelElement, file) {
             if (!labelElement) {
@@ -174,6 +386,37 @@
         }
         if (videoRemoveButton) {
             videoRemoveButton.addEventListener("click", clearVideo);
+        }
+        if (answerModeSelect) {
+            answerModeSelect.addEventListener("change", syncSingleAnswerWarning);
+            syncSingleAnswerWarning();
+        }
+        if (variantsSection) {
+            variantsSection.addEventListener("click", function (event) {
+                var addButton = event.target.closest("[data-add-option-btn]");
+                if (addButton) {
+                    addOptionCard();
+                    return;
+                }
+
+                var removeButton = event.target.closest("[data-remove-option-btn]");
+                if (removeButton) {
+                    removeOptionCard(removeButton);
+                }
+            });
+
+            variantsSection.addEventListener("change", function (event) {
+                if (event.target && /_is_correct$/.test(event.target.name || "")) {
+                    handleCorrectOptionChange(event);
+                }
+            });
+
+            renumberOptionCards();
+        } else {
+            updateRemoveButtons();
+        }
+        if (form) {
+            form.addEventListener("submit", handleFormSubmit);
         }
     }
 

@@ -14,6 +14,15 @@ from .models import Project, ProjectSubmission
 User = get_user_model()
 
 
+def _merge_submission_content(submission_text="", submission_url=""):
+    parts = []
+    if submission_text:
+        parts.append(str(submission_text).strip())
+    if submission_url:
+        parts.append(str(submission_url).strip())
+    return "\n".join(part for part in parts if part)
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Project Submission Services
 # ════════════════════════════════════════════════════════════════════════════
@@ -37,15 +46,12 @@ def create_project_submission(project, student, submission_file=None, submission
     submission = ProjectSubmission.objects.create(
         project=project,
         student=student,
-        submission_text=submission_text,
-        submission_url=submission_url,
-        submitted_at=timezone.now(),
-        status="submitted",
+        content=_merge_submission_content(submission_text, submission_url),
     )
 
     if submission_file:
-        submission.submission_file = submission_file
-        submission.save()
+        submission.file = submission_file
+        submission.save(update_fields=["file"])
 
     return submission
 
@@ -64,18 +70,22 @@ def update_project_submission(submission, submission_file=None, submission_text=
     Returns:
         ProjectSubmission: Updated submission
     """
+    update_fields = ["submitted_at", "status"]
+
     if submission_file is not None:
-        submission.submission_file = submission_file
+        submission.file = submission_file
+        update_fields.append("file")
 
     if submission_text is not None:
-        submission.submission_text = submission_text
-
-    if submission_url is not None:
-        submission.submission_url = submission_url
+        submission.content = _merge_submission_content(submission_text, submission_url or "")
+        update_fields.append("content")
+    elif submission_url is not None:
+        submission.content = _merge_submission_content(submission.content, submission_url)
+        update_fields.append("content")
 
     submission.submitted_at = timezone.now()
-    submission.status = "submitted"
-    submission.save()
+    submission.status = "pending"
+    submission.save(update_fields=update_fields)
 
     return submission
 
@@ -102,12 +112,12 @@ def grade_project_submission(submission, score, feedback, graded_by):
     if isinstance(score, str):
         score = Decimal(score)
 
-    submission.score = score
+    submission.grade = score
     submission.feedback = feedback
     submission.graded_by = graded_by
     submission.graded_at = timezone.now()
     submission.status = "graded"
-    submission.save()
+    submission.save(update_fields=["grade", "feedback", "graded_by", "graded_at", "status"])
 
     return submission
 
@@ -157,9 +167,8 @@ def assign_project_to_students(project, student_ids):
     count = 0
 
     for user in users:
-        # Create or update allowed_students relationship
-        if not project.allowed_students.filter(id=user.id).exists():
-            project.allowed_students.add(user)
+        if not project.assigned_students.filter(id=user.id).exists():
+            project.assigned_students.add(user)
             count += 1
 
     return count
@@ -181,8 +190,8 @@ def assign_project_to_group(project, student_group):
     count = 0
 
     for student in students:
-        if not project.allowed_students.filter(id=student.id).exists():
-            project.allowed_students.add(student)
+        if not project.assigned_students.filter(id=student.id).exists():
+            project.assigned_students.add(student)
             count += 1
 
     return count
@@ -240,8 +249,8 @@ def get_pending_project_submissions(teacher, organization=None):
         QuerySet: Submission queryset
     """
     qs = ProjectSubmission.objects.filter(
-        project__created_by=teacher,
-        status="submitted",
+        project__course__owner=teacher,
+        status="pending",
     ).select_related("project", "student")
 
     if organization is not None:
@@ -262,11 +271,11 @@ def can_student_submit_project(project, student):
         tuple: (can_submit: bool, reason: str)
     """
     # Check if project is published
-    if project.status != "published":
+    if project.status != "active":
         return False, "project_not_published"
 
     # Check if student is allowed
-    if not project.allowed_students.filter(id=student.id).exists():
+    if not project.assigned_students.filter(id=student.id).exists():
         # Check if student is in course
         from apps.courses.models import CourseMembership
         if not CourseMembership.objects.filter(

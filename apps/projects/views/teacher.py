@@ -37,6 +37,14 @@ def _parse_filter_date(raw_value):
         return "", None
 
 
+def _can_delete_submissions(request):
+    return (
+        request_has_permission(request, "project.delete")
+        or request_has_permission(request, "course.delete")
+        or request_has_permission(request, "exam.delete")
+    )
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Review Submissions
 # ════════════════════════════════════════════════════════════════════════════
@@ -117,7 +125,7 @@ def review_submissions(request, pk):
         "date_from": date_from_raw,
         "date_to": date_to_raw,
         "pagination_query": pagination_query,
-        "can_delete_submissions": False,
+        "can_delete_submissions": _can_delete_submissions(request),
     }
 
     return render(request, "projects/review_submissions.html", context)
@@ -137,11 +145,7 @@ def delete_submissions(request, pk):
         messages.error(request, pgettext("projects.views.message", "permission_denied"))
         return redirect(_teacher_review_back_url(request, project))
 
-    if not (
-        request_has_permission(request, "project.delete")
-        or request_has_permission(request, "course.delete")
-        or request_has_permission(request, "exam.delete")
-    ):
+    if not _can_delete_submissions(request):
         messages.error(request, pgettext("projects.views.message", "permission_denied"))
         return redirect(_teacher_review_back_url(request, project))
 

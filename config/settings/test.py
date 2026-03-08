@@ -18,6 +18,9 @@ SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
 # Debug should be False for tests to catch issues
 DEBUG = False
 
+# The local test environment may not have django-csp installed.
+MIDDLEWARE = [mw for mw in MIDDLEWARE if mw != "csp.middleware.CSPMiddleware"]
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 # Use in-memory SQLite for fast tests

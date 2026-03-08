@@ -19,22 +19,22 @@
                 <p>{% trans "subtitle_questions_bank" context "exams.template.teacher_questions_bank" %}</p>
             </div>
             <div class="qb-header-actions">
-                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="qb-btn qb-btn-light">
+                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}" class="qb-btn qb-btn-light">
                     <i class="fas fa-arrow-left"></i> {% trans "action_back_exam_detail" context "exams.template.teacher_questions_bank" %}
                 </a>
                 {% if exam.exam_type == "test" %}
-                    <a href="{% url 'exams:test_question_bank' exam.slug %}" class="qb-btn qb-btn-teal">
+                    <a href="{% url 'exams:test_question_bank' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}" class="qb-btn qb-btn-teal">
                         <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_questions_bank" %}
                     </a>
                 {% else %}
-                    <a href="{% url 'exams:create_question_bank' exam.slug %}" class="qb-btn qb-btn-teal">
+                    <a href="{% url 'exams:create_question_bank' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}" class="qb-btn qb-btn-teal">
                         <i class="fas fa-layer-group"></i> {% trans "action_bulk_add_blocks" context "exams.template.teacher_questions_bank" %}
                     </a>
                 {% endif %}
-                <a href="{% url 'exams:add_exam_question' exam.slug %}"
+                <a href="{% url 'exams:add_exam_question' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}"
                    class="qb-btn qb-btn-blue js-open-question-form-modal"
                    data-question-modal-mode="create"
-                   data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}">
+                   data-question-modal-url="{% url 'exams:add_exam_question' exam.slug %}{% if question_bank_navigation_query %}?{{ question_bank_navigation_query }}{% endif %}">
                     <i class="fas fa-plus-circle"></i> {% trans "action_add_question" context "exams.template.teacher_questions_bank" %}
                 </a>
             </div>
@@ -57,6 +57,12 @@
 
         <section class="qb-filters">
             <form id="questionSearchForm" method="get" class="qb-filter-form">
+                {% if request.GET.from_section %}
+                    <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+                {% endif %}
+                {% if request.GET.return_to %}
+                    <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+                {% endif %}
                 <div class="qb-input-wrap">
                     <i class="fas fa-search"></i>
                     <input
@@ -104,6 +110,12 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
+            {% if request.GET.from_section %}
+                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% endif %}
+            {% if request.GET.return_to %}
+                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% endif %}
 
             <section class="qb-bulk-toolbar">
                 <div class="qb-select-actions">
@@ -246,6 +258,12 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
+            {% if request.GET.from_section %}
+                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% endif %}
+            {% if request.GET.return_to %}
+                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% endif %}
         </form>
 
         <form method="post" id="singleQuestionActionForm" class="qb-hidden-form">
@@ -256,6 +274,12 @@
             <input type="hidden" name="status" value="{{ status_filter }}">
             <input type="hidden" name="sort" value="{{ sort_filter }}">
             <input type="hidden" name="page" value="{{ page_obj.number }}">
+            {% if request.GET.from_section %}
+                <input type="hidden" name="from_section" value="{{ request.GET.from_section }}">
+            {% endif %}
+            {% if request.GET.return_to %}
+                <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
+            {% endif %}
         </form>
     </div>
 </div>
