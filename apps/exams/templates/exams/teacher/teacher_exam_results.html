@@ -183,7 +183,7 @@
                 <tbody>
                     {% for item in attempts_data %}
                         {% with att=item.attempt %}
-                        <tr data-seconds-remaining="{{ item.seconds_remaining|default:0 }}">
+                        <tr data-seconds-remaining="{{ item.countdown_seconds|default:0 }}">
                             {% if can_delete_attempts %}
                                 <td>
                                     <input type="checkbox"
@@ -241,34 +241,16 @@
                             </td>
                             <td class="action-cell">
                                 <div class="results-action-buttons">
-                                    {% if exam.exam_type == 'test' %}
-                                        <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Ətraflı bax
-                                        </a>
-                                    {% else %}
-                                        {% if att.checked_by_teacher %}
-                                            {% if item.seconds_remaining %}
-                                                <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                                   class="btn btn-sm btn-outline-warning">
-                                                    <i class="fas fa-edit"></i> Yenidən yoxla
-                                                </a>
-                                                <div class="countdown-timer mt-2">
-                                                    <i class="fas fa-clock"></i>
-                                                    <span class="timer-display">--:--</span>
-                                                </div>
-                                            {% else %}
-                                                <a href="{% url 'exams:teacher_view_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i> Ətraflı bax
-                                                </a>
-                                            {% endif %}
-                                        {% else %}
-                                            <a href="{% url 'exams:teacher_check_attempt' exam.slug att.id %}?{{ exam_navigation_query }}"
-                                               class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-clipboard-check"></i> Yoxla
-                                            </a>
-                                        {% endif %}
+                                    <a href="{{ item.action_url }}"
+                                       class="btn btn-sm {% if item.action_label == 'Bax' %}btn-outline-primary{% elif item.action_label == 'Yenidən yoxla' %}btn-outline-warning{% else %}btn-outline-warning{% endif %}">
+                                        <i class="fas {% if item.action_label == 'Bax' %}fa-eye{% elif item.action_label == 'Yenidən yoxla' %}fa-edit{% else %}fa-clipboard-check{% endif %}"></i>
+                                        {{ item.action_label }}
+                                    </a>
+                                    {% if item.countdown_seconds %}
+                                        <div class="countdown-timer mt-2">
+                                            <i class="fas {% if item.countdown_mode == 'recheck' %}fa-clock{% else %}fa-user-secret{% endif %}"></i>
+                                            <span class="timer-display">--:--</span>
+                                        </div>
                                     {% endif %}
                                     {% if can_delete_attempts %}
                                         <button type="button"

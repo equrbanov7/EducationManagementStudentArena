@@ -1,0 +1,78 @@
+.my-result-detail-page .section-card--lab-answers {
+    padding: 0;
+    overflow: hidden;
+}
+
+.my-result-lab-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 28px 32px 0;
+}
+
+.my-result-lab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.my-result-lab-answer-list {
+    padding: 8px 0 0;
+}
+
+.my-result-lab-answer {
+    padding: 28px 32px;
+}
+
+.my-result-lab-answer + .my-result-lab-answer {
+    border-top: 1px solid #e2e8f0;
+}
+
+.my-result-lab-extra {
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 0 32px 32px;
+}
+
+.my-result-lab-extra-inner {
+    display: grid;
+    gap: 16px;
+    padding-top: 24px;
+}
+
+.my-result-lab-empty {
+    padding: 0 32px 32px;
+}
+
+.my-result-lab-extra .answer-box,
+.my-result-lab-extra .file-download-box {
+    margin-bottom: 0;
+}
+
+@media (max-width: 767.98px) {
+    .my-result-lab-head,
+    .my-result-lab-answer,
+    .my-result-lab-extra,
+    .my-result-lab-empty {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .my-result-lab-head {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 24px;
+    }
+
+    .my-result-lab-count {
+        font-size: 13px;
+    }
+}

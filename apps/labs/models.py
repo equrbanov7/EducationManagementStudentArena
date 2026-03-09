@@ -14,6 +14,7 @@ Modellər:
 import random
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils import timezone
@@ -182,9 +183,70 @@ class Lab(models.Model):
             return []
         return [g.strip() for g in self.allowed_groups.split(",") if g.strip()]
 
+    def get_allowed_student_ids_list(self):
+        """İcazəli tələbə ID-lərini list kimi qaytar"""
+        if not self.allowed_students:
+            return []
+        return [int(student_id) for student_id in self.allowed_students.split(",") if student_id.strip().isdigit()]
+
     def get_allowed_extensions_list(self):
         """İcazəli extension-ları list kimi qaytar"""
         return [ext.strip().lower() for ext in self.allowed_extensions.split(",") if ext.strip()]
+
+    def _get_student_membership(self, user):
+        """User bu kursda student üzvüdürsə membership qaytar"""
+        if not getattr(user, "is_authenticated", False):
+            return None
+
+        from apps.courses.models import CourseMembership
+
+        return (
+            CourseMembership.objects.filter(course=self.course, user=user, role="student")
+            .only("id", "group_name")
+            .first()
+        )
+
+    def can_student_access(self, user):
+        """
+        Student access qaydası:
+        - Kurs membership vacibdir
+        - allowed_students / allowed_groups boşdursa bütün kurs
+        - filterlərdən ən az biri uyğun gəlməlidir
+        """
+        membership = self._get_student_membership(user)
+        if membership is None:
+            return False
+
+        allowed_student_ids = set(self.get_allowed_student_ids_list())
+        allowed_groups = {group.casefold() for group in self.get_allowed_groups_list()}
+
+        if not allowed_student_ids and not allowed_groups:
+            return True
+
+        if user.id in allowed_student_ids:
+            return True
+
+        membership_group = (membership.group_name or "").strip().casefold()
+        return bool(membership_group and membership_group in allowed_groups)
+
+    def can_teacher_access(self, user):
+        """Labı yalnız course owner və course teacher/assistant görə bilər"""
+        if not getattr(user, "is_authenticated", False):
+            return False
+
+        if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+            return True
+
+        if self.course.owner_id == user.id or self.created_by_id == user.id:
+            return True
+
+        from apps.courses.models import CourseMembership
+
+        return CourseMembership.objects.filter(
+            course=self.course,
+            user=user,
+            role__in=["teacher", "assistant"],
+        ).exists()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -320,6 +382,9 @@ class LabAssignment(models.Model):
         """
         Tələbə üçün assignment yarat və sualları təyin et
         """
+        if not lab.can_student_access(student):
+            raise PermissionDenied("You do not have permission to access this lab.")
+
         assignment, created = cls.objects.get_or_create(lab=lab, student=student)
 
         # Yeni assignment üçün həmişə sual təyin et.

@@ -11,222 +11,295 @@
 
 {% block content %}
 <div class="container py-5">
-    
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-4 gap-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2 small fw-medium">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="text-decoration-none text-muted hover-primary">
+                        <a href="{% url 'courses:course_dashboard' lab.course.id %}" class="text-decoration-none text-muted">
                             {{ lab.course.title }}
                         </a>
                     </li>
-                    <li class="breadcrumb-item active text-primary-blue">{{ lab.title }}</li>
+                    <li class="breadcrumb-item active text-primary-blue" aria-current="page">{{ lab.title }}</li>
                 </ol>
             </nav>
-            <h2 class="fw-bold text-dark-blue mb-0">
-                <i class="fas fa-flask text-primary-blue me-2"></i> {% trans "heading_my_answers" context "labs.template.my_lab_answers" %}
+            <h2 class="mb-0 fw-bold text-dark-blue">
+                <i class="fa-solid fa-list-check text-primary-blue me-2"></i> {% trans "heading_my_answers" context "labs.template.my_lab_answers" %}
             </h2>
         </div>
-        <a href="{{ back_url }}" class="btn btn-outline-custom mt-2">
-            <i class="fas fa-arrow-left me-2"></i> {% trans "action_back" context "labs.template.my_lab_answers" %}
+        <a href="{{ back_url }}" class="btn btn-outline-secondary rounded-3 fw-medium">
+            <i class="fa-solid fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.my_lab_answers" %}
         </a>
     </div>
-    
-    <div class="text-center mb-5">
-        <div class="attempt-selector">
-            {% if total_attempts > 1 and attempt_number > 1 %}
-            <a href="?attempt={{ attempt_number|add:'-1' }}{% if request.GET.return_to %}&amp;return_to={{ request.GET.return_to|urlencode }}{% endif %}" class="attempt-nav-btn shadow-sm">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-            {% else %}
-            <span class="attempt-nav-btn disabled shadow-none">
-                <i class="fas fa-chevron-left"></i>
-            </span>
-            {% endif %}
-            
-            <span class="fs-5 text-dark-blue d-flex align-items-center">
-                <i class="fas fa-redo text-primary-blue me-2 opacity-75"></i>
-                <strong class="me-1">{% blocktrans trimmed context "labs.template.my_lab_answers" with attempt_number=attempt_number %}label_attempt {{ attempt_number }}{% endblocktrans %}</strong> 
-                <span class="text-secondary small fw-normal ms-1">/ {{ total_attempts }}</span>
-            </span>
-            
-            {% if total_attempts > 1 and attempt_number < total_attempts %}
-            <a href="?attempt={{ attempt_number|add:'1' }}{% if request.GET.return_to %}&amp;return_to={{ request.GET.return_to|urlencode }}{% endif %}" class="attempt-nav-btn shadow-sm">
-                <i class="fas fa-chevron-right"></i>
-            </a>
-            {% else %}
-            <span class="attempt-nav-btn disabled shadow-none">
-                <i class="fas fa-chevron-right"></i>
-            </span>
-            {% endif %}
+
+    <div class="row mb-5 g-4">
+        <div class="col-md-4">
+            <div class="stat-card blue">
+                <h2 class="fw-bold text-dark-blue mb-1">{{ total_attempts }} <span class="fs-5 text-muted fw-normal">/ {{ lab.max_attempts }}</span></h2>
+                <span class="text-muted fw-medium text-uppercase small tracking-label">{% trans "attempts_used" context "assignment.my_submissions" %}</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card green">
+                <h2 class="fw-bold mb-1 {% if attempts_left == 0 %}text-danger{% else %}text-primary-green{% endif %}">{{ attempts_left }}</h2>
+                <span class="text-muted fw-medium text-uppercase small tracking-label">{% trans "attempts_left" context "assignment.my_submissions" %}</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card white">
+                <div class="mb-2">
+                    {% if lab.is_open %}
+                        <span class="status-badge status-active"><i class="fa-solid fa-lock-open"></i> {% trans "status_active" context "assignment.my_submissions" %}</span>
+                    {% elif lab.is_upcoming %}
+                        <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-start"></i> {% trans "status_pending" context "labs.template.my_lab_answers" %}</span>
+                    {% else %}
+                        <span class="status-badge status-expired"><i class="fa-solid fa-lock"></i> {% trans "status_deadline_passed" context "assignment.my_submissions" %}</span>
+                    {% endif %}
+                </div>
+                <span class="text-muted fw-medium small"><i class="fa-regular fa-calendar me-1"></i> {{ lab.end_datetime|date:"d.m.Y H:i" }}</span>
+            </div>
         </div>
     </div>
-    
-    {% if submission %}
-    <div class="card card-modern">
-        <div class="card-body p-4 p-lg-5">
-            <div class="row text-center g-4">
-                
-                <div class="col-6 col-md-3">
-                    <div class="stat-icon-wrapper blue shadow-sm">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <small class="text-muted d-block text-uppercase fw-bold tracking-wide mb-1">{% trans "label_submission_date" context "labs.template.my_lab_answers" %}</small>
-                    <strong class="text-dark fs-6">{{ submission.submitted_at|date:"d.m.Y H:i" }}</strong>
-                </div>
-                
-                <div class="col-6 col-md-3">
-                    <div class="stat-icon-wrapper blue shadow-sm">
-                        <i class="fas fa-stopwatch"></i>
-                    </div>
-                    <small class="text-muted d-block text-uppercase fw-bold tracking-wide mb-1">{% trans "label_completion_time" context "labs.template.my_lab_answers" %}</small>
-                    <strong class="text-dark fs-6">{{ duration|default:"--" }}</strong>
-                </div>
-                
-                <div class="col-6 col-md-3">
-                    <div class="stat-icon-wrapper orange shadow-sm">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <small class="text-muted d-block text-uppercase fw-bold tracking-wide mb-2">{% trans "label_status" context "labs.template.my_lab_answers" %}</small>
-                    {% if submission.status == 'graded' %}
-                        <span class="status-badge-custom badge-graded shadow-sm"><i class="fas fa-check"></i> {% trans "status_graded" context "labs.template.my_lab_answers" %}</span>
-                    {% elif submission.status == 'late' %}
-                        <span class="status-badge-custom badge-late shadow-sm"><i class="fas fa-clock"></i> {% trans "status_late" context "labs.template.my_lab_answers" %}</span>
-                    {% else %}
-                        <span class="status-badge-custom badge-pending shadow-sm"><i class="fas fa-spinner fa-spin-pulse"></i> {% trans "status_pending" context "labs.template.my_lab_answers" %}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="col-6 col-md-3">
-                    <div class="stat-icon-wrapper green shadow-sm">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <small class="text-muted d-block text-uppercase fw-bold tracking-wide mb-1">{% trans "label_score" context "labs.template.my_lab_answers" %}</small>
-                    {% if show_review_data and submission.score is not None %}
-                        <div class="d-flex align-items-baseline justify-content-center">
-                            <span class="fs-3 fw-bold text-primary-green me-1">{{ submission.score }}</span>
-                            <span class="text-muted fw-medium">/ {{ lab.max_score }}</span>
-                        </div>
-                    {% else %}
-                        <span class="text-muted fw-medium"><i class="fas fa-minus"></i></span>
-                    {% endif %}
-                    {% if submission.status == 'graded' and not show_review_data and review_available_in_seconds > 0 %}
-                    <div class="small text-muted mt-2">
-                        <i class="fas fa-clock me-1"></i>
-                        Hesab görünəcək:
-                        <span id="reviewCountdown" data-seconds="{{ review_available_in_seconds }}" class="fw-semibold">--:--</span>
-                    </div>
-                    {% elif submission.status != 'graded' %}
-                    <div class="small text-muted mt-2">
-                        <i class="fas fa-hourglass-half me-1"></i> Yoxlama davam edir
-                    </div>
-                    {% endif %}
-                </div>
-                
-            </div>
-            
-            {% if show_review_data and submission.feedback %}
-            <div class="mt-5 pt-4 border-top">
-                <strong class="d-block text-dark-blue mb-3"><i class="fas fa-comment-dots text-primary-green me-2 fs-5"></i> {% trans "label_teacher_feedback" context "labs.template.my_lab_answers" %}</strong>
-                <div class="teacher-feedback bg-light text-secondary">
-                    {{ submission.feedback|linebreaks }}
-                </div>
-            </div>
-            {% endif %}
-            
+
+    {% if submissions %}
+    <div class="card card-modern border-0">
+        <div class="table-modern-header d-flex align-items-center">
+            <i class="fa-solid fa-inbox me-2"></i> {% trans "submitted_answers" context "assignment.my_submissions" %}
         </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-modern mb-0 history-table">
+                    <thead>
+                        <tr>
+                            <th width="8%">#</th>
+                            <th width="28%">{% trans "table_submitted_at" context "assignment.my_submissions" %}</th>
+                            <th width="20%">{% trans "table_status" context "assignment.my_submissions" %}</th>
+                            <th width="24%">{% trans "table_grade" context "assignment.my_submissions" %}</th>
+                            <th width="20%" class="text-end">{% trans "table_action" context "assignment.my_submissions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        <tr>
+                            <td class="fw-bold text-muted">{{ sub.attempt_number }}</td>
+                            <td>
+                                <div class="d-flex align-items-center fw-medium text-dark">
+                                    <i class="fa-regular fa-clock text-muted me-2"></i>
+                                    {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                                </div>
+                                {% if sub.duration %}
+                                <div class="small text-muted mt-1">
+                                    <i class="fa-solid fa-stopwatch me-1"></i> {{ sub.duration }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.is_review_pending %}
+                                    <span class="status-badge status-review-pending">
+                                        <i class="fa-regular fa-hourglass-half"></i>
+                                        <span data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
+                                    </span>
+                                {% elif sub.status == 'graded' %}
+                                    <span class="status-badge status-graded"><i class="fa-solid fa-check"></i> {% trans "status_graded" context "labs.template.my_lab_answers" %}</span>
+                                {% elif sub.status == 'late' %}
+                                    <span class="status-badge status-late"><i class="fa-solid fa-clock"></i> {% trans "status_late" context "labs.template.my_lab_answers" %}</span>
+                                {% else %}
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-spinner fa-spin-pulse"></i> {% trans "status_pending" context "labs.template.my_lab_answers" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.show_review_data and sub.score is not None %}
+                                    <span class="fw-bold fs-5 text-primary-green">{{ sub.score }}</span>
+                                {% else %}
+                                    <span class="text-muted"><i class="fa-solid fa-minus"></i></span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-custom px-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#viewLabSubmission{{ sub.id }}"
+                                    data-attempt-number="{{ sub.attempt_number }}"
+                                >
+                                    <i class="fa-solid fa-eye me-1"></i> {% trans "view" context "assignment.my_submissions" %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% for sub in submissions %}
+    <div class="modal fade" id="viewLabSubmission{{ sub.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content lab-submission-modal">
+                <div class="modal-header modal-header-custom p-4">
+                    <h5 class="modal-title fw-bold text-dark-blue">
+                        <i class="fa-regular fa-file-lines me-2 text-primary-blue"></i>
+                        {% trans "submission_number" context "assignment.my_submissions" %} #{{ sub.attempt_number }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="submission-modal-meta">
+                        <div class="submission-meta-pill">
+                            <span class="submission-meta-label">{% trans "submitted_at" context "assignment.my_submissions" %}</span>
+                            <strong>{{ sub.submitted_at|date:"d.m.Y H:i" }}</strong>
+                        </div>
+                        <div class="submission-meta-pill">
+                            <span class="submission-meta-label">{% trans "label_completion_time" context "labs.template.my_lab_answers" %}</span>
+                            <strong>{{ sub.duration|default:"--" }}</strong>
+                        </div>
+                        <div class="submission-meta-pill">
+                            <span class="submission-meta-label">{% trans "label_status" context "labs.template.my_lab_answers" %}</span>
+                            <strong>
+                                {% if sub.is_review_pending %}
+                                    <span data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
+                                {% elif sub.status == 'graded' %}
+                                    {% trans "status_graded" context "labs.template.my_lab_answers" %}
+                                {% elif sub.status == 'late' %}
+                                    {% trans "status_late" context "labs.template.my_lab_answers" %}
+                                {% else %}
+                                    {% trans "status_pending" context "labs.template.my_lab_answers" %}
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="submission-meta-pill">
+                            <span class="submission-meta-label">{% trans "label_score" context "labs.template.my_lab_answers" %}</span>
+                            <strong>
+                                {% if sub.show_review_data and sub.score is not None %}
+                                    {{ sub.score }} / {{ lab.max_score }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    {% if sub.show_review_data and sub.feedback %}
+                    <div class="submission-feedback-box">
+                        <strong class="d-block text-dark-blue mb-2"><i class="fa-regular fa-comment-dots text-primary-green me-2"></i> {% trans "teacher_feedback" context "assignment.my_submissions" %}</strong>
+                        <div class="teacher-feedback text-secondary">
+                            {{ sub.feedback|linebreaks }}
+                        </div>
+                    </div>
+                    {% elif sub.status == 'graded' and sub.review_available_in_seconds > 0 %}
+                    <div class="submission-feedback-box">
+                        <div class="review-pending-box">
+                            <strong class="d-block text-dark-blue mb-2">
+                                <i class="fa-regular fa-hourglass-half me-1 text-warning"></i> Yoxlama tamamlanıb
+                            </strong>
+                            <div class="text-secondary">
+                                Qiymət və müəllim rəyi görünəcək:
+                                <span class="fw-semibold" data-review-countdown="{{ sub.review_available_in_seconds }}">--:--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="modal-answers-shell">
+                        {% for answer in sub.answer_items %}
+                        <div class="modal-answer-item {% if not forloop.last %}border-bottom{% endif %}" id="answer-item-{{ answer.id }}">
+                            <div class="d-flex flex-column flex-md-row gap-4 align-items-md-start">
+                                <div class="question-number">
+                                    {{ forloop.counter }}
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                        <h5 class="mb-0 fw-bold text-dark lh-base">{{ answer.question.question_text }}</h5>
+                                        <button type="button" class="btn btn-sm answer-toggle-btn" data-answer-toggle="{{ answer.id }}" aria-label="Toggle answer">
+                                            <i class="fas fa-chevron-up"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="answer-content">
+                                        {% if answer.answer %}
+                                        <div class="answer-box mb-3 shadow-sm">
+                                            <small class="text-primary-blue fw-bold d-block mb-2 text-uppercase tracking-wide">
+                                                <i class="fas fa-pen-nib me-2"></i> {% trans "label_text_answer" context "labs.template.my_lab_answers" %}
+                                            </small>
+                                            <div class="text-dark">{{ answer.answer|linebreaks }}</div>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if answer.answer_file %}
+                                        <div class="file-download-box mb-3 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                            <div>
+                                                <small class="text-primary-blue fw-bold d-block mb-1 text-uppercase tracking-wide">
+                                                    <i class="fas fa-paperclip me-1"></i> {% trans "label_uploaded_file" context "labs.template.my_lab_answers" %}
+                                                </small>
+                                                <span class="text-dark fw-medium">{{ answer.answer_file.name|filename }}</span>
+                                            </div>
+                                            <a href="{{ answer.answer_file.url }}" target="_blank" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
+                                                <i class="fas fa-download me-2"></i> Yüklə
+                                            </a>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if not answer.answer and not answer.answer_file %}
+                                        <div class="empty-answer-box mb-3">
+                                            <i class="fas fa-exclamation-circle text-muted me-2"></i> {% trans "empty_no_answer_for_question" context "labs.template.my_lab_answers" %}
+                                        </div>
+                                        {% endif %}
+
+                                        {% if sub.show_review_data and answer.score is not None %}
+                                        <div class="mt-4">
+                                            <span class="score-badge shadow-sm">
+                                                <i class="fas fa-star text-warning me-2"></i>
+                                                <span class="me-1">{% trans "grade" context "assignment.my_submissions" %}:</span>
+                                                <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}</strong>
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 px-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3 text-muted empty-icon-circle">
+                                <i class="fas fa-inbox fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark-blue mb-2">Bu cəhd üçün cavab yoxdur</h5>
+                            <p class="text-secondary mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">{% trans "close" context "assignment.my_submissions" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state-card mt-4">
+        <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm empty-icon-circle">
+                <i class="fa-solid fa-folder-open fa-2x text-primary-blue"></i>
+            </div>
+        </div>
+        <h4 class="fw-bold text-dark-blue mb-2">Bu cəhd üçün cavab yoxdur</h4>
+        <p class="text-muted mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
     </div>
     {% endif %}
-    
-    <div class="card card-modern">
-        <div class="answers-header d-flex justify-content-between align-items-center">
-            <span class="fs-5"><i class="fas fa-list-ol me-2 text-white-50"></i> <strong class="fw-semibold">{% trans "heading_my_answers" context "labs.template.my_lab_answers" %}</strong></span>
-            <span class="badge bg-white text-primary-blue fs-6 px-3 py-2 rounded-pill shadow-sm">
-                {% blocktrans trimmed context "labs.template.my_lab_answers" with answer_count=answers.count %}label_question_count {{ answer_count }}{% endblocktrans %}
-            </span>
-        </div>
-        
-        <div class="card-body p-0">
-            {% for answer in answers %}
-            <div class="p-4 p-md-5 {% if not forloop.last %}border-bottom{% endif %} border-light hover-bg-light answer-item" id="answer-item-{{ answer.id }}">
-                <div class="d-flex flex-column flex-md-row gap-4 align-items-md-start">
-                    
-                    <div class="question-number">
-                        {{ forloop.counter }}
-                    </div>
-                    
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                            <h5 class="mb-0 fw-bold text-dark lh-base">{{ answer.question.question_text }}</h5>
-                            <button type="button" class="btn btn-sm answer-toggle-btn" data-answer-toggle="{{ answer.id }}" aria-label="Toggle answer">
-                                <i class="fas fa-chevron-up"></i>
-                            </button>
-                        </div>
-                        <div class="answer-content" id="answer-content-{{ answer.id }}">
-                        
-                        {% if answer.answer %}
-                        <div class="answer-box mb-3 shadow-sm">
-                            <small class="text-primary-blue fw-bold d-block mb-2 text-uppercase tracking-wide">
-                                <i class="fas fa-pen-nib me-2"></i> {% trans "label_text_answer" context "labs.template.my_lab_answers" %}
-                            </small>
-                            <div class="text-dark">{{ answer.answer|linebreaks }}</div>
-                        </div>
-                        {% endif %}
-                        
-                        {% if answer.answer_file %}
-                        <div class="file-download-box mb-3 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div>
-                                <small class="text-primary-blue fw-bold d-block mb-1 text-uppercase tracking-wide">
-                                    <i class="fas fa-paperclip me-1"></i> {% trans "label_uploaded_file" context "labs.template.my_lab_answers" %}
-                                </small>
-                                <span class="text-dark fw-medium">{{ answer.answer_file.name|filename }}</span>
-                                {% if answer.answer %}
-                                <div class="mt-2 text-secondary">{{ answer.answer|linebreaks }}</div>
-                                {% endif %}
-                            </div>
-                            <a href="{{ answer.answer_file.url }}" target="_blank" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
-                                <i class="fas fa-download me-2"></i> Yüklə
-                            </a>
-                        </div>
-                        {% endif %}
-                        
-                        {% if not answer.answer and not answer.answer_file %}
-                        <div class="empty-answer-box mb-3">
-                            <i class="fas fa-exclamation-circle text-muted me-2"></i> {% trans "empty_no_answer_for_question" context "labs.template.my_lab_answers" %}
-                        </div>
-                        {% endif %}
-                        
-                        {% if show_review_data and answer.score is not None %}
-                        <div class="mt-4">
-                            <span class="score-badge shadow-sm">
-                                <i class="fas fa-star text-warning me-2"></i> 
-                                <span class="me-1">Qiymət:</span>
-                                <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}</strong>
-                            </span>
-                        </div>
-                        {% endif %}
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-            {% empty %}
-            <div class="text-center py-5">
-                <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3 text-muted" style="width: 80px; height: 80px;">
-                    <i class="fas fa-inbox fa-2x"></i>
-                </div>
-                <h5 class="fw-bold text-dark-blue mb-2">Bu cəhd üçün cavab yoxdur</h5>
-                <p class="text-secondary mb-0">{% trans "empty_no_answers_for_attempt" context "labs.template.my_lab_answers" %}</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    
+
+    {% if preopen_submission_id %}
+    <script>
+        window.LAB_ANSWERS_PREOPEN_MODAL = 'viewLabSubmission{{ preopen_submission_id }}';
+    </script>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 <script src="{% static 'labs/js/my_lab_answers.js' %}"></script>
 {% endblock %}

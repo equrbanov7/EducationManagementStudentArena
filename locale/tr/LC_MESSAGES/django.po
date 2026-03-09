@@ -664,7 +664,7 @@ msgstr "Exams"
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Courses"
+msgstr "Serbest işler"
 
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
@@ -674,7 +674,7 @@ msgstr "Labs"
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_independent"
-msgstr "Independent work"
+msgstr "Kurs işleri"
 
 #: apps/accounts/templates/accounts/my_results.html:63
 msgctxt "accounts.my_results_page"
@@ -1717,7 +1717,7 @@ msgstr "Kurslar"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Kurs ödevleri"
+msgstr "Serbest işler"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1727,7 +1727,7 @@ msgstr "Laboratuvarlar"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
-msgstr "Bağımsız"
+msgstr "Kurs işleri"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
 msgctxt "profile.assigned_tasks"
@@ -1932,7 +1932,7 @@ msgstr "Sınavlar"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:26
 msgctxt "profile.results"
 msgid "tab_assignments"
-msgstr "Görevler"
+msgstr "Serbest işler"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:30
 msgctxt "profile.results"
@@ -1942,7 +1942,7 @@ msgstr "Laboratuvarlar"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:34
 msgctxt "profile.results"
 msgid "tab_independent"
-msgstr "Bağımsız"
+msgstr "Kurs işleri"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:65
 msgctxt "profile.results"
@@ -11384,6 +11384,26 @@ msgstr "Gönderdikten sonra düzenleme yapamazsınız!"
 msgctxt "labs.template.lab_detail"
 msgid "action_finish_lab"
 msgstr "Laboratuvarı bitir"
+
+#: apps/labs/templates/labs/lab_detail.html:365
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_title"
+msgstr "Bitirmek istediğinizden emin misiniz?"
+
+#: apps/labs/templates/labs/lab_detail.html:369
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_description"
+msgstr "Laboratuvarı bitirdikten sonra geri dönüp düzenleme yapamayacaksınız."
+
+#: apps/labs/templates/labs/lab_detail.html:374
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_no_back"
+msgstr "Hayır, devam et"
+
+#: apps/labs/templates/labs/lab_detail.html:377
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_yes"
+msgstr "Evet, laboratuvarı bitir"
 
 #: apps/labs/templates/labs/lab_detail.html:263
 msgctxt "labs.template.lab_detail"

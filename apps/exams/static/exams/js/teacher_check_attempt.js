@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
         pointsUnit: i18n.pointsUnit || "unit_points",
         statusNotChecked: i18n.statusNotChecked || "status_not_checked",
         saveButtonDirty: i18n.saveButtonDirty || "action_save_changes",
+        confirmTitle: i18n.confirmTitle || "Qiymətləndirməni təsdiqləyin",
+        confirmMessage: i18n.confirmMessage || "Bu yoxlamanı yekunlaşdırıb saxlamaq istədiyinizə əminsiniz?",
     };
 
     // Elementlər
@@ -14,9 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const warningModal = document.getElementById('warningModal'); 
     const mainSaveBtn = document.getElementById('mainSaveBtn');
     const backBtn = document.getElementById('backBtn'); // HTML-də id="backBtn" olduğundan əmin olun
+    const gradingForm = document.getElementById('gradingForm');
+    const modalScoreInput = document.getElementById('modalScoreInput');
     
     let isFormDirty = false;  
     let isModalDirty = false;
+    let submitConfirmed = false;
     
     // YENİ: İtifadıçının getmək istədiyi ünvanı yadda saxlamaq üçün dəyişən
     let pendingNavigationUrl = null; 
@@ -56,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalScoreInput').value = currentScore;
         document.getElementById('modalFeedbackInput').value = currentFeedback;
         document.getElementById('currentQuestionId').value = qId;
+        normalizeIntegerInput(modalScoreInput);
 
         backdrop.style.display = 'block';
         modal.style.display = 'block';
@@ -70,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             isModalDirty = true;
         });
     });
+
+    if (modalScoreInput) {
+        modalScoreInput.addEventListener('blur', () => {
+            normalizeIntegerInput(modalScoreInput);
+        });
+    }
 
     // 4. Overlay Click
     backdrop.addEventListener('click', (e) => {
@@ -139,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Yadda Saxla (Modal daxili)
     window.saveFromModal = function() {
         const qId = document.getElementById('currentQuestionId').value;
+        normalizeIntegerInput(modalScoreInput);
         const newScore = document.getElementById('modalScoreInput').value;
         const newFeedback = document.getElementById('modalFeedbackInput').value;
 
@@ -179,7 +192,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('gradingForm').addEventListener('submit', () => {
-        isFormDirty = false;
-    });
+    if (gradingForm) {
+        gradingForm.addEventListener('submit', (e) => {
+            if (submitConfirmed) {
+                submitConfirmed = false;
+                isFormDirty = false;
+                return;
+            }
+
+            e.preventDefault();
+
+            if (typeof window.openActionConfirmModal !== 'function') {
+                submitConfirmed = true;
+                if (typeof gradingForm.requestSubmit === 'function') {
+                    gradingForm.requestSubmit();
+                } else {
+                    gradingForm.submit();
+                }
+                return;
+            }
+
+            window.openActionConfirmModal({
+                title: t.confirmTitle,
+                message: t.confirmMessage,
+                confirmLabel: mainSaveBtn ? mainSaveBtn.textContent.trim() : 'Yadda saxla',
+                confirmButtonClass: 'btn btn-success',
+                onConfirm: function () {
+                    submitConfirmed = true;
+                    if (typeof gradingForm.requestSubmit === 'function') {
+                        gradingForm.requestSubmit();
+                    } else {
+                        gradingForm.submit();
+                    }
+                }
+            });
+        });
+    }
 });
+    function normalizeIntegerInput(input) {
+        if (!input) return;
+        const normalized = (input.value || '').trim().replace(',', '.');
+        if (!normalized) {
+            input.value = '';
+            return;
+        }
+        const match = normalized.match(/^-?\d+/);
+        if (!match) {
+            input.value = '';
+            return;
+        }
+        let nextValue = parseInt(match[0], 10);
+        if (Number.isNaN(nextValue) || nextValue < 0) {
+            nextValue = 0;
+        }
+        input.value = String(nextValue);
+    }

@@ -27,6 +27,7 @@ from ._dashboard_helpers import (
     _collect_my_results,
     _collect_pending_answer_items,
     _collect_pending_review_items,
+    _resolve_teacher_identity_window,
 )
 from ._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -59,6 +60,26 @@ from ._helpers import (
 from ..models import ProfileRole
 
 User = get_user_model()
+
+
+def _resolve_pending_review_identity(*, student, submitted_at, graded_at, is_recheck, now=None):
+    is_hidden, seconds_left = _resolve_teacher_identity_window(
+        submitted_at=submitted_at,
+        reviewed_at=graded_at,
+        is_reviewed=is_recheck,
+        now=now,
+    )
+    student_display = "Anonim tələbə" if is_hidden else (student.get_full_name() or student.username)
+    return student_display, is_hidden, seconds_left
+
+
+def _format_decimal_input(value):
+    if value is None or value == "":
+        return ""
+    formatted = format(Decimal(str(value)), "f")
+    if "." in formatted:
+        formatted = formatted.rstrip("0").rstrip(".")
+    return formatted or "0"
 
 
 @login_required
@@ -455,6 +476,23 @@ def my_result_detail(request, item_type, item_id):
         is_graded_visible = submission.status == "graded" and (
             not submission.graded_at or _is_result_visible_to_student(submission.graded_at)
         )
+        lab_answers = (
+            LabAnswer.objects.filter(
+                lab=submission.assignment.lab,
+                student=request.user,
+                attempt_number=submission.attempt_number,
+                is_draft=False,
+            )
+            .select_related("question", "question__block")
+            .order_by("question__block__order", "question__question_number")
+        )
+        if not lab_answers.exists():
+            lab_answers = (
+                submission.answers.filter(is_draft=False)
+                .select_related("question", "question__block")
+                .order_by("question__block__order", "question__question_number")
+            )
+
         context = {
             "item_type": "labs",
             "item_type_label": pgettext_lazy("accounts.my_result_detail.type", "lab"),
@@ -468,6 +506,8 @@ def my_result_detail(request, item_type, item_id):
             "content_text": submission.submission_text,
             "submission_link": submission.submission_link,
             "submission_file": submission.submission_file,
+            "lab_answers": lab_answers,
+            "lab_answer_count": lab_answers.count(),
             "back_url": back_url,
         }
         return render(request, "accounts/my_result_detail.html", context)
@@ -572,6 +612,17 @@ def pending_review_detail(request, item_type, item_id):
         )
         max_score = Decimal(str(submission.assignment.max_score or 100))
         is_locked = _is_review_window_closed(submission.graded_at)
+        is_recheck_window = bool(
+            submission.status == "graded"
+            and submission.graded_at
+            and not is_locked
+        )
+        student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+            student=submission.user,
+            submitted_at=submission.submitted_at,
+            graded_at=submission.graded_at,
+            is_recheck=is_recheck_window,
+        )
 
         if request.method == "POST":
             if is_locked:
@@ -606,7 +657,7 @@ def pending_review_detail(request, item_type, item_id):
             **base_context,
             "item_title": submission.assignment.title,
             "course_title": submission.assignment.course.title,
-            "student_display": "Anonim tələbə",
+            "student_display": student_display,
             "status_display": submission.get_status_display(),
             "submitted_at": submission.submitted_at,
             "graded_at": submission.graded_at,
@@ -614,9 +665,14 @@ def pending_review_detail(request, item_type, item_id):
             "content_text": submission.content,
             "attachments": _extract_assignment_attachments(submission),
             "current_score": submission.grade,
+            "current_score_input_value": _format_decimal_input(submission.grade),
             "max_score": max_score,
             "is_locked": is_locked,
+            "is_recheck_window": is_recheck_window,
+            "is_identity_hidden": is_identity_hidden,
+            "is_pregrade_anonymous_window": is_identity_hidden and not is_recheck_window,
             "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+            "identity_window_seconds_left": identity_window_seconds_left,
             "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
         }
         return render(request, "accounts/pending_review_detail.html", context)
@@ -629,6 +685,17 @@ def pending_review_detail(request, item_type, item_id):
         )
         max_score = Decimal(str(submission.project.max_score or 100))
         is_locked = _is_review_window_closed(submission.graded_at)
+        is_recheck_window = bool(
+            submission.status == "graded"
+            and submission.graded_at
+            and not is_locked
+        )
+        student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+            student=submission.student,
+            submitted_at=submission.submitted_at,
+            graded_at=submission.graded_at,
+            is_recheck=is_recheck_window,
+        )
 
         if request.method == "POST":
             if is_locked:
@@ -667,7 +734,7 @@ def pending_review_detail(request, item_type, item_id):
             **base_context,
             "item_title": submission.project.title,
             "course_title": submission.project.course.title,
-            "student_display": "Anonim tələbə",
+            "student_display": student_display,
             "status_display": submission.get_status_display(),
             "submitted_at": submission.submitted_at,
             "graded_at": submission.graded_at,
@@ -675,9 +742,14 @@ def pending_review_detail(request, item_type, item_id):
             "content_text": submission.content,
             "attachments": attachments,
             "current_score": submission.grade,
+            "current_score_input_value": _format_decimal_input(submission.grade),
             "max_score": max_score,
             "is_locked": is_locked,
+            "is_recheck_window": is_recheck_window,
+            "is_identity_hidden": is_identity_hidden,
+            "is_pregrade_anonymous_window": is_identity_hidden and not is_recheck_window,
             "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+            "identity_window_seconds_left": identity_window_seconds_left,
             "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
         }
         return render(request, "accounts/pending_review_detail.html", context)
@@ -689,6 +761,17 @@ def pending_review_detail(request, item_type, item_id):
     )
     max_score = Decimal(str(submission.assignment.lab.max_score or 100))
     is_locked = _is_review_window_closed(submission.graded_at)
+    is_recheck_window = bool(
+        submission.status == "graded"
+        and submission.graded_at
+        and not is_locked
+    )
+    student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
+        student=submission.assignment.student,
+        submitted_at=submission.submitted_at,
+        graded_at=submission.graded_at,
+        is_recheck=is_recheck_window,
+    )
 
     lab_answers = list(
         submission.answers.select_related("question", "question__block").order_by(
@@ -716,11 +799,13 @@ def pending_review_detail(request, item_type, item_id):
         feedback = (request.POST.get("feedback") or "").strip()
         try:
             auto_total = Decimal("0")
+            has_posted_answer_scores = False
             for answer in lab_answers:
                 raw_answer_score = (request.POST.get(f"answer_score_{answer.id}") or "").strip()
                 if not raw_answer_score:
                     answer.score = None
                 else:
+                    has_posted_answer_scores = True
                     answer_score = _parse_decimal_score(raw_answer_score)
                     if answer_score < 0:
                         answer_score = Decimal("0")
@@ -731,14 +816,12 @@ def pending_review_detail(request, item_type, item_id):
                     auto_total += answer_score
                 answer.save(update_fields=["score", "submitted_at"])
 
-            score = _parse_decimal_score(request.POST.get("score"))
+            entered_total = _parse_decimal_score(request.POST.get("score"))
         except InvalidOperation:
             messages.error(request, "Bal düzgün rəqəm formatında olmalıdır.")
             return redirect(redirect_url)
 
-        use_manual_total = request.POST.get("use_manual_total") == "1"
-        if not use_manual_total:
-            score = auto_total
+        score = entered_total if (not has_posted_answer_scores or entered_total != auto_total) else auto_total
 
         if score < 0 or score > max_score:
             messages.error(request, f"Bal 0 və {max_score} aralığında olmalıdır.")
@@ -768,11 +851,24 @@ def pending_review_detail(request, item_type, item_id):
     if submission.submission_link:
         attachments.append({"name": submission.submission_link, "url": submission.submission_link})
 
+    has_answer_scores = any(answer.score is not None for answer in lab_answers)
+    auto_total_decimal = sum(
+        (answer.score if answer.score is not None else Decimal("0") for answer in lab_answers),
+        Decimal("0"),
+    )
+    use_manual_total_initial = False
+    if submission.score is not None:
+        submission_score_decimal = Decimal(str(submission.score))
+        use_manual_total_initial = (not has_answer_scores) or submission_score_decimal != auto_total_decimal
+
+    for answer in lab_answers:
+        answer.score_input_value = _format_decimal_input(answer.score)
+
     context = {
         **base_context,
         "item_title": submission.assignment.lab.title,
         "course_title": submission.assignment.lab.course.title,
-        "student_display": "Anonim tələbə",
+        "student_display": student_display,
         "status_display": submission.get_status_display(),
         "submitted_at": submission.submitted_at,
         "graded_at": submission.graded_at,
@@ -781,11 +877,18 @@ def pending_review_detail(request, item_type, item_id):
         "attachments": attachments,
         "lab_answers": lab_answers,
         "current_score": submission.score,
-        "auto_total_score": sum((a.score or Decimal("0")) for a in lab_answers),
+        "current_score_input_value": _format_decimal_input(submission.score),
+        "auto_total_score": auto_total_decimal,
+        "auto_total_score_input_value": _format_decimal_input(auto_total_decimal),
         "max_score": max_score,
         "is_locked": is_locked,
+        "is_recheck_window": is_recheck_window,
+        "is_identity_hidden": is_identity_hidden,
+        "is_pregrade_anonymous_window": is_identity_hidden and not is_recheck_window,
         "review_window_seconds_left": _review_window_seconds_left(submission.graded_at),
+        "identity_window_seconds_left": identity_window_seconds_left,
         "review_deadline": submission.graded_at + REVIEW_EDIT_WINDOW if submission.graded_at else None,
+        "use_manual_total_initial": use_manual_total_initial,
     }
     return render(request, "accounts/pending_review_detail.html", context)
 

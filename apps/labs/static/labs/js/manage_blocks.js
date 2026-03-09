@@ -7,11 +7,95 @@
     const $ = (id) => document.getElementById(id);
     const I18N = window.LAB_I18N || {};
     const t = (key, fallback) => I18N[key] || fallback;
+    const RELOAD_NOTIFICATION_KEY = 'labs.manageBlocks.pendingNotification';
+    const ICON_CLASS_BY_TYPE = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle',
+    };
 
     let pendingBlockData = null;
     let pendingQuestionData = null;
     let pendingImportBlockId = null;
     let pendingAddQuestionBlockId = null;
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function getToastContainer() {
+        let container = document.querySelector('.toast-container');
+        if (container) return container;
+
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function showNotification(message, type = 'info', duration = 4000) {
+        const normalizedType = ['success', 'error', 'warning', 'info'].includes(type) ? type : 'info';
+        const alertType = normalizedType === 'error' ? 'danger' : normalizedType;
+        const container = getToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${alertType} alert-dismissible fade show`;
+        toast.setAttribute('role', 'alert');
+        toast.dataset.autoHide = String(duration);
+        toast.innerHTML = `
+            <i class="fas ${ICON_CLASS_BY_TYPE[normalizedType] || ICON_CLASS_BY_TYPE.info} me-2"></i>
+            ${escapeHtml(message)}
+            <button type="button" class="btn-close" aria-label="Bağla"></button>
+        `;
+
+        const closeButton = toast.querySelector('.btn-close');
+        const removeToast = () => {
+            toast.classList.add('fade-out');
+            setTimeout(() => toast.remove(), 300);
+        };
+
+        closeButton.addEventListener('click', removeToast);
+        container.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(removeToast, duration);
+        }
+    }
+
+    function showError(message) {
+        showNotification(message, 'error', 5000);
+    }
+
+    function persistNotificationForReload(message, type = 'success', duration = 4000) {
+        try {
+            sessionStorage.setItem(
+                RELOAD_NOTIFICATION_KEY,
+                JSON.stringify({ message, type, duration })
+            );
+        } catch (error) {
+            // Ignore storage failures and continue with reload.
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const rawValue = sessionStorage.getItem(RELOAD_NOTIFICATION_KEY);
+            if (!rawValue) return;
+
+            sessionStorage.removeItem(RELOAD_NOTIFICATION_KEY);
+            const notification = JSON.parse(rawValue);
+            if (!notification || !notification.message) return;
+
+            showNotification(notification.message, notification.type || 'info', notification.duration || 4000);
+        } catch (error) {
+            sessionStorage.removeItem(RELOAD_NOTIFICATION_KEY);
+        }
+    });
 
     const editBlockModal = $('editBlockModal');
     if (editBlockModal) {
@@ -125,13 +209,13 @@
                     if (d.success) {
                         location.reload();
                     } else {
-                        alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                         btn.disabled = false;
                         btn.innerHTML = t('actionCreate', 'Create');
                     }
                 })
                 .catch(() => {
-                    alert(t('errorServer', 'Server error'));
+                    showError(t('errorServer', 'Server error'));
                     btn.disabled = false;
                     btn.innerHTML = t('actionCreate', 'Create');
                 });
@@ -159,13 +243,13 @@
                     if (d.success) {
                         location.reload();
                     } else {
-                        alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                         btn.disabled = false;
                         btn.innerHTML = t('actionSave', 'Save');
                     }
                 })
                 .catch(() => {
-                    alert(t('errorServer', 'Server error'));
+                    showError(t('errorServer', 'Server error'));
                     btn.disabled = false;
                     btn.innerHTML = t('actionSave', 'Save');
                 });
@@ -191,13 +275,13 @@
                     if (d.success) {
                         location.reload();
                     } else {
-                        alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                         btn.disabled = false;
                         btn.innerHTML = t('actionAdd', 'Add');
                     }
                 })
                 .catch(() => {
-                    alert(t('errorServer', 'Server error'));
+                    showError(t('errorServer', 'Server error'));
                     btn.disabled = false;
                     btn.innerHTML = t('actionAdd', 'Add');
                 });
@@ -225,13 +309,13 @@
                     if (d.success) {
                         location.reload();
                     } else {
-                        alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                         btn.disabled = false;
                         btn.innerHTML = t('actionSave', 'Save');
                     }
                 })
                 .catch(() => {
-                    alert(t('errorServer', 'Server error'));
+                    showError(t('errorServer', 'Server error'));
                     btn.disabled = false;
                     btn.innerHTML = t('actionSave', 'Save');
                 });
@@ -255,19 +339,25 @@
                 .then((r) => r.json())
                 .then((d) => {
                     if (d.success) {
-                        alert(
+                        persistNotificationForReload(
                             d.message ||
-                                t('successImportDefault', '{count} questions imported').replace('{count}', d.count || 0)
+                                t('successImportDefault', '{count} questions imported').replace('{count}', d.count || 0),
+                            'success',
+                            4500
                         );
+                        const modal = bootstrap.Modal.getInstance(importModal);
+                        if (modal) {
+                            modal.hide();
+                        }
                         location.reload();
                     } else {
-                        alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-upload me-1"></i> ' + t('actionImport', 'Import');
                     }
                 })
                 .catch(() => {
-                    alert(t('errorServer', 'Server error'));
+                    showError(t('errorServer', 'Server error'));
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-upload me-1"></i> ' + t('actionImport', 'Import');
                 });
@@ -289,10 +379,10 @@
                 if (d.success) {
                     location.reload();
                 } else {
-                    alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                    showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                 }
             })
-            .catch(() => alert(t('errorServer', 'Server error')));
+            .catch(() => showError(t('errorServer', 'Server error')));
     });
 
     document.addEventListener('click', (e) => {
@@ -310,9 +400,9 @@
                 if (d.success) {
                     location.reload();
                 } else {
-                    alert(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                    showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
                 }
             })
-            .catch(() => alert(t('errorServer', 'Server error')));
+            .catch(() => showError(t('errorServer', 'Server error')));
     });
 })();

@@ -101,6 +101,14 @@ class ProjectDetailBackUrlTest(TestCase):
             f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=independent",
         )
 
+    def test_project_detail_includes_submit_confirmation_modal(self):
+        self._login_as(self.student)
+        response = self.client.get(reverse("projects:project_detail", kwargs={"pk": self.project.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertContains(response, "Bu kurs işini göndərmək istədiyinizə əminsiniz?")
+
 
 class ProjectReviewSubmissionNavigationTest(TestCase):
     def setUp(self):
@@ -188,6 +196,68 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["back_url"], return_to)
+
+    def test_review_submissions_hides_student_name_for_first_five_minutes_then_reveals(self):
+        self._login_teacher()
+        response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, "Yoxla")
+        self.assertNotContains(response, self.student.username)
+        self.assertNotContains(response, 'data-review-countdown="')
+
+        self.submission.submitted_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["submitted_at"])
+
+        revealed_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+        self.assertEqual(revealed_response.status_code, 200)
+        self.assertContains(revealed_response, self.student.username)
+        self.assertNotContains(revealed_response, "Anonim tələbə")
+
+    def test_review_submissions_shows_recheck_then_view_after_window_closes(self):
+        self.submission.status = "graded"
+        self.submission.grade = "77.00"
+        self.submission.feedback = "Initial review"
+        self.submission.graded_at = timezone.now()
+        self.submission.save(update_fields=["status", "grade", "feedback", "graded_at"])
+
+        self._login_teacher()
+        response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Yenidən yoxla")
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, 'data-review-countdown="')
+        self.assertEqual(response.context["submissions"][0].review_action_label, "Yenidən yoxla")
+
+        self.submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["graded_at"])
+
+        locked_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+        self.assertEqual(locked_response.status_code, 200)
+        self.assertContains(locked_response, "Bax")
+        self.assertContains(locked_response, self.student.username)
+        self.assertEqual(locked_response.context["submissions"][0].review_action_label, "Bax")
+
+    def test_review_submissions_includes_confirm_modal_and_preserves_grade_value(self):
+        self.submission.status = "graded"
+        self.submission.grade = "30.00"
+        self.submission.feedback = "Saved project score"
+        self.submission.graded_at = timezone.now()
+        self.submission.save(update_fields=["status", "grade", "feedback", "graded_at"])
+
+        self._login_teacher()
+        response = self.client.get(
+            reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}),
+            {"submission": str(self.submission.id)},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertContains(response, 'id="grade-input"')
+        self.assertContains(response, 'step="1"')
+        self.assertContains(response, 'data-grade="30"')
 
 
 class ProjectUploadSecurityTest(TestCase):

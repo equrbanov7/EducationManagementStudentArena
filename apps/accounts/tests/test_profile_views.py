@@ -2,6 +2,7 @@
 Tests for profile and dashboard views.
 """
 
+from decimal import Decimal
 from urllib.parse import quote
 
 from django.contrib.auth import get_user_model
@@ -1427,6 +1428,57 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, reverse("accounts:profile") + "?section=my-results")
         self.assertContains(response, "results_type=all")
 
+    def test_my_result_detail_for_lab_submission_shows_question_answers(self):
+        from apps.labs.models import LabAnswer, LabBlock, LabQuestion
+
+        block = LabBlock.objects.create(lab=self.lab, title="Core block", order=1)
+        question_one = LabQuestion.objects.create(
+            block=block,
+            question_number=1,
+            question_text="Explain the JavaScript loop flow.",
+        )
+        question_two = LabQuestion.objects.create(
+            block=block,
+            question_number=2,
+            question_text="Upload your notes.",
+        )
+
+        self.lab_submission.submission_text = ""
+        self.lab_submission.save(update_fields=["submission_text"])
+
+        LabAnswer.objects.create(
+            lab=self.lab,
+            question=question_one,
+            student=self.student,
+            attempt_number=self.lab_submission.attempt_number,
+            answer="The loop repeats until the condition becomes false.",
+            is_draft=False,
+            score=47,
+        )
+        LabAnswer.objects.create(
+            lab=self.lab,
+            question=question_two,
+            student=self.student,
+            attempt_number=self.lab_submission.attempt_number,
+            answer_file=SimpleUploadedFile("lab-proof.txt", b"proof"),
+            is_draft=False,
+        )
+
+        self._login_student()
+        response = self.client.get(
+            reverse(
+                "accounts:my_result_detail",
+                kwargs={"item_type": "labs", "item_id": self.lab_submission.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Explain the JavaScript loop flow.")
+        self.assertContains(response, "The loop repeats until the condition becomes false.")
+        self.assertContains(response, "lab-proof")
+        self.assertContains(response, 'data-answer-toggle="')
+        self.assertNotContains(response, "No text answer")
+
     def test_my_result_detail_preserves_profile_results_filter_in_back_link(self):
         self._login_student()
         response = self.client.get(
@@ -1877,6 +1929,49 @@ class PendingReviewViewTest(TestCase):
         self.assertContains(response, "Anonim tələbə")
         self.assertNotContains(response, student.username)
 
+    def test_pending_review_reveals_assignment_student_after_pregrade_window_closes(self):
+        from datetime import timedelta
+
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="revealed_pending_assignment_student",
+            email="revealed_pending_assignment_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        course = Course.objects.create(owner=self.user, title="Revealed Pending Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Revealed Pending Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Older pending answer",
+            status="submitted",
+        )
+        submission.submitted_at = timezone.now() - timedelta(minutes=6)
+        submission.save(update_fields=["submitted_at"])
+
+        self._login_user()
+        response = self.client.get(reverse("accounts:pending_review"))
+        self.assertEqual(response.status_code, 200)
+
+        items = response.context["review_items"]
+        assignment_item = next(item for item in items if item["title"] == "Revealed Pending Assignment")
+        self.assertEqual(assignment_item["student_display"], student.username)
+        self.assertEqual(assignment_item["action_label"], "Yoxla")
+        self.assertContains(response, student.username)
+        self.assertNotContains(response, "Anonim tələbə")
+
     def test_pending_review_detail_allows_edit_within_window_and_locks_after(self):
         from datetime import timedelta
 
@@ -1948,6 +2043,53 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(pending_after_window.status_code, 200)
         self.assertNotContains(pending_after_window, "Pending Lock Assignment")
 
+    def test_pending_review_detail_preserves_saved_assignment_score_in_ui_and_shows_confirm_modal(self):
+        from datetime import timedelta
+
+        from apps.assignments.models import Assignment, Submission
+        from apps.courses.models import Course
+        from django.utils import timezone
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_assignment_grade_student",
+            email="pending_assignment_grade_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        course = Course.objects.create(owner=self.user, title="Pending Score Course", status="published")
+        assignment = Assignment.objects.create(
+            course=course,
+            title="Pending Score Assignment",
+            start_date=timezone.now() - timedelta(days=1),
+            due_date=timezone.now() + timedelta(days=2),
+            status="published",
+        )
+        submission = Submission.objects.create(
+            assignment=assignment,
+            user=student,
+            content="Saved score answer",
+            status="graded",
+            grade="30.00",
+            feedback="Saved score feedback",
+            graded_at=timezone.now(),
+        )
+
+        self._login_user()
+        response = self.client.get(
+            reverse(
+                "accounts:pending_review_detail",
+                kwargs={"item_type": "assignment", "item_id": submission.id},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="id_score"')
+        self.assertContains(response, 'value="30"')
+        self.assertContains(response, 'step="1"')
+        self.assertContains(response, "courseActionConfirmModal")
+
     def test_pending_review_detail_deduplicates_assignment_attachments(self):
         from datetime import timedelta
 
@@ -1991,6 +2133,99 @@ class PendingReviewViewTest(TestCase):
         self.assertEqual(len(response.context["attachments"]), 1)
         self.assertEqual(response.context["attachments"][0]["name"], "VBS.docx")
         self.assertEqual(response.content.decode("utf-8").count("VBS.docx"), 1)
+
+    def test_pending_review_lab_detail_preserves_manual_total_without_checkbox(self):
+        from datetime import timedelta
+
+        from apps.courses.models import Course, CourseMembership
+        from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+        from django.utils import timezone
+
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="pending_lab_student",
+            email="pending_lab_student@example.com",
+            password="testpass123",
+        )
+        self._set_user_role(student, ProfileRole.STUDENT)
+        course = Course.objects.create(owner=self.user, title="Pending Lab Course", status="published")
+        CourseMembership.objects.create(course=course, user=student, role="student")
+        lab = Lab.objects.create(
+            course=course,
+            title="Pending Review Lab",
+            description="Pending review manual total",
+            start_datetime=timezone.now() - timedelta(days=1),
+            end_datetime=timezone.now() + timedelta(days=2),
+            max_score=100,
+            max_attempts=2,
+            status="published",
+            created_by=self.user,
+        )
+        assignment = LabAssignment.objects.create(lab=lab, student=student)
+        submission = LabSubmission.objects.create(
+            assignment=assignment,
+            status="graded",
+            score="95.00",
+            feedback="Manual total should persist",
+            graded_at=timezone.now(),
+            attempt_number=1,
+        )
+        block = LabBlock.objects.create(lab=lab, title="Manual Block", order=1)
+        question = LabQuestion.objects.create(
+            block=block,
+            question_text="Explain the pending review solution",
+            question_number=1,
+            points=100,
+        )
+        answer = LabAnswer.objects.create(
+            lab=lab,
+            question=question,
+            student=student,
+            submission=submission,
+            attempt_number=1,
+            answer="Pending review lab answer",
+            is_draft=False,
+        )
+
+        self._login_user()
+        detail_url = reverse(
+            "accounts:pending_review_detail",
+            kwargs={"item_type": "lab", "item_id": submission.id},
+        )
+
+        initial_response = self.client.get(detail_url)
+        self.assertEqual(initial_response.status_code, 200)
+        self.assertContains(initial_response, 'value="95"')
+        self.assertContains(initial_response, 'step="1"')
+        self.assertContains(initial_response, "courseActionConfirmModal")
+        self.assertNotContains(initial_response, "Yekun balı əl ilə dəyiş")
+        self.assertNotContains(initial_response, "useManualTotal")
+
+        save_response = self.client.post(
+            detail_url,
+            {
+                "score": "95.00",
+                "feedback": "Updated manual total review",
+                f"answer_score_{answer.id}": "",
+            },
+        )
+        self.assertEqual(save_response.status_code, 302)
+        submission.refresh_from_db()
+        answer.refresh_from_db()
+        self.assertEqual(submission.score, Decimal("95.00"))
+        self.assertEqual(submission.feedback, "Updated manual total review")
+        self.assertIsNone(answer.score)
+
+        submission.submitted_at = timezone.now() - timedelta(minutes=10)
+        submission.graded_at = timezone.now() - timedelta(minutes=6)
+        submission.save(update_fields=["submitted_at", "graded_at"])
+
+        locked_response = self.client.get(detail_url)
+        self.assertEqual(locked_response.status_code, 200)
+        self.assertContains(locked_response, student.username)
+        self.assertContains(locked_response, 'value="95"')
+        self.assertContains(locked_response, "Yoxlama bağlanıb.")
 
 
 class ReviewResultsViewTest(TestCase):

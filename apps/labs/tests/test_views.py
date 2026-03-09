@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
-from apps.labs.models import Lab, LabAssignment, LabSubmission
+from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -140,6 +140,19 @@ class LabDetailBackUrlTest(TestCase):
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "selectedLabCount")
 
+    def test_lab_detail_renders_finish_confirmation_modal(self):
+        LabAssignment.get_or_create_for_student(self.lab, self.student)
+        block = LabBlock.objects.create(lab=self.lab, title="Block 1", order=1)
+        LabQuestion.objects.create(block=block, question_text="Question 1", question_number=1, points=10)
+
+        self._login_as(self.student)
+        response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="finishLabConfirmModal"')
+        self.assertContains(response, 'id="confirmFinishLabBtn"')
+        self.assertContains(response, "Bitirməyə əminsiniz?")
+
     def test_lab_submissions_support_bulk_delete_controls(self):
         assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
         LabSubmission.objects.create(
@@ -252,6 +265,298 @@ class LabTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class LabAccessControlTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.owner = User.objects.create_user("lab_owner", "lab_owner@example.com", "StrongPass123!")
+        self.other_teacher = User.objects.create_user("other_teacher", "other_teacher@example.com", "StrongPass123!")
+        self.allowed_student = User.objects.create_user("allowed_student", "allowed_student@example.com", "StrongPass123!")
+        self.blocked_student = User.objects.create_user("blocked_student", "blocked_student@example.com", "StrongPass123!")
+        self.unenrolled_student = User.objects.create_user("unenrolled_student", "unenrolled_student@example.com", "StrongPass123!")
+
+        self.organization = Organization.objects.create(
+            name="Lab Access Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+
+        _assign_user_to_org(self.owner, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.other_teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.allowed_student, self.organization, ProfileRole.STUDENT)
+        _assign_user_to_org(self.blocked_student, self.organization, ProfileRole.STUDENT)
+        _assign_user_to_org(self.unenrolled_student, self.organization, ProfileRole.STUDENT)
+
+        self.course = Course.objects.create(owner=self.owner, title="Lab Access Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.allowed_student, role="student", group_name="A1")
+        CourseMembership.objects.create(course=self.course, user=self.blocked_student, role="student", group_name="B1")
+
+        self.lab = Lab.objects.create(
+            course=self.course,
+            title="Restricted Lab",
+            description="Restricted lab test",
+            start_datetime=timezone.now() - timedelta(hours=1),
+            end_datetime=timezone.now() + timedelta(days=1),
+            max_score=100,
+            max_attempts=1,
+            status="published",
+            allowed_groups="A1",
+            created_by=self.owner,
+        )
+
+    def _login_as(self, user):
+        _login_with_org(self.client, user, self.organization)
+
+    def test_lab_detail_blocks_same_tenant_student_without_course_membership(self):
+        self._login_as(self.unenrolled_student)
+
+        response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(LabAssignment.objects.filter(lab=self.lab, student=self.unenrolled_student).exists())
+
+    def test_lab_detail_blocks_student_outside_allowed_groups_and_students(self):
+        self.lab.allowed_students = str(self.owner.id)
+        self.lab.save(update_fields=["allowed_students"])
+        self._login_as(self.blocked_student)
+
+        response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(LabAssignment.objects.filter(lab=self.lab, student=self.blocked_student).exists())
+
+    def test_submit_lab_blocks_student_outside_access_rules(self):
+        self._login_as(self.blocked_student)
+
+        response = self.client.post(reverse("labs:submit_lab", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["success"], False)
+        self.assertFalse(LabAssignment.objects.filter(lab=self.lab, student=self.blocked_student).exists())
+
+    def test_lab_submissions_blocks_other_teacher_in_same_tenant(self):
+        assignment = LabAssignment.get_or_create_for_student(self.lab, self.allowed_student)
+        LabSubmission.objects.create(assignment=assignment, status="submitted", attempt_number=1)
+        self._login_as(self.other_teacher)
+
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 403)
+
+
+class LabQuestionImportTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("lab_import_teacher", "lab_import_teacher@example.com", "StrongPass123!")
+        self.organization = Organization.objects.create(
+            name="Lab Import Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+
+        self.course = Course.objects.create(owner=self.teacher, title="Lab Import Course", status="published")
+        self.lab = Lab.objects.create(
+            course=self.course,
+            title="Lab Import",
+            description="Lab import test",
+            start_datetime=timezone.now() - timedelta(hours=1),
+            end_datetime=timezone.now() + timedelta(days=1),
+            max_score=100,
+            max_attempts=1,
+            status="published",
+            created_by=self.teacher,
+        )
+        self.block = LabBlock.objects.create(lab=self.lab, title="Import Block", order=1)
+
+    def test_import_questions_returns_interpolated_success_message(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+        response = self.client.post(
+            reverse("labs:import_questions", kwargs={"block_id": self.block.id}),
+            {
+                "questions_text": "1. Birinci sual\n2. Ikinci sual",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["count"], 2)
+        self.assertNotIn("%(count)s", payload["message"])
+        self.assertIn("2", payload["message"])
+        self.assertEqual(LabQuestion.objects.filter(block=self.block).count(), 2)
+
+
+class LabTeacherReviewWindowTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("lab_review_teacher", "lab_review_teacher@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("lab_review_student", "lab_review_student@example.com", "StrongPass123!")
+        self.organization = Organization.objects.create(
+            name="Lab Teacher Review Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
+
+        self.course = Course.objects.create(owner=self.teacher, title="Lab Teacher Review Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="580")
+        self.lab = Lab.objects.create(
+            course=self.course,
+            title="Lab Teacher Review",
+            description="Teacher-side review window test",
+            start_datetime=timezone.now() - timedelta(hours=1),
+            end_datetime=timezone.now() + timedelta(days=1),
+            max_score=100,
+            max_attempts=1,
+            status="published",
+            created_by=self.teacher,
+        )
+        self.assignment = LabAssignment.objects.create(lab=self.lab, student=self.student)
+        self.submission = LabSubmission.objects.create(
+            assignment=self.assignment,
+            status="graded",
+            score="95.00",
+            feedback="Teacher review window",
+            graded_at=timezone.now(),
+            attempt_number=1,
+        )
+        self.block = LabBlock.objects.create(lab=self.lab, title="Review Block", order=1)
+        self.question = LabQuestion.objects.create(
+            block=self.block,
+            question_text="Explain the solution",
+            question_number=1,
+            points=100,
+        )
+        self.answer = LabAnswer.objects.create(
+            lab=self.lab,
+            question=self.question,
+            student=self.student,
+            submission=self.submission,
+            attempt_number=1,
+            answer="Manual total grading answer",
+            is_draft=False,
+        )
+
+    def _login_teacher(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+    def test_lab_submissions_hides_student_identity_during_recheck_window(self):
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, "Yenidən yoxla")
+        self.assertContains(response, 'data-review-countdown="')
+        self.assertNotContains(response, self.student.username)
+        self.assertNotContains(response, self.student.email)
+
+    def test_lab_submissions_hide_pending_student_identity_for_first_five_minutes(self):
+        pending_submission = LabSubmission.objects.create(
+            assignment=self.assignment,
+            status="submitted",
+            attempt_number=2,
+        )
+        self.submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["graded_at"])
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        submissions = list(response.context["submissions"])
+        pending_context = next(sub for sub in submissions if sub.id == pending_submission.id)
+        self.assertFalse(pending_context.can_view_student_identity)
+        self.assertGreater(pending_context.identity_window_seconds_left, 0)
+        self.assertContains(response, "Anonim tələbə")
+        self.assertNotContains(response, 'data-review-countdown="')
+
+    def test_lab_submissions_reveals_student_identity_after_recheck_window_closes(self):
+        self.submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["graded_at"])
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student.username)
+        self.assertContains(response, self.student.email)
+        self.assertNotContains(response, "Yenidən yoxla")
+        self.assertContains(response, "Bax")
+        self.assertNotContains(response, "Yoxlama bağlanıb")
+        self.assertNotContains(response, "Blokları idarə et")
+        self.assertNotContains(response, 'data-review-countdown="')
+
+    def test_grade_submission_page_preserves_saved_total_in_recheck_window(self):
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:grade_submission_page", kwargs={"pk": self.submission.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="95"')
+        self.assertContains(response, 'step="1"')
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertNotContains(response, "useManualTotal")
+        self.assertContains(response, f'name="answer_score_{self.answer.id}"')
+
+    def test_grade_submission_page_keeps_pending_student_anonymous_for_first_five_minutes(self):
+        pending_submission = LabSubmission.objects.create(
+            assignment=self.assignment,
+            status="submitted",
+            attempt_number=2,
+        )
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:grade_submission_page", kwargs={"pk": pending_submission.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, "Anonim yoxlama pəncərəsi aktivdir.")
+
+    def test_grade_submission_post_preserves_existing_manual_total_without_checkbox(self):
+        self._login_teacher()
+
+        response = self.client.post(
+            reverse("labs:grade_submission_page", kwargs={"pk": self.submission.id}),
+            {
+                "score": "95.00",
+                "feedback": "Teacher review window updated",
+                "use_manual_total": "0",
+                f"answer_score_{self.answer.id}": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.submission.refresh_from_db()
+        self.answer.refresh_from_db()
+        self.assertEqual(self.submission.score, 95)
+        self.assertEqual(self.submission.feedback, "Teacher review window updated")
+        self.assertIsNone(self.answer.score)
+
+    def test_grade_submission_page_allows_read_only_view_after_window_closes(self):
+        self.submission.graded_at = timezone.now() - timedelta(minutes=6)
+        self.submission.save(update_fields=["graded_at"])
+        self._login_teacher()
+
+        response = self.client.get(reverse("labs:grade_submission_page", kwargs={"pk": self.submission.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.student.username)
+        self.assertContains(response, "Bu cavab artıq yalnız baxış üçündür.")
+        self.assertContains(response, "disabled")
+        self.assertContains(response, "Bağla")
+
+
 class LabReviewVisibilityTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -301,8 +606,11 @@ class LabReviewVisibilityTest(TestCase):
 
         hidden_answers_response = self.client.get(reverse("labs:my_lab_answers", kwargs={"pk": self.lab.id}))
         self.assertEqual(hidden_answers_response.status_code, 200)
-        self.assertContains(hidden_answers_response, 'id="reviewCountdown"')
+        self.assertContains(hidden_answers_response, 'data-bs-target="#viewLabSubmission')
+        self.assertContains(hidden_answers_response, 'data-review-countdown="')
         self.assertNotContains(hidden_answers_response, "17,25")
+        self.assertContains(hidden_answers_response, "status-review-pending")
+        self.assertNotContains(hidden_answers_response, "fa-spin-pulse")
 
         self.submission.graded_at = timezone.now() - timedelta(minutes=6)
         self.submission.save(update_fields=["graded_at"])

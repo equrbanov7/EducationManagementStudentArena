@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load lab_filters %}
 
-{% block title %}{% trans "title_prefix_grade" context "labs.template.grade_submission" %} - {{ submission.assignment.student.username }}{% endblock %}
+{% block title %}{% trans "title_prefix_grade" context "labs.template.grade_submission" %} - {{ student_display }}{% endblock %}
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'labs/css/grade_submission.css' %}">
 {% endblock %}
@@ -26,7 +26,7 @@
             </nav>
             <h3 class="mb-0">
                 <i class="fas fa-user-graduate text-primary me-2"></i> 
-                {{ submission.assignment.student.get_full_name|default:submission.assignment.student.username }}
+                {{ student_display }}
             </h3>
             <small class="text-muted">{% blocktrans trimmed context "labs.template.grade_submission" with attempt_number=submission.attempt_number submitted_at=submission.submitted_at|date:"d.m.Y H:i" %}label_attempt_info {{ attempt_number }} · {{ submitted_at }}{% endblocktrans %}</small>
         </div>
@@ -34,6 +34,31 @@
             <i class="fas fa-arrow-left me-1"></i> {% trans "action_back" context "labs.template.grade_submission" %}
         </a>
     </div>
+
+    {% if is_recheck_window %}
+    <div class="review-window-banner">
+        <strong>Yenidən yoxlama pəncərəsi aktivdir.</strong>
+        <span>
+            Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+            <span data-review-countdown="{{ review_window_seconds_left }}">--:--:--</span>
+        </span>
+    </div>
+    {% elif is_pregrade_anonymous_window %}
+    <div class="review-window-banner">
+        <strong>Anonim yoxlama pəncərəsi aktivdir.</strong>
+        <span>
+            Tələbə adı bu müddətdə gizlidir. Qalan vaxt:
+            <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
+        </span>
+    </div>
+    {% elif is_locked %}
+    <div class="review-window-banner review-window-banner--locked">
+        <strong>Yoxlama bağlanıb.</strong>
+        <span>
+            Bu cavab artıq yalnız baxış üçündür. Tələbənin yazdıqları görünür, amma bal və rəy dəyişdirilə bilməz.
+        </span>
+    </div>
+    {% endif %}
     
     <div class="row">
         <div class="col-lg-8 mb-4">
@@ -84,14 +109,16 @@
                                     <label class="form-label fw-semibold mb-2">Bu suala bal (0{% if answer.question.points > 0 %} - {{ answer.question.points }}{% endif %})</label>
                                     <input
                                         type="number"
-                                        step="0.01"
+                                        step="1"
                                         min="0"
                                         {% if answer.question.points > 0 %}max="{{ answer.question.points }}"{% endif %}
                                         name="answer_score_{{ answer.id }}"
                                         class="form-control answer-score-input"
-                                        value="{% if answer.score is not None %}{{ answer.score }}{% endif %}"
+                                        value="{{ answer.score_input_value }}"
                                         data-question-max="{% if answer.question.points > 0 %}{{ answer.question.points }}{% else %}0{% endif %}"
+                                        inputmode="numeric"
                                         form="gradeForm"
+                                        {% if is_locked %}disabled{% endif %}
                                     >
                                 </div>
                                 </div>
@@ -110,8 +137,9 @@
         
         <div class="col-lg-4">
             <div class="card shadow-sm sticky-top" style="top: 20px;">
-                <div class="card-header bg-success text-white">
-                    <i class="fas fa-star me-2"></i> <strong>{% trans "heading_grading" context "labs.template.grade_submission" %}</strong>
+                <div class="card-header {% if is_locked %}bg-secondary{% else %}bg-success{% endif %} text-white">
+                    <i class="fas {% if is_locked %}fa-eye{% else %}fa-star{% endif %} me-2"></i>
+                    <strong>{% if is_locked %}Baxış{% else %}{% trans "heading_grading" context "labs.template.grade_submission" %}{% endif %}</strong>
                 </div>
                 <div class="card-body">
                     <form method="POST" id="gradeForm">
@@ -121,33 +149,33 @@
                             <label class="form-label fw-bold">{% trans "label_score" context "labs.template.grade_submission" %}</label>
                             <div class="input-group input-group-lg">
                                 <input type="number" name="score" class="form-control text-center fs-3" 
-                                       value="{% if submission.score is not None %}{{ submission.score }}{% else %}{{ auto_total_score }}{% endif %}"
+                                       value="{% if submission_score_input_value %}{{ submission_score_input_value }}{% else %}{{ auto_total_score_input_value }}{% endif %}"
                                        id="totalScoreInput"
-                                       min="0" max="{{ lab.max_score }}" step="0.01" required
-                                       placeholder="0">
+                                       min="0" max="{{ lab.max_score }}" step="1" required
+                                       inputmode="numeric"
+                                       data-manual-total-initial="{% if use_manual_total_initial %}1{% else %}0{% endif %}"
+                                       data-auto-total="{% if auto_total_score_input_value %}{{ auto_total_score_input_value }}{% else %}0{% endif %}"
+                                       placeholder="0"
+                                       {% if is_locked %}disabled{% endif %}>
                                 <span class="input-group-text">/ {{ lab.max_score }}</span>
                             </div>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" id="useManualTotal">
-                                <label class="form-check-label small text-muted" for="useManualTotal">
-                                    Toplam balı əl ilə dəyiş
-                                </label>
-                            </div>
-                            <input type="hidden" name="use_manual_total" id="useManualTotalHidden" value="0">
                         </div>
                         
                         <div class="mb-4">
                             <label class="form-label fw-bold">{% trans "label_feedback" context "labs.template.grade_submission" %}</label>
                             <textarea name="feedback" class="form-control" rows="5" 
-                                      placeholder="{% trans 'placeholder_feedback' context 'labs.template.grade_submission' %}">{{ submission.feedback|default:'' }}</textarea>
+                                      placeholder="{% trans 'placeholder_feedback' context 'labs.template.grade_submission' %}"
+                                      {% if is_locked %}disabled{% endif %}>{{ submission.feedback|default:'' }}</textarea>
                         </div>
                         
                         <div class="d-grid gap-2">
+                            {% if not is_locked %}
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-check me-2"></i> {% trans "action_save" context "labs.template.grade_submission" %}
                             </button>
+                            {% endif %}
                             <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-outline-secondary">
-                                {% trans "action_cancel" context "labs.template.grade_submission" %}
+                                {% if is_locked %}Bağla{% else %}{% trans "action_cancel" context "labs.template.grade_submission" %}{% endif %}
                             </a>
                         </div>
                     </form>
@@ -166,7 +194,9 @@
         
     </div>
 </div>
+{% include "courses/partials/_action_confirm_modal.html" %}
 {% endblock %}
 {% block extraJs %}
+<script src="{% static 'js/review_countdown.js' %}"></script>
 <script src="{% static 'labs/js/grade_submission.js' %}"></script>
 {% endblock %}

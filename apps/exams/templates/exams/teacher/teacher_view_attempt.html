@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ attempt.user.get_full_name|default:attempt.user.username }}{% endblock %}
+{% block title %}{% trans "page_title_attempt_detail" context "exams.template.teacher_view_attempt" %} - {{ student_display }}{% endblock %}
 
 {% block extraCss %}
     {# Yeni CSS faylını qoşuruq #}
@@ -15,9 +15,15 @@
         <h1 class="h3">
             <i class="fas fa-user-graduate me-2"></i>
             {% trans "heading_student_answers" context "exams.template.teacher_view_attempt" %}:
-            <span class="student-name">{{ attempt.user.get_full_name|default:attempt.user.username }}</span>
+            <span class="student-name{% if not can_view_student_identity %} anonymous-name{% endif %}">{{ student_display }}</span>
         </h1>
     </div>
+
+    {% if not can_view_student_identity and identity_window_seconds_left %}
+        <div class="alert alert-warning">
+            Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>
+        </div>
+    {% endif %}
 
     <div class="exam-summary-card shadow-sm">
         <div class="summary-item">
@@ -230,4 +236,31 @@
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script>
+(function () {
+    document.querySelectorAll('[data-review-countdown]').forEach(function (node) {
+        let secondsLeft = parseInt(node.getAttribute('data-review-countdown'), 10);
+        if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
+            node.textContent = '00:00:00';
+            return;
+        }
+
+        function render() {
+            const hours = Math.floor(secondsLeft / 3600);
+            const minutes = Math.floor((secondsLeft % 3600) / 60);
+            const seconds = secondsLeft % 60;
+            node.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        render();
+        window.setInterval(function () {
+            secondsLeft = Math.max(0, secondsLeft - 1);
+            render();
+        }, 1000);
+    });
+})();
+</script>
 {% endblock %}

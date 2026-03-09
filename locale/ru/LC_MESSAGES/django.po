@@ -666,7 +666,7 @@ msgstr "Exams"
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Courses"
+msgstr "Свободные работы"
 
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
@@ -676,7 +676,7 @@ msgstr "Labs"
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_independent"
-msgstr "Independent work"
+msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/my_results.html:63
 msgctxt "accounts.my_results_page"
@@ -1720,7 +1720,7 @@ msgstr "Курсы"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:25
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Курсовые работы"
+msgstr "Свободные работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:29
 msgctxt "profile.assigned_tasks"
@@ -1730,7 +1730,7 @@ msgstr "Лаборатории"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:33
 msgctxt "profile.assigned_tasks"
 msgid "tab_independent"
-msgstr "Независимый"
+msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:55
 msgctxt "profile.assigned_tasks"
@@ -1935,7 +1935,7 @@ msgstr "Экзамены"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:26
 msgctxt "profile.results"
 msgid "tab_assignments"
-msgstr "Задачи"
+msgstr "Свободные работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:30
 msgctxt "profile.results"
@@ -1945,7 +1945,7 @@ msgstr "Лаборатории"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:34
 msgctxt "profile.results"
 msgid "tab_independent"
-msgstr "Независимый"
+msgstr "Курсовые работы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:65
 msgctxt "profile.results"
@@ -11402,6 +11402,26 @@ msgstr "Вы не можете редактировать после отпра�
 msgctxt "labs.template.lab_detail"
 msgid "action_finish_lab"
 msgstr "Завершить лабораторию"
+
+#: apps/labs/templates/labs/lab_detail.html:365
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_title"
+msgstr "Вы уверены, что хотите завершить?"
+
+#: apps/labs/templates/labs/lab_detail.html:369
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_description"
+msgstr "После завершения лабораторной работы вы не сможете вернуться и отредактировать её."
+
+#: apps/labs/templates/labs/lab_detail.html:374
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_no_back"
+msgstr "Нет, продолжить"
+
+#: apps/labs/templates/labs/lab_detail.html:377
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_yes"
+msgstr "Да, завершить лабораторию"
 
 #: apps/labs/templates/labs/lab_detail.html:263
 msgctxt "labs.template.lab_detail"
