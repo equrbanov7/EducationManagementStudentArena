@@ -1,15 +1,19 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n lab_filters %}
 
 {% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% if item_type == "labs" %}
+<link rel="stylesheet" href="{% static 'labs/css/my_lab_answers.css' %}">
+<link rel="stylesheet" href="{% static 'css/my_result_detail.css' %}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
 {% trans "file_name_fallback" context "accounts.my_result_detail_page" as file_name_fallback %}
-<div class="profile-page">
+<div class="profile-page my-result-detail-page">
     <div class="profile-main" style="max-width: 900px; margin: 0 auto;">
         <div class="profile-header">
             <h1 class="profile-title">{{ item_title }}</h1>
@@ -45,6 +49,131 @@
             </div>
         </div>
 
+        {% if item_type == "labs" %}
+        <div class="section-card section-card--lab-answers">
+            <div class="my-result-lab-head">
+                <div class="section-title mb-0">
+                    <i class="fas fa-align-left"></i> {% trans "answer_submission_title" context "accounts.my_result_detail_page" %}
+                </div>
+                {% if lab_answer_count %}
+                <span class="my-result-lab-count">
+                    {% blocktrans trimmed context "labs.template.my_lab_answers" with answer_count=lab_answer_count %}label_question_count {{ answer_count }}{% endblocktrans %}
+                </span>
+                {% endif %}
+            </div>
+
+            {% if lab_answer_count %}
+            <div class="my-result-lab-answer-list">
+                {% for answer in lab_answers %}
+                <div class="my-result-lab-answer answer-item" id="answer-item-{{ answer.id }}">
+                    <div class="d-flex flex-column flex-md-row gap-4 align-items-md-start">
+                        <div class="question-number">
+                            {{ forloop.counter }}
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                <h5 class="mb-0 fw-bold text-dark lh-base">{{ answer.question.question_text }}</h5>
+                                <button type="button" class="btn btn-sm answer-toggle-btn" data-answer-toggle="{{ answer.id }}" aria-label="Toggle answer">
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                            </div>
+
+                            <div class="answer-content" id="answer-content-{{ answer.id }}">
+                                {% if answer.answer %}
+                                <div class="answer-box mb-3 shadow-sm">
+                                    <small class="text-primary-blue fw-bold d-block mb-2 text-uppercase tracking-wide">
+                                        <i class="fas fa-pen-nib me-2"></i> {% trans "label_text_answer" context "labs.template.my_lab_answers" %}
+                                    </small>
+                                    <div class="text-dark">{{ answer.answer|linebreaks }}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if answer.answer_file %}
+                                <div class="file-download-box mb-3 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                    <div>
+                                        <small class="text-primary-blue fw-bold d-block mb-1 text-uppercase tracking-wide">
+                                            <i class="fas fa-paperclip me-1"></i> {% trans "label_uploaded_file" context "labs.template.my_lab_answers" %}
+                                        </small>
+                                        <span class="text-dark fw-medium">{{ answer.answer_file.name|filename|default:file_name_fallback }}</span>
+                                    </div>
+                                    <a href="{{ answer.answer_file.url }}" target="_blank" rel="noopener" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-download me-2"></i> Yüklə
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                {% if not answer.answer and not answer.answer_file %}
+                                <div class="empty-answer-box mb-3">
+                                    <i class="fas fa-exclamation-circle text-muted me-2"></i> {% trans "empty_no_answer_for_question" context "labs.template.my_lab_answers" %}
+                                </div>
+                                {% endif %}
+
+                                {% if answer.score is not None %}
+                                <div class="mt-4">
+                                    <span class="score-badge shadow-sm">
+                                        <i class="fas fa-star text-warning me-2"></i>
+                                        <span class="me-1">Qiymət:</span>
+                                        <strong>{% blocktrans trimmed context "labs.template.my_lab_answers" with score=answer.score %}label_points {{ score }}{% endblocktrans %}</strong>
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if content_text or submission_file or submission_link %}
+            <div class="my-result-lab-extra">
+                <div class="my-result-lab-extra-inner">
+                    {% if content_text %}
+                    <div class="answer-box shadow-sm">
+                        <small class="text-primary-blue fw-bold d-block mb-2 text-uppercase tracking-wide">
+                            <i class="fas fa-align-left me-2"></i> {% trans "answer_submission_title" context "accounts.my_result_detail_page" %}
+                        </small>
+                        <div class="text-dark">{{ content_text|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if submission_file %}
+                    <div class="file-download-box shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <small class="text-primary-blue fw-bold d-block mb-1 text-uppercase tracking-wide">
+                                <i class="fas fa-paperclip me-1"></i> {% trans "view_file" context "accounts.my_result_detail_page" %}
+                            </small>
+                            <span class="text-dark fw-medium">{{ submission_file.name|filename|default:file_name_fallback }}</span>
+                        </div>
+                        <a href="{{ submission_file.url }}" target="_blank" rel="noopener" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-download me-2"></i> Yüklə
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if submission_link %}
+                    <div class="file-download-box shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <small class="text-primary-blue fw-bold d-block mb-1 text-uppercase tracking-wide">
+                                <i class="fas fa-link me-1"></i> {% trans "view_link" context "accounts.my_result_detail_page" %}
+                            </small>
+                            <span class="text-dark fw-medium text-break">{{ submission_link }}</span>
+                        </div>
+                        <a href="{{ submission_link }}" target="_blank" rel="noopener" class="btn btn-primary text-white bg-primary-blue border-0 rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-arrow-up-right-from-square me-2"></i> {% trans "view_link" context "accounts.my_result_detail_page" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% elif not lab_answer_count %}
+            <div class="my-result-lab-empty">
+                <div class="info-value">{% trans "no_text_answer" context "accounts.my_result_detail_page" %}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
         <div class="section-card">
             <div class="section-title">
                 <i class="fas fa-align-left"></i> {% trans "answer_submission_title" context "accounts.my_result_detail_page" %}
@@ -87,6 +216,7 @@
             </div>
             {% endif %}
         </div>
+        {% endif %}
 
         <div class="section-card">
             <div class="section-title">
@@ -102,4 +232,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+{% if item_type == "labs" and lab_answer_count %}
+<script src="{% static 'labs/js/my_lab_answers.js' %}"></script>
+{% endif %}
 {% endblock %}

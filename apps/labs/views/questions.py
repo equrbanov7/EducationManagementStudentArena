@@ -188,7 +188,7 @@ def import_questions(request, block_id):
             {
                 "success": True,
                 "count": created_count,
-                "message": pgettext("labs.view.message", "import_success_with_count").format(count=created_count),
+                "message": pgettext("labs.view.message", "import_success_with_count") % {"count": created_count},
             }
         )
 

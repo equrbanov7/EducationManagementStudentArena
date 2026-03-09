@@ -21,3 +21,26 @@
     max-height: 0;
     opacity: 0;
 }
+
+.review-window-banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    border: 1px solid #fcd34d;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.review-window-banner strong {
+    font-weight: 700;
+}
+
+.review-window-banner--locked {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+}

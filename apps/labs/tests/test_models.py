@@ -5,10 +5,11 @@ Model tests for labs app.
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.labs.models import Lab, LabAssignment, LabBlock, LabQuestion, LabSubmission
 
 User = get_user_model()
@@ -19,6 +20,7 @@ class LabAssignmentReassignmentTest(TestCase):
         self.teacher = User.objects.create_user("lab_teacher_m", "lab_teacher_m@example.com", "StrongPass123!")
         self.student = User.objects.create_user("lab_student_m", "lab_student_m@example.com", "StrongPass123!")
         self.course = Course.objects.create(owner=self.teacher, title="Lab Course M", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="A1")
         self.lab = Lab.objects.create(
             course=self.course,
             title="Lab Reassign",
@@ -43,6 +45,23 @@ class LabAssignmentReassignmentTest(TestCase):
         assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
 
         self.assertEqual(set(assignment.assigned_questions.values_list("id", flat=True)), {q1.id, q2.id})
+
+    def test_get_or_create_blocks_student_without_course_access(self):
+        outsider = User.objects.create_user("outsider_student", "outsider@example.com", "StrongPass123!")
+        self.lab.allowed_groups = "B1"
+        self.lab.allowed_students = ""
+        self.lab.save(update_fields=["allowed_groups", "allowed_students"])
+
+        with self.assertRaises(PermissionDenied):
+            LabAssignment.get_or_create_for_student(self.lab, outsider)
+
+    def test_get_or_create_blocks_student_outside_allowed_filters(self):
+        self.lab.allowed_groups = "B1"
+        self.lab.allowed_students = "999999"
+        self.lab.save(update_fields=["allowed_groups", "allowed_students"])
+
+        with self.assertRaises(PermissionDenied):
+            LabAssignment.get_or_create_for_student(self.lab, self.student)
 
     def test_get_or_create_refreshes_assignment_even_when_submission_exists(self):
         block = LabBlock.objects.create(lab=self.lab, title="First", order=1)

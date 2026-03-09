@@ -45,6 +45,43 @@ def _can_delete_submissions(request):
     )
 
 
+def _resolve_recheck_window(submission, *, current_time=None):
+    if submission.status != "graded" or not submission.graded_at:
+        return False, 0
+
+    now = current_time or timezone.now()
+    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    if now >= reveal_at:
+        return False, 0
+
+    return True, max(0, int((reveal_at - now).total_seconds()))
+
+
+def _resolve_identity_window(submission, *, current_time=None):
+    now = current_time or timezone.now()
+
+    if submission.status == "graded" and submission.graded_at:
+        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+    elif submission.submitted_at:
+        reveal_at = submission.submitted_at + REVIEW_EDIT_LOCK_WINDOW
+    else:
+        return False, 0
+
+    if now >= reveal_at:
+        return False, 0
+
+    return True, max(0, int((reveal_at - now).total_seconds()))
+
+
+def _format_input_number(value):
+    if value in (None, ""):
+        return ""
+    normalized = str(value).replace(",", ".")
+    if "." in normalized:
+        normalized = normalized.rstrip("0").rstrip(".")
+    return normalized or "0"
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Review Submissions
 # ════════════════════════════════════════════════════════════════════════════
@@ -114,9 +151,47 @@ def review_submissions(request, pk):
         }
     )
 
+    submissions_page = list(page_obj.object_list)
+    current_time = timezone.now()
+    for submission in submissions_page:
+        in_recheck_window, review_window_seconds_left = _resolve_recheck_window(
+            submission, current_time=current_time
+        )
+        is_identity_hidden, identity_window_seconds_left = _resolve_identity_window(
+            submission, current_time=current_time
+        )
+        submission.in_recheck_window = in_recheck_window
+        submission.review_window_seconds_left = review_window_seconds_left
+        submission.identity_window_seconds_left = identity_window_seconds_left
+        submission.can_view_student_identity = not is_identity_hidden
+        submission.student_display_name = (
+            submission.student.get_full_name() or submission.student.username
+            if submission.can_view_student_identity
+            else "Anonim tələbə"
+        )
+        submission.student_display_meta = (
+            f"@{submission.student.username}"
+            if submission.can_view_student_identity
+            else "Anonim görünüş"
+        )
+        submission.grade_input_value = _format_input_number(submission.grade)
+        submission.review_action_label = (
+            "Yenidən yoxla" if in_recheck_window else ("Bax" if submission.status == "graded" else "Yoxla")
+        )
+        submission.review_action_variant = (
+            "warning" if in_recheck_window else ("secondary" if submission.status == "graded" else "primary")
+        )
+        submission.can_edit_review = submission.status != "graded" or in_recheck_window
+        submission.review_countdown_seconds = (
+            review_window_seconds_left if in_recheck_window else identity_window_seconds_left
+        )
+        submission.review_countdown_mode = "recheck" if in_recheck_window else (
+            "identity" if identity_window_seconds_left > 0 else ""
+        )
+
     context = {
         "project": project,
-        "submissions": page_obj.object_list,
+        "submissions": submissions_page,
         "page_obj": page_obj,
         "selected_submission_id": selected_submission_id,
         "back_url": _teacher_review_back_url(request, project),

@@ -357,6 +357,33 @@
 </div>
 
 {% if lab.is_open and questions and can_retry %}
+<div class="modal fade" id="finishLabConfirmModal" tabindex="-1" aria-labelledby="finishLabConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark-blue" id="finishLabConfirmModalLabel">
+                    {% trans "confirm_finish_title" context "labs.template.lab_detail" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-secondary mb-0" id="finishLabConfirmMessage">
+                    {% trans "confirm_finish_description" context "labs.template.lab_detail" %}
+                </p>
+                <div class="alert alert-warning mt-3 mb-0 d-none" id="finishLabUnansweredNotice" role="alert"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    {% trans "confirm_finish_no_back" context "labs.template.lab_detail" %}
+                </button>
+                <button type="button" class="btn btn-success rounded-pill px-4" id="confirmFinishLabBtn">
+                    {% trans "confirm_finish_yes" context "labs.template.lab_detail" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     window.LAB_CONFIG = {
         labId: {{ lab.id }},
@@ -370,6 +397,7 @@
         statusSaving: '{% trans "status_saving" context "labs.js.lab_detail" %}',
         statusError: '{% trans "status_error" context "labs.js.lab_detail" %}',
         confirmUnanswered: '{% trans "confirm_unanswered" context "labs.js.lab_detail" %}',
+        confirmFinishDescription: '{% trans "confirm_finish_description" context "labs.template.lab_detail" %}',
         actionSubmitting: '{% trans "action_submitting" context "labs.js.lab_detail" %}',
         errorPrefix: '{% trans "error_prefix" context "labs.js.lab_detail" %}',
         errorUnknown: '{% trans "error_unknown" context "labs.js.lab_detail" %}',

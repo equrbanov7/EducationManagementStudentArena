@@ -171,8 +171,13 @@
                             </td>
                         {% endif %}
                         <td class="student-name-cell">
-                            <strong>{{ sub.assignment.student.get_full_name|default:sub.assignment.student.username }}</strong>
-                            <div class="text-muted small">{{ sub.assignment.student.email }}</div>
+                            {% if sub.can_view_student_identity %}
+                                <strong>{{ sub.student_display_name }}</strong>
+                                <div class="text-muted small">{{ sub.student_display_email }}</div>
+                            {% else %}
+                                <strong class="anonymous-name">{{ sub.student_display_name }}</strong>
+                                <div class="text-muted small">{{ sub.student_display_email }}</div>
+                            {% endif %}
                         </td>
                         <td>
                             {% with group=student_groups|get_item:sub.assignment.student.id %}
@@ -203,9 +208,29 @@
                         </td>
                         <td>
                             <div class="results-action-buttons">
-                                <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-primary">
-                                    {% trans "action_grade" context "labs.template.lab_submissions" %}
-                                </a>
+                                {% if sub.status == 'graded' %}
+                                    {% if sub.in_recheck_window %}
+                                        <div>
+                                            <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-edit"></i> Yenidən yoxla
+                                            </a>
+                                            <div class="countdown-timer mt-2">
+                                                <i class="fas fa-clock"></i>
+                                                <span data-review-countdown="{{ sub.review_window_seconds_left }}">--:--:--</span>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-eye"></i> Bax
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <div>
+                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-primary">
+                                            {% trans "action_grade" context "labs.template.lab_submissions" %}
+                                        </a>
+                                    </div>
+                                {% endif %}
                                 {% if can_delete_submissions %}
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger js-single-delete-lab-submission"
@@ -233,9 +258,6 @@
     {% endif %}
 
     <div class="results-page-actions">
-        <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-outline-primary">
-            <i class="fas fa-cubes"></i> {% trans "action_manage_blocks" context "labs.template.lab_submissions" %}
-        </a>
         <a href="{{ back_url }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Geri qayıt
         </a>
@@ -281,6 +303,7 @@
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
+<script src="{% static 'js/review_countdown.js' %}"></script>
 <script>
 {% if can_delete_submissions %}
 window.initResultsBulkActions({

@@ -218,6 +218,9 @@
     </div>
     {% endif %}
 
+    {% if can_submit %}
+        {% include "courses/partials/_action_confirm_modal.html" %}
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -231,6 +234,9 @@
             unknownError: "{% trans 'unknown_error' context 'assignment.detail' %}",
             serverError: "{% trans 'server_error' context 'assignment.detail' %}",
             submitButton: "{% trans 'submit' context 'assignment.detail' %}",
+            confirmTitle: "{% trans 'Göndərməni təsdiqləyin' context 'assignment.detail' %}",
+            confirmMessage: "{% trans 'Bu sərbəst işi göndərmək istədiyinizə əminsiniz?' context 'assignment.detail' %}",
+            confirmSubmit: "{% trans 'submit' context 'assignment.detail' %}",
         };
     
         const fileInput = document.getElementById('fileInput');
@@ -258,7 +264,26 @@
     
         const form = document.getElementById('submitForm');
         if (form) {
+            let submitConfirmed = false;
             form.addEventListener('submit', function(e) {
+                if (!submitConfirmed && typeof window.openActionConfirmModal === 'function') {
+                    e.preventDefault();
+                    window.openActionConfirmModal({
+                        title: i18n.confirmTitle,
+                        message: i18n.confirmMessage,
+                        confirmLabel: i18n.confirmSubmit,
+                        confirmButtonClass: 'btn btn-success',
+                        onConfirm: function() {
+                            submitConfirmed = true;
+                            window.setTimeout(function() {
+                                form.requestSubmit();
+                            }, 0);
+                            return true;
+                        }
+                    });
+                    return;
+                }
+
                 e.preventDefault();
     
                 const btn = form.querySelector('[type=submit]');
@@ -280,12 +305,14 @@
                     if (data.success) {
                         window.location.reload();
                     } else {
+                        submitConfirmed = false;
                         alert(i18n.errorPrefix + ': ' + (data.error || i18n.unknownError));
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fa-regular fa-paper-plane me-2"></i> ' + i18n.submitButton;
                     }
                 })
                 .catch(() => {
+                    submitConfirmed = false;
                     alert(i18n.serverError);
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-regular fa-paper-plane me-2"></i> ' + i18n.submitButton;

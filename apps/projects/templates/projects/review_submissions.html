@@ -151,7 +151,13 @@
                             </td>
                         {% endif %}
                         <td class="student-name-cell">
-                            <strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong>
+                            {% if submission.can_view_student_identity %}
+                                <strong>{{ submission.student_display_name }}</strong>
+                                <div class="text-muted small">{{ submission.student_display_meta }}</div>
+                            {% else %}
+                                <strong class="anonymous-name">{{ submission.student_display_name }}</strong>
+                                <div class="text-muted small">{{ submission.student_display_meta }}</div>
+                            {% endif %}
                         </td>
                         <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
                         <td>
@@ -172,18 +178,29 @@
                         </td>
                         <td>
                             <div class="results-action-buttons">
-                                <button class="btn btn-sm btn-outline-primary view-submission-btn"
+                                <button class="btn btn-sm {% if submission.review_action_label == 'Yenidən yoxla' %}btn-outline-warning{% elif submission.review_action_label == 'Bax' %}btn-outline-secondary{% else %}btn-outline-primary{% endif %} view-submission-btn"
                                         data-bs-toggle="modal"
                                         data-bs-target="#submissionModal"
                                         data-id="{{ submission.id }}"
-                                        data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
+                                        data-student="{{ submission.student_display_name }}"
                                         data-content="{{ submission.content }}"
                                         data-file="{% if submission.file %}{{ submission.file.url }}{% endif %}"
                                         data-filename="{% if submission.file %}{{ submission.file.name|cut:'projects/submissions/' }}{% endif %}"
-                                        data-grade="{{ submission.grade|default:'' }}"
-                                        data-feedback="{{ submission.feedback }}">
-                                    <i class="fa-solid fa-eye"></i> {% trans "view" context "projects.review" %}
+                                        data-grade="{{ submission.grade_input_value }}"
+                                        data-feedback="{{ submission.feedback }}"
+                                        data-can-edit="{% if submission.can_edit_review %}1{% else %}0{% endif %}"
+                                        data-action-label="{{ submission.review_action_label }}"
+                                        data-countdown-seconds="{{ submission.review_countdown_seconds }}"
+                                        data-countdown-mode="{{ submission.review_countdown_mode }}">
+                                    <i class="fa-solid {% if submission.review_action_label == 'Bax' %}fa-eye{% elif submission.review_action_label == 'Yenidən yoxla' %}fa-rotate-right{% else %}fa-clipboard-check{% endif %}"></i>
+                                    {{ submission.review_action_label }}
                                 </button>
+                                {% if submission.review_countdown_mode == 'recheck' and submission.review_countdown_seconds %}
+                                    <div class="countdown-timer mt-2">
+                                        <i class="fa-solid fa-clock"></i>
+                                        <span data-review-countdown="{{ submission.review_countdown_seconds }}">--:--:--</span>
+                                    </div>
+                                {% endif %}
                                 {% if can_delete_submissions %}
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger js-single-delete-project-submission"
@@ -264,6 +281,8 @@
                     <p id="modal-student" class="mb-0"></p>
                 </div>
 
+                <div id="modal-review-note" class="alert d-none" role="alert"></div>
+
                 <div class="mb-3">
                     <strong>{% trans "explanation" context "projects.review" %}</strong>
                     <div id="modal-content" class="results-modal-answer"></div>
@@ -291,9 +310,10 @@
                                id="grade-input"
                                name="grade"
                                class="form-control"
-                               step="0.01"
+                               step="1"
                                min="0"
                                max="{{ project.max_score }}"
+                               inputmode="numeric"
                                placeholder="0-{{ project.max_score }}">
                     </div>
 
@@ -314,6 +334,7 @@
         </div>
     </div>
 </div>
+{% include "courses/partials/_action_confirm_modal.html" %}
 {% endblock %}
 
 {% block extraJs %}
@@ -331,13 +352,66 @@ const projectReviewConfig = {
         errorPrefix: `{% trans "error_prefix" context "projects.review.js" %}`,
         unknownError: `{% trans "unknown_error" context "projects.review.js" %}`,
         serverError: `{% trans "server_error" context "projects.review.js" %}`,
-        gradeButton: `{% trans "grade_button" context "projects.review.js" %}`
+        gradeButton: `{% trans "grade_button" context "projects.review.js" %}`,
+        reviewLocked: "Yoxlama bağlanıb. Bu cavab yalnız baxış üçündür.",
+        identityWindow: "Anonimlik pəncərəsi aktivdir. Tələbə adı 5 dəqiqə tamam olduqdan sonra görünəcək.",
+        recheckWindow: "Yenidən yoxlama pəncərəsi aktivdir. Bu müddətdə adı anonim qalır.",
+        reviewNow: "Yoxla və yadda saxla",
+        reviewAgain: "Yenidən yoxla və yadda saxla",
+        confirmTitle: "Qiymətləndirməni təsdiqləyin",
+        confirmMessage: "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
     }
 };
 
 (() => {
     const config = projectReviewConfig;
     const i18n = config.i18n || {};
+
+    function parseIntegerGrade(rawValue) {
+        const normalized = (rawValue || '').trim().replace(',', '.');
+        if (!normalized) return null;
+        const match = normalized.match(/^-?\d+/);
+        if (!match) return null;
+        const parsed = parseInt(match[0], 10);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function normalizeGradeInput(input) {
+        if (!input) return;
+        const max = parseInt(input.getAttribute('max') || '0', 10);
+        const parsed = parseIntegerGrade(input.value);
+        if (parsed === null) {
+            input.value = '';
+            return;
+        }
+        let nextValue = parsed;
+        if (nextValue < 0) nextValue = 0;
+        if (!Number.isNaN(max) && max > 0 && nextValue > max) nextValue = max;
+        input.value = String(nextValue);
+    }
+
+    function setupReviewCountdowns() {
+        document.querySelectorAll('[data-review-countdown]').forEach(function (node) {
+            let secondsLeft = parseInt(node.getAttribute('data-review-countdown'), 10);
+            if (Number.isNaN(secondsLeft) || secondsLeft <= 0) {
+                node.textContent = '00:00:00';
+                return;
+            }
+
+            function render() {
+                const hours = Math.floor(secondsLeft / 3600);
+                const minutes = Math.floor((secondsLeft % 3600) / 60);
+                const seconds = secondsLeft % 60;
+                node.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            render();
+            window.setInterval(function () {
+                secondsLeft = Math.max(0, secondsLeft - 1);
+                render();
+            }, 1000);
+        });
+    }
 
     function openSubmission(button) {
         if (!button) return;
@@ -349,12 +423,40 @@ const projectReviewConfig = {
         const filename = button.dataset.filename;
         const grade = button.dataset.grade;
         const feedback = button.dataset.feedback;
+        const canEdit = button.dataset.canEdit === '1';
+        const actionLabel = button.dataset.actionLabel;
+        const countdownMode = button.dataset.countdownMode;
+
+        const gradeInput = document.getElementById('grade-input');
+        const feedbackInput = document.getElementById('feedback-input');
+        const submitButton = document.getElementById('gradeSubmitButton');
+        const reviewNote = document.getElementById('modal-review-note');
 
         document.getElementById('submission-id').value = submissionId;
         document.getElementById('modal-student').textContent = student;
         document.getElementById('modal-content').textContent = content || i18n.noContent;
-        document.getElementById('grade-input').value = grade;
-        document.getElementById('feedback-input').value = feedback;
+        gradeInput.value = grade || '';
+        feedbackInput.value = feedback;
+        normalizeGradeInput(gradeInput);
+        gradeInput.disabled = !canEdit;
+        feedbackInput.disabled = !canEdit;
+        submitButton.classList.toggle('d-none', !canEdit);
+        submitButton.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + (
+            actionLabel === 'Yenidən yoxla' ? i18n.reviewAgain : i18n.reviewNow
+        );
+
+        reviewNote.className = 'alert d-none';
+        reviewNote.textContent = '';
+        if (!canEdit) {
+            reviewNote.className = 'alert alert-secondary';
+            reviewNote.textContent = i18n.reviewLocked;
+        } else if (countdownMode === 'recheck') {
+            reviewNote.className = 'alert alert-warning';
+            reviewNote.textContent = i18n.recheckWindow;
+        } else if (countdownMode === 'identity') {
+            reviewNote.className = 'alert alert-warning';
+            reviewNote.textContent = i18n.identityWindow;
+        }
 
         if (file) {
             document.getElementById('modal-file-container').style.display = 'block';
@@ -371,6 +473,15 @@ const projectReviewConfig = {
         });
     });
 
+    const projectGradeInput = document.getElementById('grade-input');
+    if (projectGradeInput) {
+        projectGradeInput.addEventListener('blur', function () {
+            normalizeGradeInput(this);
+        });
+    }
+
+    setupReviewCountdowns();
+
     if (config.selectedSubmissionId) {
         const targetButton = document.querySelector('.view-submission-btn[data-id="' + config.selectedSubmissionId + '"]');
         if (targetButton) {
@@ -384,11 +495,14 @@ const projectReviewConfig = {
         }
     }
 
-    document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-
+    function submitGradeForm() {
         const submissionId = document.getElementById('submission-id').value;
-        const formData = new FormData(this);
+        const gradeForm = document.getElementById('gradeForm');
+        if (!gradeForm) {
+            return Promise.resolve(false);
+        }
+        normalizeGradeInput(document.getElementById('grade-input'));
+        const formData = new FormData(gradeForm);
         const btn = document.getElementById('gradeSubmitButton');
 
         btn.disabled = true;
@@ -396,7 +510,7 @@ const projectReviewConfig = {
 
         const gradeUrl = (config.gradeUrlTemplate || '').replace('__ID__', submissionId);
 
-        fetch(gradeUrl, {
+        return fetch(gradeUrl, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': config.csrfToken,
@@ -408,10 +522,12 @@ const projectReviewConfig = {
             .then(data => {
                 if (data.success) {
                     location.reload();
+                    return true;
                 } else {
                     alert(`${i18n.errorPrefix}${data.error || i18n.unknownError}`);
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
+                    return false;
                 }
             })
             .catch(err => {
@@ -419,7 +535,25 @@ const projectReviewConfig = {
                 alert(i18n.serverError);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
+                return false;
             });
+    }
+
+    document.getElementById('gradeForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        if (typeof window.openActionConfirmModal === 'function') {
+            window.openActionConfirmModal({
+                title: i18n.confirmTitle,
+                message: i18n.confirmMessage,
+                confirmLabel: document.getElementById('gradeSubmitButton')?.textContent.trim() || i18n.gradeButton,
+                confirmButtonClass: 'btn btn-success',
+                onConfirm: submitGradeForm
+            });
+            return;
+        }
+
+        submitGradeForm();
     });
 
     {% if can_delete_submissions %}

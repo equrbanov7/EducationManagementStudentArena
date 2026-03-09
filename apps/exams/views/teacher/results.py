@@ -98,9 +98,15 @@ def _resolve_attempt_name_visibility(attempt, *, current_time=None):
     if attempt.exam.exam_type == "test":
         return True, None
 
-    # Müəllim hələ yoxlamayıbsa anonimlik qalır.
     if not attempt.checked_by_teacher:
-        return False, None
+        reveal_source = attempt.finished_at or attempt.started_at
+        if not reveal_source:
+            return True, None
+        reveal_at = reveal_source + REVIEW_EDIT_LOCK_WINDOW
+        if now >= reveal_at:
+            return True, None
+        seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
+        return False, seconds_remaining
 
     # Köhnə datada timestamp olmaya bilər. Bu halda tələbə balı görə bildiyi üçün
     # müəllim də real adı görə bilməlidir.
@@ -113,6 +119,38 @@ def _resolve_attempt_name_visibility(attempt, *, current_time=None):
 
     seconds_remaining = max(0, int((reveal_at - now).total_seconds()))
     return False, seconds_remaining
+
+
+def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
+    if attempt.exam.exam_type == "test":
+        return {
+            "label": "Bax",
+            "url_name": "exams:teacher_view_attempt",
+            "countdown_seconds": 0,
+            "countdown_mode": "",
+        }
+
+    if attempt.checked_by_teacher:
+        if seconds_remaining:
+            return {
+                "label": "Yenidən yoxla",
+                "url_name": "exams:teacher_check_attempt",
+                "countdown_seconds": seconds_remaining,
+                "countdown_mode": "recheck",
+            }
+        return {
+            "label": "Bax",
+            "url_name": "exams:teacher_view_attempt",
+            "countdown_seconds": 0,
+            "countdown_mode": "",
+        }
+
+    return {
+        "label": "Yoxla",
+        "url_name": "exams:teacher_check_attempt",
+        "countdown_seconds": seconds_remaining if not can_view_name else 0,
+        "countdown_mode": "identity" if not can_view_name and seconds_remaining else "",
+    }
 
 
 @login_required
@@ -259,14 +297,27 @@ def teacher_exam_results(request, slug):
         anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
 
         can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
+        action_state = _resolve_attempt_action_state(
+            att,
+            can_view_name=can_view_name,
+            seconds_remaining=seconds_remaining or 0,
+        )
+        real_name = att.user.get_full_name() or att.user.username
 
         attempts_data.append(
             {
                 "attempt": att,
                 "anonymous_name": anonymous_name,
-                "real_name": att.user.username,
+                "real_name": real_name,
                 "can_view_name": can_view_name,
                 "seconds_remaining": seconds_remaining,
+                "action_label": action_state["label"],
+                "action_url": _append_query_params(
+                    reverse(action_state["url_name"], kwargs={"slug": exam.slug, "attempt_id": att.id}),
+                    **navigation_params,
+                ),
+                "countdown_seconds": action_state["countdown_seconds"],
+                "countdown_mode": action_state["countdown_mode"],
             }
         )
 
@@ -399,6 +450,14 @@ def teacher_view_attempt(request, slug, attempt_id):
         )
 
     qa_list = [{"question": a.question, "answer": a} for a in answers_qs]
+    can_view_name, seconds_remaining = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
+    if attempt.exam.exam_type == "test":
+        student_display = attempt.user.get_full_name() or attempt.user.username
+    else:
+        hash_input = f"{attempt.id}-{attempt.user.id}-{attempt.exam.id}"
+        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
+        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
+        student_display = attempt.user.get_full_name() or attempt.user.username if can_view_name else anonymous_name
 
     search_query = (request.GET.get("q") or "").strip()
     if search_query:
@@ -438,6 +497,9 @@ def teacher_view_attempt(request, slug, attempt_id):
         "read_only": True,  # ✅ Yalnız oxumaq rejimi
         "profile_return_url": profile_return_url,
         "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
+        "student_display": student_display,
+        "can_view_student_identity": can_view_name,
+        "identity_window_seconds_left": seconds_remaining or 0,
     }
 
     return render(request, "exams/teacher/teacher_view_attempt.html", context)
@@ -592,7 +654,7 @@ def teacher_pending_attempts(request):
             {
                 "attempt": att,
                 "anonymous_name": anonymous_name,
-                "real_name": att.user.username,
+                "real_name": att.user.get_full_name() or att.user.username,
                 "can_view_name": can_view_name,
                 "seconds_remaining": seconds_remaining,
             }

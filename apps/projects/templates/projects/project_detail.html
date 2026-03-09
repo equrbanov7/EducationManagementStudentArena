@@ -188,6 +188,9 @@
     </div>
     {% endif %}
 
+    {% if can_submit %}
+        {% include "courses/partials/_action_confirm_modal.html" %}
+    {% endif %}
 </div>
 <script>
 window.projectDetailConfig = {
@@ -198,7 +201,10 @@ window.projectDetailConfig = {
         submit: `{% trans "submit" context "projects.detail.js" %}`,
         errorPrefix: `{% trans "error_prefix" context "projects.detail.js" %}`,
         unknownError: `{% trans "unknown_error" context "projects.detail.js" %}`,
-        serverError: `{% trans "server_error" context "projects.detail.js" %}`
+        serverError: `{% trans "server_error" context "projects.detail.js" %}`,
+        confirmTitle: `{% trans "Göndərməni təsdiqləyin" context "projects.detail" %}`,
+        confirmMessage: `{% trans "Bu kurs işini göndərmək istədiyinizə əminsiniz?" context "projects.detail" %}`,
+        confirmSubmit: `{% trans "submit" context "projects.detail.js" %}`
     }
 };
 </script>

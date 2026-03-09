@@ -664,7 +664,7 @@ msgstr "Exams"
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Courses"
+msgstr "Free work"
 
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
@@ -674,7 +674,7 @@ msgstr "Labs"
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_independent"
-msgstr "Independent work"
+msgstr "Coursework"
 
 #: apps/accounts/templates/accounts/my_results.html:63
 msgctxt "accounts.my_results_page"
@@ -1928,7 +1928,7 @@ msgstr "Tab exams"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:26
 msgctxt "profile.results"
 msgid "tab_assignments"
-msgstr "Tab assignments"
+msgstr "Free work"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:30
 msgctxt "profile.results"
@@ -1938,7 +1938,7 @@ msgstr "Tab labs"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:34
 msgctxt "profile.results"
 msgid "tab_independent"
-msgstr "Tab independent"
+msgstr "Coursework"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:65
 msgctxt "profile.results"
@@ -11397,6 +11397,26 @@ msgstr "You cannot edit after submitting!"
 msgctxt "labs.template.lab_detail"
 msgid "action_finish_lab"
 msgstr "Finish lab"
+
+#: apps/labs/templates/labs/lab_detail.html:365
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_title"
+msgstr "Are you sure you want to finish?"
+
+#: apps/labs/templates/labs/lab_detail.html:369
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_description"
+msgstr "After finishing the lab, you will not be able to return and edit it."
+
+#: apps/labs/templates/labs/lab_detail.html:374
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_no_back"
+msgstr "No, keep working"
+
+#: apps/labs/templates/labs/lab_detail.html:377
+msgctxt "labs.template.lab_detail"
+msgid "confirm_finish_yes"
+msgstr "Yes, finish the lab"
 
 #: apps/labs/templates/labs/lab_detail.html:263
 msgctxt "labs.template.lab_detail"

@@ -30,7 +30,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    let submitConfirmed = false;
     form.addEventListener('submit', function(e) {
+        if (!submitConfirmed && typeof window.openActionConfirmModal === 'function') {
+            e.preventDefault();
+            window.openActionConfirmModal({
+                title: i18n.confirmTitle || 'Göndərməni təsdiqləyin',
+                message: i18n.confirmMessage || 'Bu kurs işini göndərmək istədiyinizə əminsiniz?',
+                confirmLabel: i18n.confirmSubmit || i18n.submit || 'Göndər',
+                confirmButtonClass: 'btn btn-success',
+                onConfirm: function () {
+                    submitConfirmed = true;
+                    window.setTimeout(function () {
+                        form.requestSubmit();
+                    }, 0);
+                    return true;
+                }
+            });
+            return;
+        }
+
         e.preventDefault();
 
         const btn = form.querySelector('[type=submit]');
@@ -54,11 +73,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
+                submitConfirmed = false;
                 alert(`${i18n.errorPrefix || 'Error: '}${data.error || i18n.unknownError || 'Unknown error'}`);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> ${i18n.submit || 'Submit'}`;
             })
             .catch(() => {
+                submitConfirmed = false;
                 alert(i18n.serverError || 'Server error');
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-paper-plane me-1"></i> ${i18n.submit || 'Submit'}`;

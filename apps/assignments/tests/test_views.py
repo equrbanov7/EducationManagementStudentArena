@@ -100,6 +100,14 @@ class AssignmentDetailBackUrlTest(TestCase):
             f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type=assignments",
         )
 
+    def test_assignment_detail_includes_submit_confirmation_modal(self):
+        _login_with_org(self.client, self.student, self.organization)
+        response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertContains(response, "Bu sərbəst işi göndərmək istədiyinizə əminsiniz?")
+
 
 class AssignmentTenantIsolationTest(TestCase):
     def setUp(self):
@@ -291,6 +299,85 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertContains(response, "selectedAssignmentCount")
         self.assertContains(response, "deleteSelectedAssignmentsBtn")
         self.assertContains(response, "js-assignment-submission-checkbox")
+
+    def test_review_submissions_hides_student_name_for_first_five_minutes_then_reveals(self):
+        submission = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Anonymous answer",
+            status="submitted",
+        )
+
+        self._login_teacher()
+        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, "Yoxla")
+        self.assertNotContains(response, self.student.username)
+        self.assertNotContains(response, 'data-review-countdown="')
+
+        submission.submitted_at = timezone.now() - timedelta(minutes=6)
+        submission.save(update_fields=["submitted_at"])
+
+        revealed_response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id})
+        )
+        self.assertEqual(revealed_response.status_code, 200)
+        self.assertContains(revealed_response, self.student.username)
+        self.assertNotContains(revealed_response, "Anonim tələbə")
+
+    def test_review_submissions_shows_recheck_then_view_after_window_closes(self):
+        submission = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Recheck answer",
+            status="graded",
+            grade="91.50",
+            feedback="Initial grading",
+            graded_at=timezone.now(),
+        )
+
+        self._login_teacher()
+        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Yenidən yoxla")
+        self.assertContains(response, "Anonim tələbə")
+        self.assertContains(response, 'data-review-countdown="')
+        self.assertEqual(response.context["submissions"][0].review_action_label, "Yenidən yoxla")
+
+        submission.graded_at = timezone.now() - timedelta(minutes=6)
+        submission.save(update_fields=["graded_at"])
+
+        locked_response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+        self.assertEqual(locked_response.status_code, 200)
+        self.assertContains(locked_response, "Bax")
+        self.assertContains(locked_response, self.student.username)
+        self.assertEqual(locked_response.context["submissions"][0].review_action_label, "Bax")
+
+    def test_review_submissions_includes_confirm_modal_and_preserves_grade_value(self):
+        submission = Submission.objects.create(
+            assignment=self.assignment,
+            user=self.student,
+            content="Grade value answer",
+            status="graded",
+            grade="20.00",
+            feedback="Saved assignment score",
+            graded_at=timezone.now(),
+        )
+
+        self._login_teacher()
+        response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}),
+            {"submission": str(submission.id)},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "courseActionConfirmModal")
+        self.assertContains(response, 'id="grade-input"')
+        self.assertContains(response, 'step="1"')
+        self.assertContains(response, 'data-grade="20"')
 
     def test_delete_assignment_submissions_removes_selected_rows(self):
         first = Submission.objects.create(

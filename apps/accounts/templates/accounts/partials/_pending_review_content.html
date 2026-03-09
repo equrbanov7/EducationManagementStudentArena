@@ -60,6 +60,8 @@
                         <span class="pr-badge pr-badge-type">{{ item.type_label }}</span>
                         {% if item.is_recheck and item.review_window_seconds_left > 0 %}
                             <span class="pr-badge pr-badge-recheck"><i class="fas fa-redo me-1"></i>Yenidən yoxla</span>
+                        {% elif not item.can_view_student_identity and item.review_window_seconds_left > 0 %}
+                            <span class="pr-badge pr-badge-recheck"><i class="fas fa-user-secret me-1"></i>Anonim</span>
                         {% endif %}
                     </h4>
                     
@@ -94,7 +96,7 @@
                         </span>
                     </div>
 
-                    {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                    {% if item.countdown_mode == 'recheck' and item.review_window_seconds_left > 0 %}
                         <div class="pr-timer-box">
                             <i class="fas fa-hourglass-half"></i>
                             <span data-review-queue-countdown
@@ -107,8 +109,10 @@
 
                 <div class="pr-item-action">
                     <a href="{{ item.action_url }}" class="pr-btn-review">
-                        {% if item.is_recheck and item.review_window_seconds_left > 0 %}
+                        {% if item.action_label == 'Yenidən yoxla' %}
                             <i class="fas fa-search"></i> Yenidən yoxla
+                        {% elif item.action_label == 'Bax' %}
+                            <i class="fas fa-eye"></i> Bax
                         {% else %}
                             <i class="fas fa-check-double"></i> Yoxla
                         {% endif %}
@@ -180,12 +184,16 @@
 
             function render() {
                 if (secondsLeft <= 0) {
-                    node.textContent = "Yenidən yoxlama vaxtı bitdi.";
+                    node.textContent = "Vaxt bitdi.";
                     shouldReload = true;
                     return;
                 }
                 var minutes = Math.floor(secondsLeft / 60);
                 var seconds = secondsLeft % 60;
+                if (node.textContent.indexOf("Anonim") !== -1) {
+                    node.textContent = "Anonimliyin bitməsinə qalan vaxt: " + minutes + " dəq " + seconds + " san.";
+                    return;
+                }
                 node.textContent = "Yenidən yoxlama üçün qalan vaxt: " + minutes + " dəq " + seconds + " san.";
             }
 

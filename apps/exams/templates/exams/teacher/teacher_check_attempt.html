@@ -166,7 +166,7 @@
         
         <div class="grading-area">
             <label>{% trans "label_score" context "exams.template.teacher_check_attempt" %}:</label>
-            <input type="number" id="modalScoreInput" class="form-control mb-2">
+            <input type="number" id="modalScoreInput" class="form-control mb-2" step="1" min="0" inputmode="numeric">
             
             <label>{% trans "label_feedback" context "exams.template.teacher_check_attempt" %}:</label>
             <textarea id="modalFeedbackInput" rows="3" class="form-control"></textarea>
@@ -193,6 +193,7 @@
         </div>
     </div>
 </div>
+{% include "courses/partials/_action_confirm_modal.html" %}
 {% endblock %}
 
 {% block extraJs %}
@@ -202,7 +203,9 @@
             noAnswer: "{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}",
             pointsUnit: "{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}",
             statusNotChecked: "{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}",
-            saveButtonDirty: "{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}"
+            saveButtonDirty: "{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}",
+            confirmTitle: "Qiymətləndirməni təsdiqləyin",
+            confirmMessage: "Bu yoxlamanı yekunlaşdırıb saxlamaq istədiyinizə əminsiniz?"
         };
     </script>
     <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>

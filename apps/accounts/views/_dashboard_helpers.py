@@ -62,6 +62,30 @@ def _standard_item_type_meta(raw_type):
     return mapping.get(normalized, ("Tapşırıq", "fas fa-file"))
 
 
+def _resolve_teacher_identity_window(*, submitted_at=None, reviewed_at=None, is_reviewed=False, now=None):
+    current_time = now or timezone.now()
+
+    if is_reviewed and reviewed_at:
+        reveal_at = reviewed_at + REVIEW_EDIT_WINDOW
+    elif submitted_at:
+        reveal_at = submitted_at + REVIEW_EDIT_WINDOW
+    else:
+        return False, 0
+
+    if current_time >= reveal_at:
+        return False, 0
+
+    return True, max(0, int((reveal_at - current_time).total_seconds()))
+
+
+def _resolve_teacher_review_action(*, is_graded=False, in_recheck_window=False):
+    if in_recheck_window:
+        return "Yenidən yoxla"
+    if is_graded:
+        return "Bax"
+    return "Yoxla"
+
+
 def _collect_assigned_tasks(request, filter_type=None, search=None):
     """
     Build a unified assigned task list across exams, assignments, labs, and projects.
@@ -786,7 +810,8 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     teacher_exams = _tenant_scoped_exams(request, Exam.objects.filter(author=request.user))
-    review_cutoff = timezone.now() - REVIEW_EDIT_WINDOW
+    current_time = timezone.now()
+    review_cutoff = current_time - REVIEW_EDIT_WINDOW
 
     student_memberships = []
     if teacher_courses.exists():
@@ -799,8 +824,6 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         (membership["course_id"], membership["user_id"]): membership["group_name"] or ""
         for membership in student_memberships
     }
-    anonymous_student_label = "Anonim tələbə"
-
     items = []
 
     if normalized_type in {"all", "exams"}:
@@ -823,21 +846,34 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
         for attempt in attempts:
             course = attempt.exam.course
-            review_window_seconds_left = _review_window_seconds_left(attempt.teacher_checked_at)
+            is_recheck = bool(attempt.checked_by_teacher and _is_review_window_open(attempt.teacher_checked_at, now=current_time))
+            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
+                submitted_at=attempt.finished_at or attempt.started_at,
+                reviewed_at=attempt.teacher_checked_at,
+                is_reviewed=is_recheck,
+                now=current_time,
+            )
+            student_display = (
+                "Anonim tələbə"
+                if is_identity_hidden
+                else (attempt.user.get_full_name() or attempt.user.username)
+            )
             items.append(
                 {
                     "type": "exam",
                     "icon": _standard_item_type_meta("exam")[1],
                     "student": attempt.user,
-                    "student_display": anonymous_student_label,
+                    "student_display": student_display,
                     "title": attempt.exam.title,
                     "course_title": course.title if course else "-",
                     "group_name": group_map.get((course.id, attempt.user_id), "") if course else "",
                     "status": attempt.status,
                     "date": attempt.teacher_checked_at or attempt.started_at,
                     "type_label": _pending_review_type_label("exam"),
-                    "is_recheck": bool(attempt.checked_by_teacher),
-                    "review_window_seconds_left": review_window_seconds_left if attempt.checked_by_teacher else 0,
+                    "is_recheck": is_recheck,
+                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "can_view_student_identity": not is_identity_hidden,
+                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
                     "action_url": _append_query_params(
                         reverse(
                             "exams:teacher_check_attempt",
@@ -846,7 +882,10 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         from_section="pending-review",
                         return_to=profile_return_url,
                     ),
-                    "action_label": pgettext_lazy("profile.pending_review.action", "review"),
+                    "action_label": _resolve_teacher_review_action(
+                        is_graded=bool(attempt.checked_by_teacher),
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -864,14 +903,23 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
         for submission in submissions:
             course = submission.assignment.course
-            is_recheck = submission.status == "graded"
-            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
+            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
+                submitted_at=submission.submitted_at,
+                reviewed_at=submission.graded_at,
+                is_reviewed=is_recheck,
+                now=current_time,
+            )
             items.append(
                 {
                     "type": "assignment",
                     "icon": _standard_item_type_meta("assignments")[1],
                     "student": submission.user,
-                    "student_display": anonymous_student_label,
+                    "student_display": (
+                        "Anonim tələbə"
+                        if is_identity_hidden
+                        else (submission.user.get_full_name() or submission.user.username)
+                    ),
                     "title": submission.assignment.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.user_id), ""),
@@ -879,7 +927,9 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "date": submission.graded_at or submission.submitted_at,
                     "type_label": _pending_review_type_label("assignment"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": review_window_seconds_left,
+                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "can_view_student_identity": not is_identity_hidden,
+                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",
@@ -887,7 +937,10 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         ),
                         return_to=profile_return_url,
                     ),
-                    "action_label": pgettext_lazy("profile.pending_review.action", "open_assignment"),
+                    "action_label": _resolve_teacher_review_action(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -905,14 +958,23 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
         for submission in project_submissions:
             course = submission.project.course
-            is_recheck = submission.status == "graded"
-            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
+            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
+                submitted_at=submission.submitted_at,
+                reviewed_at=submission.graded_at,
+                is_reviewed=is_recheck,
+                now=current_time,
+            )
             items.append(
                 {
                     "type": "project",
                     "icon": _standard_item_type_meta("projects")[1],
                     "student": submission.student,
-                    "student_display": anonymous_student_label,
+                    "student_display": (
+                        "Anonim tələbə"
+                        if is_identity_hidden
+                        else (submission.student.get_full_name() or submission.student.username)
+                    ),
                     "title": submission.project.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, submission.student_id), ""),
@@ -920,7 +982,9 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "date": submission.graded_at or submission.submitted_at,
                     "type_label": _pending_review_type_label("project"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": review_window_seconds_left,
+                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "can_view_student_identity": not is_identity_hidden,
+                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",
@@ -928,7 +992,10 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         ),
                         return_to=profile_return_url,
                     ),
-                    "action_label": pgettext_lazy("profile.pending_review.action", "open_project"),
+                    "action_label": _resolve_teacher_review_action(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -951,14 +1018,21 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course
-            is_recheck = submission.status == "graded"
-            review_window_seconds_left = _review_window_seconds_left(submission.graded_at) if is_recheck else 0
+            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
+                submitted_at=submission.submitted_at,
+                reviewed_at=submission.graded_at,
+                is_reviewed=is_recheck,
+                now=current_time,
+            )
             items.append(
                 {
                     "type": "lab",
                     "icon": _standard_item_type_meta("lab")[1],
                     "student": student,
-                    "student_display": anonymous_student_label,
+                    "student_display": (
+                        "Anonim tələbə" if is_identity_hidden else (student.get_full_name() or student.username)
+                    ),
                     "title": submission.assignment.lab.title,
                     "course_title": course.title,
                     "group_name": group_map.get((course.id, student.id), ""),
@@ -966,7 +1040,9 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                     "date": submission.graded_at or submission.submitted_at,
                     "type_label": _pending_review_type_label("lab"),
                     "is_recheck": is_recheck,
-                    "review_window_seconds_left": review_window_seconds_left,
+                    "review_window_seconds_left": identity_window_seconds_left if is_identity_hidden else 0,
+                    "can_view_student_identity": not is_identity_hidden,
+                    "countdown_mode": "recheck" if is_recheck else ("identity" if is_identity_hidden else ""),
                     "action_url": _append_query_params(
                         reverse(
                             "accounts:pending_review_detail",
@@ -974,7 +1050,10 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                         ),
                         return_to=profile_return_url,
                     ),
-                    "action_label": pgettext_lazy("profile.pending_review.action", "grade"),
+                    "action_label": _resolve_teacher_review_action(
+                        is_graded=submission.status == "graded",
+                        in_recheck_window=is_recheck,
+                    ),
                 }
             )
 
@@ -1196,4 +1275,3 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
 
     items.sort(key=lambda item: (item["date"] is not None, item["date"] or timezone.now()), reverse=True)
     return items, search_query, normalized_type, selected_group, available_groups
-

@@ -8,6 +8,11 @@
     const TOTAL_QUESTIONS = window.LAB_CONFIG.totalQuestions;
     const I18N = window.LAB_I18N || {};
     const t = (key, fallback) => I18N[key] || fallback;
+    const finishConfirmModalEl = document.getElementById('finishLabConfirmModal');
+    const finishConfirmMessage = document.getElementById('finishLabConfirmMessage');
+    const finishUnansweredNotice = document.getElementById('finishLabUnansweredNotice');
+    const confirmFinishLabBtn = document.getElementById('confirmFinishLabBtn');
+    let finishConfirmModal = null;
 
     let labStartTime = localStorage.getItem('lab_' + LAB_ID + '_start');
     if (!labStartTime) {
@@ -176,30 +181,62 @@
     const labForm = document.getElementById('labForm');
     if (!labForm) return;
 
-    labForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+    function getUnansweredCount() {
+        const answeredEl = document.getElementById('answeredCount');
+        const answered = answeredEl ? parseInt(answeredEl.textContent, 10) : 0;
+        return TOTAL_QUESTIONS - (isNaN(answered) ? 0 : answered);
+    }
 
-        const answered = parseInt(document.getElementById('answeredCount').textContent, 10);
-        const unanswered = TOTAL_QUESTIONS - answered;
+    function setSubmitButtonState(isSubmitting) {
+        const btn = document.getElementById('submitBtn');
+        if (!btn) return;
+        btn.disabled = isSubmitting;
+        btn.innerHTML = isSubmitting
+            ? '<span class="spinner-border spinner-border-sm me-2"></span> ' + t('actionSubmitting', 'Submitting...')
+            : '<i class="fas fa-paper-plane me-2"></i> ' + t('actionFinishLab', 'Finish Lab');
+    }
+
+    function setConfirmButtonState(isSubmitting) {
+        if (confirmFinishLabBtn) confirmFinishLabBtn.disabled = isSubmitting;
+    }
+
+    function updateFinishConfirmContent(unanswered) {
+        if (finishConfirmMessage) {
+            finishConfirmMessage.textContent = t(
+                'confirmFinishDescription',
+                'After finishing the lab, you will not be able to return and edit it.'
+            );
+        }
+
+        if (!finishUnansweredNotice) return;
 
         if (unanswered > 0) {
-            const confirmText = t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace(
+            finishUnansweredNotice.textContent = t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace(
                 '{count}',
                 unanswered
             );
-            if (!confirm(confirmText)) {
-                return;
-            }
+            finishUnansweredNotice.classList.remove('d-none');
+        } else {
+            finishUnansweredNotice.textContent = '';
+            finishUnansweredNotice.classList.add('d-none');
         }
+    }
 
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML =
-            '<span class="spinner-border spinner-border-sm me-2"></span> ' + t('actionSubmitting', 'Submitting...');
+    function getFinishConfirmModal() {
+        if (!finishConfirmModalEl || !window.bootstrap) return null;
+        if (!finishConfirmModal) {
+            finishConfirmModal = new window.bootstrap.Modal(finishConfirmModalEl);
+        }
+        return finishConfirmModal;
+    }
+
+    function submitLabForm() {
+        setSubmitButtonState(true);
+        setConfirmButtonState(true);
 
         fetch('/labs/' + LAB_ID + '/submit/', {
             method: 'POST',
-            body: new FormData(this),
+            body: new FormData(labForm),
             headers: { 'X-CSRFToken': CSRF },
         })
             .then((r) => r.json())
@@ -209,15 +246,47 @@
                     window.location.href = data.redirect_url || '/';
                 } else {
                     alert(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
-                    btn.disabled = false;
-                    btn.innerHTML =
-                        '<i class="fas fa-paper-plane me-2"></i> ' + t('actionFinishLab', 'Finish Lab');
+                    setSubmitButtonState(false);
+                    setConfirmButtonState(false);
                 }
             })
             .catch(() => {
                 alert(t('errorServer', 'Server error'));
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> ' + t('actionFinishLab', 'Finish Lab');
+                setSubmitButtonState(false);
+                setConfirmButtonState(false);
             });
+    }
+
+    if (confirmFinishLabBtn) {
+        confirmFinishLabBtn.addEventListener('click', function () {
+            const modal = getFinishConfirmModal();
+            if (modal) modal.hide();
+            submitLabForm();
+        });
+    }
+
+    labForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const unanswered = getUnansweredCount();
+
+        const modal = getFinishConfirmModal();
+        if (!modal) {
+            let confirmText = t(
+                'confirmFinishDescription',
+                'After finishing the lab, you will not be able to return and edit it.'
+            );
+            if (unanswered > 0) {
+                confirmText +=
+                    '\n\n' +
+                    t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace('{count}', unanswered);
+            }
+            if (!confirm(confirmText)) return;
+            submitLabForm();
+            return;
+        }
+
+        updateFinishConfirmContent(unanswered);
+        modal.show();
     });
 })();

@@ -34,6 +34,35 @@ def _user_can_access_course_roster(user, course):
     ).exists()
 
 
+def _raise_lab_access_denied():
+    raise PermissionDenied("You do not have permission to access this lab.")
+
+
+def _format_lab_submission_duration(start_time, submitted_at):
+    if not start_time or not submitted_at:
+        return None
+
+    delta = submitted_at - start_time
+    total_seconds = int(delta.total_seconds())
+    if total_seconds <= 0:
+        return None
+
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    if hours > 0:
+        duration_tpl = pgettext("labs.view.message", "duration_hours_minutes")
+        try:
+            return duration_tpl % {"hours": hours, "minutes": minutes}
+        except Exception:
+            return duration_tpl.format(hours=hours, minutes=minutes)
+
+    duration_tpl = pgettext("labs.view.message", "duration_minutes")
+    try:
+        return duration_tpl % {"minutes": minutes}
+    except Exception:
+        return duration_tpl.format(minutes=minutes)
+
+
 @login_required
 def lab_detail(request, pk):
     """Lab detalları - Tələbə görünüşü"""
@@ -49,8 +78,7 @@ def lab_detail(request, pk):
     review_available_in_seconds = 0
 
     if request.user.is_authenticated:
-        # Müəllim üçün bütün sualları göstər
-        if getattr(request.user, "is_teacher", False):
+        if lab.can_teacher_access(request.user):
             questions = (
                 LabQuestion.objects.filter(block__lab=lab)
                 .select_related("block")
@@ -61,6 +89,9 @@ def lab_detail(request, pk):
 
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
+            if not lab.can_student_access(request.user):
+                _raise_lab_access_denied()
+
             assignment = LabAssignment.get_or_create_for_student(lab, request.user)
 
             # ƏSAS FİX: select_related və prefetch_related istifadə et
@@ -138,103 +169,91 @@ def my_lab_answers(request, pk):
     """Tələbənin öz cavablarını görmək"""
     lab = _get_tenant_lab_or_404(request, pk)
 
+    if not lab.can_student_access(request.user):
+        _raise_lab_access_denied()
+
     assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
     if not assignment:
         messages.error(request, pgettext("labs.view.error", "assignment_not_found"))
-        return redirect("courses:course_dashboard", pk=lab.course.id)
+        return redirect("courses:course_dashboard", course_id=lab.course.id)
 
-    all_submissions = LabSubmission.objects.filter(assignment=assignment).order_by("attempt_number")
+    all_submissions = list(
+        LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at", "-attempt_number")
+    )
 
-    if not all_submissions.exists():
+    if not all_submissions:
         messages.error(request, pgettext("labs.view.error", "submission_not_found"))
-        return redirect("courses:course_dashboard", pk=lab.course.id)
+        return redirect("courses:course_dashboard", course_id=lab.course.id)
 
-    total_attempts = all_submissions.count()
+    total_attempts = len(all_submissions)
+    attempts_left = max((lab.max_attempts or 1) - total_attempts, 0)
+    requested_attempt = request.GET.get("attempt")
+    preopen_submission_id = None
 
-    # Hansı cəhdə baxılır?
-    attempt = request.GET.get("attempt")
-    if attempt and attempt.isdigit():
-        attempt_number = int(attempt)
-        submission = all_submissions.filter(attempt_number=attempt_number).first()
-        if not submission:
-            submission = all_submissions.last()
-            attempt_number = submission.attempt_number
-    else:
-        submission = all_submissions.last()
-        attempt_number = submission.attempt_number if submission else 1
-
-    # Müddət
-    duration = None
-    if submission and submission.submitted_at:
-        start_time = assignment.assigned_at if assignment.assigned_at else lab.start_datetime
-        if start_time:
-            delta = submission.submitted_at - start_time
-            total_seconds = int(delta.total_seconds())
-            if total_seconds > 0:
-                hours = total_seconds // 3600
-                minutes = (total_seconds % 3600) // 60
-                if hours > 0:
-                    duration_tpl = pgettext("labs.view.message", "duration_hours_minutes")
-                    try:
-                        duration = duration_tpl % {"hours": hours, "minutes": minutes}
-                    except Exception:
-                        duration = duration_tpl.format(hours=hours, minutes=minutes)
-                else:
-                    duration_tpl = pgettext("labs.view.message", "duration_minutes")
-                    try:
-                        duration = duration_tpl % {"minutes": minutes}
-                    except Exception:
-                        duration = duration_tpl.format(minutes=minutes)
-
-    # Bu cəhdin cavablarını al - attempt_number ilə
-    # Əgər attempt_number field yoxdursa, bütün cavabları göstər
     try:
-        answers = (
+        answers = list(
             LabAnswer.objects.filter(
                 lab=lab,
                 student=request.user,
-                attempt_number=attempt_number,
                 is_draft=False,
             )
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
     except Exception:
-        # Əgər attempt_number field yoxdursa
-        answers = (
+        answers = list(
             LabAnswer.objects.filter(lab=lab, student=request.user, is_draft=False)
             .select_related("question")
             .order_by("question__block__order", "question__question_number")
         )
 
-    show_review_data = False
-    review_available_in_seconds = 0
-    review_reveal_at = None
-    if (
-        submission
-        and submission.status == "graded"
-        and submission.graded_at
-        and timezone.now() >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    ):
-        show_review_data = True
-    elif submission and submission.status == "graded" and submission.graded_at:
-        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-        remain = int((reveal_at - timezone.now()).total_seconds())
-        if remain > 0:
-            review_available_in_seconds = remain
-            review_reveal_at = reveal_at
+    answers_by_submission_id = {}
+    answers_by_attempt = {}
+    for answer in answers:
+        if answer.submission_id:
+            answers_by_submission_id.setdefault(answer.submission_id, []).append(answer)
+        answers_by_attempt.setdefault(answer.attempt_number, []).append(answer)
+
+    now = timezone.now()
+    start_time = assignment.assigned_at if assignment.assigned_at else lab.start_datetime
+    submissions = []
+    for submission in all_submissions:
+        submission_answers = answers_by_submission_id.get(submission.id) or answers_by_attempt.get(
+            submission.attempt_number, []
+        )
+        submission.answer_items = submission_answers
+        submission.answer_count = len(submission_answers)
+        submission.duration = _format_lab_submission_duration(start_time, submission.submitted_at)
+        submission.show_review_data = False
+        submission.review_available_in_seconds = 0
+        submission.is_review_pending = False
+
+        if submission.status == "graded" and submission.graded_at:
+            reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
+            if now >= reveal_at:
+                submission.show_review_data = True
+            else:
+                submission.is_review_pending = True
+                submission.review_available_in_seconds = max(0, int((reveal_at - now).total_seconds()))
+
+        submissions.append(submission)
+
+        if requested_attempt and requested_attempt.isdigit() and submission.attempt_number == int(requested_attempt):
+            preopen_submission_id = submission.id
+
+    latest_submission = submissions[0]
+    show_review_data = latest_submission.show_review_data
+    review_available_in_seconds = latest_submission.review_available_in_seconds
 
     context = {
         "lab": lab,
-        "submission": submission,
-        "all_submissions": all_submissions,
-        "answers": answers,
-        "duration": duration,
-        "attempt_number": attempt_number,
+        "submission": latest_submission,
+        "submissions": submissions,
         "total_attempts": total_attempts,
+        "attempts_left": attempts_left,
         "show_review_data": show_review_data,
         "review_available_in_seconds": review_available_in_seconds,
-        "review_reveal_at": review_reveal_at,
+        "preopen_submission_id": preopen_submission_id,
         "back_url": _lab_back_url(request, lab),
     }
 
