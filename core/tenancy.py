@@ -2,63 +2,43 @@
 Shared helpers for request-scoped tenant filtering.
 """
 
-from django.db.models import Q
-
-INT32_MAX = 2_147_483_647
-
-
 def get_request_organization(request):
     """
-    Resolve active organization from middleware/session, then profile fallback.
+    Resolve the active organization selected on this request.
     """
     if request is None:
         return None
 
-    request_org = getattr(request, "organization", None)
-    if request_org is not None:
-        return request_org
+    return getattr(request, "organization", None)
+
+
+def request_has_active_organization_context(request, *, allow_superadmin=True):
+    """
+    Return whether the request has a valid active tenant context.
+    """
+    organization = get_request_organization(request)
+    if organization is None:
+        return False
 
     user = getattr(request, "user", None)
-    profile = getattr(user, "profile", None) if user is not None else None
-    return getattr(profile, "organization", None)
+    if allow_superadmin and bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False)):
+        return True
+
+    memberships = getattr(request, "org_memberships", None) or []
+    return bool(memberships)
 
 
-def get_organization_int_id(organization):
+def scoped_by_organization(queryset, request, org_field="organization"):
     """
-    Return int-compatible organization id for legacy IntegerField storage.
-    """
-    if organization is None:
-        return None
-
-    org_pk = getattr(organization, "pk", None)
-    if isinstance(org_pk, int) and org_pk <= INT32_MAX:
-        return org_pk
-    return None
-
-
-def scoped_by_organization_id(queryset, request, org_id_field, fallback_org_field=None):
-    """
-    Apply active-organization filtering for models using an integer org id field.
+    Apply active-organization filtering for models bound to an Organization FK.
 
     Args:
         queryset: Base queryset to scope.
         request: Django request object (for active org lookup).
-        org_id_field: Integer org id field on model (e.g. ``organization_id``).
-        fallback_org_field: Optional FK path to organization for legacy rows where
-            org_id is NULL (e.g. ``owner__profile__organization``).
+        org_field: Organization FK field on the model (defaults to ``organization``).
     """
     organization = get_request_organization(request)
-    if organization is None:
-        return queryset
-
-    org_int_id = get_organization_int_id(organization)
-    if org_int_id is None:
-        if fallback_org_field:
-            return queryset.filter(**{f"{org_id_field}__isnull": True, fallback_org_field: organization})
+    if organization is None or not request_has_active_organization_context(request):
         return queryset.none()
 
-    filters = Q(**{org_id_field: org_int_id})
-    if fallback_org_field:
-        filters |= Q(**{f"{org_id_field}__isnull": True, fallback_org_field: organization})
-
-    return queryset.filter(filters)
+    return queryset.filter(**{org_field: organization})

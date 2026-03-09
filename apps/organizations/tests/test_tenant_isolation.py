@@ -3,11 +3,15 @@ Tenant isolation tests for multi-tenant functionality.
 Ensures Organization A users cannot access Organization B resources.
 """
 
+from types import SimpleNamespace
+
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.test import TestCase
 
 from core.constants import OrganizationType, RoleScopeType
+from core.permissions import request_has_permission
+from core.tenancy import request_has_active_organization_context, scoped_by_organization
 
 from ..models import Membership, Organization, Role
 from ..services import (
@@ -196,3 +200,85 @@ class TenantIsolationTest(TestCase):
 
         # Cross-org - cannot manage
         self.assertFalse(self.membership_a.can_manage(self.membership_b))
+
+
+class RequestTenantContextTest(TestCase):
+    """Tests for request-scoped permission and queryset isolation."""
+
+    def setUp(self):
+        post_save.disconnect(create_default_roles, sender=Organization)
+
+        self.user = User.objects.create_user(username="tenant_user", email="tenant@example.com", password="testpass123")
+        self.other_user = User.objects.create_user(
+            username="other_tenant_user",
+            email="other@example.com",
+            password="testpass123",
+        )
+
+        self.org_a = Organization.objects.create(
+            name="Scoped Org A",
+            slug="scoped-org-a",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+        )
+        self.org_b = Organization.objects.create(
+            name="Scoped Org B",
+            slug="scoped-org-b",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.other_user,
+        )
+
+        self.role_a = Role.objects.create(
+            organization=self.org_a,
+            name="teacher",
+            display_name="Teacher",
+            level=60,
+            scope_type=RoleScopeType.COURSE,
+            permissions=["course.create"],
+        )
+        self.role_b = Role.objects.create(
+            organization=self.org_b,
+            name="teacher",
+            display_name="Teacher",
+            level=60,
+            scope_type=RoleScopeType.COURSE,
+            permissions=["course.create"],
+        )
+
+        self.membership_a = Membership.objects.create(
+            user=self.user,
+            organization=self.org_a,
+            role=self.role_a,
+            is_primary=True,
+        )
+
+    def tearDown(self):
+        post_save.connect(create_default_roles, sender=Organization)
+
+    def _request(self, *, organization=None, memberships=None, permissions=None, user=None):
+        return SimpleNamespace(
+            user=user or self.user,
+            organization=organization,
+            org_memberships=[] if memberships is None else memberships,
+            org_permissions=[] if permissions is None else permissions,
+        )
+
+    def test_request_permission_denies_without_active_org_context(self):
+        request = self._request(organization=self.org_a, memberships=[], permissions=["course.create"])
+
+        self.assertFalse(request_has_active_organization_context(request))
+        self.assertFalse(request_has_permission(request, "course.create"))
+
+    def test_request_scoping_returns_none_without_active_org_context(self):
+        request = self._request(organization=None, memberships=[self.membership_a], permissions=["course.create"])
+
+        scoped_roles = scoped_by_organization(Role.objects.all(), request)
+
+        self.assertFalse(scoped_roles.exists())
+
+    def test_request_scoping_returns_none_for_forged_org_without_membership(self):
+        request = self._request(organization=self.org_b, memberships=[], permissions=["course.create"])
+
+        scoped_roles = scoped_by_organization(Role.objects.all(), request)
+
+        self.assertFalse(scoped_roles.exists())

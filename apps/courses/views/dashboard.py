@@ -22,7 +22,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path, _tenant_scoped_courses
-from core.tenancy import get_request_organization, scoped_by_organization_id
+from core.tenancy import get_request_organization, scoped_by_organization
 
 from ._helpers import _student_users_queryset
 
@@ -221,28 +221,22 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
         if context["can_manage_course"]:
             # MÜƏLLİM - bu kursa bağlı bütün imtahanları görür
-            context["course_exams"] = scoped_by_organization_id(
+            context["course_exams"] = scoped_by_organization(
                 Exam.objects.filter(course=course),
                 self.request,
-                org_id_field="organization_id",
-                fallback_org_field="author__profile__organization",
             ).order_by("-created_at")
 
             # Müəllimin bütün imtahanları (kurs ilə əlaqələndirmək üçün)
-            context["teacher_exams"] = scoped_by_organization_id(
+            context["teacher_exams"] = scoped_by_organization(
                 Exam.objects.filter(author=user).exclude(course=course),
                 self.request,
-                org_id_field="organization_id",
-                fallback_org_field="author__profile__organization",
             ).order_by("-created_at")[:10]
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
-            all_course_exams = scoped_by_organization_id(
+            all_course_exams = scoped_by_organization(
                 Exam.objects.filter(course=course, is_active=True),
                 self.request,
-                org_id_field="organization_id",
-                fallback_org_field="author__profile__organization",
             )
 
             exams_with_data = []

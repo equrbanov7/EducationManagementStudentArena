@@ -20,13 +20,13 @@ class OrganizationMiddleware:
 
         # Only process for authenticated users
         if request.user.is_authenticated:
+            from .models import Organization
+
             # Get organization from session (set by organization selector)
             org_slug = request.session.get("active_organization")
 
             if org_slug:
                 # Try to load the organization
-                from .models import Organization
-
                 try:
                     request.organization = Organization.objects.get(slug=org_slug, is_active=True)
                 except Organization.DoesNotExist:
@@ -42,6 +42,42 @@ class OrganizationMiddleware:
                     .order_by("-is_primary", "-role__level")
                 )
 
+                can_bootstrap_admin_membership = False
+                if not request.org_memberships:
+                    from apps.accounts.models import ProfileRole
+
+                    profile = getattr(request.user, "profile", None)
+                    can_bootstrap_admin_membership = (
+                        getattr(profile, "organization_id", None) == request.organization.id
+                        and getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
+                    )
+
+                if not request.org_memberships and not can_bootstrap_admin_membership and not (
+                    getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+                ):
+                    request.organization = None
+                    request.session.pop("active_organization", None)
+
+            if request.organization is None:
+                active_memberships = list(
+                    request.user.memberships.filter(is_active=True, organization__is_active=True)
+                    .select_related("organization", "role", "scope_unit")
+                    .order_by("-is_primary", "-role__level")
+                )
+                unique_organizations = {}
+                for membership in active_memberships:
+                    unique_organizations.setdefault(membership.organization_id, membership.organization)
+
+                if len(unique_organizations) == 1:
+                    request.organization = next(iter(unique_organizations.values()))
+                    request.session["active_organization"] = request.organization.slug
+                    request.org_memberships = [
+                        membership
+                        for membership in active_memberships
+                        if membership.organization_id == request.organization.id
+                    ]
+
+            if request.organization:
                 # Collect all permissions from memberships
                 permissions_set = set()
                 for membership in request.org_memberships:

@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import override, pgettext
@@ -18,11 +18,34 @@ from apps.assignments.models import Assignment
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
 from apps.labs.models import Lab
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from apps.projects.models import Project
 from core.constants import OrganizationType
 
 User = get_user_model()
+
+
+def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
+    membership_role_name = membership_role_name or {
+        ProfileRole.TEACHER: "teacher",
+        ProfileRole.STUDENT: "student",
+    }.get(profile_role, "member")
+
+    profile = user.profile
+    profile.organization = organization
+    profile.organization_type = organization.org_type
+    profile.role = profile_role
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=organization,
+        defaults={
+            "role": organization.roles.get(name=membership_role_name),
+            "is_primary": True,
+            "is_active": True,
+        },
+    )
 
 
 class CourseOwnershipTenantFilteringTest(TestCase):
@@ -63,29 +86,10 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             is_active=True,
         )
 
-        owner_profile = self.owner.profile
-        owner_profile.organization = self.org_a
-        owner_profile.organization_type = self.org_a.org_type
-        owner_profile.role = ProfileRole.TEACHER
-        owner_profile.save()
-
-        student_profile = self.student.profile
-        student_profile.organization = self.org_a
-        student_profile.organization_type = self.org_a.org_type
-        student_profile.role = ProfileRole.STUDENT
-        student_profile.save()
-
-        other_teacher_profile = self.other_teacher.profile
-        other_teacher_profile.organization = self.org_a
-        other_teacher_profile.organization_type = self.org_a.org_type
-        other_teacher_profile.role = ProfileRole.TEACHER
-        other_teacher_profile.save()
-
-        external_student_profile = self.external_student.profile
-        external_student_profile.organization = self.org_b
-        external_student_profile.organization_type = self.org_b.org_type
-        external_student_profile.role = ProfileRole.STUDENT
-        external_student_profile.save()
+        _assign_user_to_org(self.owner, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.org_a, ProfileRole.STUDENT)
+        _assign_user_to_org(self.other_teacher, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.external_student, self.org_b, ProfileRole.STUDENT)
 
         self.course_a = Course.objects.create(
             owner=self.owner,
@@ -96,7 +100,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             owner=self.owner,
             title="Tenant B Course",
             status="published",
-            organization_id=999,
+            organization=self.org_b,
         )
         self.course_exam = Exam.objects.create(
             author=self.owner,
@@ -153,6 +157,20 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_a.title)
         self.assertNotContains(response, self.course_b.title)
+
+    def test_my_courses_shows_no_data_without_active_organization(self):
+        from apps.courses.views.crud import MyCoursesListView
+
+        request = RequestFactory().get(reverse("courses:my_courses"))
+        request.user = self.owner
+        request.organization = None
+        request.org_memberships = []
+        request.org_permissions = []
+        response = MyCoursesListView.as_view()(request)
+        response.render()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context_data["courses"].exists())
 
     def test_course_dashboard_preserves_assigned_tasks_profile_return_context(self):
         self.client.force_login(self.student)

@@ -21,7 +21,7 @@ from apps.exams.models import Exam
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from core.constants import OrganizationType
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW
-from core.tenancy import get_request_organization, scoped_by_organization_id
+from core.tenancy import get_request_organization, scoped_by_organization
 
 from ..models import ProfileRole
 
@@ -60,22 +60,12 @@ def _get_active_organization(request):
 
 def _tenant_scoped_courses(request, queryset=None):
     base_queryset = queryset if queryset is not None else Course.objects.all()
-    return scoped_by_organization_id(
-        base_queryset,
-        request,
-        org_id_field="organization_id",
-        fallback_org_field="owner__profile__organization",
-    )
+    return scoped_by_organization(base_queryset, request)
 
 
 def _tenant_scoped_exams(request, queryset=None):
     base_queryset = queryset if queryset is not None else Exam.objects.all()
-    return scoped_by_organization_id(
-        base_queryset,
-        request,
-        org_id_field="organization_id",
-        fallback_org_field="author__profile__organization",
-    )
+    return scoped_by_organization(base_queryset, request)
 
 
 def _assigned_courses_queryset(request, user):

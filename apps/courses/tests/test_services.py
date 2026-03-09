@@ -8,6 +8,8 @@ from django.test import TestCase
 from apps.courses import services
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import StudentGroup
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -168,3 +170,30 @@ class CourseQueryServicesTest(TestCase):
             password="pass123"
         )
         self.assertFalse(services.is_user_enrolled_in_course(self.course, other_user))
+
+
+class CourseTenantOrganizationTest(TestCase):
+    def test_course_organization_defaults_from_owner_profile(self):
+        teacher = User.objects.create_user(
+            username="tenant_teacher",
+            email="tenant_teacher@example.com",
+            password="pass123",
+        )
+        organization = Organization.objects.create(
+            name="Course Model Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        teacher.profile.organization = organization
+        teacher.profile.organization_type = organization.org_type
+        teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        course = Course.objects.create(
+            title="Tenant Bound Course",
+            owner=teacher,
+            status="published",
+        )
+
+        self.assertEqual(course.organization, organization)

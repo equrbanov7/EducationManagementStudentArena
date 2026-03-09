@@ -126,12 +126,16 @@ if sentry_dsn:
 
 # Content Security Policy (CSP) - Production settings (daha ciddi)
 # Base settings-dəki CSP-ni production üçün daha ciddi edirik
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'",)  # unsafe-inline silindi - production üçün daha təhlükəsiz
-CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")  # unsafe-inline silindi
-CSP_IMG_SRC = ("'self'", "data:", "https:")  # HTTPS-dən şəkil yükləməyə icazə
-CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
-CSP_CONNECT_SRC = ("'self'",)  # AJAX/WebSocket bağlantıları
-CSP_FRAME_ANCESTORS = ("'none'",)  # Clickjacking-ə qarşı
-CSP_BASE_URI = ("'self'",)  # Base tag-ı məhdudlaşdırır
-CSP_FORM_ACTION = ("'self'",)  # Form submission-ları məhdudlaşdırır
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        **CONTENT_SECURITY_POLICY["DIRECTIVES"],
+        "script-src": CSP_SCRIPT_SOURCES,
+        "style-src": CSP_STYLE_SOURCES,
+        "img-src": ("'self'", "data:", "https:"),  # HTTPS-dən şəkil yükləməyə icazə
+        "font-src": CSP_FONT_SOURCES,
+        "connect-src": ("'self'",),  # AJAX/WebSocket bağlantıları
+        "frame-ancestors": ("'none'",),  # Clickjacking-ə qarşı
+        "base-uri": ("'self'",),  # Base tag-ı məhdudlaşdırır
+        "form-action": ("'self'",),  # Form submission-ları məhdudlaşdırır
+    }
+}

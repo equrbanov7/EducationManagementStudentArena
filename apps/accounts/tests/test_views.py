@@ -7,6 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
+from apps.blog.models import Category, Post
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -249,3 +250,114 @@ class RoleBasedAccessTest(TestCase):
         self.client.login(username="student", password="StrongPass123!")
         response = self.client.get(profile_url)
         self.assertEqual(response.status_code, 200)
+
+
+class PublicProfileViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.owner = User.objects.create_user("publicowner", "publicowner@example.com", "StrongPass123!")
+        self.viewer = User.objects.create_user("publicviewer", "publicviewer@example.com", "StrongPass123!")
+        self.category = Category.objects.create(name="Frontend", slug="frontend")
+        self.other_category = Category.objects.create(name="Backend", slug="backend")
+
+        owner_profile = self.owner.profile
+        owner_profile.bio = "Açıq bio məlumatı"
+        owner_profile.location = "Bakı"
+        owner_profile.save(update_fields=["bio", "location", "updated_at"])
+
+        Post.objects.create(
+            author=self.owner,
+            category=self.category,
+            title="Public Post",
+            excerpt="Visible excerpt",
+            content="Visible content",
+            is_published=True,
+        )
+        Post.objects.create(
+            author=self.owner,
+            category=self.category,
+            title="Private Draft",
+            excerpt="Hidden excerpt",
+            content="Hidden content",
+            is_published=False,
+        )
+
+        for index in range(7):
+            Post.objects.create(
+                author=self.owner,
+                category=self.category,
+                title=f"Pagination Post {index}",
+                excerpt=f"Excerpt {index}",
+                content=f"Content {index}",
+                is_published=True,
+            )
+
+        Post.objects.create(
+            author=self.owner,
+            category=self.category,
+            title="Alpha Search Match",
+            excerpt="Searchable excerpt",
+            content="Searchable content",
+            is_published=True,
+        )
+        Post.objects.create(
+            author=self.owner,
+            category=self.other_category,
+            title="Backend Public Post",
+            excerpt="Backend excerpt",
+            content="Backend content",
+            is_published=True,
+        )
+
+    def test_public_profile_is_accessible_anonymously_and_hides_private_sections(self):
+        response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Alpha Search Match")
+        self.assertNotContains(response, "Private Draft")
+        self.assertContains(response, "Açıq bio məlumatı")
+        self.assertContains(response, "Bakı")
+        self.assertNotContains(response, reverse("create_post"))
+        self.assertNotContains(response, reverse("courses:my_courses"))
+        self.assertNotContains(response, reverse("courses:create_course"))
+        self.assertNotContains(response, reverse("exams:create_exam"))
+        self.assertNotContains(response, reverse("accounts:assigned_exams"))
+
+    def test_public_profile_redirects_owner_to_private_profile(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile"))
+
+    def test_public_profile_search_and_pagination_work(self):
+        search_response = self.client.get(
+            reverse("accounts:public_profile", args=[self.owner.username]),
+            {"q": "Alpha"},
+        )
+        self.assertEqual(search_response.status_code, 200)
+        self.assertContains(search_response, "Alpha Search Match")
+        self.assertNotContains(search_response, "Public Post")
+
+        page_response = self.client.get(
+            reverse("accounts:public_profile", args=[self.owner.username]),
+            {"page": 2},
+        )
+        self.assertEqual(page_response.status_code, 200)
+        self.assertEqual(page_response.context["posts"].number, 2)
+
+    def test_public_profile_active_category_link_toggles_filter_off(self):
+        response = self.client.get(
+            reverse("accounts:public_profile", args=[self.owner.username]),
+            {"category": self.category.slug, "q": "Alpha"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Alpha Search Match")
+        self.assertNotContains(response, "Backend Public Post")
+        self.assertContains(
+            response,
+            f'href="{reverse("accounts:public_profile", args=[self.owner.username])}?q=Alpha"',
+            html=False,
+        )

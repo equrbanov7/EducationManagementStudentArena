@@ -9,7 +9,42 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from apps.accounts.models import ProfileRole
+from apps.organizations.models import Membership, Organization
+from core.constants import OrganizationType
+
 User = get_user_model()
+
+
+def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
+    membership_role_name = membership_role_name or {
+        ProfileRole.TEACHER: "teacher",
+        ProfileRole.STUDENT: "student",
+        ProfileRole.MEMBER: "member",
+    }.get(profile_role, "member")
+
+    profile = user.profile
+    profile.organization = organization
+    profile.organization_type = organization.org_type
+    profile.role = profile_role
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=organization,
+        defaults={
+            "role": organization.roles.get(name=membership_role_name),
+            "is_primary": True,
+            "is_active": True,
+        },
+    )
+
+
+def _login_with_org(client, user, organization):
+    client.force_login(user)
+    session = client.session
+    session["active_organization"] = organization.slug
+    session.save()
 
 
 class ProfileViewTest(TestCase):
@@ -195,13 +230,10 @@ class ProfileViewTest(TestCase):
 
     def test_profile_my_exams_context_for_teacher(self):
         """Test that teacher profile includes my_exams context."""
-        from apps.accounts.models import ProfileRole, UserProfile
+        from apps.accounts.models import UserProfile
         from apps.exams.models import Exam
-        from apps.organizations.models import Organization
-        from core.constants import OrganizationType
 
         profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.TEACHER
         organization = Organization.objects.create(
             name="Teacher Profile Org",
             org_type=OrganizationType.SCHOOL,
@@ -209,16 +241,11 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
-        profile.organization = organization
-        profile.organization_type = organization.org_type
-        profile.save()
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
 
         exam = Exam.objects.create(author=self.user, title="Profile Exam", is_active=True)
 
-        self.client.login(username="testuser", password="testpass123")
-        session = self.client.session
-        session["active_organization"] = organization.slug
-        session.save()
+        _login_with_org(self.client, self.user, organization)
 
         profile_url = reverse("accounts:profile") + "?section=my-exams"
         response = self.client.get(profile_url)
@@ -667,8 +694,15 @@ class ProfileViewTest(TestCase):
             email="tasks_teacher@example.com",
             password="testpass123",
         )
-        self.user.profile.role = ProfileRole.STUDENT
-        self.user.profile.save(update_fields=["role", "updated_at"])
+        organization = Organization.objects.create(
+            name="Assigned Tasks Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
         course = Course.objects.create(
             owner=teacher,
@@ -728,7 +762,7 @@ class ProfileViewTest(TestCase):
         )
         exam.allowed_users.add(self.user)
 
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile") + "?section=assigned-exams")
 
         self.assertEqual(response.status_code, 200)
@@ -781,8 +815,15 @@ class ProfileViewTest(TestCase):
             email="tasks_search_teacher@example.com",
             password="testpass123",
         )
-        self.user.profile.role = ProfileRole.STUDENT
-        self.user.profile.save(update_fields=["role", "updated_at"])
+        organization = Organization.objects.create(
+            name="Assigned Tasks Search Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
         course = Course.objects.create(owner=teacher, title="Search Course", status="published")
         CourseMembership.objects.create(course=course, user=self.user, role="student")
@@ -805,7 +846,7 @@ class ProfileViewTest(TestCase):
         )
         hidden_item.assigned_students.add(self.user)
 
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(
             reverse("accounts:profile"),
             {"section": "assigned-exams", "assigned_search": "python"},
@@ -817,7 +858,6 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, hidden_item.title)
 
     def test_assigned_courses_search_filters_items(self):
-        from apps.accounts.models import ProfileRole
         from apps.courses.models import Course, CourseMembership
 
         teacher = User.objects.create_user(
@@ -825,15 +865,22 @@ class ProfileViewTest(TestCase):
             email="assigned_courses_search_teacher@example.com",
             password="testpass123",
         )
-        self.user.profile.role = ProfileRole.STUDENT
-        self.user.profile.save(update_fields=["role", "updated_at"])
+        organization = Organization.objects.create(
+            name="Assigned Courses Search Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(teacher, organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
         keep_course = Course.objects.create(owner=teacher, title="Python Fundamentals", status="published")
         hidden_course = Course.objects.create(owner=teacher, title="Rust Advanced", status="published")
         CourseMembership.objects.create(course=keep_course, user=self.user, role="student")
         CourseMembership.objects.create(course=hidden_course, user=self.user, role="student")
 
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(
             reverse("accounts:profile"),
             {"section": "assigned-courses", "assigned_course_search": "python"},
@@ -856,6 +903,17 @@ class AssignedItemsViewTest(TestCase):
             email="test@example.com",
             password="testpass123",
         )
+        self.organization = Organization.objects.create(
+            name="Assigned Items Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, self.organization, ProfileRole.STUDENT)
+
+    def _login_user(self, user=None):
+        _login_with_org(self.client, user or self.user, self.organization)
 
     def test_assigned_exams_requires_login(self):
         """Test that assigned exams page requires authentication."""
@@ -864,7 +922,7 @@ class AssignedItemsViewTest(TestCase):
 
     def test_assigned_exams_loads(self):
         """Test that assigned exams page loads."""
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:assigned_exams"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təyin olunmuş imtahanlarım")
@@ -876,7 +934,7 @@ class AssignedItemsViewTest(TestCase):
 
     def test_assigned_courses_loads(self):
         """Test that assigned courses page loads."""
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:assigned_courses"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təyin olunmuş kurslarım")
@@ -889,6 +947,7 @@ class AssignedItemsViewTest(TestCase):
             email="course_teacher@example.com",
             password="testpass123",
         )
+        _assign_user_to_org(teacher, self.organization, ProfileRole.TEACHER)
         course = Course.objects.create(
             owner=teacher,
             title="Assigned Course",
@@ -896,14 +955,14 @@ class AssignedItemsViewTest(TestCase):
         )
         CourseMembership.objects.create(course=course, user=self.user, role="student")
 
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:assigned_courses"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Assigned Course")
         self.assertContains(response, reverse("courses:course_dashboard", args=[course.id]))
 
     def test_assigned_courses_empty_state_message(self):
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:assigned_courses"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No courses assigned yet.")
@@ -917,6 +976,7 @@ class AssignedItemsViewTest(TestCase):
             email="exam_teacher@example.com",
             password="testpass123",
         )
+        _assign_user_to_org(teacher, self.organization, ProfileRole.TEACHER)
         course = Course.objects.create(
             owner=teacher,
             title="Assigned Exam Course",
@@ -964,7 +1024,7 @@ class AssignedItemsViewTest(TestCase):
             is_public=True,
         )
 
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:assigned_exams"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, direct_exam.title)
@@ -1002,8 +1062,15 @@ class MyResultsViewTest(TestCase):
             email="results_student@example.com",
             password="testpass123",
         )
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="My Results Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Result Course", status="published")
 
@@ -1063,12 +1130,15 @@ class MyResultsViewTest(TestCase):
             status="pending",
         )
 
+    def _login_student(self):
+        _login_with_org(self.client, self.student, self.organization)
+
     def test_my_results_requires_login(self):
         response = self.client.get(reverse("accounts:my_results"))
         self.assertEqual(response.status_code, 302)
 
     def test_my_results_unified_list_contains_all_submission_types(self):
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(reverse("accounts:my_results"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Unified Exam")
@@ -1078,14 +1148,14 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, "View answer/details")
 
     def test_my_results_filter_labs_only(self):
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(reverse("accounts:my_results") + "?type=labs")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Unified Lab")
         self.assertNotContains(response, "Unified Assignment")
 
     def test_my_result_detail_for_assignment_submission(self):
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(
             reverse(
                 "accounts:my_result_detail",
@@ -1099,7 +1169,7 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, "results_type=all")
 
     def test_my_result_detail_preserves_profile_results_filter_in_back_link(self):
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(
             reverse(
                 "accounts:my_result_detail",
@@ -1119,7 +1189,7 @@ class MyResultsViewTest(TestCase):
         self.assignment_submission.graded_at = timezone.now()
         self.assignment_submission.save(update_fields=["graded_at"])
 
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(reverse("accounts:my_results"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Unified Assignment")
@@ -1136,7 +1206,7 @@ class MyResultsViewTest(TestCase):
         self.assignment_submission.graded_at = timezone.now()
         self.assignment_submission.save(update_fields=["graded_at"])
 
-        self.client.login(username="results_student", password="testpass123")
+        self._login_student()
         response = self.client.get(
             reverse(
                 "accounts:my_result_detail",
@@ -1171,8 +1241,15 @@ class PendingAnswersViewTest(TestCase):
             email="pending_answers_student@example.com",
             password="testpass123",
         )
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Pending Answers Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Pending Answers Course", status="published")
 
@@ -1249,12 +1326,15 @@ class PendingAnswersViewTest(TestCase):
             status="pending",
         )
 
+    def _login_student(self):
+        _login_with_org(self.client, self.student, self.organization)
+
     def test_pending_answers_requires_login(self):
         response = self.client.get(reverse("accounts:pending_answers"))
         self.assertEqual(response.status_code, 302)
 
     def test_pending_answers_lists_only_pending_or_window_items(self):
-        self.client.login(username="pending_answers_student", password="testpass123")
+        self._login_student()
         response = self.client.get(reverse("accounts:pending_answers"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pending Assignment Visible")
@@ -1269,7 +1349,7 @@ class PendingAnswersViewTest(TestCase):
         self.assertIn("section=pending-answers", recent_item["detail_url"])
 
     def test_pending_answers_search_filters_results(self):
-        self.client.login(username="pending_answers_student", password="testpass123")
+        self._login_student()
         response = self.client.get(reverse("accounts:pending_answers") + "?pending_search=Async")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Async Written Exam")
@@ -1297,8 +1377,15 @@ class StudentDashboardAssignmentVisibilityTest(TestCase):
             email="dashboard_student@example.com",
             password="testpass123",
         )
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Student Dashboard Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Dashboard Course", status="published")
         CourseMembership.objects.create(course=self.course, user=self.student, role="student")
@@ -1321,7 +1408,7 @@ class StudentDashboardAssignmentVisibilityTest(TestCase):
         )
 
     def test_student_dashboard_only_lists_assignments_assigned_to_student(self):
-        self.client.login(username="dashboard_student", password="testpass123")
+        _login_with_org(self.client, self.student, self.organization)
         response = self.client.get(reverse("accounts:student_dashboard"))
 
         self.assertEqual(response.status_code, 200)
@@ -1350,11 +1437,15 @@ class GradingQueueViewTest(TestCase):
             email="grading_queue_student@example.com",
             password="testpass123",
         )
-
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Grading Queue Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Grading Queue Course", status="published")
         self.assignment = Assignment.objects.create(
@@ -1374,7 +1465,7 @@ class GradingQueueViewTest(TestCase):
         )
 
     def test_grading_queue_renders_assignment_review_actions_and_stats(self):
-        self.client.login(username="grading_queue_teacher", password="testpass123")
+        _login_with_org(self.client, self.teacher, self.organization)
         response = self.client.get(reverse("accounts:grading_queue"))
 
         self.assertEqual(response.status_code, 200)
@@ -1397,6 +1488,20 @@ class PendingReviewViewTest(TestCase):
             email="test@example.com",
             password="testpass123",
         )
+        self.org = Organization.objects.create(
+            name="Pending Review Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, self.org, ProfileRole.MEMBER)
+
+    def _set_user_role(self, user, role):
+        _assign_user_to_org(user, self.org, role)
+
+    def _login_user(self, user=None):
+        _login_with_org(self.client, user or self.user, self.org)
 
     def test_pending_review_requires_login(self):
         """Test that pending review requires authentication."""
@@ -1405,27 +1510,19 @@ class PendingReviewViewTest(TestCase):
 
     def test_pending_review_redirects_non_teacher(self):
         """Test that non-teacher users are redirected."""
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:pending_review"))
         self.assertEqual(response.status_code, 302)  # Redirect for non-teacher
 
     def test_pending_review_loads_for_teacher(self):
-        from apps.accounts.models import ProfileRole
-
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        self._login_user()
         response = self.client.get(reverse("accounts:pending_review"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("review_items", response.context)
 
     def test_pending_review_only_includes_teacher_owned_exam_attempts(self):
-        from apps.accounts.models import ProfileRole
         from apps.exams.models import Exam, ExamAttempt
-        from apps.organizations.models import Organization
-        from core.constants import OrganizationType
 
         other_teacher = User.objects.create_user(
             username="other_teacher",
@@ -1438,28 +1535,9 @@ class PendingReviewViewTest(TestCase):
             password="testpass123",
         )
 
-        org = Organization.objects.create(
-            name="Pending Org",
-            org_type=OrganizationType.SCHOOL,
-            owner=self.user,
-            status="active",
-            is_active=True,
-        )
-
-        self.user.profile.organization = org
-        self.user.profile.organization_type = org.org_type
-        self.user.profile.role = ProfileRole.TEACHER
-        self.user.profile.save()
-
-        other_teacher.profile.organization = org
-        other_teacher.profile.organization_type = org.org_type
-        other_teacher.profile.role = ProfileRole.TEACHER
-        other_teacher.profile.save()
-
-        student.profile.organization = org
-        student.profile.organization_type = org.org_type
-        student.profile.role = ProfileRole.STUDENT
-        student.profile.save()
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        self._set_user_role(other_teacher, ProfileRole.TEACHER)
+        self._set_user_role(student, ProfileRole.STUDENT)
 
         teacher_exam = Exam.objects.create(
             author=self.user,
@@ -1487,11 +1565,7 @@ class PendingReviewViewTest(TestCase):
             checked_by_teacher=False,
         )
 
-        self.client.login(username="testuser", password="testpass123")
-        session = self.client.session
-        session["active_organization"] = org.slug
-        session.save()
-
+        self._login_user()
         response = self.client.get(reverse("accounts:pending_review"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Teacher Pending Exam")
@@ -1500,20 +1574,18 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_assignment_points_to_pending_detail_with_type_label(self):
         from datetime import timedelta
 
-        from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from django.utils import timezone
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="pending_assignment_student",
             email="pending_assignment_student@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
         course = Course.objects.create(owner=self.user, title="Pending Detail Course", status="published")
         assignment = Assignment.objects.create(
             course=course,
@@ -1529,7 +1601,7 @@ class PendingReviewViewTest(TestCase):
             status="submitted",
         )
 
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:pending_review"))
         self.assertEqual(response.status_code, 200)
         items = response.context["review_items"]
@@ -1549,20 +1621,18 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_detail_allows_edit_within_window_and_locks_after(self):
         from datetime import timedelta
 
-        from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from django.utils import timezone
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="pending_lock_student",
             email="pending_lock_student@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
         course = Course.objects.create(owner=self.user, title="Pending Lock Course", status="published")
         assignment = Assignment.objects.create(
             course=course,
@@ -1578,7 +1648,7 @@ class PendingReviewViewTest(TestCase):
             status="submitted",
         )
 
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         detail_url = reverse(
             "accounts:pending_review_detail",
             kwargs={"item_type": "assignment", "item_id": submission.id},
@@ -1622,20 +1692,18 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_detail_deduplicates_assignment_attachments(self):
         from datetime import timedelta
 
-        from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from django.utils import timezone
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="pending_attachment_student",
             email="pending_attachment_student@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
         course = Course.objects.create(owner=self.user, title="Attachment Course", status="published")
         assignment = Assignment.objects.create(
             course=course,
@@ -1652,7 +1720,7 @@ class PendingReviewViewTest(TestCase):
             files=[{"name": "VBS.docx", "path": "assignments/submissions/vbs.docx"}],
         )
 
-        self.client.login(username="testuser", password="testpass123")
+        self._login_user()
         response = self.client.get(
             reverse(
                 "accounts:pending_review_detail",
@@ -1676,41 +1744,48 @@ class ReviewResultsViewTest(TestCase):
             email="review_user@example.com",
             password="testpass123",
         )
+        self.org = Organization.objects.create(
+            name="Review Results Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, self.org, ProfileRole.MEMBER)
+
+    def _set_user_role(self, user, role):
+        _assign_user_to_org(user, self.org, role)
+
+    def _login_user(self, user=None):
+        _login_with_org(self.client, user or self.user, self.org)
 
     def test_review_results_requires_login(self):
         response = self.client.get(reverse("accounts:review_results"))
         self.assertEqual(response.status_code, 302)
 
     def test_review_results_redirects_non_teacher(self):
-        self.client.login(username="review_user", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:review_results"))
         self.assertEqual(response.status_code, 302)
 
     def test_review_results_loads_for_teacher(self):
-        from apps.accounts.models import ProfileRole
-
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save()
-
-        self.client.login(username="review_user", password="testpass123")
+        self._set_user_role(self.user, ProfileRole.TEACHER)
+        self._login_user()
         response = self.client.get(reverse("accounts:review_results"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("evaluated_review_items", response.context)
 
     def test_review_results_exam_action_url_points_to_attempt_detail(self):
-        from apps.accounts.models import ProfileRole
         from apps.exams.models import Exam, ExamAttempt
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="review_result_student",
             email="review_result_student@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
         exam = Exam.objects.create(
             author=self.user,
             title="Direct Detail Test",
@@ -1723,7 +1798,7 @@ class ReviewResultsViewTest(TestCase):
             status="submitted",
         )
 
-        self.client.login(username="review_user", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:review_results"))
 
         self.assertEqual(response.status_code, 200)
@@ -1739,22 +1814,20 @@ class ReviewResultsViewTest(TestCase):
     def test_review_results_non_exam_action_urls_point_to_review_detail_page(self):
         from datetime import timedelta
 
-        from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from apps.labs.models import Lab, LabAssignment, LabSubmission
         from apps.projects.models import Project, ProjectSubmission
         from django.utils import timezone
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="review_result_student_2",
             email="review_result_student_2@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
 
         course = Course.objects.create(owner=self.user, title="Review Result Course", status="published")
 
@@ -1803,7 +1876,7 @@ class ReviewResultsViewTest(TestCase):
             score=77,
         )
 
-        self.client.login(username="review_user", password="testpass123")
+        self._login_user()
         response = self.client.get(reverse("accounts:review_results"))
         self.assertEqual(response.status_code, 200)
 
@@ -1837,20 +1910,18 @@ class ReviewResultsViewTest(TestCase):
     def test_review_result_detail_assignment_loads_for_teacher(self):
         from datetime import timedelta
 
-        from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from django.utils import timezone
 
-        profile = self.user.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self._set_user_role(self.user, ProfileRole.TEACHER)
 
         student = User.objects.create_user(
             username="review_detail_student",
             email="review_detail_student@example.com",
             password="testpass123",
         )
+        self._set_user_role(student, ProfileRole.STUDENT)
 
         course = Course.objects.create(owner=self.user, title="Detail Course", status="published")
         assignment = Assignment.objects.create(
@@ -1867,7 +1938,7 @@ class ReviewResultsViewTest(TestCase):
             grade=100,
         )
 
-        self.client.login(username="review_user", password="testpass123")
+        self._login_user()
         response = self.client.get(
             reverse(
                 "accounts:review_result_detail",

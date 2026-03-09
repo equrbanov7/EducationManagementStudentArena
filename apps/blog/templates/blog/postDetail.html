@@ -9,6 +9,15 @@
 
 {% block content %}
 <div class="article-page-wrapper">
+    <a
+        href="{% if post.author %}{% url 'accounts:public_profile' post.author.username %}{% else %}{% url 'home' %}{% endif %}"
+        class="article-back-link"
+        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
+    >
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Geri qayıt
+    </a>
+
     <article class="article-container">
 
         <header class="article-header">
@@ -87,9 +96,9 @@
             {% if not request.user.is_authenticated %}
                 <p class="comment-auth-message">
                     {% trans "auth_prompt_prefix" context "blog.post_detail_page" %}
-                    <a href="{% url 'login' %}?next={{ request.path }}">{% trans "auth_login_link" context "blog.post_detail_page" %}</a>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}">{% trans "auth_login_link" context "blog.post_detail_page" %}</a>
                     {% trans "auth_prompt_middle" context "blog.post_detail_page" %}
-                    <a href="{% url 'register' %}">{% trans "auth_register_link" context "blog.post_detail_page" %}</a>{% trans "auth_prompt_suffix" context "blog.post_detail_page" %}
+                    <a href="{% url 'accounts:register' %}">{% trans "auth_register_link" context "blog.post_detail_page" %}</a>{% trans "auth_prompt_suffix" context "blog.post_detail_page" %}
                 </p>
             {% else %}
                 <form method="post" class="comment-form">

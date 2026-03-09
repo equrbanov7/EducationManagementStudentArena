@@ -1,302 +1,233 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static %}
 
-{% block title %}{{ profile_user.username }} | {% trans "profile_label" context "accounts.public_profile_page" %}{% endblock %}
+{% block title %}{{ display_name }} | Profil{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
+    <link rel="stylesheet" href="{% static 'css/public_profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-page-wrapper">
-    <header class="profile-section-header">
-        <!-- Profile Info Container with Avatar -->
-        <div class="profile-info-container">
-            <div class="profile-avatar">
-                {{ profile_user.username|slice:":1"|upper }}
-            </div>
-            <div class="profile-text-info">
-                <h1><span>{{ profile_user.username }}</span> {% trans "profile_suffix" context "accounts.public_profile_page" %}</h1>
-                <p class="profile-subheading">{% trans "subheading_posts" context "accounts.public_profile_page" %}</p>
-            </div>
-        </div>
-
-        {% if request.user.is_authenticated and request.user == profile_user %}
-            <div class="profile-buttons-container">
-                
-                <a href="{% url 'create_post' %}" class="profile-create-post-btn">
-                    <i class="fas fa-plus-circle"></i> {% trans "create_post" context "accounts.public_profile_page" %}
-                </a>
-
-                {% if assigned_count > 0 %}
-                    <a href="{% url 'accounts:assigned_exams' %}" class="profile-create-post-btn">
-                        <i class="fas fa-clipboard-check"></i> {% trans "assigned_exams" context "accounts.public_profile_page" %}
-                        <span class="pending-badge">{{ assigned_count }}</span>
-                    </a>
-                {% endif %}
-
-                <a href="{% url 'exams:student_exam_history' %}" class="profile-create-post-btn">
-                    <i class="fas fa-list-alt"></i> {% trans "my_exam_results" context "accounts.public_profile_page" %}
-                </a>
-
-                {% if request.user.is_student %}
-                    <a href="{% url 'courses:student_courses' %}" class="profile-create-post-btn" style="background-color: #10b981; color: white;">
-                        <i class="fas fa-graduation-cap"></i> {% trans "my_courses" context "accounts.public_profile_page" %}
-                        {% if student_courses_count > 0 %}
-                            <span class="pending-badge">{{ student_courses_count }}</span>
-                        {% endif %}
-                    </a>
-                {% endif %}
-
-                {% if request.user.is_teacher %}
-                    <a href="{% url 'exams:teacher_exam_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-file-alt"></i> {% trans "my_exams" context "accounts.public_profile_page" %}
-                    </a>
-                    
-                    {% if pending_count > 0 %}
-                        <a href="{% url 'exams:teacher_pending_attempts' %}" class="profile-create-post-btn btn-warning-pulse">
-                            <i class="fas fa-bell"></i> {% trans "pending_review" context "accounts.public_profile_page" %}
-                            <span class="pending-badge">{{ pending_count }}</span>
-                        </a>
+<section class="public-profile-shell">
+    <div class="public-profile-container">
+        <header class="public-profile-hero">
+            <div class="public-profile-hero__identity">
+                <div class="public-profile-avatar">
+                    {% if profile.avatar %}
+                        <img
+                            src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|date:'U' }}"
+                            alt="{{ display_name }}"
+                            class="public-profile-avatar__image"
+                        >
+                    {% else %}
+                        <span class="public-profile-avatar__fallback">{{ display_name|slice:":1"|upper }}</span>
                     {% endif %}
-                    
-                    <a href="{% url 'exams:create_exam' %}" class="profile-create-post-btn">
-                        <i class="fas fa-plus-square"></i> {% trans "new_exam" context "accounts.public_profile_page" %}
-                    </a>
-                    
-                    <a href="{% url 'exams:teacher_group_list' %}" class="profile-create-post-btn">
-                        <i class="fas fa-users"></i> {% trans "my_groups" context "accounts.public_profile_page" %}
-                    </a>
-                     
-                    <a href="{% url 'courses:my_courses' %}" class="profile-create-post-btn" style="background-color:#0ea5e9; color: white;">
-                        <i class="fas fa-graduation-cap"></i> {% trans "my_courses" context "accounts.public_profile_page" %}
-                    </a>
-                    
-                    <a href="{% url 'courses:create_course' %}" class="profile-create-post-btn" style="background-color: #059669; color: white;">
-                        <i class="fas fa-graduation-cap"></i> {% trans "new_course" context "accounts.public_profile_page" %}
-                    </a>
-                {% endif %}
-                
-            </div>
-        {% endif %}
-    </header>
+                </div>
 
+                <div class="public-profile-hero__copy">
+                    <span class="public-profile-eyebrow">Açıq profil</span>
+                    <h1 class="public-profile-title">{{ display_name }}</h1>
+                    <p class="public-profile-subtitle">
+                        Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür.
+                        Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir.
+                    </p>
 
-    <section class="profile-posts-section">
-        {% if posts %}
-            <div class="blog-grid-container"> {# Blog kartlarını grid sistemində göstərmək üçün yeni konteyner #}
-                {% for post in posts %}
-                    <article class="profile-post-card">
-                        {% if request.user == profile_user %}
-                            <div class="post-controls">
-                                {# Status Etiketi #}
-                                <span class="post-status-badge 
-                                    {% if post.requires_approval and post.approval_status == 'pending' %}status-awaiting{% elif post.requires_approval and post.approval_status == 'needs_changes' %}status-needs-changes{% elif post.is_published %}status-published{% else %}status-draft{% endif %}">
-                                    {% if post.requires_approval and post.approval_status == 'pending' %}
-                                        <i class="fas fa-hourglass-half"></i> Müəllim təsdiqi gözləyir
-                                    {% elif post.requires_approval and post.approval_status == 'needs_changes' %}
-                                        <i class="fas fa-pen"></i> Düzəliş tələb olunur
-                                    {% elif post.is_published %}
-                                        <i class="fas fa-check-circle"></i> {% trans "status_published" context "accounts.public_profile_page" %}
-                                    {% else %}
-                                        <i class="fas fa-pencil-alt"></i> {% trans "status_draft" context "accounts.public_profile_page" %}
-                                    {% endif %}
-                                </span>
-
-                                {# Redaktə və Sil İkonları #}
-                                <div class="action-icons">
-                                    <button class="icon-action-btn edit-btn js-edit-post"
-                                            data-post-id="{{ post.pk }}"
-                                            data-title="{{ post.title|escape }}"
-                                            data-content="{{ post.content|escape }}"
-                                            data-category="{{ post.category.id|default_if_none:'' }}"
-                                            data-excerpt="{{ post.excerpt|default_if_none:''|escape }}"
-                                            data-image-url="{{ post.image_url|default_if_none:''|escape }}"
-                                            data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
-                                            data-is-published="{{ post.is_published|yesno:'true,false' }}"
-                                            data-requires-approval="{{ post.requires_approval|yesno:'true,false' }}"
-                                            data-approval-status="{{ post.approval_status }}"
-                                            data-approval-feedback="{{ post.latest_feedback_text|default_if_none:''|escape }}"
-                                            data-slug="{{ post.slug|escape }}"
-                                            data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
-                                            data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
-                                            title="{% trans 'edit_action_title' context 'accounts.public_profile_page' %}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                
-                                    <button class="icon-action-btn delete-btn js-open-delete"
-                                            data-post-id="{{ post.pk }}"
-                                            data-title="{{ post.title|escape }}"
-                                            title="{% trans 'delete_action_title' context 'accounts.public_profile_page' %}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="public-profile-meta">
+                        <span class="public-profile-meta__item">
+                            <i class="fas fa-at" aria-hidden="true"></i>
+                            {{ profile_user.username }}
+                        </span>
+                        <span class="public-profile-meta__item">
+                            <i class="far fa-calendar-alt" aria-hidden="true"></i>
+                            {{ profile_user.date_joined|date:"d M Y" }}
+                        </span>
+                        {% if profile_location %}
+                            <span class="public-profile-meta__item">
+                                <i class="fas fa-location-dot" aria-hidden="true"></i>
+                                {{ profile_location }}
+                            </span>
                         {% endif %}
-                        
-                        {% include "partials/_blogCard.html" with post=post %} 
-                        {% if post.requires_approval or post.latest_feedback_text %}
-                            {% with feedback_text=post.latest_feedback_text|default_if_none:'' %}
-                                <details class="post-feedback-accordion{% if not feedback_text %} is-empty{% endif %}">
-                                    <summary class="post-feedback-summary">
-                                        <span class="post-feedback-title"><i class="fas fa-comment-dots"></i> Feedback</span>
-                                        <span class="post-feedback-preview">
-                                            {% if feedback_text %}
-                                                {{ feedback_text|truncatechars:70 }}
-                                            {% elif post.approval_status == 'pending' %}
-                                                Müəllim baxışı gözlənilir.
-                                            {% elif post.approval_status == 'needs_changes' %}
-                                                Düzəliş üçün feedback əlavə edilə bilər.
-                                            {% else %}
-                                                Hələ feedback yoxdur.
-                                            {% endif %}
-                                        </span>
-                                        <span class="post-feedback-chevron" aria-hidden="true">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </span>
-                                    </summary>
-                                    <div class="post-feedback-content">
-                                        {% if feedback_text %}
-                                            {{ feedback_text|linebreaksbr }}
-                                        {% elif post.approval_status == 'needs_changes' %}
-                                            Müəllim “düzəliş tələb olunur” seçib, amma əlavə mətn yazmayıb.
-                                        {% elif post.approval_status == 'pending' %}
-                                            Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.
-                                        {% else %}
-                                            Bu post üçün hələ feedback paylaşılmayıb.
-                                        {% endif %}
-                                    </div>
-                                </details>
-                            {% endwith %}
-                        {% endif %}
-                    </article>
-                {% endfor %}
-            </div> {# .blog-grid-container sonu #}
-
-            {# Pagination partial əlavə olunur #}
-            {% if posts.has_other_pages %}
-                {% include "partials/_pagination.html" with page_obj=posts %}
-            {% endif %}
-
-        {% else %}
-            <p class="profile-no-posts-message">{% trans "empty_posts" context "accounts.public_profile_page" %}</p>
-        {% endif %}
-    </section>
-    
-    {# MODAL HİSSƏLƏRİ DƏYİŞMİR #}
-    {# Edit Modal #}
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3>{% trans "modal_edit_title" context "accounts.public_profile_page" %}</h3>
-                <button class="modal-close-btn" id="closeEditModal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            {# Meta məlumat bloku #}
-            <div class="form-meta">
-                <p><strong>{% trans "meta_slug" context "accounts.public_profile_page" %}:</strong> <span id="editSlugInfo"></span></p>
-                <p><strong>{% trans "meta_created_at" context "accounts.public_profile_page" %}:</strong> <span id="editCreatedAtInfo"></span></p>
-                <p><strong>{% trans "meta_updated_at" context "accounts.public_profile_page" %}:</strong> <span id="editUpdatedAtInfo"></span></p>
-            </div>
-
-            <div id="editApprovalNotice" class="approval-notice" hidden>
-                Bu post saxlananda yenidən müəllim təsdiqini gözləyəcək.
-            </div>
-
-            <form id="editForm" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="editTitle">{% trans "field_title" context "accounts.public_profile_page" %}</label>
-                    <input type="text" id="editTitle" name="title" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editCategory">{% trans "field_category" context "accounts.public_profile_page" %}</label>
-                    <select id="editCategory" name="category" class="form-control" required>
-                        <option value="" disabled>{% trans "category_select" context "accounts.public_profile_page" %}</option>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editExcerpt">{% trans "field_excerpt" context "accounts.public_profile_page" %}</label>
-                    <textarea id="editExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="editContent">{% trans "field_content" context "accounts.public_profile_page" %}</label>
-                    <textarea id="editContent" name="content" class="form-control" rows="10" required></textarea>
-                </div>
-
-                {# Şəkil preview + yeni şəkil + URL #}
-                <div class="form-group">
-                    <label>{% trans "field_current_image" context "accounts.public_profile_page" %}</label>
-                    <div id="editImagePreviewWrapper" class="image-preview-wrapper">
-                        <img id="editImagePreview" src="" alt="{% trans 'image_alt' context 'accounts.public_profile_page' %}" class="image-preview" style="display:none;">
-                        <p id="noImageText" class="no-image-text">{% trans "no_image" context "accounts.public_profile_page" %}</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="editImage">{% trans "field_new_image_optional" context "accounts.public_profile_page" %}</label>
-                    <input type="file" id="editImage" name="image" class="form-control" accept="image/*">
-                </div>
+            <div class="public-profile-hero__stats">
+                <article class="public-stat-card">
+                    <span class="public-stat-card__label">Açıq postlar</span>
+                    <strong class="public-stat-card__value">{{ published_posts_count }}</strong>
+                </article>
+                <article class="public-stat-card">
+                    <span class="public-stat-card__label">Kateqoriyalar</span>
+                    <strong class="public-stat-card__value">{{ category_count }}</strong>
+                </article>
+            </div>
+        </header>
 
-                <div class="form-group">
-                    <label for="editImageUrl">{% trans "field_image_url" context "accounts.public_profile_page" %}</label>
-                    <input type="url" id="editImageUrl" name="image_url" class="form-control">
-                </div>
-
-                <div class="form-group form-check">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="editIsPublished" name="is_published">
-                        {% trans "publish_checkbox" context "accounts.public_profile_page" %}
-                    </label>
-                </div>
-
-                <div class="modal-buttons">
-                    <button type="button" id="cancelEdit" class="modal-cancel-btn">{% trans "cancel" context "accounts.public_profile_page" %}</button>
-                    <button type="submit" id="saveEdit" class="modal-confirm-btn" disabled>{% trans "save" context "accounts.public_profile_page" %}</button>
-                </div>
+        <section class="public-search-panel">
+            <form method="get" class="public-search-form" role="search">
+                {% if selected_category %}
+                    <input type="hidden" name="category" value="{{ selected_category }}">
+                {% endif %}
+                <label class="public-search-form__field">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ search_query }}"
+                        placeholder="Məqalə axtar..."
+                        aria-label="Məqalə axtar"
+                    >
+                </label>
+                <button type="submit" class="public-search-form__button">Axtar</button>
             </form>
+
+            {% if search_query or selected_category %}
+                <div class="public-active-filters">
+                    {% if search_query %}
+                        <span class="public-chip">Sorğu: {{ search_query }}</span>
+                    {% endif %}
+                    {% if selected_category %}
+                        <span class="public-chip">Kateqoriya: {{ selected_category }}</span>
+                    {% endif %}
+                    <a href="{% url 'accounts:public_profile' profile_user.username %}" class="public-reset-link">
+                        Filtrləri sıfırla
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <div class="public-profile-layout">
+            <main class="public-profile-main">
+                <section class="public-section-card">
+                    <div class="public-section-card__header">
+                        <div>
+                            <h2>Paylaşımlar</h2>
+                            <p>Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir.</p>
+                        </div>
+                    </div>
+
+                    {% if posts %}
+                        <div class="public-post-grid">
+                            {% for post in posts %}
+                                <article class="public-post-card">
+                                    <a href="{% url 'post_detail' post.slug %}" class="public-post-card__media-link" aria-label="{{ post.title }}">
+                                        <div class="public-post-card__media">
+                                            <img
+                                                src="{{ post.get_image }}"
+                                                alt="{{ post.title }}"
+                                                loading="lazy"
+                                                onerror="this.onerror=null;this.src='{% static 'images/tech-placeholder.svg' %}';"
+                                            >
+                                            {% if post.category %}
+                                                <span class="public-post-card__badge">{{ post.category.name }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </a>
+
+                                    <div class="public-post-card__body">
+                                        <div class="public-post-card__meta">
+                                            <span><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ post.created_at|date:"d M Y" }}</span>
+                                            {% if post.average_rating %}
+                                                <span><i class="fas fa-star" aria-hidden="true"></i> {{ post.average_rating|floatformat:1 }}</span>
+                                            {% endif %}
+                                        </div>
+
+                                        <h3 class="public-post-card__title">
+                                            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                                        </h3>
+
+                                        {% if post.excerpt %}
+                                            <p class="public-post-card__excerpt">{{ post.excerpt|truncatechars:160 }}</p>
+                                        {% else %}
+                                            <p class="public-post-card__excerpt">{{ post.content|striptags|truncatechars:160 }}</p>
+                                        {% endif %}
+
+                                        <div class="public-post-card__footer">
+                                            <span class="public-post-card__author">
+                                                <i class="fas fa-user-circle" aria-hidden="true"></i>
+                                                {{ profile_user.username }}
+                                            </span>
+                                            <a href="{% url 'post_detail' post.slug %}" class="public-post-card__link">
+                                                Oxumağa davam et
+                                            </a>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+
+                        {% include "partials/_pagination.html" with page_obj=posts extra_query=extra_query %}
+                    {% else %}
+                        <div class="public-empty-state">
+                            <div class="public-empty-state__icon">
+                                <i class="far fa-newspaper" aria-hidden="true"></i>
+                            </div>
+                            <h3>Göstəriləcək açıq paylaşım tapılmadı</h3>
+                            <p>
+                                {% if search_query or selected_category %}
+                                    Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın.
+                                {% else %}
+                                    Bu istifadəçi hələ açıq post paylaşmayıb.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </section>
+            </main>
+
+            <aside class="public-profile-sidebar">
+                <section class="public-section-card public-section-card--sidebar">
+                    <div class="public-section-card__header">
+                        <h2>Açıq məlumatlar</h2>
+                    </div>
+                    <dl class="public-profile-facts">
+                        <div class="public-profile-facts__row">
+                            <dt>İstifadəçi adı</dt>
+                            <dd>@{{ profile_user.username }}</dd>
+                        </div>
+                        <div class="public-profile-facts__row">
+                            <dt>Qoşulma tarixi</dt>
+                            <dd>{{ profile_user.date_joined|date:"d M Y" }}</dd>
+                        </div>
+                        {% if profile_location %}
+                            <div class="public-profile-facts__row">
+                                <dt>Lokasiya</dt>
+                                <dd>{{ profile_location }}</dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </section>
+
+                {% if profile_bio %}
+                    <section class="public-section-card public-section-card--sidebar">
+                        <div class="public-section-card__header">
+                            <h2>Haqqında</h2>
+                        </div>
+                        <div class="public-profile-bio">{{ profile_bio|linebreaksbr }}</div>
+                    </section>
+                {% endif %}
+
+                {% if category_items %}
+                    <section class="public-section-card public-section-card--sidebar">
+                        <div class="public-section-card__header">
+                            <h2>Kateqoriyalar</h2>
+                        </div>
+                        <nav class="public-category-list" aria-label="Kateqoriyalar">
+                            {% for item in category_items %}
+                                <a
+                                    href="{% url 'accounts:public_profile' profile_user.username %}{% if selected_category == item.category__slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% else %}?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}category={{ item.category__slug|urlencode }}{% endif %}"
+                                    class="public-category-list__item{% if selected_category == item.category__slug %} is-active{% endif %}"
+                                >
+                                    <span>{{ item.category__name }}</span>
+                                    <strong>{{ item.total }}</strong>
+                                </a>
+                            {% endfor %}
+                        </nav>
+                    </section>
+                {% endif %}
+            </aside>
         </div>
     </div>
-
-
-    {# Delete Confirmation Modal #}
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>{% trans "modal_delete_title" context "accounts.public_profile_page" %}</h3>
-            <p>{% trans "modal_delete_message_prefix" context "accounts.public_profile_page" %} <span id="deleteTitle" class="fw-bold"></span> {% trans "modal_delete_message_suffix" context "accounts.public_profile_page" %}</p>
-            <div class="modal-buttons">
-                <button id="cancelDelete" class="modal-cancel-btn">{% trans "cancel" context "accounts.public_profile_page" %}</button>
-                {# Burda .delete-btn yalnız dizayn üçündür, JS selektoru artıq .js-open-delete-dir #}
-                <button id="confirmDelete" class="modal-confirm-btn delete-btn">{% trans "delete_action" context "accounts.public_profile_page" %}</button>
-            </div>
-        </div>
-    </div>
-
-    {# Unsaved Changes Warning Modal #}
-    <div id="warningModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>{% trans "modal_unsaved_title" context "accounts.public_profile_page" %}</h3>
-            <p>{% trans "modal_unsaved_message" context "accounts.public_profile_page" %}</p>
-            <div class="modal-buttons">
-                <button id="stayOnModal" class="modal-cancel-btn">{% trans "stay" context "accounts.public_profile_page" %}</button>
-                <button id="discardChanges" class="modal-confirm-btn warning-btn">{% trans "discard_changes" context "accounts.public_profile_page" %}</button>
-            </div>
-        </div>
-    </div>
-
-</div>
-{% endblock %}
-
-{% block extraJs %}
-    <script src="{% static 'js/user_profile.js' %}"></script>
+</section>
 {% endblock %}

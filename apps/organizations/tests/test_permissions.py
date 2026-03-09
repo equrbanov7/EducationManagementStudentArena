@@ -32,6 +32,13 @@ class PermissionSystemTest(TestCase):
         self.assertTrue(has_permission(user_perms, "course.delete"))
         self.assertFalse(has_permission(user_perms, "exam.create"))
 
+    def test_grading_alias_permissions_match_legacy_prefix(self):
+        """Legacy `grading.*` roles should satisfy current `grade.*` checks."""
+        self.assertTrue(has_permission(["grading.input"], "grade.input"))
+        self.assertTrue(has_permission(["grading.*"], "grade.input"))
+        self.assertTrue(validate_permissions(["grading.*"]))
+        self.assertIn("grade.input", expand_wildcard_permissions(["grading.*"]))
+
     def test_empty_permissions(self):
         """Test with empty permission list."""
         user_perms = []

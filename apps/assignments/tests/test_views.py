@@ -15,10 +15,41 @@ from django.utils import timezone
 from apps.accounts.models import ProfileRole
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseMembership
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+
+
+def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
+    membership_role_name = membership_role_name or {
+        ProfileRole.TEACHER: "teacher",
+        ProfileRole.ASSISTANT_TEACHER: "member",
+        ProfileRole.STUDENT: "student",
+    }.get(profile_role, "member")
+
+    profile = user.profile
+    profile.organization = organization
+    profile.organization_type = organization.org_type
+    profile.role = profile_role
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=organization,
+        defaults={
+            "role": organization.roles.get(name=membership_role_name),
+            "is_primary": True,
+            "is_active": True,
+        },
+    )
+
+
+def _login_with_org(client, user, organization):
+    client.force_login(user)
+    session = client.session
+    session["active_organization"] = organization.slug
+    session.save()
 
 
 class AssignmentDetailBackUrlTest(TestCase):
@@ -26,9 +57,15 @@ class AssignmentDetailBackUrlTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("assignment_teacher", "teacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("assignment_student", "student@example.com", "StrongPass123!")
-
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Assignment Detail Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Back Nav Course", status="published")
         self.assignment = Assignment.objects.create(
@@ -41,7 +78,7 @@ class AssignmentDetailBackUrlTest(TestCase):
         self.assignment.assigned_students.add(self.student)
 
     def test_assignment_detail_defaults_back_to_course_dashboard(self):
-        self.client.login(username="assignment_student", password="StrongPass123!")
+        _login_with_org(self.client, self.student, self.organization)
         response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
 
         self.assertEqual(response.status_code, 200)
@@ -51,7 +88,7 @@ class AssignmentDetailBackUrlTest(TestCase):
         )
 
     def test_assignment_detail_returns_to_assigned_tasks_when_source_is_profile_tasks(self):
-        self.client.login(username="assignment_student", password="StrongPass123!")
+        _login_with_org(self.client, self.student, self.organization)
         response = self.client.get(
             reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}),
             {"from_section": "assigned-exams", "assigned_type": "assignments"},
@@ -142,11 +179,15 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("assignment_reg_teacher", "areg_t@example.com", "StrongPass123!")
         self.student = User.objects.create_user("assignment_reg_student", "areg_s@example.com", "StrongPass123!")
-
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Assignment Regression Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Assignment Regression Course", status="published")
         self.assignment = Assignment.objects.create(
@@ -164,6 +205,12 @@ class AssignmentSubmissionRegressionTest(TestCase):
         shutil.rmtree(self.temp_media, ignore_errors=True)
         super().tearDown()
 
+    def _login_teacher(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+    def _login_student(self):
+        _login_with_org(self.client, self.student, self.organization)
+
     def test_assignment_views_render_existing_submission_using_user_relation(self):
         submission = Submission.objects.create(
             assignment=self.assignment,
@@ -172,7 +219,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
             status="submitted",
         )
 
-        self.client.force_login(self.student)
+        self._login_student()
 
         detail_response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
         self.assertEqual(detail_response.status_code, 200)
@@ -183,7 +230,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(list(my_submissions_response.context["submissions"]), [submission])
 
     def test_submit_assignment_stores_uploaded_file_in_json_payload(self):
-        self.client.force_login(self.student)
+        self._login_student()
 
         response = self.client.post(
             reverse("assignments:submit_assignment", kwargs={"pk": self.assignment.id}),
@@ -217,7 +264,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
             status="submitted",
         )
 
-        self.client.force_login(self.teacher)
+        self._login_teacher()
         response = self.client.get(
             reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}),
             {"submission": str(submission.id)},
@@ -236,7 +283,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
             status="submitted",
         )
 
-        self.client.force_login(self.teacher)
+        self._login_teacher()
         response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
 
         self.assertEqual(response.status_code, 200)
@@ -259,7 +306,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
             status="submitted",
         )
 
-        self.client.force_login(self.teacher)
+        self._login_teacher()
         response = self.client.post(
             reverse("assignments:delete_assignment_submissions", kwargs={"pk": self.assignment.id}),
             {
@@ -273,7 +320,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertFalse(Submission.objects.filter(id=second.id).exists())
 
     def test_student_submit_then_teacher_grade_flow_hides_results_until_review_window_closes(self):
-        self.client.force_login(self.student)
+        self._login_student()
 
         detail_response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
         self.assertEqual(detail_response.status_code, 200)
@@ -299,7 +346,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(my_submissions_response.status_code, 200)
         self.assertContains(my_submissions_response, "flow.pdf")
 
-        self.client.force_login(self.teacher)
+        self._login_teacher()
         review_response = self.client.get(
             reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}),
             {"submission": str(submission.id)},
@@ -320,7 +367,7 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(float(submission.grade), 95.0)
         self.assertEqual(submission.feedback, "Looks good")
 
-        self.client.force_login(self.student)
+        self._login_student()
         hidden_detail_response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
         self.assertEqual(hidden_detail_response.status_code, 200)
         self.assertFalse(hidden_detail_response.context["user_submissions"][0].show_review_data)
@@ -362,17 +409,23 @@ class RosterAPIAuthorizationTest(TestCase):
         self.student = User.objects.create_user("student", "student@example.com", "StrongPass123!")
         self.unauthorized_user = User.objects.create_user("unauthorized", "unauthorized@example.com", "StrongPass123!")
 
-        # Set roles
-        self.owner.profile.role = ProfileRole.TEACHER
-        self.owner.profile.save(update_fields=["role", "updated_at"])
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-        self.assistant.profile.role = ProfileRole.TEACHER
-        self.assistant.profile.save(update_fields=["role", "updated_at"])
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
-        self.unauthorized_user.profile.role = ProfileRole.STUDENT
-        self.unauthorized_user.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Assignment Roster Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.owner, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(
+            self.assistant,
+            self.organization,
+            ProfileRole.ASSISTANT_TEACHER,
+            membership_role_name="member",
+        )
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
+        _assign_user_to_org(self.unauthorized_user, self.organization, ProfileRole.STUDENT)
 
         # Create course
         self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published")
@@ -382,69 +435,72 @@ class RosterAPIAuthorizationTest(TestCase):
         CourseMembership.objects.create(course=self.course, user=self.assistant, role="assistant")
         CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="Group A")
 
+    def _login_as(self, user):
+        _login_with_org(self.client, user, self.organization)
+
     def test_search_students_owner_can_access(self):
         """Course owner should be able to search students"""
-        self.client.force_login(self.owner)
+        self._login_as(self.owner)
         response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_teacher_can_access(self):
         """Teacher should be able to search students"""
-        self.client.force_login(self.teacher)
+        self._login_as(self.teacher)
         response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_assistant_can_access(self):
         """Assistant should be able to search students"""
-        self.client.force_login(self.assistant)
+        self._login_as(self.assistant)
         response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_unauthorized_denied(self):
         """Unauthorized user should be denied"""
-        self.client.force_login(self.unauthorized_user)
+        self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
         self.assertEqual(response.status_code, 403)
 
     def test_search_groups_owner_can_access(self):
         """Course owner should be able to search groups"""
-        self.client.force_login(self.owner)
+        self._login_as(self.owner)
         response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_groups_teacher_can_access(self):
         """Teacher should be able to search groups"""
-        self.client.force_login(self.teacher)
+        self._login_as(self.teacher)
         response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_groups_unauthorized_denied(self):
         """Unauthorized user should be denied"""
-        self.client.force_login(self.unauthorized_user)
+        self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
         self.assertEqual(response.status_code, 403)
 
     def test_students_by_groups_owner_can_access(self):
         """Course owner should be able to get students by groups"""
-        self.client.force_login(self.owner)
+        self._login_as(self.owner)
         response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_students_by_groups_teacher_can_access(self):
         """Teacher should be able to get students by groups"""
-        self.client.force_login(self.teacher)
+        self._login_as(self.teacher)
         response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_students_by_groups_unauthorized_denied(self):
         """Unauthorized user should be denied"""
-        self.client.force_login(self.unauthorized_user)
+        self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
         self.assertEqual(response.status_code, 403)
