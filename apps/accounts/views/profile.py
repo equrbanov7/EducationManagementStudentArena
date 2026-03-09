@@ -48,6 +48,7 @@ from ._helpers import (
     _assignable_profile_roles_for_user,
     _assigned_courses_queryset,
     _assigned_exams_queryset,
+    _bind_active_role_context,
     _build_student_org_management_section,
     _build_student_org_request_section,
     _collect_actor_permissions,
@@ -805,6 +806,12 @@ def user_profile(request):
     if "manage-roles" in allowed_sections:
         manage_roles_search = request.GET.get("manage_roles_search", "")
         manage_roles_org = _get_active_organization(request)
+        _bind_active_role_context(
+            request.user,
+            manage_roles_org,
+            memberships=getattr(request, "org_memberships", []),
+            permissions=getattr(request, "org_permissions", []),
+        )
         manage_roles_user_level = (
             request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
         )
@@ -822,16 +829,18 @@ def user_profile(request):
             }
         )
 
-        if capabilities["is_superadmin"]:
-            manage_role_profiles = UserProfile.objects.all().select_related("user").prefetch_related("user__groups")
-        elif manage_roles_org is None:
+        if manage_roles_org is None:
             manage_roles_section["access_denied_message"] = "Rol idarəetməsi üçün aktiv təşkilat tapılmadı."
             manage_role_profiles = UserProfile.objects.none()
         else:
             manage_role_profiles = (
-                UserProfile.objects.filter(organization=manage_roles_org)
+                UserProfile.objects.filter(
+                    user__memberships__organization=manage_roles_org,
+                    user__memberships__is_active=True,
+                )
                 .select_related("user")
-                .prefetch_related("user__groups")
+                .prefetch_related("user__memberships__role")
+                .distinct()
             )
 
         if manage_roles_search:
@@ -850,6 +859,7 @@ def user_profile(request):
             manage_roles_page_obj.object_list,
             actor_level=manage_roles_user_level,
             is_superadmin=capabilities["is_superadmin"],
+            organization=manage_roles_org,
         )
 
         manage_roles_section["profiles"] = manage_roles_page_obj
@@ -1107,4 +1117,3 @@ def public_user_profile(request, username):
         "posts": posts,
     }
     return render(request, "accounts/public_profile.html", context)
-

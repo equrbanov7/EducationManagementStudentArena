@@ -11,7 +11,7 @@ from apps.accounts import services
 from apps.accounts.models import ProfileRole
 from apps.blog.models import EmailOTP
 from apps.courses.models import Course, CourseMembership
-from apps.organizations.models import Country
+from apps.organizations.models import Country, Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -25,6 +25,13 @@ class RoleManagementServicesTest(TestCase):
             username="superadmin",
             email="super@example.com",
             password="pass123"
+        )
+        self.organization = Organization.objects.create(
+            name="Service Roles Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.superuser,
+            status="active",
+            is_active=True,
         )
         self.teacher = User.objects.create_user(
             username="teacher1",
@@ -41,6 +48,24 @@ class RoleManagementServicesTest(TestCase):
         )
         self.student.profile.role = ProfileRole.STUDENT
         self.student.profile.save(update_fields=["role", "updated_at"])
+
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.organization,
+            role=self.organization.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
+        Membership.objects.create(
+            user=self.student,
+            organization=self.organization,
+            role=self.organization.roles.get(name="student"),
+            is_primary=True,
+            is_active=True,
+        )
+
+        self.teacher.set_active_organization_context(self.organization)
+        self.student.set_active_organization_context(self.organization)
 
     def test_is_superadmin_user(self):
         """Test superadmin detection."""

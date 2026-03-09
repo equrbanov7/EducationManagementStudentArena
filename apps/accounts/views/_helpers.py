@@ -8,7 +8,6 @@ from pathlib import PurePosixPath
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.core.signing import TimestampSigner
 from django.db.models import Q
@@ -56,6 +55,16 @@ def _get_active_organization(request):
     Use middleware-selected organization first; fallback to profile organization.
     """
     return get_request_organization(request)
+
+
+def _bind_active_role_context(user, organization, *, memberships=None, permissions=None):
+    if user and hasattr(user, "set_active_organization_context"):
+        user.set_active_organization_context(
+            organization,
+            memberships=memberships,
+            permissions=permissions,
+        )
+    return user
 
 
 def _tenant_scoped_courses(request, queryset=None):
@@ -221,36 +230,46 @@ def _user_has_any_role(user, role_names):
 
 def _extract_profile_roles_for_user(user):
     if not user:
-        return [ProfileRole.MEMBER]
+        return []
 
     roles = []
     if hasattr(user, "get_all_roles"):
         candidates = user.get_all_roles()
     else:
-        profile = getattr(user, "profile", None)
-        candidates = [getattr(profile, "role", None)]
+        candidates = []
 
     for role_name in candidates:
         if role_name in PROFILE_ROLE_NAMES and role_name not in roles:
             roles.append(role_name)
 
-    if not roles:
-        roles = [ProfileRole.MEMBER]
     return roles
 
 
 def _assignable_profile_roles_for_user(user):
+    manageable_role_names = {
+        name
+        for name, _display in ProfileRole.CHOICES
+        if name not in {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
+    }
+
     if _is_superadmin_user(user):
-        return [(name, display) for name, display in ProfileRole.CHOICES if name != ProfileRole.SUPERADMIN]
+        return [(name, display) for name, display in ProfileRole.CHOICES if name in manageable_role_names]
 
     user_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else 0
-    return [(name, display) for name, display in ProfileRole.CHOICES if ProfileRole.LEVELS.get(name, 0) < user_level]
+    return [
+        (name, display)
+        for name, display in ProfileRole.CHOICES
+        if name in manageable_role_names and ProfileRole.LEVELS.get(name, 0) < user_level
+    ]
 
 
-def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin):
+def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, organization=None):
     for profile in profiles:
+        _bind_active_role_context(profile.user, organization)
         current_roles = _extract_profile_roles_for_user(profile.user)
-        primary_role_name = max(current_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
+        primary_role_name = None
+        if current_roles:
+            primary_role_name = max(current_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
         profile.current_roles = current_roles
         profile.current_role_items = [
             {
@@ -261,42 +280,76 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin):
             }
             for role_name in current_roles
         ]
-        profile.primary_role = {
-            "name": primary_role_name,
-            "label": PROFILE_ROLE_LABELS.get(primary_role_name, primary_role_name),
-            "level": ProfileRole.LEVELS.get(primary_role_name, 0),
-        }
+        profile.primary_role = None
+        if primary_role_name:
+            profile.primary_role = {
+                "name": primary_role_name,
+                "label": PROFILE_ROLE_LABELS.get(primary_role_name, primary_role_name),
+                "level": ProfileRole.LEVELS.get(primary_role_name, 0),
+            }
 
         target_level = profile.user._highest_role_level() if hasattr(profile.user, "_highest_role_level") else 0
         profile.can_edit_roles = is_superadmin or actor_level > target_level
 
 
-def _sync_user_role_groups(user, desired_role_names, *, editable_role_names=None):
+def _sync_user_role_memberships(user, organization, desired_role_names, *, actor=None, editable_role_names=None):
+    from apps.organizations.models import Membership
+
+    if organization is None:
+        return []
+
     desired = set(desired_role_names or []) & PROFILE_ROLE_NAMES
     editable = set(editable_role_names or PROFILE_ROLE_NAMES) & PROFILE_ROLE_NAMES
+    editable -= {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
 
-    current_role_group_names = set(user.groups.filter(name__in=PROFILE_ROLE_NAMES).values_list("name", flat=True))
-    removable_role_group_names = current_role_group_names & editable
+    desired_membership_roles = {}
+    for role_name in sorted(desired & editable, key=lambda item: ProfileRole.LEVELS.get(item, 0), reverse=True):
+        membership_role = _resolve_membership_role(organization, role_name)
+        if membership_role is not None:
+            desired_membership_roles[membership_role.id] = membership_role
 
-    role_names_to_remove = removable_role_group_names - desired
-    role_names_to_add = desired - current_role_group_names
+    current_memberships = list(
+        Membership.objects.filter(user=user, organization=organization)
+        .select_related("role")
+        .order_by("-is_active", "-is_primary", "-role__level")
+    )
 
-    if role_names_to_remove:
-        groups_to_remove = list(Group.objects.filter(name__in=role_names_to_remove))
-        if groups_to_remove:
-            user.groups.remove(*groups_to_remove)
+    memberships_to_deactivate = []
+    for membership in current_memberships:
+        mapped_role = _map_org_role_to_profile_role(membership.role)
+        if mapped_role in editable and membership.role_id not in desired_membership_roles and membership.is_active:
+            memberships_to_deactivate.append(membership.id)
 
-    if role_names_to_add:
-        existing_role_groups = set(Group.objects.filter(name__in=role_names_to_add).values_list("name", flat=True))
-        missing_role_names = [role_name for role_name in role_names_to_add if role_name not in existing_role_groups]
-        if missing_role_names:
-            Group.objects.bulk_create(
-                [Group(name=role_name) for role_name in missing_role_names], ignore_conflicts=True
-            )
+    if memberships_to_deactivate:
+        Membership.objects.filter(id__in=memberships_to_deactivate).update(is_active=False, is_primary=False)
 
-        groups_to_add = list(Group.objects.filter(name__in=role_names_to_add))
-        if groups_to_add:
-            user.groups.add(*groups_to_add)
+    for membership_role in desired_membership_roles.values():
+        Membership.objects.update_or_create(
+            user=user,
+            organization=organization,
+            role=membership_role,
+            scope_unit=None,
+            defaults={
+                "is_active": True,
+                "is_primary": False,
+                "assigned_by": actor,
+            },
+        )
+
+    final_memberships = list(
+        Membership.objects.filter(user=user, organization=organization, is_active=True)
+        .select_related("role")
+        .order_by("-role__level", "-is_primary", "id")
+    )
+    Membership.objects.filter(user=user, organization=organization, is_primary=True).update(is_primary=False)
+    if final_memberships:
+        primary_membership = final_memberships[0]
+        primary_membership.is_primary = True
+        primary_membership.save(update_fields=["is_primary"])
+        final_memberships[0] = primary_membership
+
+    _bind_active_role_context(user, organization, memberships=final_memberships)
+    return final_memberships
 
 
 def _resolve_next_url(request, fallback_url):
@@ -436,9 +489,14 @@ def _extract_assignment_attachments(submission):
 
 
 def _role_capabilities(user, profile):
-    role = profile.role if profile and profile.role else ProfileRole.MEMBER
+    scoped_roles = _extract_profile_roles_for_user(user)
+    profile_role = getattr(profile, "role", ProfileRole.MEMBER) if profile else ProfileRole.MEMBER
+    has_active_org_context = bool(scoped_roles or getattr(user, "active_organization", None))
+    role = scoped_roles[0] if scoped_roles else profile_role
     is_superadmin = _is_superadmin_user(user)
     is_student = _user_has_any_role(user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
+    if not has_active_org_context and profile_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
+        is_student = True
     is_teacher = _user_has_any_role(user, {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER})
     is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR})
     user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
@@ -611,17 +669,21 @@ def _map_signup_role_to_profile_role(initial_role):
 
 
 def _map_org_role_to_profile_role(role):
-    role_name = (role.name or "").lower()
-    if role_name == "member":
+    role_name = ProfileRole.normalize_membership_role_name(getattr(role, "name", ""))
+    if role_name == ProfileRole.MEMBER:
         return ProfileRole.MEMBER
-    if role_name == "student" or role.level <= 20:
+    if role_name == ProfileRole.LEAD_STUDENT:
+        return ProfileRole.LEAD_STUDENT
+    if role_name == ProfileRole.STUDENT:
         return ProfileRole.STUDENT
-    if "hr" in role_name:
+    if role_name == ProfileRole.HR:
         return ProfileRole.HR
-    if role.level >= 80:
-        return ProfileRole.ORG_ADMIN
-    if any(token in role_name for token in ["teacher", "instructor", "professor", "assistant"]):
+    if role_name in {ProfileRole.ASSISTANT_TEACHER, "assistant", "lab_assistant"}:
+        return ProfileRole.ASSISTANT_TEACHER
+    if role_name in {ProfileRole.TEACHER, "instructor", "professor", "associate_professor"}:
         return ProfileRole.TEACHER
+    if getattr(role, "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
+        return ProfileRole.ORG_ADMIN
     return ProfileRole.MEMBER
 
 
@@ -632,7 +694,7 @@ def _resolve_membership_role(organization, initial_role):
     if not roles.exists():
         return None
 
-    if initial_role == ProfileRole.ORG_ADMIN:
+    if initial_role in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
         return roles.order_by("-level").first()
 
     if initial_role == ProfileRole.MEMBER:
@@ -644,17 +706,30 @@ def _resolve_membership_role(organization, initial_role):
             return student_role
         return roles.order_by("level").first()
 
-    if initial_role == ProfileRole.STUDENT:
+    if initial_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
         return roles.filter(name="student").first() or roles.order_by("level").first()
+
+    if initial_role == ProfileRole.ASSISTANT_TEACHER:
+        for role_name in [
+            "assistant_teacher",
+            "assistant",
+            "lab_assistant",
+        ]:
+            match = roles.filter(name=role_name).first()
+            if match:
+                return match
+        return (
+            roles.filter(level__gte=40, level__lt=ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)).order_by("-level").first()
+            or roles.filter(level__gte=40).order_by("level").first()
+            or roles.order_by("level").first()
+        )
 
     if initial_role == ProfileRole.TEACHER:
         for role_name in [
             "teacher",
             "instructor",
-            "assistant_teacher",
             "professor",
             "associate_professor",
-            "assistant",
         ]:
             match = roles.filter(name=role_name).first()
             if match:

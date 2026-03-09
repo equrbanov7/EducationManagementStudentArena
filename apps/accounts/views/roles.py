@@ -28,6 +28,7 @@ from ._helpers import (
     ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT,
     _append_query_params,
     _assignable_profile_roles_for_user,
+    _bind_active_role_context,
     _close_other_pending_student_requests,
     _collect_actor_permissions,
     _decorate_manage_role_profiles,
@@ -42,7 +43,7 @@ from ._helpers import (
     _query_string,
     _resolve_next_url,
     _role_capabilities,
-    _sync_user_role_groups,
+    _sync_user_role_memberships,
     signer,
 )
 
@@ -53,21 +54,25 @@ User = get_user_model()
 @login_required
 def manage_roles(request):
     """
-    Multi-role assignment view for admin-level users.
-    Primary role is stored in UserProfile.role; additional roles are synced via Django groups.
-    Organization-scoped: only shows users from the same org.
+    Organization-scoped multi-role assignment view.
+    Effective roles are derived from memberships in the active organization.
     """
     is_superadmin = _is_superadmin_user(request.user)
     if not is_superadmin and not getattr(request.user, "is_admin_level", False):
         messages.error(request, pgettext_lazy("accounts.manage_roles.message", "admin_only"))
         return redirect("home")
 
-    # Get user's active organization for scoping
     user_org = _get_active_organization(request)
-    if not is_superadmin and not user_org:
+    if not user_org:
         messages.error(request, pgettext_lazy("accounts.manage_roles.message", "active_organization_not_found"))
         return redirect("accounts:profile")
 
+    _bind_active_role_context(
+        request.user,
+        user_org,
+        memberships=getattr(request, "org_memberships", []),
+        permissions=getattr(request, "org_permissions", []),
+    )
     actor_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
     assignable_roles = _assignable_profile_roles_for_user(request.user)
     assignable_role_names = {name for name, _ in assignable_roles}
@@ -83,12 +88,16 @@ def manage_roles(request):
 
         target_user = get_object_or_404(User, id=user_id)
 
-        # Ensure target is in same organization
-        target_org = getattr(getattr(target_user, "profile", None), "organization", None)
-        if not is_superadmin and target_org != user_org:
+        target_has_membership = Membership.objects.filter(
+            user=target_user,
+            organization=user_org,
+            is_active=True,
+        ).exists()
+        if not target_has_membership:
             messages.error(request, pgettext_lazy("accounts.manage_roles.message", "manage_only_own_org_users"))
             return redirect(next_url)
 
+        _bind_active_role_context(target_user, user_org)
         target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
         if not is_superadmin and target_user != request.user and target_level >= actor_level:
             messages.error(
@@ -126,19 +135,23 @@ def manage_roles(request):
         added_roles = effective_roles - current_roles
         removed_roles = current_roles - effective_roles
 
-        primary_role = max(effective_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
-        additional_roles = effective_roles - {primary_role}
-
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
         with transaction.atomic():
-            target_profile.role = primary_role
-            target_profile.save(update_fields=["role", "updated_at"])
-            _sync_user_role_groups(
+            final_memberships = _sync_user_role_memberships(
                 target_user,
-                additional_roles,
+                user_org,
+                effective_roles,
+                actor=request.user,
                 editable_role_names=assignable_role_names,
             )
+            _bind_active_role_context(target_user, user_org, memberships=final_memberships)
+            refreshed_roles = _extract_profile_roles_for_user(target_user)
+            if not refreshed_roles:
+                refreshed_roles = [ProfileRole.MEMBER]
+            primary_role = max(refreshed_roles, key=lambda role_name: ProfileRole.LEVELS.get(role_name, 0))
+            target_profile.role = primary_role
+            target_profile.save(update_fields=["role", "updated_at"])
 
         assigned_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(effective_roles)]
         added_labels = [PROFILE_ROLE_LABELS.get(role_name, role_name) for role_name in sorted(added_roles)]
@@ -162,13 +175,15 @@ def manage_roles(request):
         )
         return redirect(next_url)
 
-    # Get org-scoped users
-    if is_superadmin:
-        profiles = UserProfile.objects.all().select_related("user").prefetch_related("user__groups")
-    else:
-        profiles = (
-            UserProfile.objects.filter(organization=user_org).select_related("user").prefetch_related("user__groups")
+    profiles = (
+        UserProfile.objects.filter(
+            user__memberships__organization=user_org,
+            user__memberships__is_active=True,
         )
+        .select_related("user")
+        .prefetch_related("user__memberships__role")
+        .distinct()
+    )
 
     # Search
     search = request.GET.get("search", "")
@@ -186,6 +201,7 @@ def manage_roles(request):
         profiles_page_obj.object_list,
         actor_level=actor_level,
         is_superadmin=is_superadmin,
+        organization=user_org,
     )
 
     context = {
