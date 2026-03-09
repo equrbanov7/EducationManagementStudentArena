@@ -11,6 +11,7 @@ import io
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import get_language
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
@@ -34,10 +35,126 @@ from ._helpers import (
     _serialize_players,
 )
 
+PIN_ENTRY_COPY = {
+    "az": {
+        "title": "Canlı imtahana qoşul",
+        "eyebrow": "EMSArena Live",
+        "subtitle": "Müəllimin göstərdiyi 6 rəqəmli PIN-i yaz, sonra adını seçib oyuna daxil ol.",
+        "pin_label": "Oyun PIN-i",
+        "pin_placeholder": "Məsələn: 368121",
+        "button": "Davam et",
+        "hint": "PIN-i ekranda gördüyün kimi daxil et. Növbəti addımda ad və avatar seçəcəksən.",
+        "feature_fast": "Saniyələr içində qoşul",
+        "feature_device": "Telefon, planşet və kompüterdən işləyir",
+        "feature_live": "Canlı nəticə və liderlik cədvəli",
+        "card_title": "Hazırsan?",
+        "card_subtitle": "Bir URL, bir PIN, hamısı eyni oyunda.",
+        "footer_left": "Müəllim ekranında PIN və QR kod görünür.",
+        "footer_right": "Daxil olduqdan sonra avatar və ad seçimi gəlir.",
+        "loading": "Yoxlanılır...",
+        "invalid_pin": "6 rəqəmli PIN daxil et.",
+        "session_not_found": "Bu PIN tapılmadı və ya oyun bağlanıb.",
+    },
+    "en": {
+        "title": "Join a live exam",
+        "eyebrow": "EMSArena Live",
+        "subtitle": "Enter the 6-digit PIN shown by the teacher, then choose your name and join the game.",
+        "pin_label": "Game PIN",
+        "pin_placeholder": "Example: 368121",
+        "button": "Continue",
+        "hint": "Type the PIN exactly as shown on screen. You will choose your nickname and avatar next.",
+        "feature_fast": "Join in seconds",
+        "feature_device": "Works on phone, tablet, and desktop",
+        "feature_live": "Live results and leaderboard",
+        "card_title": "Ready to play?",
+        "card_subtitle": "One link, one PIN, everyone in the same session.",
+        "footer_left": "The teacher screen shows the PIN and QR code.",
+        "footer_right": "After this step, students choose nickname and avatar.",
+        "loading": "Checking...",
+        "invalid_pin": "Enter a 6-digit PIN.",
+        "session_not_found": "This PIN was not found or the session is closed.",
+    },
+    "ru": {
+        "title": "Присоединитесь к живому экзамену",
+        "eyebrow": "EMSArena Live",
+        "subtitle": "Введите 6-значный PIN, который показал преподаватель, затем выберите имя и войдите в игру.",
+        "pin_label": "PIN игры",
+        "pin_placeholder": "Например: 368121",
+        "button": "Продолжить",
+        "hint": "Введите PIN точно как на экране. На следующем шаге вы выберете ник и аватар.",
+        "feature_fast": "Подключение за несколько секунд",
+        "feature_device": "Работает на телефоне, планшете и компьютере",
+        "feature_live": "Живые результаты и таблица лидеров",
+        "card_title": "Готовы?",
+        "card_subtitle": "Одна ссылка, один PIN, одна общая сессия.",
+        "footer_left": "На экране преподавателя видны PIN и QR-код.",
+        "footer_right": "После этого шага ученик выбирает ник и аватар.",
+        "loading": "Проверяем...",
+        "invalid_pin": "Введите 6-значный PIN.",
+        "session_not_found": "Такой PIN не найден или сессия уже закрыта.",
+    },
+    "tr": {
+        "title": "Canlı sınava katıl",
+        "eyebrow": "EMSArena Live",
+        "subtitle": "Öğretmenin gösterdiği 6 haneli PIN kodunu gir, sonra adını seçip oyuna katıl.",
+        "pin_label": "Oyun PIN'i",
+        "pin_placeholder": "Örnek: 368121",
+        "button": "Devam et",
+        "hint": "PIN kodunu ekrandaki gibi gir. Sonraki adımda rumuz ve avatar seçeceksin.",
+        "feature_fast": "Saniyeler içinde katıl",
+        "feature_device": "Telefon, tablet ve bilgisayarda çalışır",
+        "feature_live": "Canlı sonuç ve lider tablosu",
+        "card_title": "Hazır mısın?",
+        "card_subtitle": "Tek link, tek PIN, herkes aynı oturumda.",
+        "footer_left": "Öğretmen ekranında PIN ve QR kod görünür.",
+        "footer_right": "Bu adımdan sonra öğrenci ad ve avatar seçer.",
+        "loading": "Kontrol ediliyor...",
+        "invalid_pin": "6 haneli bir PIN gir.",
+        "session_not_found": "Bu PIN bulunamadı veya oturum kapanmış.",
+    },
+}
+
+
+def _pin_entry_copy() -> dict[str, str]:
+    lang = (get_language() or "az")[:2].lower()
+    return PIN_ENTRY_COPY.get(lang, PIN_ENTRY_COPY["az"])
+
+
+def _normalize_pin(raw_pin: str | None) -> str:
+    return "".join(ch for ch in str(raw_pin or "") if ch.isdigit())[:6]
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # Player Join / Wait / Screen
 # ════════════════════════════════════════════════════════════════════════════
+
+
+def live_pin_entry(request):
+    copy = _pin_entry_copy()
+    pin_value = _normalize_pin(request.POST.get("pin") if request.method == "POST" else request.GET.get("pin"))
+    error_message = ""
+    status_code = 200
+
+    if request.method == "POST":
+        if len(pin_value) != 6:
+            error_message = copy["invalid_pin"]
+            status_code = 400
+        elif not LiveSession.objects.filter(pin=pin_value).exists():
+            error_message = copy["session_not_found"]
+            status_code = 404
+        else:
+            return redirect("liveExam:join_page", pin=pin_value)
+
+    return render(
+        request,
+        "liveExam/pin_entry.html",
+        {
+            "copy": copy,
+            "pin_value": pin_value,
+            "error_message": error_message,
+        },
+        status=status_code,
+    )
 
 
 def live_join_page(request, pin):

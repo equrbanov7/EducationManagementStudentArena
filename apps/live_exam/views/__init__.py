@@ -24,6 +24,7 @@ from .host import (
 # Player Views
 # ═══════════════════════════════════════════════════════════════
 from .player import (
+    live_pin_entry,
     live_join_enter,
     live_join_page,
     live_player_screen,
@@ -48,6 +49,7 @@ __all__ = [
     "host_reveal",
     "host_finish",
     # Player
+    "live_pin_entry",
     "live_join_page",
     "live_join_enter",
     "live_qr_png",
