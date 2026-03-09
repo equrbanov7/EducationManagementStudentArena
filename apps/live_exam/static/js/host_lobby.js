@@ -91,11 +91,59 @@ async function post(url, data = null) {
         const opts = { method: 'POST', headers: { 'X-CSRFToken': CONFIG.csrf } };
         if (data) opts.body = data;
         const res = await fetch(url, opts);
-        return await res.json();
+        const payload = await res.json();
+        if (payload && payload.ok) {
+            await syncState();
+        }
+        return payload;
     } catch (e) {
         log(fmt(tr('postError', 'POST error: {message}'), { message: e.message }));
         return { ok: false };
     }
+}
+
+async function syncState() {
+    try {
+        const res = await fetch(CONFIG.urls.state, {
+            headers: { Accept: 'application/json' }
+        });
+        if (!res.ok) {
+            log(`State sync failed: ${res.status}`);
+            return null;
+        }
+        const snapshot = await res.json();
+        applyStateSnapshot(snapshot);
+        return snapshot;
+    } catch (e) {
+        log(fmt(tr('playMessageError', 'Play message error: {message}'), { message: e.message || '' }));
+        return null;
+    }
+}
+
+function applyStateSnapshot(snapshot) {
+    if (!snapshot || !snapshot.ok) return;
+
+    if (snapshot.state === 'question' && snapshot.question) {
+        setState('question');
+        renderQuestion(snapshot.question);
+        UI.answeredText.textContent = `0 / ${totalPlayers}`;
+        return;
+    }
+
+    if (snapshot.state === 'reveal') {
+        setState('reveal');
+        renderResults(snapshot.results || []);
+        renderLeaderboard(snapshot.top || []);
+        return;
+    }
+
+    if (snapshot.state === 'finished') {
+        setState('finished');
+        renderPodium(snapshot.top || []);
+        return;
+    }
+
+    setState('lobby');
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -166,7 +214,10 @@ lobbyWS.onmessage = e => {
 
 // Play WS
 const playWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
-playWS.onopen = () => log(tr('wsPlayOpen', 'Play WS open'));
+playWS.onopen = async () => {
+    log(tr('wsPlayOpen', 'Play WS open'));
+    await syncState();
+};
 playWS.onclose = () => log(tr('wsPlayClosed', 'Play WS closed'));
 
 playWS.onmessage = e => {
@@ -407,3 +458,4 @@ UI.questionCount.addEventListener('keydown', function(e) {
 
 setState('lobby');
 log(tr('hostReady', 'Host ready'));
+syncState();

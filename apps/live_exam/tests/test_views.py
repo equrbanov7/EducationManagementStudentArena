@@ -5,9 +5,11 @@ View tests for live_exam app.
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
+from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.models import LivePlayer, LiveSession
 
 User = get_user_model()
@@ -205,9 +207,11 @@ class LiveStateAPITest(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.host_client = Client()
         self.teacher = User.objects.create_user("state_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.host_client.login(username="state_teacher", password="StrongPass123!")
 
         self.exam = Exam.objects.create(
             title="State Test Exam",
@@ -223,20 +227,35 @@ class LiveStateAPITest(TestCase):
             text="Test Question",
             order=1,
         )
-        ExamQuestionOption.objects.create(question=self.question, text="Option A", is_correct=True)
+        self.correct_option = ExamQuestionOption.objects.create(question=self.question, text="Option A", is_correct=True)
         ExamQuestionOption.objects.create(question=self.question, text="Option B", is_correct=False)
 
-    def test_state_json_accessible(self):
-        """Test that state JSON endpoint is accessible."""
-        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertTrue(data["ok"])
-        self.assertEqual(data["pin"], self.session.pin)
-        self.assertEqual(data["state"], self.session.state)
+    def _authenticate_player(self, client=None):
+        client = client or self.client
+        player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="StatePlayer",
+            avatar_key="avatar_1",
+            client_id="state-client",
+        )
+        client.cookies["live_client_id"] = player.client_id
+        client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+        return player
 
-    def test_state_json_with_active_question(self):
-        """Test state JSON with an active question."""
+    def test_state_json_requires_player_token(self):
+        """Test that state JSON endpoint requires an authenticated player."""
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 403)
+        data = response.json()
+        self.assertFalse(data["ok"])
+
+    def test_state_json_hides_question_until_published(self):
+        """Test that question payload stays hidden until publish timestamps exist."""
+        self._authenticate_player()
         self.session.state = LiveSession.STATE_QUESTION
         self.session.current_index = 0
         self.session.save(update_fields=["state", "current_index"])
@@ -246,6 +265,113 @@ class LiveStateAPITest(TestCase):
         data = response.json()
         self.assertTrue(data["ok"])
         self.assertEqual(data["state"], LiveSession.STATE_QUESTION)
+        self.assertNotIn("question", data)
+
+    def test_state_json_returns_published_question_for_authenticated_player(self):
+        """Test that an authenticated player gets only the current published question."""
+        self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=15)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["question"]["id"], self.question.id)
+        self.assertEqual(data["correct_option_ids"], [])
+
+    def test_state_json_allows_host_session_access(self):
+        """Test that the host can resync live state via session auth."""
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=15)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.host_client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["question"]["id"], self.question.id)
+
+    def test_state_json_reveal_includes_correct_options(self):
+        """Test that correct options are only exposed during reveal."""
+        self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_REVEAL
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=15)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["correct_option_ids"], [self.correct_option.id])
+
+
+class LivePlayerProtectedViewsTest(TestCase):
+    """Test auth-protected player views."""
+
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("player_teacher", "teacher@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Protected Player Views Exam",
+            slug="protected-player-views-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+    def _authenticate_player(self, client=None):
+        client = client or self.client
+        player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="LobbyPlayer",
+            avatar_key="avatar_2",
+            client_id="lobby-client",
+        )
+        client.cookies["live_client_id"] = player.client_id
+        client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+        return player
+
+    def test_wait_room_requires_player_token(self):
+        """Test that wait room redirects unauthenticated requests back to join."""
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_wait_room_shows_player_context_for_authenticated_player(self):
+        """Test that wait room renders roster only for an authenticated player."""
+        player = self._authenticate_player()
+
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["my_nickname"], player.nickname)
+        self.assertEqual(response.context["my_avatar_key"], player.avatar_key)
+
+    def test_player_screen_requires_valid_player_token(self):
+        """Test that player screen rejects unauthenticated access."""
+        response = self.client.get(reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
 
 class HelperFunctionsTest(TestCase):
