@@ -76,6 +76,7 @@ def manage_roles(request):
     actor_level = request.user._highest_role_level() if hasattr(request.user, "_highest_role_level") else 0
     assignable_roles = _assignable_profile_roles_for_user(request.user)
     assignable_role_names = {name for name, _ in assignable_roles}
+    can_self_manage_extra_roles = is_superadmin or getattr(user_org, "owner_id", None) == request.user.id
 
     if request.method == "POST":
         user_id = request.POST.get("user_id")
@@ -99,6 +100,9 @@ def manage_roles(request):
 
         _bind_active_role_context(target_user, user_org)
         target_level = target_user._highest_role_level() if hasattr(target_user, "_highest_role_level") else 0
+        if target_user == request.user and not can_self_manage_extra_roles:
+            messages.error(request, "Öz rol kombinasiyanızı dəyişmək üçün təşkilat sahibi və ya superadmin olmalısınız.")
+            return redirect(next_url)
         if not is_superadmin and target_user != request.user and target_level >= actor_level:
             messages.error(
                 request, pgettext_lazy("accounts.manage_roles.message", "insufficient_level_for_target_user")
@@ -202,6 +206,7 @@ def manage_roles(request):
         actor_level=actor_level,
         is_superadmin=is_superadmin,
         organization=user_org,
+        actor_user=request.user,
     )
 
     context = {

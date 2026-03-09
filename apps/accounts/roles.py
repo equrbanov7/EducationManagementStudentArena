@@ -82,6 +82,17 @@ def _resolve_active_organization_context(self):
     return None, []
 
 
+def _should_use_legacy_profile_fallback(self):
+    if not _is_authenticated_user(self):
+        return False
+
+    active_organization = getattr(self, "_active_organization", None)
+    if active_organization is not None:
+        return False
+
+    return not self.memberships.filter(is_active=True, organization__is_active=True).exists()
+
+
 def _get_active_organization(self):
     organization, _memberships = _resolve_active_organization_context(self)
     return organization
@@ -114,6 +125,11 @@ def _get_all_roles(self):
         return []
 
     active_organization, memberships = _resolve_active_organization_context(self)
+    if not memberships and _should_use_legacy_profile_fallback(self):
+        profile = _get_profile_safe(self)
+        legacy_role = getattr(profile, "role", None)
+        return [legacy_role] if legacy_role in ProfileRole.LEVELS else []
+
     role_names = []
     for membership in memberships:
         aliases = _membership_role_aliases(self, membership, active_organization)
@@ -138,6 +154,10 @@ def _highest_role_level(self):
         return 999
 
     active_organization, memberships = _resolve_active_organization_context(self)
+    if not memberships and _should_use_legacy_profile_fallback(self):
+        profile = _get_profile_safe(self)
+        return ProfileRole.LEVELS.get(getattr(profile, "role", None), 0)
+
     levels = [_membership_effective_level(self, membership, active_organization) for membership in memberships]
     return max(levels, default=0)
 
@@ -153,6 +173,9 @@ def _has_role(self, role_name: str) -> bool:
 
     active_organization, memberships = _resolve_active_organization_context(self)
     if not memberships:
+        if _should_use_legacy_profile_fallback(self):
+            profile = _get_profile_safe(self)
+            return getattr(profile, "role", None) == normalized_role_name
         return False
 
     for membership in memberships:

@@ -11,7 +11,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.organizations.models import Organization
 
-from ._helpers import _is_superadmin_user
+from ._helpers import _build_user_organization_access_rows, _get_active_organization, _is_superadmin_user
 
 
 @login_required
@@ -106,6 +106,12 @@ def superadmin_organizations(request):
 
     context = {
         "organizations": organizations_page,
+        "organization_access_rows": _build_user_organization_access_rows(
+            request.user,
+            active_organization=_get_active_organization(request),
+            include_active_superadmin_org=True,
+            profile_section="superadmin-organizations",
+        ),
         "search_query": search_query,
         "org_type_filter": org_type_filter,
         "status_filter": status_filter,

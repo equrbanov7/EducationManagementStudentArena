@@ -2,6 +2,6 @@
 <section class="profile-section-panel profile-section--superadmin-organizations {% if active_section == 'superadmin-organizations' %}is-active{% endif %}"
          data-profile-section-panel="superadmin-organizations"
          data-source-url="{% url 'accounts:superadmin_organizations' %}">
-    {% include "accounts/partials/_superadmin_organizations_content.html" with organizations=superadmin_organizations_section.organizations all_modules=superadmin_organizations_section.all_modules organizations_page_param=superadmin_organizations_section.organizations_page_param organizations_pagination_query=superadmin_organizations_section.organizations_pagination_query %}
+    {% include "accounts/partials/_superadmin_organizations_content.html" with organizations=superadmin_organizations_section.organizations organization_access_rows=superadmin_organizations_section.organization_access_rows all_modules=superadmin_organizations_section.all_modules organizations_page_param=superadmin_organizations_section.organizations_page_param organizations_pagination_query=superadmin_organizations_section.organizations_pagination_query %}
 </section>
 {% endif %}

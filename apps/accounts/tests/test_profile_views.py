@@ -688,6 +688,145 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("accounts:pending_review"))
 
+    def test_org_owner_can_assign_secondary_role_to_self_via_manage_roles(self):
+        organization = Organization.objects.create(
+            name="Owner Self Manage Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        profile = self.user.profile
+        profile.organization = organization
+        profile.organization_type = organization.org_type
+        profile.role = ProfileRole.ORG_OWNER
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        Membership.objects.update_or_create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="rector"),
+            defaults={
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.post(
+            reverse("accounts:manage_roles"),
+            data={
+                "user_id": self.user.id,
+                "action": "assign",
+                "role_names": [ProfileRole.TEACHER],
+                "next": reverse("accounts:manage_roles"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:manage_roles"))
+
+        self.user.refresh_from_db()
+        self.user.set_active_organization_context(organization)
+        self.assertTrue(self.user.has_role(ProfileRole.ORG_OWNER))
+        self.assertTrue(self.user.has_role(ProfileRole.TEACHER))
+        self.assertTrue(
+            Membership.objects.filter(
+                user=self.user,
+                organization=organization,
+                role__name="teacher",
+                is_active=True,
+            ).exists()
+        )
+
+    def test_org_owner_legacy_teacher_group_is_backfilled_to_active_org_membership(self):
+        from django.contrib.auth.models import Group
+
+        organization = Organization.objects.create(
+            name="Legacy Teacher Owner Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        profile = self.user.profile
+        profile.organization = organization
+        profile.organization_type = organization.org_type
+        profile.role = ProfileRole.ORG_OWNER
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        Membership.objects.update_or_create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="rector"),
+            defaults={
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
+        self.user.groups.add(teacher_group)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("accounts:pending_review"))
+        self.assertTrue(
+            Membership.objects.filter(
+                user=self.user,
+                organization=organization,
+                role__name="teacher",
+                is_active=True,
+            ).exists()
+        )
+
+    def test_superadmin_profile_lists_owned_and_member_organizations(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_orgs",
+            email="profile_superadmin_orgs@example.com",
+            password="adminpass123",
+        )
+        owned_org = Organization.objects.create(
+            name="Superadmin Owned Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        member_owner = User.objects.create_user(
+            username="member_org_owner",
+            email="member_org_owner@example.com",
+            password="testpass123",
+        )
+        member_org = Organization.objects.create(
+            name="Superadmin Member Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=member_owner,
+            status="active",
+            is_active=True,
+        )
+        Membership.objects.update_or_create(
+            user=superuser,
+            organization=member_org,
+            role=member_org.roles.get(name="teacher"),
+            defaults={
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        _login_with_org(self.client, superuser, member_org)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Təşkilat girişləri")
+        self.assertContains(response, owned_org.name)
+        self.assertContains(response, member_org.name)
+        self.assertContains(response, reverse("organizations:dashboard", kwargs={"slug": member_org.slug}))
+        self.assertContains(response, reverse("organizations:switch", kwargs={"slug": owned_org.slug}))
+
     def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
         from apps.accounts.models import ProfileRole
         from apps.organizations.models import Membership

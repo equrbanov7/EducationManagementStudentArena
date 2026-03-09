@@ -92,6 +92,40 @@
     font-weight: 600;
 }
 
+.pending-post-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.pending-post-text--content-preview,
+.pending-post-text--content-full {
+    width: 100%;
+}
+
+.pending-post-content-toggle {
+    border: 0;
+    background: transparent;
+    color: #2563eb;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.18rem;
+}
+
+.pending-post-content-toggle:hover {
+    color: #1d4ed8;
+}
+
+.pending-post-content-toggle:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.35);
+    outline-offset: 4px;
+    border-radius: 6px;
+}
+
 .pending-post-preview {
     width: 100%;
     max-width: min(520px, 100%);

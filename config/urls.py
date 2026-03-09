@@ -4,10 +4,12 @@ import re
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path, re_path, reverse_lazy
 from django.views.static import serve
 
 from core.views import health_check, ping, test_error
+
+admin.site.site_url = reverse_lazy("home")
 
 urlpatterns = [
     path("admin/", admin.site.urls),

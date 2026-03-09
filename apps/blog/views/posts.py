@@ -18,7 +18,7 @@ from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_fi
 
 from ..forms import PostForm
 from ..models import Category, Post, PostApprovalLog
-from ..services import author_requires_post_approval, can_user_review_post
+from ..services import author_requires_post_approval, can_user_create_post_category, can_user_review_post
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +36,11 @@ def create_post(request):
         raise PermissionDenied(pgettext("blog.permission", "no_permission"))
 
     requires_approval = author_requires_post_approval(request.user)
+    can_create_categories = can_user_create_post_category(request.user)
 
     if request.method == "POST":
         is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
-        form = PostForm(request.POST, request.FILES)
+        form = PostForm(request.POST, request.FILES, author=request.user)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
@@ -109,7 +110,7 @@ def create_post(request):
                 status=400,
             )
     else:
-        form = PostForm()
+        form = PostForm(author=request.user)
 
     return render(
         request,
@@ -117,6 +118,7 @@ def create_post(request):
         {
             "form": form,
             "requires_approval": requires_approval,
+            "can_create_categories": can_create_categories,
         },
     )
 

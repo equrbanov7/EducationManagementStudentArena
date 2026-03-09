@@ -63,6 +63,12 @@ def author_requires_post_approval(author):
     return user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
 
 
+def can_user_create_post_category(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return False
+    return get_user_role_level(user) >= ROLE_LEVEL_TEACHER
+
+
 def can_user_review_post(user, post):
     if not user or not getattr(user, "is_authenticated", False):
         return False

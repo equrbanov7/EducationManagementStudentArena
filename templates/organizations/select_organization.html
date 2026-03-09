@@ -188,7 +188,7 @@
         {% if organizations %}
         <div class="org-list">
             {% for org_data in organizations %}
-            <a href="{% url 'organizations:switch' org_data.organization.slug %}?next={{ request.GET.next|default:'/' }}" 
+            <a href="{{ org_data.switch_url }}" 
                class="org-card {% if org_data.organization == current_org %}active{% endif %}">
                 <div class="org-header">
                     <div>
@@ -203,8 +203,8 @@
                 </div>
                 <div class="org-roles">
                     <strong>{% trans "your_roles_label" context "organizations.select" %}</strong>
-                    {% for membership in org_data.memberships %}
-                    <span class="role-badge">{{ membership.role.display_name }}</span>
+                    {% for role_label in org_data.role_labels %}
+                    <span class="role-badge">{{ role_label }}</span>
                     {% endfor %}
                 </div>
             </a>

@@ -10,6 +10,62 @@
     </div>
 </div>
 
+{% if organization_access_rows %}
+<div class="section-card">
+    <div class="section-title">
+        <i class="fas fa-id-badge"></i> Mənim təşkilat girişlərim
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Təşkilat</th>
+                    <th>Rollarım</th>
+                    <th>Status</th>
+                    <th>Üzv sayı</th>
+                    <th>Keçidlər</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for org_access in organization_access_rows %}
+                <tr>
+                    <td>
+                        <div><strong>{{ org_access.organization.name }}</strong></div>
+                        <div class="text-muted small">{{ org_access.organization.get_org_type_display }} · Owner: {{ org_access.organization.owner.username }}</div>
+                    </td>
+                    <td>
+                        <div class="role-badges">
+                            {% for role_label in org_access.role_labels %}
+                            <span class="role-badge">{{ role_label }}</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if org_access.is_current %}
+                        <span class="role-badge role-success">Aktiv təşkilat</span>
+                        {% else %}
+                        <span class="role-badge">{{ org_access.status_label }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ org_access.member_count }}</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ org_access.dashboard_url }}" class="btn btn-outline-secondary btn-sm">Panel</a>
+                            <a href="{{ org_access.members_url }}" class="btn btn-outline-secondary btn-sm">Üzvlər</a>
+                            <a href="{{ org_access.roles_url }}" class="btn btn-outline-secondary btn-sm">Rollar</a>
+                            {% if not org_access.is_current %}
+                            <a href="{{ org_access.switch_url }}" class="btn btn-primary btn-sm">Aktiv et</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <div class="section-card">
     <div class="section-title">
         <i class="fas fa-building"></i> {% trans "all_organizations_title" context "profile.superadmin_orgs" %}
