@@ -86,5 +86,12 @@ class OrganizationMiddleware:
 
                 request.org_permissions = list(permissions_set)
 
+            if hasattr(request.user, "set_active_organization_context"):
+                request.user.set_active_organization_context(
+                    request.organization,
+                    memberships=request.org_memberships,
+                    permissions=request.org_permissions,
+                )
+
         response = self.get_response(request)
         return response

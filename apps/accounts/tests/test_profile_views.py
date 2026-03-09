@@ -265,24 +265,34 @@ class ProfileViewTest(TestCase):
         self.assertEqual(profile.role_level, 20)
 
     def test_profile_role_level_check(self):
-        """Test that profile role is used for role level checks."""
-        from apps.accounts.models import ProfileRole, UserProfile
-
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.TEACHER
-        profile.save()
-        # Reload user
-        self.user.refresh_from_db()
+        """Test that active-organization membership is used for role level checks."""
+        organization = Organization.objects.create(
+            name="Role Level Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+        self.user.set_active_organization_context(organization)
         self.assertTrue(self.user.is_teacher_or_above)
 
     def test_student_profile_hides_teacher_and_admin_navigation(self):
-        from apps.accounts.models import ProfileRole, UserProfile
+        owner = User.objects.create_user(
+            username="student_nav_owner",
+            email="student_nav_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Student Navigation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.STUDENT
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("accounts:role_assignment"))
@@ -291,13 +301,21 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:pending_review"))
 
     def test_student_profile_shows_posts_and_results_navigation(self):
-        from apps.accounts.models import ProfileRole, UserProfile
+        owner = User.objects.create_user(
+            username="student_results_owner",
+            email="student_results_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Student Results Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.STUDENT
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("create_post"))
@@ -517,26 +535,42 @@ class ProfileViewTest(TestCase):
         self.assertContains(profile_response, "blog-header__user-avatar-image")
 
     def test_student_profile_keeps_single_assigned_courses_sidebar_entry(self):
-        from apps.accounts.models import ProfileRole, UserProfile
+        owner = User.objects.create_user(
+            username="student_sidebar_owner",
+            email="student_sidebar_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Student Sidebar Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
 
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.STUDENT
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("accounts:assigned_courses"))
         self.assertNotContains(response, reverse("accounts:profile") + "?section=courses")
 
     def test_teacher_profile_shows_teacher_navigation_only(self):
-        from apps.accounts.models import ProfileRole, UserProfile
+        owner = User.objects.create_user(
+            username="teacher_nav_owner",
+            email="teacher_nav_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Teacher Navigation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
 
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.TEACHER
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("exams:teacher_group_list"))
@@ -546,20 +580,37 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
 
     def test_member_profile_shows_group_navigation(self):
-        self.client.login(username="testuser", password="testpass123")
+        owner = User.objects.create_user(
+            username="member_nav_owner",
+            email="member_nav_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Member Navigation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER)
+
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("exams:teacher_group_list"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
 
     def test_org_admin_profile_shows_groups_and_management_navigation(self):
-        from apps.accounts.models import ProfileRole, UserProfile
+        organization = Organization.objects.create(
+            name="Org Admin Navigation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.ORG_ADMIN)
 
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.ORG_ADMIN
-        profile.save()
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f"{reverse('accounts:profile')}?section=role-assignment")
@@ -576,63 +627,93 @@ class ProfileViewTest(TestCase):
             email="profile_superadmin@example.com",
             password="adminpass123",
         )
-        self.client.force_login(superuser)
+        organization = Organization.objects.create(
+            name="Manage Roles Table Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER)
+        _login_with_org(self.client, superuser, organization)
         response = self.client.get(reverse("accounts:manage_roles"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f"@{self.user.username}")
 
     def test_manage_roles_shows_primary_role_summary_for_multi_role_user(self):
-        from django.contrib.auth.models import Group
-
         from apps.accounts.models import ProfileRole
+        from apps.organizations.models import Membership
 
         superuser = User.objects.create_superuser(
             username="profile_superadmin_primary",
             email="profile_superadmin_primary@example.com",
             password="adminpass123",
         )
-        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
-        self.user.groups.add(teacher_group)
+        organization = Organization.objects.create(
+            name="Manage Roles Primary Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+        Membership.objects.update_or_create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="member"),
+            defaults={
+                "is_primary": False,
+                "is_active": True,
+            },
+        )
 
-        self.client.force_login(superuser)
+        _login_with_org(self.client, superuser, organization)
         response = self.client.get(reverse("accounts:manage_roles"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Primary:")
         self.assertContains(response, "Müəllim (60)")
 
     def test_org_owner_with_teacher_secondary_role_sees_teacher_navigation(self):
-        from django.contrib.auth.models import Group
+        organization = Organization.objects.create(
+            name="Owner Teacher Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
 
-        from apps.accounts.models import ProfileRole, UserProfile
-
-        profile = UserProfile.objects.get(user=self.user)
-        profile.role = ProfileRole.ORG_OWNER
-        profile.save(update_fields=["role", "updated_at"])
-
-        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
-        self.user.groups.add(teacher_group)
-
-        self.client.login(username="testuser", password="testpass123")
+        _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("accounts:pending_review"))
 
     def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
         from apps.accounts.models import ProfileRole
+        from apps.organizations.models import Membership
 
-        User.objects.create_superuser(
+        superuser = User.objects.create_superuser(
             username="superadmin_manage_roles",
             email="superadmin_manage_roles@example.com",
             password="adminpass123",
         )
-        self.client.login(username="superadmin_manage_roles", password="adminpass123")
+        organization = Organization.objects.create(
+            name="Manage Roles Assign Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER)
+
+        _login_with_org(self.client, superuser, organization)
 
         response = self.client.post(
             reverse("accounts:manage_roles"),
             data={
                 "user_id": self.user.id,
                 "action": "assign",
-                "role_names": [ProfileRole.TEACHER, ProfileRole.ORG_OWNER],
+                "role_names": [ProfileRole.TEACHER, ProfileRole.ORG_ADMIN],
                 "next": reverse("accounts:manage_roles"),
             },
         )
@@ -641,27 +722,46 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.url, reverse("accounts:manage_roles"))
 
         self.user.refresh_from_db()
-        self.assertEqual(self.user.profile.role, ProfileRole.ORG_OWNER)
-        self.assertTrue(self.user.has_role(ProfileRole.ORG_OWNER))
+        self.user.set_active_organization_context(organization)
+        self.assertEqual(self.user.profile.role, ProfileRole.ORG_ADMIN)
+        self.assertTrue(self.user.has_role(ProfileRole.ORG_ADMIN))
         self.assertTrue(self.user.has_role(ProfileRole.TEACHER))
-        self.assertIn(
-            ProfileRole.TEACHER,
-            set(self.user.groups.values_list("name", flat=True)),
+        self.assertFalse(self.user.groups.filter(name__in=[ProfileRole.TEACHER, ProfileRole.ORG_ADMIN]).exists())
+        self.assertTrue(
+            Membership.objects.filter(
+                user=self.user,
+                organization=organization,
+                role__name="teacher",
+                is_active=True,
+            ).exists()
         )
-        self.assertNotIn(
-            ProfileRole.ORG_OWNER,
-            set(self.user.groups.values_list("name", flat=True)),
+        self.assertTrue(
+            Membership.objects.filter(
+                user=self.user,
+                organization=organization,
+                role__level__gte=80,
+                is_active=True,
+            ).exists()
         )
 
     def test_manage_roles_respects_next_redirect_url(self):
         from apps.accounts.models import ProfileRole
 
-        User.objects.create_superuser(
+        superuser = User.objects.create_superuser(
             username="superadmin_manage_roles_next",
             email="superadmin_manage_roles_next@example.com",
             password="adminpass123",
         )
-        self.client.login(username="superadmin_manage_roles_next", password="adminpass123")
+        organization = Organization.objects.create(
+            name="Manage Roles Redirect Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=superuser,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER)
+
+        _login_with_org(self.client, superuser, organization)
 
         next_url = reverse("accounts:profile") + "?section=manage-roles"
         response = self.client.post(
@@ -676,6 +776,26 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, next_url)
+
+    def test_global_teacher_group_does_not_grant_teacher_navigation_in_active_org(self):
+        from django.contrib.auth.models import Group
+
+        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
+        self.user.groups.add(teacher_group)
+
+        organization = Organization.objects.create(
+            name="Group Leakage Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("accounts:pending_review"))
 
     def test_assigned_tasks_section_lists_exam_assignment_lab_and_project(self):
         from datetime import timedelta

@@ -47,6 +47,62 @@ class ProfileRole:
         STUDENT: 10,
     }
 
+    ROLE_NAME_NORMALIZATION = {
+        "deputy_director": "vice_director",
+        "chair_head": "department_head",
+        "section_head": "department_head",
+    }
+
+    MEMBERSHIP_ROLE_ALIASES = {
+        MEMBER: {MEMBER},
+        STUDENT: {STUDENT},
+        LEAD_STUDENT: {LEAD_STUDENT, STUDENT},
+        HR: {HR},
+        TEACHER: {TEACHER},
+        "instructor": {TEACHER, "instructor"},
+        "professor": {TEACHER, "professor"},
+        "associate_professor": {TEACHER, "associate_professor"},
+        ASSISTANT_TEACHER: {ASSISTANT_TEACHER},
+        "assistant": {ASSISTANT_TEACHER, "assistant"},
+        "lab_assistant": {ASSISTANT_TEACHER, "lab_assistant"},
+    }
+
+    ADMIN_EQUIVALENT_ROLE_NAMES = {
+        ORG_ADMIN,
+        ORG_OWNER,
+        "rector",
+        "vice_rector",
+        "dean",
+        "vice_dean",
+        "department_head",
+        "director",
+        "vice_director",
+        "manager",
+        "senior_instructor",
+    }
+
+    @classmethod
+    def normalize_membership_role_name(cls, role_name):
+        normalized = (role_name or "").strip().lower()
+        return cls.ROLE_NAME_NORMALIZATION.get(normalized, normalized)
+
+    @classmethod
+    def aliases_for_membership_role(cls, role_name, *, level=0, is_org_owner=False):
+        normalized = cls.normalize_membership_role_name(role_name)
+        aliases = set()
+
+        if normalized:
+            aliases.add(normalized)
+            aliases.update(cls.MEMBERSHIP_ROLE_ALIASES.get(normalized, set()))
+
+        if is_org_owner:
+            aliases.update({cls.ORG_OWNER, cls.ORG_ADMIN})
+
+        if normalized in cls.ADMIN_EQUIVALENT_ROLE_NAMES or level >= cls.LEVELS.get(cls.ORG_ADMIN, 80):
+            aliases.add(cls.ORG_ADMIN)
+
+        return aliases
+
 
 class UserProfile(models.Model):
     """
