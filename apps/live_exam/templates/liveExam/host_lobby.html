@@ -141,6 +141,7 @@ const CONFIG = {
     maxQuestions: {{ exam_total_questions }},
     urls: {
         start: "{% url 'liveExam:start_game' session.pin %}",
+        state: "{% url 'liveExam:state_json' session.pin %}",
         reveal: "{% url 'liveExam:host_reveal' session.pin %}",
         next: "{% url 'liveExam:next_question' session.pin %}",
         finish: "{% url 'liveExam:finish_game' session.pin %}"

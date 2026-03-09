@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import io
 
-from django.core import signing
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,12 +17,16 @@ from django.views.decorators.http import require_POST
 
 import qrcode
 
+from apps.live_exam.auth import (
+    PLAYER_COOKIE_NAME,
+    PLAYER_TOKEN_MAX_AGE,
+    build_player_token,
+    get_request_player,
+)
 from apps.live_exam.models import LiveSession
 
 from ._helpers import (
     AVATAR_KEYS,
-    PLAYER_COOKIE_NAME,
-    PLAYER_TOKEN_SALT,
     _broadcast,
     _build_join_url,
     _clean_nickname,
@@ -86,10 +89,7 @@ def live_join_enter(request, pin):
             last_seen=now,
         )
 
-    token = signing.dumps(
-        {"pin": session.pin, "player_id": player.id, "client_id": client_id},
-        salt=PLAYER_TOKEN_SALT,
-    )
+    token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
     # lobby-yə realtime update
     _broadcast(
@@ -110,7 +110,7 @@ def live_join_enter(request, pin):
     resp.set_cookie(
         PLAYER_COOKIE_NAME,
         token,
-        max_age=60 * 60 * 6,
+        max_age=PLAYER_TOKEN_MAX_AGE,
         samesite="Lax",
         httponly=True,
         secure=request.is_secure(),
@@ -136,6 +136,9 @@ def live_qr_png(request, pin):
 
 def live_wait_room(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
+    player = get_request_player(request, pin=pin)
+    if player is None:
+        return redirect("liveExam:join_page", pin=pin)
 
     players = _serialize_players(session)
     return render(
@@ -144,6 +147,8 @@ def live_wait_room(request, pin):
         {
             "session": session,
             "players": players,
+            "my_nickname": player.nickname,
+            "my_avatar_key": player.avatar_key,
             "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
         },
     )
@@ -151,9 +156,15 @@ def live_wait_room(request, pin):
 
 def live_player_screen(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
-
-    token = request.COOKIES.get(PLAYER_COOKIE_NAME)
-    if not token:
+    player = get_request_player(request, pin=pin)
+    if player is None:
         return redirect("liveExam:join_page", pin=pin)
 
-    return render(request, "liveExam/player_screen.html", {"session": session})
+    return render(
+        request,
+        "liveExam/player_screen.html",
+        {
+            "session": session,
+            "player": player,
+        },
+    )

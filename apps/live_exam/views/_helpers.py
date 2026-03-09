@@ -21,6 +21,7 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.live_exam.auth import PLAYER_COOKIE_NAME, PLAYER_TOKEN_SALT
 from apps.live_exam.models import LiveAnswer, LiveSession
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -41,10 +42,6 @@ AVATAR_KEYS = [
     "avatar_11",
     "avatar_12",
 ]
-
-PLAYER_COOKIE_NAME = "live_player_token"
-PLAYER_TOKEN_SALT = "liveExam.player"
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # Small Utils

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
-from django.core import signing
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -12,11 +11,29 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.live_exam.auth import PLAYER_COOKIE_NAME, authenticate_player_token
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 
-# ⚠️ consumers içindən views import eləmə (circular risk).
-PLAYER_COOKIE_NAME = "live_player_token"
-PLAYER_TOKEN_SALT = "liveExam.player"
+
+class LiveSessionSocketAuthMixin:
+    @database_sync_to_async
+    def _authorize_connection(self, pin: str, user_id: int | None, token: str | None) -> dict[str, Any] | None:
+        session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
+        if session is None:
+            return None
+
+        if user_id and session.host_user_id == user_id:
+            return {"role": "host"}
+
+        payload, player = authenticate_player_token(token, pin=pin)
+        if payload is None or player is None:
+            return None
+
+        return {
+            "role": "player",
+            "player_id": player.id,
+            "client_id": player.client_id,
+        }
 
 
 # -------------------------
@@ -24,7 +41,7 @@ PLAYER_TOKEN_SALT = "liveExam.player"
 # -------------------------
 
 
-class LiveLobbyConsumer(AsyncJsonWebsocketConsumer):
+class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     """
     Wait room / lobby websocket:
     - connect olanda hazırkı players listini göndərir
@@ -35,9 +52,13 @@ class LiveLobbyConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
         self.group_name = f"live_{self.pin}_lobby"
+        user = self.scope.get("user")
+        user_id = user.id if getattr(user, "is_authenticated", False) else None
+        token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
 
-        if not await self._session_exists(self.pin):
-            await self.close()
+        self.auth_context = await self._authorize_connection(self.pin, user_id, token)
+        if self.auth_context is None:
+            await self.close(code=4401)
             return
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -56,10 +77,6 @@ class LiveLobbyConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(data)
 
     @database_sync_to_async
-    def _session_exists(self, pin: str) -> bool:
-        return LiveSession.objects.filter(pin=pin).exists()
-
-    @database_sync_to_async
     def _get_lobby_state(self, pin: str) -> dict:
         session = LiveSession.objects.get(pin=pin)
         players = list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[:50])
@@ -75,7 +92,7 @@ class LiveLobbyConsumer(AsyncJsonWebsocketConsumer):
 # -------------------------
 
 
-class LivePlayConsumer(AsyncJsonWebsocketConsumer):
+class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     """
     Oyun websocket:
     - client 'answer' göndərir
@@ -88,9 +105,14 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
         self.group_name = f"live_{self.pin}_play"
+        user = self.scope.get("user")
+        user_id = user.id if getattr(user, "is_authenticated", False) else None
+        token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
 
-        if not await self._session_exists(self.pin):
-            await self.close()
+        self.auth_context = await self._authorize_connection(self.pin, user_id, token)
+        self.player_auth = self.auth_context if self.auth_context and self.auth_context["role"] == "player" else None
+        if self.auth_context is None:
+            await self.close(code=4401)
             return
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -103,25 +125,11 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         if (data or {}).get("type") != "answer":
             return
 
-        # 1) token
-        cookies = self.scope.get("cookies") or {}
-        token = cookies.get(PLAYER_COOKIE_NAME)
-
-        if not token:
-            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "no_token")})
+        if self.player_auth is None:
+            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "auth_required")})
             return
 
-        try:
-            payload = signing.loads(token, salt=PLAYER_TOKEN_SALT, max_age=60 * 60 * 6)
-        except Exception:
-            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "bad_token")})
-            return
-
-        if str(payload.get("pin")) != str(self.pin):
-            await self.send_json({"type": "error", "message": pgettext("live_exam.consumer.error", "pin_mismatch")})
-            return
-
-        # 2) parse payload
+        # 1) parse payload
         ok, parsed_or_msg = self._parse_answer_payload(data)
         if not ok:
             await self.send_json({"type": "error", "message": parsed_or_msg})
@@ -132,8 +140,8 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
         # 3) save + score
         ok, result = await self._save_answer_and_score(
             pin=self.pin,
-            player_id=payload.get("player_id"),
-            client_id=payload.get("client_id"),
+            player_id=self.player_auth["player_id"],
+            client_id=self.player_auth["client_id"],
             question_id=question_id,
             option_ids=option_ids,
             answer_ms=answer_ms,
@@ -182,10 +190,6 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
     # -------------------- DB helpers --------------------
 
     @database_sync_to_async
-    def _session_exists(self, pin: str) -> bool:
-        return LiveSession.objects.filter(pin=pin).exists()
-
-    @database_sync_to_async
     def _get_answer_progress(self, pin: str, question_id: int) -> dict:
         session = LiveSession.objects.get(pin=pin)
         total_players = LivePlayer.objects.filter(session=session).count()
@@ -221,7 +225,7 @@ class LivePlayConsumer(AsyncJsonWebsocketConsumer):
 
         # question
         try:
-            eq = ExamQuestion.objects.get(id=question_id)
+            eq = ExamQuestion.objects.get(id=question_id, exam=session.exam)
         except ExamQuestion.DoesNotExist:
             return False, pgettext("live_exam.consumer.error", "question_not_found")
 
