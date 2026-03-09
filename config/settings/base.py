@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "csp",
 ]
 
 MIDDLEWARE = [
@@ -180,9 +181,35 @@ MESSAGE_TAGS = {
 }
 
 # Content Security Policy (CSP) settings
-# XSS hücumlarına qarşı əlavə müdafiə təmin edir
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'")  # İlk etapda, sonra unsafe-inline silinməlidir
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com")
-CSP_IMG_SRC = ("'self'", "data:")
-CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+# XSS hücumlarına qarşı əlavə müdafiə təmin edir.
+# Note: the current templates still rely on inline styles/scripts and CDN-hosted
+# Bootstrap / Font Awesome assets, so the policy must explicitly allow them.
+CSP_SCRIPT_SOURCES = (
+    "'self'",
+    "'unsafe-inline'",
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudflare.com",
+)
+CSP_STYLE_SOURCES = (
+    "'self'",
+    "'unsafe-inline'",
+    "https://fonts.googleapis.com",
+    "https://cdn.jsdelivr.net",
+    "https://cdnjs.cloudflare.com",
+)
+CSP_FONT_SOURCES = (
+    "'self'",
+    "data:",
+    "https://fonts.gstatic.com",
+    "https://cdnjs.cloudflare.com",
+)
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": CSP_SCRIPT_SOURCES,
+        "style-src": CSP_STYLE_SOURCES,
+        "img-src": ("'self'", "data:"),
+        "font-src": CSP_FONT_SOURCES,
+    }
+}

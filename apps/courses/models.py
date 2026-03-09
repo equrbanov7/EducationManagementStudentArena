@@ -96,12 +96,14 @@ class Course(models.Model):
     # SPRINT 7: YENİ SAHƏLƏR
     # ══════════════════════════════════════════════════════════════════════════
 
-    organization_id = models.IntegerField(
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="courses",
         null=True,
         blank=True,
-        verbose_name="Təşkilat ID",
-        help_text="Gələcəkdə organizations.Organization FK olacaq",
-        db_index=True,
+        verbose_name="Təşkilat",
+        help_text="Kursun aid olduğu təşkilat",
     )
 
     unit_id = models.IntegerField(
@@ -184,6 +186,10 @@ class Course(models.Model):
                 base_slug = f"{original_slug}-{x}"
 
             self.slug = base_slug
+
+        if self.organization_id is None and self.owner_id:
+            profile = getattr(self.owner, "profile", None)
+            self.organization = getattr(profile, "organization", None)
 
         super().save(*args, **kwargs)
 

@@ -12,6 +12,7 @@ from django.shortcuts import redirect
 from django.utils.translation import pgettext
 
 from apps.organizations.permissions import has_permission
+from core.tenancy import request_has_active_organization_context
 
 
 def is_teacher(user):
@@ -57,16 +58,20 @@ def is_superadmin_user(user) -> bool:
 def request_has_permission(request, permission: str) -> bool:
     """
     Permission policy:
-    - superadmin/superuser: always allowed
+    - active organization context is required
+    - superadmin/superuser: allowed within an active organization
     - user with active-org memberships: must have the requested permission
-    - no active-org membership context: allow (legacy profile-scoped fallback)
+    - missing org context or memberships: deny
     """
+    if not request_has_active_organization_context(request):
+        return False
+
     if is_superadmin_user(getattr(request, "user", None)):
         return True
 
     memberships = list(getattr(request, "org_memberships", []) or [])
     if not memberships:
-        return True
+        return False
 
     org_permissions = list(getattr(request, "org_permissions", []) or [])
     return has_permission(org_permissions, permission)
@@ -75,6 +80,9 @@ def request_has_permission(request, permission: str) -> bool:
 def ensure_request_permission(request, permission: str, message: str | None = None) -> None:
     if request_has_permission(request, permission):
         return
+
+    if not request_has_active_organization_context(request):
+        raise PermissionDenied(message or pgettext("core.permission.error", "An active organization is required."))
 
     raise PermissionDenied(
         message

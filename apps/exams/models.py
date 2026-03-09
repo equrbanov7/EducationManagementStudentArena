@@ -239,12 +239,14 @@ class Exam(models.Model):
     # SPRINT 9: YENİ SAHƏLƏR
     # ══════════════════════════════════════════════════════════════════════════
 
-    organization_id = models.IntegerField(
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="exams",
         null=True,
         blank=True,
-        verbose_name=pgettext_lazy("exams.model.exam.field", "organization_id"),
-        help_text=pgettext_lazy("exams.model.exam.help", "organization_id"),
-        db_index=True,
+        verbose_name=pgettext_lazy("exams.model.exam.field", "organization"),
+        help_text=pgettext_lazy("exams.model.exam.help", "organization"),
     )
 
     EXAM_TYPE_EXTENDED_CHOICES = (
@@ -346,6 +348,12 @@ class Exam(models.Model):
         return f"{self.title} ({self.get_exam_type_display()})"
 
     def save(self, *args, **kwargs):
+        if self.course_id and getattr(self.course, "organization_id", None):
+            self.organization = self.course.organization
+        elif self.organization_id is None and self.author_id:
+            profile = getattr(self.author, "profile", None)
+            self.organization = getattr(profile, "organization", None)
+
         if not self.slug:
             base_slug = slugify(self.title)
             self.slug = f"{base_slug}-{get_random_string(6)}"

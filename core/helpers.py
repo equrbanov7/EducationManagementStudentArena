@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from apps.courses.models import Course
-from core.tenancy import scoped_by_organization_id
+from core.tenancy import scoped_by_organization
 
 # ════════════════════════════════════════════════════════════════════════════
 # Constants
@@ -40,12 +40,7 @@ def _tenant_scoped_courses(request, queryset=None):
         QuerySet of courses filtered by organization
     """
     base_queryset = queryset if queryset is not None else Course.objects.all()
-    return scoped_by_organization_id(
-        base_queryset,
-        request,
-        org_id_field="organization_id",
-        fallback_org_field="owner__profile__organization",
-    )
+    return scoped_by_organization(base_queryset, request)
 
 
 # ════════════════════════════════════════════════════════════════════════════

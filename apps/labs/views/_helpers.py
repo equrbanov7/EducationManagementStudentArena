@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from apps.courses.models import Course
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, _safe_same_origin_redirect_path
-from core.tenancy import scoped_by_organization_id
+from core.tenancy import scoped_by_organization
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from ..models import Lab, LabBlock, LabQuestion, LabSubmission
@@ -59,12 +59,7 @@ def _validate_and_prepare_lab_upload(uploaded_file, *, allowed_extensions, max_s
 
 def _tenant_scoped_courses(request, queryset=None):
     base_queryset = queryset if queryset is not None else Course.objects.all()
-    return scoped_by_organization_id(
-        base_queryset,
-        request,
-        org_id_field="organization_id",
-        fallback_org_field="owner__profile__organization",
-    )
+    return scoped_by_organization(base_queryset, request)
 
 
 def _tenant_scoped_labs(request, queryset=None):

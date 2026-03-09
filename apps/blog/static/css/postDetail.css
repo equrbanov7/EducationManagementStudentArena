@@ -8,6 +8,29 @@
     font-family: var(--font-main, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
 }
 
+.article-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #dbe2ec;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    color: var(--text-dark, #1f2937);
+    font-weight: 600;
+}
+
+.article-back-link:hover {
+    color: var(--primary-color, #4f46e5);
+    border-color: rgba(79, 70, 229, 0.25);
+}
+
+.article-back-link i {
+    color: var(--primary-color, #4f46e5);
+}
+
 /* --- Məqalənin Əsas Konteyneri --- */
 .article-container {
     background: var(--card-bg, #ffffff);
@@ -389,6 +412,10 @@
 
     .article-header {
         margin-bottom: 30px;
+    }
+
+    .article-back-link {
+        margin-bottom: 14px;
     }
 
     .article-featured-image {

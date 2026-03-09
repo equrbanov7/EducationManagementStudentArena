@@ -33,7 +33,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, StudentGroup
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
-from core.tenancy import get_request_organization, scoped_by_organization_id
+from core.tenancy import get_request_organization, scoped_by_organization
 
 from ._helpers import _get_owner_course_or_404, _owner_courses_queryset, _student_users_queryset
 
@@ -412,11 +412,9 @@ def link_exam_to_course(request, pk):
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
-        exam_qs = scoped_by_organization_id(
+        exam_qs = scoped_by_organization(
             Exam.objects.filter(author=request.user),
             request,
-            org_id_field="organization_id",
-            fallback_org_field="author__profile__organization",
         )
         exam = get_object_or_404(exam_qs, id=exam_id)
         exam.course = course
@@ -438,11 +436,9 @@ def unlink_exam_from_course(request, pk):
         exam_id = data.get("exam_id")
 
         exam = get_object_or_404(
-            scoped_by_organization_id(
+            scoped_by_organization(
                 Exam.objects.filter(course=course),
                 request,
-                org_id_field="organization_id",
-                fallback_org_field="author__profile__organization",
             ),
             id=exam_id,
         )

@@ -1032,38 +1032,49 @@ def user_profile(request):
     return render(request, "accounts/profile.html", context)
 
 
-@login_required
 def public_user_profile(request, username):
     """
-    Public user profile showing user's posts and activity.
-    Different from the accounts:profile which is for editing own profile.
+    Public user profile showing only published posts and non-confidential profile information.
     """
     from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+    from django.db.models import Count, Q
 
     from apps.blog.models import Post
 
     profile_user = get_object_or_404(User, username=username)
 
-    # Get user's profile
-    profile, created = UserProfile.objects.get_or_create(user=profile_user)
+    if request.user.is_authenticated and request.user == profile_user:
+        return redirect("accounts:profile")
 
-    # 1. Posts filtering
-    if request.user == profile_user:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user)
-            .select_related("category")
-            .prefetch_related("approval_logs")
-            .order_by("-created_at")
-        )
-    else:
-        user_posts_list = (
-            Post.objects.filter(author=profile_user, is_published=True)
-            .select_related("category")
-            .prefetch_related("approval_logs")
-            .order_by("-created_at")
+    profile, _ = UserProfile.objects.get_or_create(user=profile_user)
+
+    published_posts = (
+        Post.objects.filter(author=profile_user, is_published=True)
+        .select_related("category")
+        .order_by("-created_at")
+    )
+
+    search_query = (request.GET.get("q") or "").strip()
+    selected_category = (request.GET.get("category") or "").strip()
+
+    user_posts_list = published_posts
+    if search_query:
+        user_posts_list = user_posts_list.filter(
+            Q(title__icontains=search_query)
+            | Q(excerpt__icontains=search_query)
+            | Q(content__icontains=search_query)
         )
 
-    # 2. Pagination
+    if selected_category:
+        user_posts_list = user_posts_list.filter(category__slug=selected_category)
+
+    category_items = list(
+        published_posts.exclude(category__isnull=True)
+        .values("category__name", "category__slug")
+        .annotate(total=Count("id"))
+        .order_by("-total", "category__name")
+    )
+
     paginator = Paginator(user_posts_list, 6)
     page_number = request.GET.get("page")
     try:
@@ -1073,56 +1084,27 @@ def public_user_profile(request, username):
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
 
-    # 3. Pending exams count (for teachers)
-    pending_count = 0
-    if request.user.is_authenticated and request.user == profile_user and getattr(request.user, "is_teacher", False):
-        pending_count = (
-            ExamAttempt.objects.filter(
-                exam__author=request.user,
-                status__in=["submitted", "expired"],
-                checked_by_teacher=False,
-            )
-            .exclude(exam__exam_type="test")
-            .count()
-        )
+    display_name = (f"{profile_user.first_name} {profile_user.last_name}").strip() or profile_user.username
+    profile_bio = (profile.bio or "").strip()
+    profile_location = (profile.location or "").strip()
 
-    # 4. Assigned exams count
-    assigned_count = 0
-    if request.user.is_authenticated and request.user == profile_user:
-        assigned_count = _assigned_exams_queryset(request, request.user, active_only=True).count()
-
-    # 5. Student courses
-    student_courses = []
-    student_courses_count = 0
-
-    if request.user.is_authenticated and request.user == profile_user:
-        if getattr(request.user, "is_student", False):
-            student_courses = (
-                Course.objects.filter(
-                    memberships__user=request.user,
-                    memberships__role="student",
-                    status="published",
-                )
-                .distinct()
-                .order_by("-created_at")
-            )
-            student_courses_count = student_courses.count()
-
-    # 6. Categories
-    from apps.blog.models import Category
-
-    categories = Category.objects.all().order_by("name")
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+    extra_query = query_params.urlencode()
 
     context = {
         "profile_user": profile_user,
         "profile": profile,
+        "display_name": display_name,
+        "search_query": search_query,
+        "selected_category": selected_category,
+        "extra_query": extra_query,
+        "category_items": category_items,
+        "published_posts_count": published_posts.count(),
+        "category_count": len(category_items),
+        "profile_bio": profile_bio,
+        "profile_location": profile_location,
         "posts": posts,
-        "categories": categories,
-        "pending_count": pending_count,
-        "assigned_count": assigned_count,
-        "student_courses": student_courses,
-        "student_courses_count": student_courses_count,
     }
     return render(request, "accounts/public_profile.html", context)
-
 

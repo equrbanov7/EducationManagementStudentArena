@@ -13,10 +13,41 @@ from django.utils import timezone
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
 from apps.labs.models import Lab, LabAssignment, LabSubmission
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+
+
+def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
+    membership_role_name = membership_role_name or {
+        ProfileRole.TEACHER: "teacher",
+        ProfileRole.ASSISTANT_TEACHER: "member",
+        ProfileRole.STUDENT: "student",
+    }.get(profile_role, "member")
+
+    profile = user.profile
+    profile.organization = organization
+    profile.organization_type = organization.org_type
+    profile.role = profile_role
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=organization,
+        defaults={
+            "role": organization.roles.get(name=membership_role_name),
+            "is_primary": True,
+            "is_active": True,
+        },
+    )
+
+
+def _login_with_org(client, user, organization):
+    client.force_login(user)
+    session = client.session
+    session["active_organization"] = organization.slug
+    session.save()
 
 
 class LabDetailBackUrlTest(TestCase):
@@ -24,7 +55,17 @@ class LabDetailBackUrlTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("lab_teacher", "lab_teacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("lab_student", "lab_student@example.com", "StrongPass123!")
+        self.organization = Organization.objects.create(
+            name="Lab Detail Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
         self.course = Course.objects.create(owner=self.teacher, title="Lab Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
         self.lab = Lab.objects.create(
             course=self.course,
             title="Lab Back Url",
@@ -37,8 +78,11 @@ class LabDetailBackUrlTest(TestCase):
             created_by=self.teacher,
         )
 
+    def _login_as(self, user):
+        _login_with_org(self.client, user, self.organization)
+
     def test_lab_detail_defaults_back_to_course_dashboard(self):
-        self.client.login(username="lab_student", password="StrongPass123!")
+        self._login_as(self.student)
         response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
@@ -48,7 +92,7 @@ class LabDetailBackUrlTest(TestCase):
         )
 
     def test_lab_detail_returns_to_assigned_tasks_when_opened_from_profile_tasks(self):
-        self.client.login(username="lab_student", password="StrongPass123!")
+        self._login_as(self.student)
         response = self.client.get(
             reverse("labs:lab_detail", kwargs={"pk": self.lab.id}),
             {"from_section": "assigned-exams", "assigned_type": "labs"},
@@ -68,7 +112,7 @@ class LabDetailBackUrlTest(TestCase):
             attempt_number=1,
         )
 
-        self.client.login(username="lab_student", password="StrongPass123!")
+        self._login_as(self.student)
         return_to = f"{reverse('accounts:profile')}?section=assigned-courses"
         response = self.client.get(
             reverse("labs:my_lab_answers", kwargs={"pk": self.lab.id}),
@@ -88,7 +132,7 @@ class LabDetailBackUrlTest(TestCase):
             attempt_number=1,
         )
 
-        self.client.login(username="lab_teacher", password="StrongPass123!")
+        self._login_as(self.teacher)
         response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
@@ -104,7 +148,7 @@ class LabDetailBackUrlTest(TestCase):
             attempt_number=1,
         )
 
-        self.client.login(username="lab_teacher", password="StrongPass123!")
+        self._login_as(self.teacher)
         response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
@@ -125,7 +169,7 @@ class LabDetailBackUrlTest(TestCase):
             attempt_number=2,
         )
 
-        self.client.login(username="lab_teacher", password="StrongPass123!")
+        self._login_as(self.teacher)
         response = self.client.post(
             reverse("labs:delete_submissions", kwargs={"pk": self.lab.id}),
             {
@@ -213,10 +257,18 @@ class LabReviewVisibilityTest(TestCase):
         self.client = Client()
         self.teacher = User.objects.create_user("lab_visibility_teacher", "lvt@example.com", "StrongPass123!")
         self.student = User.objects.create_user("lab_visibility_student", "lvs@example.com", "StrongPass123!")
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Lab Visibility Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.course = Course.objects.create(owner=self.teacher, title="Lab Visibility Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
         self.lab = Lab.objects.create(
             course=self.course,
             title="Lab Visibility",
@@ -239,7 +291,7 @@ class LabReviewVisibilityTest(TestCase):
         )
 
     def test_lab_detail_hides_score_until_review_window_closes(self):
-        self.client.force_login(self.student)
+        _login_with_org(self.client, self.student, self.organization)
 
         hidden_response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
         self.assertEqual(hidden_response.status_code, 200)
@@ -274,17 +326,23 @@ class RosterAPIAuthorizationTest(TestCase):
         self.student = User.objects.create_user("student", "student@example.com", "StrongPass123!")
         self.unauthorized_user = User.objects.create_user("unauthorized", "unauthorized@example.com", "StrongPass123!")
 
-        # Set roles
-        self.owner.profile.role = ProfileRole.TEACHER
-        self.owner.profile.save(update_fields=["role", "updated_at"])
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-        self.assistant.profile.role = ProfileRole.TEACHER
-        self.assistant.profile.save(update_fields=["role", "updated_at"])
-        self.student.profile.role = ProfileRole.STUDENT
-        self.student.profile.save(update_fields=["role", "updated_at"])
-        self.unauthorized_user.profile.role = ProfileRole.STUDENT
-        self.unauthorized_user.profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Lab Roster Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.owner, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(
+            self.assistant,
+            self.organization,
+            ProfileRole.ASSISTANT_TEACHER,
+            membership_role_name="member",
+        )
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
+        _assign_user_to_org(self.unauthorized_user, self.organization, ProfileRole.STUDENT)
 
         # Create course
         self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published")
@@ -294,56 +352,59 @@ class RosterAPIAuthorizationTest(TestCase):
         CourseMembership.objects.create(course=self.course, user=self.assistant, role="assistant")
         CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="Group A")
 
+    def _login_as(self, user):
+        _login_with_org(self.client, user, self.organization)
+
     def test_api_get_groups_owner_can_access(self):
         """Course owner should be able to access groups"""
-        self.client.force_login(self.owner)
+        self._login_as(self.owner)
         response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
         self.assertEqual(response.status_code, 200)
         self.assertIn("groups", response.json())
 
     def test_api_get_groups_teacher_can_access(self):
         """Teacher should be able to access groups"""
-        self.client.force_login(self.teacher)
+        self._login_as(self.teacher)
         response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
         self.assertEqual(response.status_code, 200)
         self.assertIn("groups", response.json())
 
     def test_api_get_groups_assistant_can_access(self):
         """Assistant should be able to access groups"""
-        self.client.force_login(self.assistant)
+        self._login_as(self.assistant)
         response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
         self.assertEqual(response.status_code, 200)
         self.assertIn("groups", response.json())
 
     def test_api_get_groups_unauthorized_denied(self):
         """Unauthorized user should be denied"""
-        self.client.force_login(self.unauthorized_user)
+        self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("labs:api_get_groups", kwargs={"course_id": self.course.id}))
         self.assertEqual(response.status_code, 403)
 
     def test_api_get_students_owner_can_access(self):
         """Course owner should be able to access students"""
-        self.client.force_login(self.owner)
+        self._login_as(self.owner)
         response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_teacher_can_access(self):
         """Teacher should be able to access students"""
-        self.client.force_login(self.teacher)
+        self._login_as(self.teacher)
         response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_assistant_can_access(self):
         """Assistant should be able to access students"""
-        self.client.force_login(self.assistant)
+        self._login_as(self.assistant)
         response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_unauthorized_denied(self):
         """Unauthorized user should be denied"""
-        self.client.force_login(self.unauthorized_user)
+        self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
         self.assertEqual(response.status_code, 403)

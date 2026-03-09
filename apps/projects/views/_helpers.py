@@ -9,10 +9,8 @@ from urllib.parse import urlencode
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
-from apps.courses.models import Course
 from apps.projects.models import Project, ProjectSubmission
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, _safe_same_origin_redirect_path, _tenant_scoped_courses
-from core.tenancy import scoped_by_organization_id
 
 
 # ════════════════════════════════════════════════════════════════════════════

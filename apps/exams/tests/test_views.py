@@ -6,7 +6,8 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.core.exceptions import PermissionDenied
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import override
@@ -14,10 +15,42 @@ from django.utils.translation import override
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+
+
+def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
+    membership_role_name = membership_role_name or {
+        ProfileRole.TEACHER: "teacher",
+        ProfileRole.STUDENT: "student",
+        ProfileRole.ORG_ADMIN: "member",
+        ProfileRole.MEMBER: "member",
+    }.get(profile_role, "member")
+
+    profile = user.profile
+    profile.organization = organization
+    profile.organization_type = organization.org_type
+    profile.role = profile_role
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=organization,
+        defaults={
+            "role": organization.roles.get(name=membership_role_name),
+            "is_primary": True,
+            "is_active": True,
+        },
+    )
+
+
+def _login_with_org(client, user, organization):
+    client.force_login(user)
+    session = client.session
+    session["active_organization"] = organization.slug
+    session.save()
 
 
 class MyGroupsTenantIsolationTest(TestCase):
@@ -65,11 +98,7 @@ class MyGroupsTenantIsolationTest(TestCase):
         self._set_active_org(self.org_a)
 
     def _assign_profile(self, user, organization, role):
-        profile = user.profile
-        profile.organization = organization
-        profile.organization_type = organization.org_type
-        profile.role = role
-        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        _assign_user_to_org(user, organization, role)
 
     def _login_as(self, user):
         self.client.force_login(user)
@@ -289,7 +318,8 @@ class MyGroupsTenantIsolationTest(TestCase):
         self._login_as(self.teacher)
         self._set_active_org(self.org_b)
         response = self.client.get(reverse("exams:teacher_group_list"))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
 
     def test_superadmin_can_manage_any_active_tenant(self):
         self._login_as(self.superadmin)
@@ -355,23 +385,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
             is_active=True,
         )
 
-        teacher_profile = self.teacher.profile
-        teacher_profile.organization = self.org_a
-        teacher_profile.organization_type = self.org_a.org_type
-        teacher_profile.role = ProfileRole.TEACHER
-        teacher_profile.save()
-
-        other_profile = self.other_teacher.profile
-        other_profile.organization = self.org_a
-        other_profile.organization_type = self.org_a.org_type
-        other_profile.role = ProfileRole.TEACHER
-        other_profile.save()
-
-        student_profile = self.student.profile
-        student_profile.organization = self.org_a
-        student_profile.organization_type = self.org_a.org_type
-        student_profile.role = ProfileRole.STUDENT
-        student_profile.save()
+        _assign_user_to_org(self.teacher, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.other_teacher, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.org_a, ProfileRole.STUDENT)
 
         self.exam_visible = Exam.objects.create(
             author=self.teacher,
@@ -381,7 +397,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.exam_other_tenant = Exam.objects.create(
             author=self.teacher,
             title="Other Tenant Exam",
-            organization_id=999,
+            organization=self.org_b,
             is_active=True,
         )
         self.exam_other_author = Exam.objects.create(
@@ -446,6 +462,51 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         created_exam = Exam.objects.get(title="Linked From Course Dashboard")
         self.assertEqual(created_exam.author, self.teacher)
         self.assertEqual(created_exam.course, self.course)
+        self.assertEqual(created_exam.organization, self.org_a)
+
+    def test_create_exam_requires_active_organization(self):
+        from apps.exams.views.teacher.exams import createAndEditExamView
+
+        request = RequestFactory().post(
+            reverse("exams:create_exam"),
+            {
+                "title": "Blocked Without Org",
+                "description": "Should not be created",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+        )
+        request.user = self.teacher
+        request.organization = None
+        request.org_memberships = []
+        request.org_permissions = []
+
+        with self.assertRaises(PermissionDenied):
+            createAndEditExamView(request)
+
+        self.assertFalse(Exam.objects.filter(title="Blocked Without Org").exists())
+
+    def test_create_exam_auto_selects_single_membership_organization(self):
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("exams:create_exam"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("active_organization"), self.org_a.slug)
+
+    def test_create_exam_redirects_to_org_selector_without_active_org_when_multiple_orgs(self):
+        _assign_user_to_org(self.teacher, self.org_b, ProfileRole.TEACHER)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.get(reverse("exams:create_exam"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("organizations:select")))
+        self.assertIn("next=%2Fexams%2Fcreate%2F", response.url)
 
     def test_modal_add_question_returns_partial_markup(self):
         response = self.client.get(
@@ -802,24 +863,17 @@ class StudentExamVisibilityFilteringTest(TestCase):
             status="active",
             is_active=True,
         )
+        self.org_b = Organization.objects.create(
+            name="Student Exam Org B",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.superadmin,
+            status="active",
+            is_active=True,
+        )
 
-        teacher_profile = self.teacher.profile
-        teacher_profile.organization = self.org_a
-        teacher_profile.organization_type = self.org_a.org_type
-        teacher_profile.role = ProfileRole.TEACHER
-        teacher_profile.save()
-
-        student_profile = self.student.profile
-        student_profile.organization = self.org_a
-        student_profile.organization_type = self.org_a.org_type
-        student_profile.role = ProfileRole.STUDENT
-        student_profile.save()
-
-        viewer_teacher_profile = self.viewer_teacher.profile
-        viewer_teacher_profile.organization = self.org_a
-        viewer_teacher_profile.organization_type = self.org_a.org_type
-        viewer_teacher_profile.role = ProfileRole.TEACHER
-        viewer_teacher_profile.save()
+        _assign_user_to_org(self.teacher, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.org_a, ProfileRole.STUDENT)
+        _assign_user_to_org(self.viewer_teacher, self.org_a, ProfileRole.TEACHER)
 
         self.assigned_exam = Exam.objects.create(
             author=self.teacher,
@@ -928,14 +982,11 @@ class StudentExamVisibilityFilteringTest(TestCase):
             title="Assigned But Other Tenant",
             is_active=True,
             is_public=False,
-            organization_id=999,
+            organization=self.org_b,
         )
         self.other_tenant_exam.allowed_users.add(self.student)
 
-        self.client.force_login(self.student)
-        session = self.client.session
-        session["active_organization"] = self.org_a.slug
-        session.save()
+        _login_with_org(self.client, self.student, self.org_a)
 
     def test_student_available_exam_list_includes_public_exams_in_active_tenant(self):
         response = self.client.get(reverse("exams:student_exam_list"), {"q": self.course_assigned_exam.title})
@@ -1132,7 +1183,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
             is_active=True,
             is_public=False,
             access_code="654321",
-            organization_id=999,
+            organization=self.org_b,
         )
         code_exam.allowed_users.add(self.student)
 
@@ -1156,15 +1207,12 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_public_exams_are_visible_to_other_authenticated_roles(self):
-        self.client.force_login(self.viewer_teacher)
-        session = self.client.session
-        session["active_organization"] = self.org_a.slug
-        session.save()
+        _login_with_org(self.client, self.viewer_teacher, self.org_a)
         teacher_response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(teacher_response.status_code, 200)
         self.assertContains(teacher_response, self.unassigned_public_exam.title)
 
-        self.client.force_login(self.superadmin)
+        _login_with_org(self.client, self.superadmin, self.org_a)
         superadmin_response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(superadmin_response.status_code, 200)
         self.assertContains(superadmin_response, self.unassigned_public_exam.title)
@@ -1307,9 +1355,15 @@ class TeacherViewAttemptSearchPaginationTest(TestCase):
             password="StrongPass123!",
         )
 
-        profile = self.teacher.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="View Attempt Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.exam = Exam.objects.create(
             author=self.teacher,
@@ -1347,7 +1401,7 @@ class TeacherViewAttemptSearchPaginationTest(TestCase):
             )
             answer.selected_options.add(correct_option)
 
-        self.client.force_login(self.teacher)
+        _login_with_org(self.client, self.teacher, self.organization)
 
     def test_teacher_view_attempt_supports_search_and_questions_pagination(self):
         response = self.client.get(
@@ -1404,13 +1458,15 @@ class StudentExamResultVisibilityWindowTest(TestCase):
             password="StrongPass123!",
         )
 
-        teacher_profile = self.teacher.profile
-        teacher_profile.role = ProfileRole.TEACHER
-        teacher_profile.save(update_fields=["role", "updated_at"])
-
-        student_profile = self.student.profile
-        student_profile.role = ProfileRole.STUDENT
-        student_profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Exam Result Visibility Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
         self.exam = Exam.objects.create(
             author=self.teacher,
@@ -1427,7 +1483,7 @@ class StudentExamResultVisibilityWindowTest(TestCase):
             teacher_checked_at=timezone.now(),
         )
 
-        self.client.force_login(self.student)
+        _login_with_org(self.client, self.student, self.organization)
 
     def test_exam_result_hidden_while_teacher_review_window_open(self):
         response = self.client.get(reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]))
@@ -1450,9 +1506,14 @@ class TeacherQuestionsBankViewTest(TestCase):
             password="StrongPass123!",
         )
 
-        profile = self.teacher.profile
-        profile.role = ProfileRole.TEACHER
-        profile.save(update_fields=["role", "updated_at"])
+        self.organization = Organization.objects.create(
+            name="Questions Bank Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
 
         self.exam = Exam.objects.create(
             author=self.teacher,
@@ -1475,7 +1536,7 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.questions[2].is_active = False
         self.questions[2].save(update_fields=["is_active"])
 
-        self.client.force_login(self.teacher)
+        _login_with_org(self.client, self.teacher, self.organization)
 
     def test_questions_bank_supports_search_status_filter_and_pagination(self):
         response = self.client.get(

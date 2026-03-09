@@ -142,6 +142,14 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("accounts:public_profile", args=[self.student.username]))
 
+    def test_post_detail_renders_back_link_with_public_profile_fallback(self):
+        response = self.client.get(reverse("post_detail", args=[self.teacher_post.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Geri qayıt")
+        self.assertContains(response, reverse("accounts:public_profile", args=[self.teacher.username]))
+        self.assertContains(response, "window.history.back()")
+
     def test_author_can_create_post_via_ajax(self):
         self.client.force_login(self.teacher)
         response = self.client.post(

@@ -509,7 +509,13 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         free_other_profile.requested_organization_name = self.org_b.name
         free_other_profile.save()
 
-        self.client.force_login(self.admin_user)
+        self._activate_org_session(self.admin_user, self.org_a)
+
+    def _activate_org_session(self, user, organization):
+        self.client.force_login(user)
+        session = self.client.session
+        session["active_organization"] = organization.slug
+        session.save()
 
     def test_org_admin_can_assign_roles_only_inside_own_tenant(self):
         fallback_next = f"{reverse('accounts:profile')}?section=role-assignment"
@@ -683,7 +689,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         high_actor_profile.role = ProfileRole.ORG_ADMIN
         high_actor_profile.save()
 
-        self.client.force_login(high_actor)
+        self._activate_org_session(high_actor, self.org_a)
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -746,7 +752,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         actor_profile.role = ProfileRole.ORG_ADMIN
         actor_profile.save()
 
-        self.client.force_login(actor)
+        self._activate_org_session(actor, self.org_a)
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -771,10 +777,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         super_profile.role = ProfileRole.SUPERADMIN
         super_profile.save()
 
-        session = self.client.session
-        session["active_organization"] = self.org_a.slug
-        session.save()
-        self.client.force_login(superadmin)
+        self._activate_org_session(superadmin, self.org_a)
 
         response = self.client.post(
             reverse("accounts:role_assignment"),
@@ -1168,7 +1171,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(student_profile.requested_organization_name, self.org_a.name)
         self.assertEqual(student_profile.requested_organization_message, "Mən bu təşkilata qoşulmaq istəyirəm.")
 
-        self.client.force_login(self.admin_user)
+        self._activate_org_session(self.admin_user, self.org_a)
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mən bu təşkilata qoşulmaq istəyirəm.")
@@ -1289,7 +1292,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             },
         )
 
-        self.client.force_login(self.admin_user)
+        self._activate_org_session(self.admin_user, self.org_a)
         approve_response = self.client.post(
             reverse("accounts:student_organization_management"),
             {
@@ -1334,10 +1337,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         org_b_admin_profile.role = ProfileRole.ORG_ADMIN
         org_b_admin_profile.save()
 
-        self.client.force_login(org_b_admin)
-        session = self.client.session
-        session["active_organization"] = self.org_b.slug
-        session.save()
+        self._activate_org_session(org_b_admin, self.org_b)
         management_response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(management_response.status_code, 200)
         self.assertContains(management_response, f"İstifadəçi artıq {self.org_a.name} təşkilatının üzvüdür.")
@@ -1361,7 +1361,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         teacher_profile.role = ProfileRole.TEACHER
         teacher_profile.save()
 
-        self.client.force_login(teacher_user)
+        self._activate_org_session(teacher_user, self.org_a)
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertRedirects(response, reverse("accounts:profile"))
 
@@ -1384,7 +1384,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         student_profile.role = ProfileRole.STUDENT
         student_profile.save()
 
-        self.client.force_login(student_user)
+        self._activate_org_session(student_user, self.org_a)
         response = self.client.post(
             reverse("accounts:student_leave_organization"),
             {
@@ -1426,7 +1426,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         teacher_profile.role = ProfileRole.TEACHER
         teacher_profile.save()
 
-        self.client.force_login(teacher_user)
+        self._activate_org_session(teacher_user, self.org_a)
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -1490,7 +1490,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         teacher_profile.role = ProfileRole.TEACHER
         teacher_profile.save()
 
-        self.client.force_login(teacher_user)
+        self._activate_org_session(teacher_user, self.org_a)
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -1537,7 +1537,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         teacher_profile.role = ProfileRole.TEACHER
         teacher_profile.save()
 
-        self.client.force_login(teacher_user)
+        self._activate_org_session(teacher_user, self.org_a)
         response = self.client.post(
             reverse("accounts:role_assignment"),
             {
@@ -1594,7 +1594,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         constrained_profile.role = ProfileRole.ORG_ADMIN
         constrained_profile.save()
 
-        self.client.force_login(constrained_admin)
+        self._activate_org_session(constrained_admin, self.org_a)
         response = self.client.post(
             reverse("accounts:permission_editor"),
             {
@@ -1646,7 +1646,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         constrained_profile.role = ProfileRole.ORG_ADMIN
         constrained_profile.save()
 
-        self.client.force_login(constrained_admin)
+        self._activate_org_session(constrained_admin, self.org_a)
         response = self.client.post(
             reverse("accounts:permission_editor"),
             {
@@ -1709,7 +1709,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         owner_profile.role = ProfileRole.ORG_OWNER
         owner_profile.save()
 
-        self.client.force_login(owner_without_membership)
+        self._activate_org_session(owner_without_membership, self.org_a)
         response = self.client.get(reverse("accounts:permission_editor"), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur.")
@@ -1797,7 +1797,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         constrained_profile.role = ProfileRole.ORG_ADMIN
         constrained_profile.save()
 
-        self.client.force_login(constrained_admin)
+        self._activate_org_session(constrained_admin, self.org_a)
         response = self.client.post(
             reverse("accounts:permission_editor"),
             {

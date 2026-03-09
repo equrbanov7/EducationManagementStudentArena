@@ -112,7 +112,16 @@ class ExamTest(TestCase):
     def setUp(self):
         self.author = User.objects.create_user("examauthor", "examauthor@example.com", "StrongPass123!")
         self.author.profile.role = ProfileRole.TEACHER
-        self.author.profile.save(update_fields=["role", "updated_at"])
+        self.org = Organization.objects.create(
+            name="Exam Model Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.author,
+            status="active",
+            is_active=True,
+        )
+        self.author.profile.organization = self.org
+        self.author.profile.organization_type = self.org.org_type
+        self.author.profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
 
     def test_exam_creation(self):
         """Test that Exam can be created."""
@@ -127,6 +136,15 @@ class ExamTest(TestCase):
         self.assertEqual(exam.author, self.author)
         self.assertTrue(exam.is_active)
         self.assertIsNotNone(exam.slug)
+
+    def test_exam_organization_defaults_from_author_profile(self):
+        exam = Exam.objects.create(
+            author=self.author,
+            title="Tenant Bound Exam",
+            is_active=True,
+        )
+
+        self.assertEqual(exam.organization, self.org)
 
     def test_exam_slug_auto_generated(self):
         """Test that slug is auto-generated."""

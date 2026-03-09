@@ -17,7 +17,7 @@ from apps.exams.services.attempts import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
-from core.tenancy import get_organization_int_id
+from core.tenancy import request_has_active_organization_context
 
 
 def _safe_same_origin_redirect_path(request, candidate_url):
@@ -109,6 +109,24 @@ def _ensure_exam_permission(request, permission):
     )
 
 
+def _organization_selection_redirect(request):
+    return redirect(f"{reverse('organizations:select')}?{urlencode({'next': request.get_full_path()})}")
+
+
+def _resolve_required_organization(request):
+    organization = get_active_organization(request)
+    if organization is not None and request_has_active_organization_context(request):
+        return organization
+
+    if not hasattr(request, "session"):
+        raise PermissionDenied(
+            pgettext("exams.view.exams.permission", "missing_required_permission").format(permission="organization")
+        )
+
+    messages.error(request, pgettext_lazy("exams.view.groups.message", "active_org_not_found"))
+    return None
+
+
 def _get_editable_exam_or_404(request, slug):
     exam = tenant_scoped_exams(request, Exam.objects.filter(slug=slug)).first()
     if exam is None:
@@ -176,6 +194,9 @@ def teacher_exam_list(request):
     Müəllimin yaratdığı bütün imtahanların siyahısı.
     """
     _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
     exams = tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
     return render(
         request,
@@ -197,9 +218,12 @@ def createAndEditExamView(request, slug=None):
     slug=<value> -> Mövcud imtahanı redaktə
     """
     _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
+
     required_permission = "exam.edit" if slug else "exam.create"
     _ensure_exam_permission(request, required_permission)
-    organization = get_active_organization(request)
 
     # Əgər slug varsa -> Edit mode
     if slug:
@@ -227,7 +251,7 @@ def createAndEditExamView(request, slug=None):
                 exam_instance.author = request.user
                 if linked_course is not None:
                     exam_instance.course = linked_course
-            exam_instance.organization_id = get_organization_int_id(organization)
+            exam_instance.organization = organization
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
@@ -301,6 +325,9 @@ def teacher_exam_detail(request, slug):
     (sonra bura statistikalar, attempts və s. də əlavə ediləcək).
     """
     _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
     exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
     profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
@@ -325,6 +352,9 @@ def toggle_exam_active(request, slug):
     Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
     """
     _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
     _ensure_exam_permission(request, "exam.edit")
     exam = get_teacher_exam_or_404(request, slug=slug)
 
@@ -341,6 +371,9 @@ def delete_exam(request, slug):
     Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
     """
     _ensure_teacher(request.user)
+    organization = _resolve_required_organization(request)
+    if organization is None:
+        return _organization_selection_redirect(request)
     _ensure_exam_permission(request, "exam.delete")
     exam = _get_editable_exam_or_404(request, slug)
 

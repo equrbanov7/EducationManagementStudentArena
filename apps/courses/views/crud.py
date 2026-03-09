@@ -23,7 +23,7 @@ from django.views.generic import CreateView, ListView, UpdateView, View
 from apps.courses.forms import CourseForm
 from apps.courses.models import Course
 from core.helpers import _safe_same_origin_redirect_path
-from core.tenancy import get_organization_int_id, get_request_organization
+from core.tenancy import get_request_organization
 
 from ._helpers import IsCourseOwnerMixin, IsTeacherMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
 
@@ -61,8 +61,7 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         _require_org_permission(self.request, "course.create")
         form.instance.owner = self.request.user
         form.instance.status = "draft"
-        organization = get_request_organization(self.request)
-        form.instance.organization_id = get_organization_int_id(organization)
+        form.instance.organization = get_request_organization(self.request)
         super().form_valid(form)
         messages.success(
             self.request,
@@ -109,6 +108,8 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
     pk_url_kwarg = "course_id"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         _require_org_permission(request, "course.edit")
         return super().dispatch(request, *args, **kwargs)
 
