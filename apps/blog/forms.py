@@ -7,6 +7,7 @@ from django.utils.translation import pgettext_lazy
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Comment, Post, Question
+from .services import can_user_create_post_category
 
 
 class SubscriptionForm(forms.Form):
@@ -141,11 +142,21 @@ class PostForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        author = kwargs.pop("author", None)
         super().__init__(*args, **kwargs)
+        self.allow_new_category = can_user_create_post_category(author)
         self.fields["category"].required = False
         self.fields["category"].empty_label = pgettext_lazy("blog.form.post", "category_empty_label")
         self.fields["image"].required = False
         self.fields["image_url"].required = False
+        if not self.allow_new_category:
+            self.fields["new_category"].widget = forms.HiddenInput()
+
+    def clean_new_category(self):
+        new_category = (self.cleaned_data.get("new_category") or "").strip()
+        if new_category and not self.allow_new_category:
+            raise forms.ValidationError("Yeni kateqoriya yaratmaq üçün müəllim və ya daha yüksək rol tələb olunur.")
+        return new_category
 
     def clean_image(self):
         image = self.cleaned_data.get("image")

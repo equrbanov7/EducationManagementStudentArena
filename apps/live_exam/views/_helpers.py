@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from asgiref.sync import async_to_sync
+from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
@@ -108,13 +109,21 @@ def _broadcast(pin: str, payload: dict, group_suffix: str) -> None:
       - LiveLobbyConsumer -> lobby_event
       - LivePlayConsumer  -> play_event
     """
-    layer = get_channel_layer()
+    try:
+        layer = get_channel_layer()
+    except (InvalidChannelLayerError, ModuleNotFoundError):
+        return
+    if layer is None:
+        return
     event_type = "play_event" if group_suffix == "play" else "lobby_event"
 
-    async_to_sync(layer.group_send)(
-        f"live_{pin}_{group_suffix}",
-        {"type": event_type, "data": payload},
-    )
+    try:
+        async_to_sync(layer.group_send)(
+            f"live_{pin}_{group_suffix}",
+            {"type": event_type, "data": payload},
+        )
+    except (InvalidChannelLayerError, ModuleNotFoundError):
+        return
 
 
 # ════════════════════════════════════════════════════════════════════════════

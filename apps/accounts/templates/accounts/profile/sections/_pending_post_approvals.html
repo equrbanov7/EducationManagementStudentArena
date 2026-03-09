@@ -71,7 +71,31 @@
                             {% if item.post.excerpt %}
                                 <p class="pending-post-text pending-post-text--excerpt">{{ item.post.excerpt|truncatechars:200 }}</p>
                             {% endif %}
-                            <p class="pending-post-text">{{ item.post.content|truncatechars:260 }}</p>
+
+                            {% with content_length=item.post.content|length %}
+                                <div class="pending-post-content" data-pending-post-content>
+                                    {% if content_length > 320 %}
+                                        <div class="pending-post-text pending-post-text--content-preview" data-pending-post-preview>
+                                            {{ item.post.content|truncatechars:320|linebreaksbr }}
+                                        </div>
+                                        <div class="pending-post-text pending-post-text--content-full" data-pending-post-full hidden>
+                                            {{ item.post.content|linebreaksbr }}
+                                        </div>
+                                        <button type="button"
+                                                class="pending-post-content-toggle"
+                                                data-pending-post-toggle
+                                                data-collapsed-label="Show more"
+                                                data-expanded-label="Show less"
+                                                aria-expanded="false">
+                                            Show more
+                                        </button>
+                                    {% else %}
+                                        <div class="pending-post-text pending-post-text--content-full">
+                                            {{ item.post.content|linebreaksbr }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endwith %}
 
                             {% if item.post.get_image %}
                                 <div class="pending-post-preview">
@@ -167,6 +191,36 @@
 
         selects.forEach(function (select) {
             select.addEventListener("change", submitForm);
+        });
+    });
+
+    var toggleButtons = document.querySelectorAll("[data-pending-post-toggle]");
+    toggleButtons.forEach(function (button) {
+        if (!button || button.dataset.toggleBound === "1") {
+            return;
+        }
+        button.dataset.toggleBound = "1";
+
+        button.addEventListener("click", function () {
+            var container = button.closest("[data-pending-post-content]");
+            if (!container) {
+                return;
+            }
+
+            var preview = container.querySelector("[data-pending-post-preview]");
+            var full = container.querySelector("[data-pending-post-full]");
+            if (!preview || !full) {
+                return;
+            }
+
+            var isExpanded = button.getAttribute("aria-expanded") === "true";
+            preview.hidden = !isExpanded;
+            full.hidden = isExpanded;
+            button.setAttribute("aria-expanded", isExpanded ? "false" : "true");
+            button.textContent = isExpanded
+                ? (button.dataset.collapsedLabel || "Show more")
+                : (button.dataset.expandedLabel || "Show less");
+            container.classList.toggle("is-expanded", !isExpanded);
         });
     });
 })();

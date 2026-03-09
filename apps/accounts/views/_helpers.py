@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.core.signing import TimestampSigner
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -232,6 +232,15 @@ def _extract_profile_roles_for_user(user):
     if not user:
         return []
 
+    active_organization = getattr(user, "active_organization", None)
+    if active_organization is not None:
+        scoped_memberships = _materialize_legacy_teacher_membership(
+            user,
+            active_organization,
+            memberships=getattr(user, "_active_org_memberships", None),
+        )
+        _bind_active_role_context(user, active_organization, memberships=scoped_memberships)
+
     roles = []
     if hasattr(user, "get_all_roles"):
         candidates = user.get_all_roles()
@@ -263,7 +272,14 @@ def _assignable_profile_roles_for_user(user):
     ]
 
 
-def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, organization=None):
+def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, organization=None, actor_user=None):
+    actor_user_id = getattr(actor_user, "id", None)
+    owner_self_management_enabled = bool(
+        actor_user_id
+        and organization is not None
+        and getattr(organization, "owner_id", None) == actor_user_id
+    )
+
     for profile in profiles:
         _bind_active_role_context(profile.user, organization)
         current_roles = _extract_profile_roles_for_user(profile.user)
@@ -289,7 +305,12 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, orga
             }
 
         target_level = profile.user._highest_role_level() if hasattr(profile.user, "_highest_role_level") else 0
-        profile.can_edit_roles = is_superadmin or actor_level > target_level
+        is_self_profile = actor_user_id is not None and profile.user_id == actor_user_id
+        profile.can_edit_roles = (
+            is_superadmin
+            or actor_level > target_level
+            or (is_self_profile and owner_self_management_enabled)
+        )
 
 
 def _sync_user_role_memberships(user, organization, desired_role_names, *, actor=None, editable_role_names=None):
@@ -350,6 +371,140 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
 
     _bind_active_role_context(user, organization, memberships=final_memberships)
     return final_memberships
+
+
+def _materialize_legacy_teacher_membership(user, organization=None, *, memberships=None):
+    """
+    Backfill tenant-scoped memberships from the legacy single-org profile.
+
+    Authorization still reads memberships only. This helper simply materializes
+    missing memberships for the profile's legacy organization so older data
+    continues to work inside the same tenant without leaking into others.
+    """
+    from apps.organizations.models import Membership
+
+    if not user or not getattr(user, "is_authenticated", False):
+        return list(memberships or [])
+
+    profile = getattr(user, "profile", None)
+    target_organization = organization or getattr(profile, "organization", None)
+    if profile is None or target_organization is None or getattr(profile, "organization_id", None) != target_organization.id:
+        return list(memberships or [])
+
+    current_memberships = list(memberships) if memberships is not None else list(
+        Membership.objects.filter(user=user, organization=target_organization, is_active=True)
+        .select_related("organization", "role", "scope_unit")
+        .order_by("-is_primary", "-role__level")
+    )
+
+    legacy_profile_role = getattr(profile, "role", None)
+    current_profile_roles = {
+        _map_org_role_to_profile_role(membership.role)
+        for membership in current_memberships
+        if getattr(membership, "is_active", False)
+    }
+
+    desired_primary_role = legacy_profile_role if legacy_profile_role in {
+        ProfileRole.ORG_OWNER,
+        ProfileRole.ORG_ADMIN,
+        ProfileRole.HR,
+        ProfileRole.TEACHER,
+        ProfileRole.ASSISTANT_TEACHER,
+        ProfileRole.STUDENT,
+        ProfileRole.LEAD_STUDENT,
+        ProfileRole.MEMBER,
+    } else None
+
+    primary_role_satisfied = False
+    if desired_primary_role in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
+        primary_role_satisfied = target_organization.owner_id == user.id or any(
+            getattr(getattr(membership, "role", None), "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
+            for membership in current_memberships
+            if getattr(membership, "is_active", False)
+        )
+    elif desired_primary_role == ProfileRole.LEAD_STUDENT:
+        primary_role_satisfied = ProfileRole.STUDENT in current_profile_roles
+    elif desired_primary_role is not None:
+        primary_role_satisfied = desired_primary_role in current_profile_roles
+
+    if desired_primary_role is not None and not primary_role_satisfied:
+        primary_membership_role = _resolve_membership_role(target_organization, desired_primary_role)
+        if primary_membership_role is not None:
+            Membership.objects.update_or_create(
+                user=user,
+                organization=target_organization,
+                role=primary_membership_role,
+                scope_unit=None,
+                defaults={
+                    "is_active": True,
+                    "is_primary": not current_memberships,
+                    "assigned_by": user,
+                },
+            )
+            current_memberships = list(
+                Membership.objects.filter(user=user, organization=target_organization, is_active=True)
+                .select_related("organization", "role", "scope_unit")
+                .order_by("-is_primary", "-role__level")
+            )
+            current_profile_roles = {
+                _map_org_role_to_profile_role(membership.role)
+                for membership in current_memberships
+                if getattr(membership, "is_active", False)
+            }
+
+    has_admin_context = target_organization.owner_id == user.id or any(
+        getattr(getattr(membership, "role", None), "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
+        for membership in current_memberships
+        if getattr(membership, "is_active", False)
+    )
+    if not has_admin_context or legacy_profile_role not in {
+        ProfileRole.ORG_OWNER,
+        ProfileRole.ORG_ADMIN,
+        ProfileRole.TEACHER,
+        ProfileRole.ASSISTANT_TEACHER,
+    }:
+        return current_memberships
+
+    if current_profile_roles & {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
+        return current_memberships
+
+    legacy_role_hints = set()
+    if legacy_profile_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
+        legacy_role_hints.add(legacy_profile_role)
+
+    legacy_group_names = set(
+        user.groups.filter(name__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).values_list("name", flat=True)
+    )
+    legacy_role_hints.update(legacy_group_names)
+
+    if ProfileRole.TEACHER in legacy_role_hints:
+        desired_role_name = ProfileRole.TEACHER
+    elif ProfileRole.ASSISTANT_TEACHER in legacy_role_hints:
+        desired_role_name = ProfileRole.ASSISTANT_TEACHER
+    else:
+        return current_memberships
+
+    membership_role = _resolve_membership_role(target_organization, desired_role_name)
+    if membership_role is None:
+        return current_memberships
+
+    Membership.objects.update_or_create(
+        user=user,
+        organization=target_organization,
+        role=membership_role,
+        scope_unit=None,
+        defaults={
+            "is_active": True,
+            "is_primary": False,
+            "assigned_by": user,
+        },
+    )
+
+    return list(
+        Membership.objects.filter(user=user, organization=target_organization, is_active=True)
+        .select_related("organization", "role", "scope_unit")
+        .order_by("-is_primary", "-role__level")
+    )
 
 
 def _resolve_next_url(request, fallback_url):
@@ -904,6 +1059,120 @@ def _append_query_params(url, **params):
 def _query_string(**params):
     clean_params = {key: value for key, value in params.items() if value not in (None, "")}
     return urlencode(clean_params)
+
+
+def _build_user_organization_access_rows(
+    user,
+    *,
+    active_organization=None,
+    include_active_superadmin_org=False,
+    profile_section="profile-info",
+):
+    from apps.organizations.models import Membership, Organization
+
+    if not user or not getattr(user, "is_authenticated", False):
+        return []
+
+    membership_queryset = (
+        Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
+        .select_related("organization", "organization__owner", "role")
+        .order_by("organization__name", "-is_primary", "-role__level", "role__display_name")
+    )
+
+    grouped_rows = {}
+    for membership in membership_queryset:
+        organization = membership.organization
+        row = grouped_rows.setdefault(
+            organization.id,
+            {
+                "organization": organization,
+                "memberships": [],
+                "role_labels": [],
+                "access_origin": "membership",
+                "is_owner": organization.owner_id == user.id,
+            },
+        )
+        row["memberships"].append(membership)
+        role_label = membership.role.display_name
+        if role_label not in row["role_labels"]:
+            row["role_labels"].append(role_label)
+
+    owned_organizations = Organization.objects.filter(owner=user, is_active=True).select_related("owner").order_by("name")
+    for organization in owned_organizations:
+        row = grouped_rows.setdefault(
+            organization.id,
+            {
+                "organization": organization,
+                "memberships": [],
+                "role_labels": [],
+                "access_origin": "owner",
+                "is_owner": True,
+            },
+        )
+        row["is_owner"] = True
+        if PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER] not in row["role_labels"]:
+            row["role_labels"].insert(0, PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER])
+        if row["access_origin"] != "membership":
+            row["access_origin"] = "owner"
+
+    if (
+        include_active_superadmin_org
+        and _is_superadmin_user(user)
+        and active_organization is not None
+        and getattr(active_organization, "is_active", False)
+        and active_organization.id not in grouped_rows
+    ):
+        grouped_rows[active_organization.id] = {
+            "organization": active_organization,
+            "memberships": [],
+            "role_labels": [PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN]],
+            "access_origin": "superadmin",
+            "is_owner": active_organization.owner_id == user.id,
+        }
+
+    org_ids = list(grouped_rows.keys())
+    member_counts = {}
+    if org_ids:
+        member_counts = {
+            row["organization_id"]: row["member_count"]
+            for row in Membership.objects.filter(organization_id__in=org_ids, is_active=True)
+            .values("organization_id")
+            .annotate(member_count=Count("id"))
+        }
+
+    section_url = _append_query_params(reverse("accounts:profile"), section=profile_section)
+    rows = []
+    for row in grouped_rows.values():
+        organization = row["organization"]
+        if row["access_origin"] == "superadmin" and PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN] not in row["role_labels"]:
+            row["role_labels"].insert(0, PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN])
+        if row["is_owner"] and PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER] not in row["role_labels"]:
+            row["role_labels"].insert(0, PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER])
+
+        row["is_current"] = active_organization is not None and organization.id == active_organization.id
+        row["member_count"] = member_counts.get(organization.id, 0)
+        row["status_label"] = (
+            "Aktiv"
+            if organization.is_active and organization.status == "active"
+            else ("Dayandırılıb" if organization.is_suspended else "Qeyri-aktiv")
+        )
+        row["switch_url"] = _append_query_params(
+            reverse("organizations:switch", kwargs={"slug": organization.slug}),
+            next=section_url,
+        )
+        row["dashboard_url"] = reverse("organizations:dashboard", kwargs={"slug": organization.slug})
+        row["members_url"] = reverse("organizations:members", kwargs={"slug": organization.slug})
+        row["roles_url"] = reverse("organizations:roles", kwargs={"slug": organization.slug})
+        row["settings_url"] = reverse("organizations:settings", kwargs={"slug": organization.slug})
+        rows.append(row)
+
+    rows.sort(
+        key=lambda item: (
+            not item["is_current"],
+            item["organization"].name.lower(),
+        )
+    )
+    return rows
 
 
 def _build_student_org_management_section(*, request, organization, is_superadmin, user_level):

@@ -47,6 +47,7 @@
                     <div class="post-form-field-error">{{ form.category.errors.0 }}</div>
                 {% endif %}
 
+                {% if can_create_categories %}
                 <div style="text-align: center; margin: 10px 0; color: #888; font-size: 0.8em; font-weight: bold; text-transform: uppercase;">
                     {% trans "or_create_new" context "blog.post_form_page" %}
                 </div>
@@ -54,6 +55,14 @@
                 {{ form.new_category }}
                 {% if form.new_category.errors %}
                     <div class="post-form-field-error">{{ form.new_category.errors.0 }}</div>
+                {% endif %}
+                {% else %}
+                    <div style="margin-top: 10px; color: #64748b; font-size: 0.9em;">
+                        Mövcud kateqoriyalardan birini seçə bilərsiniz. Yeni kateqoriya yaratmaq yalnız müəllim və daha yüksək rollar üçündür.
+                    </div>
+                    {% if form.new_category.errors %}
+                        <div class="post-form-field-error">{{ form.new_category.errors.0 }}</div>
+                    {% endif %}
                 {% endif %}
             </div>
 

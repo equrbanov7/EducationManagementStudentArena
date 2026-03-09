@@ -2,9 +2,12 @@
 Views for the organizations app.
 """
 
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.helpers import _safe_same_origin_redirect_path
@@ -12,11 +15,26 @@ from core.helpers import _safe_same_origin_redirect_path
 from .models import Organization
 
 
+def _can_access_organization(user, organization):
+    if not getattr(user, "is_authenticated", False):
+        return False
+
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+
+    if getattr(organization, "owner_id", None) == user.id:
+        return True
+
+    return user.memberships.filter(organization=organization, is_active=True).exists()
+
+
 @login_required
 def select_organization(request):
     """
     View for selecting/switching active organization.
     """
+    is_superadmin = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+
     # Get all organizations user is a member of
     user_memberships = request.user.memberships.filter(is_active=True).select_related("organization", "role")
 
@@ -31,8 +49,43 @@ def select_organization(request):
                 }
             organizations[org.id]["memberships"].append(membership)
 
+    owned_organizations = Organization.objects.filter(owner=request.user, is_active=True).order_by("name")
+    for organization in owned_organizations:
+        organizations.setdefault(
+            organization.id,
+            {
+                "organization": organization,
+                "memberships": [],
+            },
+        )
+
+    if is_superadmin:
+        for organization in Organization.objects.filter(is_active=True).select_related("owner").order_by("name"):
+            organizations.setdefault(
+                organization.id,
+                {
+                    "organization": organization,
+                    "memberships": [],
+                },
+            )
+
+    next_url = request.GET.get("next", "")
+    for org_data in organizations.values():
+        role_labels = [membership.role.display_name for membership in org_data["memberships"]]
+        if org_data["organization"].owner_id == request.user.id and "Təşkilat Sahibi" not in role_labels:
+            role_labels.insert(0, "Təşkilat Sahibi")
+        if is_superadmin and not role_labels:
+            role_labels.append("Super Admin")
+        org_data["role_labels"] = role_labels
+        default_next_url = reverse("organizations:dashboard", kwargs={"slug": org_data["organization"].slug})
+        target_next_url = next_url or default_next_url
+        org_data["switch_url"] = "{}?{}".format(
+            reverse("organizations:switch", kwargs={"slug": org_data["organization"].slug}),
+            urlencode({"next": target_next_url}),
+        )
+
     context = {
-        "organizations": list(organizations.values()),
+        "organizations": sorted(organizations.values(), key=lambda item: item["organization"].name.lower()),
         "current_org": request.organization,
     }
 
@@ -47,10 +100,7 @@ def switch_organization(request, slug):
     # Verify user has access to this organization
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user is a member
-    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
-
-    if not has_membership:
+    if not _can_access_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -66,7 +116,7 @@ def switch_organization(request, slug):
     safe_path = _safe_same_origin_redirect_path(request, next_url)
     if safe_path:
         return redirect(safe_path)
-    return redirect("/")
+    return redirect("organizations:dashboard", slug=organization.slug)
 
 
 # Sprint 6: Dashboard and Management Views
@@ -81,10 +131,7 @@ def organization_dashboard(request, slug):
 
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user has access
-    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
-
-    if not has_membership:
+    if not _can_access_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -123,10 +170,7 @@ def organization_structure(request, slug):
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user has access
-    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
-
-    if not has_membership:
+    if not _can_access_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -150,10 +194,7 @@ def organization_members(request, slug):
 
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user has access
-    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
-
-    if not has_membership:
+    if not _can_access_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -196,10 +237,7 @@ def organization_roles(request, slug):
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user has access
-    has_membership = request.user.memberships.filter(organization=organization, is_active=True).exists()
-
-    if not has_membership:
+    if not _can_access_organization(request.user, organization):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
@@ -225,10 +263,14 @@ def organization_settings(request, slug):
     """
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
 
-    # Check if user has access and is owner
+    if not _can_access_organization(request.user, organization):
+        messages.error(request, pgettext("organizations.views.message", "no_org_access"))
+        return redirect("organizations:select")
+
+    is_superadmin = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
     is_owner = organization.owner == request.user
 
-    if not is_owner:
+    if not is_superadmin and not is_owner:
         # Check if user has admin role
         has_admin = request.user.memberships.filter(
             organization=organization, role__level__gte=90, is_active=True
@@ -252,7 +294,7 @@ def organization_settings(request, slug):
 
     context = {
         "organization": organization,
-        "is_owner": is_owner,
+        "is_owner": is_owner or is_superadmin,
     }
 
     return render(request, "organizations/settings.html", context)

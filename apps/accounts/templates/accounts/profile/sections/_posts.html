@@ -144,11 +144,21 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="createNewCategory">{% trans "label_new_category" context "profile.posts" %}</label>
-                        <input type="text" id="createNewCategory" name="new_category" class="form-control"
-                               placeholder="{% trans 'placeholder_new_category' context 'profile.posts' %}">
-                    </div>
+                    {% if can_create_post_categories %}
+                        <div class="form-group">
+                            <label for="createNewCategory">{% trans "label_new_category" context "profile.posts" %}</label>
+                            <input type="text" id="createNewCategory" name="new_category" class="form-control"
+                                   placeholder="{% trans 'placeholder_new_category' context 'profile.posts' %}">
+                        </div>
+                    {% else %}
+                        <div class="form-group">
+                            <div class="approval-lock-row">
+                                <i class="fas fa-tag"></i>
+                                <span>Mövcud kateqoriyalardan birini seçə bilərsiniz.</span>
+                            </div>
+                            <small class="approval-help-text">Yeni kateqoriya yaratmaq yalnız müəllim və daha yüksək rollar üçündür.</small>
+                        </div>
+                    {% endif %}
 
                     <div class="form-group">
                         <label for="createExcerpt">{% trans "label_excerpt" context "profile.posts" %}</label>

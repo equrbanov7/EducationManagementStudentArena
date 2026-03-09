@@ -49,6 +49,7 @@ from ._helpers import (
     _assigned_courses_queryset,
     _assigned_exams_queryset,
     _bind_active_role_context,
+    _build_user_organization_access_rows,
     _build_student_org_management_section,
     _build_student_org_request_section,
     _collect_actor_permissions,
@@ -96,6 +97,7 @@ def user_profile(request):
     from apps.blog.models import Category, Post
     from apps.blog.services import (
         author_requires_post_approval,
+        can_user_create_post_category,
         collect_reviewable_posts,
         count_pending_reviewable_posts,
     )
@@ -235,6 +237,13 @@ def user_profile(request):
 
     # Get user's roles
     user_roles = request.user.get_all_roles() if hasattr(request.user, "get_all_roles") else []
+    active_organization = _get_active_organization(request)
+    organization_access_rows = _build_user_organization_access_rows(
+        request.user,
+        active_organization=active_organization,
+        include_active_superadmin_org=capabilities["is_superadmin"],
+        profile_section="superadmin-organizations" if capabilities["is_superadmin"] else "profile-info",
+    )
 
     teacher_courses = _tenant_scoped_courses(request, Course.objects.filter(owner=request.user))
     created_courses_qs = teacher_courses.order_by("-created_at")
@@ -263,6 +272,7 @@ def user_profile(request):
     posts_count = 0
     categories = []
     post_creation_requires_approval = False
+    can_create_post_categories = False
     if capabilities["can_manage_blog"]:
         user_posts_qs = (
             Post.objects.filter(author=request.user)
@@ -274,6 +284,7 @@ def user_profile(request):
         user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
         categories = Category.objects.all().order_by("name")
         post_creation_requires_approval = author_requires_post_approval(request.user)
+        can_create_post_categories = can_user_create_post_category(request.user)
 
     assigned_exams_count = 0
     assigned_courses_count = 0
@@ -438,7 +449,6 @@ def user_profile(request):
     can_multi_assign_group_teachers = False
     groups_section_return_url = f"{reverse('accounts:profile')}?section=groups"
     if "groups" in allowed_sections:
-        active_organization = _get_active_organization(request)
         if active_organization is not None:
             current_role_level = (
                 request.user._highest_role_level()
@@ -607,6 +617,7 @@ def user_profile(request):
     }
     superadmin_organizations_section = {
         "organizations": [],
+        "organization_access_rows": [],
         "all_modules": [],
         "organizations_page_param": "superadmin_org_page",
         "organizations_pagination_query": "",
@@ -860,6 +871,7 @@ def user_profile(request):
             actor_level=manage_roles_user_level,
             is_superadmin=capabilities["is_superadmin"],
             organization=manage_roles_org,
+            actor_user=request.user,
         )
 
         manage_roles_section["profiles"] = manage_roles_page_obj
@@ -880,6 +892,7 @@ def user_profile(request):
         superadmin_organizations_section["organizations"] = Paginator(superadmin_organizations_queryset, 12).get_page(
             superadmin_org_page
         )
+        superadmin_organizations_section["organization_access_rows"] = organization_access_rows
         superadmin_organizations_section["all_modules"] = [
             "accounts",
             "organizations",
@@ -963,6 +976,7 @@ def user_profile(request):
         "posts_count": posts_count,
         "categories": categories,
         "post_creation_requires_approval": post_creation_requires_approval,
+        "can_create_post_categories": can_create_post_categories,
         "my_courses": my_courses,
         "courses_count": courses_count,
         "my_exams": my_exams,
@@ -992,6 +1006,7 @@ def user_profile(request):
         "teacher_groups": teacher_groups,
         "teacher_groups_count": teacher_groups_count,
         "teacher_groups_payload": teacher_groups_payload,
+        "organization_access_rows": organization_access_rows,
         "student_member_groups": student_member_groups,
         "student_member_groups_count": student_member_groups_count,
         "student_member_groups_more_count": student_member_groups_more_count,

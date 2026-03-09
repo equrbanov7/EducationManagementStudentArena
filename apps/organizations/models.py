@@ -132,7 +132,7 @@ class Organization(UUIDModel, TimeStampedModel):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("organizations:detail", kwargs={"slug": self.slug})
+        return reverse("organizations:dashboard", kwargs={"slug": self.slug})
 
     @property
     def is_suspended(self):

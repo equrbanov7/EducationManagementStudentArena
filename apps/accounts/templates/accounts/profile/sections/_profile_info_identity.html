@@ -76,6 +76,54 @@
         </div>
         {% endif %}
 
+        {% if organization_access_rows %}
+        {% if is_superadmin or can_manage_org or organization_access_rows|length > 1 %}
+        <div class="section-card mb-3">
+            <div class="section-title">
+                <i class="fas fa-building"></i>
+                <span>Təşkilat girişləri</span>
+            </div>
+            <div class="d-grid gap-3">
+                {% for org_access in organization_access_rows %}
+                <div class="border rounded-3 p-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="fw-semibold">{{ org_access.organization.name }}</div>
+                            <div class="text-muted small mt-1">
+                                {{ org_access.organization.get_org_type_display }} · Owner: {{ org_access.organization.owner.username }} · Üzv sayı: {{ org_access.member_count }}
+                            </div>
+                            <div class="text-muted small">
+                                Status: {{ org_access.status_label }}
+                                {% if org_access.organization.organization_identifier %} · Kod: {{ org_access.organization.organization_identifier }}{% endif %}
+                                {% if org_access.organization.license_identifier %} · Lisenziya: {{ org_access.organization.license_identifier }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if org_access.is_current %}
+                            <span class="role-badge role-success">Aktiv təşkilat</span>
+                            {% else %}
+                            <a href="{{ org_access.switch_url }}" class="btn btn-sm btn-outline-primary">Aktiv et</a>
+                            {% endif %}
+                            <a href="{{ org_access.dashboard_url }}" class="btn btn-sm btn-outline-secondary">Panel</a>
+                            <a href="{{ org_access.members_url }}" class="btn btn-sm btn-outline-secondary">Üzvlər</a>
+                            <a href="{{ org_access.roles_url }}" class="btn btn-sm btn-outline-secondary">Rollar</a>
+                        </div>
+                    </div>
+                    <div class="role-badges mt-3">
+                        {% for role_label in org_access.role_labels %}
+                        <span class="role-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            {{ role_label }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
         <div class="section-title">
             <i class="fas fa-address-card"></i>
             <span>{% trans "personal_info" context "profile.info" %}</span>

@@ -20,7 +20,10 @@ class OrganizationMiddleware:
 
         # Only process for authenticated users
         if request.user.is_authenticated:
+            from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
             from .models import Organization
+
+            _materialize_legacy_teacher_membership(request.user)
 
             # Get organization from session (set by organization selector)
             org_slug = request.session.get("active_organization")
@@ -78,6 +81,12 @@ class OrganizationMiddleware:
                     ]
 
             if request.organization:
+                request.org_memberships = _materialize_legacy_teacher_membership(
+                    request.user,
+                    request.organization,
+                    memberships=request.org_memberships,
+                )
+
                 # Collect all permissions from memberships
                 permissions_set = set()
                 for membership in request.org_memberships:
