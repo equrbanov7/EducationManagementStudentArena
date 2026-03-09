@@ -20,9 +20,9 @@ from apps.live_exam.models import LiveSession
 
 from ._helpers import (
     _broadcast,
-    _build_join_url,
     _build_question_payload,
     _get_exam_question_ids,
+    _get_public_base_url,
     _get_question_by_index,
     _get_total_questions,
     _safe_int,
@@ -56,7 +56,7 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    join_url = _build_join_url(request, session)
+    entry_url = f"{_get_public_base_url(request)}{reverse('liveExam:pin_entry')}"
 
     exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
 
@@ -69,7 +69,7 @@ def live_host_lobby(request, pin):
 
     context = {
         "session": session,
-        "join_url": join_url,
+        "entry_url": entry_url,
         "qr_url": reverse("liveExam:qr_png", kwargs={"pin": session.pin}),
         "total_questions": selected,
         "exam_total_questions": exam_total,

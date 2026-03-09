@@ -31,6 +31,7 @@ class LiveExamViewsImportTest(TestCase):
         self.assertTrue(hasattr(views, "host_finish"))
 
         # Player views
+        self.assertTrue(hasattr(views, "live_pin_entry"))
         self.assertTrue(hasattr(views, "live_join_page"))
         self.assertTrue(hasattr(views, "live_join_enter"))
         self.assertTrue(hasattr(views, "live_qr_png"))
@@ -161,6 +162,24 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("session", response.context)
         self.assertEqual(response.context["session"], self.session)
+
+    def test_pin_entry_page_accessible(self):
+        """Test that the generic PIN entry page is accessible."""
+        response = self.client.get(reverse("liveExam:pin_entry"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("copy", response.context)
+
+    def test_pin_entry_redirects_to_join_page_for_valid_pin(self):
+        """Test that a valid PIN redirects to the session join page."""
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": self.session.pin})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_pin_entry_shows_error_for_unknown_pin(self):
+        """Test that an unknown PIN returns a friendly validation page."""
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "999999", status_code=404)
 
     def test_join_enter_requires_nickname(self):
         """Test that joining requires a nickname."""
@@ -441,6 +460,7 @@ class URLPatternTest(TestCase):
         """Test that all URL patterns resolve correctly."""
         urls_to_test = [
             ("liveExam:create_session_slug", {"slug": self.exam.slug}),
+            ("liveExam:pin_entry", {}),
             ("liveExam:host_lobby", {"pin": self.session.pin}),
             ("liveExam:host_start_game", {"pin": self.session.pin}),
             ("liveExam:host_next_question", {"pin": self.session.pin}),

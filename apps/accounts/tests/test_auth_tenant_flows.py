@@ -22,7 +22,10 @@ class SignupAndLoginFlowTest(TestCase):
         self.register_url = reverse("accounts:register")
         self.login_url = reverse("accounts:login")
         self.verify_code_url = reverse("accounts:verify_code")
-        self.az = Country.objects.get(code="AZ")
+        self.az, _ = Country.objects.get_or_create(
+            code="AZ",
+            defaults={"name": "Azerbaijan", "is_active": True},
+        )
 
     def _register_payload(self, **overrides):
         payload = {

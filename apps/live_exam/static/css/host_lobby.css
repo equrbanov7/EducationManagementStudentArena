@@ -69,7 +69,19 @@ body {
 
 .link-box { text-align: left; }
 .link-box small { opacity: 0.8; display: block; margin-bottom: 4px; }
-.link-box a { color: #fef3c7; font-size: 1.4rem; font-weight: 700; text-decoration: none; }
+.link-box a {
+    color: #fef3c7;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    word-break: break-all;
+}
+.pin-inline {
+    margin-top: 8px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    CONTROL BAR

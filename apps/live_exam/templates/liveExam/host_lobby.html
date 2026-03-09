@@ -21,7 +21,8 @@
             </div>
             <div class="link-box">
                 <small>{% trans "join_info_label" context "live_exam.host_lobby" %}</small>
-                <a href="{{ join_url }}" target="_blank">LearnHub.it / {{ session.pin }}</a>
+                <a href="{{ entry_url }}" target="_blank" rel="noopener">{{ entry_url }}</a>
+                <div class="pin-inline">PIN: {{ session.pin }}</div>
             </div>
         </div>
     </header>

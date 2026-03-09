@@ -11,6 +11,7 @@ urlpatterns = [
         views.live_create_session_by_slug,
         name="create_session_slug",
     ),
+    path("live/", views.live_pin_entry, name="pin_entry"),
     # Host lobby + idarəetmə
     path("live/host/<str:pin>/", views.live_host_lobby, name="host_lobby"),
     path("live/host/<str:pin>/start/", views.host_start_game, name="host_start_game"),

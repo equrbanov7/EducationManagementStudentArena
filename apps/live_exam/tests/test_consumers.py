@@ -6,18 +6,26 @@ from asgiref.sync import async_to_sync
 from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TransactionTestCase
+from django.test import override_settings
+from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
-from apps.exams.models import Exam
+from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
-from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from config.asgi import application
 
 User = get_user_model()
 
+TEST_CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
-class LiveExamConsumerAuthTest(TestCase):
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class LiveExamConsumerAuthTest(TransactionTestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("consumer_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
@@ -119,3 +127,303 @@ class LiveExamConsumerAuthTest(TestCase):
 
         connected = async_to_sync(scenario)()
         self.assertTrue(connected)
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
+    def setUp(self):
+        self.teacher = User.objects.create_user("answer_teacher", "answer@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Answer Validation Exam",
+            slug="answer-validation-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.other_exam = Exam.objects.create(
+            title="Other Exam",
+            slug="other-answer-validation-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Current question",
+            order=1,
+            points=10,
+        )
+        self.correct_option = ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Correct",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Wrong",
+            is_correct=False,
+        )
+
+        self.other_question_same_exam = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Not current",
+            order=2,
+            points=10,
+        )
+        self.other_option_same_exam = ExamQuestionOption.objects.create(
+            question=self.other_question_same_exam,
+            text="Other question option",
+            is_correct=True,
+        )
+
+        self.cross_exam_question = ExamQuestion.objects.create(
+            exam=self.other_exam,
+            text="Cross exam question",
+            order=1,
+            points=10,
+        )
+        self.cross_exam_option = ExamQuestionOption.objects.create(
+            question=self.cross_exam_question,
+            text="Cross exam option",
+            is_correct=True,
+        )
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now - timezone.timedelta(seconds=1)
+        self.session.question_ends_at = now + timezone.timedelta(seconds=15)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Player One",
+            avatar_key="avatar_1",
+            client_id="player-one-client",
+        )
+
+    def _player_headers(self, player):
+        token = build_player_token(
+            pin=self.session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+        return [(b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
+
+    def _host_and_player_headers(self, player):
+        host_client = Client()
+        host_client.login(username="answer_teacher", password="StrongPass123!")
+        session_cookie = host_client.cookies[settings.SESSION_COOKIE_NAME].value
+        player_cookie = build_player_token(
+            pin=self.session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+        return [
+            (
+                b"cookie",
+                (
+                    f"{settings.SESSION_COOKIE_NAME}={session_cookie}; "
+                    f"{PLAYER_COOKIE_NAME}={player_cookie}"
+                ).encode(),
+            )
+        ]
+
+    def test_play_ws_rejects_non_current_question_answers(self):
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.other_question_same_exam.id,
+                        "option_id": self.other_option_same_exam.id,
+                        "answer_ms": 250,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "error")
+        self.assertEqual(LiveAnswer.objects.count(), 0)
+
+    def test_play_ws_rejects_late_answers(self):
+        now = timezone.now()
+        self.session.question_started_at = now - timezone.timedelta(seconds=20)
+        self.session.question_ends_at = now - timezone.timedelta(seconds=1)
+        self.session.save(update_fields=["question_started_at", "question_ends_at"])
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 250,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "error")
+        self.assertEqual(LiveAnswer.objects.count(), 0)
+
+    def test_play_ws_rejects_cross_exam_answers(self):
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.cross_exam_question.id,
+                        "option_id": self.cross_exam_option.id,
+                        "answer_ms": 250,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "error")
+        self.assertEqual(LiveAnswer.objects.count(), 0)
+
+    def test_play_ws_reveals_immediately_after_all_players_answer(self):
+        second_player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Player Two",
+            avatar_key="avatar_2",
+            client_id="player-two-client",
+        )
+
+        async def scenario():
+            ws1 = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            ws2 = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(second_player),
+            )
+
+            connected1, _ = await ws1.connect()
+            connected2, _ = await ws2.connect()
+            self.assertTrue(connected1)
+            self.assertTrue(connected2)
+
+            try:
+                await ws1.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 250,
+                    }
+                )
+                first_sender_messages = [
+                    await ws1.receive_json_from(timeout=1),
+                    await ws1.receive_json_from(timeout=1),
+                ]
+                first_other_message = await ws2.receive_json_from(timeout=1)
+
+                await ws2.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 300,
+                    }
+                )
+                second_sender_messages = [
+                    await ws2.receive_json_from(timeout=1),
+                    await ws2.receive_json_from(timeout=1),
+                    await ws2.receive_json_from(timeout=1),
+                ]
+                first_player_completion_messages = [
+                    await ws1.receive_json_from(timeout=1),
+                    await ws1.receive_json_from(timeout=1),
+                ]
+
+                return (
+                    [message["type"] for message in first_sender_messages],
+                    first_other_message["type"],
+                    [message["type"] for message in second_sender_messages],
+                    [message["type"] for message in first_player_completion_messages],
+                )
+            finally:
+                await ws1.disconnect()
+                await ws2.disconnect()
+
+        first_sender_types, first_other_type, second_sender_types, first_player_completion_types = async_to_sync(scenario)()
+
+        self.assertEqual(first_sender_types, ["answer_saved", "answer_progress"])
+        self.assertEqual(first_other_type, "answer_progress")
+        self.assertEqual(second_sender_types, ["answer_saved", "answer_progress", "reveal"])
+        self.assertEqual(first_player_completion_types, ["answer_progress", "reveal"])
+
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.state, LiveSession.STATE_REVEAL)
+        self.assertEqual(
+            LiveAnswer.objects.filter(session=self.session, question_id=self.question.id).count(),
+            2,
+        )
+
+    def test_play_ws_prefers_player_cookie_when_host_session_is_also_present(self):
+        headers = self._host_and_player_headers(self.player)
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 200,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "answer_saved")
+        self.assertEqual(
+            LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=self.question.id).count(),
+            1,
+        )
