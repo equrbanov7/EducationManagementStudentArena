@@ -101,6 +101,39 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yadda Saxla")
 
+    def test_profile_change_password_section_renders(self):
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=change-password")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Şifrəni dəyiş")
+        self.assertContains(response, 'name="old_password"', html=False)
+        self.assertContains(response, 'name="new_password1"', html=False)
+        self.assertContains(response, 'name="new_password2"', html=False)
+
+    def test_profile_change_password_updates_password_and_keeps_session(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=change-password",
+            data={
+                "profile_form": "change-password",
+                "section": "change-password",
+                "old_password": "testpass123",
+                "new_password1": "UpdatedStrongPass123!",
+                "new_password2": "UpdatedStrongPass123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=change-password")
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("UpdatedStrongPass123!"))
+
+        follow_up = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(follow_up.status_code, 200)
+
     def test_profile_edit_section_prefills_existing_values(self):
         from apps.accounts.models import UserProfile
         from apps.courses.models import Course

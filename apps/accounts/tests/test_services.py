@@ -107,7 +107,8 @@ class OTPServicesTest(TestCase):
 
         otp = EmailOTP.objects.filter(user=self.user, is_used=False).first()
         self.assertIsNotNone(otp)
-        self.assertEqual(otp.code, code)
+        self.assertNotEqual(otp.code, code)
+        self.assertTrue(otp.matches_code(code))
 
     def test_verify_otp_code_success(self):
         """Test successful OTP verification."""

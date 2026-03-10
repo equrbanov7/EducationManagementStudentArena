@@ -685,6 +685,7 @@ def _role_capabilities(user, profile):
             "pending-post-approvals",
             "blog",
             "edit-profile",
+            "change-password",
         }
     else:
         allowed_sections = {
@@ -693,6 +694,7 @@ def _role_capabilities(user, profile):
             "posts",
             "blog",
             "edit-profile",
+            "change-password",
         }
         allowed_sections.add("my-results")
         if can_view_student_assignments:

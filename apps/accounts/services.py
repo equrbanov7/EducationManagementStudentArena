@@ -17,6 +17,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from core.constants import OrganizationType
+from core.utils import get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds
 
 from .models import ProfileRole, UserProfile
 
@@ -258,7 +259,7 @@ def create_user_with_organization(
 # ════════════════════════════════════════════════════════════════════════════
 
 
-def send_verification_otp(user):
+def send_verification_otp(user, *, request=None):
     """
     Generate and send OTP code to user's email.
 
@@ -268,17 +269,42 @@ def send_verification_otp(user):
     Returns:
         str: Generated OTP code
     """
-    # Invalidate old OTPs
+    code, expires_at = issue_email_otp(user)
+    send_verify_email(user, code, request=request, expires_at=expires_at)
+    return code
+
+
+def issue_email_otp(user):
+    """
+    Create a fresh OTP for a user and invalidate older pending OTPs.
+    """
     EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
 
-    # Generate new OTP
     code = generate_otp()
-    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timedelta(minutes=10))
+    expires_at = timezone.now() + timedelta(seconds=get_auth_otp_expiry_seconds())
+    EmailOTP.objects.create(user=user, code=code, expires_at=expires_at)
+    return code, expires_at
 
-    # Send email
-    send_verify_email(user, code)
 
-    return code
+def get_latest_pending_otp(user):
+    """
+    Return the newest unused OTP for a user, even if it has already expired.
+    """
+    if not user:
+        return None
+    return EmailOTP.objects.filter(user=user, is_used=False).order_by("-created_at").first()
+
+
+def get_otp_timer_context(user):
+    """
+    Build timer metadata for OTP-related templates.
+    """
+    otp = get_latest_pending_otp(user)
+    return {
+        "otp_expires_at": getattr(otp, "expires_at", None),
+        "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
+        "otp_expiry_seconds": get_auth_otp_expiry_seconds(),
+    }
 
 
 def verify_otp_code(user, code):
@@ -292,7 +318,7 @@ def verify_otp_code(user, code):
     Returns:
         tuple: (success: bool, otp: EmailOTP or None)
     """
-    otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
+    otp = EmailOTP.get_matching_otp(user=user, code=code)
 
     if not otp or otp.is_expired():
         return False, None

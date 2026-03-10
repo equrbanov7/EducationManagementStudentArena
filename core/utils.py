@@ -6,6 +6,7 @@ Reusable helper functions used across the application.
 import random
 import string
 
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -54,6 +55,47 @@ def send_template_email(subject, template_name, context, recipient_list, from_em
         html_message=html_message,
         fail_silently=False,
     )
+
+
+def get_public_base_url(request=None):
+    """
+    Resolve the externally reachable site origin for links sent to users.
+    """
+    if request is not None:
+        try:
+            return request.build_absolute_uri("/").rstrip("/")
+        except Exception:
+            pass
+    return str(getattr(settings, "SITE_URL", "http://127.0.0.1:8000")).rstrip("/")
+
+
+def build_absolute_url(path="", request=None):
+    """
+    Build an absolute URL for a local path using the current request or SITE_URL.
+    """
+    if not path:
+        return get_public_base_url(request)
+    if str(path).startswith(("http://", "https://")):
+        return str(path)
+    normalized_path = str(path)
+    if not normalized_path.startswith("/"):
+        normalized_path = f"/{normalized_path}"
+    return f"{get_public_base_url(request)}{normalized_path}"
+
+
+def get_auth_otp_expiry_seconds():
+    """
+    Return the configured OTP validity window in seconds.
+    """
+    return max(60, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 180)))
+
+
+def get_auth_otp_expiry_minutes():
+    """
+    Return the configured OTP validity window rounded up to minutes.
+    """
+    seconds = get_auth_otp_expiry_seconds()
+    return max(1, (seconds + 59) // 60)
 
 
 def generate_unique_slug(model_class, title, slug_field="slug"):

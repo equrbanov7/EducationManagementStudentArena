@@ -3,7 +3,9 @@ View tests for live_exam app.
 """
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -13,6 +15,12 @@ from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.models import LivePlayer, LiveSession
 
 User = get_user_model()
+LOCMEM_CACHE_SETTINGS = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "live-exam-rate-limit-tests",
+    }
+}
 
 
 class LiveExamViewsImportTest(TestCase):
@@ -221,6 +229,49 @@ class LiveJoinTest(TestCase):
         self.assertFalse(data["ok"])
 
 
+@override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_EXAM_JOIN_RATE_LIMIT="1/1m")
+class LiveJoinRateLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.teacher = User.objects.create_user("join_limit_teacher", "joinlimit@example.com", "StrongPass123!")
+        self.exam = Exam.objects.create(
+            title="Join Limit Exam",
+            slug="join-limit-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+    def test_pin_entry_blocks_repeated_invalid_attempts(self):
+        self.client.get(reverse("liveExam:pin_entry"))
+
+        first = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+        self.assertEqual(first.status_code, 404)
+
+        blocked = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+    def test_join_enter_blocks_after_rate_limit(self):
+        self.client.get(reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+        first = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "RateLimitPlayer", "avatar_key": "avatar_1"},
+        )
+        self.assertEqual(first.status_code, 200)
+
+        blocked = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "RateLimitPlayer", "avatar_key": "avatar_1"},
+        )
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertFalse(blocked.json()["ok"])
+
+
 class LiveStateAPITest(TestCase):
     """Test live state API endpoint."""
 
@@ -335,6 +386,42 @@ class LiveStateAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["correct_option_ids"], [self.correct_option.id])
+
+
+@override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_STATE_RATE_LIMIT="1/1m")
+class LiveStateRateLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.teacher = User.objects.create_user("state_limit_teacher", "statelimit@example.com", "StrongPass123!")
+        self.exam = Exam.objects.create(
+            title="State Limit Exam",
+            slug="state-limit-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="StateLimitPlayer",
+            avatar_key="avatar_1",
+            client_id="state-limit-client",
+        )
+        self.client.cookies["live_client_id"] = self.player.client_id
+        self.client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def test_state_json_blocks_after_rate_limit(self):
+        first = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertEqual(first.status_code, 200)
+
+        blocked = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertFalse(blocked.json()["ok"])
 
 
 class LivePlayerProtectedViewsTest(TestCase):

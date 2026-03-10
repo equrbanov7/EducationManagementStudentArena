@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import io
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import get_language
 from django.utils import timezone
+from django.utils.translation import get_language
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
@@ -25,6 +26,8 @@ from apps.live_exam.auth import (
     get_request_player,
 )
 from apps.live_exam.models import LiveSession
+from core.rate_limit import is_rate_limited, record_rate_limit_hit
+from core.utils import get_client_ip
 
 from ._helpers import (
     AVATAR_KEYS,
@@ -114,6 +117,11 @@ PIN_ENTRY_COPY = {
     },
 }
 
+LIVE_CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+LIVE_JOIN_LIMIT_SCOPE = "live_exam.join"
+LIVE_PIN_LIMIT_SCOPE = "live_exam.pin"
+LIVE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
 
 def _pin_entry_copy() -> dict[str, str]:
     lang = (get_language() or "az")[:2].lower()
@@ -122,6 +130,24 @@ def _pin_entry_copy() -> dict[str, str]:
 
 def _normalize_pin(raw_pin: str | None) -> str:
     return "".join(ch for ch in str(raw_pin or "") if ch.isdigit())[:6]
+
+
+def _live_client_id_key(request) -> str:
+    return request.COOKIES.get("live_client_id") or get_client_ip(request) or "unknown"
+
+
+def _ensure_live_client_cookie(request, response):
+    if request.COOKIES.get("live_client_id"):
+        return response
+
+    response.set_cookie(
+        "live_client_id",
+        _get_client_id(request),
+        max_age=LIVE_CLIENT_ID_COOKIE_MAX_AGE,
+        samesite="Lax",
+        secure=request.is_secure(),
+    )
+    return response
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -136,16 +162,46 @@ def live_pin_entry(request):
     status_code = 200
 
     if request.method == "POST":
+        is_limited, retry_after = is_rate_limited(
+            LIVE_PIN_LIMIT_SCOPE,
+            settings.LIVE_EXAM_JOIN_RATE_LIMIT,
+            _live_client_id_key(request),
+        )
+        if is_limited:
+            response = render(
+                request,
+                "liveExam/pin_entry.html",
+                {
+                    "copy": copy,
+                    "pin_value": pin_value,
+                    "error_message": LIVE_RATE_LIMIT_MESSAGE,
+                },
+                status=429,
+            )
+            if retry_after:
+                response.headers["Retry-After"] = str(retry_after)
+            return _ensure_live_client_cookie(request, response)
+
         if len(pin_value) != 6:
+            record_rate_limit_hit(
+                LIVE_PIN_LIMIT_SCOPE,
+                settings.LIVE_EXAM_JOIN_RATE_LIMIT,
+                _live_client_id_key(request),
+            )
             error_message = copy["invalid_pin"]
             status_code = 400
         elif not LiveSession.objects.filter(pin=pin_value).exists():
+            record_rate_limit_hit(
+                LIVE_PIN_LIMIT_SCOPE,
+                settings.LIVE_EXAM_JOIN_RATE_LIMIT,
+                _live_client_id_key(request),
+            )
             error_message = copy["session_not_found"]
             status_code = 404
         else:
-            return redirect("liveExam:join_page", pin=pin_value)
+            return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=pin_value))
 
-    return render(
+    response = render(
         request,
         "liveExam/pin_entry.html",
         {
@@ -155,16 +211,33 @@ def live_pin_entry(request):
         },
         status=status_code,
     )
+    return _ensure_live_client_cookie(request, response)
 
 
 def live_join_page(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
     context = {"session": session, "avatars": AVATAR_KEYS}
-    return render(request, "liveExam/join.html", context)
+    response = render(request, "liveExam/join.html", context)
+    return _ensure_live_client_cookie(request, response)
 
 
 @require_POST
 def live_join_enter(request, pin):
+    is_limited, retry_after = record_rate_limit_hit(
+        LIVE_JOIN_LIMIT_SCOPE,
+        settings.LIVE_EXAM_JOIN_RATE_LIMIT,
+        pin,
+        _live_client_id_key(request),
+    )
+    if is_limited:
+        response = JsonResponse(
+            {"ok": False, "message": LIVE_RATE_LIMIT_MESSAGE},
+            status=429,
+        )
+        if retry_after:
+            response.headers["Retry-After"] = str(retry_after)
+        return response
+
     session = get_object_or_404(LiveSession, pin=pin)
 
     if session.is_locked:
