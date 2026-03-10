@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="profile-page-wrapper">
+<div class="profile-page-wrapper" data-create-post-url="{% url 'create_post' %}">
     <header class="profile-section-header">
         <div class="profile-info-container">
             <div class="profile-avatar">
@@ -102,6 +102,7 @@
                                 <div class="action-icons">
                                     <button class="icon-action-btn edit-btn js-edit-post"
                                             data-post-id="{{ post.pk }}"
+                                            data-edit-url="{% url 'post_edit_ajax' post.pk %}"
                                             data-title="{{ post.title|escape }}"
                                             data-content="{{ post.content|escape }}"
                                             data-category="{{ post.category.id|default_if_none:'' }}"
@@ -109,6 +110,7 @@
                                             data-image-url="{{ post.image_url|default_if_none:''|escape }}"
                                             data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
                                             data-is-published="{{ post.is_published|yesno:'true,false' }}"
+                                            data-requires-approval="{{ post.requires_approval|yesno:'true,false' }}"
                                             data-slug="{{ post.slug|escape }}"
                                             data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
                                             data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
@@ -118,6 +120,7 @@
 
                                     <button class="icon-action-btn delete-btn js-open-delete"
                                             data-post-id="{{ post.pk }}"
+                                            data-delete-url="{% url 'delete_post' post.pk %}"
                                             data-title="{{ post.title|escape }}"
                                             title="{% trans 'delete_action' context 'blog.user_profile_page' %}">
                                         <i class="fas fa-trash"></i>

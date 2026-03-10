@@ -1,25 +1,29 @@
 {% load static i18n %}
+{% url 'home' as home_url %}
+{% url 'technology' as technology_url %}
+{% url 'about' as about_url %}
+{% url 'subscribe' as subscribe_url %}
 <header class="blog-header">
     <div class="blog-header__container">
         <nav class="blog-header__nav">
-            <a href="/blog/" class="blog-header__logo">Learn Hub</a>
+            <a href="{{ home_url }}" class="blog-header__logo">Learn Hub</a>
 
             <ul class="blog-header__nav-list blog-header__nav-list--desktop">
                 <li class="blog-header__nav-item">
-                    <a href="/blog/"
-                       class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
+                    <a href="{{ home_url }}"
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' %}blog-header__nav-link--active{% endif %}">
                         {% trans "home" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="/blog/technology/"
-                       class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
+                    <a href="{{ technology_url }}"
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'technology' %}blog-header__nav-link--active{% endif %}">
                         {% trans "technology" context "nav" %}
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="/blog/about/"
-                       class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
+                    <a href="{{ about_url }}"
+                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
                         {% trans "about" context "nav" %}
                     </a>
                 </li>
@@ -30,8 +34,8 @@
                     </a>
                 </li>
                 <li class="blog-header__nav-item">
-                    <a href="{% url 'subscribe' %}"
-                       class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
+                    <a href="{{ subscribe_url }}"
+                       class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
                         {% trans "subscribe" context "nav" %}
                     </a>
                 </li>
@@ -104,20 +108,20 @@
 <div class="mobile-nav-overlay"></div>
 <ul class="blog-header__nav-list mobile-nav-panel">
     <li class="blog-header__nav-item">
-        <a href="/blog/"
-           class="blog-header__nav-link {% if request.path == '/blog/' %}blog-header__nav-link--active{% endif %}">
+        <a href="{{ home_url }}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'home' %}blog-header__nav-link--active{% endif %}">
             {% trans "home" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
-        <a href="/blog/technology/"
-           class="blog-header__nav-link {% if request.path == '/blog/technology/' %}blog-header__nav-link--active{% endif %}">
+        <a href="{{ technology_url }}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'technology' %}blog-header__nav-link--active{% endif %}">
             {% trans "technology" context "nav" %}
         </a>
     </li>
     <li class="blog-header__nav-item">
-        <a href="/blog/about/"
-           class="blog-header__nav-link {% if request.path == '/blog/about/' %}blog-header__nav-link--active{% endif %}">
+        <a href="{{ about_url }}"
+           class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
             {% trans "about" context "nav" %}
         </a>
     </li>
@@ -158,8 +162,8 @@
     </li>
 
     <li class="blog-header__nav-item">
-        <a href="{% url 'subscribe' %}"
-           class="blog-header__nav-link blog-header__nav-link--primary {% if request.path == '/blog/subscribe/' %}blog-header__nav-link--active{% endif %}">
+        <a href="{{ subscribe_url }}"
+           class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
             {% trans "subscribe" context "nav" %}
         </a>
     </li>

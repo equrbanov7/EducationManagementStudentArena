@@ -24,7 +24,7 @@
         {% for post in page_obj %}
             <article class="blog-card">
                 <div class="card-img-wrapper">
-                    <a href="{% url 'post_detail' post.slug %}">
+                    <a href="{% url 'article_detail' post.slug %}">
                         
                         <img 
                             src="{{ post.get_image }}" 
@@ -47,7 +47,7 @@
                     </div>
 
                     <h2 class="card-title">
-                        <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                        <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
                     </h2>
                     
                     <p class="card-excerpt">
@@ -61,7 +61,7 @@
                                 <span class="author-name">{{ post.author.username|title }}</span> 
                             </a>
                         </div>
-                        <a href="{% url 'post_detail' post.slug %}" class="read-more-btn">{% trans "read_more" context "blog.technology_page" %} &rarr;</a>
+                        <a href="{% url 'article_detail' post.slug %}" class="read-more-btn">{% trans "read_more" context "blog.technology_page" %} &rarr;</a>
                     </div>
                 </div>
             </article>

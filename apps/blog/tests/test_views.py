@@ -86,6 +86,18 @@ class BlogRoleAccessTest(TestCase):
         )
         self.student_group.students.add(self.student)
 
+    def test_homepage_is_available_at_root(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blog/home.html")
+
+    def test_legacy_blog_home_redirects_to_root(self):
+        response = self.client.get("/blog/?q=Teacher&page=2")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.url, "/?q=Teacher&page=2")
+
     def test_student_can_open_create_post_page(self):
         self.client.force_login(self.student)
         response = self.client.get(reverse("create_post"))
@@ -191,13 +203,19 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("accounts:public_profile", args=[self.student.username]))
 
-    def test_post_detail_renders_back_link_with_public_profile_fallback(self):
-        response = self.client.get(reverse("post_detail", args=[self.teacher_post.slug]))
+    def test_article_detail_renders_back_link_with_public_profile_fallback(self):
+        response = self.client.get(reverse("article_detail", args=[self.teacher_post.slug]))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Geri qayıt")
         self.assertContains(response, reverse("accounts:public_profile", args=[self.teacher.username]))
         self.assertContains(response, "window.history.back()")
+
+    def test_legacy_blog_article_detail_redirects_to_article_route(self):
+        response = self.client.get(f"/blog/posts/{self.teacher_post.slug}/")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response.url, reverse("article_detail", args=[self.teacher_post.slug]))
 
     def test_author_can_create_post_via_ajax(self):
         self.client.force_login(self.teacher)
@@ -217,6 +235,26 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '"success": true')
         self.assertTrue(Post.objects.filter(author=self.teacher, title="Ajax Created Post").exists())
+
+    def test_legacy_blog_create_post_ajax_endpoint_still_works(self):
+        self.client.force_login(self.teacher)
+        response = self.client.post(
+            "/blog/posts/create/",
+            {
+                "title": "Legacy Ajax Created Post",
+                "content": "Legacy ajax content",
+                "excerpt": "Legacy ajax excerpt",
+                "category": "",
+                "new_category": "",
+                "image_url": "",
+                "is_published": "on",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"success": true')
+        self.assertTrue(Post.objects.filter(author=self.teacher, title="Legacy Ajax Created Post").exists())
 
     def test_student_created_post_stays_pending_until_approval(self):
         self.client.force_login(self.student)
@@ -285,7 +323,7 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(pending_post.approval_status, Post.ApprovalStatus.PENDING)
         self.assertFalse(pending_post.is_published)
 
-    def test_reviewer_can_open_pending_post_detail(self):
+    def test_reviewer_can_open_pending_article_detail(self):
         pending_post = Post.objects.create(
             author=self.student,
             title="Pending Detail Access",
@@ -296,7 +334,7 @@ class BlogRoleAccessTest(TestCase):
         )
 
         self.client.force_login(self.teacher)
-        response = self.client.get(reverse("post_detail", args=[pending_post.slug]))
+        response = self.client.get(reverse("article_detail", args=[pending_post.slug]))
         self.assertEqual(response.status_code, 200)
 
     def test_pending_post_approvals_section_shows_show_more_toggle_for_long_content(self):

@@ -28,10 +28,10 @@ def teacher_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.error(request, "You must be logged in to access this page.")
-            return redirect("blog:login")
+            return redirect("accounts:login")
         if not is_teacher(request.user):
             messages.error(request, "You must be a teacher to access this page.")
-            return redirect("blog:index")
+            return redirect("home")
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
@@ -42,10 +42,10 @@ def student_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.error(request, "You must be logged in to access this page.")
-            return redirect("blog:login")
+            return redirect("accounts:login")
         if not is_student(request.user):
             messages.error(request, "You must be a student to access this page.")
-            return redirect("blog:index")
+            return redirect("home")
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view

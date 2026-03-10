@@ -19,7 +19,7 @@ class TeacherRequiredMixin(AccessMixin):
             return self.handle_no_permission()
         if not getattr(request.user, "is_teacher_or_above", False):
             messages.error(request, "You must be a teacher to access this page.")
-            return redirect("blog:index")
+            return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -34,7 +34,7 @@ class StudentRequiredMixin(AccessMixin):
             return self.handle_no_permission()
         if not getattr(request.user, "is_student", False):
             messages.error(request, "You must be a student to access this page.")
-            return redirect("blog:index")
+            return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -47,5 +47,5 @@ class OwnerRequiredMixin(AccessMixin):
         obj = self.get_object()
         if obj.user != request.user and not request.user.is_staff:
             messages.error(request, "You don't have permission to access this page.")
-            return redirect("blog:index")
+            return redirect("home")
         return super().dispatch(request, *args, **kwargs)

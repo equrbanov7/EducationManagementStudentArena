@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const profilePageWrapper = document.querySelector(".profile-page-wrapper");
+  const createPostUrl =
+    profilePageWrapper?.dataset.createPostUrl || "/posts/create/";
+
   // Modal elementləri
   const editModal = document.getElementById("editModal");
   const deleteModal = document.getElementById("deleteModal");
@@ -59,6 +63,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // State idarəetməsi
   let currentPostId = null;
+  let currentEditUrl = "";
+  let currentDeleteUrl = "";
   let currentPostRequiresApproval = false;
   let originalFormData = {};
   let hasUnsavedChanges = false;
@@ -161,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.set("is_published", publishValue ? "on" : "");
 
       try {
-        const response = await fetch("/blog/posts/create/", {
+        const response = await fetch(createPostUrl, {
           method: "POST",
           body: formData,
           headers: {
@@ -233,6 +239,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".js-edit-post").forEach((btn) => {
     btn.addEventListener("click", function () {
       currentPostId = this.dataset.postId;
+      currentEditUrl = this.dataset.editUrl || "";
 
       const title = this.dataset.title || "";
       const content = this.dataset.content || "";
@@ -390,6 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
 
     if (!currentPostId) return;
+    if (!currentEditUrl) return;
     if (!hasUnsavedChanges) return;
 
     const formData = new FormData(editForm);
@@ -401,7 +409,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     try {
-      const response = await fetch(`/blog/post/${currentPostId}/edit/`, {
+      const response = await fetch(currentEditUrl, {
         method: "POST",
         body: formData,
         headers: {
@@ -463,6 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".js-open-delete").forEach((btn) => {
     btn.addEventListener("click", function () {
       currentPostId = this.dataset.postId;
+      currentDeleteUrl = this.dataset.deleteUrl || "";
       const title = this.dataset.title || "";
 
       deleteTitleSpan.textContent = title;
@@ -473,9 +482,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Silməni təsdiqlə
   confirmDeleteBtn.addEventListener("click", async function () {
     if (!currentPostId) return;
+    if (!currentDeleteUrl) return;
 
     try {
-      const response = await fetch(`/blog/post/${currentPostId}/delete/`, {
+      const response = await fetch(currentDeleteUrl, {
         method: "POST",
         headers: {
           "X-CSRFToken": getCookie("csrftoken"),

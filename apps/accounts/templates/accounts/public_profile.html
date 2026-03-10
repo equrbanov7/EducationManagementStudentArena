@@ -111,7 +111,7 @@
                         <div class="public-post-grid">
                             {% for post in posts %}
                                 <article class="public-post-card">
-                                    <a href="{% url 'post_detail' post.slug %}" class="public-post-card__media-link" aria-label="{{ post.title }}">
+                                    <a href="{% url 'article_detail' post.slug %}" class="public-post-card__media-link" aria-label="{{ post.title }}">
                                         <div class="public-post-card__media">
                                             <img
                                                 src="{{ post.get_image }}"
@@ -134,7 +134,7 @@
                                         </div>
 
                                         <h3 class="public-post-card__title">
-                                            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                                            <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
                                         </h3>
 
                                         {% if post.excerpt %}
@@ -148,7 +148,7 @@
                                                 <i class="fas fa-user-circle" aria-hidden="true"></i>
                                                 {{ profile_user.username }}
                                             </span>
-                                            <a href="{% url 'post_detail' post.slug %}" class="public-post-card__link">
+                                            <a href="{% url 'article_detail' post.slug %}" class="public-post-card__link">
                                                 Oxumağa davam et
                                             </a>
                                         </div>

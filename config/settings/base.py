@@ -117,8 +117,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Login / logout settings
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/blog/"
-LOGOUT_REDIRECT_URL = "/blog/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 # Keep CSRF cookie in Lax mode to reduce cross-site request risks on POST endpoints.
 CSRF_COOKIE_SAMESITE = "Lax"
