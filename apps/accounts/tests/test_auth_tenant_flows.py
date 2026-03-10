@@ -2,8 +2,12 @@
 Integration tests for auth + tenant-scoped role/permission flows.
 """
 
+import re
+
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import Client, TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
@@ -16,6 +20,7 @@ from core.constants import OrganizationType, RoleScopeType
 User = get_user_model()
 
 
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class SignupAndLoginFlowTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -50,7 +55,10 @@ class SignupAndLoginFlowTest(TestCase):
     def _verify_latest_otp(self, user):
         otp = EmailOTP.objects.filter(user=user, is_used=False).order_by("-created_at").first()
         self.assertIsNotNone(otp)
-        response = self.client.post(self.verify_code_url, {"code": otp.code})
+        self.assertTrue(mail.outbox)
+        match = re.search(r"(\d{6})", mail.outbox[-1].body)
+        self.assertIsNotNone(match)
+        response = self.client.post(self.verify_code_url, {"code": match.group(1)})
         self.assertRedirects(response, self.login_url)
         otp.refresh_from_db()
         self.assertTrue(otp.is_used)
@@ -64,6 +72,7 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertTrue(user.check_password("StrongPass123!"))
         self.assertTrue(EmailOTP.objects.filter(user=user, is_used=False).exists())
         self.assertEqual(self.client.session.get("pending_verify_email"), "newuser@example.com")
+        self.assertIn("/accounts/verify-email/?token=", mail.outbox[-1].body)
 
         # Username login should be blocked until verification.
         self.assertFalse(self.client.login(username="newuser", password="StrongPass123!"))

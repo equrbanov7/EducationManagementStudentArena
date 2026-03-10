@@ -4,13 +4,20 @@ Forms for accounts app (authentication and user management).
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import pgettext_lazy
 
+from apps.blog.models import EmailOTP
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
+from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from .models import ProfileRole
+from .services import issue_email_otp, verify_otp_code
 
 User = get_user_model()
 
@@ -400,3 +407,150 @@ class CustomLoginForm(AuthenticationForm):
                 pgettext_lazy("accounts.form.login.error", "organization_suspended"),
                 code="org_suspended",
             )
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """Styled password change form for the profile cabinet."""
+
+    old_password = forms.CharField(
+        label="Mövcud şifrə",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mövcud şifrə",
+                "autocomplete": "current-password",
+            }
+        ),
+    )
+    new_password1 = forms.CharField(
+        label="Yeni şifrə",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Yeni şifrə",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+    new_password2 = forms.CharField(
+        label="Yeni şifrəni təkrarla",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Yeni şifrəni təkrarla",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    """Password reset request form that sends both a link and an OTP code."""
+
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Email ünvanınızı daxil edin",
+                "autocomplete": "email",
+            }
+        ),
+    )
+
+    def save(
+        self,
+        domain_override=None,
+        subject_template_name="accounts/password_reset_subject.txt",
+        email_template_name="accounts/password_reset_email.txt",
+        use_https=False,
+        token_generator=default_token_generator,
+        from_email=None,
+        request=None,
+        html_email_template_name="accounts/password_reset_email.html",
+        extra_email_context=None,
+    ):
+        email = self.cleaned_data["email"]
+        for user in self.get_users(email):
+            code, expires_at = issue_email_otp(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = token_generator.make_token(user)
+            reset_url = build_absolute_url(
+                reverse("accounts:password_reset_confirm", kwargs={"uidb64": uid, "token": token}),
+                request=request,
+            )
+            context = {
+                "email": user.email,
+                "user": user,
+                "uid": uid,
+                "token": token,
+                "reset_url": reset_url,
+                "otp_code": code,
+                "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
+                "otp_expires_at": expires_at,
+                **(extra_email_context or {}),
+            }
+            self.send_mail(
+                subject_template_name,
+                email_template_name,
+                context,
+                from_email,
+                user.email,
+                html_email_template_name=html_email_template_name,
+            )
+
+
+class OTPPasswordResetConfirmForm(SetPasswordForm):
+    """Set-password form that requires the emailed OTP code as well."""
+
+    otp_code = forms.CharField(
+        label="OTP kodu",
+        max_length=6,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Emailə gələn 6 rəqəmli kod",
+                "inputmode": "numeric",
+                "autocomplete": "one-time-code",
+            }
+        ),
+    )
+    new_password1 = forms.CharField(
+        label="Yeni şifrə",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Yeni şifrə",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+    new_password2 = forms.CharField(
+        label="Yeni şifrəni təkrarla",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Yeni şifrəni təkrarla",
+                "autocomplete": "new-password",
+            }
+        ),
+    )
+
+    def clean_otp_code(self):
+        candidate = (self.cleaned_data.get("otp_code") or "").strip()
+        success, otp = verify_otp_code(self.user, candidate)
+        if not success or otp is None:
+            raise forms.ValidationError("OTP kodu yanlışdır və ya vaxtı bitib.")
+        self.matched_otp = otp
+        return candidate
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        matched_otp = getattr(self, "matched_otp", None)
+        if matched_otp is not None and not matched_otp.is_used:
+            matched_otp.is_used = True
+            matched_otp.save(update_fields=["is_used"])
+        EmailOTP.objects.filter(user=user, is_used=False).exclude(
+            pk=getattr(matched_otp, "pk", None)
+        ).update(is_used=True)
+        return user

@@ -113,6 +113,15 @@ def submit_project(request, pk):
 
     project = _get_tenant_project_or_404(request, pk)
 
+    if not project.assigned_students.filter(id=request.user.id).exists():
+        return JsonResponse(
+            {
+                "success": False,
+                "error": pgettext("projects.views.message", "submit_not_allowed"),
+            },
+            status=403,
+        )
+
     # Cavab göndərə bilərmi yoxla
     if not project.can_user_submit(request.user):
         return JsonResponse(

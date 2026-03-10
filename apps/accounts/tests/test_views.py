@@ -2,16 +2,27 @@
 View tests for accounts app.
 """
 
+import re
+
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core import mail
 from django.test import Client, TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, Post
+from apps.blog.models import Category, EmailOTP, Post
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+LOCMEM_CACHE_SETTINGS = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "accounts-rate-limit-tests",
+    }
+}
 
 
 class LoginViewTest(TestCase):
@@ -57,6 +68,82 @@ class LoginViewTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
 
+@override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LOGIN_RATE_LIMIT="2/1m")
+class LoginRateLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.user = User.objects.create_user("limiteduser", "limited@example.com", "StrongPass123!")
+        self.login_url = reverse("accounts:login")
+
+    def test_login_blocks_after_too_many_invalid_attempts(self):
+        for _ in range(2):
+            response = self.client.post(
+                self.login_url,
+                {"username": "limiteduser", "password": "wrongpassword"},
+            )
+            self.assertEqual(response.status_code, 200)
+
+        blocked = self.client.post(
+            self.login_url,
+            {"username": "limiteduser", "password": "wrongpassword"},
+        )
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+
+@override_settings(
+    CACHES=LOCMEM_CACHE_SETTINGS,
+    OTP_VERIFY_RATE_LIMIT="1/1m",
+    OTP_RESEND_RATE_LIMIT="1/1m",
+)
+class OTPRateLimitViewTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.user = User.objects.create_user(
+            "otpviewuser",
+            "otpview@example.com",
+            "StrongPass123!",
+            is_active=False,
+        )
+        session = self.client.session
+        session["pending_verify_email"] = self.user.email
+        session.save()
+        self.verify_url = reverse("accounts:verify_code")
+        self.resend_url = reverse("accounts:resend_code")
+
+    def test_verify_code_blocks_after_too_many_invalid_attempts(self):
+        EmailOTP.objects.create(user=self.user, code="123456")
+
+        first = self.client.post(self.verify_url, {"code": "000000"})
+        self.assertEqual(first.status_code, 200)
+
+        blocked = self.client.post(self.verify_url, {"code": "000000"})
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+    def test_resend_code_blocks_after_rate_limit(self):
+        first = self.client.post(self.resend_url)
+        self.assertEqual(first.status_code, 302)
+
+        blocked = self.client.post(self.resend_url)
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+
+    def test_verify_code_page_shows_expiry_timer(self):
+        EmailOTP.objects.create(user=self.user, code="123456")
+
+        response = self.client.get(self.verify_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "data-otp-expires-at")
+        self.assertContains(response, "Kod 3 dəqiqə etibarlıdır.")
+
+
 class LogoutViewTest(TestCase):
     """Test logout view functionality."""
 
@@ -78,6 +165,45 @@ class LogoutViewTest(TestCase):
         response = self.client.get(self.logout_url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class PasswordResetViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user("resetuser", "reset@example.com", "StrongPass123!")
+        self.password_reset_url = reverse("accounts:password_reset")
+        self.password_reset_done_url = reverse("accounts:password_reset_done")
+        self.password_reset_complete_url = reverse("accounts:password_reset_complete")
+
+    def test_password_reset_flow_sends_email_and_completes(self):
+        response = self.client.post(self.password_reset_url, {"email": self.user.email})
+
+        self.assertRedirects(response, self.password_reset_done_url)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/accounts/reset/", mail.outbox[0].body)
+        self.assertIn("OTP kodu", mail.outbox[0].body)
+        self.assertTrue(mail.outbox[0].alternatives)
+
+        match = re.search(r"http://testserver(?P<path>/accounts/reset/\S+/\S+/)", mail.outbox[0].body)
+        self.assertIsNotNone(match)
+        otp_match = re.search(r"OTP kodu:\s*([0-9]{6})", mail.outbox[0].body)
+        self.assertIsNotNone(otp_match)
+
+        confirm_response = self.client.get(match.group("path"), follow=True)
+        self.assertEqual(confirm_response.status_code, 200)
+        self.assertContains(confirm_response, "data-otp-expires-at")
+        confirm_path = confirm_response.request["PATH_INFO"]
+
+        complete_response = self.client.post(
+            confirm_path,
+            {
+                "otp_code": otp_match.group(1),
+                "new_password1": "UpdatedStrongPass123!",
+                "new_password2": "UpdatedStrongPass123!",
+            },
+        )
+        self.assertRedirects(complete_response, self.password_reset_complete_url)
 
 
 class RegisterViewTest(TestCase):

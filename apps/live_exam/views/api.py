@@ -6,6 +6,7 @@ API endpoints for live exam sessions.
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -13,6 +14,8 @@ from django.utils.translation import pgettext
 
 from apps.live_exam.auth import get_request_player
 from apps.live_exam.models import LiveSession
+from core.rate_limit import record_rate_limit_hit
+from core.utils import get_client_ip
 
 from ._helpers import (
     _build_options,
@@ -28,6 +31,9 @@ from ._helpers import (
     _serialize_top,
 )
 
+LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
+LIVE_STATE_RATE_LIMIT_MESSAGE = "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+
 
 # ════════════════════════════════════════════════════════════════════════════
 # API Endpoints
@@ -38,6 +44,25 @@ def live_state_json(request, pin):
     """
     ✅ NEW: cari state-i HTTP ilə almaq (late join / miss olunan WS üçün)
     """
+    if getattr(request.user, "is_authenticated", False):
+        rate_key = ("host", request.user.id, pin)
+    else:
+        rate_key = ("player", request.COOKIES.get("live_client_id") or get_client_ip(request) or "unknown", pin)
+
+    is_limited, retry_after = record_rate_limit_hit(
+        LIVE_STATE_LIMIT_SCOPE,
+        settings.LIVE_STATE_RATE_LIMIT,
+        *rate_key,
+    )
+    if is_limited:
+        response = JsonResponse(
+            {"ok": False, "message": LIVE_STATE_RATE_LIMIT_MESSAGE},
+            status=429,
+        )
+        if retry_after:
+            response.headers["Retry-After"] = str(retry_after)
+        return response
+
     session = get_object_or_404(LiveSession, pin=pin)
     is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
     if not is_host and get_request_player(request, pin=pin) is None:

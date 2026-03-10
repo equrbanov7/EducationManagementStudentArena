@@ -15,6 +15,9 @@ All views are re-exported here for backward compatibility with existing URLs.
 # Authentication views
 from .auth import (
     CustomLoginView,
+    NamespacedPasswordResetConfirmView,
+    NamespacedPasswordResetDoneView,
+    NamespacedPasswordResetView,
     logout_view,
     register_view,
     resend_code_view,
@@ -69,6 +72,9 @@ from .superadmin import (
 __all__ = [
     # Authentication
     "CustomLoginView",
+    "NamespacedPasswordResetView",
+    "NamespacedPasswordResetDoneView",
+    "NamespacedPasswordResetConfirmView",
     "register_view",
     "verify_code_view",
     "verify_email_link_view",

@@ -11,6 +11,13 @@
   <div class="register-card">
     <h1 class="register-heading">{% trans "heading" context "accounts.verify_code" %}</h1>
     <p class="register-subheading">{{ email }} {% trans "code_sent_suffix" context "accounts.verify_code" %}</p>
+    {% if otp_expires_at %}
+    <div class="otp-timer-banner" data-otp-expires-at="{{ otp_expires_at|date:'c' }}" data-expired-label="Kodun vaxtı bitib">
+      <i class="fas fa-clock" aria-hidden="true"></i>
+      <span class="otp-timer-banner__label">Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.</span>
+      <strong class="otp-timer-banner__value" data-otp-countdown>--:--</strong>
+    </div>
+    {% endif %}
 
     <form method="post" class="register-form">
       {% csrf_token %}
@@ -50,4 +57,5 @@
 
 {% block extraJs %}
 <script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
+<script src="{% static 'js/otp_timer.js' %}"></script>
 {% endblock %}

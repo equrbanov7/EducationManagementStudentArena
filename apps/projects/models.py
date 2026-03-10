@@ -71,6 +71,10 @@ class Project(models.Model):
         return self.submissions.filter(student=user).count()
 
     def can_user_submit(self, user):
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if not self.assigned_students.filter(id=user.id).exists():
+            return False
         if self.is_deadline_passed:
             return False
         if self.status != "active":

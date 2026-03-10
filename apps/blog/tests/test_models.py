@@ -25,7 +25,8 @@ class EmailOTPTest(TestCase):
             user=self.user,
             code="123456",
         )
-        self.assertEqual(otp.code, "123456")
+        self.assertNotEqual(otp.code, "123456")
+        self.assertTrue(otp.matches_code("123456"))
         self.assertFalse(otp.is_used)
         self.assertIsNotNone(otp.expires_at)
 
@@ -37,10 +38,10 @@ class EmailOTPTest(TestCase):
         )
         # expires_at should be set automatically in save()
         self.assertIsNotNone(otp.expires_at)
-        # Should be approximately 10 minutes from now
+        # Should be approximately 3 minutes from now
         time_diff = otp.expires_at - timezone.now()
-        self.assertLess(time_diff, timedelta(minutes=11))
-        self.assertGreater(time_diff, timedelta(minutes=9))
+        self.assertLess(time_diff, timedelta(minutes=4))
+        self.assertGreater(time_diff, timedelta(minutes=2))
 
     def test_emailotp_is_expired_method(self):
         """Test is_expired method."""

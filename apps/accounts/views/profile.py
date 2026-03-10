@@ -5,7 +5,7 @@ Profile views: user profile management and avatar serving.
 import mimetypes
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
@@ -30,6 +30,7 @@ from apps.notifications.services import build_profile_notification_state
 from apps.projects.models import ProjectSubmission
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
+from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
 from ._dashboard_helpers import (
     _collect_assigned_tasks,
@@ -149,6 +150,7 @@ def user_profile(request):
     requested_section = request.GET.get("section", "profile-info")
     allowed_sections = capabilities["allowed_sections"]
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
+    password_change_form = CustomPasswordChangeForm(request.user)
 
     if request.method == "POST":
         submitted_form = (request.POST.get("profile_form") or "").strip()
@@ -165,7 +167,17 @@ def user_profile(request):
             messages.success(request, "Profil şəkli uğurla yeniləndi.")
             return redirect(f"{reverse('accounts:profile')}?section=profile-info")
 
-        if submitted_form != "edit-profile":
+        if submitted_form == "change-password":
+            password_change_form = CustomPasswordChangeForm(request.user, request.POST)
+            if password_change_form.is_valid():
+                user = password_change_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Şifrə uğurla yeniləndi.")
+                return redirect(f"{reverse('accounts:profile')}?section=change-password")
+
+            messages.error(request, "Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin.")
+            active_section = "change-password"
+        elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section
             if target_section not in allowed_sections:
                 target_section = "profile-info"
@@ -933,6 +945,7 @@ def user_profile(request):
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
+        "change-password": "Şifrəni dəyiş",
     }
 
     shortcut_sections = []
@@ -972,6 +985,7 @@ def user_profile(request):
         "profile_base_url": reverse("accounts:profile"),
         "shortcut_sections": shortcut_sections,
         "role_capabilities": capabilities,
+        "password_change_form": password_change_form,
         "user_posts": user_posts,
         "posts_count": posts_count,
         "categories": categories,

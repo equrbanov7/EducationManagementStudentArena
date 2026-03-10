@@ -324,6 +324,23 @@ class ProjectUploadSecurityTest(TestCase):
         self.assertTrue(submission.file.name.endswith(".pdf"))
         self.assertFalse(submission.file.name.endswith("/report.pdf"))
 
+    def test_submit_project_rejects_unassigned_student(self):
+        other_student = User.objects.create_user(
+            "project_upload_unassigned",
+            "puu@example.com",
+            "StrongPass123!",
+        )
+        _assign_user_to_org(other_student, self.organization, ProfileRole.STUDENT)
+        _login_with_org(self.client, other_student, self.organization)
+
+        response = self.client.post(
+            reverse("projects:submit_project", kwargs={"pk": self.project.id}),
+            {"content": "should be rejected"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
 
 class ProjectTenantIsolationTest(TestCase):
     def setUp(self):

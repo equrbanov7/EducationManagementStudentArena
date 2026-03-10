@@ -85,6 +85,7 @@ class ProjectTest(TestCase):
             status="active",
             max_attempts=2,
         )
+        project.assigned_students.add(self.student)
 
         # Student can submit initially
         self.assertTrue(project.can_user_submit(self.student))
@@ -95,6 +96,22 @@ class ProjectTest(TestCase):
 
         # Student cannot submit anymore (max attempts reached)
         self.assertFalse(project.can_user_submit(self.student))
+
+    def test_project_can_user_submit_requires_assignment(self):
+        """Test that only assigned students can submit."""
+        project = Project.objects.create(
+            course=self.course,
+            title="Assignment Required Project",
+            start_date=timezone.now() - timedelta(hours=1),
+            deadline=timezone.now() + timedelta(days=7),
+            status="active",
+        )
+
+        self.assertFalse(project.can_user_submit(self.student))
+
+        project.assigned_students.add(self.student)
+
+        self.assertTrue(project.can_user_submit(self.student))
 
     def test_project_get_user_attempts(self):
         """Test get_user_attempts method."""
@@ -279,6 +296,8 @@ class ProjectWorkflowTest(TestCase):
 
     def test_project_status_affects_submission(self):
         """Test that project status affects submission ability."""
+        self.project.assigned_students.add(self.student1)
+
         # Active project - can submit
         self.assertEqual(self.project.status, "active")
         self.assertTrue(self.project.can_user_submit(self.student1))

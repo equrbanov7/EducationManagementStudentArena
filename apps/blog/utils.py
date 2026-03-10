@@ -2,8 +2,12 @@ import random
 import re
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.core.signing import TimestampSigner
+from django.template.loader import render_to_string
+from django.urls import reverse
+
+from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 signer = TimestampSigner()
 
@@ -12,19 +16,25 @@ def generate_otp():
     return f"{random.randint(0, 999999):06d}"
 
 
-def send_verify_email(user, code: str):
+def send_verify_email(user, code: str, *, request=None, expires_at=None):
     token = signer.sign(str(user.pk))
-    link = f"{settings.SITE_URL}/verify-email/?token={token}"
+    verification_url = build_absolute_url(reverse("accounts:verify_email_link"), request=request)
+    link = f"{verification_url}?token={token}"
 
     subject = "Email təsdiqi"
-    message = (
-        f"Salam {user.username},\n\n"
-        f"Təsdiq kodun: {code}\n"
-        f"və ya linklə təsdiqlə: {link}\n\n"
-        f"Kod 10 dəqiqə etibarlıdır."
-    )
+    context = {
+        "user": user,
+        "code": code,
+        "verification_link": link,
+        "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
+        "expires_at": expires_at,
+    }
+    text_body = render_to_string("accounts/emails/verification_email.txt", context)
+    html_body = render_to_string("accounts/emails/verification_email.html", context)
 
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [user.email])
+    message.attach_alternative(html_body, "text/html")
+    message.send()
 
 
 DATA_URL_PNG_RE = re.compile(r"^data:image\/png;base64,(.+)$")

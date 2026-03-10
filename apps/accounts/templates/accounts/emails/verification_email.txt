@@ -1,0 +1,9 @@
+Salam {{ user.username }},
+
+EMSArena hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
+{{ verification_link }}
+
+OTP kodu:
+{{ code }}
+
+Kod və link {{ otp_expiry_minutes }} dəqiqə etibarlıdır.

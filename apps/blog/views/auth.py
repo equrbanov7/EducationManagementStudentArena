@@ -4,12 +4,14 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core.utils import get_auth_otp_expiry_seconds
+
+from apps.accounts.services import issue_email_otp
 from ..forms import RegisterForm
 from ..models import EmailOTP
-from ..utils import generate_otp, send_verify_email
+from ..utils import send_verify_email
 
 User = get_user_model()
 signer = TimestampSigner()
@@ -29,13 +31,8 @@ def register_view(request):
             user.is_active = False
             user.save()
 
-            code = generate_otp()
-            EmailOTP.objects.create(
-                user=user,
-                code=code,
-                expires_at=timezone.now() + timezone.timedelta(minutes=10),
-            )
-            send_verify_email(user, code)
+            code, expires_at = issue_email_otp(user)
+            send_verify_email(user, code, request=request, expires_at=expires_at)
 
             request.session["pending_verify_email"] = user.email
             messages.success(request, pgettext("blog.verify.message", "code_sent"))
@@ -60,7 +57,7 @@ def verify_code_view(request):
             messages.error(request, pgettext("blog.verify.message", "user_not_found"))
             return redirect("register")
 
-        otp = EmailOTP.objects.filter(user=user, code=code, is_used=False).order_by("-created_at").first()
+        otp = EmailOTP.get_matching_otp(user=user, code=code)
         if not otp or otp.is_expired():
             messages.error(request, pgettext("blog.verify.message", "invalid_or_expired_code"))
             return render(request, "blog/verify_code.html", {"email": email})
@@ -80,7 +77,7 @@ def verify_code_view(request):
 def verify_email_link_view(request):
     token = request.GET.get("token", "")
     try:
-        user_id = signer.unsign(token, max_age=60 * 10)  # 10 dəqiqə
+        user_id = signer.unsign(token, max_age=get_auth_otp_expiry_seconds())
         user = User.objects.get(pk=user_id)
         user.is_active = True
         user.save()
@@ -102,9 +99,8 @@ def resend_code_view(request):
         messages.error(request, pgettext("blog.verify.message", "user_not_found"))
         return redirect("register")
 
-    code = generate_otp()
-    EmailOTP.objects.create(user=user, code=code, expires_at=timezone.now() + timezone.timedelta(minutes=10))
-    send_verify_email(user, code)
+    code, expires_at = issue_email_otp(user)
+    send_verify_email(user, code, request=request, expires_at=expires_at)
 
     messages.success(request, pgettext("blog.verify.message", "new_code_sent"))
     return redirect("verify_code")
