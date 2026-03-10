@@ -51,7 +51,7 @@
 
                         <div class="post-info">
                             <div class="post-title">
-                                <a href="{% url 'post_detail' item.post.slug %}" class="pending-post-title-link">
+                                <a href="{% url 'article_detail' item.post.slug %}" class="pending-post-title-link">
                                     {{ item.post.title }}
                                 </a>
                                 <span class="post-status-badge {{ item.status_class }}">{{ item.status_label }}</span>

@@ -98,7 +98,7 @@ def create_post(request):
                 return redirect(f"{reverse('accounts:profile')}?section=posts")
 
             messages.success(request, pgettext("blog.post.message", "created"))
-            return redirect("post_detail", slug=post.slug)
+            return redirect("article_detail", slug=post.slug)
         if is_ajax:
             errors = {field: [str(error) for error in error_list] for field, error_list in form.errors.items()}
             return JsonResponse(

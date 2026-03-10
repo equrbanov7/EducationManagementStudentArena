@@ -931,7 +931,7 @@ def user_profile(request):
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
-        "blog": pgettext_lazy("profile.section", "blog"),
+        "blog": pgettext_lazy("nav", "home"),
         "edit-profile": pgettext_lazy("profile.section", "edit_profile"),
     }
 
@@ -954,10 +954,10 @@ def user_profile(request):
                 "section": "blog",
                 "title": section_titles["blog"],
                 "url": reverse("home"),
-                "icon": "fas fa-blog",
+                "icon": "fas fa-house",
                 "source_url": reverse("home"),
-                "description": pgettext_lazy("profile.shortcut", "open_blog_description"),
-                "action_label": pgettext_lazy("profile.shortcut", "open_blog_action"),
+                "description": "Ana səhifə və məqalə bölməsini aç.",
+                "action_label": pgettext_lazy("nav", "home"),
             }
         )
 

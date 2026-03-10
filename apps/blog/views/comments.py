@@ -3,6 +3,7 @@
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from ..forms import CommentForm
@@ -31,7 +32,7 @@ def post_detail(request, slug):
     if request.method == "POST":
         if not request.user.is_authenticated:
             messages.error(request, pgettext("blog.post_detail.message", "login_required"))
-            return redirect("login")
+            return redirect(f"{reverse('accounts:login')}?next={request.path}")
 
         form = CommentForm(request.POST)
 
@@ -54,7 +55,7 @@ def post_detail(request, slug):
                 comment.save()
                 messages.success(request, pgettext("blog.post_detail.message", "comment_added_without_rating"))
 
-            return redirect("post_detail", slug=post.slug)
+            return redirect("article_detail", slug=post.slug)
     else:
         form = CommentForm()
 

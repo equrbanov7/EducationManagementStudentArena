@@ -12,12 +12,12 @@ urlpatterns = [
     path("users/<str:username>/", views.user_profile, name="user_profile"),
     # --- Postlarla bağlı URL-lər ---
     path("posts/create/", views.create_post, name="create_post"),
-    path("posts/<slug:slug>/", views.post_detail, name="post_detail"),
-    path("post/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
-    path("post/<int:post_id>/review/", views.review_post, name="review_post"),
-    path("post/<int:post_id>/delete/", views.delete_post, name="delete_post"),
+    path("articles/<slug:slug>/", views.post_detail, name="article_detail"),
+    path("posts/<int:pk>/edit/", views.post_edit_ajax, name="post_edit_ajax"),
+    path("posts/<int:post_id>/review/", views.review_post, name="review_post"),
+    path("posts/<int:post_id>/delete/", views.delete_post, name="delete_post"),
     # ---- Category URL-ləri ----
-    path("category/<slug:slug>/", views.category_detail, name="category_detail"),
+    path("categories/<slug:slug>/", views.category_detail, name="category_detail"),
     # ---- Question URL-ləri ----
     path("questions/create/", views.create_question, name="create_question"),
     path("questions/my/", views.my_questions, name="my_questions"),
