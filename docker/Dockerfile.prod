@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements/production.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements /app/requirements
+RUN pip install --no-cache-dir -r /app/requirements/production.txt
 
 # Copy project
 COPY . /app/
@@ -27,5 +27,5 @@ RUN python manage.py collectstatic --noinput
 # Expose port
 EXPOSE 8000
 
-# Run with gunicorn
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+# Run with Daphne so HTTP and WebSocket traffic share the ASGI app
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
