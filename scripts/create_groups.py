@@ -25,6 +25,7 @@ if __name__ == "__main__":
 
     import django
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+    if not os.environ.get("DJANGO_SETTINGS_MODULE"):
+        raise RuntimeError("DJANGO_SETTINGS_MODULE must be set before running scripts/create_groups.py.")
     django.setup()
     create_groups()
