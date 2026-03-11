@@ -1,49 +1,19 @@
 import base64
-import re
 
 from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from apps.blog.utils import DATA_URL_PNG_RE
+from apps.exams.services.exam_definition import effective_random_question_count
+from apps.exams.services.question_bank import normalize_question_text
 
 
-# Bu, sual mətnini normallaşdırır: boşluqları təmizləyir, kiçik hərflərə çevirir və çoxlu boşluqları tək boşluğa çevirir.
 def _norm(text: str) -> str:
-    if not text:
-        return ""
-    t = text.strip().lower()
-    t = re.sub(r"\s+", " ", t)
-    return t
-
-
-# 0, 1, 10, boş/None kimi dəyərlər üçün lazım olan sual sayını qaytarır.
+    return normalize_question_text(text)
 
 
 def _effective_needed_count(exam) -> int:
-    """
-    0 -> hamısı
-    1 -> 1
-    10 -> 10
-    boş/None -> 10 (default)
-    """
-    total = exam.questions.filter(is_active=True).count()
-
-    val = getattr(exam, "random_question_count", None)
-    if val is None:
-        return min(10, total)
-
-    try:
-        val = int(val)
-    except (TypeError, ValueError):
-        return min(10, total)
-
-    if val <= 0:
-        return total  # 0 -> hamısı
-
-    return min(val, total)
-
-
-# Tələbənin həqiqətən nəsə yazıb/seçib-seçmədiyini yoxlamaq üçün istifadə olunur.
+    return effective_random_question_count(exam)
 
 
 def _attempt_has_any_answer(attempt) -> bool:

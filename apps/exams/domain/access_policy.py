@@ -1,0 +1,193 @@
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.translation import pgettext, pgettext_lazy
+
+from apps.accounts.models import ProfileRole
+
+User = get_user_model()
+
+
+class StudentGroup(models.Model):
+    """
+    Müəllimin yaratdığı tələbə qrupu.
+    Məs: 875i, 842A1 və s.
+    """
+
+    teacher = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="student_groups",
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "teacher"),
+    )
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="student_groups",
+        null=True,
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "organization"),
+    )
+    name = models.CharField(
+        max_length=50,
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "name"),
+    )
+    students = models.ManyToManyField(
+        User,
+        related_name="student_groups_as_student",
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "students"),
+    )
+    teachers = models.ManyToManyField(
+        User,
+        related_name="student_groups_as_teacher",
+        blank=True,
+        verbose_name=pgettext_lazy("exams.model.student_group.field", "teachers"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = pgettext_lazy("exams.model.student_group.meta", "singular")
+        verbose_name_plural = pgettext_lazy("exams.model.student_group.meta", "plural")
+        unique_together = ("organization", "teacher", "name")
+        ordering = ["name"]
+
+    def __str__(self):
+        if self.organization:
+            return f"{self.name} ({self.teacher.username} @ {self.organization.name})"
+        return f"{self.name} ({self.teacher.username})"
+
+    def clean(self):
+        errors = {}
+
+        if self.organization_id is None:
+            errors["organization"] = pgettext("exams.model.error", "group_organization_required")
+
+        if self.teacher_id:
+            try:
+                profile = self.teacher.profile
+            except Exception:
+                profile = None
+            teacher_org = getattr(profile, "organization", None)
+            teacher_is_allowed = self.teacher.is_superuser or getattr(self.teacher, "is_superadmin", False)
+            if not teacher_is_allowed and hasattr(self.teacher, "has_role"):
+                teacher_is_allowed = self.teacher.has_role(ProfileRole.TEACHER) or self.teacher.has_role(
+                    ProfileRole.ASSISTANT_TEACHER
+                )
+            if not teacher_is_allowed:
+                teacher_role = getattr(profile, "role", None)
+                teacher_is_allowed = teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+
+            if not teacher_is_allowed:
+                errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_role_required")
+
+            if self.organization_id and teacher_org != self.organization:
+                errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_tenant_mismatch")
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def has_student(self, user: User) -> bool:
+        return self.students.filter(id=user.id).exists()
+
+    def has_teacher(self, user: User) -> bool:
+        if user is None:
+            return False
+        return self.teacher_id == user.id or self.teachers.filter(id=user.id).exists()
+
+
+class ExamAccessPolicyMixin:
+    def _user_in_allowed_groups(self, user: User) -> bool:
+        return self.allowed_groups.filter(students=user).exists()
+
+    def _user_in_assigned_course(self, user: User) -> bool:
+        if not self.course_id:
+            return False
+        return self.course.memberships.filter(user=user, role="student").exists()
+
+    def can_user_see(self, user: User) -> bool:
+        if user == self.author:
+            return True
+
+        if not self.is_active:
+            return False
+
+        if self.is_public:
+            return True
+
+        if self.allowed_users.filter(id=user.id).exists():
+            return True
+
+        if self._user_in_allowed_groups(user):
+            return True
+
+        if self._user_in_assigned_course(user):
+            return True
+
+        if self.access_code:
+            return True
+
+        return False
+
+    def can_user_start(self, user: User, code: str | None = None) -> tuple[bool, str | None]:
+        if not self.is_active:
+            return False, pgettext("exams.model.access", "exam_not_active")
+
+        if self.is_before_start():
+            start_str = self.start_datetime.strftime("%d.%m.%Y %H:%M")
+            return False, pgettext("exams.model.access", "exam_not_started").format(start_str=start_str)
+
+        if self.is_after_end():
+            return False, pgettext("exams.model.access", "exam_ended")
+
+        left = self.attempts_left_for(user)
+        if left is not None and left <= 0:
+            return False, pgettext("exams.model.access", "attempt_limit_reached")
+
+        if user == self.author:
+            return True, None
+
+        in_allowed_any = (
+            self.allowed_users.filter(id=user.id).exists()
+            or self._user_in_allowed_groups(user)
+            or self._user_in_assigned_course(user)
+        )
+
+        if not self.access_code:
+            if self.is_public:
+                return True, None
+            if in_allowed_any:
+                return True, None
+            return False, pgettext("exams.model.access", "no_exam_access")
+
+        if not self.is_public and not in_allowed_any:
+            return False, pgettext("exams.model.access", "no_exam_access")
+
+        if not code:
+            return False, pgettext("exams.model.access", "access_code_required")
+        if code != self.access_code:
+            return False, pgettext("exams.model.access", "access_code_invalid")
+
+        return True, None
+
+    def requires_code_for(self, user: User) -> bool:
+        if user == self.author or getattr(user, "is_teacher", False):
+            return False
+
+        if not self.is_active:
+            return False
+
+        if not self.access_code:
+            return False
+
+        return True
+
+
+__all__ = [
+    "ExamAccessPolicyMixin",
+    "StudentGroup",
+]
