@@ -18,8 +18,10 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
+from apps.projects.services import create_project_submission
+from apps.task_submission_core.review import annotate_student_review_state
+from apps.task_submission_core.uploads import prepare_submission_upload
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
-from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from ._helpers import _append_return_to, _get_tenant_project_or_404, _project_back_url, _student_return_to
 
@@ -28,21 +30,7 @@ REVIEW_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 
 
 def _annotate_review_state(submissions):
-    current_time = timezone.now()
-    prepared_submissions = []
-
-    for submission in submissions:
-        submission.has_grade = submission.grade is not None
-        submission.show_review_data = submission.status == "graded" and (
-            not submission.graded_at or current_time >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-        )
-        submission.review_available_in_seconds = 0
-        if submission.status == "graded" and submission.graded_at and not submission.show_review_data:
-            reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-            submission.review_available_in_seconds = max(0, int((reveal_at - current_time).total_seconds()))
-        prepared_submissions.append(submission)
-
-    return prepared_submissions
+    return annotate_student_review_state(submissions)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -109,8 +97,6 @@ def submit_project(request, pk):
     │ Form data: content (text), file (optional)                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
-    from apps.projects.models import ProjectSubmission
-
     project = _get_tenant_project_or_404(request, pk)
 
     if not project.assigned_students.filter(id=request.user.id).exists():
@@ -135,37 +121,17 @@ def submit_project(request, pk):
     uploaded_file = request.FILES.get("file")
     if uploaded_file is not None:
         try:
-            validate_uploaded_file(
-                uploaded_file,
-                allowed_extensions={
-                    ".zip",
-                    ".rar",
-                    ".7z",
-                    ".pdf",
-                    ".txt",
-                    ".doc",
-                    ".docx",
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                },
-                max_size_mb=25,
-            )
-            randomize_uploaded_filename(uploaded_file)
+            prepare_submission_upload(uploaded_file)
         except ValidationError as exc:
             return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
 
     try:
-        submission = ProjectSubmission.objects.create(
-            project=project,
-            student=request.user,
-            content=request.POST.get("content", ""),
+        submission = create_project_submission(
+            project,
+            request.user,
+            submission_file=uploaded_file,
+            submission_text=request.POST.get("content", ""),
         )
-
-        # Fayl yükləmə
-        if uploaded_file is not None:
-            submission.file = uploaded_file
-            submission.save()
 
         messages.success(request, pgettext("projects.views.message", "project_submitted"))
         return JsonResponse(
