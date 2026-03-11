@@ -12,21 +12,19 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import Exam, ExamQuestion
+from apps.live_exam.domain.session import get_exam_question_ids, get_question_by_index, get_total_questions
 from apps.live_exam.models import LiveSession
-
-from ._helpers import (
-    _broadcast,
-    _build_question_payload,
-    _get_exam_question_ids,
-    _get_public_base_url,
-    _get_question_by_index,
-    _get_total_questions,
-    _safe_int,
-    _serialize_top,
+from apps.live_exam.transport import (
+    broadcast,
+    build_finished_payload,
+    build_question_payload,
+    build_reveal_payload,
+    get_public_base_url,
 )
 
 
@@ -56,11 +54,11 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    entry_url = f"{_get_public_base_url(request)}{reverse('liveExam:pin_entry')}"
+    entry_url = f"{get_public_base_url(request)}{reverse('liveExam:pin_entry')}"
 
     exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
 
-    selected = _get_total_questions(session)  # səndə necə hesablanırsa
+    selected = get_total_questions(session)
     # ✅ təhlükəsizlik: selected max-dan böyük ola bilməsin
     if exam_total > 0:
         selected = max(1, min(selected, exam_total))
@@ -93,7 +91,7 @@ def host_start_game(request, pin):
     # 1) Host neçə sual istəyir? (form input name="question_count")
     raw = (request.POST.get("question_count") or "").strip()
 
-    all_ids = _get_exam_question_ids(session)
+    all_ids = get_exam_question_ids(session)
     total_in_exam = len(all_ids)
 
     if total_in_exam <= 0:
@@ -157,7 +155,7 @@ def host_start_game(request, pin):
     )
 
     # 4) Wait room-da olan player-ları player_screen-ə yönləndir
-    _broadcast(
+    broadcast(
         pin,
         {
             "type": "game_started",
@@ -167,21 +165,21 @@ def host_start_game(request, pin):
     )
 
     # 5) Start basan kimi 1-ci sualı publish et
-    eq = _get_question_by_index(session, 0)
+    eq = get_question_by_index(session, 0)
     if not eq:
         return JsonResponse(
             {"ok": False, "message": pgettext("live_exam.view.message", "question_not_found")},
             status=400,
         )
 
-    total = _get_total_questions(session)
-    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=0, total=total)
+    total = get_total_questions(session)
+    payload, now, ends = build_question_payload(session, eq, idx=0, total=total)
 
     session.question_started_at = now
     session.question_ends_at = ends
     session.save(update_fields=["question_started_at", "question_ends_at"])
 
-    _broadcast(pin, payload, "play")
+    broadcast(pin, payload, "play")
 
     return JsonResponse(
         {
@@ -206,18 +204,18 @@ def host_next_question(request, pin):
         session.current_index = int(session.current_index or 0) + 1
 
     idx = int(session.current_index or 0)
-    total = _get_total_questions(session)
+    total = get_total_questions(session)
 
-    eq = _get_question_by_index(session, idx)
+    eq = get_question_by_index(session, idx)
     if eq is None:
         # sual qurtardı -> finished
         session.state = LiveSession.STATE_FINISHED
         session.save(update_fields=["state"])
 
-        _broadcast(pin, {"type": "finished", "top": _serialize_top(session, limit=50)}, "play")
+        broadcast(pin, build_finished_payload(session, limit=50), "play")
         return JsonResponse({"ok": True, "finished": True})
 
-    payload, now, ends = _build_question_payload(session=session, eq=eq, idx=idx, total=total)
+    payload, now, ends = build_question_payload(session, eq, idx=idx, total=total)
 
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = now
@@ -232,7 +230,7 @@ def host_next_question(request, pin):
         ]
     )
 
-    _broadcast(pin, payload, "play")
+    broadcast(pin, payload, "play")
     return JsonResponse({"ok": True, "index": idx + 1, "total": total})
 
 
@@ -244,34 +242,18 @@ def host_reveal(request, pin):
         raise Http404()
 
     idx = int(session.current_index or 0)
-    eq = _get_question_by_index(session, idx)
+    eq = get_question_by_index(session, idx)
     if not eq:
         return JsonResponse(
             {"ok": False, "message": pgettext("live_exam.view.message", "active_question_not_found")},
             status=400,
         )
 
-    # ✅ multi-choice üçün: bir neçə correct ola bilər
-    from apps.exams.models import ExamQuestionOption
-
-    correct_ids = list(ExamQuestionOption.objects.filter(question=eq, is_correct=True).values_list("id", flat=True))
-
     session.state = LiveSession.STATE_REVEAL
     session.save(update_fields=["state"])
 
-    from django.utils import timezone
-
-    from ._helpers import _serialize_question_results
-
-    payload = {
-        "type": "reveal",
-        "question_id": eq.id,
-        "correct_option_ids": correct_ids,
-        "results": _serialize_question_results(session, eq.id, limit=50),
-        "top": _serialize_top(session, limit=10),
-        "revealed_at": timezone.now().isoformat(),
-    }
-    _broadcast(pin, payload, "play")
+    payload = build_reveal_payload(session, eq.id, revealed_at=timezone.now())
+    broadcast(pin, payload, "play")
 
     return JsonResponse({"ok": True, "question_id": eq.id})
 
@@ -286,13 +268,7 @@ def host_finish(request, pin):
     session.state = LiveSession.STATE_FINISHED
     session.save(update_fields=["state"])
 
-    from django.utils import timezone
-
-    payload = {
-        "type": "finished",
-        "top": _serialize_top(session, limit=50),
-        "finished_at": timezone.now().isoformat(),
-    }
-    _broadcast(pin, payload, "play")
+    payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
+    broadcast(pin, payload, "play")
 
     return JsonResponse({"ok": True})
