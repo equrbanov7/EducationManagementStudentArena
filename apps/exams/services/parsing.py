@@ -1,7 +1,6 @@
 import os
 import re
 from collections import defaultdict
-from importlib.readers import ZipReader
 
 from django.utils.translation import pgettext
 
@@ -9,7 +8,7 @@ from docx import Document
 
 try:
     from pypdf import PdfReader
-except Exception:
+except ImportError:
     PdfReader = None
 
 from apps.exams.constants import ANSWERLINE_RE, OPTION_RE, QUESTION_RE
@@ -78,9 +77,10 @@ def extract_text_from_upload(uploaded_file) -> str:
         return "\n".join(lines)
 
     if ext == ".pdf":
-        if ZipReader is None:
+        if PdfReader is None:
             raise ValueError(pgettext("exams.service.parsing.error", "pdf_dependency_missing"))
 
+        uploaded_file.seek(0)
         reader = PdfReader(uploaded_file)
         parts = []
         for page in reader.pages:

@@ -3,12 +3,16 @@ Service tests for exams app.
 """
 
 from decimal import Decimal
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
+from apps.exams.services import parsing
 from apps.exams.models import Exam, ExamAttempt, ExamAnswer, ExamQuestion
 
 User = get_user_model()
@@ -181,3 +185,25 @@ class ExamAccessControlServicesTest(TestCase):
         self.assertEqual(services.parse_score_value("95.5"), Decimal("95.5"))
         self.assertEqual(services.parse_score_value(85), Decimal("85"))
         self.assertIsNone(services.parse_score_value("invalid"))
+
+
+class ExamParsingServicesTest(TestCase):
+    def test_extract_text_from_upload_reads_pdf_with_pypdf(self):
+        uploaded = SimpleUploadedFile("questions.pdf", b"%PDF-1.4 fake", content_type="application/pdf")
+        fake_page = Mock()
+        fake_page.extract_text.return_value = "1) Sual A) Bir B) Iki C) Uc D) Dord Cavab: B"
+
+        with patch.object(parsing, "PdfReader", return_value=SimpleNamespace(pages=[fake_page])) as pdf_reader:
+            text = parsing.extract_text_from_upload(uploaded)
+
+        self.assertEqual(text, "1) Sual\nA) Bir\nB) Iki\nC) Uc\nD) Dord\nCavab: B")
+        pdf_reader.assert_called_once_with(uploaded)
+
+    def test_extract_text_from_upload_fails_without_pypdf(self):
+        uploaded = SimpleUploadedFile("questions.pdf", b"%PDF-1.4 fake", content_type="application/pdf")
+
+        with patch.object(parsing, "PdfReader", None):
+            with self.assertRaises(ValueError) as exc:
+                parsing.extract_text_from_upload(uploaded)
+
+        self.assertIn("pypdf", str(exc.exception))
