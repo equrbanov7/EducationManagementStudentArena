@@ -3,7 +3,7 @@ Shared helper functions for account views.
 """
 
 from datetime import timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import InvalidOperation
 from pathlib import PurePosixPath
 from urllib.parse import urlencode
 
@@ -23,6 +23,27 @@ from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW
 from core.tenancy import get_request_organization, scoped_by_organization
 
 from ..models import ProfileRole
+from ..policies import (
+    is_superadmin_user,
+    map_org_role_to_profile_role,
+    map_signup_role_to_profile_role,
+    permission_is_grantable,
+    resolve_membership_role,
+    user_has_any_role,
+)
+from ..queries import (
+    get_assigned_courses_for_user,
+    get_assigned_exams_for_user,
+    get_signup_lookup_payload,
+    pending_student_request_queryset,
+)
+from ..services import (
+    activate_verified_student_membership,
+    close_other_pending_student_requests,
+    parse_decimal_score,
+    set_student_org_request_status,
+    sync_profile_pending_request_snapshot,
+)
 
 User = get_user_model()
 signer = TimestampSigner()
@@ -47,7 +68,7 @@ ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS = 60 * 5
 
 
 def _is_superadmin_user(user):
-    return user.is_superuser or getattr(user, "is_superadmin", False)
+    return is_superadmin_user(user)
 
 
 def _get_active_organization(request):
@@ -78,32 +99,14 @@ def _tenant_scoped_exams(request, queryset=None):
 
 
 def _assigned_courses_queryset(request, user):
-    return _tenant_scoped_courses(
-        request,
-        Course.objects.filter(
-            memberships__user=user,
-            memberships__role="student",
-            status="published",
-        ).distinct(),
-    )
+    return _tenant_scoped_courses(request, get_assigned_courses_for_user(user))
 
 
 def _assigned_exams_queryset(request, user, *, active_only=True):
-    assignment_filter = (
-        Q(allowed_users=user)
-        | Q(allowed_groups__students=user)
-        | Q(
-            course__memberships__user=user,
-            course__memberships__role="student",
-            course__status="published",
-        )
-    )
-
-    exams = Exam.objects.filter(assignment_filter, is_public=False)
-    if active_only:
-        exams = exams.filter(is_active=True)
-
-    return _tenant_scoped_exams(request, exams).distinct()
+    return _tenant_scoped_exams(
+        request,
+        get_assigned_exams_for_user(user, active_only=active_only, include_public=False),
+    ).distinct()
 
 
 def _normalized_org_name(value):
@@ -111,18 +114,7 @@ def _normalized_org_name(value):
 
 
 def _pending_student_request_queryset(*, user=None, organization=None, statuses=None):
-    query = StudentOrganizationRequest.objects.all()
-
-    if statuses:
-        query = query.filter(status__in=list(statuses))
-
-    if user is not None:
-        query = query.filter(user=user)
-
-    if organization is not None:
-        query = query.filter(organization=organization)
-
-    return query
+    return pending_student_request_queryset(user=user, organization=organization, statuses=statuses)
 
 
 def _set_student_org_request_status(
@@ -133,99 +125,30 @@ def _set_student_org_request_status(
     responded_by=None,
     when=None,
 ):
-    responded_at = when or timezone.now()
-    request_obj.status = status
-    request_obj.resolution_note = (note or "").strip()
-    request_obj.responded_by = responded_by
-    request_obj.responded_at = responded_at
-    request_obj.save(
-        update_fields=[
-            "status",
-            "resolution_note",
-            "responded_by",
-            "responded_at",
-            "updated_at",
-        ]
+    return set_student_org_request_status(
+        request_obj=request_obj,
+        status=status,
+        note=note,
+        responded_by=responded_by,
+        when=when,
     )
 
 
 def _sync_profile_pending_request_snapshot(profile):
-    """
-    Keep legacy profile.requested_organization* fields synchronized with the latest pending request.
-    These fields are still used in parts of the UI and should reflect current pending state.
-    """
-    latest_pending_request = (
-        _pending_student_request_queryset(
-            user=profile.user,
-            statuses=[StudentOrganizationRequestStatus.PENDING],
-        )
-        .filter(
-            organization__is_active=True,
-            organization__status="active",
-        )
-        .select_related("organization")
-        .order_by("-created_at")
-        .first()
-    )
-
-    if latest_pending_request:
-        next_requested_org = latest_pending_request.organization
-        next_requested_name = latest_pending_request.organization.name
-        next_requested_message = (latest_pending_request.message or "").strip()
-    else:
-        next_requested_org = None
-        next_requested_name = ""
-        next_requested_message = ""
-
-    changed_fields = []
-    if profile.requested_organization_id != getattr(next_requested_org, "id", None):
-        profile.requested_organization = next_requested_org
-        changed_fields.append("requested_organization")
-    if profile.requested_organization_name != next_requested_name:
-        profile.requested_organization_name = next_requested_name
-        changed_fields.append("requested_organization_name")
-    if profile.requested_organization_message != next_requested_message:
-        profile.requested_organization_message = next_requested_message
-        changed_fields.append("requested_organization_message")
-
-    if changed_fields:
-        profile.save(update_fields=changed_fields + ["updated_at"])
-
-    return latest_pending_request
+    return sync_profile_pending_request_snapshot(profile)
 
 
 def _close_other_pending_student_requests(*, user, accepted_organization, responded_by=None, note=""):
-    close_note = (note or "").strip() or f"İstifadəçi artıq {accepted_organization.name} təşkilatının üzvüdür."
-    now = timezone.now()
-    updated = _pending_student_request_queryset(
+    return close_other_pending_student_requests(
         user=user,
-        statuses=[StudentOrganizationRequestStatus.PENDING],
-    ).exclude(organization=accepted_organization)
-
-    updated_count = updated.update(
-        status=StudentOrganizationRequestStatus.AUTO_CLOSED,
-        resolution_note=close_note,
+        accepted_organization=accepted_organization,
         responded_by=responded_by,
-        responded_at=now,
-        updated_at=now,
+        note=note,
     )
-    return updated_count
 
 
 def _user_has_any_role(user, role_names):
-    if not user:
-        return False
-
-    normalized = set(role_names or [])
-    if not normalized:
-        return False
-
-    if hasattr(user, "has_role"):
-        return any(user.has_role(role_name) for role_name in normalized)
-
-    profile = getattr(user, "profile", None)
-    current_role = getattr(profile, "role", None)
-    return current_role in normalized
+    return user_has_any_role(user, role_names)
 
 
 def _extract_profile_roles_for_user(user):
@@ -256,9 +179,7 @@ def _extract_profile_roles_for_user(user):
 
 def _assignable_profile_roles_for_user(user):
     manageable_role_names = {
-        name
-        for name, _display in ProfileRole.CHOICES
-        if name not in {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
+        name for name, _display in ProfileRole.CHOICES if name not in {ProfileRole.SUPERADMIN, ProfileRole.ORG_OWNER}
     }
 
     if _is_superadmin_user(user):
@@ -275,9 +196,7 @@ def _assignable_profile_roles_for_user(user):
 def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, organization=None, actor_user=None):
     actor_user_id = getattr(actor_user, "id", None)
     owner_self_management_enabled = bool(
-        actor_user_id
-        and organization is not None
-        and getattr(organization, "owner_id", None) == actor_user_id
+        actor_user_id and organization is not None and getattr(organization, "owner_id", None) == actor_user_id
     )
 
     for profile in profiles:
@@ -307,9 +226,7 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, orga
         target_level = profile.user._highest_role_level() if hasattr(profile.user, "_highest_role_level") else 0
         is_self_profile = actor_user_id is not None and profile.user_id == actor_user_id
         profile.can_edit_roles = (
-            is_superadmin
-            or actor_level > target_level
-            or (is_self_profile and owner_self_management_enabled)
+            is_superadmin or actor_level > target_level or (is_self_profile and owner_self_management_enabled)
         )
 
 
@@ -388,13 +305,21 @@ def _materialize_legacy_teacher_membership(user, organization=None, *, membershi
 
     profile = getattr(user, "profile", None)
     target_organization = organization or getattr(profile, "organization", None)
-    if profile is None or target_organization is None or getattr(profile, "organization_id", None) != target_organization.id:
+    if (
+        profile is None
+        or target_organization is None
+        or getattr(profile, "organization_id", None) != target_organization.id
+    ):
         return list(memberships or [])
 
-    current_memberships = list(memberships) if memberships is not None else list(
-        Membership.objects.filter(user=user, organization=target_organization, is_active=True)
-        .select_related("organization", "role", "scope_unit")
-        .order_by("-is_primary", "-role__level")
+    current_memberships = (
+        list(memberships)
+        if memberships is not None
+        else list(
+            Membership.objects.filter(user=user, organization=target_organization, is_active=True)
+            .select_related("organization", "role", "scope_unit")
+            .order_by("-is_primary", "-role__level")
+        )
     )
 
     legacy_profile_role = getattr(profile, "role", None)
@@ -404,16 +329,21 @@ def _materialize_legacy_teacher_membership(user, organization=None, *, membershi
         if getattr(membership, "is_active", False)
     }
 
-    desired_primary_role = legacy_profile_role if legacy_profile_role in {
-        ProfileRole.ORG_OWNER,
-        ProfileRole.ORG_ADMIN,
-        ProfileRole.HR,
-        ProfileRole.TEACHER,
-        ProfileRole.ASSISTANT_TEACHER,
-        ProfileRole.STUDENT,
-        ProfileRole.LEAD_STUDENT,
-        ProfileRole.MEMBER,
-    } else None
+    desired_primary_role = (
+        legacy_profile_role
+        if legacy_profile_role
+        in {
+            ProfileRole.ORG_OWNER,
+            ProfileRole.ORG_ADMIN,
+            ProfileRole.HR,
+            ProfileRole.TEACHER,
+            ProfileRole.ASSISTANT_TEACHER,
+            ProfileRole.STUDENT,
+            ProfileRole.LEAD_STUDENT,
+            ProfileRole.MEMBER,
+        }
+        else None
+    )
 
     primary_role_satisfied = False
     if desired_primary_role in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
@@ -588,10 +518,10 @@ def _is_result_visible_to_student(reviewed_at):
 
 
 def _parse_decimal_score(raw_value):
-    token = (raw_value or "").strip().replace(",", ".")
-    if not token:
+    score = parse_decimal_score((raw_value or "").strip().replace(",", "."), default=None)
+    if score is None:
         raise InvalidOperation
-    return Decimal(token)
+    return score
 
 
 def _extract_assignment_attachments(submission):
@@ -802,225 +732,27 @@ def _ensure_profile_admin_membership(user, organization):
 
 
 def _permission_is_grantable(permission, effective_permissions, grantable_permissions):
-    """
-    A permission can be granted when:
-    - actor already has that permission, or
-    - permission is explicitly grantable via `grant:*`, `grant:category.*` or `grant:exact.permission`.
-    """
-    from apps.organizations.permissions import has_permission
-
-    effective_list = list(effective_permissions)
-    grantable_list = list(grantable_permissions)
-    return has_permission(effective_list, permission) or has_permission(grantable_list, permission)
+    return permission_is_grantable(permission, effective_permissions, grantable_permissions)
 
 
 def _map_signup_role_to_profile_role(initial_role):
-    role_map = {
-        ProfileRole.STUDENT: ProfileRole.STUDENT,
-        ProfileRole.MEMBER: ProfileRole.MEMBER,
-        ProfileRole.TEACHER: ProfileRole.TEACHER,
-        ProfileRole.HR: ProfileRole.HR,
-        ProfileRole.ORG_ADMIN: ProfileRole.ORG_ADMIN,
-    }
-    return role_map.get(initial_role, ProfileRole.MEMBER)
+    return map_signup_role_to_profile_role(initial_role)
 
 
 def _map_org_role_to_profile_role(role):
-    role_name = ProfileRole.normalize_membership_role_name(getattr(role, "name", ""))
-    if role_name == ProfileRole.MEMBER:
-        return ProfileRole.MEMBER
-    if role_name == ProfileRole.LEAD_STUDENT:
-        return ProfileRole.LEAD_STUDENT
-    if role_name == ProfileRole.STUDENT:
-        return ProfileRole.STUDENT
-    if role_name == ProfileRole.HR:
-        return ProfileRole.HR
-    if role_name in {ProfileRole.ASSISTANT_TEACHER, "assistant", "lab_assistant"}:
-        return ProfileRole.ASSISTANT_TEACHER
-    if role_name in {ProfileRole.TEACHER, "instructor", "professor", "associate_professor"}:
-        return ProfileRole.TEACHER
-    if getattr(role, "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
-        return ProfileRole.ORG_ADMIN
-    return ProfileRole.MEMBER
+    return map_org_role_to_profile_role(role)
 
 
 def _resolve_membership_role(organization, initial_role):
-    from apps.organizations.models import Role
-
-    roles = Role.objects.filter(organization=organization, is_active=True)
-    if not roles.exists():
-        return None
-
-    if initial_role in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
-        return roles.order_by("-level").first()
-
-    if initial_role == ProfileRole.MEMBER:
-        member_role = roles.filter(name="member").first()
-        if member_role:
-            return member_role
-        student_role = roles.filter(name="student").first()
-        if student_role:
-            return student_role
-        return roles.order_by("level").first()
-
-    if initial_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-        return roles.filter(name="student").first() or roles.order_by("level").first()
-
-    if initial_role == ProfileRole.ASSISTANT_TEACHER:
-        for role_name in [
-            "assistant_teacher",
-            "assistant",
-            "lab_assistant",
-        ]:
-            match = roles.filter(name=role_name).first()
-            if match:
-                return match
-        return (
-            roles.filter(level__gte=40, level__lt=ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)).order_by("-level").first()
-            or roles.filter(level__gte=40).order_by("level").first()
-            or roles.order_by("level").first()
-        )
-
-    if initial_role == ProfileRole.TEACHER:
-        for role_name in [
-            "teacher",
-            "instructor",
-            "professor",
-            "associate_professor",
-        ]:
-            match = roles.filter(name=role_name).first()
-            if match:
-                return match
-        return roles.filter(level__gte=50).order_by("level").first() or roles.order_by("-level").first()
-
-    if initial_role == ProfileRole.HR:
-        hr_role = roles.filter(name="hr").first()
-        if hr_role:
-            return hr_role
-        return Role.objects.create(
-            organization=organization,
-            name="hr",
-            display_name="HR",
-            level=65,
-            scope_type="organization",
-            permissions=["member.view", "member.invite", "member.edit"],
-            is_system=False,
-            is_active=True,
-        )
-
-    return roles.order_by("level").first()
+    return resolve_membership_role(organization, initial_role)
 
 
 def _get_signup_lookup_payload():
-    """
-    Return lookup payload for signup filtering.
-    """
-    from apps.organizations.models import Country, Organization
-
-    countries = list(Country.objects.filter(is_active=True).values("code", "name").order_by("name"))
-    country_codes = {country["code"] for country in countries}
-    country_name_to_code = {country["name"].strip().lower(): country["code"] for country in countries}
-    organizations = []
-    org_rows = (
-        Organization.objects.filter(
-            is_active=True,
-            status="active",
-            org_type__in={
-                OrganizationType.SCHOOL,
-                OrganizationType.UNIVERSITY,
-                OrganizationType.COURSE_CENTER,
-            },
-        )
-        .values("id", "name", "slug", "org_type", "country")
-        .order_by("name")
-    )
-
-    for org in org_rows:
-        raw_country = (org.get("country") or "").strip()
-        normalized_country = raw_country.upper()
-        country_code = ""
-        if normalized_country in country_codes:
-            country_code = normalized_country
-        elif raw_country:
-            country_code = country_name_to_code.get(raw_country.lower(), "")
-
-        organizations.append(
-            {
-                "id": str(org["id"]),
-                "name": org["name"],
-                "slug": org["slug"],
-                "org_type": org["org_type"],
-                "country": raw_country,
-                "country_code": country_code,
-            }
-        )
-
-    return {
-        "countries": countries,
-        "organizations": organizations,
-    }
+    return get_signup_lookup_payload()
 
 
 def _activate_verified_student_membership(user):
-    """
-    Keep student join request pending after email verification.
-    Student should only join after organization approval.
-    """
-    profile = getattr(user, "profile", None)
-    if profile is None:
-        return None
-
-    requested_organization = getattr(profile, "requested_organization", None)
-    if requested_organization is None:
-        return None
-
-    if profile.organization_id:
-        return profile.organization
-
-    if requested_organization.is_suspended:
-        return None
-
-    if profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-        request_message = (profile.requested_organization_message or "").strip()
-        existing_pending = (
-            _pending_student_request_queryset(
-                user=user,
-                organization=requested_organization,
-                statuses=[StudentOrganizationRequestStatus.PENDING],
-            )
-            .order_by("-created_at")
-            .first()
-        )
-        if existing_pending:
-            if existing_pending.message != request_message:
-                existing_pending.message = request_message
-                existing_pending.save(update_fields=["message", "updated_at"])
-        else:
-            StudentOrganizationRequest.objects.create(
-                user=user,
-                organization=requested_organization,
-                message=request_message,
-                status=StudentOrganizationRequestStatus.PENDING,
-            )
-
-    profile.requested_organization_name = requested_organization.name
-    profile.student_university_name = requested_organization.name
-    if requested_organization.org_type == OrganizationType.SCHOOL:
-        profile.student_school_identifier = (
-            requested_organization.organization_identifier or requested_organization.license_identifier or ""
-        )
-    else:
-        profile.student_school_identifier = ""
-    profile.save(
-        update_fields=[
-            "requested_organization_name",
-            "student_university_name",
-            "student_school_identifier",
-        ]
-    )
-    _sync_profile_pending_request_snapshot(profile)
-
-    return None
+    return activate_verified_student_membership(user)
 
 
 def _result_status_badge(status, is_graded=False):
@@ -1099,7 +831,9 @@ def _build_user_organization_access_rows(
         if role_label not in row["role_labels"]:
             row["role_labels"].append(role_label)
 
-    owned_organizations = Organization.objects.filter(owner=user, is_active=True).select_related("owner").order_by("name")
+    owned_organizations = (
+        Organization.objects.filter(owner=user, is_active=True).select_related("owner").order_by("name")
+    )
     for organization in owned_organizations:
         row = grouped_rows.setdefault(
             organization.id,
@@ -1146,7 +880,10 @@ def _build_user_organization_access_rows(
     rows = []
     for row in grouped_rows.values():
         organization = row["organization"]
-        if row["access_origin"] == "superadmin" and PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN] not in row["role_labels"]:
+        if (
+            row["access_origin"] == "superadmin"
+            and PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN] not in row["role_labels"]
+        ):
             row["role_labels"].insert(0, PROFILE_ROLE_LABELS[ProfileRole.SUPERADMIN])
         if row["is_owner"] and PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER] not in row["role_labels"]:
             row["role_labels"].insert(0, PROFILE_ROLE_LABELS[ProfileRole.ORG_OWNER])
@@ -1243,17 +980,21 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         title=STUDENT_PENDING_INVITE_TITLE,
     ).values_list("user_id", flat=True)
 
-    legacy_requested_profiles = UserProfile.objects.filter(
-        user__is_active=True,
-        organization__isnull=True,
-        role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT, ProfileRole.MEMBER],
-    ).filter(
-        Q(requested_organization=organization)
-        | Q(
-            requested_organization__isnull=True,
-            requested_organization_name__iexact=organization.name,
+    legacy_requested_profiles = (
+        UserProfile.objects.filter(
+            user__is_active=True,
+            organization__isnull=True,
+            role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT, ProfileRole.MEMBER],
         )
-    ).exclude(user_id__in=pending_invite_user_ids)
+        .filter(
+            Q(requested_organization=organization)
+            | Q(
+                requested_organization__isnull=True,
+                requested_organization_name__iexact=organization.name,
+            )
+        )
+        .exclude(user_id__in=pending_invite_user_ids)
+    )
     legacy_user_ids = set(legacy_requested_profiles.values_list("user_id", flat=True))
     if legacy_user_ids:
         existing_pending_user_ids = set(
@@ -1367,14 +1108,10 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
 
     for pending_request in section["pending_requested_students"].object_list:
         pending_request.request_display_status = (
-            "Gözləyir"
-            if pending_request.status == StudentOrganizationRequestStatus.PENDING
-            else "Bağlanıb"
+            "Gözləyir" if pending_request.status == StudentOrganizationRequestStatus.PENDING else "Bağlanıb"
         )
         pending_request.request_display_class = (
-            "warning"
-            if pending_request.status == StudentOrganizationRequestStatus.PENDING
-            else "secondary"
+            "warning" if pending_request.status == StudentOrganizationRequestStatus.PENDING else "secondary"
         )
 
         profile = getattr(pending_request.user, "profile", None)
@@ -1391,10 +1128,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         if profile and profile.organization and profile.organization != organization:
             active_other_org_name = profile.organization.name
 
-        if (
-            not active_other_org_name
-            and pending_request.status == StudentOrganizationRequestStatus.PENDING
-        ):
+        if not active_other_org_name and pending_request.status == StudentOrganizationRequestStatus.PENDING:
             active_other_membership = (
                 Membership.objects.filter(user=pending_request.user, is_active=True)
                 .exclude(organization=organization)
@@ -1406,15 +1140,12 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
                 active_other_org_name = active_other_membership.organization.name
 
         if active_other_org_name and pending_request.status == StudentOrganizationRequestStatus.PENDING:
-            pending_request.request_note = (
-                f"İstifadəçi artıq {active_other_org_name} təşkilatının üzvüdür."
-            )
+            pending_request.request_note = f"İstifadəçi artıq {active_other_org_name} təşkilatının üzvüdür."
             pending_request.request_is_actionable = False
         elif pending_request.status == StudentOrganizationRequestStatus.AUTO_CLOSED:
             pending_request.request_note = (
-                (pending_request.resolution_note or "").strip()
-                or "Bu müraciət avtomatik bağlanıb."
-            )
+                pending_request.resolution_note or ""
+            ).strip() or "Bu müraciət avtomatik bağlanıb."
             pending_request.request_is_actionable = False
         else:
             pending_request.request_note = (pending_request.resolution_note or "").strip()
@@ -1520,7 +1251,9 @@ def _build_student_org_request_section(*, request, profile):
     pending_requested_org = pending_student_requests[0].organization if pending_student_requests else None
     pending_requested_org_name = pending_requested_org.name if pending_requested_org else ""
     pending_request_message = (pending_student_requests[0].message or "").strip() if pending_student_requests else ""
-    selected_org_id = str(pending_requested_org.id) if pending_requested_org else str(profile.requested_organization_id or "")
+    selected_org_id = (
+        str(pending_requested_org.id) if pending_requested_org else str(profile.requested_organization_id or "")
+    )
     pending_request_org_ids = {item.organization_id for item in pending_student_requests}
 
     organizations = Organization.objects.filter(is_active=True, status="active").exclude(

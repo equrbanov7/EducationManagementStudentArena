@@ -7,28 +7,27 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 from django.core.signing import BadSignature, SignatureExpired
-from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import pgettext_lazy
 
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
-from core.constants import OrganizationType
+from apps.blog.models import EmailOTP
+from apps.organizations.models import Country
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes
 from core.utils import get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
-from ..models import ProfileRole, UserProfile
-from ..services import get_otp_timer_context, send_verification_otp, verify_otp_code
-from apps.blog.models import EmailOTP
-from ._helpers import (
-    _activate_verified_student_membership,
-    _get_signup_lookup_payload,
-    _map_signup_role_to_profile_role,
-    _resolve_membership_role,
-    signer,
+from ..models import ProfileRole
+from ..queries import get_signup_lookup_payload
+from ..services import (
+    activate_user_account,
+    create_user_with_organization,
+    get_otp_timer_context,
+    send_verification_otp,
+    verify_otp_code,
 )
+from ._helpers import signer
 
 User = get_user_model()
 
@@ -134,133 +133,29 @@ def register_view(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
-            from apps.organizations.models import Country, Membership, Organization, Role
+            country_code = form.cleaned_data.get("country", "")
+            country_obj = Country.objects.filter(code=country_code).first()
+            country_name = country_obj.name if country_obj else country_code
+            user, organization, _, profile = create_user_with_organization(
+                username=form.cleaned_data["username"],
+                email=form.cleaned_data["email"],
+                password=form.cleaned_data["password"],
+                first_name=form.cleaned_data["first_name"],
+                last_name=form.cleaned_data["last_name"],
+                signup_mode=form.cleaned_data.get("signup_mode", "individual"),
+                organization_type=form.cleaned_data["organization_type"],
+                country_code=country_code,
+                country_name=country_name,
+                join_organization=form.cleaned_data.get("join_organization"),
+                institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
+                organization_identifier=form.cleaned_data.get("organization_identifier", ""),
+                organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
+                initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
+            )
+            requested_organization_name = profile.requested_organization_name
 
-            with transaction.atomic():
-                user = form.save(commit=False)
-                user.email = form.cleaned_data["email"]
-                user.set_password(form.cleaned_data["password"])
-                # Account becomes active only after OTP/email-link verification.
-                user.is_active = False
-                user.save()
-
-                signup_mode = form.cleaned_data.get("signup_mode", "individual")
-                organization_type = form.cleaned_data["organization_type"]
-                country_code = form.cleaned_data.get("country", "")
-                country_obj = Country.objects.filter(code=country_code).first()
-                country_name = country_obj.name if country_obj else country_code
-                join_organization = form.cleaned_data.get("join_organization")
-                institution_not_listed_name = form.cleaned_data.get("institution_not_listed_name", "")
-                organization_identifier = form.cleaned_data.get("organization_identifier", "")
-                organization_license_identifier = form.cleaned_data.get("organization_license_identifier", "")
-                initial_role = form.cleaned_data.get("initial_role", ProfileRole.MEMBER)
-
-                organization = None
-                requested_organization = None
-                requested_organization_name = ""
-                resolved_identifier = organization_identifier
-
-                if signup_mode == "individual":
-                    owner_display_name = (f"{user.first_name} {user.last_name}").strip() or user.username
-                    organization_name = f"{owner_display_name} Workspace"
-                    organization = Organization.objects.create(
-                        name=organization_name,
-                        org_type=OrganizationType.INDIVIDUAL,
-                        country=country_name,
-                        owner=user,
-                        status="active",
-                        is_active=True,
-                    )
-                    requested_organization = organization
-                    requested_organization_name = organization.name
-                elif signup_mode == "organization_create":
-                    organization_name = institution_not_listed_name
-                    requested_organization_name = organization_name
-                    resolved_identifier = organization_identifier
-                    organization = Organization.objects.create(
-                        name=organization_name,
-                        org_type=organization_type,
-                        country=country_name,
-                        owner=user,
-                        status="active",
-                        is_active=True,
-                        organization_identifier=resolved_identifier,
-                        license_identifier=organization_license_identifier,
-                    )
-                    requested_organization = organization
-                    requested_organization_name = organization.name
-                else:
-                    requested_organization = join_organization
-                    requested_organization_name = join_organization.name if join_organization else ""
-                    resolved_identifier = (
-                        join_organization.organization_identifier if join_organization else organization_identifier
-                    )
-
-                profile, _ = UserProfile.objects.get_or_create(user=user)
-                profile.organization_type = organization.org_type if organization is not None else organization_type
-                profile.organization = organization
-                profile.requested_organization = requested_organization
-                profile.requested_organization_name = requested_organization_name
-                profile.requested_organization_message = ""
-                profile.country = country_name
-                profile.role = _map_signup_role_to_profile_role(initial_role)
-                profile.student_university_name = (
-                    requested_organization_name
-                    if signup_mode == "student_join"
-                    or organization_type
-                    in {
-                        OrganizationType.UNIVERSITY,
-                        OrganizationType.SCHOOL,
-                        OrganizationType.COURSE_CENTER,
-                    }
-                    else ""
-                )
-                profile.student_school_identifier = (
-                    resolved_identifier if organization_type == OrganizationType.SCHOOL else ""
-                )
-                profile.save()
-
-                if (
-                    organization is None
-                    and requested_organization is not None
-                    and profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
-                ):
-                    StudentOrganizationRequest.objects.update_or_create(
-                        user=user,
-                        organization=requested_organization,
-                        status=StudentOrganizationRequestStatus.PENDING,
-                        defaults={
-                            "message": "",
-                            "resolution_note": "",
-                            "responded_by": None,
-                            "responded_at": None,
-                        },
-                    )
-
-                if organization is not None:
-                    membership_role = _resolve_membership_role(organization, initial_role)
-                    if membership_role is None:
-                        membership_role = Role.objects.create(
-                            organization=organization,
-                            name="owner",
-                            display_name="Owner",
-                            level=100,
-                            scope_type="organization",
-                            permissions=["*"],
-                            is_system=False,
-                            is_active=True,
-                        )
-
-                    Membership.objects.create(
-                        user=user,
-                        organization=organization,
-                        role=membership_role,
-                        is_primary=True,
-                        is_active=True,
-                        assigned_by=user,
-                    )
-
-                    request.session["active_organization"] = organization.slug
+            if organization is not None:
+                request.session["active_organization"] = organization.slug
 
             send_verification_otp(user, request=request)
             request.session["pending_verify_email"] = user.email
@@ -285,7 +180,7 @@ def register_view(request):
         "accounts/register.html",
         {
             "form": form,
-            "lookup_payload": _get_signup_lookup_payload(),
+            "lookup_payload": get_signup_lookup_payload(),
         },
     )
 
@@ -343,9 +238,7 @@ def verify_code_view(request):
         otp.save()
         clear_rate_limit(OTP_VERIFY_LIMIT_SCOPE, *otp_limit_key)
 
-        user.is_active = True
-        user.save()
-        joined_organization = _activate_verified_student_membership(user)
+        joined_organization = activate_user_account(user)
         if joined_organization is not None:
             request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
@@ -370,10 +263,8 @@ def verify_email_link_view(request):
     try:
         user_id = signer.unsign(token, max_age=settings.AUTH_OTP_EXPIRY_SECONDS)
         user = User.objects.get(pk=user_id)
-        user.is_active = True
-        user.save()
         EmailOTP.objects.filter(user=user, is_used=False).update(is_used=True)
-        joined_organization = _activate_verified_student_membership(user)
+        joined_organization = activate_user_account(user)
         if joined_organization is not None:
             request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
