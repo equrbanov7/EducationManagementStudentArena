@@ -14,7 +14,13 @@ from pathlib import Path
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
+
+def _require_settings_module() -> None:
+    if not os.environ.get("DJANGO_SETTINGS_MODULE"):
+        raise RuntimeError("DJANGO_SETTINGS_MODULE must be set before loading config.wsgi.")
+
+
+_require_settings_module()
 
 
 def _bootstrap_tmp_sqlite() -> None:

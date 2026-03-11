@@ -7,7 +7,13 @@ deployments can serve the live exam experience in real time.
 
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
+
+def _require_settings_module() -> None:
+    if not os.environ.get("DJANGO_SETTINGS_MODULE"):
+        raise RuntimeError("DJANGO_SETTINGS_MODULE must be set before loading config.asgi.")
+
+
+_require_settings_module()
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
