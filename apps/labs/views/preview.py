@@ -10,7 +10,7 @@ from django.utils.translation import pgettext
 
 from apps.courses.models import CourseMembership
 
-from ..models import LabAssignment
+from ..lab_assignment_service import get_lab_assignment_for_student
 from ._helpers import _get_tenant_lab_or_404
 
 
@@ -40,7 +40,7 @@ def preview_randomization(request, pk):
             selected_student = User.objects.get(id=selected_student_id)
 
             # Bu tələbə üçün assignment yarat/al
-            assignment = LabAssignment.get_or_create_for_student(lab, selected_student)
+            assignment = get_lab_assignment_for_student(lab, selected_student)
             questions = assignment.assigned_questions.all().order_by("block__order", "question_number")
         except Exception:
             pass
