@@ -19,24 +19,22 @@ from django.views.decorators.http import require_POST
 
 import qrcode
 
+from apps.live_exam.constants import AVATAR_KEYS
 from apps.live_exam.auth import (
+    LIVE_CLIENT_ID_COOKIE_MAX_AGE,
+    LIVE_CLIENT_ID_COOKIE_NAME,
     PLAYER_COOKIE_NAME,
     PLAYER_TOKEN_MAX_AGE,
     build_player_token,
+    clean_nickname,
+    get_client_id,
     get_request_player,
 )
 from apps.live_exam.models import LiveSession
+from apps.live_exam.serializers import serialize_players
+from apps.live_exam.transport import broadcast, build_join_url
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.utils import get_client_ip
-
-from ._helpers import (
-    AVATAR_KEYS,
-    _broadcast,
-    _build_join_url,
-    _clean_nickname,
-    _get_client_id,
-    _serialize_players,
-)
 
 PIN_ENTRY_COPY = {
     "az": {
@@ -117,7 +115,6 @@ PIN_ENTRY_COPY = {
     },
 }
 
-LIVE_CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 LIVE_JOIN_LIMIT_SCOPE = "live_exam.join"
 LIVE_PIN_LIMIT_SCOPE = "live_exam.pin"
 LIVE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
@@ -133,16 +130,16 @@ def _normalize_pin(raw_pin: str | None) -> str:
 
 
 def _live_client_id_key(request) -> str:
-    return request.COOKIES.get("live_client_id") or get_client_ip(request) or "unknown"
+    return request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME) or get_client_ip(request) or "unknown"
 
 
 def _ensure_live_client_cookie(request, response):
-    if request.COOKIES.get("live_client_id"):
+    if request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME):
         return response
 
     response.set_cookie(
-        "live_client_id",
-        _get_client_id(request),
+        LIVE_CLIENT_ID_COOKIE_NAME,
+        get_client_id(request),
         max_age=LIVE_CLIENT_ID_COOKIE_MAX_AGE,
         samesite="Lax",
         secure=request.is_secure(),
@@ -246,7 +243,7 @@ def live_join_enter(request, pin):
             status=403,
         )
 
-    nickname = _clean_nickname(request.POST.get("nickname"))
+    nickname = clean_nickname(request.POST.get("nickname"))
     avatar_key = request.POST.get("avatar_key") or "avatar_1"
     if avatar_key not in AVATAR_KEYS:
         avatar_key = "avatar_1"
@@ -257,7 +254,7 @@ def live_join_enter(request, pin):
             status=400,
         )
 
-    client_id = _get_client_id(request)
+    client_id = get_client_id(request)
     now = timezone.now()
 
     from apps.live_exam.models import LivePlayer
@@ -282,12 +279,12 @@ def live_join_enter(request, pin):
     token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
     # lobby-yə realtime update
-    _broadcast(
+    broadcast(
         session.pin,
         {
             "type": "lobby_state",
             "count": session.players.count(),
-            "players": _serialize_players(session),
+            "players": serialize_players(session),
         },
         "lobby",
     )
@@ -296,7 +293,13 @@ def live_join_enter(request, pin):
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
     # Set cookies with appropriate security flags
-    resp.set_cookie("live_client_id", client_id, max_age=60 * 60 * 24 * 30, samesite="Lax", secure=request.is_secure())
+    resp.set_cookie(
+        LIVE_CLIENT_ID_COOKIE_NAME,
+        client_id,
+        max_age=LIVE_CLIENT_ID_COOKIE_MAX_AGE,
+        samesite="Lax",
+        secure=request.is_secure(),
+    )
     resp.set_cookie(
         PLAYER_COOKIE_NAME,
         token,
@@ -312,7 +315,7 @@ def live_join_enter(request, pin):
 def live_qr_png(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
 
-    join_url = _build_join_url(request, session)
+    join_url = build_join_url(request, session)
 
     img = qrcode.make(join_url)
     buf = io.BytesIO()
@@ -330,7 +333,7 @@ def live_wait_room(request, pin):
     if player is None:
         return redirect("liveExam:join_page", pin=pin)
 
-    players = _serialize_players(session)
+    players = serialize_players(session)
     return render(
         request,
         "liveExam/wait_room.html",

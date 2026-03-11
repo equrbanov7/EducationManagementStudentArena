@@ -4,15 +4,30 @@ Authentication helpers for live exam player access.
 
 from __future__ import annotations
 
+import re
+import uuid
 from typing import Any
 
 from django.core import signing
 
-from apps.live_exam.models import LivePlayer
+from apps.live_exam.models import LivePlayer, LiveSession
 
 PLAYER_COOKIE_NAME = "live_player_token"
 PLAYER_TOKEN_SALT = "liveExam.player"
 PLAYER_TOKEN_MAX_AGE = 60 * 60 * 6
+LIVE_CLIENT_ID_COOKIE_NAME = "live_client_id"
+LIVE_CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+
+
+def clean_nickname(name: str) -> str:
+    cleaned = (name or "").strip()
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned[:32]
+
+
+def get_client_id(request) -> str:
+    client_id = request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME)
+    return client_id or uuid.uuid4().hex
 
 
 def build_player_token(*, pin: str, player_id: int, client_id: str) -> str:
@@ -81,3 +96,22 @@ def get_player_from_token(token: str | None, *, pin: str) -> LivePlayer | None:
 
 def get_request_player(request, *, pin: str) -> LivePlayer | None:
     return get_player_from_token(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=pin)
+
+
+def authorize_socket_connection(*, pin: str, user_id: int | None, token: str | None) -> dict[str, Any] | None:
+    session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
+    if session is None:
+        return None
+
+    payload, player = authenticate_player_token(token, pin=pin)
+    if payload is not None and player is not None:
+        return {
+            "role": "player",
+            "player_id": player.id,
+            "client_id": player.client_id,
+        }
+
+    if user_id and session.host_user_id == user_id:
+        return {"role": "host"}
+
+    return None

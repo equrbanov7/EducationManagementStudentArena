@@ -1,0 +1,100 @@
+"""
+Serialization helpers for live exam transport payloads.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import random
+from datetime import datetime
+from typing import Any
+
+from django.utils.translation import pgettext
+
+from apps.exams.models import ExamQuestionOption
+from apps.live_exam.domain.session import (
+    detect_multi,
+    get_option_label,
+    get_option_text,
+    get_question_text,
+    question_points,
+    question_time_limit,
+    safe_int,
+)
+from apps.live_exam.models import LiveAnswer, LiveSession
+
+
+def serialize_players(session: LiveSession, limit: int = 50) -> list[dict[str, Any]]:
+    return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[:limit])
+
+
+def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
+    return list(session.players.order_by("-score", "created_at").values("nickname", "avatar_key", "score")[:limit])
+
+
+def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
+    answers = (
+        LiveAnswer.objects.filter(session=session, question_id=question_id)
+        .select_related("player")
+        .order_by("-awarded_points", "-created_at")
+    )[:limit]
+
+    results: list[dict[str, Any]] = []
+    for answer in answers:
+        results.append(
+            {
+                "nickname": answer.player.nickname,
+                "avatar_key": answer.player.avatar_key,
+                "is_correct": bool(answer.is_correct),
+                "awarded_points": safe_int(answer.awarded_points, 0),
+                "total_score": safe_int(answer.player.score, 0),
+            }
+        )
+    return results
+
+
+def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
+    seed_str = f"{pin}:{int(question_id)}:{started_at.isoformat()}"
+    return int(hashlib.sha256(seed_str.encode("utf-8")).hexdigest()[:8], 16)
+
+
+def build_options(exam_question, *, seed: int | None = None) -> list[dict[str, Any]]:
+    letters = ["A", "B", "C", "D", "E", "F"]
+    options = list(ExamQuestionOption.objects.filter(question=exam_question).order_by("id"))
+    rnd = random.Random(seed) if seed is not None else random
+    rnd.shuffle(options)
+
+    payload: list[dict[str, Any]] = []
+    for index, option in enumerate(options):
+        label = get_option_label(option) or (letters[index] if index < len(letters) else str(index + 1))
+        text = get_option_text(option) or pgettext("live_exam.view.option", "option_fallback_text").format(label=label)
+        payload.append({"id": option.id, "label": label, "text": text})
+
+    return payload
+
+
+def serialize_question(
+    session: LiveSession,
+    exam_question,
+    *,
+    idx: int,
+    total: int,
+    started_at,
+    ends_at,
+) -> dict[str, Any]:
+    is_multi, max_select, _ = detect_multi(exam_question)
+    seed = options_seed(session.pin, exam_question.id, started_at) if started_at else None
+
+    return {
+        "id": exam_question.id,
+        "text": get_question_text(exam_question),
+        "time_limit": question_time_limit(session, exam_question),
+        "points": question_points(session, exam_question),
+        "multi": is_multi,
+        "max_select": max_select,
+        "options": build_options(exam_question, seed=seed),
+        "started_at": started_at.isoformat() if started_at else None,
+        "ends_at": ends_at.isoformat() if ends_at else None,
+        "index": safe_int(idx, 0) + 1,
+        "total": safe_int(total, 0),
+    }
