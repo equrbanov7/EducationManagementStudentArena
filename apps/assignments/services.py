@@ -3,24 +3,21 @@ Business logic layer for assignments app.
 This module contains service functions that encapsulate business operations.
 """
 
-from decimal import Decimal, InvalidOperation
-
-from django.contrib.auth import get_user_model
-from django.db import transaction
 from django.utils import timezone
 
-from .models import Assignment, Submission
+from apps.task_submission_core.services import (
+    apply_grade,
+    assign_task_to_group,
+    assign_task_to_students,
+    bulk_grade_submissions,
+    create_submission,
+    get_pending_task_submissions,
+    get_task_submissions,
+    parse_score_value,
+    update_submission,
+)
 
-User = get_user_model()
-
-
-def _merge_submission_content(submission_text="", submission_url=""):
-    parts = []
-    if submission_text:
-        parts.append(str(submission_text).strip())
-    if submission_url:
-        parts.append(str(submission_url).strip())
-    return "\n".join(part for part in parts if part)
+from .models import Submission
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -28,8 +25,16 @@ def _merge_submission_content(submission_text="", submission_url=""):
 # ════════════════════════════════════════════════════════════════════════════
 
 
-@transaction.atomic
-def create_assignment_submission(assignment, student, submission_file=None, submission_text="", submission_url=""):
+def create_assignment_submission(
+    assignment,
+    student,
+    submission_file=None,
+    submission_text="",
+    submission_url="",
+    *,
+    original_file_name="",
+    attempt_number=None,
+):
     """
     Create an assignment submission.
 
@@ -43,22 +48,33 @@ def create_assignment_submission(assignment, student, submission_file=None, subm
     Returns:
         Submission: Created submission
     """
-    submission = Submission.objects.create(
-        assignment=assignment,
-        user=student,
-        content=_merge_submission_content(submission_text, submission_url),
-        status="submitted",
+    extra_create_fields = {}
+    if attempt_number is not None:
+        extra_create_fields["attempt_number"] = attempt_number
+
+    return create_submission(
+        submission_model=Submission,
+        task_field_name="assignment",
+        task=assignment,
+        student_field_name="user",
+        student=student,
+        submitted_status="submitted",
+        submission_file=submission_file,
+        submission_text=submission_text,
+        submission_url=submission_url,
+        original_file_name=original_file_name,
+        extra_create_fields=extra_create_fields or None,
     )
 
-    if submission_file:
-        submission.attach_uploaded_file(submission_file)
-        submission.save(update_fields=["files"])
 
-    return submission
-
-
-@transaction.atomic
-def update_assignment_submission(submission, submission_file=None, submission_text=None, submission_url=None):
+def update_assignment_submission(
+    submission,
+    submission_file=None,
+    submission_text=None,
+    submission_url=None,
+    *,
+    original_file_name="",
+):
     """
     Update an assignment submission.
 
@@ -71,24 +87,14 @@ def update_assignment_submission(submission, submission_file=None, submission_te
     Returns:
         Submission: Updated submission
     """
-    update_fields = ["submitted_at", "status"]
-
-    if submission_file is not None:
-        submission.attach_uploaded_file(submission_file)
-        update_fields.append("files")
-
-    if submission_text is not None:
-        submission.content = _merge_submission_content(submission_text, submission_url or "")
-        update_fields.append("content")
-    elif submission_url is not None:
-        submission.content = _merge_submission_content(submission.content, submission_url)
-        update_fields.append("content")
-
-    submission.submitted_at = timezone.now()
-    submission.status = "submitted"
-    submission.save(update_fields=update_fields)
-
-    return submission
+    return update_submission(
+        submission,
+        submitted_status="submitted",
+        submission_file=submission_file,
+        submission_text=submission_text,
+        submission_url=submission_url,
+        original_file_name=original_file_name,
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -96,7 +102,6 @@ def update_assignment_submission(submission, submission_file=None, submission_te
 # ════════════════════════════════════════════════════════════════════════════
 
 
-@transaction.atomic
 def grade_assignment_submission(submission, score, feedback, graded_by):
     """
     Grade an assignment submission.
@@ -110,20 +115,9 @@ def grade_assignment_submission(submission, score, feedback, graded_by):
     Returns:
         Submission: Graded submission
     """
-    if isinstance(score, str):
-        score = Decimal(score)
-
-    submission.grade = score
-    submission.feedback = feedback
-    submission.graded_by = graded_by
-    submission.graded_at = timezone.now()
-    submission.status = "graded"
-    submission.save(update_fields=["grade", "feedback", "graded_by", "graded_at", "status"])
-
-    return submission
+    return apply_grade(submission, score, feedback, graded_by, graded_status="graded")
 
 
-@transaction.atomic
 def bulk_grade_assignment_submissions(submission_ids, scores, feedback_list, graded_by):
     """
     Grade multiple assignment submissions at once.
@@ -138,13 +132,7 @@ def bulk_grade_assignment_submissions(submission_ids, scores, feedback_list, gra
         int: Number of submissions graded
     """
     submissions = Submission.objects.filter(id__in=submission_ids)
-    count = 0
-
-    for submission, score, feedback in zip(submissions, scores, feedback_list):
-        grade_assignment_submission(submission, score, feedback, graded_by)
-        count += 1
-
-    return count
+    return bulk_grade_submissions(submissions, scores, feedback_list, graded_by, graded_status="graded")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -152,7 +140,6 @@ def bulk_grade_assignment_submissions(submission_ids, scores, feedback_list, gra
 # ════════════════════════════════════════════════════════════════════════════
 
 
-@transaction.atomic
 def assign_to_students(assignment, student_ids):
     """
     Assign assignment to multiple students.
@@ -164,18 +151,9 @@ def assign_to_students(assignment, student_ids):
     Returns:
         int: Number of students assigned
     """
-    users = User.objects.filter(id__in=student_ids)
-    count = 0
-
-    for user in users:
-        if not assignment.assigned_students.filter(id=user.id).exists():
-            assignment.assigned_students.add(user)
-            count += 1
-
-    return count
+    return assign_task_to_students(assignment, student_ids)
 
 
-@transaction.atomic
 def assign_to_group(assignment, student_group):
     """
     Assign assignment to all students in a group.
@@ -187,15 +165,7 @@ def assign_to_group(assignment, student_group):
     Returns:
         int: Number of students assigned
     """
-    students = student_group.students.all()
-    count = 0
-
-    for student in students:
-        if not assignment.assigned_students.filter(id=student.id).exists():
-            assignment.assigned_students.add(student)
-            count += 1
-
-    return count
+    return assign_task_to_group(assignment, student_group)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -215,27 +185,14 @@ def get_assignment_submissions(assignment, status=None, group_name=None):
     Returns:
         QuerySet: Submission queryset
     """
-    qs = Submission.objects.filter(
-        assignment=assignment
-    ).select_related(
-        "user",
-        "user__profile",
-        "graded_by"
+    return get_task_submissions(
+        submission_model=Submission,
+        task_field_name="assignment",
+        task=assignment,
+        student_field_name="user",
+        status=status,
+        group_name=group_name,
     )
-
-    if status:
-        qs = qs.filter(status=status)
-
-    if group_name:
-        from apps.courses.models import CourseMembership
-        student_ids = CourseMembership.objects.filter(
-            course=assignment.course,
-            role="student",
-            group_name=group_name,
-        ).values_list("user_id", flat=True)
-        qs = qs.filter(user_id__in=student_ids)
-
-    return qs.order_by("-submitted_at")
 
 
 def get_pending_assignment_submissions(teacher, organization=None):
@@ -249,15 +206,15 @@ def get_pending_assignment_submissions(teacher, organization=None):
     Returns:
         QuerySet: Submission queryset
     """
-    qs = Submission.objects.filter(
-        assignment__created_by=teacher,
-        status="submitted",
-    ).select_related("assignment", "user")
-
-    if organization is not None:
-        qs = qs.filter(assignment__course__organization=organization)
-
-    return qs.order_by("submitted_at")
+    return get_pending_task_submissions(
+        submission_model=Submission,
+        task_field_name="assignment",
+        student_field_name="user",
+        teacher_lookup="assignment__created_by",
+        teacher=teacher,
+        pending_status="submitted",
+        organization=organization,
+    )
 
 
 def can_student_submit_assignment(assignment, student):
@@ -291,30 +248,3 @@ def can_student_submit_assignment(assignment, student):
         return False, "deadline_passed"
 
     return True, "ok"
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Score Parsing Services
-# ════════════════════════════════════════════════════════════════════════════
-
-
-def parse_score_value(value, *, default=None):
-    """
-    Parse a score value to Decimal.
-
-    Args:
-        value: Value to parse
-        default: Default value if parsing fails
-
-    Returns:
-        Decimal or default
-    """
-    if value is None:
-        return default
-    if isinstance(value, Decimal):
-        return value
-
-    try:
-        return Decimal(str(value).strip())
-    except (InvalidOperation, ValueError, AttributeError):
-        return default

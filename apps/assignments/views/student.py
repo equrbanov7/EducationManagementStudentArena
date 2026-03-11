@@ -18,9 +18,10 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
-from apps.assignments.models import AssignmentSubmission
+from apps.assignments.services import create_assignment_submission
+from apps.task_submission_core.review import annotate_student_review_state
+from apps.task_submission_core.uploads import prepare_submission_upload
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
-from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from ._helpers import _append_return_to, _assignment_back_url, _get_tenant_assignment_or_404, _student_return_to
 
@@ -29,21 +30,7 @@ REVIEW_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 
 
 def _annotate_review_state(submissions):
-    current_time = timezone.now()
-    prepared_submissions = []
-
-    for submission in submissions:
-        submission.has_grade = submission.grade is not None
-        submission.show_review_data = submission.status == "graded" and (
-            not submission.graded_at or current_time >= submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-        )
-        submission.review_available_in_seconds = 0
-        if submission.status == "graded" and submission.graded_at and not submission.show_review_data:
-            reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-            submission.review_available_in_seconds = max(0, int((reveal_at - current_time).total_seconds()))
-        prepared_submissions.append(submission)
-
-    return prepared_submissions
+    return annotate_student_review_state(submissions)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -137,39 +124,20 @@ def submit_assignment(request, pk):
     uploaded_file = request.FILES.get("file")
     original_file_name = ""
     if uploaded_file is not None:
-        original_file_name = uploaded_file.name
         try:
-            validate_uploaded_file(
-                uploaded_file,
-                allowed_extensions={
-                    ".zip",
-                    ".rar",
-                    ".7z",
-                    ".pdf",
-                    ".txt",
-                    ".doc",
-                    ".docx",
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                },
-                max_size_mb=25,
-            )
-            randomize_uploaded_filename(uploaded_file)
+            original_file_name = prepare_submission_upload(uploaded_file)
         except ValidationError as exc:
             return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
 
     try:
-        submission = AssignmentSubmission.objects.create(
-            assignment=assignment,
-            user=request.user,
+        submission = create_assignment_submission(
+            assignment,
+            request.user,
+            submission_file=uploaded_file,
+            submission_text=request.POST.get("content", ""),
+            original_file_name=original_file_name,
             attempt_number=assignment.get_user_attempts(request.user) + 1,
-            content=request.POST.get("content", ""),
         )
-
-        if uploaded_file is not None:
-            submission.attach_uploaded_file(uploaded_file, original_name=original_file_name)
-            submission.save(update_fields=["files"])
 
         messages.success(request, pgettext("assignments.views.message", "assignment_submitted"))
         return JsonResponse(

@@ -8,33 +8,25 @@ Contains:
 - grade_submission
 """
 
-from datetime import datetime
-from urllib.parse import urlencode
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
+from apps.task_submission_core.review import (
+    annotate_teacher_review_state,
+    apply_submission_filters,
+    build_pagination_query,
+)
+from apps.task_submission_core.services import apply_grade
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 
 from ._helpers import _get_tenant_project_or_404, _get_tenant_submission_or_404, _teacher_review_back_url
-
-
-def _parse_filter_date(raw_value):
-    raw_date = (raw_value or "").strip()
-    if not raw_date:
-        return "", None
-    try:
-        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
-    except ValueError:
-        return "", None
 
 
 def _can_delete_submissions(request):
@@ -43,43 +35,6 @@ def _can_delete_submissions(request):
         or request_has_permission(request, "course.delete")
         or request_has_permission(request, "exam.delete")
     )
-
-
-def _resolve_recheck_window(submission, *, current_time=None):
-    if submission.status != "graded" or not submission.graded_at:
-        return False, 0
-
-    now = current_time or timezone.now()
-    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
-
-
-def _resolve_identity_window(submission, *, current_time=None):
-    now = current_time or timezone.now()
-
-    if submission.status == "graded" and submission.graded_at:
-        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    elif submission.submitted_at:
-        reveal_at = submission.submitted_at + REVIEW_EDIT_LOCK_WINDOW
-    else:
-        return False, 0
-
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
-
-
-def _format_input_number(value):
-    if value in (None, ""):
-        return ""
-    normalized = str(value).replace(",", ".")
-    if "." in normalized:
-        normalized = normalized.rstrip("0").rstrip(".")
-    return normalized or "0"
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -108,86 +63,24 @@ def review_submissions(request, pk):
         return redirect("courses:course_dashboard", course_id=project.course.id)
 
     submissions = project.submissions.select_related("student")
-    search_query = (request.GET.get("q") or "").strip()
-    if search_query:
-        submissions = submissions.filter(
-            Q(student__username__icontains=search_query)
-            | Q(student__first_name__icontains=search_query)
-            | Q(student__last_name__icontains=search_query)
-            | Q(content__icontains=search_query)
-        )
-
-    status_filter = (request.GET.get("status") or "all").strip().lower()
-    allowed_status_filters = {"all", "pending", "graded", "rejected"}
-    if status_filter not in allowed_status_filters:
-        status_filter = "all"
-    if status_filter != "all":
-        submissions = submissions.filter(status=status_filter)
-
-    date_from_raw, date_from = _parse_filter_date(request.GET.get("date_from"))
-    date_to_raw, date_to = _parse_filter_date(request.GET.get("date_to"))
-    if date_from:
-        submissions = submissions.filter(submitted_at__date__gte=date_from)
-    if date_to:
-        submissions = submissions.filter(submitted_at__date__lte=date_to)
-
+    submissions, filters = apply_submission_filters(
+        submissions,
+        request.GET,
+        student_lookup_prefix="student",
+        allowed_status_filters={"all", "pending", "graded", "rejected"},
+    )
     submissions = submissions.order_by("-submitted_at")
     page_obj = Paginator(submissions, 12).get_page(request.GET.get("page"))
     selected_submission_raw = (request.GET.get("submission") or "").strip()
     selected_submission_id = selected_submission_raw if selected_submission_raw.isdigit() else ""
-    pagination_query = urlencode(
-        {
-            key: value
-            for key, value in {
-                "q": search_query,
-                "status": status_filter,
-                "date_from": date_from_raw,
-                "date_to": date_to_raw,
-                "submission": selected_submission_id,
-                "from_section": (request.GET.get("from_section") or "").strip(),
-                "return_to": (request.GET.get("return_to") or "").strip(),
-            }.items()
-            if value not in ("", None)
-        }
+    pagination_query = build_pagination_query(
+        filters=filters,
+        selected_submission_id=selected_submission_id,
+        from_section=request.GET.get("from_section"),
+        return_to=request.GET.get("return_to"),
     )
 
-    submissions_page = list(page_obj.object_list)
-    current_time = timezone.now()
-    for submission in submissions_page:
-        in_recheck_window, review_window_seconds_left = _resolve_recheck_window(
-            submission, current_time=current_time
-        )
-        is_identity_hidden, identity_window_seconds_left = _resolve_identity_window(
-            submission, current_time=current_time
-        )
-        submission.in_recheck_window = in_recheck_window
-        submission.review_window_seconds_left = review_window_seconds_left
-        submission.identity_window_seconds_left = identity_window_seconds_left
-        submission.can_view_student_identity = not is_identity_hidden
-        submission.student_display_name = (
-            submission.student.get_full_name() or submission.student.username
-            if submission.can_view_student_identity
-            else "Anonim tələbə"
-        )
-        submission.student_display_meta = (
-            f"@{submission.student.username}"
-            if submission.can_view_student_identity
-            else "Anonim görünüş"
-        )
-        submission.grade_input_value = _format_input_number(submission.grade)
-        submission.review_action_label = (
-            "Yenidən yoxla" if in_recheck_window else ("Bax" if submission.status == "graded" else "Yoxla")
-        )
-        submission.review_action_variant = (
-            "warning" if in_recheck_window else ("secondary" if submission.status == "graded" else "primary")
-        )
-        submission.can_edit_review = submission.status != "graded" or in_recheck_window
-        submission.review_countdown_seconds = (
-            review_window_seconds_left if in_recheck_window else identity_window_seconds_left
-        )
-        submission.review_countdown_mode = "recheck" if in_recheck_window else (
-            "identity" if identity_window_seconds_left > 0 else ""
-        )
+    submissions_page = annotate_teacher_review_state(list(page_obj.object_list), student_attr="student")
 
     context = {
         "project": project,
@@ -195,10 +88,10 @@ def review_submissions(request, pk):
         "page_obj": page_obj,
         "selected_submission_id": selected_submission_id,
         "back_url": _teacher_review_back_url(request, project),
-        "search_query": search_query,
-        "status_filter": status_filter,
-        "date_from": date_from_raw,
-        "date_to": date_to_raw,
+        "search_query": filters.search_query,
+        "status_filter": filters.status_filter,
+        "date_from": filters.date_from_raw,
+        "date_to": filters.date_to_raw,
         "pagination_query": pagination_query,
         "can_delete_submissions": _can_delete_submissions(request),
     }
@@ -289,13 +182,14 @@ def grade_submission(request, pk):
         )
 
     try:
-        submission.grade = request.POST.get("grade")
-        submission.feedback = request.POST.get("feedback", "")
-        submission.status = "graded"
-        if not submission.graded_at:
-            submission.graded_at = timezone.now()
-        submission.graded_by = request.user
-        submission.save()
+        apply_grade(
+            submission,
+            request.POST.get("grade"),
+            request.POST.get("feedback", ""),
+            request.user,
+            graded_status="graded",
+            preserve_existing_graded_at=True,
+        )
 
         messages.success(request, pgettext("projects.views.message", "grade_given"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "grade_given")})
