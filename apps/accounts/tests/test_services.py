@@ -22,9 +22,7 @@ class RoleManagementServicesTest(TestCase):
 
     def setUp(self):
         self.superuser = User.objects.create_superuser(
-            username="superadmin",
-            email="super@example.com",
-            password="pass123"
+            username="superadmin", email="super@example.com", password="pass123"
         )
         self.organization = Organization.objects.create(
             name="Service Roles Org",
@@ -33,19 +31,11 @@ class RoleManagementServicesTest(TestCase):
             status="active",
             is_active=True,
         )
-        self.teacher = User.objects.create_user(
-            username="teacher1",
-            email="teacher@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher1", email="teacher@example.com", password="pass123")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
 
-        self.student = User.objects.create_user(
-            username="student1",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.student = User.objects.create_user(username="student1", email="student@example.com", password="pass123")
         self.student.profile.role = ProfileRole.STUDENT
         self.student.profile.save(update_fields=["role", "updated_at"])
 
@@ -92,10 +82,7 @@ class OTPServicesTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="pass123",
-            is_active=False
+            username="testuser", email="test@example.com", password="pass123", is_active=False
         )
 
     def test_send_verification_otp(self):
@@ -141,3 +128,37 @@ class ScoreParsingServicesTest(TestCase):
         self.assertIsNone(services.parse_decimal_score("invalid"))
         self.assertIsNone(services.parse_decimal_score(None))
         self.assertEqual(services.parse_decimal_score("invalid", default=Decimal("0")), Decimal("0"))
+
+
+class RegistrationServicesTest(TestCase):
+    """Test registration bootstrap services."""
+
+    def test_create_user_with_organization_preserves_org_admin_role(self):
+        """Organization bootstrap should keep ORG_ADMIN as the profile role."""
+        user, organization, requested_organization, profile = services.create_user_with_organization(
+            username="orgadminsignup",
+            email="orgadminsignup@example.com",
+            password="StrongPass123!",
+            first_name="Org",
+            last_name="Admin",
+            signup_mode="organization_create",
+            organization_type=OrganizationType.SCHOOL,
+            country_code="AZ",
+            country_name="Azerbaijan",
+            institution_not_listed_name="Role Mapping School",
+            organization_identifier="",
+            organization_license_identifier="",
+            initial_role=ProfileRole.ORG_ADMIN,
+        )
+
+        self.assertFalse(user.is_active)
+        self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
+        self.assertEqual(requested_organization, organization)
+        self.assertTrue(
+            Membership.objects.filter(
+                user=user,
+                organization=organization,
+                is_primary=True,
+                is_active=True,
+            ).exists()
+        )
