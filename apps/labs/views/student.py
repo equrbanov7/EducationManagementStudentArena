@@ -14,53 +14,15 @@ from django.utils.translation import pgettext
 from apps.courses.models import CourseMembership
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
+from ..lab_access import can_student_access_lab, can_teacher_access_lab, can_user_access_course_roster
+from ..lab_assignment_service import get_lab_assignment_for_student
+from ..lab_submission_service import format_lab_submission_duration, get_next_attempt_number
 from ..models import LabAnswer, LabAssignment, LabQuestion, LabSubmission
 from ._helpers import _append_return_to, _get_tenant_lab_or_404, _lab_back_url, _lab_return_to
 
 
-def _user_can_access_course_roster(user, course):
-    """
-    Check if user can access course roster (groups/students).
-    User must be course owner OR have teacher/assistant role in the course.
-    """
-    if course.owner == user:
-        return True
-
-    # Check if user has teacher or assistant role in the course
-    return CourseMembership.objects.filter(
-        course=course,
-        user=user,
-        role__in=["teacher", "assistant"]
-    ).exists()
-
-
 def _raise_lab_access_denied():
     raise PermissionDenied("You do not have permission to access this lab.")
-
-
-def _format_lab_submission_duration(start_time, submitted_at):
-    if not start_time or not submitted_at:
-        return None
-
-    delta = submitted_at - start_time
-    total_seconds = int(delta.total_seconds())
-    if total_seconds <= 0:
-        return None
-
-    hours = total_seconds // 3600
-    minutes = (total_seconds % 3600) // 60
-    if hours > 0:
-        duration_tpl = pgettext("labs.view.message", "duration_hours_minutes")
-        try:
-            return duration_tpl % {"hours": hours, "minutes": minutes}
-        except Exception:
-            return duration_tpl.format(hours=hours, minutes=minutes)
-
-    duration_tpl = pgettext("labs.view.message", "duration_minutes")
-    try:
-        return duration_tpl % {"minutes": minutes}
-    except Exception:
-        return duration_tpl.format(minutes=minutes)
 
 
 @login_required
@@ -78,7 +40,7 @@ def lab_detail(request, pk):
     review_available_in_seconds = 0
 
     if request.user.is_authenticated:
-        if lab.can_teacher_access(request.user):
+        if can_teacher_access_lab(lab, request.user):
             questions = (
                 LabQuestion.objects.filter(block__lab=lab)
                 .select_related("block")
@@ -89,10 +51,10 @@ def lab_detail(request, pk):
 
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
-            if not lab.can_student_access(request.user):
+            if not can_student_access_lab(lab, request.user):
                 _raise_lab_access_denied()
 
-            assignment = LabAssignment.get_or_create_for_student(lab, request.user)
+            assignment = get_lab_assignment_for_student(lab, request.user)
 
             # ƏSAS FİX: select_related və prefetch_related istifadə et
             questions = assignment.assigned_questions.select_related("block").order_by(
@@ -131,10 +93,7 @@ def lab_detail(request, pk):
     # Saved answers - yalnız cari cəhd üçün draft cavablar
     saved_answers = {}
     if request.user.is_authenticated:
-        current_attempt = 1
-        if assignment:
-            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
-            current_attempt = submitted_count + 1
+        current_attempt = get_next_attempt_number(assignment)
 
         answers = LabAnswer.objects.filter(
             lab=lab,
@@ -169,7 +128,7 @@ def my_lab_answers(request, pk):
     """Tələbənin öz cavablarını görmək"""
     lab = _get_tenant_lab_or_404(request, pk)
 
-    if not lab.can_student_access(request.user):
+    if not can_student_access_lab(lab, request.user):
         _raise_lab_access_denied()
 
     assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
@@ -223,7 +182,7 @@ def my_lab_answers(request, pk):
         )
         submission.answer_items = submission_answers
         submission.answer_count = len(submission_answers)
-        submission.duration = _format_lab_submission_duration(start_time, submission.submitted_at)
+        submission.duration = format_lab_submission_duration(start_time, submission.submitted_at)
         submission.show_review_data = False
         submission.review_available_in_seconds = 0
         submission.is_review_pending = False
@@ -268,7 +227,7 @@ def api_get_groups(request, course_id):
     course = _get_tenant_course_or_404(request, course_id)
 
     # Authorization check: user must be course owner or have teacher/assistant role
-    if not _user_can_access_course_roster(request.user, course):
+    if not can_user_access_course_roster(request.user, course):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
     groups = (
@@ -290,7 +249,7 @@ def api_get_students(request, course_id):
     course = _get_tenant_course_or_404(request, course_id)
 
     # Authorization check: user must be course owner or have teacher/assistant role
-    if not _user_can_access_course_roster(request.user, course):
+    if not can_user_access_course_roster(request.user, course):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
     groups = request.GET.get("groups", "").split(",")

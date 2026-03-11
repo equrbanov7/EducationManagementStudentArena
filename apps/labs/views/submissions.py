@@ -7,7 +7,7 @@ import json
 import os
 import traceback
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -23,6 +23,15 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from ..lab_access import (
+    can_student_access_lab,
+    can_teacher_access_lab,
+    resolve_identity_window,
+    resolve_recheck_window,
+)
+from ..lab_assignment_service import get_lab_assignment_for_student
+from ..lab_grading_service import format_decimal_input, parse_decimal_input
+from ..lab_submission_service import finalize_submission_answers, get_next_attempt_number, is_lab_open
 from apps.courses.models import CourseMembership
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
@@ -63,59 +72,12 @@ def _lab_student_access_denied_json():
     )
 
 
-def _resolve_recheck_window(submission, *, current_time=None):
-    if submission.status != "graded" or not submission.graded_at:
-        return False, 0
-
-    now = current_time or timezone.now()
-    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
-
-
-def _resolve_identity_window(submission, *, current_time=None):
-    now = current_time or timezone.now()
-
-    if submission.status == "graded" and submission.graded_at:
-        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    elif submission.submitted_at:
-        reveal_at = submission.submitted_at + REVIEW_EDIT_LOCK_WINDOW
-    else:
-        return False, 0
-
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
-
-
-def _format_decimal_input(value):
-    if value is None or value == "":
-        return ""
-    formatted = format(Decimal(str(value)), "f")
-    if "." in formatted:
-        formatted = formatted.rstrip("0").rstrip(".")
-    return formatted or "0"
-
-
-def _parse_decimal_input(raw_value):
-    raw_value = (str(raw_value).strip() if raw_value is not None else "").replace(",", ".")
-    if not raw_value:
-        return None
-    try:
-        return Decimal(raw_value)
-    except (InvalidOperation, TypeError, ValueError):
-        return None
-
-
 @login_required
 def lab_submissions(request, pk):
     """Lab cavablarını göstər - müəllim üçün"""
     lab = _get_tenant_lab_or_404(request, pk)
 
-    if not lab.can_teacher_access(request.user):
+    if not can_teacher_access_lab(lab, request.user):
         _raise_lab_teacher_access_denied()
 
     # Bütün submission-lar
@@ -172,8 +134,8 @@ def lab_submissions(request, pk):
 
     current_time = timezone.now()
     for submission in submissions_page:
-        in_recheck_window, seconds_left = _resolve_recheck_window(submission, current_time=current_time)
-        is_identity_hidden, identity_window_seconds_left = _resolve_identity_window(
+        in_recheck_window, seconds_left = resolve_recheck_window(submission, current_time=current_time)
+        is_identity_hidden, identity_window_seconds_left = resolve_identity_window(
             submission, current_time=current_time
         )
         submission.in_recheck_window = in_recheck_window
@@ -246,7 +208,7 @@ def lab_submissions(request, pk):
 def delete_submissions(request, pk):
     lab = _get_tenant_lab_or_404(request, pk)
 
-    if not lab.can_teacher_access(request.user):
+    if not can_teacher_access_lab(lab, request.user):
         _raise_lab_teacher_access_denied()
 
     if not _can_delete_submissions(request):
@@ -293,15 +255,15 @@ def grade_submission_page(request, pk):
     submission = _get_tenant_submission_or_404(request, pk)
     lab = submission.assignment.lab
 
-    if not lab.can_teacher_access(request.user):
+    if not can_teacher_access_lab(lab, request.user):
         _raise_lab_teacher_access_denied()
 
     if not request_has_permission(request, "grade.input"):
         messages.error(request, pgettext("labs.view.permission", "permission_denied"))
         return redirect("labs:lab_submissions", pk=lab.id)
 
-    is_recheck_window, review_window_seconds_left = _resolve_recheck_window(submission)
-    is_identity_hidden, identity_window_seconds_left = _resolve_identity_window(submission)
+    is_recheck_window, review_window_seconds_left = resolve_recheck_window(submission)
+    is_identity_hidden, identity_window_seconds_left = resolve_identity_window(submission)
     is_pregrade_anonymous_window = is_identity_hidden and not is_recheck_window
     is_locked = submission.status == "graded" and submission.graded_at and not is_recheck_window
 
@@ -349,7 +311,7 @@ def grade_submission_page(request, pk):
                     answer.score = None
                 else:
                     has_posted_answer_scores = True
-                    val = _parse_decimal_input(raw_score)
+                    val = parse_decimal_input(raw_score)
                     if val is None:
                         val = Decimal("0")
                     if val < 0:
@@ -362,7 +324,7 @@ def grade_submission_page(request, pk):
                 answer.save(update_fields=["score", "submitted_at"])
 
             score_raw = (request.POST.get("score", "") or "").strip()
-            entered_total = _parse_decimal_input(score_raw)
+            entered_total = parse_decimal_input(score_raw)
             use_manual_total = request.POST.get("use_manual_total") == "1"
             should_use_manual_total = (
                 entered_total is not None
@@ -405,10 +367,10 @@ def grade_submission_page(request, pk):
         use_manual_total_initial = (not has_answer_scores) or submission_score_decimal != auto_total_decimal
 
     for answer in answers:
-        answer.score_input_value = _format_decimal_input(answer.score)
+        answer.score_input_value = format_decimal_input(answer.score)
 
-    submission_score_input_value = _format_decimal_input(submission.score)
-    auto_total_score_input_value = _format_decimal_input(auto_total_decimal)
+    submission_score_input_value = format_decimal_input(submission.score)
+    auto_total_score_input_value = format_decimal_input(auto_total_decimal)
 
     student_display = (
         "Anonim tələbə"
@@ -442,25 +404,15 @@ def auto_save_answer(request, pk):
     """Cavabı avtomatik saxla - cari cəhd üçün"""
     lab = _get_tenant_lab_or_404(request, pk)
 
-    if not lab.can_student_access(request.user):
+    if not can_student_access_lab(lab, request.user):
         return _lab_student_access_denied_json()
 
-    now = timezone.now()
-    if lab.start_datetime and lab.end_datetime:
-        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-    else:
-        is_open = lab.status == "published"
-
-    if not is_open:
+    if not is_lab_open(lab):
         return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
 
     try:
-        # Cari cəhd nömrəsini tap
         assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
-        current_attempt = 1
-        if assignment:
-            submitted_count = LabSubmission.objects.filter(assignment=assignment).count()
-            current_attempt = submitted_count + 1
+        current_attempt = get_next_attempt_number(assignment)
 
         update_answer_text = False
         if request.content_type == "application/json":
@@ -521,41 +473,28 @@ def submit_lab(request, pk):
     """Labı göndər"""
     lab = _get_tenant_lab_or_404(request, pk)
 
-    if not lab.can_student_access(request.user):
+    if not can_student_access_lab(lab, request.user):
         return _lab_student_access_denied_json()
 
-    now = timezone.now()
-    if lab.start_datetime and lab.end_datetime:
-        is_open = lab.status == "published" and lab.start_datetime <= now <= lab.end_datetime
-    else:
-        is_open = lab.status == "published"
-
-    if not is_open and not lab.allow_late_submission:
+    if not is_lab_open(lab) and not lab.allow_late_submission:
         return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
 
     try:
-        assignment = LabAssignment.get_or_create_for_student(lab, request.user)
-
-        current_attempts = LabSubmission.objects.filter(assignment=assignment).count()
+        assignment = get_lab_assignment_for_student(lab, request.user)
+        next_attempt_number = get_next_attempt_number(assignment)
+        current_attempts = next_attempt_number - 1
         max_attempts = lab.max_attempts or 1
 
         if current_attempts >= max_attempts:
             return JsonResponse({"success": False, "error": pgettext("labs.view.error", "attempts_exhausted")})
 
-        new_attempt_number = current_attempts + 1
-
-        # Yeni submission yarat
         submission = LabSubmission.objects.create(
-            assignment=assignment, status="submitted", attempt_number=new_attempt_number
+            assignment=assignment,
+            status="submitted",
+            attempt_number=next_attempt_number,
         )
 
-        # Bu cəhdin cavablarını submission-a bağla və final et
-        LabAnswer.objects.filter(
-            lab=lab,
-            student=request.user,
-            attempt_number=new_attempt_number,
-            is_draft=True,
-        ).update(is_draft=False, submission=submission)
+        finalize_submission_answers(submission)
 
         return JsonResponse(
             {
@@ -575,7 +514,7 @@ def submission_answers(request, pk):
     """Submission-un cavablarını JSON olaraq qaytar"""
     submission = _get_tenant_submission_or_404(request, pk)
 
-    if not submission.assignment.lab.can_teacher_access(request.user):
+    if not can_teacher_access_lab(submission.assignment.lab, request.user):
         return JsonResponse(
             {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
         )
