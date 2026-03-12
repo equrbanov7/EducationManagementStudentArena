@@ -11,8 +11,9 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
-from apps.live_exam.domain.session import get_active_question
+from apps.live_exam.domain.session import build_question_phase_times, get_active_question
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.serializers import serialize_player_question_result
 
 
 def score_multi_fraction(chosen_ids: list[int], correct_ids: list[int], *, mode: str = "strict") -> float:
@@ -118,10 +119,12 @@ def save_answer_and_score(
                 return False, pgettext("live_exam.consumer.error", "question_not_active")
 
             if LiveAnswer.objects.filter(session=session, player=player, question_id=question_id).exists():
+                existing_answer = serialize_player_question_result(session, question_id, player.id) or {}
                 return True, {
                     "answer": {
                         "message": pgettext("live_exam.consumer.error", "already_answered"),
                         "score": player.score,
+                        **existing_answer,
                     },
                     "question_id": question_id,
                     "reveal_question_id": None,
@@ -134,7 +137,15 @@ def save_answer_and_score(
             ):
                 return False, pgettext("live_exam.consumer.error", "question_not_accepting_answers")
 
-            if not (session.question_started_at <= received_at <= session.question_ends_at):
+            question_idx = int(session.current_index or 0)
+            _, answer_starts_at, _ = build_question_phase_times(
+                session,
+                exam_question,
+                started_at=session.question_started_at,
+                idx=question_idx,
+            )
+
+            if not (answer_starts_at <= received_at <= session.question_ends_at):
                 return False, pgettext("live_exam.consumer.error", "submission_outside_active_window")
 
             correct_ids = list(
@@ -143,7 +154,7 @@ def save_answer_and_score(
             if not correct_ids:
                 return False, pgettext("live_exam.consumer.error", "no_correct_options")
 
-            total_ms = int((session.question_ends_at - session.question_started_at).total_seconds() * 1000)
+            total_ms = int((session.question_ends_at - answer_starts_at).total_seconds() * 1000)
             score = calculate_answer_score(
                 option_ids=option_ids,
                 correct_ids=correct_ids,
@@ -186,6 +197,8 @@ def save_answer_and_score(
     except LivePlayer.DoesNotExist:
         return False, pgettext("live_exam.consumer.error", "player_not_found")
 
+    personal_result = serialize_player_question_result(session, question_id, player.id) or {}
+
     return True, {
         "answer": {
             "is_correct": score["is_correct"],
@@ -197,6 +210,7 @@ def save_answer_and_score(
             "base": score["base"],
             "bonus": score["bonus"],
             "score": player.score,
+            **personal_result,
         },
         "question_id": question_id,
         "reveal_question_id": reveal_question_id,

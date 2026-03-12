@@ -14,6 +14,7 @@ from django.utils import timezone
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
+from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from config.asgi import application
 
@@ -232,7 +233,9 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
         now = timezone.now()
         self.session.state = LiveSession.STATE_QUESTION
         self.session.current_index = 0
-        self.session.question_started_at = now - timezone.timedelta(seconds=1)
+        self.session.question_started_at = now - timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS + 1
+        )
         self.session.question_ends_at = now + timezone.timedelta(seconds=15)
         self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
 
@@ -317,6 +320,37 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
                         "question_id": self.question.id,
                         "option_id": self.correct_option.id,
                         "answer_ms": 250,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "error")
+        self.assertEqual(LiveAnswer.objects.count(), 0)
+
+    def test_play_ws_rejects_answers_during_intro_window(self):
+        now = timezone.now()
+        self.session.question_started_at = now - timezone.timedelta(seconds=2)
+        self.session.question_ends_at = now + timezone.timedelta(seconds=20)
+        self.session.save(update_fields=["question_started_at", "question_ends_at"])
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 10,
                     }
                 )
                 return await communicator.receive_json_from(timeout=1)
@@ -415,18 +449,28 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
                     [message["type"] for message in first_sender_messages],
                     first_other_message["type"],
                     [message["type"] for message in second_sender_messages],
+                    second_sender_messages[2],
                     [message["type"] for message in first_player_completion_messages],
                 )
             finally:
                 await ws1.disconnect()
                 await ws2.disconnect()
 
-        first_sender_types, first_other_type, second_sender_types, first_player_completion_types = async_to_sync(scenario)()
+        (
+            first_sender_types,
+            first_other_type,
+            second_sender_types,
+            reveal_message,
+            first_player_completion_types,
+        ) = async_to_sync(scenario)()
 
         self.assertEqual(first_sender_types, ["answer_saved", "answer_progress"])
         self.assertEqual(first_other_type, "answer_progress")
         self.assertEqual(second_sender_types, ["answer_saved", "answer_progress", "reveal"])
         self.assertEqual(first_player_completion_types, ["answer_progress", "reveal"])
+        self.assertIn("previous_top", reveal_message)
+        self.assertIn("next_question_at", reveal_message)
+        self.assertTrue(any("player_id" in row for row in reveal_message["top"]))
 
         self.session.refresh_from_db()
         self.assertEqual(self.session.state, LiveSession.STATE_REVEAL)
@@ -461,6 +505,7 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
 
         message = async_to_sync(scenario)()
         self.assertEqual(message["type"], "answer_saved")
+        self.assertEqual(message["answer_rank"], 1)
         self.assertEqual(
             LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=self.question.id).count(),
             1,

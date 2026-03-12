@@ -14,13 +14,15 @@ from asgiref.sync import async_to_sync
 from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
-from apps.live_exam.domain.session import question_time_limit
+from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
+from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
 from apps.live_exam.serializers import (
     serialize_player_identity,
     serialize_players,
     serialize_question,
     serialize_question_results,
     serialize_top,
+    serialize_top_before_question,
 )
 
 
@@ -111,7 +113,12 @@ def build_answer_progress_payload(*, question_id: int, answered_count: int, tota
 
 def build_question_payload(session, exam_question, *, idx: int, total: int):
     started_at = timezone.now()
-    ends_at = started_at + timezone.timedelta(seconds=question_time_limit(session, exam_question))
+    ready_ends_at, answer_starts_at, ends_at = build_question_phase_times(
+        session,
+        exam_question,
+        started_at=started_at,
+        idx=idx,
+    )
     payload = {
         "type": "question_published",
         "question": serialize_question(
@@ -120,8 +127,11 @@ def build_question_payload(session, exam_question, *, idx: int, total: int):
             idx=idx,
             total=total,
             started_at=started_at,
+            ready_ends_at=ready_ends_at,
+            answer_starts_at=answer_starts_at,
             ends_at=ends_at,
         ),
+        "previous_top": serialize_top(session, limit=10),
     }
     return payload, started_at, ends_at
 
@@ -134,6 +144,8 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
+    revealed_at = revealed_at or timezone.now()
+    leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
     _, _, correct_ids = detect_multi(exam_question)
     payload = {
         "type": "reveal",
@@ -141,9 +153,14 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
         "correct_option_ids": correct_ids,
         "results": serialize_question_results(session, question_id, limit=50),
         "top": serialize_top(session, limit=10),
+        "previous_top": serialize_top_before_question(session, question_id, limit=10),
+        "revealed_at": revealed_at.isoformat(),
+        "result_duration_ms": int(PLAYER_RESULT_SECONDS * 1000),
+        "leaderboard_duration_ms": int(PLAYER_LEADERBOARD_SECONDS * 1000),
+        "transition_duration_ms": int(PLAYER_REVEAL_TRANSITION_SECONDS * 1000),
+        "leaderboard_starts_at": leaderboard_starts_at.isoformat(),
+        "next_question_at": next_question_at.isoformat(),
     }
-    if revealed_at is not None:
-        payload["revealed_at"] = revealed_at.isoformat()
     return payload
 
 

@@ -148,6 +148,13 @@ function applyStateSnapshot(snapshot) {
         setState('reveal');
         renderResults(snapshot.results || []);
         renderLeaderboard(snapshot.top || []);
+        if (UI.autoMode.checked && snapshot.next_question_at) {
+            const ms = Math.max(0, new Date(snapshot.next_question_at) - Date.now());
+            clearTimeout(autoNextTimeout);
+            autoNextTimeout = setTimeout(() => {
+                if (state === 'reveal') UI.nextBtn.click();
+            }, ms + 120);
+        }
         return;
     }
 
@@ -278,11 +285,12 @@ playWS.onmessage = e => {
             renderLeaderboard(d.top || []);
             
             // Auto next
-            if (UI.autoMode.checked) {
+            if (UI.autoMode.checked && d.next_question_at) {
+                const ms = Math.max(0, new Date(d.next_question_at) - Date.now());
                 clearTimeout(autoNextTimeout);
                 autoNextTimeout = setTimeout(() => {
                     if (state === 'reveal') UI.nextBtn.click();
-                }, 4000);
+                }, ms + 120);
             }
         }
         

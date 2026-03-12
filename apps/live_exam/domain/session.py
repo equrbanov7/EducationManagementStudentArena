@@ -4,9 +4,16 @@ Session and question domain helpers for live exams.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.live_exam.constants import (
+    PLAYER_GET_READY_SECONDS,
+    PLAYER_LEADERBOARD_SECONDS,
+    PLAYER_QUESTION_INTRO_SECONDS,
+    PLAYER_RESULT_SECONDS,
+)
 from apps.live_exam.models import LiveSession
 
 
@@ -83,6 +90,41 @@ def question_time_limit(session: LiveSession, exam_question: ExamQuestion) -> in
         return value
 
     return 15
+
+
+def question_intro_seconds(session: LiveSession, exam_question: ExamQuestion | None = None) -> float:
+    return float(PLAYER_QUESTION_INTRO_SECONDS)
+
+
+def question_get_ready_seconds(session: LiveSession, *, idx: int) -> float:
+    return float(PLAYER_GET_READY_SECONDS if safe_int(idx, 0) == 0 else 0)
+
+
+def result_phase_seconds(session: LiveSession | None = None) -> float:
+    return float(PLAYER_RESULT_SECONDS)
+
+
+def leaderboard_phase_seconds(session: LiveSession | None = None) -> float:
+    return float(PLAYER_LEADERBOARD_SECONDS)
+
+
+def build_question_phase_times(
+    session: LiveSession,
+    exam_question: ExamQuestion,
+    *,
+    started_at,
+    idx: int,
+):
+    ready_ends_at = started_at + timedelta(seconds=question_get_ready_seconds(session, idx=idx))
+    answer_starts_at = ready_ends_at + timedelta(seconds=question_intro_seconds(session, exam_question))
+    ends_at = answer_starts_at + timedelta(seconds=question_time_limit(session, exam_question))
+    return ready_ends_at, answer_starts_at, ends_at
+
+
+def build_reveal_phase_times(session: LiveSession, *, revealed_at):
+    result_ends_at = revealed_at + timedelta(seconds=result_phase_seconds(session))
+    leaderboard_ends_at = result_ends_at + timedelta(seconds=leaderboard_phase_seconds(session))
+    return result_ends_at, leaderboard_ends_at
 
 
 def question_points(session: LiveSession, exam_question: ExamQuestion) -> int:

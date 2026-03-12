@@ -139,6 +139,7 @@ def host_start_game(request, pin):
 
     # 3) Oyun reset
     session.current_index = 0
+    session.current_question_id = None
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = None
     session.question_ends_at = None
@@ -148,6 +149,7 @@ def host_start_game(request, pin):
             "selected_question_ids",
             "question_limit",
             "current_index",
+            "current_question_id",
             "state",
             "question_started_at",
             "question_ends_at",
@@ -175,9 +177,10 @@ def host_start_game(request, pin):
     total = get_total_questions(session)
     payload, now, ends = build_question_payload(session, eq, idx=0, total=total)
 
+    session.current_question_id = eq.id
     session.question_started_at = now
     session.question_ends_at = ends
-    session.save(update_fields=["question_started_at", "question_ends_at"])
+    session.save(update_fields=["current_question_id", "question_started_at", "question_ends_at"])
 
     broadcast(pin, payload, "play")
 
@@ -210,7 +213,8 @@ def host_next_question(request, pin):
     if eq is None:
         # sual qurtardı -> finished
         session.state = LiveSession.STATE_FINISHED
-        session.save(update_fields=["state"])
+        session.current_question_id = None
+        session.save(update_fields=["state", "current_question_id"])
 
         broadcast(pin, build_finished_payload(session, limit=50), "play")
         return JsonResponse({"ok": True, "finished": True})
@@ -218,6 +222,7 @@ def host_next_question(request, pin):
     payload, now, ends = build_question_payload(session, eq, idx=idx, total=total)
 
     session.state = LiveSession.STATE_QUESTION
+    session.current_question_id = eq.id
     session.question_started_at = now
     session.question_ends_at = ends
 
@@ -225,6 +230,7 @@ def host_next_question(request, pin):
         update_fields=[
             "state",
             "current_index",
+            "current_question_id",
             "question_started_at",
             "question_ends_at",
         ]
@@ -249,10 +255,12 @@ def host_reveal(request, pin):
             status=400,
         )
 
+    revealed_at = timezone.now()
     session.state = LiveSession.STATE_REVEAL
-    session.save(update_fields=["state"])
+    session.question_ends_at = revealed_at
+    session.save(update_fields=["state", "question_ends_at"])
 
-    payload = build_reveal_payload(session, eq.id, revealed_at=timezone.now())
+    payload = build_reveal_payload(session, eq.id, revealed_at=revealed_at)
     broadcast(pin, payload, "play")
 
     return JsonResponse({"ok": True, "question_id": eq.id})
@@ -266,7 +274,8 @@ def host_finish(request, pin):
         raise Http404()
 
     session.state = LiveSession.STATE_FINISHED
-    session.save(update_fields=["state"])
+    session.current_question_id = None
+    session.save(update_fields=["state", "current_question_id"])
 
     payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
     broadcast(pin, payload, "play")
