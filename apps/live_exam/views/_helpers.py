@@ -26,12 +26,14 @@ from apps.live_exam.scoring import score_multi_fraction
 from apps.live_exam.serializers import (
     build_options,
     options_seed,
+    serialize_player_identity,
     serialize_players,
     serialize_question_results,
     serialize_top,
 )
 from apps.live_exam.transport import (
     broadcast,
+    build_reaction_event_payload,
     build_join_url,
     build_question_payload,
     build_reveal_payload,
@@ -45,6 +47,7 @@ _get_public_base_url = get_public_base_url
 _build_join_url = build_join_url
 _broadcast = broadcast
 _serialize_players = serialize_players
+_serialize_player_identity = serialize_player_identity
 _serialize_top = serialize_top
 _serialize_question_results = serialize_question_results
 _get_selected_question_ids = get_selected_question_ids
@@ -62,4 +65,5 @@ _build_options = build_options
 _detect_multi = detect_multi
 _build_question_payload = build_question_payload
 _build_reveal_payload = build_reveal_payload
+_build_reaction_event_payload = build_reaction_event_payload
 _score_multi_fraction = score_multi_fraction

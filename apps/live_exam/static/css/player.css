@@ -22,6 +22,10 @@ body {
     color: #fff;
 }
 
+.player-avatar {
+    vertical-align: middle;
+}
+
 .player-wrapper {
     max-width: 800px;
     margin: 0 auto;

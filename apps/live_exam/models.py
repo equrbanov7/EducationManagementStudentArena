@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.models import Exam, ExamQuestion
+from apps.live_exam.constants import DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
 
 
 def generate_pin():
@@ -78,7 +79,8 @@ class LivePlayer(models.Model):
     session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="players")
 
     nickname = models.CharField(max_length=32)
-    avatar_key = models.CharField(max_length=32, default="avatar_1")
+    avatar_key = models.CharField(max_length=32, default=DEFAULT_AVATAR_KEY)
+    accessory_key = models.CharField(max_length=32, default=DEFAULT_ACCESSORY_KEY)
 
     client_id = models.CharField(max_length=64, db_index=True)
 

@@ -2,12 +2,6 @@
    PLAYER SCREEN - Complete Logic
    ═══════════════════════════════════════════════════════════════ */
 
-   const AVATARS = {
-    'avatar_1':'🦊','avatar_2':'🐼','avatar_3':'🦁','avatar_4':'🐯',
-    'avatar_5':'🐨','avatar_6':'🐷','avatar_7':'🐸','avatar_8':'🐙',
-    'avatar_9':'🐵','avatar_10':'🦄','avatar_11':'🐰','avatar_12':'🐹'
-};
-
 // DOM Elements
 const $ = id => document.getElementById(id);
 
@@ -45,6 +39,8 @@ const fmt = (template, values) =>
 const wsUrl = path => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${path}`;
 const esc = t => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
 const pad = n => String(n).padStart(2, '0');
+const avatarMarkup = (player, size, className = '') =>
+    window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
 
 /* ═══════════════════════════════════════════════════════════════
    CONNECTION STATUS
@@ -325,7 +321,7 @@ function renderLeaderboard(top) {
         div.innerHTML = `
             <div class="lb-info">
                 <span class="lb-rank">${i + 1}</span>
-                <span class="lb-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                ${avatarMarkup(p, 40, 'lb-avatar player-avatar')}
                 <span class="lb-name">${esc(p.nickname)}</span>
             </div>
             <span class="lb-score">${p.score || 0}</span>
@@ -349,7 +345,7 @@ function renderResults(results) {
         div.className = `result-row ${r.is_correct ? 'correct' : 'wrong'}`;
         div.innerHTML = `
             <div class="result-info">
-                <span class="result-avatar">${AVATARS[r.avatar_key] || '👤'}</span>
+                ${avatarMarkup(r, 36, 'result-avatar player-avatar')}
                 <span class="result-name">${esc(r.nickname)}</span>
             </div>
             <span class="result-points">${r.is_correct ? '+' + (r.awarded_points || 0) : '0'}</span>
@@ -393,7 +389,7 @@ function renderFinal(msg) {
         div.innerHTML = `
             <div class="final-info">
                 <span class="final-rank">${i + 1}</span>
-                <span class="final-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                ${avatarMarkup(p, 52, 'final-avatar player-avatar')}
                 <span class="final-name">${esc(p.nickname)}</span>
             </div>
             <span class="final-score">${p.score || 0} ${tr('pointsSuffix', 'pts')}</span>

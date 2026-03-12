@@ -5,6 +5,7 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
 <link rel="stylesheet" href="{% static 'css/join.css' %}">
 {% endblock %}
 
@@ -31,6 +32,19 @@
             <div class="pin-badge">{{ session.pin }}</div>
         </div>
 
+        {% if remembered_player and remembered_join_copy %}
+        <div class="resume-notice">
+            <div class="resume-notice__copy">
+                <strong>{{ remembered_join_copy.notice_title }}</strong>
+                <span>{{ remembered_join_copy.notice_body }}</span>
+                <small>{{ remembered_join_copy.notice_hint }}</small>
+            </div>
+            <button id="resumePlayerBtn" type="button" class="resume-notice__button">
+                {{ remembered_join_copy.continue_button }}
+            </button>
+        </div>
+        {% endif %}
+
         <!-- Nickname Input -->
         <div class="input-group">
             <label class="input-label">
@@ -38,7 +52,7 @@
             </label>
             <input id="nickname" 
                    class="custom-input" 
-                   maxlength="15" 
+                   maxlength="32" 
                    placeholder="{% trans 'nickname_placeholder' context 'live_exam.join' %}" 
                    autocomplete="off"
                    autofocus>
@@ -66,15 +80,38 @@
 
     </div>
 </div>
+
+{% if remembered_player and remembered_join_copy %}
+<div id="joinResumePrompt" class="join-modal-backdrop" hidden>
+    <section class="join-modal" role="dialog" aria-modal="true" aria-labelledby="joinResumeTitle">
+        <button id="joinResumeClose" type="button" class="join-modal__close" aria-label="{{ remembered_join_copy.close_button }}">
+            <i class="fas fa-xmark"></i>
+        </button>
+        <h2 id="joinResumeTitle">{{ remembered_join_copy.modal_title }}</h2>
+        <p>{{ remembered_join_copy.modal_body }}</p>
+        <div class="join-modal__actions">
+            <button id="joinResumeContinue" type="button" class="join-modal__button join-modal__button--secondary">
+                {{ remembered_join_copy.continue_button }}
+            </button>
+            <button id="joinResumeRestart" type="button" class="join-modal__button join-modal__button--primary">
+                {{ remembered_join_copy.restart_button }}
+            </button>
+        </div>
+    </section>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extraJs %}
 <!-- ÖNCƏ CONFIG-i Django ilə render et -->
+{{ remembered_player|json_script:"rememberedPlayerData" }}
 <script>
     const CONFIG = {
         joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
-        csrf: "{{ csrf_token }}"
+        csrf: "{{ csrf_token }}",
+        resumeUrl: "{{ resume_url }}"
     };
+    CONFIG.rememberedPlayer = JSON.parse(document.getElementById("rememberedPlayerData").textContent);
     window.LIVE_EXAM_JOIN_I18N = {
         alertSelectAvatar: "{% trans 'alert_select_avatar' context 'live_exam.join.js' %}",
         buttonJoining: "{% trans 'button_joining' context 'live_exam.join.js' %}",
@@ -83,6 +120,8 @@
         errorConnection: "{% trans 'error_connection' context 'live_exam.join.js' %}"
     };
 </script>
+<script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+<script src="{% static 'js/live_avatar_renderer.js' %}"></script>
 <!-- SONRA static JS-i yüklə -->
 <script src="{% static 'js/join.js' %}"></script>
 {% endblock %}

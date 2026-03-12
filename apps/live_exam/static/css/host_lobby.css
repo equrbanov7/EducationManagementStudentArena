@@ -23,10 +23,69 @@ body {
     color: #fff;
 }
 
+.host-avatar {
+    vertical-align: middle;
+}
+
 .host-container {
     max-width: 1300px;
     margin: 0 auto;
     padding: 15px;
+}
+
+.host-reaction-overlay {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    width: min(320px, calc(100vw - 32px));
+    height: 260px;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.host-reaction-burst {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 18px 36px rgba(2, 8, 23, 0.28);
+    transform: translateX(-50%);
+    animation: hostReactionRise 2.2s ease-out forwards;
+}
+
+.host-reaction-burst__emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.host-reaction-burst__name {
+    max-width: 128px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+@keyframes hostReactionRise {
+    0% {
+        transform: translate3d(-50%, 0, 0) scale(0.88);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(calc(-50% + var(--reaction-drift, 0px)), -210px, 0) scale(1.02);
+        opacity: 0;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -583,6 +642,13 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+    .host-reaction-overlay {
+        right: 12px;
+        bottom: 12px;
+        width: min(280px, calc(100vw - 24px));
+        height: 220px;
+    }
+
     .pin-display { font-size: 2rem; letter-spacing: 6px; }
     .control-bar { padding: 10px; gap: 6px; }
     .btn { padding: 8px 14px; font-size: 11px; }

@@ -1,115 +1,146 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // CONFIG artıq template-dən gəlir (global dəyişən)
+document.addEventListener("DOMContentLoaded", function () {
     const i18n = window.LIVE_EXAM_JOIN_I18N || {};
     const tr = (key, fallback) => i18n[key] || fallback;
+    const catalog = window.LiveAvatarCatalog || {};
+    const rememberedPlayer = CONFIG.rememberedPlayer || null;
 
-    // Avatar emoji-ləri
-    const AVATAR_EMOJIS = {
-        "avatar_1": "🦊",
-        "avatar_2": "🐼",
-        "avatar_3": "🦁",
-        "avatar_4": "🐯",
-        "avatar_5": "🐨",
-        "avatar_6": "🐷",
-        "avatar_7": "🐙",
-        "avatar_8": "🦄",
-        "avatar_9": "🐸",
-        "avatar_10": "🐰",
-        "avatar_11": "🐻",
-        "avatar_12": "🐶"
-    };
+    const avatarGrid = document.getElementById("avatarGrid");
+    const joinBtn = document.getElementById("joinBtn");
+    const nicknameInput = document.getElementById("nickname");
+    const resumeNoticeBtn = document.getElementById("resumePlayerBtn");
+    const resumePrompt = document.getElementById("joinResumePrompt");
+    const resumeContinueBtn = document.getElementById("joinResumeContinue");
+    const resumeRestartBtn = document.getElementById("joinResumeRestart");
+    const resumeCloseBtn = document.getElementById("joinResumeClose");
+    if (!avatarGrid || !joinBtn || !nicknameInput) return;
 
-    // Avatar grid-i doldur
-    const avatarGrid = document.getElementById('avatarGrid');
-    if (!avatarGrid) return;
-    
-    let selectedAvatar = null;
+    let selectedAvatar = rememberedPlayer?.avatar_key || catalog.defaultAvatarKey || "avatar_1";
+    let allowFreshJoin = !rememberedPlayer;
 
-    Object.entries(AVATAR_EMOJIS).forEach(([key, emoji]) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'avatar-btn';
-        btn.dataset.key = key;
-        btn.textContent = emoji;
-        
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedAvatar = key;
-        });
-        
-        avatarGrid.appendChild(btn);
-    });
-
-    // Auto-select first avatar
-    const firstBtn = avatarGrid.querySelector('.avatar-btn');
-    if (firstBtn) {
-        firstBtn.click();
+    if (!nicknameInput.value.trim() && rememberedPlayer?.nickname) {
+        nicknameInput.value = rememberedPlayer.nickname;
     }
 
-    // Join button
-    const joinBtn = document.getElementById('joinBtn');
-    if (!joinBtn) return;
+    (catalog.avatarKeys || []).forEach(function (avatarKey) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "avatar-btn";
+        button.dataset.key = avatarKey;
+        button.innerHTML = window.LiveAvatarRenderer.renderAvatarMarkup(
+            { avatar_key: avatarKey, accessory_key: catalog.defaultAccessoryKey || "accessory_none" },
+            { size: 52, className: "join-avatar", interactive: false }
+        );
+        button.addEventListener("click", function () {
+            selectedAvatar = avatarKey;
+            avatarGrid.querySelectorAll(".avatar-btn").forEach(function (candidate) {
+                candidate.classList.toggle("selected", candidate === button);
+            });
+        });
+        avatarGrid.appendChild(button);
+    });
 
-    joinBtn.addEventListener('click', async () => {
-        const nickname = document.getElementById('nickname').value.trim();
-        
+    const initialAvatarButton =
+        avatarGrid.querySelector(`.avatar-btn[data-key="${selectedAvatar}"]`) || avatarGrid.querySelector(".avatar-btn");
+    initialAvatarButton?.click();
+
+    function openResumePrompt() {
+        if (!resumePrompt) return;
+        resumePrompt.hidden = false;
+        document.body.classList.add("join-modal-open");
+    }
+
+    function closeResumePrompt() {
+        if (!resumePrompt) return;
+        resumePrompt.hidden = true;
+        document.body.classList.remove("join-modal-open");
+    }
+
+    function continuePreviousPlayer() {
+        closeResumePrompt();
+        window.location.href = CONFIG.resumeUrl;
+    }
+
+    async function submitJoin() {
+        const nickname = nicknameInput.value.trim();
         if (!nickname) {
-            document.getElementById('nickname').focus();
-            document.getElementById('nickname').style.borderColor = '#ef4444';
+            nicknameInput.focus();
+            nicknameInput.style.borderColor = "#ef4444";
             return;
         }
 
         if (!selectedAvatar) {
-            alert(tr('alertSelectAvatar', 'Select an avatar!'));
+            window.alert(tr("alertSelectAvatar", "Select an avatar!"));
             return;
         }
 
         joinBtn.disabled = true;
-        joinBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> ${tr('buttonJoining', 'Joining...')}`;
+        joinBtn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> ${tr("buttonJoining", "Joining...")}`;
 
         try {
             const formData = new FormData();
-            formData.append('nickname', nickname);
-            formData.append('avatar_key', selectedAvatar);
+            formData.append("nickname", nickname);
+            formData.append("avatar_key", selectedAvatar);
 
             const res = await fetch(CONFIG.joinUrl, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'X-CSRFToken': CONFIG.csrf
+                    "X-CSRFToken": CONFIG.csrf
                 },
                 body: formData
             });
 
             const data = await res.json();
-
             if (data.ok) {
                 window.location.href = data.redirect;
-            } else {
-                alert(data.message || tr('errorUnknown', 'An error occurred'));
-                joinBtn.disabled = false;
-                joinBtn.innerHTML = `<i class="fas fa-play me-2"></i> ${tr('buttonJoin', 'Join Game')}`;
+                return;
             }
-        } catch (err) {
-            console.error(err);
-            alert(tr('errorConnection', 'Connection error'));
+
+            window.alert(data.message || tr("errorUnknown", "An error occurred"));
+        } catch (error) {
+            console.error(error);
+            window.alert(tr("errorConnection", "Connection error"));
+        } finally {
             joinBtn.disabled = false;
-            joinBtn.innerHTML = `<i class="fas fa-play me-2"></i> ${tr('buttonJoin', 'Join Game')}`;
+            joinBtn.innerHTML = `<i class="fas fa-play me-2"></i> ${tr("buttonJoin", "Join Game")}`;
+        }
+    }
+
+    joinBtn.addEventListener("click", function () {
+        if (rememberedPlayer && !allowFreshJoin) {
+            openResumePrompt();
+            return;
+        }
+        submitJoin();
+    });
+
+    resumeNoticeBtn?.addEventListener("click", continuePreviousPlayer);
+    resumeContinueBtn?.addEventListener("click", continuePreviousPlayer);
+    resumeRestartBtn?.addEventListener("click", function () {
+        allowFreshJoin = true;
+        closeResumePrompt();
+        submitJoin();
+    });
+    resumeCloseBtn?.addEventListener("click", closeResumePrompt);
+    resumePrompt?.addEventListener("click", function (event) {
+        if (event.target === resumePrompt) {
+            closeResumePrompt();
         }
     });
 
-    // Enter key to submit
-    const nicknameInput = document.getElementById('nickname');
-    if (nicknameInput) {
-        nicknameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                joinBtn.click();
-            }
-        });
+    nicknameInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            joinBtn.click();
+        }
+    });
 
-        // Reset border color on input
-        nicknameInput.addEventListener('input', function() {
-            this.style.borderColor = '#e5e7eb';
-        });
-    }
+    nicknameInput.addEventListener("input", function () {
+        this.style.borderColor = "#e5e7eb";
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeResumePrompt();
+        }
+    });
 });

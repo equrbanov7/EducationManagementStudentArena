@@ -19,7 +19,15 @@ from django.views.decorators.http import require_POST
 
 import qrcode
 
-from apps.live_exam.constants import AVATAR_KEYS
+from apps.live_exam.constants import (
+    ACCESSORY_KEYS,
+    AVATAR_KEYS,
+    DEFAULT_ACCESSORY_KEY,
+    DEFAULT_AVATAR_KEY,
+    REACTIONS,
+    REACTION_KEYS,
+    build_wait_room_catalog,
+)
 from apps.live_exam.auth import (
     LIVE_CLIENT_ID_COOKIE_MAX_AGE,
     LIVE_CLIENT_ID_COOKIE_NAME,
@@ -31,8 +39,8 @@ from apps.live_exam.auth import (
     get_request_player,
 )
 from apps.live_exam.models import LiveSession
-from apps.live_exam.serializers import serialize_players
-from apps.live_exam.transport import broadcast, build_join_url
+from apps.live_exam.serializers import serialize_player_identity, serialize_players
+from apps.live_exam.transport import broadcast, build_join_url, build_reaction_event_payload
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.utils import get_client_ip
 
@@ -115,9 +123,61 @@ PIN_ENTRY_COPY = {
     },
 }
 
+JOIN_RESUME_COPY = {
+    "az": {
+        "notice_title": "Əvvəlki qoşulma tapıldı",
+        "notice_body": "{nickname} adı ilə bu oyuna artıq daxil olmusan.",
+        "notice_hint": "İstəsən həmin oyunçu ilə davam et, istəsən yeni ad və avatarla yenidən qoşul.",
+        "continue_button": "{nickname} kimi davam et",
+        "modal_title": "Əvvəlki adla davam etmək istəyirsən?",
+        "modal_body": "Bu PIN üçün aktiv oyunçu profilin var. Həmin profil ilə gözləmə otağına qayıda və ya yeni ad/avatar seçib yenidən daxil ola bilərsən.",
+        "restart_button": "Yenidən daxil ol",
+        "close_button": "Bağla",
+    },
+    "en": {
+        "notice_title": "Previous join found",
+        "notice_body": "You already joined this game as {nickname}.",
+        "notice_hint": "Continue with that player or join again with a new nickname and avatar.",
+        "continue_button": "Continue as {nickname}",
+        "modal_title": "Continue with your previous name?",
+        "modal_body": "You already have an active player profile for this PIN. You can jump back into the waiting room or join again with a new nickname and avatar.",
+        "restart_button": "Join again",
+        "close_button": "Close",
+    },
+    "ru": {
+        "notice_title": "Найдено предыдущее подключение",
+        "notice_body": "Вы уже вошли в эту игру как {nickname}.",
+        "notice_hint": "Можно продолжить с этим игроком или войти заново с новым именем и аватаром.",
+        "continue_button": "Продолжить как {nickname}",
+        "modal_title": "Продолжить с прежним именем?",
+        "modal_body": "Для этого PIN уже есть активный профиль игрока. Вы можете вернуться в комнату ожидания или войти заново с новым именем и аватаром.",
+        "restart_button": "Войти заново",
+        "close_button": "Закрыть",
+    },
+    "tr": {
+        "notice_title": "Önceki katılım bulundu",
+        "notice_body": "Bu oyuna zaten {nickname} adıyla katıldın.",
+        "notice_hint": "İstersen aynı oyuncuyla devam et, istersen yeni rumuz ve avatarla tekrar katıl.",
+        "continue_button": "{nickname} olarak devam et",
+        "modal_title": "Önceki adınla devam etmek ister misin?",
+        "modal_body": "Bu PIN için aktif bir oyuncu profilin var. Bekleme odasına geri dönebilir ya da yeni rumuz ve avatarla yeniden katılabilirsin.",
+        "restart_button": "Yeniden katıl",
+        "close_button": "Kapat",
+    },
+}
+
+NICKNAME_CONFLICT_COPY = {
+    "az": "Bu ad artıq istifadə olunur. Başqa ad seç.",
+    "en": "This nickname is already in use. Choose another one.",
+    "ru": "Этот ник уже используется. Выберите другой.",
+    "tr": "Bu rumuz zaten kullanılıyor. Başka bir ad seç.",
+}
+
 LIVE_JOIN_LIMIT_SCOPE = "live_exam.join"
 LIVE_PIN_LIMIT_SCOPE = "live_exam.pin"
+LIVE_REACTION_LIMIT_SCOPE = "live_exam.reaction"
 LIVE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+REACTION_EMOJI = dict(REACTIONS)
 
 
 def _pin_entry_copy() -> dict[str, str]:
@@ -125,8 +185,37 @@ def _pin_entry_copy() -> dict[str, str]:
     return PIN_ENTRY_COPY.get(lang, PIN_ENTRY_COPY["az"])
 
 
+def _join_resume_copy(nickname: str) -> dict[str, str]:
+    lang = (get_language() or "az")[:2].lower()
+    copy = JOIN_RESUME_COPY.get(lang, JOIN_RESUME_COPY["az"]).copy()
+    safe_nickname = clean_nickname(nickname) or "Player"
+    for key, value in copy.items():
+        copy[key] = value.format(nickname=safe_nickname)
+    return copy
+
+
 def _normalize_pin(raw_pin: str | None) -> str:
     return "".join(ch for ch in str(raw_pin or "") if ch.isdigit())[:6]
+
+
+def _nickname_conflict_message() -> str:
+    lang = (get_language() or "az")[:2].lower()
+    return NICKNAME_CONFLICT_COPY.get(lang, NICKNAME_CONFLICT_COPY["az"])
+
+
+def _nickname_is_taken(
+    session: LiveSession,
+    nickname: str,
+    *,
+    exclude_player_id: int | None = None,
+    exclude_client_id: str | None = None,
+) -> bool:
+    queryset = session.players.filter(nickname__iexact=nickname)
+    if exclude_player_id:
+        queryset = queryset.exclude(id=exclude_player_id)
+    if exclude_client_id:
+        queryset = queryset.exclude(client_id=exclude_client_id)
+    return queryset.exists()
 
 
 def _live_client_id_key(request) -> str:
@@ -145,6 +234,18 @@ def _ensure_live_client_cookie(request, response):
         secure=request.is_secure(),
     )
     return response
+
+
+def _broadcast_lobby_state(session: LiveSession) -> None:
+    broadcast(
+        session.pin,
+        {
+            "type": "lobby_state",
+            "count": session.players.count(),
+            "players": serialize_players(session),
+        },
+        "lobby",
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -213,7 +314,15 @@ def live_pin_entry(request):
 
 def live_join_page(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
-    context = {"session": session, "avatars": AVATAR_KEYS}
+    remembered_player = get_request_player(request, pin=pin)
+    context = {
+        "session": session,
+        "avatars": AVATAR_KEYS,
+        "live_catalog": build_wait_room_catalog(),
+        "remembered_player": serialize_player_identity(remembered_player) if remembered_player else None,
+        "remembered_join_copy": _join_resume_copy(remembered_player.nickname) if remembered_player else None,
+        "resume_url": reverse("liveExam:wait_room", kwargs={"pin": session.pin}),
+    }
     response = render(request, "liveExam/join.html", context)
     return _ensure_live_client_cookie(request, response)
 
@@ -244,9 +353,12 @@ def live_join_enter(request, pin):
         )
 
     nickname = clean_nickname(request.POST.get("nickname"))
-    avatar_key = request.POST.get("avatar_key") or "avatar_1"
+    avatar_key = request.POST.get("avatar_key") or DEFAULT_AVATAR_KEY
     if avatar_key not in AVATAR_KEYS:
-        avatar_key = "avatar_1"
+        avatar_key = DEFAULT_AVATAR_KEY
+    accessory_key = request.POST.get("accessory_key") or DEFAULT_ACCESSORY_KEY
+    if accessory_key not in ACCESSORY_KEYS:
+        accessory_key = DEFAULT_ACCESSORY_KEY
 
     if not nickname:
         return JsonResponse(
@@ -259,35 +371,34 @@ def live_join_enter(request, pin):
 
     from apps.live_exam.models import LivePlayer
 
+    if _nickname_is_taken(session, nickname, exclude_client_id=client_id):
+        return JsonResponse(
+            {"ok": False, "message": _nickname_conflict_message()},
+            status=409,
+        )
+
     player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
     if player:
         player.nickname = nickname
         player.avatar_key = avatar_key
+        player.accessory_key = accessory_key
         player.is_connected = True
         player.last_seen = now
-        player.save(update_fields=["nickname", "avatar_key", "is_connected", "last_seen"])
+        player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
     else:
         player = LivePlayer.objects.create(
             session=session,
             client_id=client_id,
             nickname=nickname,
             avatar_key=avatar_key,
+            accessory_key=accessory_key,
             is_connected=True,
             last_seen=now,
         )
 
     token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
-    # lobby-yə realtime update
-    broadcast(
-        session.pin,
-        {
-            "type": "lobby_state",
-            "count": session.players.count(),
-            "players": serialize_players(session),
-        },
-        "lobby",
-    )
+    _broadcast_lobby_state(session)
 
     wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
     resp = JsonResponse({"ok": True, "redirect": wait_url})
@@ -332,6 +443,8 @@ def live_wait_room(request, pin):
     player = get_request_player(request, pin=pin)
     if player is None:
         return redirect("liveExam:join_page", pin=pin)
+    if session.state != LiveSession.STATE_LOBBY:
+        return redirect("liveExam:player_screen", pin=pin)
 
     players = serialize_players(session)
     return render(
@@ -340,10 +453,116 @@ def live_wait_room(request, pin):
         {
             "session": session,
             "players": players,
-            "my_nickname": player.nickname,
-            "my_avatar_key": player.avatar_key,
+            "my_player": serialize_player_identity(player),
+            "my_player_id": player.id,
             "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
+            "live_catalog": build_wait_room_catalog(),
         },
+    )
+
+
+@require_POST
+def live_wait_profile_update(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    player = get_request_player(request, pin=pin)
+    if player is None or player.session_id != session.id:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+            status=403,
+        )
+
+    nickname = clean_nickname(request.POST.get("nickname"))
+    avatar_key = request.POST.get("avatar_key") or DEFAULT_AVATAR_KEY
+    accessory_key = request.POST.get("accessory_key") or DEFAULT_ACCESSORY_KEY
+
+    if not nickname:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "nickname_required")},
+            status=400,
+        )
+    if avatar_key not in AVATAR_KEYS:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "invalid_avatar")},
+            status=400,
+        )
+    if accessory_key not in ACCESSORY_KEYS:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "invalid_accessory")},
+            status=400,
+        )
+    if _nickname_is_taken(session, nickname, exclude_player_id=player.id):
+        return JsonResponse(
+            {"ok": False, "message": _nickname_conflict_message()},
+            status=409,
+        )
+
+    player.nickname = nickname
+    player.avatar_key = avatar_key
+    player.accessory_key = accessory_key
+    player.is_connected = True
+    player.last_seen = timezone.now()
+    player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
+
+    _broadcast_lobby_state(session)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "player": serialize_player_identity(player),
+        }
+    )
+
+
+@require_POST
+def live_wait_reaction(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    player = get_request_player(request, pin=pin)
+    if player is None or player.session_id != session.id:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+            status=403,
+        )
+
+    reaction_key = (request.POST.get("reaction_key") or "").strip().lower()
+    if reaction_key not in REACTION_KEYS:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "invalid_reaction")},
+            status=400,
+        )
+
+    is_limited, retry_after = record_rate_limit_hit(
+        LIVE_REACTION_LIMIT_SCOPE,
+        settings.LIVE_REACTION_RATE_LIMIT,
+        pin,
+        player.id,
+        player.client_id,
+    )
+    if is_limited:
+        response = JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "reaction_rate_limited")},
+            status=429,
+        )
+        if retry_after:
+            response.headers["Retry-After"] = str(retry_after)
+        return response
+
+    created_at = timezone.now()
+    broadcast(
+        session.pin,
+        build_reaction_event_payload(
+            player=player,
+            reaction_key=reaction_key,
+            emoji=REACTION_EMOJI[reaction_key],
+            created_at=created_at,
+        ),
+        "lobby",
+    )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "reaction_key": reaction_key,
+        }
     )
 
 
