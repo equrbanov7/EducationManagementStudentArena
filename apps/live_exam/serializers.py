@@ -9,6 +9,7 @@ import random
 from datetime import datetime
 from typing import Any
 
+from django.db.models import Sum
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestionOption
@@ -38,33 +39,130 @@ def serialize_players(session: LiveSession, limit: int = 50) -> list[dict[str, A
 
 
 def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
-    return list(
-        session.players.order_by("-score", "created_at").values("nickname", "avatar_key", "accessory_key", "score")[
-            :limit
-        ]
+    players = session.players.order_by("-score", "created_at").values(
+        "id",
+        "nickname",
+        "avatar_key",
+        "accessory_key",
+        "score",
+    )[:limit]
+    return [
+        {
+            "player_id": row["id"],
+            "nickname": row["nickname"],
+            "avatar_key": row["avatar_key"],
+            "accessory_key": row["accessory_key"],
+            "score": safe_int(row["score"], 0),
+        }
+        for row in players
+    ]
+
+
+def serialize_top_before_question(session: LiveSession, question_id: int, limit: int = 10) -> list[dict[str, Any]]:
+    awarded_lookup = {
+        int(row["player_id"]): safe_int(row["awarded_total"], 0)
+        for row in (
+            LiveAnswer.objects.filter(session=session, question_id=question_id)
+            .values("player_id")
+            .annotate(awarded_total=Sum("awarded_points"))
+        )
+    }
+
+    players = list(
+        session.players.values(
+            "id",
+            "nickname",
+            "avatar_key",
+            "accessory_key",
+            "score",
+            "created_at",
+        )
     )
+
+    rows: list[dict[str, Any]] = []
+    for row in players:
+        score_before = safe_int(row["score"], 0) - safe_int(awarded_lookup.get(int(row["id"]), 0), 0)
+        rows.append(
+            {
+                "player_id": row["id"],
+                "nickname": row["nickname"],
+                "avatar_key": row["avatar_key"],
+                "accessory_key": row["accessory_key"],
+                "score": max(0, score_before),
+                "_created_at": row["created_at"],
+            }
+        )
+
+    rows.sort(key=lambda item: (-safe_int(item["score"], 0), item["_created_at"], safe_int(item["player_id"], 0)))
+    return [{key: value for key, value in row.items() if key != "_created_at"} for row in rows[:limit]]
 
 
 def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
+    speed_rank_lookup = {
+        answer.id: index + 1
+        for index, answer in enumerate(
+            LiveAnswer.objects.filter(session=session, question_id=question_id).order_by("answer_ms", "created_at", "id")
+        )
+    }
     answers = (
         LiveAnswer.objects.filter(session=session, question_id=question_id)
         .select_related("player")
-        .order_by("-awarded_points", "-created_at")
+        .order_by("-awarded_points", "answer_ms", "created_at", "id")
     )[:limit]
 
     results: list[dict[str, Any]] = []
     for answer in answers:
         results.append(
             {
+                "player_id": answer.player_id,
                 "nickname": answer.player.nickname,
                 "avatar_key": answer.player.avatar_key,
                 "accessory_key": answer.player.accessory_key,
                 "is_correct": bool(answer.is_correct),
                 "awarded_points": safe_int(answer.awarded_points, 0),
                 "total_score": safe_int(answer.player.score, 0),
+                "answer_ms": safe_int(answer.answer_ms, 0),
+                "answer_rank": safe_int(speed_rank_lookup.get(answer.id), 0),
             }
         )
     return results
+
+
+def serialize_player_question_result(session: LiveSession, question_id: int, player_id: int | None) -> dict[str, Any] | None:
+    if not player_id:
+        return None
+
+    answers = list(
+        LiveAnswer.objects.filter(session=session, question_id=question_id)
+        .select_related("player")
+        .order_by("answer_ms", "created_at", "id")
+    )
+    if not answers:
+        return None
+
+    answer = next((item for item in answers if int(item.player_id) == int(player_id)), None)
+    if answer is None:
+        return None
+
+    answer_rank = 1
+    for index, item in enumerate(answers, start=1):
+        if item.id == answer.id:
+            answer_rank = index
+            break
+
+    choice_ids = list(answer.choice_ids or [])
+    if not choice_ids and answer.choice_id is not None:
+        choice_ids = [answer.choice_id]
+
+    return {
+        "player_id": answer.player_id,
+        "choice_ids": choice_ids,
+        "is_correct": bool(answer.is_correct),
+        "awarded_points": safe_int(answer.awarded_points, 0),
+        "total_score": safe_int(answer.player.score, 0),
+        "answer_ms": safe_int(answer.answer_ms, 0),
+        "answer_rank": answer_rank,
+    }
 
 
 def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
@@ -94,6 +192,8 @@ def serialize_question(
     idx: int,
     total: int,
     started_at,
+    ready_ends_at,
+    answer_starts_at,
     ends_at,
 ) -> dict[str, Any]:
     is_multi, max_select, _ = detect_multi(exam_question)
@@ -108,7 +208,11 @@ def serialize_question(
         "max_select": max_select,
         "options": build_options(exam_question, seed=seed),
         "started_at": started_at.isoformat() if started_at else None,
+        "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
+        "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,
         "ends_at": ends_at.isoformat() if ends_at else None,
+        "get_ready_duration_ms": int(max(0, (ready_ends_at - started_at).total_seconds() * 1000)) if ready_ends_at and started_at else 0,
+        "intro_duration_ms": int(max(0, (answer_starts_at - ready_ends_at).total_seconds() * 1000)) if answer_starts_at and ready_ends_at else 0,
         "index": safe_int(idx, 0) + 1,
         "total": safe_int(total, 0),
     }

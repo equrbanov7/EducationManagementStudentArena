@@ -8,11 +8,13 @@ from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
-from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 
 User = get_user_model()
 LOCMEM_CACHE_SETTINGS = {
@@ -400,6 +402,29 @@ class LiveStateAPITest(TestCase):
         self.assertEqual(data["question"]["id"], self.question.id)
         self.assertEqual(data["correct_option_ids"], [])
 
+    def test_state_json_includes_question_phase_timestamps(self):
+        self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=20)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        question = response.json()["question"]
+        started_at = parse_datetime(question["started_at"])
+        ready_ends_at = parse_datetime(question["ready_ends_at"])
+        answer_starts_at = parse_datetime(question["answer_starts_at"])
+
+        self.assertIsNotNone(started_at)
+        self.assertIsNotNone(ready_ends_at)
+        self.assertIsNotNone(answer_starts_at)
+        self.assertGreater(ready_ends_at, started_at)
+        self.assertGreater(answer_starts_at, ready_ends_at)
+
     def test_state_json_allows_host_session_access(self):
         """Test that the host can resync live state via session auth."""
         now = timezone.now()
@@ -431,6 +456,76 @@ class LiveStateAPITest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data["correct_option_ids"], [self.correct_option.id])
+
+    def test_state_json_includes_player_answer_summary(self):
+        player = self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_REVEAL
+        self.session.current_index = 0
+        self.session.question_started_at = now - timezone.timedelta(seconds=8)
+        self.session.question_ends_at = now + timezone.timedelta(seconds=4)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        player.score = 12
+        player.save(update_fields=["score"])
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=player,
+            question_id=self.question.id,
+            choice_id=self.correct_option.id,
+            choice_ids=[self.correct_option.id],
+            is_correct=True,
+            answer_ms=850,
+            awarded_points=12,
+        )
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        player_answer = response.json()["player_answer"]
+        self.assertEqual(player_answer["player_id"], player.id)
+        self.assertEqual(player_answer["awarded_points"], 12)
+        self.assertEqual(player_answer["answer_rank"], 1)
+        self.assertEqual(player_answer["total_score"], 12)
+
+    def test_state_json_reveal_includes_leaderboard_transition_meta(self):
+        player = self._authenticate_player()
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_REVEAL
+        self.session.current_index = 0
+        self.session.question_started_at = now - timezone.timedelta(seconds=12)
+        self.session.question_ends_at = now
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        player.score = 30
+        player.save(update_fields=["score"])
+        LiveAnswer.objects.create(
+            session=self.session,
+            player=player,
+            question_id=self.question.id,
+            choice_id=self.correct_option.id,
+            choice_ids=[self.correct_option.id],
+            is_correct=True,
+            answer_ms=600,
+            awarded_points=12,
+        )
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["result_duration_ms"], int(PLAYER_RESULT_SECONDS * 1000))
+        self.assertEqual(data["leaderboard_duration_ms"], int(PLAYER_LEADERBOARD_SECONDS * 1000))
+        self.assertIn("leaderboard_starts_at", data)
+        self.assertIn("next_question_at", data)
+
+        previous_row = next((row for row in data["previous_top"] if row["player_id"] == player.id), None)
+        current_row = next((row for row in data["top"] if row["player_id"] == player.id), None)
+
+        self.assertIsNotNone(previous_row)
+        self.assertIsNotNone(current_row)
+        self.assertEqual(previous_row["score"], 18)
+        self.assertEqual(current_row["score"], 30)
 
 
 @override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_STATE_RATE_LIMIT="1/1m")

@@ -1,14 +1,14 @@
 :root {
-    --pin-bg: #0d1326;
-    --pin-surface: rgba(10, 17, 35, 0.72);
+    --pin-bg: #1a082f;
+    --pin-surface: rgba(43, 7, 81, 0.5);
     --pin-surface-strong: rgba(255, 255, 255, 0.92);
     --pin-line: rgba(255, 255, 255, 0.14);
-    --pin-text: #f8fafc;
-    --pin-muted: rgba(226, 232, 240, 0.8);
-    --pin-accent: #ff8a3d;
-    --pin-accent-strong: #ff5d3d;
-    --pin-secondary: #24d1b5;
-    --pin-shadow: 0 24px 70px rgba(2, 8, 23, 0.4);
+    --pin-text: #f8f7ff;
+    --pin-muted: rgba(237, 233, 254, 0.8);
+    --pin-accent: #8b5cf6;
+    --pin-accent-strong: #6d28d9;
+    --pin-secondary: #a78bfa;
+    --pin-shadow: 0 28px 80px rgba(14, 7, 37, 0.4);
 }
 
 * {
@@ -24,9 +24,10 @@ body {
 body.pin-entry-page {
     font-family: "Manrope", sans-serif;
     background:
-        radial-gradient(circle at top left, rgba(255, 138, 61, 0.28), transparent 32%),
-        radial-gradient(circle at top right, rgba(36, 209, 181, 0.24), transparent 28%),
-        linear-gradient(145deg, #071121 0%, #111a35 52%, #08111f 100%);
+        radial-gradient(circle at 18% 18%, rgba(251, 191, 36, 0.16), transparent 20%),
+        radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.12), transparent 20%),
+        radial-gradient(circle at 50% 80%, rgba(167, 139, 250, 0.2), transparent 30%),
+        linear-gradient(150deg, #1a082f 0%, #2b0751 25%, #5c239a 60%, #7e3af2 100%);
     color: var(--pin-text);
     overflow-x: hidden;
 }
@@ -50,7 +51,7 @@ body.pin-entry-page {
     height: 34rem;
     top: -10rem;
     right: -6rem;
-    background: radial-gradient(circle, rgba(255, 138, 61, 0.7) 0%, rgba(255, 93, 61, 0.06) 72%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.04) 72%);
 }
 
 .pin-entry-orb--two {
@@ -58,7 +59,7 @@ body.pin-entry-page {
     height: 28rem;
     bottom: -8rem;
     left: -6rem;
-    background: radial-gradient(circle, rgba(36, 209, 181, 0.58) 0%, rgba(36, 209, 181, 0.04) 72%);
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.48) 0%, rgba(167, 139, 250, 0.04) 72%);
 }
 
 .pin-entry-grid {
@@ -91,7 +92,7 @@ body.pin-entry-page {
     gap: 16px;
     border: 1px solid var(--pin-line);
     border-radius: 22px;
-    background: rgba(7, 17, 33, 0.58);
+    background: rgba(26, 8, 47, 0.42);
     backdrop-filter: blur(18px);
     box-shadow: var(--pin-shadow);
     z-index: 10;
@@ -116,7 +117,7 @@ body.pin-entry-page {
     font-weight: 700;
     background: linear-gradient(135deg, var(--pin-accent), var(--pin-accent-strong));
     color: #fff7ed;
-    box-shadow: 0 14px 32px rgba(255, 93, 61, 0.26);
+    box-shadow: 0 14px 32px rgba(109, 40, 217, 0.26);
 }
 
 .pin-entry-brand__text {
@@ -167,7 +168,7 @@ body.pin-entry-page {
     font-weight: 800;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #fcd6bf;
+    color: #e9d5ff;
 }
 
 .pin-entry-copy__eyebrow::before {
@@ -256,7 +257,7 @@ body.pin-entry-page {
     width: 88px;
     height: 88px;
     border-radius: 24px;
-    background: linear-gradient(135deg, rgba(36, 209, 181, 0.28), rgba(255, 138, 61, 0.18));
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(167, 139, 250, 0.16));
     filter: blur(0.4px);
 }
 
@@ -272,7 +273,7 @@ body.pin-entry-page {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: #fcd6bf;
+    color: #e9d5ff;
 }
 
 .pin-entry-panel__header h2 {
@@ -311,7 +312,7 @@ body.pin-entry-page {
 
 .pin-entry-input-wrap:focus-within {
     border-color: var(--pin-accent);
-    box-shadow: 0 0 0 4px rgba(255, 138, 61, 0.14);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
     transform: translateY(-1px);
 }
 
@@ -365,14 +366,14 @@ body.pin-entry-page {
     color: #fff9f5;
     font-size: 1rem;
     font-weight: 800;
-    box-shadow: 0 18px 28px rgba(255, 93, 61, 0.24);
+    box-shadow: 0 18px 28px rgba(109, 40, 217, 0.24);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .pin-entry-submit:hover {
     transform: translateY(-2px);
     filter: brightness(1.04);
-    box-shadow: 0 22px 32px rgba(255, 93, 61, 0.28);
+    box-shadow: 0 22px 32px rgba(109, 40, 217, 0.28);
 }
 
 .pin-entry-submit:disabled {

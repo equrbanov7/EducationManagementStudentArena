@@ -1,117 +1,130 @@
-{% extends "base.html" %}
-{% load static i18n %}
-
-{% block title %}{% trans "title" context "live_exam.player_screen" %} | {{ session.pin }}{% endblock %}
-
-{% block extraCss %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-<link rel="stylesheet" href="{% static 'css/player.css' %}">
-{% endblock %}
-
-{% block content %}
-<div class="player-wrapper">
-    
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="pin-badge">
-            <i class="fas fa-gamepad"></i>
-            <span>{{ session.pin }}</span>
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Exam | {{ session.pin }}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔷</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/player.css' %}">
+</head>
+<body class="live-player-page">
+    <div class="live-player-shell">
+        <div class="live-player-bg" aria-hidden="true">
+            <span class="live-player-bg__blob live-player-bg__blob--one"></span>
+            <span class="live-player-bg__blob live-player-bg__blob--two"></span>
+            <span class="live-player-bg__blob live-player-bg__blob--three"></span>
+            <span class="live-player-bg__grid"></span>
+            <span class="live-player-bg__spark live-player-bg__spark--one"></span>
+            <span class="live-player-bg__spark live-player-bg__spark--two"></span>
+            <span class="live-player-bg__spark live-player-bg__spark--three"></span>
         </div>
-        <div class="connection-status" id="connStatus">
-            <span class="dot"></span>
-            <span class="text">{% trans "connecting" context "live_exam.player_screen" %}</span>
-        </div>
-        <div class="timer-box" id="timerBox">
-            <i class="fas fa-clock"></i>
-            <span id="timerText">--:--</span>
-        </div>
-    </div>
 
-    <!-- Main Card -->
-    <div class="main-card" id="mainCard">
-        
-        <!-- Question Meta -->
-        <div class="question-meta" id="questionMeta"></div>
-        
-        <!-- Question Text -->
-        <div class="question-text" id="questionText">
-            <div class="waiting-screen">
-                <div class="waiting-icon">🎮</div>
-                <div class="waiting-title">{% trans "waiting_title" context "live_exam.player_screen" %}</div>
-                <div class="waiting-subtitle">{% trans "waiting_subtitle" context "live_exam.player_screen" %}</div>
+        <header class="live-player-header">
+            <div class="live-player-chip live-player-chip--question" id="questionChip">Question</div>
+            <div class="live-player-header__status">
+                <div class="live-player-timer" id="timerBox">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span id="timerText">--:--</span>
+                </div>
             </div>
-        </div>
-        
-        <!-- Options Grid -->
-        <div class="options-container" id="optionsContainer"></div>
-        
-        <!-- Multi Select Actions -->
-        <div class="multi-actions" id="multiActions">
-            <div class="select-counter" id="selectCounter">{% trans "select_counter_placeholder" context "live_exam.player_screen" %}</div>
-            <button class="submit-btn" id="submitBtn" disabled>
-                <i class="fas fa-paper-plane"></i> {% trans "submit_button" context "live_exam.player_screen" %}
-            </button>
-        </div>
-        
-        <!-- Status Message -->
-        <div class="status-message" id="statusMessage"></div>
-        
-    </div>
+        </header>
 
-    <!-- Leaderboard Section -->
-    <div class="leaderboard-section" id="leaderboardSection">
-        <div class="lb-header">
-            <i class="fas fa-trophy"></i>
-            <span>{% trans "leaderboard_title" context "live_exam.player_screen" %}</span>
-        </div>
-        <div class="lb-list" id="leaderboardList"></div>
-        
-        <div class="results-section" id="resultsSection">
-            <div class="results-header">
-                <i class="fas fa-chart-bar"></i>
-                <span>{% trans "results_title" context "live_exam.player_screen" %}</span>
+        <main class="live-player-stage">
+            <section class="phase-panel" id="phasePanel" aria-live="polite">
+                <div class="phase-panel__inner" id="phasePanelInner"></div>
+            </section>
+
+            <section class="options-shell" id="optionsShell">
+                <div class="options-grid" id="optionsContainer"></div>
+                <div class="multi-actions" id="multiActions">
+                    <div class="select-counter" id="selectCounter">Select your answers</div>
+                    <button class="submit-btn" id="submitBtn" type="button" disabled>
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Submit answer</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="live-player-footer">
+            <div class="live-player-identity">
+                <div class="live-player-identity__avatar" id="playerAvatar"></div>
+                <div class="live-player-identity__meta">
+                    <div class="live-player-identity__name" id="playerName">{{ player.nickname }}</div>
+                    <div class="live-player-identity__scoreline">
+                        <span class="live-player-identity__score" id="playerScore">{{ player.score|default:0 }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="results-list" id="resultsList"></div>
-        </div>
+        </footer>
     </div>
 
-    <!-- Final Screen -->
-    <div class="final-screen" id="finalScreen">
-        <div class="confetti-layer" id="confettiLayer"></div>
-        <div class="final-content">
-            <div class="final-trophy">🏆</div>
-            <h1 class="final-title">{% trans "final_title" context "live_exam.player_screen" %}</h1>
-            <p class="final-subtitle">{% trans "final_subtitle" context "live_exam.player_screen" %}</p>
-            <div class="final-leaderboard" id="finalLeaderboard"></div>
-        </div>
-    </div>
-
-</div>
-{% endblock %}
-
-{% block extraJs %}
-<script>
-const GAME_CONFIG = {
-    pin: "{{ session.pin }}",
-    csrf: "{{ csrf_token }}"
-};
-window.LIVE_EXAM_PLAYER_I18N = {
-    connectionOnline: "{% trans 'connection_online' context 'live_exam.player_screen.js' %}",
-    connectionOffline: "{% trans 'connection_offline' context 'live_exam.player_screen.js' %}",
-    statusTimeout: "{% trans 'status_timeout' context 'live_exam.player_screen.js' %}",
-    selectedCounter: "{% trans 'selected_counter' context 'live_exam.player_screen.js' %}",
-    questionMeta: "{% trans 'question_meta' context 'live_exam.player_screen.js' %}",
-    questionLoading: "{% trans 'question_loading' context 'live_exam.player_screen.js' %}",
-    statusSending: "{% trans 'status_sending' context 'live_exam.player_screen.js' %}",
-    statusCorrect: "{% trans 'status_correct' context 'live_exam.player_screen.js' %}",
-    statusWrong: "{% trans 'status_wrong' context 'live_exam.player_screen.js' %}",
-    statusNotAnswered: "{% trans 'status_not_answered' context 'live_exam.player_screen.js' %}",
-    pointsSuffix: "{% trans 'points_suffix' context 'live_exam.player_screen.js' %}",
-    statusAnswerSaved: "{% trans 'status_answer_saved' context 'live_exam.player_screen.js' %}"
-};
-</script>
-<script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-<script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-<script src="{% static 'js/player.js' %}"></script>
-{% endblock %}
+    <script>
+        window.LIVE_EXAM_PLAYER_BOOTSTRAP = {
+            pin: "{{ session.pin }}",
+            csrf: "{{ csrf_token }}",
+            quizTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+            waitingMessages: [
+                "Easy does it!",
+                "Nice move!",
+                "Let's see how you did!",
+                "Good call!",
+                "Locked in!"
+            ],
+            player: {
+                id: {{ player.id }},
+                nickname: "{{ player.nickname|escapejs }}",
+                avatar_key: "{{ player.avatar_key|escapejs }}",
+                accessory_key: "{{ player.accessory_key|escapejs }}",
+                score: {{ player.score|default:0 }}
+            }
+        };
+        window.LIVE_EXAM_PLAYER_I18N = {
+            connectionOnline: "Online",
+            connectionOffline: "Offline",
+            connectionConnecting: "Connecting",
+            questionLabel: "Question",
+            waitingForHost: "Waiting for the host to start the next round.",
+            getReadyTitle: "Get ready",
+            getReadyBody: "Loading the first question...",
+            introHint: "Read the question. Answers are about to appear.",
+            introUnlocking: "Answers unlock in",
+            questionPrompt: "Pick your answer before the timer runs out.",
+            multiPrompt: "Choose up to {max} answers.",
+            submitAnswer: "Submit answer",
+            answerSending: "Locking in your answer...",
+            answerLocked: "Answer locked in",
+            answerTimeout: "Time is up. Waiting for the round to close.",
+            waitingBody: "Hold tight while the rest of the class answers.",
+            waitingProgress: "{answered} of {total} answered",
+            resultCorrect: "Correct",
+            resultIncorrect: "Incorrect",
+            resultNoAnswer: "No answer submitted",
+            resultEarned: "Earned",
+            resultAnswered: "You answered",
+            resultTotal: "Total score",
+            resultNoRank: "No rank",
+            scoreboardTitle: "Leaderboard",
+            scoreboardSubtitle: "Updated totals after this round.",
+            scoreboardTopFive: "Top 5 players",
+            scoreboardMovementUp: "Moved up",
+            scoreboardMovementNew: "New in top 5",
+            scoreboardRank: "Rank",
+            scoreboardScore: "Total",
+            finalTitle: "Final results",
+            finalBody: "The live exam is complete.",
+            leaderboardTitle: "Top players",
+            pointsSuffix: "pts"
+        };
+    </script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
+    <script src="{% static 'js/player.js' %}"></script>
+</body>
+</html>

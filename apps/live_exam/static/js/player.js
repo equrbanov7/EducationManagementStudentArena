@@ -1,463 +1,1179 @@
-/* ═══════════════════════════════════════════════════════════════
-   PLAYER SCREEN - Complete Logic
-   ═══════════════════════════════════════════════════════════════ */
+const $ = (id) => document.getElementById(id);
 
-// DOM Elements
-const $ = id => document.getElementById(id);
-
-const UI = {
-    connStatus: $('connStatus'),
-    timerBox: $('timerBox'),
-    timerText: $('timerText'),
-    questionMeta: $('questionMeta'),
-    questionText: $('questionText'),
-    optionsContainer: $('optionsContainer'),
-    multiActions: $('multiActions'),
-    selectCounter: $('selectCounter'),
-    submitBtn: $('submitBtn'),
-    statusMessage: $('statusMessage'),
-    leaderboardSection: $('leaderboardSection'),
-    leaderboardList: $('leaderboardList'),
-    resultsSection: $('resultsSection'),
-    resultsList: $('resultsList'),
-    finalScreen: $('finalScreen'),
-    finalLeaderboard: $('finalLeaderboard'),
-    confettiLayer: $('confettiLayer')
-};
-
-// State
-let currentQuestion = null;
-let selectedIds = new Set();
-let answered = false;
-let timerInterval = null;
+const BOOTSTRAP = window.LIVE_EXAM_PLAYER_BOOTSTRAP || {};
 const I18N = window.LIVE_EXAM_PLAYER_I18N || {};
 const tr = (key, fallback) => I18N[key] || fallback;
 const fmt = (template, values) =>
-    String(template || '').replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
+    String(template || "").replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
 
-// Helpers
-const wsUrl = path => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${path}`;
-const esc = t => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
-const pad = n => String(n).padStart(2, '0');
-const avatarMarkup = (player, size, className = '') =>
+const UI = {
+    questionChip: $("questionChip"),
+    quizTitleText: $("quizTitleText"),
+    connStatus: $("connStatus"),
+    connStatusText: document.querySelector("#connStatus .live-player-connection__text"),
+    timerBox: $("timerBox"),
+    timerText: $("timerText"),
+    phasePanelInner: $("phasePanelInner"),
+    optionsShell: $("optionsShell"),
+    optionsContainer: $("optionsContainer"),
+    multiActions: $("multiActions"),
+    selectCounter: $("selectCounter"),
+    submitBtn: $("submitBtn"),
+    playerAvatar: $("playerAvatar"),
+    playerName: $("playerName"),
+    playerScore: $("playerScore"),
+    roundProgressText: $("roundProgressText"),
+};
+
+const WAITING_MESSAGES = Array.isArray(BOOTSTRAP.waitingMessages) && BOOTSTRAP.waitingMessages.length
+    ? BOOTSTRAP.waitingMessages
+    : ["Easy does it!", "Nice move!", "Let's see how you did!", "Good call!", "Locked in!"];
+
+const DEFAULT_RESULT_DURATION_MS = 1600;
+const DEFAULT_LEADERBOARD_DURATION_MS = 5000;
+const LEADERBOARD_LIMIT = 5;
+const AudioCtor = window.AudioContext || window.webkitAudioContext;
+
+const PHASES = Object.freeze({
+    IDLE: "idle",
+    GET_READY: "get_ready",
+    INTRO: "intro",
+    QUESTION: "question",
+    WAITING: "waiting",
+    LOCKED: "locked",
+    RESULT: "result",
+    LEADERBOARD: "leaderboard",
+    FINAL: "final",
+});
+
+const state = {
+    player: Object.assign({ score: 0 }, BOOTSTRAP.player || {}),
+    currentQuestion: null,
+    selectedIds: new Set(),
+    currentAnswer: null,
+    pendingScore: null,
+    phase: "",
+    waitingMessage: "",
+    lastWaitingMessage: "",
+    answeredCount: 0,
+    totalPlayers: 0,
+    submitting: false,
+    ticker: null,
+    phaseTimer: null,
+    revealKey: "",
+    revealPayload: null,
+    lastTop: [],
+    lastRoundSoundKey: "",
+    lastScoreSoundKey: "",
+    audioContext: null,
+};
+
+const wsUrl = (path) => `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`;
+const esc = (value) => {
+    const div = document.createElement("div");
+    div.textContent = value || "";
+    return div.innerHTML;
+};
+const ts = (value) => (value ? new Date(value).getTime() : 0);
+const avatarMarkup = (player, size, className = "") =>
     window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
 
-/* ═══════════════════════════════════════════════════════════════
-   CONNECTION STATUS
-   ═══════════════════════════════════════════════════════════════ */
-
-function setConnection(online) {
-    UI.connStatus.className = 'connection-status ' + (online ? 'online' : 'offline');
-    UI.connStatus.querySelector('.text').textContent = online
-        ? tr('connectionOnline', 'Online')
-        : tr('connectionOffline', 'Offline');
+function ordinal(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) return tr("resultNoRank", "No rank");
+    const mod100 = number % 100;
+    if (mod100 >= 11 && mod100 <= 13) return `${number}th`;
+    const mod10 = number % 10;
+    if (mod10 === 1) return `${number}st`;
+    if (mod10 === 2) return `${number}nd`;
+    if (mod10 === 3) return `${number}rd`;
+    return `${number}th`;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TIMER
-   ═══════════════════════════════════════════════════════════════ */
-
-function clearTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = null;
-    UI.timerText.textContent = '--:--';
-    UI.timerBox.className = 'timer-box';
+function formatClock(milliseconds) {
+    const safe = Math.max(0, milliseconds);
+    const totalSeconds = Math.ceil(safe / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-function startTimer(endsAt) {
-    clearTimer();
-    if (!endsAt) return;
-    
-    const endTime = new Date(endsAt).getTime();
-    
-    function tick() {
-        const now = Date.now();
-        const diff = Math.max(0, endTime - now);
-        const sec = Math.ceil(diff / 1000);
-        const mm = Math.floor(sec / 60);
-        const ss = sec % 60;
-        
-        UI.timerText.textContent = `${pad(mm)}:${pad(ss)}`;
-        
-        if (sec <= 5) {
-            UI.timerBox.className = 'timer-box danger';
-        } else if (sec <= 10) {
-            UI.timerBox.className = 'timer-box warning';
-        } else {
-            UI.timerBox.className = 'timer-box';
-        }
-        
-        if (diff <= 0) {
-            clearInterval(timerInterval);
-            disableOptions();
-            if (!answered) {
-                showStatus('timeout', tr('statusTimeout', 'Time is up!'));
-            }
-        }
+function isMulti(question) {
+    return Boolean(question && question.multi);
+}
+
+function maxSelect(question) {
+    const value = Number(question && question.max_select);
+    return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function setRoundHint(text) {
+    if (UI.roundProgressText) {
+        UI.roundProgressText.textContent = text || "";
     }
-    
-    tick();
-    timerInterval = setInterval(tick, 200);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   STATUS MESSAGE
-   ═══════════════════════════════════════════════════════════════ */
-
-function showStatus(type, text) {
-    UI.statusMessage.className = 'status-message ' + type;
-    UI.statusMessage.textContent = text;
+function setConnection(kind) {
+    if (!UI.connStatus || !UI.connStatusText) {
+        return;
+    }
+    UI.connStatus.classList.remove("is-online", "is-offline");
+    if (kind === "online") {
+        UI.connStatus.classList.add("is-online");
+        UI.connStatusText.textContent = tr("connectionOnline", "Online");
+        return;
+    }
+    if (kind === "offline") {
+        UI.connStatus.classList.add("is-offline");
+        UI.connStatusText.textContent = tr("connectionOffline", "Offline");
+        return;
+    }
+    UI.connStatusText.textContent = tr("connectionConnecting", "Connecting");
 }
 
-function hideStatus() {
-    UI.statusMessage.className = 'status-message';
+function setTimerState(show, milliseconds = 0) {
+    UI.timerBox.classList.toggle("is-visible", Boolean(show));
+    UI.timerBox.classList.remove("is-warning", "is-danger");
+    if (!show) {
+        UI.timerText.textContent = "--:--";
+        return;
+    }
+
+    UI.timerText.textContent = formatClock(milliseconds);
+    const seconds = Math.ceil(Math.max(0, milliseconds) / 1000);
+    if (seconds <= 5) {
+        UI.timerBox.classList.add("is-danger");
+    } else if (seconds <= 10) {
+        UI.timerBox.classList.add("is-warning");
+    }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   OPTIONS
-   ═══════════════════════════════════════════════════════════════ */
+function setQuestionChip(question) {
+    if (!question || !question.index) {
+        UI.questionChip.textContent = tr("questionLabel", "Question");
+        return;
+    }
+    UI.questionChip.textContent = `${tr("questionLabel", "Question")} ${question.index}`;
+}
 
-function disableOptions() {
-    document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+function setScore(value) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return;
+    state.player.score = parsed;
+    UI.playerScore.textContent = String(parsed);
+}
+
+function renderPlayerIdentity() {
+    if (UI.quizTitleText) {
+        UI.quizTitleText.textContent = BOOTSTRAP.quizTitle || "Quiz";
+    }
+    UI.playerName.textContent = state.player.nickname || "Player";
+    UI.playerAvatar.innerHTML = avatarMarkup(state.player, 72, "player-avatar");
+    setScore(state.player.score || 0);
+}
+
+function clearTicker() {
+    if (state.ticker) {
+        window.clearInterval(state.ticker);
+        state.ticker = null;
+    }
+}
+
+function clearPhaseTimer() {
+    if (state.phaseTimer) {
+        window.clearTimeout(state.phaseTimer);
+        state.phaseTimer = null;
+    }
+}
+
+function queuePhaseTransition(callback, delay) {
+    clearPhaseTimer();
+    state.phaseTimer = window.setTimeout(() => {
+        state.phaseTimer = null;
+        callback();
+    }, Math.max(0, delay));
+}
+
+function hideOptions() {
+    UI.optionsShell.style.display = "none";
+    UI.optionsContainer.innerHTML = "";
+    UI.multiActions.style.display = "none";
     UI.submitBtn.disabled = true;
 }
 
-function isMulti(q) {
-    return !!(q && q.multi);
-}
-
-function maxSelect(q) {
-    const v = Number(q?.max_select);
-    return Number.isFinite(v) && v > 0 ? v : 1;
+function disableOptions() {
+    document.querySelectorAll(".option-btn").forEach((button) => {
+        button.disabled = true;
+    });
+    UI.submitBtn.disabled = true;
 }
 
 function updateCounter() {
-    if (!isMulti(currentQuestion)) return;
-    const max = maxSelect(currentQuestion);
-    UI.selectCounter.textContent = fmt(tr('selectedCounter', 'Selected: {selected} / {max}'), {
-        selected: selectedIds.size,
-        max: max,
-    });
-    UI.submitBtn.disabled = selectedIds.size === 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RENDER QUESTION
-   ═══════════════════════════════════════════════════════════════ */
-
-function renderQuestion(q) {
-    currentQuestion = q;
-    answered = false;
-    selectedIds = new Set();
-    
-    // Hide sections
-    UI.leaderboardSection.style.display = 'none';
-    UI.finalScreen.style.display = 'none';
-    hideStatus();
-    
-    // Meta
-    UI.questionMeta.textContent = q.index && q.total
-        ? fmt(tr('questionMeta', 'Question {index} / {total}'), { index: q.index, total: q.total })
-        : '';
-    
-    // Question text
-    UI.questionText.innerHTML = `<div class="q-text-content">${esc(q.text || tr('questionLoading', 'Loading question...'))}</div>`;
-    
-    // Options
-    UI.optionsContainer.innerHTML = '';
-    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
-    
-    (q.options || []).forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.className = `option-btn opt-${i % 6}`;
-        btn.dataset.id = opt.id;
-        
-        const label = opt.label || letters[i] || String(i + 1);
-        const text = opt.text || opt.title || '';
-        
-        btn.innerHTML = `
-            <span class="option-letter">${label}</span>
-            <span class="option-text">${esc(text)}</span>
-        `;
-        
-        btn.onclick = () => handleOptionClick(btn, opt.id);
-        UI.optionsContainer.appendChild(btn);
-    });
-    
-    // Multi actions
-    if (isMulti(q)) {
-        UI.multiActions.style.display = 'flex';
-        updateCounter();
-    } else {
-        UI.multiActions.style.display = 'none';
-    }
-    
-    // Timer
-    startTimer(q.ends_at);
-}
-
-function handleOptionClick(btn, optId) {
-    if (answered) return;
-    
-    // Single choice
-    if (!isMulti(currentQuestion)) {
-        selectedIds = new Set([optId]);
-        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        
-        // Auto submit after short delay
-        setTimeout(() => submitAnswer(), 150);
+    if (!isMulti(state.currentQuestion)) {
+        UI.multiActions.style.display = "none";
         return;
     }
-    
-    // Multi choice
-    const max = maxSelect(currentQuestion);
-    
-    if (selectedIds.has(optId)) {
-        selectedIds.delete(optId);
-        btn.classList.remove('selected');
-    } else {
-        if (selectedIds.size >= max) return;
-        selectedIds.add(optId);
-        btn.classList.add('selected');
+    const maximum = maxSelect(state.currentQuestion);
+    UI.multiActions.style.display = "flex";
+    UI.selectCounter.textContent = `Selected ${state.selectedIds.size} / ${maximum}`;
+    UI.submitBtn.disabled = state.selectedIds.size === 0 || state.submitting;
+}
+
+function pickWaitingMessage() {
+    const pool = WAITING_MESSAGES.filter((message) => message !== state.lastWaitingMessage);
+    const source = pool.length ? pool : WAITING_MESSAGES;
+    const choice = source[Math.floor(Math.random() * source.length)] || WAITING_MESSAGES[0];
+    state.lastWaitingMessage = choice;
+    return choice;
+}
+
+function normalizeTopRows(rows) {
+    return (Array.isArray(rows) ? rows : []).map((row, index) => {
+        const fallbackKey = `${row && row.nickname ? row.nickname : "Player"}-${index}`;
+        const playerId = Number(row && (row.player_id || row.id || 0));
+        return {
+            player_id: playerId,
+            nickname: (row && row.nickname) || "Player",
+            avatar_key: row && row.avatar_key,
+            accessory_key: row && row.accessory_key,
+            score: Number((row && row.score) || 0) || 0,
+            _key: String(playerId || fallbackKey),
+        };
+    });
+}
+
+function cloneTopRows(rows) {
+    return normalizeTopRows(rows).map((row) => ({ ...row }));
+}
+
+function setStoredTop(rows) {
+    state.lastTop = cloneTopRows(rows);
+}
+
+function findPersonalResult(results) {
+    const rows = Array.isArray(results) ? results : [];
+    return rows.find((row) => Number(row.player_id) === Number(state.player.id)) || null;
+}
+
+function getPersonalResult(payload) {
+    if (state.currentAnswer) {
+        return Object.assign({}, state.currentAnswer);
     }
-    
+    const fromResults = findPersonalResult(payload && payload.results);
+    if (fromResults) return fromResults;
+    return null;
+}
+
+function getRevealKey(payload) {
+    return `${payload.question_id || state.currentQuestion?.id || "question"}:${payload.revealed_at || state.currentQuestion?.ends_at || ""}`;
+}
+
+function getRevealTimings(payload) {
+    const revealedAt = ts(payload && payload.revealed_at) || Date.now();
+    const resultDurationMs = Math.max(0, Number(payload && payload.result_duration_ms) || DEFAULT_RESULT_DURATION_MS);
+    const leaderboardDurationMs = Math.max(
+        0,
+        Number(payload && payload.leaderboard_duration_ms) || DEFAULT_LEADERBOARD_DURATION_MS
+    );
+    const leaderboardStartsAt = ts(payload && payload.leaderboard_starts_at) || (revealedAt + resultDurationMs);
+    const nextQuestionAt = ts(payload && payload.next_question_at) || (leaderboardStartsAt + leaderboardDurationMs);
+
+    return {
+        revealedAt,
+        resultDurationMs,
+        leaderboardDurationMs,
+        leaderboardStartsAt,
+        nextQuestionAt,
+    };
+}
+
+function buildQuestionCard(question, extraMarkup = "") {
+    return `
+        <div class="question-card">
+            <div class="question-card__eyebrow">Round ${Number(question.index || 0)} of ${Number(question.total || 0)}</div>
+            <div class="question-card__text">${esc(question.text || "")}</div>
+            ${extraMarkup}
+        </div>
+    `;
+}
+
+function getAudioContext() {
+    if (!AudioCtor) return null;
+    if (!state.audioContext) {
+        state.audioContext = new AudioCtor();
+    }
+    return state.audioContext;
+}
+
+function unlockAudio() {
+    const ctx = getAudioContext();
+    if (!ctx || ctx.state !== "suspended") return;
+    ctx.resume().catch(() => {});
+}
+
+function playTone(ctx, config) {
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    const startTime = config.startTime;
+    const duration = config.duration;
+    const peak = config.gain;
+
+    oscillator.type = config.type || "sine";
+    oscillator.frequency.setValueAtTime(config.frequency, startTime);
+    if (config.endFrequency) {
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, config.endFrequency), startTime + duration);
+    }
+
+    gainNode.gain.setValueAtTime(0.0001, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(peak, startTime + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration + 0.02);
+}
+
+function playRoundEndSound(revealKey) {
+    if (state.lastRoundSoundKey === revealKey) return;
+
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const start = () => {
+        const base = ctx.currentTime + 0.01;
+        playTone(ctx, {
+            startTime: base,
+            duration: 0.12,
+            frequency: 520,
+            endFrequency: 420,
+            gain: 0.045,
+            type: "triangle",
+        });
+        playTone(ctx, {
+            startTime: base + 0.06,
+            duration: 0.26,
+            frequency: 320,
+            endFrequency: 220,
+            gain: 0.06,
+            type: "sine",
+        });
+        state.lastRoundSoundKey = revealKey;
+    };
+
+    if (ctx.state === "suspended") {
+        ctx.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
+function playLeaderboardSound(revealKey) {
+    if (state.lastScoreSoundKey === revealKey) return;
+
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const start = () => {
+        const base = ctx.currentTime + 0.01;
+        [290, 360, 430].forEach((frequency, index) => {
+            playTone(ctx, {
+                startTime: base + index * 0.08,
+                duration: 0.12,
+                frequency,
+                endFrequency: frequency * 1.03,
+                gain: 0.035,
+                type: "square",
+            });
+        });
+        playTone(ctx, {
+            startTime: base + 0.02,
+            duration: 0.34,
+            frequency: 180,
+            endFrequency: 140,
+            gain: 0.022,
+            type: "triangle",
+        });
+        state.lastScoreSoundKey = revealKey;
+    };
+
+    if (ctx.state === "suspended") {
+        ctx.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
+function animateNumber(element, fromValue, toValue, duration = 900) {
+    if (!element) return;
+    const from = Number(fromValue);
+    const to = Number(toValue);
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) {
+        element.textContent = String(toValue);
+        return;
+    }
+
+    const startedAt = performance.now();
+    const step = (timestamp) => {
+        const progress = Math.min(1, (timestamp - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(from + ((to - from) * eased));
+        element.textContent = String(value);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+
+    window.requestAnimationFrame(step);
+}
+
+function renderIdle() {
+    clearTicker();
+    clearPhaseTimer();
+    state.phase = PHASES.IDLE;
+    state.currentQuestion = null;
+    state.currentAnswer = null;
+    state.revealPayload = null;
+    hideOptions();
+    setTimerState(false);
+    setQuestionChip(null);
+    setRoundHint(tr("waitingForHost", "Waiting for the host to start the next round."));
+    UI.phasePanelInner.innerHTML = `
+        <div class="phase-shell">
+            <div class="phase-kicker"><i class="fa-solid fa-circle-play"></i><span>Live Exam</span></div>
+            <div class="phase-arch"></div>
+            <h1 class="phase-title">${esc(tr("getReadyTitle", "Get ready"))}</h1>
+            <p class="phase-subtitle">${esc(tr("waitingForHost", "Waiting for the host to start the next round."))}</p>
+        </div>
+    `;
+}
+
+function renderGetReady(question) {
+    if (state.phase !== PHASES.GET_READY) {
+        hideOptions();
+        setTimerState(false);
+        setQuestionChip(question);
+        UI.phasePanelInner.innerHTML = `
+            <div class="phase-shell">
+                <div class="phase-kicker"><i class="fa-solid fa-bolt"></i><span>Live mode</span></div>
+                <div class="phase-arch"></div>
+                <h1 class="phase-title">${esc(tr("getReadyTitle", "Get ready"))}</h1>
+                <p class="phase-subtitle">${esc(tr("getReadyBody", "Loading the first question..."))}</p>
+            </div>
+        `;
+        state.phase = PHASES.GET_READY;
+    }
+    setRoundHint(tr("getReadyBody", "Loading the first question..."));
+}
+
+function renderIntro(question) {
+    if (state.phase !== PHASES.INTRO) {
+        hideOptions();
+        setTimerState(false);
+        setQuestionChip(question);
+        UI.phasePanelInner.innerHTML = `
+            <div class="phase-shell">
+                ${buildQuestionCard(
+                    question,
+                    `
+                        <div class="intro-progress">
+                            <div class="intro-progress__track">
+                                <div class="intro-progress__meter" data-intro-meter></div>
+                            </div>
+                            <div class="intro-progress__meta">
+                                <span>${esc(tr("introHint", "Read the question. Answers are about to appear."))}</span>
+                                <span data-intro-countdown></span>
+                            </div>
+                        </div>
+                    `
+                )}
+            </div>
+        `;
+        state.phase = PHASES.INTRO;
+    }
+    updateIntroProgress(question);
+    setRoundHint(tr("introHint", "Read the question. Answers are about to appear."));
+}
+
+function updateIntroProgress(question) {
+    const meter = UI.phasePanelInner.querySelector("[data-intro-meter]");
+    const countdown = UI.phasePanelInner.querySelector("[data-intro-countdown]");
+    if (!meter || !countdown) return;
+
+    const readyEndsAt = ts(question.ready_ends_at) || ts(question.started_at);
+    const answerStartsAt = ts(question.answer_starts_at);
+    const now = Date.now();
+    const total = Math.max(1, answerStartsAt - readyEndsAt);
+    const elapsed = Math.max(0, Math.min(total, now - readyEndsAt));
+    const percent = Math.max(0, Math.min(100, (elapsed / total) * 100));
+    meter.style.width = `${percent}%`;
+
+    const seconds = Math.max(1, Math.ceil((answerStartsAt - now) / 1000));
+    countdown.textContent = `${tr("introUnlocking", "Answers unlock in")} ${seconds}s`;
+}
+
+function renderOptions(question) {
+    const letters = ["A", "B", "C", "D", "E", "F"];
+    UI.optionsContainer.innerHTML = "";
+
+    (question.options || []).forEach((option, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `option-btn opt-${index % 6}`;
+        button.dataset.id = String(option.id);
+        if (state.selectedIds.has(option.id)) {
+            button.classList.add("selected");
+        }
+        button.innerHTML = `
+            <span class="option-letter">${esc(option.label || letters[index] || String(index + 1))}</span>
+            <span class="option-text">${esc(option.text || "")}</span>
+        `;
+        button.addEventListener("click", () => handleOptionClick(button, option.id));
+        UI.optionsContainer.appendChild(button);
+    });
+}
+
+function renderQuestion(question) {
+    if (state.phase !== PHASES.QUESTION) {
+        setQuestionChip(question);
+        UI.phasePanelInner.innerHTML = `
+            <div class="phase-shell">
+                ${buildQuestionCard(question)}
+            </div>
+        `;
+        renderOptions(question);
+        UI.optionsShell.style.display = "grid";
+        state.phase = PHASES.QUESTION;
+    }
+
+    document.querySelectorAll(".option-btn").forEach((button) => {
+        button.disabled = state.submitting;
+    });
+    updateCounter();
+    setRoundHint(tr("questionPrompt", "Pick your answer before the timer runs out."));
+    const endsAt = ts(question.ends_at);
+    setTimerState(true, Math.max(0, endsAt - Date.now()));
+}
+
+function renderWaiting(message) {
+    if (state.phase !== PHASES.WAITING) {
+        hideOptions();
+        setTimerState(false);
+        setQuestionChip(state.currentQuestion);
+        UI.phasePanelInner.innerHTML = `
+            <div class="phase-shell">
+                <div class="phase-arch"></div>
+                <h1 class="phase-title">${esc(message)}</h1>
+                <p class="phase-subtitle">${esc(tr("waitingBody", "Hold tight while the rest of the class answers."))}</p>
+                <div class="waiting-progress">
+                    <div class="waiting-progress__track">
+                        <div class="waiting-progress__meter" data-waiting-meter></div>
+                    </div>
+                    <div class="waiting-progress__meta">
+                        <span data-waiting-count></span>
+                    </div>
+                </div>
+            </div>
+        `;
+        state.phase = PHASES.WAITING;
+    }
+    updateWaitingProgress();
+    setRoundHint(tr("answerLocked", "Answer locked in"));
+}
+
+function renderLocked() {
+    if (state.phase !== PHASES.LOCKED) {
+        hideOptions();
+        setTimerState(false);
+        setQuestionChip(state.currentQuestion);
+        UI.phasePanelInner.innerHTML = `
+            <div class="phase-shell">
+                <div class="phase-kicker"><i class="fa-solid fa-hourglass-end"></i><span>Round closed</span></div>
+                <div class="phase-arch"></div>
+                <h1 class="phase-title">${esc(tr("answerTimeout", "Time is up. Waiting for the round to close."))}</h1>
+                <p class="phase-subtitle">${esc(tr("waitingBody", "Hold tight while the rest of the class answers."))}</p>
+                <div class="waiting-progress">
+                    <div class="waiting-progress__track">
+                        <div class="waiting-progress__meter" data-waiting-meter></div>
+                    </div>
+                    <div class="waiting-progress__meta">
+                        <span data-waiting-count></span>
+                    </div>
+                </div>
+            </div>
+        `;
+        state.phase = PHASES.LOCKED;
+    }
+    updateWaitingProgress();
+    setRoundHint(tr("answerTimeout", "Time is up. Waiting for the round to close."));
+}
+
+function updateWaitingProgress() {
+    const count = UI.phasePanelInner.querySelector("[data-waiting-count]");
+    const meter = UI.phasePanelInner.querySelector("[data-waiting-meter]");
+    const total = Math.max(0, Number(state.totalPlayers || 0));
+    const answered = Math.max(0, Number(state.answeredCount || 0));
+    if (count) {
+        if (total > 0) {
+            count.textContent = fmt(tr("waitingProgress", "{answered} of {total} answered"), {
+                answered,
+                total,
+            });
+        } else {
+            count.textContent = tr("waitingBody", "Hold tight while the rest of the class answers.");
+        }
+    }
+    if (meter) {
+        const percent = total > 0 ? Math.max(0, Math.min(100, (answered / total) * 100)) : 0;
+        meter.style.width = `${percent}%`;
+    }
+}
+
+function renderResult(payload) {
+    clearTicker();
+    hideOptions();
+    setTimerState(false);
+    setQuestionChip(state.currentQuestion);
+
+    const personalResult = getPersonalResult(payload);
+    const hasAnswer = Boolean(personalResult);
+    const isCorrect = Boolean(personalResult && personalResult.is_correct);
+    const title = isCorrect ? tr("resultCorrect", "Correct") : tr("resultIncorrect", "Incorrect");
+    const icon = isCorrect ? "fa-check" : "fa-xmark";
+    const rankText = hasAnswer && personalResult.answer_rank
+        ? ordinal(personalResult.answer_rank)
+        : tr("resultNoRank", "No rank");
+    const points = hasAnswer ? Number(personalResult.awarded_points || 0) : 0;
+    const totalScore = hasAnswer && Number.isFinite(Number(personalResult.total_score))
+        ? Number(personalResult.total_score)
+        : (Number.isFinite(Number(state.pendingScore)) ? Number(state.pendingScore) : state.player.score);
+
+    setScore(totalScore);
+    state.pendingScore = null;
+    state.phase = PHASES.RESULT;
+
+    const subtitle = hasAnswer
+        ? `${tr("resultAnswered", "You answered")} ${rankText}`
+        : tr("resultNoAnswer", "No answer submitted");
+
+    UI.phasePanelInner.innerHTML = `
+        <div class="result-shell ${isCorrect ? "is-correct" : "is-wrong"}">
+            <div class="result-shell__icon"><i class="fa-solid ${icon}"></i></div>
+            <h1 class="result-shell__title">${esc(title)}</h1>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="result-stat__label">${esc(tr("resultEarned", "Earned"))}</div>
+                    <div class="result-stat__value">${points > 0 ? `+${points}` : "0"}</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat__label">${esc(tr("resultAnswered", "You answered"))}</div>
+                    <div class="result-stat__value">${esc(rankText)}</div>
+                </div>
+            </div>
+            <p class="result-shell__subtitle">${esc(subtitle)}</p>
+        </div>
+    `;
+
+    setRoundHint(isCorrect ? tr("resultCorrect", "Correct") : subtitle);
+}
+
+function renderLeaderboard(payload) {
+    clearTicker();
+    hideOptions();
+    setTimerState(false);
+    setQuestionChip(state.currentQuestion);
+
+    const revealKey = getRevealKey(payload);
+    const currentRows = normalizeTopRows(payload && payload.top).slice(0, LEADERBOARD_LIMIT);
+    const previousRows = normalizeTopRows(
+        payload && payload.previous_top && payload.previous_top.length ? payload.previous_top : state.lastTop
+    );
+
+    state.phase = PHASES.LEADERBOARD;
+    state.revealPayload = payload;
+
+    UI.phasePanelInner.innerHTML = `
+        <div class="leaderboard-shell">
+            <div class="phase-kicker"><i class="fa-solid fa-trophy"></i><span>${esc(tr("scoreboardTopFive", "Top 5 players"))}</span></div>
+            <h1 class="leaderboard-shell__title">${esc(tr("scoreboardTitle", "Leaderboard"))}</h1>
+            <p class="phase-subtitle">${esc(tr("scoreboardSubtitle", "Updated totals after this round."))}</p>
+            <div class="leaderboard-list" id="leaderboardList"></div>
+        </div>
+    `;
+
+    const list = document.getElementById("leaderboardList");
+    if (!list) {
+        setStoredTop(payload && payload.top);
+        return;
+    }
+
+    if (!currentRows.length) {
+        list.innerHTML = `<div class="final-row"><span class="final-row__name">${esc(tr("waitingForHost", "Waiting for the host to start the next round."))}</span></div>`;
+        setStoredTop(payload && payload.top);
+        return;
+    }
+
+    const previousRankMap = new Map(previousRows.map((row, index) => [row._key, index + 1]));
+    const previousScoreMap = new Map(previousRows.map((row) => [row._key, row.score]));
+    const currentRankMap = new Map(currentRows.map((row, index) => [row._key, index + 1]));
+
+    const startRows = currentRows
+        .slice()
+        .sort((a, b) => {
+            const aPrev = previousRankMap.get(a._key) || (100 + (currentRankMap.get(a._key) || 0));
+            const bPrev = previousRankMap.get(b._key) || (100 + (currentRankMap.get(b._key) || 0));
+            return aPrev - bPrev;
+        });
+
+    list.innerHTML = startRows
+        .map((row) => {
+            const currentRank = currentRankMap.get(row._key) || 0;
+            const previousRank = previousRankMap.get(row._key) || 0;
+            const movedUpBy = previousRank > 0 && previousRank > currentRank ? previousRank - currentRank : 0;
+            const enteredTop = !previousRank;
+            const movementLabel = movedUpBy > 0
+                ? `↑ ${movedUpBy}`
+                : (enteredTop ? "↑" : "");
+
+            return `
+                <article
+                    class="leaderboard-row ${Number(row.player_id) === Number(state.player.id) ? "is-self" : ""} ${movementLabel ? "is-rising" : ""}"
+                    data-player-key="${esc(row._key)}"
+                    style="order:${previousRank || (100 + currentRank)}">
+                    <div class="leaderboard-row__left">
+                        <span class="leaderboard-row__rank" data-rank>${currentRank}</span>
+                        <span class="leaderboard-row__avatar">${avatarMarkup(row, 44, "leaderboard-row__avatar-art")}</span>
+                        <span class="leaderboard-row__name">${esc(row.nickname)}</span>
+                    </div>
+                    <div class="leaderboard-row__right">
+                        <span class="leaderboard-row__score" data-score-value>${Math.round(row.score)}</span>
+                        ${
+                            movementLabel
+                                ? `<span class="leaderboard-row__movement" aria-hidden="true">${esc(movementLabel)}</span>`
+                                : ""
+                        }
+                    </div>
+                </article>
+            `;
+        })
+        .join("");
+
+    const rowElements = new Map(
+        Array.from(list.querySelectorAll("[data-player-key]")).map((element) => [element.dataset.playerKey, element])
+    );
+
+    const firstRects = new Map(
+        Array.from(rowElements.entries()).map(([key, element]) => [key, element.getBoundingClientRect()])
+    );
+
+    currentRows.forEach((row, index) => {
+        const element = rowElements.get(row._key);
+        if (!element) return;
+        element.style.order = String(index + 1);
+        const rankEl = element.querySelector("[data-rank]");
+        if (rankEl) {
+            rankEl.textContent = String(index + 1);
+        }
+    });
+
+    list.offsetHeight;
+
+    const lastRects = new Map(
+        Array.from(rowElements.entries()).map(([key, element]) => [key, element.getBoundingClientRect()])
+    );
+
+    rowElements.forEach((element, key) => {
+        const firstRect = firstRects.get(key);
+        const lastRect = lastRects.get(key);
+        const deltaY = firstRect && lastRect ? firstRect.top - lastRect.top : 0;
+        if (deltaY) {
+            element.style.transition = "none";
+            element.style.transform = `translateY(${deltaY}px)`;
+        }
+    });
+
+    list.offsetHeight;
+
+    rowElements.forEach((element) => {
+        element.style.transition = "transform 680ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease";
+        element.style.transform = "translateY(0)";
+    });
+
+    let hasScoreChange = false;
+    currentRows.forEach((row) => {
+        const element = rowElements.get(row._key);
+        const scoreEl = element?.querySelector("[data-score-value]");
+        const previousScore = previousScoreMap.get(row._key);
+        if (!scoreEl) return;
+        if (Number.isFinite(previousScore) && previousScore !== row.score) {
+            hasScoreChange = true;
+            animateNumber(scoreEl, previousScore, row.score, 920);
+            return;
+        }
+        scoreEl.textContent = String(Math.round(row.score));
+    });
+
+    if (hasScoreChange) {
+        playLeaderboardSound(revealKey);
+    }
+
+    setStoredTop(payload && payload.top);
+    setRoundHint(tr("scoreboardTitle", "Leaderboard"));
+}
+
+function renderFinal(payload) {
+    clearTicker();
+    clearPhaseTimer();
+    hideOptions();
+    setTimerState(false);
+    setQuestionChip(null);
+    state.phase = PHASES.FINAL;
+    state.revealPayload = null;
+
+    const rows = (payload.top || []).slice(0, 10).map((player, index) => `
+        <div class="final-row">
+            <div class="final-row__meta">
+                <span class="final-row__rank">${index + 1}</span>
+                ${avatarMarkup(player, 54, "player-avatar")}
+                <span class="final-row__name">${esc(player.nickname || "Player")}</span>
+            </div>
+            <span class="final-row__score">${Number(player.score || 0)} ${esc(tr("pointsSuffix", "pts"))}</span>
+        </div>
+    `).join("");
+
+    UI.phasePanelInner.innerHTML = `
+        <div class="final-shell">
+            <div class="phase-kicker"><i class="fa-solid fa-flag-checkered"></i><span>${esc(tr("leaderboardTitle", "Top players"))}</span></div>
+            <div class="final-shell__trophy">🏆</div>
+            <h1 class="phase-title">${esc(tr("finalTitle", "Final results"))}</h1>
+            <p class="phase-subtitle">${esc(tr("finalBody", "The live exam is complete."))}</p>
+            <div class="final-leaderboard">${rows}</div>
+        </div>
+    `;
+    setStoredTop(payload.top || []);
+    setRoundHint(tr("finalTitle", "Final results"));
+}
+
+function startTicker() {
+    clearTicker();
+    state.ticker = window.setInterval(syncQuestionPhase, 120);
+}
+
+function syncQuestionPhase() {
+    if (
+        !state.currentQuestion ||
+        state.phase === PHASES.RESULT ||
+        state.phase === PHASES.LEADERBOARD ||
+        state.phase === PHASES.FINAL
+    ) {
+        return;
+    }
+
+    if (state.currentAnswer) {
+        renderWaiting(state.waitingMessage || pickWaitingMessage());
+        return;
+    }
+
+    const now = Date.now();
+    const readyEndsAt = ts(state.currentQuestion.ready_ends_at) || ts(state.currentQuestion.started_at);
+    const answerStartsAt = ts(state.currentQuestion.answer_starts_at) || readyEndsAt;
+    const endsAt = ts(state.currentQuestion.ends_at);
+
+    if (now < readyEndsAt) {
+        renderGetReady(state.currentQuestion);
+        return;
+    }
+
+    if (now < answerStartsAt) {
+        renderIntro(state.currentQuestion);
+        return;
+    }
+
+    if (now < endsAt) {
+        renderQuestion(state.currentQuestion);
+        return;
+    }
+
+    renderLocked();
+}
+
+function handleOptionClick(button, optionId) {
+    unlockAudio();
+
+    if (state.phase !== PHASES.QUESTION || state.submitting || state.currentAnswer) return;
+
+    if (!isMulti(state.currentQuestion)) {
+        state.selectedIds = new Set([optionId]);
+        document.querySelectorAll(".option-btn").forEach((item) => item.classList.remove("selected"));
+        button.classList.add("selected");
+        window.setTimeout(() => {
+            if (state.phase === PHASES.QUESTION && !state.currentAnswer && !state.submitting) {
+                submitAnswer();
+            }
+        }, 120);
+        return;
+    }
+
+    const maximum = maxSelect(state.currentQuestion);
+    if (state.selectedIds.has(optionId)) {
+        state.selectedIds.delete(optionId);
+        button.classList.remove("selected");
+    } else {
+        if (state.selectedIds.size >= maximum) return;
+        state.selectedIds.add(optionId);
+        button.classList.add("selected");
+    }
     updateCounter();
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SUBMIT ANSWER
-   ═══════════════════════════════════════════════════════════════ */
-
 function submitAnswer() {
-    if (!currentQuestion || selectedIds.size === 0 || answered) return;
-    
-    answered = true;
+    unlockAudio();
+
+    if (!state.currentQuestion || !state.selectedIds.size || state.submitting || state.currentAnswer) return;
+
+    state.submitting = true;
     disableOptions();
-    showStatus('sending', tr('statusSending', 'Sending answer...'));
-    
-    const startedAt = currentQuestion.started_at ? new Date(currentQuestion.started_at).getTime() : Date.now();
-    const answerMs = Math.max(0, Date.now() - startedAt);
-    
+    setRoundHint(tr("answerSending", "Locking in your answer..."));
+
+    const answerStart = ts(state.currentQuestion.answer_starts_at) || ts(state.currentQuestion.started_at) || Date.now();
+    const answerMs = Math.max(0, Date.now() - answerStart);
+
     const payload = {
-        type: 'answer',
-        question_id: currentQuestion.id,
-        answer_ms: answerMs
+        type: "answer",
+        question_id: state.currentQuestion.id,
+        answer_ms: answerMs,
     };
-    
-    if (isMulti(currentQuestion)) {
-        payload.option_ids = Array.from(selectedIds);
+
+    if (isMulti(state.currentQuestion)) {
+        payload.option_ids = Array.from(state.selectedIds);
     } else {
-        payload.option_id = Array.from(selectedIds)[0];
+        payload.option_id = Array.from(state.selectedIds)[0];
     }
-    
+
     try {
         playWS.send(JSON.stringify(payload));
-    } catch (e) {
-        console.error('Send error:', e);
+    } catch (error) {
+        state.submitting = false;
+        renderQuestion(state.currentQuestion);
+        setRoundHint(error && error.message ? error.message : "Unable to send your answer.");
     }
 }
 
-// Submit button for multi
-UI.submitBtn.onclick = () => {
-    if (isMulti(currentQuestion) && !answered) {
-        submitAnswer();
-    }
-};
+function applyQuestionState(question, playerAnswer, previousTop) {
+    const isNewQuestion =
+        !state.currentQuestion ||
+        Number(state.currentQuestion.id) !== Number(question.id) ||
+        state.currentQuestion.started_at !== question.started_at;
 
-/* ═══════════════════════════════════════════════════════════════
-   RENDER REVEAL
-   ═══════════════════════════════════════════════════════════════ */
+    clearPhaseTimer();
+    state.revealPayload = null;
+    state.currentQuestion = question;
 
-function renderReveal(msg) {
-    clearTimer();
-    disableOptions();
-    
-    const correctIds = new Set((msg.correct_option_ids || []).map(Number));
-    
-    // Mark correct/wrong options
-    document.querySelectorAll('.option-btn').forEach(btn => {
-        const optId = Number(btn.dataset.id);
-        if (correctIds.has(optId)) {
-            btn.classList.add('correct');
-        } else if (selectedIds.has(optId)) {
-            btn.classList.add('wrong');
-        }
-    });
-    
-    // Determine if user was correct
-    let isCorrect = false;
-    if (answered && selectedIds.size > 0) {
-        if (isMulti(currentQuestion)) {
-            isCorrect = selectedIds.size === correctIds.size && 
-                        Array.from(selectedIds).every(id => correctIds.has(Number(id)));
-        } else {
-            isCorrect = correctIds.has(Number(Array.from(selectedIds)[0]));
-        }
-        showStatus(
-            isCorrect ? 'correct' : 'wrong',
-            isCorrect ? tr('statusCorrect', 'Correct!') : tr('statusWrong', 'Wrong!')
-        );
-    } else {
-        showStatus('timeout', tr('statusNotAnswered', 'No answer submitted'));
+    if (isNewQuestion) {
+        state.selectedIds = new Set();
+        state.currentAnswer = null;
+        state.pendingScore = null;
+        state.submitting = false;
+        state.waitingMessage = "";
+        state.phase = "";
+        setQuestionChip(question);
     }
-    
-    // Show leaderboard
-    renderLeaderboard(msg.top || []);
-    renderResults(msg.results || []);
-    UI.leaderboardSection.style.display = 'block';
+
+    if (previousTop && previousTop.length) {
+        setStoredTop(previousTop);
+    }
+
+    if (playerAnswer) {
+        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, playerAnswer);
+        state.pendingScore = Number.isFinite(Number(playerAnswer.total_score))
+            ? Number(playerAnswer.total_score)
+            : state.pendingScore;
+        state.waitingMessage = state.waitingMessage || pickWaitingMessage();
+    }
+
+    startTicker();
+    syncQuestionPhase();
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RENDER LEADERBOARD
-   ═══════════════════════════════════════════════════════════════ */
+function applyRevealState(payload) {
+    clearTicker();
 
-function renderLeaderboard(top) {
-    UI.leaderboardList.innerHTML = '';
-    
-    top.slice(0, 10).forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'lb-row';
-        div.innerHTML = `
-            <div class="lb-info">
-                <span class="lb-rank">${i + 1}</span>
-                ${avatarMarkup(p, 40, 'lb-avatar player-avatar')}
-                <span class="lb-name">${esc(p.nickname)}</span>
-            </div>
-            <span class="lb-score">${p.score || 0}</span>
-        `;
-        UI.leaderboardList.appendChild(div);
-    });
-}
+    if (payload.question) {
+        state.currentQuestion = payload.question;
+    }
+    if (!state.currentQuestion && payload.question_id) {
+        state.currentQuestion = Object.assign({}, state.currentQuestion || {}, { id: payload.question_id });
+    }
 
-function renderResults(results) {
-    UI.resultsList.innerHTML = '';
-    
-    if (!results || results.length === 0) {
-        UI.resultsSection.style.display = 'none';
+    if (payload.previous_top && payload.previous_top.length) {
+        setStoredTop(payload.previous_top);
+    }
+
+    const personalResult = getPersonalResult(payload);
+    if (personalResult) {
+        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, personalResult);
+        state.pendingScore = Number.isFinite(Number(personalResult.total_score))
+            ? Number(personalResult.total_score)
+            : state.pendingScore;
+    }
+
+    const revealKey = getRevealKey(payload);
+    const timings = getRevealTimings(payload);
+    const now = Date.now();
+
+    state.revealPayload = payload;
+
+    if (state.revealKey !== revealKey) {
+        state.revealKey = revealKey;
+        playRoundEndSound(revealKey);
+    }
+
+    if (now >= timings.leaderboardStartsAt) {
+        renderLeaderboard(payload);
         return;
     }
-    
-    UI.resultsSection.style.display = 'block';
-    
-    results.slice(0, 10).forEach(r => {
-        const div = document.createElement('div');
-        div.className = `result-row ${r.is_correct ? 'correct' : 'wrong'}`;
-        div.innerHTML = `
-            <div class="result-info">
-                ${avatarMarkup(r, 36, 'result-avatar player-avatar')}
-                <span class="result-name">${esc(r.nickname)}</span>
-            </div>
-            <span class="result-points">${r.is_correct ? '+' + (r.awarded_points || 0) : '0'}</span>
-        `;
-        UI.resultsList.appendChild(div);
-    });
+
+    renderResult(payload);
+    queuePhaseTransition(() => {
+        if (state.revealKey === revealKey && state.revealPayload) {
+            renderLeaderboard(state.revealPayload);
+        }
+    }, timings.leaderboardStartsAt - now);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RENDER FINAL
-   ═══════════════════════════════════════════════════════════════ */
-
-function renderFinal(msg) {
-    clearTimer();
-    
-    // Create confetti
-    UI.confettiLayer.innerHTML = '';
-    const colors = ['#fbbf24', '#ef4444', '#3b82f6', '#10b981', '#a855f7', '#ec4899'];
-    for (let i = 0; i < 50; i++) {
-        const c = document.createElement('div');
-        c.className = 'confetti-piece';
-        c.style.cssText = `
-            left: ${Math.random() * 100}%;
-            animation-delay: ${Math.random() * 3}s;
-            animation-duration: ${3 + Math.random() * 2}s;
-            background: ${colors[Math.floor(Math.random() * colors.length)]};
-            width: ${6 + Math.random() * 8}px;
-            height: ${6 + Math.random() * 8}px;
-            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-        `;
-        UI.confettiLayer.appendChild(c);
+function applyStateSnapshot(snapshot) {
+    if (!snapshot || !snapshot.ok) {
+        renderIdle();
+        return;
     }
-    
-    // Render leaderboard
-    UI.finalLeaderboard.innerHTML = '';
-    
-    (msg.top || []).slice(0, 10).forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'final-row';
-        div.style.animationDelay = `${0.1 + i * 0.1}s`;
-        div.innerHTML = `
-            <div class="final-info">
-                <span class="final-rank">${i + 1}</span>
-                ${avatarMarkup(p, 52, 'final-avatar player-avatar')}
-                <span class="final-name">${esc(p.nickname)}</span>
-            </div>
-            <span class="final-score">${p.score || 0} ${tr('pointsSuffix', 'pts')}</span>
-        `;
-        UI.finalLeaderboard.appendChild(div);
-    });
-    
-    UI.finalScreen.style.display = 'block';
+
+    state.totalPlayers = Number(snapshot.total_players || state.totalPlayers || 0);
+    state.answeredCount = Number(snapshot.answered_count || 0);
+
+    if (snapshot.state === "finished") {
+        renderFinal(snapshot);
+        return;
+    }
+
+    if (!snapshot.question) {
+        renderIdle();
+        return;
+    }
+
+    if (snapshot.state === "reveal") {
+        state.currentQuestion = snapshot.question;
+        applyRevealState(snapshot);
+        return;
+    }
+
+    applyQuestionState(snapshot.question, snapshot.player_answer || null, snapshot.previous_top || []);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   WEBSOCKET
-   ═══════════════════════════════════════════════════════════════ */
-
-const playWS = new WebSocket(wsUrl(`/ws/live/${GAME_CONFIG.pin}/play/`));
-
-playWS.onopen = async () => {
-    setConnection(true);
-    
-    // Fetch initial state
+async function fetchInitialState() {
     try {
-        const res = await fetch(`/live/state/${GAME_CONFIG.pin}/`, {
-            headers: { 'Accept': 'application/json' }
+        const response = await fetch(`/live/state/${BOOTSTRAP.pin}/`, {
+            headers: { Accept: "application/json" },
         });
-        const st = await res.json();
-        
-        if (st.ok && st.question) {
-            renderQuestion(st.question);
-            
-            if (st.state === 'reveal') {
-                renderReveal({
-                    correct_option_ids: st.correct_option_ids || [],
-                    top: [],
-                    results: []
-                });
+        if (!response.ok) {
+            renderIdle();
+            return;
+        }
+        applyStateSnapshot(await response.json());
+    } catch (error) {
+        console.error("live player state fetch failed", error);
+        renderIdle();
+    }
+}
+
+function handleAnswerSaved(data) {
+    state.submitting = false;
+    state.currentAnswer = Object.assign({}, state.currentAnswer || {}, data, {
+        total_score: data.total_score || data.score || state.pendingScore || state.player.score,
+    });
+    state.pendingScore = Number.isFinite(Number(state.currentAnswer.total_score))
+        ? Number(state.currentAnswer.total_score)
+        : state.pendingScore;
+    state.waitingMessage = pickWaitingMessage();
+    syncQuestionPhase();
+}
+
+function handleSocketMessage(message) {
+    const data = message.data || message;
+    switch (data.type) {
+        case "question_published":
+            state.answeredCount = 0;
+            state.totalPlayers = Math.max(state.totalPlayers, 0);
+            applyQuestionState(data.question, null, data.previous_top || []);
+            break;
+        case "answer_saved":
+            handleAnswerSaved(data);
+            break;
+        case "answer_progress":
+            state.answeredCount = Number(data.answered_count || 0);
+            state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
+            if (state.phase === PHASES.WAITING || state.phase === PHASES.LOCKED) {
+                updateWaitingProgress();
             }
-        }
-    } catch (e) {
-        console.error('State fetch error:', e);
+            break;
+        case "reveal":
+            applyRevealState(data);
+            break;
+        case "finished":
+            renderFinal(data);
+            break;
+        case "error":
+            state.submitting = false;
+            if (state.currentQuestion && !state.currentAnswer) {
+                renderQuestion(state.currentQuestion);
+            }
+            setRoundHint(data.message || "Unable to continue.");
+            break;
+        default:
+            break;
     }
+}
+
+UI.submitBtn.addEventListener("click", () => {
+    if (state.phase === PHASES.QUESTION) {
+        submitAnswer();
+    }
+});
+
+["pointerdown", "touchstart", "keydown"].forEach((eventName) => {
+    document.addEventListener(eventName, unlockAudio, { passive: true });
+});
+
+renderPlayerIdentity();
+renderIdle();
+setConnection("connecting");
+
+const playWS = new WebSocket(wsUrl(`/ws/live/${BOOTSTRAP.pin}/play/`));
+
+playWS.onopen = () => {
+    setConnection("online");
+    fetchInitialState();
 };
 
-playWS.onclose = () => setConnection(false);
-playWS.onerror = () => setConnection(false);
+playWS.onclose = () => {
+    setConnection("offline");
+};
 
-playWS.onmessage = (e) => {
+playWS.onerror = () => {
+    setConnection("offline");
+};
+
+playWS.onmessage = (event) => {
     try {
-        const msg = JSON.parse(e.data);
-        const data = msg.data || msg;
-        
-        switch (data.type) {
-            case 'question_published':
-                renderQuestion(data.question);
-                break;
-                
-            case 'answer_saved':
-                showStatus('sending', tr('statusAnswerSaved', 'Answer received!'));
-                break;
-                
-            case 'reveal':
-                renderReveal(data);
-                break;
-                
-            case 'finished':
-                renderFinal(data);
-                break;
-        }
-    } catch (err) {
-        console.error('Message parse error:', err);
+        handleSocketMessage(JSON.parse(event.data));
+    } catch (error) {
+        console.error("live player message parse failed", error);
     }
 };
+
+window.addEventListener("beforeunload", () => {
+    clearTicker();
+    clearPhaseTimer();
+    if (playWS && playWS.readyState === WebSocket.OPEN) {
+        playWS.close();
+    }
+});
