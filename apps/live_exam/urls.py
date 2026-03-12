@@ -23,6 +23,8 @@ urlpatterns = [
     path("live/join/<str:pin>/enter/", views.live_join_enter, name="join_enter"),
     path("live/play/<str:pin>/", views.live_player_screen, name="player_screen"),
     path("live/wait/<str:pin>/", views.live_wait_room, name="wait_room"),
+    path("live/wait/<str:pin>/profile/", views.live_wait_profile_update, name="wait_room_profile"),
+    path("live/wait/<str:pin>/reaction/", views.live_wait_reaction, name="wait_room_reaction"),
     # QR image
     path("live/qr/<str:pin>.png", views.live_qr_png, name="qr_png"),
     # Game flow endpoints

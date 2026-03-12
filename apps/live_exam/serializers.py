@@ -21,15 +21,28 @@ from apps.live_exam.domain.session import (
     question_time_limit,
     safe_int,
 )
-from apps.live_exam.models import LiveAnswer, LiveSession
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+
+
+def serialize_player_identity(player: LivePlayer) -> dict[str, Any]:
+    return {
+        "id": player.id,
+        "nickname": player.nickname,
+        "avatar_key": player.avatar_key,
+        "accessory_key": player.accessory_key,
+    }
 
 
 def serialize_players(session: LiveSession, limit: int = 50) -> list[dict[str, Any]]:
-    return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key")[:limit])
+    return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key", "accessory_key")[:limit])
 
 
 def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
-    return list(session.players.order_by("-score", "created_at").values("nickname", "avatar_key", "score")[:limit])
+    return list(
+        session.players.order_by("-score", "created_at").values("nickname", "avatar_key", "accessory_key", "score")[
+            :limit
+        ]
+    )
 
 
 def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
@@ -45,6 +58,7 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
             {
                 "nickname": answer.player.nickname,
                 "avatar_key": answer.player.avatar_key,
+                "accessory_key": answer.player.accessory_key,
                 "is_correct": bool(answer.is_correct),
                 "awarded_points": safe_int(answer.awarded_points, 0),
                 "total_score": safe_int(answer.player.score, 0),

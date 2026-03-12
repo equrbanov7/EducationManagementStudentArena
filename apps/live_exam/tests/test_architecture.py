@@ -14,5 +14,7 @@ class LiveExamArchitectureModulesTest(SimpleTestCase):
         self.assertTrue(hasattr(scoring, "score_multi_fraction"))
         self.assertTrue(hasattr(serializers, "serialize_question"))
         self.assertTrue(hasattr(serializers, "serialize_players"))
+        self.assertTrue(hasattr(serializers, "serialize_player_identity"))
         self.assertTrue(hasattr(transport, "build_question_payload"))
         self.assertTrue(hasattr(transport, "build_reveal_payload"))
+        self.assertTrue(hasattr(transport, "build_reaction_event_payload"))

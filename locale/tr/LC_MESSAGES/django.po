@@ -12874,6 +12874,121 @@ msgctxt "live_exam.wait_room.js"
 msgid "ws_connection_error"
 msgstr "Bağlantı hatası"
 
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "hero_copy"
+msgstr "Ana ekrana bak ve geri sayım başlamadan önce takma adının göründüğünü doğrula."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "reaction_title"
+msgstr "Tepkiler"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "reaction_button"
+msgstr "Tepki ver"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "edit_button"
+msgstr "Oyuncuyu düzenle"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "edit_title"
+msgstr "Oyuncunu özelleştir"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "close_button"
+msgstr "Kapat"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "preview_label"
+msgstr "Canlı önizleme"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "nickname_label"
+msgstr "Takma ad"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "nickname_placeholder"
+msgstr "Takma adını gir"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "avatar_label"
+msgstr "Avatar"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "accessory_label"
+msgstr "Aksesuar"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "cancel_button"
+msgstr "İptal"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "save_button"
+msgstr "Değişiklikleri kaydet"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "default_player"
+msgstr "Oyuncu"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "status_waiting_host"
+msgstr "Öğretmen oyunu başlatıyor"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "players_empty"
+msgstr "Diğer oyuncular burada görünecek."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "players_ready"
+msgstr "Başlamaya hazır"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_required"
+msgstr "Takma ad boş olamaz."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_too_long"
+msgstr "Takma ad çok uzun."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "saving"
+msgstr "Değişiklikler kaydediliyor..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "saved"
+msgstr "Kaydedildi"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "save_failed"
+msgstr "Değişiklikler kaydedilemedi."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_failed"
+msgstr "Tepki gönderilemedi."
+
 #: apps/live_exam/templates/liveExam/host_lobby.html
 msgctxt "live_exam.host_lobby"
 msgid "title"
@@ -13204,6 +13319,11 @@ msgctxt "live_exam.view.message"
 msgid "question_not_found"
 msgstr "Soru bulunamadı."
 
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "auth_required"
+msgstr "Kimlik doğrulaması gerekiyor."
+
 #: apps/live_exam/views.py:458
 msgctxt "live_exam.view.message"
 msgid "lobby_locked"
@@ -13213,6 +13333,26 @@ msgstr "Lobi kilitlendi."
 msgctxt "live_exam.view.message"
 msgid "nickname_required"
 msgstr "Takma ad boş olamaz."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_avatar"
+msgstr "Geçerli bir avatar seç."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_accessory"
+msgstr "Geçerli bir aksesuar seç."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_reaction"
+msgstr "Geçerli bir tepki seç."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "reaction_rate_limited"
+msgstr "Tepkileri çok hızlı gönderiyorsun. Biraz sonra tekrar dene."
 
 #: apps/live_exam/views.py:581
 msgctxt "live_exam.view.message"

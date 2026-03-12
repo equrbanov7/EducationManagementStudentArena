@@ -29,6 +29,8 @@ from .player import (
     live_join_page,
     live_player_screen,
     live_qr_png,
+    live_wait_profile_update,
+    live_wait_reaction,
     live_wait_room,
 )
 
@@ -54,6 +56,8 @@ __all__ = [
     "live_join_enter",
     "live_qr_png",
     "live_wait_room",
+    "live_wait_profile_update",
+    "live_wait_reaction",
     "live_player_screen",
     # API
     "live_state_json",

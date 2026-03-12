@@ -2,12 +2,6 @@
    HOST LOBBY - Full Rewrite
    ═══════════════════════════════════════════════════════════════ */
 
-   const AVATARS = {
-    'avatar_1':'🦊','avatar_2':'🐼','avatar_3':'🦁','avatar_4':'🐯',
-    'avatar_5':'🐨','avatar_6':'🐷','avatar_7':'🐸','avatar_8':'🐙',
-    'avatar_9':'🐵','avatar_10':'🦄','avatar_11':'🐰','avatar_12':'🐹'
-};
-
 // DOM Elements
 const $ = id => document.getElementById(id);
 
@@ -39,7 +33,8 @@ const UI = {
     qMeta: $('qMeta'),
     qText: $('qText'),
     qTimer: $('qTimer'),
-    qOptions: $('qOptions')
+    qOptions: $('qOptions'),
+    reactionOverlay: $('hostReactionOverlay')
 };
 
 let state = 'lobby';
@@ -85,6 +80,25 @@ function log(msg) {
 
 const wsUrl = path => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}${path}`;
 const esc = t => { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; };
+const avatarMarkup = (player, size, className = '') =>
+    window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
+
+function spawnReaction(eventData) {
+    if (!UI.reactionOverlay) return;
+    const meta = (window.LiveAvatarCatalog || {}).reactions?.[eventData?.reaction_key] || {};
+    const burst = document.createElement('div');
+    burst.className = 'host-reaction-burst';
+    burst.innerHTML = `
+        <span class="host-reaction-burst__emoji">${meta.emoji || eventData?.emoji || '✨'}</span>
+        <span class="host-reaction-burst__name">${esc(eventData?.player?.nickname || '')}</span>
+    `;
+    const left = 16 + Math.random() * 68;
+    const drift = -26 + Math.random() * 52;
+    burst.style.left = `${left}%`;
+    burst.style.setProperty('--reaction-drift', `${drift}px`);
+    UI.reactionOverlay.appendChild(burst);
+    setTimeout(() => burst.remove(), 2300);
+}
 
 async function post(url, data = null) {
     try {
@@ -203,9 +217,12 @@ lobbyWS.onmessage = e => {
             (d.players || []).forEach(p => {
                 const div = document.createElement('div');
                 div.className = 'player-chip';
-                div.innerHTML = `<div class="avatar">${AVATARS[p.avatar_key] || '👤'}</div><div class="name">${esc(p.nickname)}</div>`;
+                div.innerHTML = `<div class="avatar">${avatarMarkup(p, 54, 'host-avatar host-avatar--chip')}</div><div class="name">${esc(p.nickname)}</div>`;
                 UI.playersList.appendChild(div);
             });
+        }
+        else if (d.type === 'reaction_event') {
+            spawnReaction(d);
         }
     } catch (err) {
         log(fmt(tr('lobbyMessageError', 'Lobby message error: {message}'), { message: err.message || '' }));
@@ -327,7 +344,7 @@ function renderResults(results) {
         div.className = `result-row ${r.is_correct ? 'correct' : 'wrong'}`;
         div.innerHTML = `
             <div class="result-info">
-                <span class="result-avatar">${AVATARS[r.avatar_key] || '👤'}</span>
+                ${avatarMarkup(r, 38, 'result-avatar host-avatar')}
                 <span class="result-name">${esc(r.nickname)}</span>
             </div>
             <span class="result-points">${r.is_correct ? '+' + (r.awarded_points || 0) : '0'}</span>
@@ -345,7 +362,7 @@ function renderLeaderboard(top) {
         div.innerHTML = `
             <div class="leader-info">
                 <span class="leader-rank">${i + 1}</span>
-                <span class="leader-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                ${avatarMarkup(p, 40, 'leader-avatar host-avatar')}
                 <span class="leader-name">${esc(p.nickname)}</span>
             </div>
             <span class="leader-score">${p.score || 0}</span>
@@ -388,7 +405,7 @@ function renderPodium(top) {
         div.innerHTML = `
             <div class="podium-card">
                 ${p.place === 1 ? '<div class="crown">👑</div>' : ''}
-                <div class="podium-avatar">${AVATARS[p.avatar_key] || '👤'}</div>
+                <div class="podium-avatar">${avatarMarkup(p, 78, 'podium-avatar host-avatar')}</div>
                 <div class="podium-name">${esc(p.nickname)}</div>
                 <div class="podium-score">${p.score || 0} ${tr('pointsSuffix', 'pts')}</div>
             </div>
@@ -406,7 +423,7 @@ function renderPodium(top) {
         div.innerHTML = `
             <div class="other-info">
                 <span class="other-rank">${i + 4}</span>
-                <span class="other-avatar">${AVATARS[p.avatar_key] || '👤'}</span>
+                ${avatarMarkup(p, 38, 'other-avatar host-avatar')}
                 <span class="other-name">${esc(p.nickname)}</span>
             </div>
             <span class="other-score">${p.score || 0}</span>

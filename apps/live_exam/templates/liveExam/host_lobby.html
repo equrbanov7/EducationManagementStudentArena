@@ -5,11 +5,13 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
 <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="host-container">
+    <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
     
     <!-- LOBBY HEADER -->
     <header id="lobbyHeader" class="lobby-header">
@@ -177,5 +179,7 @@ function closePodium() {
     document.getElementById('finalPodium').style.display = 'none';
 }
 </script>
+<script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+<script src="{% static 'js/live_avatar_renderer.js' %}"></script>
 <script src="{% static 'js/host_lobby.js' %}"></script>
 {% endblock %}

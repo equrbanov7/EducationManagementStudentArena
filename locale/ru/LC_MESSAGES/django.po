@@ -12893,6 +12893,121 @@ msgctxt "live_exam.wait_room.js"
 msgid "ws_connection_error"
 msgstr "Ошибка соединения"
 
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "hero_copy"
+msgstr "Посмотрите на главный экран и убедитесь, что ваш ник виден до начала отсчёта."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "reaction_title"
+msgstr "Реакции"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "reaction_button"
+msgstr "Реагировать"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "edit_button"
+msgstr "Изменить игрока"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "edit_title"
+msgstr "Настройте своего игрока"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "close_button"
+msgstr "Закрыть"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "preview_label"
+msgstr "Предпросмотр"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "nickname_label"
+msgstr "Ник"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "nickname_placeholder"
+msgstr "Введите ник"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "avatar_label"
+msgstr "Аватар"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "accessory_label"
+msgstr "Аксессуар"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "cancel_button"
+msgstr "Отмена"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room"
+msgid "save_button"
+msgstr "Сохранить изменения"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "default_player"
+msgstr "Игрок"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "status_waiting_host"
+msgstr "Преподаватель запускает игру"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "players_empty"
+msgstr "Здесь появятся другие игроки."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "players_ready"
+msgstr "Готов к старту"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_required"
+msgstr "Ник не может быть пустым."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_too_long"
+msgstr "Ник слишком длинный."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "saving"
+msgstr "Сохраняем изменения..."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "saved"
+msgstr "Сохранено"
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "save_failed"
+msgstr "Не удалось сохранить изменения."
+
+#: apps/live_exam/templates/liveExam/wait_room.html
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_failed"
+msgstr "Не удалось отправить реакцию."
+
 #: apps/live_exam/templates/liveExam/host_lobby.html
 msgctxt "live_exam.host_lobby"
 msgid "title"
@@ -13223,6 +13338,11 @@ msgctxt "live_exam.view.message"
 msgid "question_not_found"
 msgstr "Вопрос не найден."
 
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "auth_required"
+msgstr "Требуется авторизация."
+
 #: apps/live_exam/views.py:458
 msgctxt "live_exam.view.message"
 msgid "lobby_locked"
@@ -13231,7 +13351,27 @@ msgstr "Лобби заблокировано."
 #: apps/live_exam/views.py:472
 msgctxt "live_exam.view.message"
 msgid "nickname_required"
-msgstr "Никнейм не может быть пустым."
+msgstr "Ник не может быть пустым."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_avatar"
+msgstr "Выберите корректный аватар."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_accessory"
+msgstr "Выберите корректный аксессуар."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "invalid_reaction"
+msgstr "Выберите корректную реакцию."
+
+#: apps/live_exam/views/player.py
+msgctxt "live_exam.view.message"
+msgid "reaction_rate_limited"
+msgstr "Вы отправляете реакции слишком быстро. Попробуйте ещё раз чуть позже."
 
 #: apps/live_exam/views.py:581
 msgctxt "live_exam.view.message"

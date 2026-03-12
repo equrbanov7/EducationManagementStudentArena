@@ -5,6 +5,7 @@
 
 {% block extraCss %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
 <link rel="stylesheet" href="{% static 'css/player.css' %}">
 {% endblock %}
 
@@ -110,5 +111,7 @@ window.LIVE_EXAM_PLAYER_I18N = {
     statusAnswerSaved: "{% trans 'status_answer_saved' context 'live_exam.player_screen.js' %}"
 };
 </script>
+<script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+<script src="{% static 'js/live_avatar_renderer.js' %}"></script>
 <script src="{% static 'js/player.js' %}"></script>
 {% endblock %}

@@ -15,7 +15,13 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
 from apps.live_exam.domain.session import question_time_limit
-from apps.live_exam.serializers import serialize_players, serialize_question, serialize_question_results, serialize_top
+from apps.live_exam.serializers import (
+    serialize_player_identity,
+    serialize_players,
+    serialize_question,
+    serialize_question_results,
+    serialize_top,
+)
 
 
 def get_public_base_url(request) -> str:
@@ -80,6 +86,18 @@ def build_lobby_state_payload(session, *, limit: int = 50) -> dict[str, Any]:
         "count": session.players.count(),
         "players": serialize_players(session, limit=limit),
     }
+
+
+def build_reaction_event_payload(*, player, reaction_key: str, emoji: str, created_at=None) -> dict[str, Any]:
+    payload = {
+        "type": "reaction_event",
+        "reaction_key": reaction_key,
+        "emoji": emoji,
+        "player": serialize_player_identity(player),
+    }
+    if created_at is not None:
+        payload["created_at"] = created_at.isoformat()
+    return payload
 
 
 def build_answer_progress_payload(*, question_id: int, answered_count: int, total_players: int) -> dict[str, Any]:

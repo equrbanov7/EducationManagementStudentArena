@@ -8,6 +8,7 @@ body {
     min-height: 100vh;
     background: linear-gradient(135deg, #1a5d4a 0%, #2d8a6e 50%, #45b08c 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
 }
 
 /* Floating shapes */
@@ -43,11 +44,11 @@ body {
 
 /* Main container */
 .join-container {
-    min-height: 100vh;
+    min-height: calc(100vh - 140px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding: clamp(24px, 5vh, 48px) 20px 40px;
     position: relative;
     z-index: 1;
 }
@@ -57,9 +58,9 @@ body {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
     border-radius: 30px;
-    padding: 40px;
+    padding: clamp(24px, 4vw, 40px);
     width: 100%;
-    max-width: 450px;
+    max-width: 520px;
     box-shadow: 
         0 25px 50px rgba(0, 0, 0, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.2);
@@ -108,13 +109,15 @@ body {
     display: inline-block;
     background: linear-gradient(135deg, #1a5d4a 0%, #2d8a6e 100%);
     color: white;
-    font-size: 2.5rem;
+    width: min(100%, 100%);
+    font-size: clamp(2rem, 6vw, 2.75rem);
     font-weight: 800;
-    letter-spacing: 8px;
-    padding: 15px 40px;
+    letter-spacing: clamp(0.24em, 1.8vw, 0.34em);
+    padding: 15px clamp(20px, 5vw, 40px);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(26, 93, 74, 0.4);
     animation: pulse 2s infinite;
+    overflow-wrap: anywhere;
 }
 
 @keyframes pulse {
@@ -164,18 +167,72 @@ body {
     color: #9ca3af;
 }
 
+.resume-notice {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(209, 250, 229, 0.92), rgba(219, 234, 254, 0.96));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    text-align: left;
+}
+
+.resume-notice__copy {
+    display: grid;
+    gap: 4px;
+}
+
+.resume-notice__copy strong {
+    color: #065f46;
+    font-size: 0.98rem;
+}
+
+.resume-notice__copy span {
+    color: #0f172a;
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.resume-notice__copy small {
+    color: #475569;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+.resume-notice__button {
+    flex: 0 0 auto;
+    min-width: 156px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 16px;
+    background: #0f766e;
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resume-notice__button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(15, 118, 110, 0.22);
+}
+
 /* Avatar Grid */
 .avatar-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    gap: 12px;
+    width: 100%;
 }
 
 .avatar-btn {
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 1;
+    border-radius: 22px;
     border: 3px solid transparent;
     background: #f3f4f6;
     cursor: pointer;
@@ -183,13 +240,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
     position: relative;
     overflow: visible;
 }
 
 .avatar-btn:hover {
-    transform: scale(1.15);
+    transform: translateY(-2px) scale(1.03);
     border-color: #2d8a6e;
     box-shadow: 0 5px 20px rgba(45, 138, 110, 0.3);
 }
@@ -197,15 +253,15 @@ body {
 .avatar-btn.selected {
     border-color: #10b981;
     background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    transform: scale(1.1);
+    transform: scale(1.01);
     box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
 }
 
 .avatar-btn.selected::after {
     content: '✓';
     position: absolute;
-    bottom: -5px;
-    right: -5px;
+    bottom: 4px;
+    right: 4px;
     background: #10b981;
     color: white;
     width: 22px;
@@ -217,6 +273,10 @@ body {
     justify-content: center;
     font-weight: bold;
     border: 2px solid white;
+}
+
+.avatar-btn .live-avatar {
+    transform: scale(0.94);
 }
 
 /* Join Button */
@@ -265,7 +325,94 @@ body {
     font-weight: 600;
 }
 
+.join-modal-open {
+    overflow: hidden;
+}
+
+.join-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(6px);
+}
+
+.join-modal {
+    position: relative;
+    width: min(100%, 460px);
+    padding: 28px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
+    color: #0f172a;
+    text-align: left;
+}
+
+.join-modal h2 {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.join-modal p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.join-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.join-modal__actions {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.join-modal__button {
+    flex: 1 1 180px;
+    min-height: 52px;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 18px;
+    font-weight: 800;
+}
+
+.join-modal__button--secondary {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.join-modal__button--primary {
+    background: linear-gradient(135deg, #2d8a6e 0%, #1a5d4a 100%);
+    color: #ffffff;
+}
+
 /* Responsive */
+@media (max-width: 640px) {
+    .resume-notice {
+        flex-direction: column;
+    }
+
+    .resume-notice__button {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
 @media (max-width: 500px) {
     .join-card {
         padding: 30px 20px;
@@ -274,17 +421,21 @@ body {
 
     .pin-badge {
         font-size: 2rem;
-        padding: 12px 30px;
-        letter-spacing: 6px;
+        padding: 12px 20px;
+        letter-spacing: 0.2em;
     }
 
     .avatar-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+        gap: 10px;
     }
 
-    .avatar-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 26px;
+    .join-modal {
+        padding: 24px 18px 18px;
+        border-radius: 24px;
+    }
+
+    .join-modal__actions {
+        flex-direction: column;
     }
 }

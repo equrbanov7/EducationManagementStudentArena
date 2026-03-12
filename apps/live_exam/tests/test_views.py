@@ -44,6 +44,8 @@ class LiveExamViewsImportTest(TestCase):
         self.assertTrue(hasattr(views, "live_join_enter"))
         self.assertTrue(hasattr(views, "live_qr_png"))
         self.assertTrue(hasattr(views, "live_wait_room"))
+        self.assertTrue(hasattr(views, "live_wait_profile_update"))
+        self.assertTrue(hasattr(views, "live_wait_reaction"))
         self.assertTrue(hasattr(views, "live_player_screen"))
 
         # API views
@@ -171,6 +173,30 @@ class LiveJoinTest(TestCase):
         self.assertIn("session", response.context)
         self.assertEqual(response.context["session"], self.session)
 
+    def test_join_page_exposes_remembered_player_context(self):
+        """Test that join page exposes remembered player info for returning clients."""
+        player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Remembered Player",
+            avatar_key="avatar_4",
+            accessory_key="cap",
+            client_id="remembered-client",
+        )
+        self.client.cookies["live_client_id"] = player.client_id
+        self.client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+
+        response = self.client.get(reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["remembered_player"]["nickname"], "Remembered Player")
+        self.assertEqual(response.context["remembered_player"]["avatar_key"], "avatar_4")
+        self.assertEqual(response.context["resume_url"], reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+        self.assertIn("remembered_join_copy", response.context)
+
     def test_pin_entry_page_accessible(self):
         """Test that the generic PIN entry page is accessible."""
         response = self.client.get(reverse("liveExam:pin_entry"))
@@ -214,6 +240,7 @@ class LiveJoinTest(TestCase):
         player = LivePlayer.objects.filter(session=self.session, nickname="TestPlayer").first()
         self.assertIsNotNone(player)
         self.assertEqual(player.avatar_key, "avatar_1")
+        self.assertEqual(player.accessory_key, "accessory_none")
 
     def test_join_enter_locked_session(self):
         """Test joining a locked session."""
@@ -227,6 +254,24 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 403)
         data = response.json()
         self.assertFalse(data["ok"])
+
+    def test_join_enter_rejects_duplicate_nickname_from_another_client(self):
+        """Test that a second client cannot join with the same nickname."""
+        LivePlayer.objects.create(
+            session=self.session,
+            nickname="TakenName",
+            avatar_key="avatar_1",
+            client_id="existing-client",
+        )
+        self.client.cookies["live_client_id"] = "new-client"
+
+        response = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "takenname", "avatar_key": "avatar_2"},
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(response.json()["ok"])
 
 
 @override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_EXAM_JOIN_RATE_LIMIT="1/1m")
@@ -470,8 +515,20 @@ class LivePlayerProtectedViewsTest(TestCase):
         response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["my_nickname"], player.nickname)
-        self.assertEqual(response.context["my_avatar_key"], player.avatar_key)
+        self.assertEqual(response.context["my_player"]["nickname"], player.nickname)
+        self.assertEqual(response.context["my_player"]["avatar_key"], player.avatar_key)
+        self.assertEqual(response.context["my_player"]["accessory_key"], player.accessory_key)
+
+    def test_wait_room_redirects_to_player_screen_after_game_starts(self):
+        """Test that wait room reloads land on the player screen once the session leaves lobby state."""
+        self._authenticate_player()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.save(update_fields=["state"])
+
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
 
     def test_player_screen_requires_valid_player_token(self):
         """Test that player screen rejects unauthenticated access."""
@@ -479,6 +536,164 @@ class LivePlayerProtectedViewsTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
+
+class LiveWaitRoomInteractionTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("wait_room_teacher", "waitroom@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+        self.exam = Exam.objects.create(
+            title="Wait Room Test Exam",
+            slug="wait-room-test-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Lobby Player",
+            avatar_key="avatar_2",
+            accessory_key="cap",
+            client_id="wait-room-client",
+        )
+        self.client.cookies["live_client_id"] = self.player.client_id
+        self.client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def test_wait_room_profile_update_success(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "Updated Player", "avatar_key": "avatar_10", "accessory_key": "crown"},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["player"]["nickname"], "Updated Player")
+        self.assertEqual(data["player"]["avatar_key"], "avatar_10")
+        self.assertEqual(data["player"]["accessory_key"], "crown")
+
+        self.player.refresh_from_db()
+        self.assertEqual(self.player.nickname, "Updated Player")
+        self.assertEqual(self.player.avatar_key, "avatar_10")
+        self.assertEqual(self.player.accessory_key, "crown")
+
+    def test_wait_room_profile_update_rejects_empty_nickname(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "   ", "avatar_key": "avatar_2", "accessory_key": "cap"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+
+    def test_wait_room_profile_update_truncates_long_nickname(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "A" * 60, "avatar_key": "avatar_2", "accessory_key": "cap"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["player"]["nickname"], "A" * 32)
+
+    def test_wait_room_profile_update_rejects_invalid_avatar(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "Updated Player", "avatar_key": "avatar_999", "accessory_key": "cap"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+
+    def test_wait_room_profile_update_rejects_invalid_accessory(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "Updated Player", "avatar_key": "avatar_2", "accessory_key": "jetpack"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+
+    def test_wait_room_profile_update_rejects_duplicate_nickname(self):
+        LivePlayer.objects.create(
+            session=self.session,
+            nickname="TakenName",
+            avatar_key="avatar_9",
+            client_id="other-client",
+        )
+
+        response = self.client.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "takenname", "avatar_key": "avatar_2", "accessory_key": "cap"},
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(response.json()["ok"])
+
+    def test_wait_room_profile_update_requires_player_token(self):
+        anonymous = Client()
+        response = anonymous.post(
+            reverse("liveExam:wait_room_profile", kwargs={"pin": self.session.pin}),
+            {"nickname": "Updated Player", "avatar_key": "avatar_2", "accessory_key": "cap"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_wait_room_reaction_accepts_known_reaction(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_reaction", kwargs={"pin": self.session.pin}),
+            {"reaction_key": "laugh"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertEqual(response.json()["reaction_key"], "laugh")
+
+    def test_wait_room_reaction_rejects_invalid_reaction(self):
+        response = self.client.post(
+            reverse("liveExam:wait_room_reaction", kwargs={"pin": self.session.pin}),
+            {"reaction_key": "boom"},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+
+
+@override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LIVE_REACTION_RATE_LIMIT="1/1m")
+class LiveWaitRoomReactionRateLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.teacher = User.objects.create_user("reaction_teacher", "reaction@example.com", "StrongPass123!")
+        self.exam = Exam.objects.create(
+            title="Reaction Test Exam",
+            slug="reaction-test-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Reaction Player",
+            avatar_key="avatar_1",
+            client_id="reaction-client",
+        )
+        self.client.cookies["live_client_id"] = self.player.client_id
+        self.client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def test_wait_room_reaction_rate_limit_blocks_second_request(self):
+        first = self.client.post(
+            reverse("liveExam:wait_room_reaction", kwargs={"pin": self.session.pin}),
+            {"reaction_key": "like"},
+        )
+        self.assertEqual(first.status_code, 200)
+
+        blocked = self.client.post(
+            reverse("liveExam:wait_room_reaction", kwargs={"pin": self.session.pin}),
+            {"reaction_key": "like"},
+        )
+        self.assertEqual(blocked.status_code, 429)
+        self.assertFalse(blocked.json()["ok"])
 
 class HelperFunctionsTest(TestCase):
     """Test helper functions."""
@@ -557,6 +772,8 @@ class URLPatternTest(TestCase):
             ("liveExam:join_enter", {"pin": self.session.pin}),
             ("liveExam:player_screen", {"pin": self.session.pin}),
             ("liveExam:wait_room", {"pin": self.session.pin}),
+            ("liveExam:wait_room_profile", {"pin": self.session.pin}),
+            ("liveExam:wait_room_reaction", {"pin": self.session.pin}),
             ("liveExam:qr_png", {"pin": self.session.pin}),
             ("liveExam:state_json", {"pin": self.session.pin}),
         ]

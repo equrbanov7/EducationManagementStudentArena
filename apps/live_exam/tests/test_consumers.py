@@ -3,6 +3,7 @@ Consumer tests for live_exam websocket auth.
 """
 
 from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -95,6 +96,43 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         connected, message = async_to_sync(scenario)()
         self.assertTrue(connected)
         self.assertEqual(message["type"], "lobby_state")
+        self.assertEqual(message["players"][0]["accessory_key"], "accessory_none")
+
+    def test_lobby_ws_delivers_reaction_events(self):
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/lobby/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            await communicator.receive_json_from(timeout=1)
+            await get_channel_layer().group_send(
+                f"live_{self.session.pin}_lobby",
+                {
+                    "type": "lobby_event",
+                    "data": {
+                        "type": "reaction_event",
+                        "reaction_key": "like",
+                        "emoji": "👍",
+                        "player": {
+                            "id": self.player.id,
+                            "nickname": self.player.nickname,
+                            "avatar_key": self.player.avatar_key,
+                            "accessory_key": self.player.accessory_key,
+                        },
+                    },
+                },
+            )
+            try:
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "reaction_event")
+        self.assertEqual(message["player"]["accessory_key"], "accessory_none")
 
     def test_play_ws_accepts_authenticated_player(self):
         async def scenario():
