@@ -18,6 +18,7 @@ from .host import (
     host_start_game,
     live_create_session_by_slug,
     live_host_lobby,
+    live_host_presentation,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -46,6 +47,7 @@ __all__ = [
     # Host
     "live_create_session_by_slug",
     "live_host_lobby",
+    "live_host_presentation",
     "host_start_game",
     "host_next_question",
     "host_reveal",

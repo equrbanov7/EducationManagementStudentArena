@@ -76,6 +76,20 @@ def live_host_lobby(request, pin):
     return render(request, "liveExam/host_lobby.html", context)
 
 
+@login_required
+def live_host_presentation(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+
+    if session.host_user != request.user:
+        raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
+
+    context = {
+        "session": session,
+        "auto_fullscreen": "1" if request.GET.get("autofs") == "1" else "0",
+    }
+    return render(request, "liveExam/host_presentation.html", context)
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # Host Game Controls (Kahoot Flow)
 # ════════════════════════════════════════════════════════════════════════════

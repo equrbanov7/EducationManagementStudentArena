@@ -120,6 +120,7 @@ def live_state_json(request, pin):
         data["results"] = reveal_payload["results"]
         data["top"] = reveal_payload["top"]
         data["previous_top"] = reveal_payload["previous_top"]
+        data["distribution"] = reveal_payload["distribution"]
         data["revealed_at"] = reveal_payload["revealed_at"]
         data["result_duration_ms"] = reveal_payload["result_duration_ms"]
         data["leaderboard_duration_ms"] = reveal_payload["leaderboard_duration_ms"]

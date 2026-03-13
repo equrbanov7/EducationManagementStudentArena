@@ -17,6 +17,7 @@ from channels.layers import get_channel_layer
 from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
 from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
 from apps.live_exam.serializers import (
+    serialize_answer_distribution,
     serialize_player_identity,
     serialize_players,
     serialize_question,
@@ -151,6 +152,7 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
         "type": "reveal",
         "question_id": question_id,
         "correct_option_ids": correct_ids,
+        "distribution": serialize_answer_distribution(session, question_id),
         "results": serialize_question_results(session, question_id, limit=50),
         "top": serialize_top(session, limit=10),
         "previous_top": serialize_top_before_question(session, question_id, limit=10),
