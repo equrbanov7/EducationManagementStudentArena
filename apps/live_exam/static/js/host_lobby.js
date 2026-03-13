@@ -294,7 +294,7 @@ function setSessionState(nextState) {
     UI.lobbyHeader.style.display = CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none");
     UI.playersSection.style.display = CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none");
     UI.gameArea.style.display = CONFIG.presentationOnly ? "block" : (isPlay ? "block" : "none");
-    UI.finalPodium.style.display = isFinished ? "block" : "none";
+    UI.finalPodium.style.display = isFinished ? "grid" : "none";
     UI.progressBox.style.display = !CONFIG.presentationOnly && nextState === "question" ? "flex" : "none";
 
     if (isLobby) {
@@ -746,6 +746,7 @@ function applyRevealState(payload, question) {
 
 function renderPodium(top) {
     UI.confetti.innerHTML = "";
+    const othersSection = UI.othersList?.closest(".others-section");
     const colors = ["#fbbf24", "#fb7185", "#38bdf8", "#34d399", "#a855f7", "#f97316", "#fde047"];
     const appendConfetti = (variant, styles) => {
         const piece = document.createElement("div");
@@ -839,7 +840,11 @@ function renderPodium(top) {
     });
 
     UI.othersList.innerHTML = "";
-    top.slice(3, 10).forEach((player, index) => {
+    const others = top.slice(3, 10);
+    if (othersSection) {
+        othersSection.style.display = others.length ? "" : "none";
+    }
+    others.forEach((player, index) => {
         const row = document.createElement("div");
         row.className = "other-row";
         row.style.setProperty("--other-delay", `${6.35 + index * 0.12}s`);
