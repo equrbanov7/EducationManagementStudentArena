@@ -14,6 +14,7 @@ urlpatterns = [
     path("live/", views.live_pin_entry, name="pin_entry"),
     # Host lobby + idarəetmə
     path("live/host/<str:pin>/", views.live_host_lobby, name="host_lobby"),
+    path("live/host/<str:pin>/presentation/", views.live_host_presentation, name="host_presentation"),
     path("live/host/<str:pin>/start/", views.host_start_game, name="host_start_game"),
     path("live/host/<str:pin>/next/", views.host_next_question, name="host_next_question"),
     path("live/host/<str:pin>/reveal/", views.host_reveal, name="host_reveal"),

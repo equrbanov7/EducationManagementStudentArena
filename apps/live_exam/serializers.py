@@ -97,6 +97,38 @@ def serialize_top_before_question(session: LiveSession, question_id: int, limit:
     return [{key: value for key, value in row.items() if key != "_created_at"} for row in rows[:limit]]
 
 
+def serialize_answer_distribution(session: LiveSession, question_id: int) -> dict[str, Any]:
+    counts: dict[int, int] = {}
+    total_answers = 0
+
+    answers = LiveAnswer.objects.filter(session=session, question_id=question_id).values("choice_id", "choice_ids")
+    for answer in answers:
+        option_ids = list(answer.get("choice_ids") or [])
+        if not option_ids and answer.get("choice_id") is not None:
+            option_ids = [answer.get("choice_id")]
+
+        seen: set[int] = set()
+        for raw_option_id in option_ids:
+            option_id = safe_int(raw_option_id, 0)
+            if option_id <= 0 or option_id in seen:
+                continue
+            counts[option_id] = counts.get(option_id, 0) + 1
+            seen.add(option_id)
+
+        total_answers += 1
+
+    return {
+        "total_answers": total_answers,
+        "counts": [
+            {
+                "option_id": option_id,
+                "count": safe_int(count, 0),
+            }
+            for option_id, count in sorted(counts.items())
+        ],
+    }
+
+
 def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
     speed_rank_lookup = {
         answer.id: index + 1

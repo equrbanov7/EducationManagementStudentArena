@@ -469,6 +469,7 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
         self.assertEqual(second_sender_types, ["answer_saved", "answer_progress", "reveal"])
         self.assertEqual(first_player_completion_types, ["answer_progress", "reveal"])
         self.assertIn("previous_top", reveal_message)
+        self.assertIn("distribution", reveal_message)
         self.assertIn("next_question_at", reveal_message)
         self.assertTrue(any("player_id" in row for row in reveal_message["top"]))
 

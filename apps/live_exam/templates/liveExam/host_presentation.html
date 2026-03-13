@@ -1,0 +1,120 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}</title>
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
+</head>
+<body class="host-presentation-page">
+    <div class="host-container host-container--presentation">
+        <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
+
+        <div id="gameArea" class="game-area presentation-game-area">
+            <div id="presentationStage" class="presentation-stage" data-phase="idle">
+                <div class="presentation-stage__glow presentation-stage__glow--left"></div>
+                <div class="presentation-stage__glow presentation-stage__glow--right"></div>
+                <div class="presentation-stage__grid"></div>
+                <div class="presentation-stage__content" id="presentationContent"></div>
+            </div>
+        </div>
+
+        <div class="host-hidden-ui" aria-hidden="true">
+            <header id="lobbyHeader"></header>
+            <div id="playersSection"></div>
+            <div id="playersCount">0</div>
+            <div id="playersList"></div>
+            <div id="progressBox"></div>
+            <div id="answeredText">0 / 0</div>
+            <div id="gameState"></div>
+            <button id="startBtn" type="button"></button>
+            <button id="presentBtn" type="button"></button>
+            <button id="revealBtn" type="button"></button>
+            <button id="nextBtn" type="button"></button>
+            <button id="finishBtn" type="button"></button>
+            <input id="questionCount" type="text" value="{{ session.question_limit|default:1 }}">
+            <input id="autoMode" type="checkbox" checked>
+            <button id="debugBtn" type="button"></button>
+            <pre id="debugLog"></pre>
+        </div>
+    </div>
+
+    <div id="finalPodium" class="final-podium">
+        <div id="confetti" class="confetti-wrap"></div>
+        <div class="spotlight s1"></div>
+        <div class="spotlight s2"></div>
+        <div class="spotlight s3"></div>
+        <div class="podium-header">
+            <h1>🏆 {% trans "final_results_title" context "live_exam.host_lobby" %}</h1>
+            <p>{% trans "final_results_subtitle" context "live_exam.host_lobby" %}</p>
+        </div>
+        <div id="podiumStage" class="podium-stage"></div>
+        <div class="others-section">
+            <div class="others-title">{% trans "other_players" context "live_exam.host_lobby" %}</div>
+            <div id="othersList" class="others-list"></div>
+        </div>
+    </div>
+
+    <script>
+    const CONFIG = {
+        pin: "{{ session.pin }}",
+        csrf: "{{ csrf_token }}",
+        maxQuestions: 999,
+        examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        presentationOnly: true,
+        autoFullscreen: {{ auto_fullscreen|default:"0" }},
+        urls: {
+            state: "{% url 'liveExam:state_json' session.pin %}",
+            reveal: "{% url 'liveExam:host_reveal' session.pin %}",
+            next: "{% url 'liveExam:next_question' session.pin %}",
+            finish: "{% url 'liveExam:finish_game' session.pin %}",
+            present: "{% url 'liveExam:host_presentation' session.pin %}"
+        }
+    };
+    window.LIVE_EXAM_HOST_I18N = {
+        debugLabel: "{% trans 'debug_label' context 'live_exam.host_lobby.js' %}",
+        stateLobby: "{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}",
+        stateQuestion: "{% trans 'state_question' context 'live_exam.host_lobby.js' %}",
+        stateReveal: "{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}",
+        stateFinished: "{% trans 'state_finished' context 'live_exam.host_lobby.js' %}",
+        stateLog: "{% trans 'state_log' context 'live_exam.host_lobby.js' %}",
+        questionMeta: "{% trans 'question_meta' context 'live_exam.host_lobby.js' %}",
+        noAnswersYet: "{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}",
+        pointsSuffix: "{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}",
+        hostReady: "{% trans 'host_ready' context 'live_exam.host_lobby.js' %}",
+        wsLobbyOpen: "{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}",
+        wsLobbyClosed: "{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}",
+        wsPlayOpen: "{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}",
+        wsPlayClosed: "{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}",
+        allAnsweredAutoReveal: "{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}",
+        lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
+        playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
+        postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
+        introTitle: "Quiz",
+        introSubtitle: "Get ready for the next round",
+        countdownLabel: "Starting now",
+        questionStageLabel: "Question",
+        answersLabel: "Answers live",
+        revealLabel: "Answer reveal",
+        scoreboardTitle: "Scoreboard",
+        scoreboardSubtitle: "Top 5 players",
+        correctAnswerLabel: "Correct answer",
+        answersSingular: "Answer",
+        answersPlural: "Answers",
+        playersAnswered: "{answered} answered",
+        secondsLabel: "seconds",
+        countdownNumberLabel: "Round starts in {value}",
+        scoreboardMovedUp: "Moved up {count}",
+        scoreboardNewEntry: "New in top 5",
+        distributionNoAnswers: "No answers were submitted this round.",
+        revealCorrectTag: "Correct",
+        revealWrongTag: "Incorrect"
+    };
+    </script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
+    <script src="{% static 'js/host_lobby.js' %}"></script>
+</body>
+</html>

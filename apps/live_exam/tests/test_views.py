@@ -35,6 +35,7 @@ class LiveExamViewsImportTest(TestCase):
         # Host views
         self.assertTrue(hasattr(views, "live_create_session_by_slug"))
         self.assertTrue(hasattr(views, "live_host_lobby"))
+        self.assertTrue(hasattr(views, "live_host_presentation"))
         self.assertTrue(hasattr(views, "host_start_game"))
         self.assertTrue(hasattr(views, "host_next_question"))
         self.assertTrue(hasattr(views, "host_reveal"))
@@ -518,6 +519,9 @@ class LiveStateAPITest(TestCase):
         self.assertEqual(data["leaderboard_duration_ms"], int(PLAYER_LEADERBOARD_SECONDS * 1000))
         self.assertIn("leaderboard_starts_at", data)
         self.assertIn("next_question_at", data)
+        self.assertEqual(data["distribution"]["total_answers"], 1)
+        self.assertEqual(data["distribution"]["counts"][0]["option_id"], self.correct_option.id)
+        self.assertEqual(data["distribution"]["counts"][0]["count"], 1)
 
         previous_row = next((row for row in data["previous_top"] if row["player_id"] == player.id), None)
         current_row = next((row for row in data["top"] if row["player_id"] == player.id), None)
@@ -859,6 +863,7 @@ class URLPatternTest(TestCase):
             ("liveExam:create_session_slug", {"slug": self.exam.slug}),
             ("liveExam:pin_entry", {}),
             ("liveExam:host_lobby", {"pin": self.session.pin}),
+            ("liveExam:host_presentation", {"pin": self.session.pin}),
             ("liveExam:host_start_game", {"pin": self.session.pin}),
             ("liveExam:host_next_question", {"pin": self.session.pin}),
             ("liveExam:host_reveal", {"pin": self.session.pin}),

@@ -43,6 +43,7 @@
         <button id="revealBtn" class="btn btn-reveal" disabled><i class="fas fa-eye"></i> {% trans "reveal_button" context "live_exam.host_lobby" %}</button>
         <button id="nextBtn" class="btn btn-next" disabled><i class="fas fa-forward"></i> {% trans "next_button" context "live_exam.host_lobby" %}</button>
         <button id="finishBtn" class="btn btn-finish"><i class="fas fa-stop"></i> {% trans "finish_button" context "live_exam.host_lobby" %}</button>
+        <button id="presentBtn" class="btn btn-present"><i class="fas fa-up-right-from-square"></i> Açılış</button>
         
         <label class="auto-toggle">
             <input type="checkbox" id="autoMode" checked>
@@ -59,36 +60,12 @@
 
     <!-- GAME AREA -->
     <div id="gameArea" class="game-area">
-        
-        <!-- LEFT: Question / Results -->
-        <div class="left-panel">
-            
-            <!-- Question Display -->
-            <div id="questionPanel" class="panel question-panel">
-                <div class="q-header">
-                    <span id="qMeta">{% trans "question_meta_placeholder" context "live_exam.host_lobby" %}</span>
-                    <div id="qTimer" class="timer">--</div>
-                </div>
-                <div id="qText" class="q-text">{% trans "question_text_placeholder" context "live_exam.host_lobby" %}</div>
-                <div id="qOptions" class="options-grid"></div>
-            </div>
-            
-            <!-- Results Display -->
-            <div id="resultsPanel" class="panel results-panel">
-                <div class="panel-title"><i class="fas fa-chart-bar"></i> {% trans "results_panel_title" context "live_exam.host_lobby" %}</div>
-                <div id="resultsList" class="results-list"></div>
-            </div>
-            
+        <div id="presentationStage" class="presentation-stage" data-phase="idle">
+            <div class="presentation-stage__glow presentation-stage__glow--left"></div>
+            <div class="presentation-stage__glow presentation-stage__glow--right"></div>
+            <div class="presentation-stage__grid"></div>
+            <div class="presentation-stage__content" id="presentationContent"></div>
         </div>
-        
-        <!-- RIGHT: Leaderboard -->
-        <div class="right-panel">
-            <div class="panel leaderboard-panel">
-                <div class="panel-title"><i class="fas fa-trophy"></i> {% trans "leaderboard_title" context "live_exam.host_lobby" %}</div>
-                <div id="leaderList" class="leader-list"></div>
-            </div>
-        </div>
-        
     </div>
 
     <!-- PLAYERS (Lobby only) -->
@@ -142,12 +119,16 @@ const CONFIG = {
     pin: "{{ session.pin }}",
     csrf: "{{ csrf_token }}",
     maxQuestions: {{ exam_total_questions }},
+    examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+    presentationOnly: false,
+    autoFullscreen: false,
     urls: {
         start: "{% url 'liveExam:start_game' session.pin %}",
         state: "{% url 'liveExam:state_json' session.pin %}",
         reveal: "{% url 'liveExam:host_reveal' session.pin %}",
         next: "{% url 'liveExam:next_question' session.pin %}",
-        finish: "{% url 'liveExam:finish_game' session.pin %}"
+        finish: "{% url 'liveExam:finish_game' session.pin %}",
+        present: "{% url 'liveExam:host_presentation' session.pin %}"
     }
 };
 window.LIVE_EXAM_HOST_I18N = {
@@ -168,7 +149,26 @@ window.LIVE_EXAM_HOST_I18N = {
     allAnsweredAutoReveal: "{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}",
     lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
     playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
-    postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}"
+    postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
+    introTitle: "Quiz",
+    introSubtitle: "Get ready for the next round",
+    countdownLabel: "Starting now",
+    questionStageLabel: "Question",
+    answersLabel: "Answers live",
+    revealLabel: "Answer reveal",
+    scoreboardTitle: "Scoreboard",
+    scoreboardSubtitle: "Top 5 players",
+    correctAnswerLabel: "Correct answer",
+    answersSingular: "Answer",
+    answersPlural: "Answers",
+    playersAnswered: "{answered} answered",
+    secondsLabel: "seconds",
+    countdownNumberLabel: "Round starts in {value}",
+    scoreboardMovedUp: "Moved up {count}",
+    scoreboardNewEntry: "New in top 5",
+    distributionNoAnswers: "No answers were submitted this round.",
+    revealCorrectTag: "Correct",
+    revealWrongTag: "Incorrect"
 };
 
 function toggleQR(show) {
