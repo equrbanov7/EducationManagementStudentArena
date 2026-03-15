@@ -23,6 +23,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import pgettext_lazy
 
 User = get_user_model()
 
@@ -191,7 +192,9 @@ class Course(models.Model):
             self.organization = getattr(profile, "organization", None)
 
         if self.organization_id is None:
-            raise ValidationError("Kurs üçün təşkilat mütləqdir.")
+            raise ValidationError(
+                pgettext_lazy("courses.model.course.error", "organization_required")
+            )
 
         super().save(*args, **kwargs)
 

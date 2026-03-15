@@ -63,9 +63,7 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         organization = get_request_organization(self.request)
         if organization is None:
             raise PermissionDenied(
-                pgettext("courses.view.permission", "required_permission_missing").format(
-                    permission="organization"
-                )
+                pgettext("courses.view.permission", "active_organization_required")
             )
         form.instance.owner = self.request.user
         form.instance.status = "draft"

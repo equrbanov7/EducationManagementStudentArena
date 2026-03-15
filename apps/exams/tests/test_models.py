@@ -250,6 +250,16 @@ class ExamQuestionTest(TestCase):
 
     def setUp(self):
         self.author = User.objects.create_user("qauthor", "qauthor@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Question Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.author,
+            status="active",
+            is_active=True,
+        )
+        self.author.profile.organization = self.org
+        self.author.profile.organization_type = self.org.org_type
+        self.author.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.exam = Exam.objects.create(
             author=self.author,
             title="Question Test Exam",
@@ -329,6 +339,16 @@ class ExamAttemptTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("attemptteacher", "attemptteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("attemptstudent", "attemptstudent@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Attempt Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             author=self.teacher,
@@ -418,6 +438,16 @@ class ExamAccessControlTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("accessteacher", "accessteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("accessstudent", "accessstudent@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Access Control Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             author=self.teacher,
