@@ -28,10 +28,18 @@ class CourseEnrollmentServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Enrollment Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
         self.course = Course.objects.create(
             title="Test Course",
             owner=self.teacher,
-            status="published"
+            status="published",
+            organization=self.org,
         )
 
     def test_enroll_user_in_course(self):
@@ -72,10 +80,18 @@ class RosterManagementServicesTest(TestCase):
             email="teacher@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Roster Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
         self.course = Course.objects.create(
             title="Test Course",
             owner=self.teacher,
-            status="published"
+            status="published",
+            organization=self.org,
         )
         self.students = [
             User.objects.create_user(
@@ -136,10 +152,18 @@ class CourseQueryServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Query Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
         self.course = Course.objects.create(
             title="Test Course",
             owner=self.teacher,
-            status="published"
+            status="published",
+            organization=self.org,
         )
         services.enroll_user_in_course(
             self.course,

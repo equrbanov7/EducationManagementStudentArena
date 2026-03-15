@@ -95,6 +95,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             owner=self.owner,
             title="Tenant A Course",
             status="published",
+            organization=self.org_a,
         )
         self.course_b = Course.objects.create(
             owner=self.owner,
