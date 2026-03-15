@@ -12,6 +12,7 @@ Contains:
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -59,9 +60,16 @@ class CreateCourseView(IsTeacherMixin, CreateView):
 
     def form_valid(self, form):
         _require_org_permission(self.request, "course.create")
+        organization = get_request_organization(self.request)
+        if organization is None:
+            raise PermissionDenied(
+                pgettext("courses.view.permission", "required_permission_missing").format(
+                    permission="organization"
+                )
+            )
         form.instance.owner = self.request.user
         form.instance.status = "draft"
-        form.instance.organization = get_request_organization(self.request)
+        form.instance.organization = organization
         super().form_valid(form)
         messages.success(
             self.request,

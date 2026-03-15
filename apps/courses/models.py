@@ -20,6 +20,7 @@ Clean Code Prinsipləri:
 import itertools
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -100,8 +101,6 @@ class Course(models.Model):
         "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="courses",
-        null=True,
-        blank=True,
         verbose_name="Təşkilat",
         help_text="Kursun aid olduğu təşkilat",
     )
@@ -190,6 +189,9 @@ class Course(models.Model):
         if self.organization_id is None and self.owner_id:
             profile = getattr(self.owner, "profile", None)
             self.organization = getattr(profile, "organization", None)
+
+        if self.organization_id is None:
+            raise ValidationError("Kurs üçün təşkilat mütləqdir.")
 
         super().save(*args, **kwargs)
 

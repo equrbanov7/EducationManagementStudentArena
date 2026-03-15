@@ -159,7 +159,17 @@ class ProfileViewTest(TestCase):
                 "updated_at",
             ]
         )
-        Course.objects.create(owner=self.user, title="Owned Course", status="published")
+        org = Organization.objects.create(
+            name="Profile Edit Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        profile.organization = org
+        profile.organization_type = org.org_type
+        profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        Course.objects.create(owner=self.user, title="Owned Course", status="published", organization=org)
 
         self.client.login(username="testuser", password="testpass123")
         response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")

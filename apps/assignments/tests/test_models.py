@@ -10,6 +10,8 @@ from django.utils import timezone
 
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -21,10 +23,22 @@ class AssignmentTest(TestCase):
         self.teacher = User.objects.create_user("assignteacher", "assignteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("assignstudent", "assignstudent@example.com", "StrongPass123!")
 
+        self.org = Organization.objects.create(
+            name="Assign Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.course = Course.objects.create(
             owner=self.teacher,
             title="Test Course",
             status="published",
+            organization=self.org,
         )
 
     def test_assignment_creation(self):
@@ -129,10 +143,22 @@ class SubmissionTest(TestCase):
         self.teacher = User.objects.create_user("subteacher", "subteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("substudent", "substudent@example.com", "StrongPass123!")
 
+        self.org = Organization.objects.create(
+            name="Submission Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.course = Course.objects.create(
             owner=self.teacher,
             title="Submission Course",
             status="published",
+            organization=self.org,
         )
 
         self.assignment = Assignment.objects.create(
@@ -220,10 +246,22 @@ class AssignmentSubmissionWorkflowTest(TestCase):
         self.student1 = User.objects.create_user("student1", "s1@example.com", "StrongPass123!")
         self.student2 = User.objects.create_user("student2", "s2@example.com", "StrongPass123!")
 
+        self.org = Organization.objects.create(
+            name="Workflow Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.course = Course.objects.create(
             owner=self.teacher,
             title="Workflow Course",
             status="published",
+            organization=self.org,
         )
 
         self.assignment = Assignment.objects.create(

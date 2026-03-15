@@ -12,6 +12,8 @@ from django.utils import timezone
 from apps.courses.models import Course
 from apps.labs import services
 from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -30,10 +32,21 @@ class LabSubmissionServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Lab Submission Services Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.course = Course.objects.create(
             title="Test Course",
             owner=self.teacher,
-            status="published"
+            status="published",
+            organization=self.org,
         )
         self.lab = Lab.objects.create(
             title="Test Lab",
@@ -95,10 +108,21 @@ class LabGradingServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Lab Grading Services Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.course = Course.objects.create(
             title="Test Course",
             owner=self.teacher,
-            status="published"
+            status="published",
+            organization=self.org,
         )
         self.lab = Lab.objects.create(
             title="Test Lab",

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -106,8 +107,6 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="exams",
-        null=True,
-        blank=True,
         verbose_name=pgettext_lazy("exams.model.exam.field", "organization"),
         help_text=pgettext_lazy("exams.model.exam.help", "organization"),
     )
@@ -184,6 +183,11 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         elif self.organization_id is None and self.author_id:
             profile = getattr(self.author, "profile", None)
             self.organization = getattr(profile, "organization", None)
+
+        if self.organization_id is None:
+            raise ValidationError(
+                pgettext_lazy("exams.model.exam.error", "organization_required")
+            )
 
         if not self.slug:
             base_slug = slugify(self.title)

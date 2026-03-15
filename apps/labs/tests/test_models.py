@@ -11,6 +11,8 @@ from django.utils import timezone
 
 from apps.courses.models import Course, CourseMembership
 from apps.labs.models import Lab, LabAssignment, LabBlock, LabQuestion, LabSubmission
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -19,7 +21,17 @@ class LabAssignmentReassignmentTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("lab_teacher_m", "lab_teacher_m@example.com", "StrongPass123!")
         self.student = User.objects.create_user("lab_student_m", "lab_student_m@example.com", "StrongPass123!")
-        self.course = Course.objects.create(owner=self.teacher, title="Lab Course M", status="published")
+        self.org = Organization.objects.create(
+            name="Lab Model Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        self.course = Course.objects.create(owner=self.teacher, title="Lab Course M", status="published", organization=self.org)
         CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="A1")
         self.lab = Lab.objects.create(
             course=self.course,
