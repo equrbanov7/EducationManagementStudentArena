@@ -31,6 +31,11 @@
     border-bottom: 1px solid var(--profile-border);
 }
 
+/* Avatar fallback: hide by default without relying on Bootstrap d-none */
+.avatar-placeholder--fallback {
+    display: none;
+}
+
 .avatar-container {
     display: inline-block;
     position: relative;
@@ -125,11 +130,20 @@
     gap: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
 }
 
-.role-badge.admin { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-.role-badge.teacher { background: #eff6ff; color: var(--profile-primary); border: 1px solid #bfdbfe; }
-.role-badge.student { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.role-badge.superadmin           { background: #fee2e2; color: #dc2626;  border: 1px solid #fecaca; }
+.role-badge.admin                { background: #fee2e2; color: #dc2626;  border: 1px solid #fecaca; }
+.role-badge.org_owner            { background: #ffedd5; color: #c2410c;  border: 1px solid #fed7aa; }
+.role-badge.org_admin            { background: #fef9c3; color: #a16207;  border: 1px solid #fef08a; }
+.role-badge.teacher              { background: #eff6ff; color: #2563eb;  border: 1px solid #bfdbfe; }
+.role-badge.assistant_teacher    { background: #ecfeff; color: #0891b2;  border: 1px solid #a5f3fc; }
+.role-badge.lead_student         { background: #faf5ff; color: #9333ea;  border: 1px solid #e9d5ff; }
+.role-badge.student              { background: #dcfce7; color: #166534;  border: 1px solid #bbf7d0; }
+.role-badge.role-success         { background: #dcfce7; color: #166534;  border: 1px solid #bbf7d0; }
 
 /* --- Şəxsi Məlumatlar Bölməsi --- */
 .section-title {
