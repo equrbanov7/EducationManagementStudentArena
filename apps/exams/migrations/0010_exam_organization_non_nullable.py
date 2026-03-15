@@ -39,6 +39,11 @@ def handle_exams_without_organization(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
+    # atomic=False is required because PostgreSQL cannot ALTER TABLE while
+    # deferred trigger events (e.g. FK cascades) from the preceding RunPython
+    # step are still pending within the same transaction.
+    atomic = False
+
     dependencies = [
         ("courses", "0004_course_organization_non_nullable"),
         ("exams", "0009_alter_examquestion_created_at"),
