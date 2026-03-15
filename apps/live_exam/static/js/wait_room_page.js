@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const state = {
         myPlayer: config.myPlayer || {},
         players: [],
+        sessionSettings: Object.assign({}, config.sessionSettings || {}),
         socket: null,
         reconnectTimer: null,
         reconnectAttempts: 0,
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
         preview: document.getElementById("waitRoomPreview"),
         avatarGrid: document.getElementById("waitRoomAvatarGrid"),
         accessoryGrid: document.getElementById("waitRoomAccessoryGrid"),
+        appearanceSection: document.getElementById("waitRoomAppearanceSection"),
         panelButtons: document.querySelectorAll("[data-wait-room-panel-target]"),
         pickerPanels: document.querySelectorAll("[data-wait-room-panel]"),
         reactionRoot: document.getElementById("waitRoomReactionDock"),
@@ -74,6 +76,25 @@ document.addEventListener("DOMContentLoaded", function () {
     accessoryPicker.render();
     reactionPanel.init();
 
+    function applySessionSettings(nextSettings) {
+        state.sessionSettings = Object.assign({}, state.sessionSettings, nextSettings || {});
+        const charactersEnabled = state.sessionSettings.characters_enabled !== false;
+        const reactionsEnabled = state.sessionSettings.reactions_enabled !== false;
+        document.body.dataset.liveTheme = state.sessionSettings.theme_key || "aurora";
+
+        if (dom.reactionRoot) {
+            dom.reactionRoot.hidden = !reactionsEnabled;
+        }
+
+        if (dom.appearanceSection) {
+            dom.appearanceSection.hidden = !charactersEnabled;
+        }
+
+        if (!charactersEnabled) {
+            setActivePanel("avatar");
+        }
+    }
+
     function setFeedback(message, kind) {
         if (!dom.feedback) return;
         dom.feedback.textContent = message || "";
@@ -102,12 +123,25 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function renderPlayers(players) {
+    function renderPlayers(players, totalCount) {
         state.players = Array.isArray(players) ? players : [];
+        const expectedTotal = Number.isFinite(Number(totalCount)) ? Number(totalCount) : state.players.length;
+        const me = state.players.find(function (player) {
+            return Number(player?.id) === Number(state.myPlayer?.id);
+        });
+        if (!me && expectedTotal <= state.players.length) {
+            setFeedback(tr("removedFromLobby", "You were removed from the lobby."), "error");
+            window.setTimeout(function () {
+                window.location.replace(config.joinPageUrl || window.location.href);
+            }, 450);
+            return;
+        }
+        if (me) {
+            state.myPlayer = Object.assign({}, state.myPlayer, me);
+            renderHero();
+        }
         if (dom.footerCount) {
-            const otherPlayersCount = state.players.filter(function (player) {
-                return Number(player?.id) !== Number(state.myPlayer?.id);
-            }).length;
+            const otherPlayersCount = Math.max(expectedTotal - 1, 0);
             dom.footerCount.textContent = String(Math.max(otherPlayersCount, 0));
         }
     }
@@ -279,8 +313,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     return;
                 }
                 if (payload.type === "lobby_state") {
+                    applySessionSettings(payload.settings);
                     state.players = Array.isArray(payload.players) ? payload.players : [];
-                    renderPlayers(state.players);
+                    renderPlayers(state.players, payload.count);
+                    return;
+                }
+                if (payload.type === "session_settings" && payload.settings) {
+                    applySessionSettings(payload.settings);
                     return;
                 }
                 if (payload.type === "reaction_event") {
@@ -304,8 +343,9 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
+    applySessionSettings(state.sessionSettings);
     renderHero();
-    renderPlayers(state.players);
+    renderPlayers(state.players, state.players.length);
     dom.editButton?.addEventListener("click", openModal);
     dom.modalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeModal);

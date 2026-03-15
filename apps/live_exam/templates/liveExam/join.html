@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "title" context "live_exam.join" %} | {{ session.pin }}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔷</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -13,9 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
     <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}">
     <link rel="stylesheet" href="{% static 'css/join.css' %}">
 </head>
-<body class="join-page">
+<body class="join-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
     <div class="join-bg" aria-hidden="true">
         <span class="join-bg__blob join-bg__blob--one"></span>
         <span class="join-bg__blob join-bg__blob--two"></span>
@@ -73,26 +74,6 @@
                 <div id="joinNicknameError" class="join-form__error" aria-live="polite"></div>
             </div>
 
-            <div class="join-form__section">
-                <div class="join-tabs" role="tablist" aria-label="{% trans 'title' context 'live_exam.join' %}">
-                    <button id="joinTabAvatar" type="button" class="join-tabs__button is-active" data-join-panel-target="avatar" aria-selected="true">
-                        {% trans "avatar_label" context "live_exam.join" %}
-                    </button>
-                    <button id="joinTabAccessory" type="button" class="join-tabs__button" data-join-panel-target="accessory" aria-selected="false">
-                        Accessory
-                    </button>
-                </div>
-            </div>
-
-            <div class="join-picker-panels">
-                <section id="joinAvatarPanel" class="join-picker-panel is-active" data-join-panel="avatar">
-                    <div id="avatarGrid" class="join-picker__grid"></div>
-                </section>
-                <section id="joinAccessoryPanel" class="join-picker-panel" data-join-panel="accessory" hidden>
-                    <div id="accessoryGrid" class="join-picker__chips"></div>
-                </section>
-            </div>
-
             <div id="joinStatus" class="join-status" aria-live="polite"></div>
 
             <button id="joinBtn" class="join-btn" type="button">
@@ -123,15 +104,18 @@
     {% endif %}
 
     {{ remembered_player|json_script:"rememberedPlayerData" }}
+    {{ session_settings|json_script:"joinSessionSettings" }}
     <script>
         const CONFIG = {
+            pin: "{{ session.pin }}",
             joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
             csrf: "{{ csrf_token }}",
-            resumeUrl: "{{ resume_url }}"
+            resumeUrl: "{{ resume_url }}",
+            generatedNickname: "{{ generated_nickname|escapejs }}",
+            sessionSettings: JSON.parse(document.getElementById("joinSessionSettings").textContent)
         };
         CONFIG.rememberedPlayer = JSON.parse(document.getElementById("rememberedPlayerData").textContent);
         window.LIVE_EXAM_JOIN_I18N = {
-            accessoryLabel: "Accessory",
             joinReady: "{% trans 'join_button' context 'live_exam.join' %}",
             buttonJoining: "{% trans 'button_joining' context 'live_exam.join.js' %}",
             errorUnknown: "{% trans 'error_unknown' context 'live_exam.join.js' %}",
@@ -144,8 +128,6 @@
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
     <script src="{% static 'js/wait_room_nickname_editor.js' %}"></script>
-    <script src="{% static 'js/wait_room_avatar_picker.js' %}"></script>
-    <script src="{% static 'js/wait_room_accessory_picker.js' %}"></script>
     <script src="{% static 'js/join.js' %}"></script>
 </body>
 </html>

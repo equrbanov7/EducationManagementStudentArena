@@ -9,7 +9,6 @@ const UI = {
     questionCount: $("questionCount"),
     autoMode: $("autoMode"),
     gameState: $("gameState"),
-    lobbyHeader: $("lobbyHeader"),
     gameArea: $("gameArea"),
     presentationStage: $("presentationStage"),
     presentationContent: $("presentationContent"),
@@ -57,10 +56,20 @@ const state = {
     audioContext: null,
     lastIntroSoundKey: "",
     lastCountdownSoundKey: "",
+    lastRevealSoundKey: "",
+    lastScoreboardSoundKey: "",
+    lastFinalSoundKey: "",
+    lobbyMusicMode: "",
+    lobbyMusicTimer: 0,
+    players: [],
+    sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
+    isLocked: Boolean(CONFIG.sessionLocked),
 };
 
 const I18N = window.LIVE_EXAM_HOST_I18N || {};
+const hostShellSubscribers = new Set();
 const tr = (key, fallback) => I18N[key] || fallback;
+const controlsEnabled = () => CONFIG.controlsEnabled !== false;
 const fmt = (template, values) =>
     String(template || "").replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
 const esc = text => {
@@ -69,6 +78,9 @@ const esc = text => {
     return div.innerHTML;
 };
 const wsUrl = path => `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`;
+const safeDisplay = (node, value) => {
+    if (node) node.style.display = value;
+};
 const toMs = value => {
     const parsed = value ? new Date(value).getTime() : 0;
     return Number.isFinite(parsed) ? parsed : 0;
@@ -77,16 +89,172 @@ const questionKey = question => `${question?.id || "0"}:${question?.started_at |
 const revealKey = payload => `${payload?.question_id || "0"}:${payload?.revealed_at || ""}`;
 const answerWord = count => tr(count === 1 ? "answersSingular" : "answersPlural", count === 1 ? "Answer" : "Answers");
 const progressLabel = question => `${Number(question?.index || 0)} of ${Number(question?.total || 0)}`;
+const usesPresentationStageLayout = () => document.body.classList.contains("host-presentation-page");
+const progressBadgeMarkup = question => `
+    <div class="quiz-progress-badge" aria-label="${esc(progressLabel(question))}">
+        <strong>${Number(question?.index || 0)}</strong>
+        <span>of ${Number(question?.total || 0)}</span>
+    </div>
+`;
 const avatarMarkup = (player, size, className = "") =>
     (window.LiveAvatarRenderer || { renderAvatarMarkup: () => "" }).renderAvatarMarkup(player || {}, {
         size,
         className,
         interactive: false,
     });
+const avatarImageMarkup = (player, size, className = "") => {
+    const renderer = window.LiveAvatarRenderer || {};
+    if (typeof renderer.renderAvatarDataUrl !== "function") {
+        return avatarMarkup(player, size, className);
+    }
+
+    const resolvedSize = Number(size) > 0 ? Number(size) : 72;
+    const label = esc(player?.nickname || "Player");
+    const classes = ["host-avatar-image", className].filter(Boolean).join(" ");
+    return `<img class="${esc(classes)}" src="${renderer.renderAvatarDataUrl(player || {})}" alt="${label}" width="${resolvedSize}" height="${resolvedSize}" decoding="async">`;
+};
 
 let debugOn = false;
 const logs = [];
 let presenterWindowRef = null;
+
+function applySessionSettings(nextSettings) {
+    const previousLobbyMusic = state.sessionSettings.lobby_music;
+    state.sessionSettings = Object.assign({}, state.sessionSettings, nextSettings || {});
+    document.body.dataset.liveTheme = state.sessionSettings.theme_key || "aurora";
+    document.body.classList.toggle("live-high-contrast", Boolean(state.sessionSettings.increase_contrast));
+    if (UI.autoMode) {
+        UI.autoMode.checked = Boolean(state.sessionSettings.autoplay);
+    }
+    if (previousLobbyMusic !== state.sessionSettings.lobby_music) {
+        syncLobbyMusic(true);
+    }
+}
+
+function buildJoinUrl() {
+    const twoStepJoin = state.sessionSettings.two_step_join !== false;
+    let origin = location.origin;
+    try {
+        origin = new URL(CONFIG.entryUrl || location.origin).origin;
+    } catch (error) {
+        origin = location.origin;
+    }
+    if (twoStepJoin) {
+        const url = new URL("/live/", `${origin}/`);
+        url.searchParams.set("pin", CONFIG.pin);
+        return url.toString();
+    }
+    return `${origin}/live/join/${encodeURIComponent(CONFIG.pin)}/`;
+}
+
+function currentQrUrl() {
+    const base = CONFIG.qrUrl || "";
+    if (!base) return "";
+    const cacheKey = state.sessionSettings.two_step_join === false ? "direct" : "pin";
+    return `${base}${base.includes("?") ? "&" : "?"}mode=${cacheKey}`;
+}
+
+function publicHostState() {
+    return {
+        sessionState: state.sessionState,
+        phase: state.phase,
+        totalPlayers: Number(state.totalPlayers || 0),
+        answeredCount: Number(state.answeredCount || 0),
+        players: Array.isArray(state.players) ? [...state.players] : [],
+        settings: Object.assign({}, state.sessionSettings),
+        isLocked: Boolean(state.isLocked),
+    };
+}
+
+function notifyHostShell() {
+    const snapshot = publicHostState();
+    hostShellSubscribers.forEach(listener => {
+        try {
+            listener(snapshot);
+        } catch (error) {
+            console.error("live host shell subscriber error", error);
+        }
+    });
+    window.dispatchEvent(new CustomEvent("live-host-state", { detail: snapshot }));
+}
+
+function lobbyCopy() {
+    const lang = String(CONFIG.languageCode || "az").slice(0, 2).toLowerCase();
+    const copy = {
+        az: {
+            brand: "EMSArena Live",
+            joinLabel: "Qoşulmaq üçün",
+            joinHint: "Tələbələr link, PIN və ya QR kod ilə qoşula bilər.",
+            pinLabel: "Canlı PIN",
+            waitingLabel: "İştirakçılar gözlənilir",
+            waitingHint: "Müəllim Başla düyməsini sıxan kimi ilk sual yayımlanacaq.",
+            audienceLabel: "{count} iştirakçı qoşulub",
+            audienceEmpty: "Hələ heç kim qoşulmayıb",
+            participantsTitle: "Qoşulan iştirakçılar",
+            playersEmpty: "İştirakçılar burada görünəcək.",
+            lockedLabel: "Qoşulma bağlanıb",
+            lockedHint: "Yeni iştirakçılar artıq bu lobby-yə daxil ola bilməz.",
+            removePlayerLabel: "İştirakçını çıxar",
+        },
+        en: {
+            brand: "EMSArena Live",
+            joinLabel: "Join the live exam",
+            joinHint: "Students can join with the link, PIN, or QR code.",
+            pinLabel: "Live PIN",
+            waitingLabel: "Waiting for participants",
+            waitingHint: "The first question will appear as soon as the teacher presses Start.",
+            audienceLabel: "{count} participants joined",
+            audienceEmpty: "No participants have joined yet",
+            participantsTitle: "Joined participants",
+            playersEmpty: "Participants will appear here.",
+            lockedLabel: "Lobby locked",
+            lockedHint: "New participants cannot join until the teacher unlocks the session.",
+            removePlayerLabel: "Remove participant",
+        },
+        ru: {
+            brand: "EMSArena Live",
+            joinLabel: "Подключение к игре",
+            joinHint: "Участники могут войти по ссылке, PIN-коду или QR-коду.",
+            pinLabel: "PIN игры",
+            waitingLabel: "Ожидаем участников",
+            waitingHint: "Как только преподаватель нажмет Старт, появится первый вопрос.",
+            audienceLabel: "Подключились: {count}",
+            audienceEmpty: "Пока никто не подключился",
+            participantsTitle: "Подключившиеся участники",
+            playersEmpty: "Здесь появятся участники.",
+            lockedLabel: "Лобби закрыто",
+            lockedHint: "Новые участники больше не могут присоединиться к этой сессии.",
+            removePlayerLabel: "Удалить участника",
+        },
+        tr: {
+            brand: "EMSArena Live",
+            joinLabel: "Canli sinava katıl",
+            joinHint: "Öğrenciler bağlantı, PIN veya QR kod ile katılabilir.",
+            pinLabel: "Canlı PIN",
+            waitingLabel: "Katılımcılar bekleniyor",
+            waitingHint: "Öğretmen Başlat'a basar basmaz ilk soru gösterilecek.",
+            audienceLabel: "{count} katılımcı bağlandı",
+            audienceEmpty: "Henüz kimse bağlanmadı",
+            participantsTitle: "Katılan katılımcılar",
+            playersEmpty: "Katılımcılar burada görünecek.",
+            lockedLabel: "Lobi kilitli",
+            lockedHint: "Öğretmen yeniden açana kadar yeni katılımcı giremez.",
+            removePlayerLabel: "Katılımcıyı çıkar",
+        },
+    };
+    return copy[lang] || copy.az;
+}
+
+function joinUrlLabel(rawUrl) {
+    if (!rawUrl) return "";
+    try {
+        const parsed = new URL(rawUrl);
+        const path = parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/$/, "");
+        return `${parsed.host}${path}`;
+    } catch (error) {
+        return String(rawUrl).replace(/^https?:\/\//, "").replace(/\/$/, "");
+    }
+}
 
 function log(message) {
     console.log("[HOST]", message);
@@ -118,7 +286,7 @@ function clearAutoTimers() {
 
 function presenterUrl() {
     if (!CONFIG?.urls?.present) return "";
-    return `${CONFIG.urls.present}${CONFIG.urls.present.includes("?") ? "&" : "?"}autofs=1`;
+    return `${CONFIG.urls.present}${CONFIG.urls.present.includes("?") ? "&" : "?"}autofs=1&controls=0`;
 }
 
 function openPresenterWindow() {
@@ -167,7 +335,9 @@ function getAudioContext() {
 function unlockAudio() {
     const context = getAudioContext();
     if (!context || context.state !== "suspended") return;
-    context.resume().catch(() => {});
+    context.resume().then(() => {
+        syncLobbyMusic(true);
+    }).catch(() => {});
 }
 
 function playTone(context, config) {
@@ -250,6 +420,186 @@ function playCountdownSound(key) {
     start();
 }
 
+function stopLobbyMusic() {
+    if (state.lobbyMusicTimer) {
+        clearTimeout(state.lobbyMusicTimer);
+        state.lobbyMusicTimer = 0;
+    }
+    state.lobbyMusicMode = "";
+}
+
+function scheduleLobbyMusicLoop(mode) {
+    const context = getAudioContext();
+    if (!context || context.state !== "running" || state.sessionState !== "lobby" || mode === "silent") {
+        stopLobbyMusic();
+        return;
+    }
+
+    const patterns = {
+        original: {
+            loopMs: 3200,
+            notes: [
+                { offset: 0.00, duration: 0.22, frequency: 196, endFrequency: 220, gain: 0.016, type: "triangle" },
+                { offset: 0.24, duration: 0.18, frequency: 246.94, endFrequency: 261.63, gain: 0.013, type: "sine" },
+                { offset: 0.52, duration: 0.22, frequency: 293.66, endFrequency: 329.63, gain: 0.015, type: "triangle" },
+                { offset: 0.84, duration: 0.24, frequency: 392, endFrequency: 440, gain: 0.016, type: "triangle" },
+                { offset: 1.24, duration: 0.26, frequency: 164.81, endFrequency: 174.61, gain: 0.01, type: "sine" },
+                { offset: 1.56, duration: 0.18, frequency: 261.63, endFrequency: 293.66, gain: 0.012, type: "square" },
+            ],
+        },
+        focus: {
+            loopMs: 3600,
+            notes: [
+                { offset: 0.00, duration: 0.34, frequency: 174.61, endFrequency: 196, gain: 0.012, type: "sine" },
+                { offset: 0.44, duration: 0.26, frequency: 220, endFrequency: 233.08, gain: 0.01, type: "triangle" },
+                { offset: 0.96, duration: 0.36, frequency: 261.63, endFrequency: 293.66, gain: 0.011, type: "sine" },
+                { offset: 1.54, duration: 0.24, frequency: 196, endFrequency: 174.61, gain: 0.009, type: "triangle" },
+            ],
+        },
+    };
+
+    const selected = patterns[mode] || patterns.original;
+    const base = context.currentTime + 0.04;
+    selected.notes.forEach((note) => {
+        playTone(context, {
+            startTime: base + note.offset,
+            duration: note.duration,
+            frequency: note.frequency,
+            endFrequency: note.endFrequency,
+            gain: note.gain,
+            type: note.type,
+        });
+    });
+
+    state.lobbyMusicMode = mode;
+    if (state.lobbyMusicTimer) {
+        clearTimeout(state.lobbyMusicTimer);
+    }
+    state.lobbyMusicTimer = window.setTimeout(() => {
+        scheduleLobbyMusicLoop(mode);
+    }, selected.loopMs);
+}
+
+function syncLobbyMusic(force = false) {
+    const mode = String(state.sessionSettings.lobby_music || "original");
+    const context = getAudioContext();
+    const shouldPlay = state.sessionState === "lobby" && mode !== "silent";
+
+    if (!shouldPlay || !context || context.state !== "running") {
+        stopLobbyMusic();
+        return;
+    }
+
+    if (!force && state.lobbyMusicMode === mode && state.lobbyMusicTimer) {
+        return;
+    }
+
+    scheduleLobbyMusicLoop(mode);
+}
+
+function playRevealSound(key) {
+    if (state.lastRevealSoundKey === key) return;
+    const context = getAudioContext();
+    if (!context) return;
+
+    const start = () => {
+        const base = context.currentTime + 0.01;
+        playTone(context, {
+            startTime: base,
+            duration: 0.14,
+            frequency: 440,
+            endFrequency: 392,
+            gain: 0.038,
+            type: "triangle",
+        });
+        playTone(context, {
+            startTime: base + 0.09,
+            duration: 0.26,
+            frequency: 293.66,
+            endFrequency: 220,
+            gain: 0.05,
+            type: "sine",
+        });
+        state.lastRevealSoundKey = key;
+    };
+
+    if (context.state === "suspended") {
+        context.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
+function playScoreboardSound(key) {
+    if (state.lastScoreboardSoundKey === key) return;
+    const context = getAudioContext();
+    if (!context) return;
+
+    const start = () => {
+        const base = context.currentTime + 0.01;
+        [261.63, 329.63, 392, 523.25].forEach((frequency, index) => {
+            playTone(context, {
+                startTime: base + index * 0.08,
+                duration: 0.15,
+                frequency,
+                endFrequency: frequency * 1.02,
+                gain: 0.034,
+                type: index % 2 === 0 ? "square" : "triangle",
+            });
+        });
+        playTone(context, {
+            startTime: base + 0.04,
+            duration: 0.42,
+            frequency: 164.81,
+            endFrequency: 130.81,
+            gain: 0.018,
+            type: "sine",
+        });
+        state.lastScoreboardSoundKey = key;
+    };
+
+    if (context.state === "suspended") {
+        context.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
+function playFinalSound(key) {
+    if (state.lastFinalSoundKey === key) return;
+    const context = getAudioContext();
+    if (!context) return;
+
+    const start = () => {
+        const base = context.currentTime + 0.02;
+        [261.63, 329.63, 392, 523.25, 659.25].forEach((frequency, index) => {
+            playTone(context, {
+                startTime: base + index * 0.09,
+                duration: index === 4 ? 0.56 : 0.24,
+                frequency,
+                endFrequency: frequency * 1.015,
+                gain: index === 4 ? 0.046 : 0.03,
+                type: index < 3 ? "triangle" : "sine",
+            });
+        });
+        playTone(context, {
+            startTime: base + 0.02,
+            duration: 0.8,
+            frequency: 130.81,
+            endFrequency: 98,
+            gain: 0.02,
+            type: "sine",
+        });
+        state.lastFinalSoundKey = key;
+    };
+
+    if (context.state === "suspended") {
+        context.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
 function schedulePhaseLoop(fn) {
     clearPhaseLoop();
     const tick = () => {
@@ -277,6 +627,7 @@ function setPresentationMarkup(phase, signature, markup) {
     state.phase = phase;
     state.phaseSignature = signature;
     UI.presentationContent.innerHTML = markup;
+    notifyHostShell();
 }
 
 function setSessionState(nextState) {
@@ -291,11 +642,10 @@ function setSessionState(nextState) {
     const isPlay = nextState === "question" || nextState === "reveal";
     const isFinished = nextState === "finished";
 
-    UI.lobbyHeader.style.display = CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none");
-    UI.playersSection.style.display = CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none");
-    UI.gameArea.style.display = CONFIG.presentationOnly ? "block" : (isPlay ? "block" : "none");
-    UI.finalPodium.style.display = isFinished ? "grid" : "none";
-    UI.progressBox.style.display = !CONFIG.presentationOnly && nextState === "question" ? "flex" : "none";
+    safeDisplay(UI.playersSection, CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none"));
+    safeDisplay(UI.gameArea, CONFIG.presentationOnly ? "block" : ((isLobby || isPlay) ? "block" : "none"));
+    safeDisplay(UI.finalPodium, isFinished ? "grid" : "none");
+    safeDisplay(UI.progressBox, !CONFIG.presentationOnly && nextState === "question" ? "flex" : "none");
 
     if (isLobby) {
         clearPhaseLoop();
@@ -303,20 +653,156 @@ function setSessionState(nextState) {
         renderIdleStage();
     }
 
+    syncLobbyMusic(true);
     log(fmt(tr("stateLog", "State: {state}"), { state: stateLabel(nextState) }));
+    notifyHostShell();
 }
 
 function renderIdleStage() {
+    const copy = lobbyCopy();
+    const joinedCount = Number(state.totalPlayers || 0);
+    const audienceText = joinedCount > 0 ? fmt(copy.audienceLabel, { count: joinedCount }) : copy.audienceEmpty;
+    const joinUrl = joinUrlLabel(buildJoinUrl());
+    const waitingLabel = state.isLocked ? copy.lockedLabel : copy.waitingLabel;
+    const waitingHint = state.isLocked ? copy.lockedHint : copy.waitingHint;
+    const audienceSignature = (state.players || [])
+        .map(player =>
+            [
+                Number(player?.id || 0),
+                String(player?.nickname || ""),
+                String(player?.avatar_key || ""),
+                String(player?.accessory_key || ""),
+            ].join(":")
+        )
+        .join("|");
+    const audienceMarkup = state.players.length
+        ? state.players
+            .map(
+                player => `
+                    <article class="lobby-stage__audience-card" data-player-id="${Number(player?.id || 0)}">
+                        <div class="lobby-stage__audience-avatar">${avatarImageMarkup(player, 64, "host-avatar-image--stage-participant")}</div>
+                        <div class="lobby-stage__audience-name">${esc(player?.nickname || "")}</div>
+                        ${
+                            controlsEnabled()
+                                ? `
+                                    <button
+                                        type="button"
+                                        class="lobby-stage__audience-remove"
+                                        data-remove-player-id="${Number(player?.id || 0)}"
+                                        aria-label="${esc(copy.removePlayerLabel)}: ${esc(player?.nickname || "player")}"
+                                        title="${esc(copy.removePlayerLabel)}">
+                                        <i class="fas fa-user-minus"></i>
+                                    </button>
+                                `
+                                : ""
+                        }
+                    </article>
+                `
+            )
+            .join("")
+        : `<div class="lobby-stage__audience-empty">${esc(copy.playersEmpty)}</div>`;
+
     setPresentationMarkup(
         PHASES.IDLE,
-        "idle",
+        `idle:${joinedCount}:${state.isLocked ? "locked" : "open"}:${state.sessionSettings.two_step_join === false ? "direct" : "pin"}:${audienceSignature}`,
         `
-            <section class="present-view present-view--center">
-                <h1 class="stage-hero stage-hero--wordmark">${esc(tr("introTitle", "Quiz"))}</h1>
-                <p class="stage-copy">${esc(tr("introSubtitle", "Get ready for the next round"))}</p>
+            <section class="present-view present-view--lobby">
+                <header class="lobby-stage__join-board">
+                    <div class="lobby-stage__join-copy">
+                        <span class="lobby-stage__eyebrow">${esc(copy.joinLabel)}</span>
+                        <strong>${esc(joinUrl || CONFIG.entryUrl || "")}</strong>
+                        <p>${esc(copy.joinHint)}</p>
+                    </div>
+                    <div class="lobby-stage__pin">
+                        <span class="lobby-stage__eyebrow">${esc(copy.pinLabel)}</span>
+                        <strong>${esc(CONFIG.pin)}</strong>
+                        <small>${esc(audienceText)}</small>
+                    </div>
+                    <button type="button" class="lobby-stage__qr" onclick="toggleQR(true)" aria-label="QR">
+                        <img src="${esc(currentQrUrl())}" alt="QR">
+                    </button>
+                </header>
+
+                <div class="lobby-stage__hero">
+                    <div class="stage-pill stage-pill--brand">${esc(copy.brand)}</div>
+                    <h1 class="stage-title stage-title--lobby">${esc(CONFIG.examTitle || tr("introTitle", "Quiz"))}</h1>
+                    <div class="lobby-stage__status ${state.isLocked ? "is-locked" : ""}">
+                        <span class="lobby-stage__status-dot" aria-hidden="true"></span>
+                        <span>${esc(waitingLabel)}</span>
+                    </div>
+                </div>
+
+                <section class="lobby-stage__audience-dock ${state.players.length ? "" : "is-empty"}" aria-label="${esc(copy.participantsTitle)}">
+                    <header class="lobby-stage__audience-head">
+                        <div class="lobby-stage__audience-copy">
+                            <span class="lobby-stage__audience-kicker">${esc(copy.participantsTitle)}</span>
+                            <strong>${esc(audienceText)}</strong>
+                        </div>
+                        <span class="lobby-stage__audience-count">${joinedCount}</span>
+                    </header>
+                    <div class="lobby-stage__audience-list">
+                        ${audienceMarkup}
+                    </div>
+                </section>
+
+                <footer class="lobby-stage__footer">
+                    <div class="lobby-stage__meta lobby-stage__meta--muted">${esc(waitingHint)}</div>
+                </footer>
             </section>
         `
     );
+}
+
+function renderLobbyPlayers(players, totalCount = null) {
+    state.players = Array.isArray(players) ? players : [];
+    const expectedTotal = Number.isFinite(Number(totalCount)) ? Number(totalCount) : Number(state.players.length);
+    state.totalPlayers = expectedTotal;
+
+    if (UI.playersCount) {
+        UI.playersCount.textContent = state.totalPlayers;
+    }
+    updateAnsweredCounter();
+
+    if (!UI.playersList) {
+        notifyHostShell();
+        return;
+    }
+
+    UI.playersList.innerHTML = "";
+    if (!state.players.length) {
+        const empty = document.createElement("div");
+        empty.className = "players-empty";
+        empty.textContent = lobbyCopy().playersEmpty;
+        UI.playersList.appendChild(empty);
+        notifyHostShell();
+        return;
+    }
+
+    state.players.forEach(player => {
+        const chip = document.createElement("article");
+        chip.className = "player-chip";
+        chip.dataset.playerId = String(player.id);
+        chip.innerHTML = `
+            <div class="player-chip__avatar">${avatarMarkup(player, 54, "host-avatar host-avatar--chip")}</div>
+            <div class="player-chip__name">${esc(player.nickname || "")}</div>
+            ${
+                !CONFIG.presentationOnly && state.sessionState === "lobby"
+                    ? `
+                        <button
+                            type="button"
+                            class="player-chip__remove"
+                            data-remove-player-id="${Number(player.id || 0)}"
+                            aria-label="Remove ${esc(player.nickname || "player")}">
+                            <i class="fas fa-user-minus"></i>
+                        </button>
+                    `
+                    : ""
+            }
+        `;
+        UI.playersList.appendChild(chip);
+    });
+
+    notifyHostShell();
 }
 
 function updateAnsweredCounter() {
@@ -346,7 +832,8 @@ function updateTimerBadge(nowMs) {
     const value = $("answerTimerValue");
     const badge = $("answerTimerBadge");
     if (!value || !badge || !state.questionPlan) return;
-    const leftSeconds = Math.max(0, Math.ceil((state.questionPlan.endsAt - nowMs) / 1000));
+    const deadline = nowMs < state.questionPlan.answerStart ? state.questionPlan.answerStart : state.questionPlan.endsAt;
+    const leftSeconds = Math.max(0, Math.ceil((deadline - nowMs) / 1000));
     value.textContent = `${leftSeconds}`;
     badge.classList.toggle("is-warning", leftSeconds <= 10 && leftSeconds > 5);
     badge.classList.toggle("is-danger", leftSeconds <= 5);
@@ -429,16 +916,31 @@ function renderCountdownStage(question, number) {
 }
 
 function renderQuestionOnlyStage(question) {
+    const presentationLayout = usesPresentationStageLayout();
     setPresentationMarkup(
         PHASES.QUESTION,
         `${state.questionKey}:${PHASES.QUESTION}`,
         `
             <section class="present-view present-view--quiz">
                 <div class="quiz-shell quiz-shell--question">
-                    <div class="quiz-progress">${esc(progressLabel(question))}</div>
-                    <div class="question-card question-card--solo">
-                        <h2 class="question-card__title">${esc(question?.text || "")}</h2>
-                    </div>
+                    ${
+                        presentationLayout
+                            ? `
+                                <div class="question-card question-card--solo">
+                                    <h2 class="question-card__title">${esc(question?.text || "")}</h2>
+                                </div>
+                            `
+                            : `
+                                <div class="quiz-shell__hud quiz-shell__hud--single">
+                                    <div class="quiz-shell__hud-left">
+                                        <div class="quiz-progress">${esc(progressLabel(question))}</div>
+                                    </div>
+                                </div>
+                                <div class="question-card question-card--solo">
+                                    <h2 class="question-card__title">${esc(question?.text || "")}</h2>
+                                </div>
+                            `
+                    }
                     <div class="question-only-bar" aria-hidden="true">
                         <span id="questionOnlyBarFill"></span>
                     </div>
@@ -464,24 +966,64 @@ function answerOptionMarkup(option, index) {
 }
 
 function renderAnswersStage(question) {
+    const presentationLayout = usesPresentationStageLayout();
     setPresentationMarkup(
         PHASES.ANSWERS,
         `${state.questionKey}:${PHASES.ANSWERS}`,
         `
             <section class="present-view present-view--quiz">
                 <div class="quiz-shell">
-                    <div class="quiz-progress">${esc(progressLabel(question))}</div>
-                    <div class="question-card">
-                        <h2 class="question-card__title">${esc(question?.text || "")}</h2>
+                    <div class="${presentationLayout ? "quiz-stage-frame" : "quiz-shell__hud"}">
+                        ${
+                            presentationLayout
+                                ? `
+                                    <div class="quiz-stage-side quiz-stage-side--left">
+                                        <div id="answerTimerBadge" class="quiz-orb quiz-orb--timer">
+                                            <strong id="answerTimerValue">0</strong>
+                                            <span>${esc(tr("secondsLabel", "seconds"))}</span>
+                                        </div>
+                                    </div>
+                                    <div class="quiz-stage-main">
+                                        <div class="question-card">
+                                            <h2 class="question-card__title">${esc(question?.text || "")}</h2>
+                                        </div>
+                                    </div>
+                                    <div class="quiz-stage-side quiz-stage-side--right">
+                                        <div class="quiz-stage-stack">
+                                            ${progressBadgeMarkup(question)}
+                                            <div class="quiz-orb quiz-orb--counter">
+                                                <strong id="answerCounterNumber">0</strong>
+                                                <span id="answerCounterLabel">${esc(answerWord(0))}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `
+                                : `
+                                    <div class="quiz-shell__hud-left">
+                                        <div class="quiz-progress">${esc(progressLabel(question))}</div>
+                                    </div>
+                                    <div class="quiz-shell__hud-right">
+                                        <div id="answerTimerBadge" class="quiz-orb quiz-orb--timer">
+                                            <strong id="answerTimerValue">0</strong>
+                                            <span>${esc(tr("secondsLabel", "seconds"))}</span>
+                                        </div>
+                                        <div class="quiz-orb quiz-orb--counter">
+                                            <strong id="answerCounterNumber">0</strong>
+                                            <span id="answerCounterLabel">${esc(answerWord(0))}</span>
+                                        </div>
+                                    </div>
+                                `
+                        }
                     </div>
-                    <div id="answerTimerBadge" class="quiz-orb quiz-orb--timer">
-                        <strong id="answerTimerValue">0</strong>
-                        <span>${esc(tr("secondsLabel", "seconds"))}</span>
-                    </div>
-                    <div class="quiz-orb quiz-orb--counter">
-                        <strong id="answerCounterNumber">0</strong>
-                        <span id="answerCounterLabel">${esc(answerWord(0))}</span>
-                    </div>
+                    ${
+                        presentationLayout
+                            ? ""
+                            : `
+                                <div class="question-card">
+                                    <h2 class="question-card__title">${esc(question?.text || "")}</h2>
+                                </div>
+                            `
+                    }
                 </div>
                 <div class="host-options-grid host-options-grid--kahoot">
                     ${(question?.options || []).map(answerOptionMarkup).join("")}
@@ -550,7 +1092,11 @@ function renderRevealStage(question, payload) {
         `
             <section class="present-view present-view--quiz">
                 <div class="quiz-shell quiz-shell--reveal">
-                    <div class="quiz-progress">${esc(progressLabel(question))}</div>
+                    <div class="quiz-shell__hud quiz-shell__hud--single">
+                        <div class="quiz-shell__hud-left">
+                            <div class="quiz-progress">${esc(progressLabel(question))}</div>
+                        </div>
+                    </div>
                     <div class="question-card question-card--reveal">
                         <h2 class="question-card__title">${esc(question?.text || "")}</h2>
                     </div>
@@ -590,6 +1136,7 @@ function movementBadge(player, index, previousTop) {
 function renderScoreboardStage(payload) {
     const previousTop = payload?.previous_top || [];
     const rows = (payload?.top || []).slice(0, 5);
+    playScoreboardSound(state.revealKey || `${payload?.question_id || "0"}:scoreboard`);
 
     setPresentationMarkup(
         PHASES.SCOREBOARD,
@@ -607,10 +1154,10 @@ function renderScoreboardStage(payload) {
                                 <article class="scoreboard-row ${index === 0 ? "is-first" : ""}">
                                     <div class="scoreboard-row__left">
                                         <div class="scoreboard-row__rank">${index + 1}</div>
-                                        <div class="scoreboard-row__avatar">${avatarMarkup(
+                                        <div class="scoreboard-row__avatar">${avatarImageMarkup(
                                             player,
                                             58,
-                                            "host-avatar host-avatar--scoreboard"
+                                            "host-avatar-image--scoreboard"
                                         )}</div>
                                         <div class="scoreboard-row__meta">
                                             <div class="scoreboard-row__name">${esc(player.nickname || "")}</div>
@@ -648,6 +1195,8 @@ function syncQuestionPresentation() {
         }
     } else if (now < plan.answerStart) {
         renderQuestionOnlyStage(state.currentQuestion);
+        updateAnsweredCounter();
+        updateTimerBadge(now);
         updateQuestionIntroProgress(now);
     } else {
         renderAnswersStage(state.currentQuestion);
@@ -674,7 +1223,7 @@ function syncRevealPresentation() {
 
 function scheduleAutoReveal(question) {
     clearTimeout(state.autoRevealTimeout);
-    if (CONFIG.presentationOnly || !UI.autoMode.checked || !question?.ends_at) return;
+    if (!controlsEnabled() || !UI.autoMode.checked || !question?.ends_at) return;
     const ms = Math.max(0, toMs(question.ends_at) - Date.now());
     state.autoRevealTimeout = setTimeout(() => {
         if (state.sessionState === "question") {
@@ -685,7 +1234,7 @@ function scheduleAutoReveal(question) {
 
 function scheduleAutoNext(payload) {
     clearTimeout(state.autoNextTimeout);
-    if (CONFIG.presentationOnly || !UI.autoMode.checked || !payload?.next_question_at) return;
+    if (!controlsEnabled() || !UI.autoMode.checked || !payload?.next_question_at) return;
     const ms = Math.max(0, toMs(payload.next_question_at) - Date.now());
     state.autoNextTimeout = setTimeout(() => {
         if (state.sessionState === "reveal") {
@@ -730,6 +1279,9 @@ function applyRevealState(payload, question) {
 
     const nextKey = revealKey(payload);
     const shouldRestart = state.revealKey !== nextKey || state.sessionState !== "reveal";
+    if (state.revealKey !== nextKey) {
+        playRevealSound(nextKey);
+    }
     state.revealKey = nextKey;
 
     clearTimeout(state.autoRevealTimeout);
@@ -745,6 +1297,11 @@ function applyRevealState(payload, question) {
 }
 
 function renderPodium(top) {
+    const finalKey = (top || [])
+        .map((player) => `${Number(player?.player_id || player?.id || 0)}:${Number(player?.score || 0)}`)
+        .join("|") || "final";
+    playFinalSound(finalKey);
+
     UI.confetti.innerHTML = "";
     const othersSection = UI.othersList?.closest(".others-section");
     const colors = ["#fbbf24", "#fb7185", "#38bdf8", "#34d399", "#a855f7", "#f97316", "#fde047"];
@@ -822,10 +1379,10 @@ function renderPodium(top) {
                     <span class="podium-avatar-ring"></span>
                     <span class="podium-avatar-spark podium-avatar-spark--left"></span>
                     <span class="podium-avatar-spark podium-avatar-spark--right"></span>
-                    ${avatarMarkup(
+                    ${avatarImageMarkup(
                         player,
                         player.place === 1 ? 132 : player.place === 2 ? 116 : 108,
-                        "podium-avatar-live host-avatar"
+                        "podium-avatar-image"
                     )}
                 </div>
                 <div class="podium-name">${esc(player.nickname || "")}</div>
@@ -851,7 +1408,7 @@ function renderPodium(top) {
         row.innerHTML = `
             <div class="other-info">
                 <span class="other-rank">${index + 4}</span>
-                ${avatarMarkup(player, 44, "other-avatar-live host-avatar")}
+                ${avatarImageMarkup(player, 44, "other-avatar-image")}
                 <span class="other-name">${esc(player.nickname || "")}</span>
             </div>
             <span class="other-score">${Number(player.score || 0)}</span>
@@ -863,8 +1420,21 @@ function renderPodium(top) {
 function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
 
+    if (snapshot.settings) {
+        applySessionSettings(snapshot.settings);
+    }
+    if (snapshot.is_locked != null) {
+        state.isLocked = Boolean(snapshot.is_locked);
+    }
+    if (Array.isArray(snapshot.players)) {
+        renderLobbyPlayers(snapshot.players, snapshot.total_players);
+    }
+
     if (snapshot.total_players != null) {
         state.totalPlayers = Number(snapshot.total_players || 0);
+        if (UI.playersCount) {
+            UI.playersCount.textContent = state.totalPlayers;
+        }
     }
     if (snapshot.answered_count != null) {
         state.answeredCount = Number(snapshot.answered_count || 0);
@@ -899,10 +1469,12 @@ function applyStateSnapshot(snapshot) {
         clearAutoTimers();
         setSessionState("finished");
         renderPodium(snapshot.top || []);
+        notifyHostShell();
         return;
     }
 
     setSessionState("lobby");
+    notifyHostShell();
 }
 
 async function post(url, data = null) {
@@ -926,6 +1498,27 @@ async function post(url, data = null) {
     }
 }
 
+async function postJson(url, payload = {}) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": CONFIG.csrf,
+            },
+            body: JSON.stringify(payload || {}),
+        });
+        const data = await response.json();
+        if (data?.ok) {
+            await syncState();
+        }
+        return data;
+    } catch (error) {
+        log(fmt(tr("postError", "POST error: {message}"), { message: error.message || "" }));
+        return { ok: false };
+    }
+}
+
 async function syncState() {
     try {
         const response = await fetch(CONFIG.urls.state, {
@@ -942,6 +1535,31 @@ async function syncState() {
         log(fmt(tr("playMessageError", "Play message error: {message}"), { message: error.message || "" }));
         return null;
     }
+}
+
+function startGame() {
+    openPresenterWindow();
+    const formData = new FormData();
+    const count = parseInt(UI.questionCount?.value, 10) || 1;
+    formData.append("question_count", count);
+    return post(CONFIG.urls.start, formData);
+}
+
+function revealQuestion() {
+    return post(CONFIG.urls.reveal);
+}
+
+function nextQuestion() {
+    return post(CONFIG.urls.next);
+}
+
+function skipQuestionIntro() {
+    if (!CONFIG?.urls?.skipIntro) return Promise.resolve({ ok: false });
+    return post(CONFIG.urls.skipIntro);
+}
+
+function finishGame() {
+    return post(CONFIG.urls.finish);
 }
 
 function spawnReaction(eventData) {
@@ -968,20 +1586,18 @@ lobbyWS.onmessage = event => {
         const data = message.data || message;
 
         if (data.type === "lobby_state") {
-            state.totalPlayers = Number(data.count || 0);
-            UI.playersCount.textContent = state.totalPlayers;
-            updateAnsweredCounter();
+            if (data.settings) {
+                applySessionSettings(data.settings);
+            }
+            if (data.is_locked != null) {
+                state.isLocked = Boolean(data.is_locked);
+            }
+            renderLobbyPlayers(data.players || [], data.count);
 
-            UI.playersList.innerHTML = "";
-            (data.players || []).forEach(player => {
-                const chip = document.createElement("div");
-                chip.className = "player-chip";
-                chip.innerHTML = `
-                    <div class="avatar">${avatarMarkup(player, 54, "host-avatar host-avatar--chip")}</div>
-                    <div class="name">${esc(player.nickname || "")}</div>
-                `;
-                UI.playersList.appendChild(chip);
-            });
+            if (state.sessionState === "lobby") {
+                renderIdleStage();
+            }
+            notifyHostShell();
             return;
         }
 
@@ -1016,7 +1632,7 @@ playWS.onmessage = event => {
             updateAnsweredCounter();
 
             if (
-                !CONFIG.presentationOnly
+                controlsEnabled()
                 && state.answeredCount >= state.totalPlayers
                 && state.totalPlayers > 0
                 && state.sessionState === "question"
@@ -1048,18 +1664,29 @@ playWS.onmessage = event => {
     }
 };
 
-UI.startBtn.onclick = () => {
-    openPresenterWindow();
-    const formData = new FormData();
-    const count = parseInt(UI.questionCount.value, 10) || 1;
-    formData.append("question_count", count);
-    post(CONFIG.urls.start, formData);
-};
+UI.startBtn.onclick = startGame;
 
-UI.presentBtn.onclick = () => openPresenterWindow();
-UI.revealBtn.onclick = () => post(CONFIG.urls.reveal);
-UI.nextBtn.onclick = () => post(CONFIG.urls.next);
-UI.finishBtn.onclick = () => post(CONFIG.urls.finish);
+if (UI.presentBtn) {
+    UI.presentBtn.onclick = () => openPresenterWindow();
+}
+UI.revealBtn.onclick = revealQuestion;
+UI.nextBtn.onclick = nextQuestion;
+UI.finishBtn.onclick = finishGame;
+UI.presentationContent?.addEventListener("click", event => {
+    const button = event.target.closest("[data-remove-player-id]");
+    if (!button || !controlsEnabled() || state.sessionState !== "lobby") return;
+    button.disabled = true;
+    const formData = new FormData();
+    formData.append("player_id", button.dataset.removePlayerId);
+    post(CONFIG.urls.removePlayer, formData).finally(() => {
+        button.disabled = false;
+    });
+});
+UI.autoMode?.addEventListener("change", () => {
+    if (controlsEnabled() && CONFIG?.urls?.settings) {
+        postJson(CONFIG.urls.settings, { autoplay: Boolean(UI.autoMode.checked) });
+    }
+});
 
 UI.questionCount?.addEventListener("focus", function onFocus() {
     this.select();
@@ -1080,7 +1707,13 @@ UI.questionCount?.addEventListener("keydown", event => {
 });
 
 setSessionState("lobby");
+applySessionSettings(state.sessionSettings);
 log(tr("hostReady", "Host ready"));
+
+document.addEventListener("pointerdown", unlockAudio, { passive: true });
+document.addEventListener("touchstart", unlockAudio, { passive: true });
+document.addEventListener("keydown", unlockAudio);
+
 if (CONFIG.presentationOnly) {
     setTimeout(() => {
         tryEnterFullscreen();
@@ -1097,3 +1730,35 @@ if (CONFIG.presentationOnly) {
     });
 }
 syncState();
+
+window.LiveHostLobbyController = {
+    subscribe(listener) {
+        if (typeof listener !== "function") return () => {};
+        hostShellSubscribers.add(listener);
+        listener(publicHostState());
+        return () => hostShellSubscribers.delete(listener);
+    },
+    getState: publicHostState,
+    syncState,
+    updateSettings(updates) {
+        if (!CONFIG?.urls?.settings) return Promise.resolve({ ok: false });
+        return postJson(CONFIG.urls.settings, updates);
+    },
+    startGame,
+    skipQuestionIntro,
+    revealQuestion,
+    nextQuestion,
+    finishGame,
+    toggleLock(locked) {
+        if (!CONFIG?.urls?.lock) return Promise.resolve({ ok: false });
+        const formData = new FormData();
+        formData.append("locked", locked ? "1" : "0");
+        return post(CONFIG.urls.lock, formData);
+    },
+    removePlayer(playerId) {
+        if (!CONFIG?.urls?.removePlayer) return Promise.resolve({ ok: false });
+        const formData = new FormData();
+        formData.append("player_id", playerId);
+        return post(CONFIG.urls.removePlayer, formData);
+    },
+};

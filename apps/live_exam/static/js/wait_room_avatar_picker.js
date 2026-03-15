@@ -19,7 +19,11 @@
                 button.setAttribute("aria-pressed", avatarKey === this.value ? "true" : "false");
                 button.innerHTML = window.LiveAvatarRenderer.renderAvatarMarkup(
                     { avatar_key: avatarKey, accessory_key: this.options.previewAccessoryKey || "accessory_none" },
-                    { size: 62, className: "wait-room-picker__avatar", interactive: false }
+                    {
+                        size: Number(this.options.avatarSize || 62),
+                        className: "wait-room-picker__avatar",
+                        interactive: false,
+                    }
                 );
                 button.addEventListener("click", () => {
                     this.setValue(avatarKey);

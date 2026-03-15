@@ -138,13 +138,16 @@ class LiveSessionCreationTest(TestCase):
         self.client.login(username="live_teacher", password="StrongPass123!")
         response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
 
-        # Should redirect to host lobby
+        # Should redirect to presentation view with controls enabled
         self.assertEqual(response.status_code, 302)
 
         # Session should be created
         session = LiveSession.objects.filter(exam=self.exam, host_user=self.teacher).first()
         self.assertIsNotNone(session)
-        self.assertEqual(response.url, reverse("liveExam:host_lobby", kwargs={"pin": session.pin}))
+        self.assertEqual(
+            response.url,
+            f"{reverse('liveExam:host_presentation', kwargs={'pin': session.pin})}?controls=1",
+        )
 
 
 class LiveJoinTest(TestCase):

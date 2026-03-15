@@ -1,185 +1,188 @@
-{% extends "base.html" %}
 {% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'az' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
+    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}">
+</head>
+<body class="host-live-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+    <div class="host-container host-container--host">
+        <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
+        <button
+            id="sidebarEdgeToggle"
+            class="host-sidebar-edge-toggle"
+            type="button"
+            aria-label="Toggle sidebar"
+            aria-controls="controlBar"
+            aria-expanded="true">
+            <i class="fas fa-chevron-right"></i>
+            <span>Controls</span>
+        </button>
 
-{% block title %}{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}{% endblock %}
+        <main class="host-live-shell">
+            {% include "liveExam/_host_control_bar.html" with presentation_controls=False %}
 
-{% block extraCss %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-<link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
-{% endblock %}
+            <section class="host-stage-column">
+                <div id="gameArea" class="game-area">
+                    <div id="presentationStage" class="presentation-stage" data-phase="idle">
+                        <div class="presentation-stage__glow presentation-stage__glow--left"></div>
+                        <div class="presentation-stage__glow presentation-stage__glow--right"></div>
+                        <div class="presentation-stage__grid"></div>
+                        <div class="presentation-stage__scene" aria-hidden="true">
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--ceiling"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--board"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-a"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-b"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-c"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--desk"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-a"></span>
+                            <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-b"></span>
+                        </div>
+                        <div class="presentation-stage__content" id="presentationContent"></div>
+                    </div>
+                </div>
 
-{% block content %}
-<div class="host-container">
-    <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
-    
-    <!-- LOBBY HEADER -->
-    <header id="lobbyHeader" class="lobby-header">
-        <div class="lobby-title">🚀 {% trans "lobby_title" context "live_exam.host_lobby" %}</div>
-        <div class="pin-display">{{ session.pin }}</div>
-        <div class="join-info">
-            <div class="qr-box" onclick="toggleQR(true)">
-                <img src="{{ qr_url }}" alt="QR" width="140">
-            </div>
-            <div class="link-box">
-                <small>{% trans "join_info_label" context "live_exam.host_lobby" %}</small>
-                <a href="{{ entry_url }}" target="_blank" rel="noopener">{{ entry_url }}</a>
-                <div class="pin-inline">PIN: {{ session.pin }}</div>
-            </div>
+                <section id="playersSection" class="players-section">
+                    <div class="players-header">
+                        <h3>
+                            <i class="fas fa-users"></i>
+                            {% trans "joined_players" context "live_exam.host_lobby" %}
+                            <span id="playersCount">0</span>
+                        </h3>
+                        <small>{{ exam_total_questions }} {% trans "questions_available_suffix" context "live_exam.host_lobby" %}</small>
+                    </div>
+                    <div id="playersList" class="players-grid"></div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    {% include "liveExam/_host_settings_drawer.html" %}
+
+    <div id="finalPodium" class="final-podium">
+        <div id="confetti" class="confetti-wrap"></div>
+        <div class="spotlight s1"></div>
+        <div class="spotlight s2"></div>
+        <div class="spotlight s3"></div>
+
+        <button class="close-btn" type="button" onclick="closePodium()"><i class="fas fa-times"></i></button>
+
+        <div class="podium-header">
+            <h1>🏆 {% trans "final_results_title" context "live_exam.host_lobby" %}</h1>
+            <p>{% trans "final_results_subtitle" context "live_exam.host_lobby" %}</p>
         </div>
-    </header>
 
-    <!-- CONTROL BAR -->
-    <div class="control-bar">
-        <button id="startBtn" class="btn btn-start"><i class="fas fa-play"></i> {% trans "start_button" context "live_exam.host_lobby" %}</button>
-        
-        <div class="question-count-box">
-            <i class="fas fa-list-ol"></i>
-            <label>{% trans "question_label" context "live_exam.host_lobby" %}</label>
-            <input type="text" id="questionCount" value="{{ selected_total_questions }}" maxlength="3">
-            <span>/ {{ exam_total_questions }}</span>
-        </div>
-        
-        <button id="revealBtn" class="btn btn-reveal" disabled><i class="fas fa-eye"></i> {% trans "reveal_button" context "live_exam.host_lobby" %}</button>
-        <button id="nextBtn" class="btn btn-next" disabled><i class="fas fa-forward"></i> {% trans "next_button" context "live_exam.host_lobby" %}</button>
-        <button id="finishBtn" class="btn btn-finish"><i class="fas fa-stop"></i> {% trans "finish_button" context "live_exam.host_lobby" %}</button>
-        <button id="presentBtn" class="btn btn-present"><i class="fas fa-up-right-from-square"></i> Açılış</button>
-        
-        <label class="auto-toggle">
-            <input type="checkbox" id="autoMode" checked>
-            <span>{% trans "auto_label" context "live_exam.host_lobby" %}</span>
-        </label>
-        
-        <div class="state-badge" id="gameState">{% trans "state_lobby" context "live_exam.host_lobby" %}</div>
-        
-        <div class="progress-box" id="progressBox">
-            <i class="fas fa-users"></i>
-            <span id="answeredText">0 / 0</span>
+        <div id="podiumStage" class="podium-stage"></div>
+        <div class="others-section">
+            <div class="others-title">{% trans "other_players" context "live_exam.host_lobby" %}</div>
+            <div id="othersList" class="others-list"></div>
         </div>
     </div>
 
-    <!-- GAME AREA -->
-    <div id="gameArea" class="game-area">
-        <div id="presentationStage" class="presentation-stage" data-phase="idle">
-            <div class="presentation-stage__glow presentation-stage__glow--left"></div>
-            <div class="presentation-stage__glow presentation-stage__glow--right"></div>
-            <div class="presentation-stage__grid"></div>
-            <div class="presentation-stage__content" id="presentationContent"></div>
-        </div>
+    <div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
+        <img id="qrModalImage" src="{{ qr_url }}" alt="QR">
+        <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
     </div>
 
-    <!-- PLAYERS (Lobby only) -->
-    <div id="playersSection" class="players-section">
-        <div class="players-header">
-            <h3><i class="fas fa-users"></i> {% trans "joined_players" context "live_exam.host_lobby" %} <span id="playersCount">0</span></h3>
-            <small>{{ exam_total_questions }} {% trans "questions_available_suffix" context "live_exam.host_lobby" %}</small>
-        </div>
-        <div id="playersList" class="players-grid"></div>
-    </div>
+    {{ session_settings|json_script:"hostSessionSettings" }}
+    <script>
+    const CONFIG = {
+        pin: "{{ session.pin }}",
+        csrf: "{{ csrf_token }}",
+        maxQuestions: {{ exam_total_questions }},
+        examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        entryUrl: "{{ entry_url|escapejs }}",
+        qrUrl: "{{ qr_url|escapejs }}",
+        sessionSettings: JSON.parse(document.getElementById("hostSessionSettings").textContent),
+        sessionLocked: {{ session_locked|yesno:"true,false" }},
+        maxParticipantsCap: {{ max_participants_cap }},
+        languageCode: "{{ LANGUAGE_CODE|default:'az'|slice:':2'|lower }}",
+        presentationOnly: false,
+        autoFullscreen: false,
+        urls: {
+            start: "{% url 'liveExam:start_game' session.pin %}",
+            state: "{% url 'liveExam:state_json' session.pin %}",
+            reveal: "{% url 'liveExam:host_reveal' session.pin %}",
+            next: "{% url 'liveExam:next_question' session.pin %}",
+            skipIntro: "{% url 'liveExam:host_skip_question_intro' session.pin %}",
+            finish: "{% url 'liveExam:finish_game' session.pin %}",
+            present: "{% url 'liveExam:host_presentation' session.pin %}",
+            lock: "{% url 'liveExam:host_toggle_lock' session.pin %}",
+            settings: "{% url 'liveExam:host_update_settings' session.pin %}",
+            removePlayer: "{% url 'liveExam:host_remove_player' session.pin %}"
+        }
+    };
+    window.LIVE_EXAM_HOST_I18N = {
+        debugLabel: "{% trans 'debug_label' context 'live_exam.host_lobby.js' %}",
+        stateLobby: "{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}",
+        stateQuestion: "{% trans 'state_question' context 'live_exam.host_lobby.js' %}",
+        stateReveal: "{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}",
+        stateFinished: "{% trans 'state_finished' context 'live_exam.host_lobby.js' %}",
+        stateLog: "{% trans 'state_log' context 'live_exam.host_lobby.js' %}",
+        questionMeta: "{% trans 'question_meta' context 'live_exam.host_lobby.js' %}",
+        noAnswersYet: "{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}",
+        pointsSuffix: "{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}",
+        hostReady: "{% trans 'host_ready' context 'live_exam.host_lobby.js' %}",
+        wsLobbyOpen: "{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}",
+        wsLobbyClosed: "{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}",
+        wsPlayOpen: "{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}",
+        wsPlayClosed: "{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}",
+        allAnsweredAutoReveal: "{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}",
+        lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
+        playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
+        postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
+        introTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        introSubtitle: "Get ready for the next round",
+        countdownLabel: "Starting now",
+        questionStageLabel: "Question",
+        answersLabel: "Answers live",
+        revealLabel: "Answer reveal",
+        scoreboardTitle: "Scoreboard",
+        scoreboardSubtitle: "Top 5 players",
+        correctAnswerLabel: "Correct answer",
+        answersSingular: "Answer",
+        answersPlural: "Answers",
+        playersAnswered: "{answered} answered",
+        secondsLabel: "seconds",
+        countdownNumberLabel: "Round starts in {value}",
+        scoreboardMovedUp: "Moved up {count}",
+        scoreboardNewEntry: "New in top 5",
+        distributionNoAnswers: "No answers were submitted this round.",
+        revealCorrectTag: "Correct",
+        revealWrongTag: "Incorrect"
+    };
 
-    <!-- DEBUG -->
-    <div class="debug-section">
-        <button id="debugBtn" class="debug-btn"><i class="fas fa-terminal"></i> {% trans "debug_button" context "live_exam.host_lobby" %} ▸</button>
-        <pre id="debugLog" class="debug-log"></pre>
-    </div>
-
-</div>
-
-<!-- FINAL PODIUM -->
-<div id="finalPodium" class="final-podium">
-    <div id="confetti" class="confetti-wrap"></div>
-    <div class="spotlight s1"></div>
-    <div class="spotlight s2"></div>
-    <div class="spotlight s3"></div>
-    
-    <button class="close-btn" onclick="closePodium()"><i class="fas fa-times"></i></button>
-    
-    <div class="podium-header">
-        <h1>🏆 {% trans "final_results_title" context "live_exam.host_lobby" %}</h1>
-        <p>{% trans "final_results_subtitle" context "live_exam.host_lobby" %}</p>
-    </div>
-    
-    <div id="podiumStage" class="podium-stage"></div>
-    <div class="others-section">
-        <div class="others-title">{% trans "other_players" context "live_exam.host_lobby" %}</div>
-        <div id="othersList" class="others-list"></div>
-    </div>
-</div>
-
-<!-- QR MODAL -->
-<div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
-    <img src="{{ qr_url }}" alt="QR">
-    <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
-</div>
-{% endblock %}
-
-{% block extraJs %}
-<script>
-const CONFIG = {
-    pin: "{{ session.pin }}",
-    csrf: "{{ csrf_token }}",
-    maxQuestions: {{ exam_total_questions }},
-    examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
-    presentationOnly: false,
-    autoFullscreen: false,
-    urls: {
-        start: "{% url 'liveExam:start_game' session.pin %}",
-        state: "{% url 'liveExam:state_json' session.pin %}",
-        reveal: "{% url 'liveExam:host_reveal' session.pin %}",
-        next: "{% url 'liveExam:next_question' session.pin %}",
-        finish: "{% url 'liveExam:finish_game' session.pin %}",
-        present: "{% url 'liveExam:host_presentation' session.pin %}"
+    function currentLobbyQrUrl() {
+        const settings = window.LiveHostLobbyController?.getState?.().settings || CONFIG.sessionSettings || {};
+        const mode = settings.two_step_join === false ? "direct" : "pin";
+        return `${CONFIG.qrUrl}${CONFIG.qrUrl.includes("?") ? "&" : "?"}mode=${mode}`;
     }
-};
-window.LIVE_EXAM_HOST_I18N = {
-    debugLabel: "{% trans 'debug_label' context 'live_exam.host_lobby.js' %}",
-    stateLobby: "{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}",
-    stateQuestion: "{% trans 'state_question' context 'live_exam.host_lobby.js' %}",
-    stateReveal: "{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}",
-    stateFinished: "{% trans 'state_finished' context 'live_exam.host_lobby.js' %}",
-    stateLog: "{% trans 'state_log' context 'live_exam.host_lobby.js' %}",
-    questionMeta: "{% trans 'question_meta' context 'live_exam.host_lobby.js' %}",
-    noAnswersYet: "{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}",
-    pointsSuffix: "{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}",
-    hostReady: "{% trans 'host_ready' context 'live_exam.host_lobby.js' %}",
-    wsLobbyOpen: "{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}",
-    wsLobbyClosed: "{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}",
-    wsPlayOpen: "{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}",
-    wsPlayClosed: "{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}",
-    allAnsweredAutoReveal: "{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}",
-    lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
-    playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
-    postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
-    introTitle: "Quiz",
-    introSubtitle: "Get ready for the next round",
-    countdownLabel: "Starting now",
-    questionStageLabel: "Question",
-    answersLabel: "Answers live",
-    revealLabel: "Answer reveal",
-    scoreboardTitle: "Scoreboard",
-    scoreboardSubtitle: "Top 5 players",
-    correctAnswerLabel: "Correct answer",
-    answersSingular: "Answer",
-    answersPlural: "Answers",
-    playersAnswered: "{answered} answered",
-    secondsLabel: "seconds",
-    countdownNumberLabel: "Round starts in {value}",
-    scoreboardMovedUp: "Moved up {count}",
-    scoreboardNewEntry: "New in top 5",
-    distributionNoAnswers: "No answers were submitted this round.",
-    revealCorrectTag: "Correct",
-    revealWrongTag: "Incorrect"
-};
 
-function toggleQR(show) {
-    document.getElementById('qrModal').style.display = show ? 'flex' : 'none';
-}
+    function toggleQR(show) {
+        const modal = document.getElementById("qrModal");
+        const image = document.getElementById("qrModalImage");
+        if (image) {
+            image.src = currentLobbyQrUrl();
+        }
+        modal.style.display = show ? "flex" : "none";
+    }
 
-function closePodium() {
-    document.getElementById('finalPodium').style.display = 'none';
-}
-</script>
-<script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-<script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-<script src="{% static 'js/host_lobby.js' %}"></script>
-{% endblock %}
+    function closePodium() {
+        document.getElementById("finalPodium").style.display = "none";
+    }
+    </script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
+    <script src="{% static 'js/host_lobby.js' %}"></script>
+    <script src="{% static 'js/host_lobby_shell.js' %}"></script>
+</body>
+</html>

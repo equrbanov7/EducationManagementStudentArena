@@ -6,7 +6,9 @@ Host/teacher views for live exam sessions.
 
 from __future__ import annotations
 
+import json
 import random
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
@@ -17,14 +19,30 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import Exam, ExamQuestion
-from apps.live_exam.domain.session import get_exam_question_ids, get_question_by_index, get_total_questions
-from apps.live_exam.models import LiveSession
+from apps.live_exam.domain.session import (
+    build_question_phase_times,
+    clear_question_phase_override,
+    get_exam_question_ids,
+    get_question_by_index,
+    get_total_questions,
+    question_time_limit,
+    set_question_phase_override,
+)
+from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.session_settings import (
+    allowed_max_participants_for_user,
+    get_session_settings,
+    normalize_session_setting_updates,
+    update_session_settings,
+)
 from apps.live_exam.transport import (
     broadcast,
     build_finished_payload,
+    build_join_url,
+    build_lobby_state_payload,
+    build_question_phase_payload,
     build_question_payload,
     build_reveal_payload,
-    get_public_base_url,
 )
 
 
@@ -44,7 +62,32 @@ def live_create_session_by_slug(request, slug):
         raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
-    return redirect("liveExam:host_lobby", pin=session.pin)
+    presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": session.pin})
+    return redirect(f"{presentation_url}?controls=1")
+
+
+def _host_session_context(request, session: LiveSession, *, auto_fullscreen: str = "0") -> dict[str, object]:
+    exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
+    selected = get_total_questions(session)
+    if exam_total > 0:
+        selected = max(1, min(selected, exam_total))
+    else:
+        selected = 0
+
+    session_settings = get_session_settings(session)
+
+    return {
+        "session": session,
+        "entry_url": build_join_url(request, session),
+        "qr_url": reverse("liveExam:qr_png", kwargs={"pin": session.pin}),
+        "total_questions": selected,
+        "exam_total_questions": exam_total,
+        "selected_total_questions": selected,
+        "session_settings": session_settings,
+        "session_locked": bool(session.is_locked),
+        "max_participants_cap": allowed_max_participants_for_user(request.user),
+        "auto_fullscreen": auto_fullscreen,
+    }
 
 
 @login_required
@@ -54,25 +97,7 @@ def live_host_lobby(request, pin):
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    entry_url = f"{get_public_base_url(request)}{reverse('liveExam:pin_entry')}"
-
-    exam_total = ExamQuestion.objects.filter(exam=session.exam).count()
-
-    selected = get_total_questions(session)
-    # ✅ təhlükəsizlik: selected max-dan böyük ola bilməsin
-    if exam_total > 0:
-        selected = max(1, min(selected, exam_total))
-    else:
-        selected = 0
-
-    context = {
-        "session": session,
-        "entry_url": entry_url,
-        "qr_url": reverse("liveExam:qr_png", kwargs={"pin": session.pin}),
-        "total_questions": selected,
-        "exam_total_questions": exam_total,
-        "selected_total_questions": selected,
-    }
+    context = _host_session_context(request, session)
     return render(request, "liveExam/host_lobby.html", context)
 
 
@@ -83,10 +108,9 @@ def live_host_presentation(request, pin):
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
 
-    context = {
-        "session": session,
-        "auto_fullscreen": "1" if request.GET.get("autofs") == "1" else "0",
-    }
+    controls_enabled = str(request.GET.get("controls") or "").strip().lower() in {"1", "true", "yes", "on"}
+    context = _host_session_context(request, session, auto_fullscreen="1" if request.GET.get("autofs") == "1" else "0")
+    context["presentation_controls"] = controls_enabled
     return render(request, "liveExam/host_presentation.html", context)
 
 
@@ -142,14 +166,18 @@ def host_start_game(request, pin):
                 status=400,
             )
 
-    # 2) Random seçimi session-a yaz (desired boşdursa hamısı)
-    if desired is None:
-        # boşdursa -> hamısı (selected_question_ids boş qalır, helper fallback exam order edir)
-        session.selected_question_ids = []
-        session.question_limit = None
-    else:
-        session.selected_question_ids = random.sample(all_ids, k=desired)
-        session.question_limit = desired
+    settings = get_session_settings(session)
+    randomize_questions = bool(settings.get("randomize_questions", True))
+
+    selected_ids = list(all_ids)
+    if randomize_questions:
+        random.shuffle(selected_ids)
+
+    if desired is not None:
+        selected_ids = selected_ids[:desired]
+
+    session.selected_question_ids = selected_ids
+    session.question_limit = len(selected_ids)
 
     # 3) Oyun reset
     session.current_index = 0
@@ -157,6 +185,7 @@ def host_start_game(request, pin):
     session.state = LiveSession.STATE_QUESTION
     session.question_started_at = None
     session.question_ends_at = None
+    clear_question_phase_override(session)
 
     session.save(
         update_fields=[
@@ -167,6 +196,7 @@ def host_start_game(request, pin):
             "state",
             "question_started_at",
             "question_ends_at",
+            "host_settings",
         ]
     )
 
@@ -202,7 +232,7 @@ def host_start_game(request, pin):
         {
             "ok": True,
             "published": True,
-            "question_count": (desired or total_in_exam),
+            "question_count": len(selected_ids),
             "total_in_exam": total_in_exam,
         }
     )
@@ -239,6 +269,7 @@ def host_next_question(request, pin):
     session.current_question_id = eq.id
     session.question_started_at = now
     session.question_ends_at = ends
+    clear_question_phase_override(session)
 
     session.save(
         update_fields=[
@@ -247,11 +278,69 @@ def host_next_question(request, pin):
             "current_question_id",
             "question_started_at",
             "question_ends_at",
+            "host_settings",
         ]
     )
 
     broadcast(pin, payload, "play")
     return JsonResponse({"ok": True, "index": idx + 1, "total": total})
+
+
+@require_POST
+@login_required
+def host_skip_question_intro(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    if session.host_user_id != request.user.id:
+        raise Http404()
+
+    if session.state != LiveSession.STATE_QUESTION or session.question_started_at is None:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "active_question_not_found")},
+            status=409,
+        )
+
+    idx = int(session.current_index or 0)
+    eq = get_question_by_index(session, idx)
+    if not eq:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "active_question_not_found")},
+            status=404,
+        )
+
+    ready_ends_at, answer_starts_at, _ = build_question_phase_times(
+        session,
+        eq,
+        started_at=session.question_started_at,
+        idx=idx,
+    )
+    now = timezone.now()
+    if now >= answer_starts_at:
+        return JsonResponse({"ok": True, "skipped": False, "already_open": True})
+
+    ends_at = now + timedelta(seconds=question_time_limit(session, eq))
+    set_question_phase_override(
+        session,
+        question_id=eq.id,
+        ready_ends_at=now,
+        answer_starts_at=now,
+        ends_at=ends_at,
+    )
+    session.question_ends_at = ends_at
+    session.save(update_fields=["host_settings", "question_ends_at"])
+
+    total = get_total_questions(session)
+    payload = build_question_phase_payload(
+        session,
+        eq,
+        idx=idx,
+        total=total,
+        started_at=session.question_started_at,
+        ready_ends_at=now,
+        answer_starts_at=now,
+        ends_at=ends_at,
+    )
+    broadcast(pin, payload, "play")
+    return JsonResponse({"ok": True, "skipped": True, "ends_at": ends_at.isoformat()})
 
 
 @require_POST
@@ -272,7 +361,8 @@ def host_reveal(request, pin):
     revealed_at = timezone.now()
     session.state = LiveSession.STATE_REVEAL
     session.question_ends_at = revealed_at
-    session.save(update_fields=["state", "question_ends_at"])
+    clear_question_phase_override(session)
+    session.save(update_fields=["state", "question_ends_at", "host_settings"])
 
     payload = build_reveal_payload(session, eq.id, revealed_at=revealed_at)
     broadcast(pin, payload, "play")
@@ -289,9 +379,92 @@ def host_finish(request, pin):
 
     session.state = LiveSession.STATE_FINISHED
     session.current_question_id = None
-    session.save(update_fields=["state", "current_question_id"])
+    clear_question_phase_override(session)
+    session.save(update_fields=["state", "current_question_id", "host_settings"])
 
     payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
     broadcast(pin, payload, "play")
 
     return JsonResponse({"ok": True})
+
+
+@require_POST
+@login_required
+def host_toggle_lock(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    if session.host_user_id != request.user.id:
+        raise Http404()
+
+    raw_locked = request.POST.get("locked")
+    if raw_locked is None:
+        locked = not session.is_locked
+    else:
+        locked = str(raw_locked).strip().lower() in {"1", "true", "yes", "on"}
+
+    session.is_locked = locked
+    session.save(update_fields=["is_locked"])
+
+    broadcast(pin, build_lobby_state_payload(session), "lobby")
+    return JsonResponse({"ok": True, "is_locked": locked})
+
+
+@require_POST
+@login_required
+def host_remove_player(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    if session.host_user_id != request.user.id:
+        raise Http404()
+
+    if session.state != LiveSession.STATE_LOBBY:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "Players can only be removed in the lobby.")},
+            status=409,
+        )
+
+    try:
+        player_id = int(request.POST.get("player_id"))
+    except (TypeError, ValueError):
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "Player was not found.")},
+            status=400,
+        )
+
+    player = LivePlayer.objects.filter(session=session, id=player_id).first()
+    if player is None:
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "Player was not found.")},
+            status=404,
+        )
+
+    player.delete()
+    broadcast(pin, build_lobby_state_payload(session), "lobby")
+    return JsonResponse({"ok": True, "player_id": player_id})
+
+
+@require_POST
+@login_required
+def host_update_settings(request, pin):
+    session = get_object_or_404(LiveSession, pin=pin)
+    if session.host_user_id != request.user.id:
+        raise Http404()
+
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        payload = {}
+
+    max_participants_cap = allowed_max_participants_for_user(request.user)
+    updates = normalize_session_setting_updates(payload, max_participants_cap=max_participants_cap)
+    settings = update_session_settings(session, updates, max_participants_cap=max_participants_cap)
+
+    broadcast(pin, build_lobby_state_payload(session), "lobby")
+    broadcast(
+        pin,
+        {
+            "type": "session_settings",
+            "settings": settings,
+            "is_locked": bool(session.is_locked),
+        },
+        "play",
+    )
+    return JsonResponse({"ok": True, "settings": settings, "is_locked": bool(session.is_locked)})

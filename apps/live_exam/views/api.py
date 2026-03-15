@@ -14,8 +14,10 @@ from django.utils.translation import pgettext
 from apps.live_exam.auth import get_request_player
 from apps.live_exam.domain.session import build_question_phase_times, detect_multi, get_question_by_index, get_total_questions
 from apps.live_exam.models import LiveSession
+from apps.live_exam.session_settings import get_session_settings
 from apps.live_exam.serializers import (
     serialize_player_question_result,
+    serialize_players,
     serialize_question,
     serialize_question_results,
     serialize_top,
@@ -72,11 +74,16 @@ def live_state_json(request, pin):
         "ok": True,
         "pin": session.pin,
         "state": session.state,
+        "is_locked": bool(session.is_locked),
+        "settings": get_session_settings(session),
+        "total_players": session.players.count(),
         "current_index": int(session.current_index or 0),
         "total_questions": total,
         "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
         "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
     }
+    if session.state == LiveSession.STATE_LOBBY:
+        data["players"] = serialize_players(session)
     if session.state == LiveSession.STATE_FINISHED:
         data["top"] = serialize_top(session, limit=50)
         return JsonResponse(data)
@@ -108,7 +115,6 @@ def live_state_json(request, pin):
     )
 
     data["question"] = question
-    data["total_players"] = session.players.count()
     data["answered_count"] = session.answers.filter(question_id=eq.id).values("player_id").distinct().count()
     data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
     if player is not None:

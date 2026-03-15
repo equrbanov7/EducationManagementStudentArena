@@ -98,7 +98,13 @@ def get_request_player(request, *, pin: str) -> LivePlayer | None:
     return get_player_from_token(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=pin)
 
 
-def authorize_socket_connection(*, pin: str, user_id: int | None, token: str | None) -> dict[str, Any] | None:
+def authorize_socket_connection(
+    *,
+    pin: str,
+    user_id: int | None,
+    token: str | None,
+    allow_anonymous: bool = False,
+) -> dict[str, Any] | None:
     session = LiveSession.objects.filter(pin=pin).only("id", "host_user_id").first()
     if session is None:
         return None
@@ -113,5 +119,8 @@ def authorize_socket_connection(*, pin: str, user_id: int | None, token: str | N
 
     if user_id and session.host_user_id == user_id:
         return {"role": "host"}
+
+    if allow_anonymous:
+        return {"role": "viewer"}
 
     return None

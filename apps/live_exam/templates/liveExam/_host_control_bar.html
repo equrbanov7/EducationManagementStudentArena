@@ -1,0 +1,95 @@
+{% load i18n %}
+<aside id="controlBar" class="control-bar" aria-label="Live exam controls">
+    <div class="control-bar__top control-bar__top--compact">
+        <div class="control-brand">
+            <div class="control-brand__eyebrow">{% trans "lobby_title" context "live_exam.host_lobby" %}</div>
+            <div class="control-brand__title">{{ session.exam.title }}</div>
+        </div>
+    </div>
+
+    <div class="control-bar__content">
+        <div class="control-status-row">
+            <div class="state-badge" id="gameState">{% trans "state_lobby" context "live_exam.host_lobby" %}</div>
+            <button id="lockLobbyBtn" class="control-pill-btn" type="button" aria-pressed="{{ session_locked|yesno:'true,false' }}">
+                <i class="fas fa-lock-open"></i>
+                <span>Lobby open</span>
+            </button>
+        </div>
+
+        <div class="question-count-box">
+            <div class="question-count-box__label">
+                <i class="fas fa-list-ol"></i>
+                <span>{% trans "question_label" context "live_exam.host_lobby" %}</span>
+            </div>
+            <div class="question-count-box__input">
+                <input type="text" id="questionCount" value="{{ selected_total_questions }}" maxlength="3">
+                <span>/ {{ exam_total_questions }}</span>
+            </div>
+        </div>
+
+        <div class="question-count-box">
+            <div class="question-count-box__label">
+                <i class="fas fa-users"></i>
+                <span>Max participants</span>
+            </div>
+            <div class="question-count-box__input">
+                <input
+                    type="text"
+                    id="maxParticipants"
+                    value="{{ session_settings.max_participants|default:100 }}"
+                    maxlength="3"
+                    inputmode="numeric">
+                <span>/ {{ max_participants_cap }}</span>
+            </div>
+        </div>
+
+        <label class="auto-toggle">
+            <input type="checkbox" id="autoMode" {% if session_settings.autoplay %}checked{% endif %}>
+            <span>{% trans "auto_label" context "live_exam.host_lobby" %}</span>
+        </label>
+
+        <div class="control-toolbar">
+            <button id="settingsBtn" class="control-toolbar__button" type="button">
+                <i class="fas fa-sliders"></i>
+                <span>Settings</span>
+            </button>
+            <button id="fullscreenBtn" class="control-toolbar__button" type="button">
+                <i class="fas fa-expand"></i>
+                <span>Fullscreen</span>
+            </button>
+        </div>
+
+        <div class="control-actions">
+            <button id="startBtn" class="btn btn-start" type="button">
+                <i class="fas fa-play"></i>
+                <span>{% trans "start_button" context "live_exam.host_lobby" %}</span>
+            </button>
+            <button id="revealBtn" class="btn btn-reveal" type="button" disabled>
+                <i class="fas fa-eye"></i>
+                <span>{% trans "reveal_button" context "live_exam.host_lobby" %}</span>
+            </button>
+            <button id="nextBtn" class="btn btn-next" type="button" disabled>
+                <i class="fas fa-forward"></i>
+                <span>{% trans "next_button" context "live_exam.host_lobby" %}</span>
+            </button>
+            <button id="finishBtn" class="btn btn-finish" type="button">
+                <i class="fas fa-stop"></i>
+                <span>{% trans "finish_button" context "live_exam.host_lobby" %}</span>
+            </button>
+        </div>
+
+        <div class="progress-box" id="progressBox">
+            <i class="fas fa-users"></i>
+            <span id="answeredText">0 / 0</span>
+        </div>
+
+        <div class="debug-section">
+            <button id="debugBtn" class="debug-btn" type="button">
+                <i class="fas fa-terminal"></i>
+                {% trans "debug_button" context "live_exam.host_lobby" %}
+                ▸
+            </button>
+            <pre id="debugLog" class="debug-log"></pre>
+        </div>
+    </div>
+</aside>
