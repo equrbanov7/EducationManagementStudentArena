@@ -38,10 +38,12 @@
                 </div>
 
                 {# Ümumi imtahan timeri #}
+                {% if exam.total_duration_minutes %}
                 <div class="timer-badge" id="exam-timer-container">
                     <i class="fas fa-clock"></i> 
                     {% trans "label_total_time" context "exams.template.take_exam" %}: <span id="timer-value">--:--</span>
                 </div>
+                {% endif %}
             </div>
         </div>
         
@@ -56,65 +58,6 @@
         </div>
     </div>
 
-    {% if previous_attempts_count > 0 %}
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                <div>
-                    <h5 class="mb-1 fw-bold">Əvvəlki cəhdlər</h5>
-                    <div class="text-muted small">Bu imtahan üzrə əvvəlki nəticələrinizə baxa bilərsiniz.</div>
-                </div>
-                <a href="{{ history_url }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-list-check me-1"></i> Cavablarım ({{ previous_attempts_count }})
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-sm align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Tarix</th>
-                            <th>Status</th>
-                            <th>Nəticə</th>
-                            <th class="text-end">Əməliyyat</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for previous_attempt in previous_attempts %}
-                        <tr>
-                            <td>{{ previous_attempt.attempt_number }}</td>
-                            <td>{{ previous_attempt.started_at|date:"d.m.Y H:i" }}</td>
-                            <td>{{ previous_attempt.get_status_display }}</td>
-                            <td>
-                                {% if previous_attempt.exam.exam_type == "test" %}
-                                    {{ previous_attempt.score_percent }}%
-                                {% elif previous_attempt.checked_by_teacher and previous_attempt.can_view_result %}
-                                    {{ previous_attempt.teacher_score|default:"-" }}
-                                {% elif previous_attempt.review_available_in_seconds > 0 %}
-                                    <span class="text-muted small">
-                                        <i class="far fa-clock me-1"></i>
-                                        <span data-review-countdown="{{ previous_attempt.review_available_in_seconds }}">--:--:--</span>
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">Yoxlanır</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end">
-                                {% if previous_attempt.can_view_result %}
-                                <a href="{{ previous_attempt.result_url }}" class="btn btn-sm btn-outline-primary">Bax</a>
-                                {% else %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Gözləyir</button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     <form method="post"
           id="exam-form"
           enctype="multipart/form-data"
@@ -127,7 +70,7 @@
             {% for item in q_payload %}
                 {% with q=item.q %}
                 {% with ans_data=answers_by_qid|get_item:q.id %}
-                <div class="question-slide" 
+                <div class="question-slide{% if forloop.first %} active{% endif %}" 
                      data-index="{{ forloop.counter0 }}" 
                      id="slide-{{ forloop.counter0 }}"
                      data-time-limit="{{ q.effective_time_limit|default:0 }}">
