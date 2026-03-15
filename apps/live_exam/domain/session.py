@@ -7,6 +7,8 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any
 
+from django.utils.dateparse import parse_datetime
+
 from apps.exams.models import ExamQuestion, ExamQuestionOption
 from apps.live_exam.constants import (
     PLAYER_GET_READY_SECONDS,
@@ -15,6 +17,8 @@ from apps.live_exam.constants import (
     PLAYER_RESULT_SECONDS,
 )
 from apps.live_exam.models import LiveSession
+
+QUESTION_PHASE_OVERRIDE_KEY = "_question_phase_override"
 
 
 def safe_int(value: Any, default: int = 0) -> int:
@@ -75,6 +79,63 @@ def get_active_question(session: LiveSession) -> ExamQuestion | None:
     return get_current_exam_question(session)
 
 
+def get_question_phase_override(session: LiveSession, *, question_id: int | None = None) -> dict[str, Any] | None:
+    raw = getattr(session, "host_settings", None) or {}
+    if not isinstance(raw, dict):
+        return None
+
+    override = raw.get(QUESTION_PHASE_OVERRIDE_KEY)
+    if not isinstance(override, dict):
+        return None
+
+    active_question_id = safe_int(question_id if question_id is not None else getattr(session, "current_question_id", 0), 0)
+    override_question_id = safe_int(override.get("question_id"), 0)
+    if active_question_id <= 0 or override_question_id != active_question_id:
+        return None
+
+    answer_starts_at = parse_datetime(str(override.get("answer_starts_at") or "")) if override.get("answer_starts_at") else None
+    ends_at = parse_datetime(str(override.get("ends_at") or "")) if override.get("ends_at") else None
+    ready_ends_at = parse_datetime(str(override.get("ready_ends_at") or "")) if override.get("ready_ends_at") else None
+    if answer_starts_at is None or ends_at is None:
+        return None
+
+    return {
+        "question_id": override_question_id,
+        "ready_ends_at": ready_ends_at or answer_starts_at,
+        "answer_starts_at": answer_starts_at,
+        "ends_at": ends_at,
+    }
+
+
+def set_question_phase_override(
+    session: LiveSession,
+    *,
+    question_id: int,
+    ready_ends_at,
+    answer_starts_at,
+    ends_at,
+) -> None:
+    raw = dict(getattr(session, "host_settings", None) or {})
+    raw[QUESTION_PHASE_OVERRIDE_KEY] = {
+        "question_id": safe_int(question_id, 0),
+        "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
+        "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,
+        "ends_at": ends_at.isoformat() if ends_at else None,
+    }
+    session.host_settings = raw
+
+
+def clear_question_phase_override(session: LiveSession) -> bool:
+    raw = getattr(session, "host_settings", None) or {}
+    if not isinstance(raw, dict) or QUESTION_PHASE_OVERRIDE_KEY not in raw:
+        return False
+
+    updated = dict(raw)
+    updated.pop(QUESTION_PHASE_OVERRIDE_KEY, None)
+    session.host_settings = updated
+    return True
+
+
 def question_time_limit(session: LiveSession, exam_question: ExamQuestion) -> int:
     if hasattr(exam_question, "effective_time_limit"):
         value = safe_int(getattr(exam_question, "effective_time_limit", 0), 0)
@@ -118,6 +179,13 @@ def build_question_phase_times(
     ready_ends_at = started_at + timedelta(seconds=question_get_ready_seconds(session, idx=idx))
     answer_starts_at = ready_ends_at + timedelta(seconds=question_intro_seconds(session, exam_question))
     ends_at = answer_starts_at + timedelta(seconds=question_time_limit(session, exam_question))
+
+    override = get_question_phase_override(session, question_id=getattr(exam_question, "id", None))
+    if override:
+        ready_ends_at = override["ready_ends_at"]
+        answer_starts_at = override["answer_starts_at"]
+        ends_at = override["ends_at"]
+
     return ready_ends_at, answer_starts_at, ends_at
 
 

@@ -1,0 +1,174 @@
+<div id="hostDrawerBackdrop" class="host-drawer-backdrop" hidden></div>
+<aside id="hostSettingsDrawer" class="host-settings-drawer" aria-hidden="true">
+    <div class="host-settings-drawer__header">
+        <div>
+            <div class="host-settings-drawer__eyebrow">Lobby setup</div>
+            <h2>Settings</h2>
+        </div>
+        <button id="closeSettingsBtn" class="control-icon-btn" type="button" aria-label="Close settings">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>
+
+    <div class="host-settings-drawer__body">
+        <section class="host-settings-group">
+            <div class="host-settings-group__title">General</div>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Show questions on devices</strong>
+                    <span>Players also see question text on their own device.</span>
+                </div>
+                <input id="settingShowQuestionsOnDevices" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Characters</strong>
+                    <span>Allow nickname, avatar, and accessory customization.</span>
+                </div>
+                <input id="settingCharactersEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <div class="host-settings-item host-settings-item--stack">
+                <div class="host-settings-item__copy">
+                    <strong>Theme</strong>
+                    <span>Pick the lobby background style.</span>
+                </div>
+                <div class="theme-picker" id="themePicker">
+                    <button class="theme-card" type="button" data-theme-key="standard">
+                        <span class="theme-card__swatch theme-card__swatch--standard"></span>
+                        <span>Standard</span>
+                    </button>
+                    <button class="theme-card" type="button" data-theme-key="winter">
+                        <span class="theme-card__swatch theme-card__swatch--winter"></span>
+                        <span>Winter</span>
+                    </button>
+                    <button class="theme-card" type="button" data-theme-key="aurora">
+                        <span class="theme-card__swatch theme-card__swatch--aurora"></span>
+                        <span>Aurora</span>
+                    </button>
+                    <button class="theme-card" type="button" data-theme-key="sweet">
+                        <span class="theme-card__swatch theme-card__swatch--sweet"></span>
+                        <span>Sweet</span>
+                    </button>
+                </div>
+            </div>
+            <label class="host-settings-item host-settings-item--field">
+                <div class="host-settings-item__copy">
+                    <strong>Language</strong>
+                    <span>Preferred lobby language for this session.</span>
+                </div>
+                <select id="settingLanguage" class="host-settings-select">
+                    <option value="system">System</option>
+                    <option value="az">Azerbaijani</option>
+                    <option value="en">English</option>
+                    <option value="ru">Russian</option>
+                    <option value="tr">Turkish</option>
+                </select>
+            </label>
+            <label class="host-settings-item host-settings-item--field">
+                <div class="host-settings-item__copy">
+                    <strong>Lobby music</strong>
+                    <span>Store the selected lobby sound mode.</span>
+                </div>
+                <select id="settingLobbyMusic" class="host-settings-select">
+                    <option value="original">Original</option>
+                    <option value="focus">Focus</option>
+                    <option value="silent">Silent</option>
+                </select>
+            </label>
+        </section>
+
+        <section class="host-settings-group">
+            <div class="host-settings-group__title">Accessibility</div>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Increase contrast</strong>
+                    <span>Boost contrast for the teacher view.</span>
+                </div>
+                <input id="settingIncreaseContrast" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+        </section>
+
+        <section class="host-settings-group">
+            <div class="host-settings-group__title">Hosting</div>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Reactions</strong>
+                    <span>Students can send live reactions in the lobby.</span>
+                </div>
+                <input id="settingReactionsEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Randomize order of questions</strong>
+                    <span>Shuffle selected questions when the host starts.</span>
+                </div>
+                <input id="settingRandomizeQuestions" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Randomize order of answers</strong>
+                    <span>Shuffle answer choices for each round.</span>
+                </div>
+                <input id="settingRandomizeAnswers" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Autoplay</strong>
+                    <span>Use automatic reveal and next-step flow.</span>
+                </div>
+                <input id="settingAutoplay" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Q&amp;A</strong>
+                    <span>Reserved for a later interactive mode.</span>
+                </div>
+                <input id="settingQnaEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Allow team selection</strong>
+                    <span>Reserved for future team-based sessions.</span>
+                </div>
+                <input id="settingTeamSelectionEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Team talk</strong>
+                    <span>Reserved for future collaborative rounds.</span>
+                </div>
+                <input id="settingTeamTalkEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+        </section>
+
+        <section class="host-settings-group">
+            <div class="host-settings-group__title">Security &amp; privacy</div>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>Nickname generator</strong>
+                    <span>Generate a random nickname when a player leaves it blank.</span>
+                </div>
+                <input id="settingNicknameGenerator" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>2-step join</strong>
+                    <span>Students enter the PIN first, then continue to the join form.</span>
+                </div>
+                <input id="settingTwoStepJoin" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+        </section>
+    </div>
+</aside>

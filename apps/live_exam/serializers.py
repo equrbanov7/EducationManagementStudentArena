@@ -23,6 +23,7 @@ from apps.live_exam.domain.session import (
     safe_int,
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.session_settings import get_session_settings
 
 
 def serialize_player_identity(player: LivePlayer) -> dict[str, Any]:
@@ -34,7 +35,7 @@ def serialize_player_identity(player: LivePlayer) -> dict[str, Any]:
     }
 
 
-def serialize_players(session: LiveSession, limit: int = 50) -> list[dict[str, Any]]:
+def serialize_players(session: LiveSession, limit: int = 200) -> list[dict[str, Any]]:
     return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key", "accessory_key")[:limit])
 
 
@@ -202,11 +203,12 @@ def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
     return int(hashlib.sha256(seed_str.encode("utf-8")).hexdigest()[:8], 16)
 
 
-def build_options(exam_question, *, seed: int | None = None) -> list[dict[str, Any]]:
+def build_options(exam_question, *, seed: int | None = None, randomize: bool = True) -> list[dict[str, Any]]:
     letters = ["A", "B", "C", "D", "E", "F"]
     options = list(ExamQuestionOption.objects.filter(question=exam_question).order_by("id"))
-    rnd = random.Random(seed) if seed is not None else random
-    rnd.shuffle(options)
+    if randomize:
+        rnd = random.Random(seed) if seed is not None else random
+        rnd.shuffle(options)
 
     payload: list[dict[str, Any]] = []
     for index, option in enumerate(options):
@@ -229,7 +231,9 @@ def serialize_question(
     ends_at,
 ) -> dict[str, Any]:
     is_multi, max_select, _ = detect_multi(exam_question)
-    seed = options_seed(session.pin, exam_question.id, started_at) if started_at else None
+    settings = get_session_settings(session)
+    randomize_answers = bool(settings.get("randomize_answers", True))
+    seed = options_seed(session.pin, exam_question.id, started_at) if started_at and randomize_answers else None
 
     return {
         "id": exam_question.id,
@@ -238,7 +242,7 @@ def serialize_question(
         "points": question_points(session, exam_question),
         "multi": is_multi,
         "max_select": max_select,
-        "options": build_options(exam_question, seed=seed),
+        "options": build_options(exam_question, seed=seed, randomize=randomize_answers),
         "started_at": started_at.isoformat() if started_at else None,
         "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
         "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,

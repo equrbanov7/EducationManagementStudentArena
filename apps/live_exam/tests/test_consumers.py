@@ -61,15 +61,19 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         session_cookie = client.cookies[settings.SESSION_COOKIE_NAME].value
         return [(b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
 
-    def test_lobby_ws_rejects_missing_auth(self):
+    def test_lobby_ws_allows_viewer_without_auth(self):
         async def scenario():
             communicator = WebsocketCommunicator(application, f"/ws/live/{self.session.pin}/lobby/")
             connected, _ = await communicator.connect()
-            await communicator.wait()
-            return connected
+            message = await communicator.receive_json_from() if connected else None
+            if connected:
+                await communicator.disconnect()
+            return connected, message
 
-        connected = async_to_sync(scenario)()
-        self.assertFalse(connected)
+        connected, message = async_to_sync(scenario)()
+        self.assertTrue(connected)
+        self.assertEqual(message["type"], "lobby_state")
+        self.assertEqual(message["count"], 1)
 
     def test_play_ws_rejects_missing_auth(self):
         async def scenario():

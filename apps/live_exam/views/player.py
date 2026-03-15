@@ -7,6 +7,7 @@ Player views for live exam sessions.
 from __future__ import annotations
 
 import io
+import random
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -38,9 +39,20 @@ from apps.live_exam.auth import (
     get_client_id,
     get_request_player,
 )
-from apps.live_exam.models import LiveSession
+from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.session_settings import (
+    DEFAULT_MAX_PARTICIPANTS,
+    THEME_KEYS,
+    generate_guest_nickname,
+    get_session_settings,
+)
 from apps.live_exam.serializers import serialize_player_identity, serialize_players
-from apps.live_exam.transport import broadcast, build_join_url, build_reaction_event_payload
+from apps.live_exam.transport import (
+    broadcast,
+    build_join_url,
+    build_lobby_state_payload,
+    build_reaction_event_payload,
+)
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.utils import get_client_ip
 
@@ -185,6 +197,16 @@ def _pin_entry_copy() -> dict[str, str]:
     return PIN_ENTRY_COPY.get(lang, PIN_ENTRY_COPY["az"])
 
 
+def _pin_entry_theme_key(pin_value: str, raw_theme: str | None = None) -> str:
+    if len(pin_value) == 6:
+        session = LiveSession.objects.filter(pin=pin_value).first()
+        if session:
+            return str(get_session_settings(session).get("theme_key") or "aurora")
+
+    theme_key = str(raw_theme or "").strip().lower()
+    return theme_key if theme_key in THEME_KEYS else "aurora"
+
+
 def _join_resume_copy(nickname: str) -> dict[str, str]:
     lang = (get_language() or "az")[:2].lower()
     copy = JOIN_RESUME_COPY.get(lang, JOIN_RESUME_COPY["az"]).copy()
@@ -201,6 +223,15 @@ def _normalize_pin(raw_pin: str | None) -> str:
 def _nickname_conflict_message() -> str:
     lang = (get_language() or "az")[:2].lower()
     return NICKNAME_CONFLICT_COPY.get(lang, NICKNAME_CONFLICT_COPY["az"])
+
+
+def _random_join_avatar_key() -> str:
+    return random.choice(AVATAR_KEYS) if AVATAR_KEYS else DEFAULT_AVATAR_KEY
+
+
+def _random_join_accessory_key() -> str:
+    candidates = [key for key in ACCESSORY_KEYS if key and key != DEFAULT_ACCESSORY_KEY]
+    return random.choice(candidates) if candidates else DEFAULT_ACCESSORY_KEY
 
 
 def _nickname_is_taken(
@@ -237,15 +268,7 @@ def _ensure_live_client_cookie(request, response):
 
 
 def _broadcast_lobby_state(session: LiveSession) -> None:
-    broadcast(
-        session.pin,
-        {
-            "type": "lobby_state",
-            "count": session.players.count(),
-            "players": serialize_players(session),
-        },
-        "lobby",
-    )
+    broadcast(session.pin, build_lobby_state_payload(session), "lobby")
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -256,8 +279,14 @@ def _broadcast_lobby_state(session: LiveSession) -> None:
 def live_pin_entry(request):
     copy = _pin_entry_copy()
     pin_value = _normalize_pin(request.POST.get("pin") if request.method == "POST" else request.GET.get("pin"))
+    raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
+    theme_key = _pin_entry_theme_key(pin_value, raw_theme)
     error_message = ""
     status_code = 200
+    session_exists = len(pin_value) == 6 and LiveSession.objects.filter(pin=pin_value).exists()
+
+    if request.method != "POST" and session_exists:
+        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=pin_value))
 
     if request.method == "POST":
         is_limited, retry_after = is_rate_limited(
@@ -273,6 +302,7 @@ def live_pin_entry(request):
                     "copy": copy,
                     "pin_value": pin_value,
                     "error_message": LIVE_RATE_LIMIT_MESSAGE,
+                    "theme_key": theme_key,
                 },
                 status=429,
             )
@@ -288,7 +318,7 @@ def live_pin_entry(request):
             )
             error_message = copy["invalid_pin"]
             status_code = 400
-        elif not LiveSession.objects.filter(pin=pin_value).exists():
+        elif not session_exists:
             record_rate_limit_hit(
                 LIVE_PIN_LIMIT_SCOPE,
                 settings.LIVE_EXAM_JOIN_RATE_LIMIT,
@@ -306,6 +336,7 @@ def live_pin_entry(request):
             "copy": copy,
             "pin_value": pin_value,
             "error_message": error_message,
+            "theme_key": theme_key,
         },
         status=status_code,
     )
@@ -315,6 +346,7 @@ def live_pin_entry(request):
 def live_join_page(request, pin):
     session = get_object_or_404(LiveSession, pin=pin)
     remembered_player = get_request_player(request, pin=pin)
+    session_settings = get_session_settings(session)
     context = {
         "session": session,
         "avatars": AVATAR_KEYS,
@@ -322,6 +354,8 @@ def live_join_page(request, pin):
         "remembered_player": serialize_player_identity(remembered_player) if remembered_player else None,
         "remembered_join_copy": _join_resume_copy(remembered_player.nickname) if remembered_player else None,
         "resume_url": reverse("liveExam:wait_room", kwargs={"pin": session.pin}),
+        "session_settings": session_settings,
+        "generated_nickname": generate_guest_nickname() if session_settings.get("nickname_generator") else "",
     }
     response = render(request, "liveExam/join.html", context)
     return _ensure_live_client_cookie(request, response)
@@ -345,6 +379,7 @@ def live_join_enter(request, pin):
         return response
 
     session = get_object_or_404(LiveSession, pin=pin)
+    session_settings = get_session_settings(session)
 
     if session.is_locked:
         return JsonResponse(
@@ -353,12 +388,20 @@ def live_join_enter(request, pin):
         )
 
     nickname = clean_nickname(request.POST.get("nickname"))
-    avatar_key = request.POST.get("avatar_key") or DEFAULT_AVATAR_KEY
-    if avatar_key not in AVATAR_KEYS:
+    if not nickname and session_settings.get("nickname_generator"):
+        nickname = generate_guest_nickname()
+
+    characters_enabled = bool(session_settings.get("characters_enabled", True))
+    avatar_key = request.POST.get("avatar_key") or ""
+    accessory_key = request.POST.get("accessory_key") or ""
+    if not characters_enabled:
         avatar_key = DEFAULT_AVATAR_KEY
-    accessory_key = request.POST.get("accessory_key") or DEFAULT_ACCESSORY_KEY
-    if accessory_key not in ACCESSORY_KEYS:
         accessory_key = DEFAULT_ACCESSORY_KEY
+    else:
+        if avatar_key not in AVATAR_KEYS:
+            avatar_key = _random_join_avatar_key()
+        if accessory_key not in ACCESSORY_KEYS:
+            accessory_key = _random_join_accessory_key()
 
     if not nickname:
         return JsonResponse(
@@ -368,16 +411,23 @@ def live_join_enter(request, pin):
 
     client_id = get_client_id(request)
     now = timezone.now()
+    player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
+    max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))
 
-    from apps.live_exam.models import LivePlayer
+    if player is None and session.players.count() >= max_participants:
+        return JsonResponse(
+            {
+                "ok": False,
+                "message": pgettext("live_exam.view.message", "participant_limit_reached").format(limit=max_participants),
+            },
+            status=403,
+        )
 
     if _nickname_is_taken(session, nickname, exclude_client_id=client_id):
         return JsonResponse(
             {"ok": False, "message": _nickname_conflict_message()},
             status=409,
         )
-
-    player = LivePlayer.objects.filter(session=session, client_id=client_id).first()
     if player:
         player.nickname = nickname
         player.avatar_key = avatar_key
@@ -457,6 +507,7 @@ def live_wait_room(request, pin):
             "my_player_id": player.id,
             "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
             "live_catalog": build_wait_room_catalog(),
+            "session_settings": get_session_settings(session),
         },
     )
 
@@ -471,6 +522,7 @@ def live_wait_profile_update(request, pin):
             status=403,
         )
 
+    session_settings = get_session_settings(session)
     nickname = clean_nickname(request.POST.get("nickname"))
     avatar_key = request.POST.get("avatar_key") or DEFAULT_AVATAR_KEY
     accessory_key = request.POST.get("accessory_key") or DEFAULT_ACCESSORY_KEY
@@ -480,7 +532,10 @@ def live_wait_profile_update(request, pin):
             {"ok": False, "message": pgettext("live_exam.view.message", "nickname_required")},
             status=400,
         )
-    if avatar_key not in AVATAR_KEYS:
+    if not session_settings.get("characters_enabled", True):
+        avatar_key = DEFAULT_AVATAR_KEY
+        accessory_key = DEFAULT_ACCESSORY_KEY
+    elif avatar_key not in AVATAR_KEYS:
         return JsonResponse(
             {"ok": False, "message": pgettext("live_exam.view.message", "invalid_avatar")},
             status=400,
@@ -520,6 +575,12 @@ def live_wait_reaction(request, pin):
     if player is None or player.session_id != session.id:
         return JsonResponse(
             {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
+            status=403,
+        )
+
+    if not get_session_settings(session).get("reactions_enabled", True):
+        return JsonResponse(
+            {"ok": False, "message": pgettext("live_exam.view.message", "Reactions are disabled for this live exam.")},
             status=403,
         )
 
@@ -578,5 +639,6 @@ def live_player_screen(request, pin):
         {
             "session": session,
             "player": player,
+            "session_settings": get_session_settings(session),
         },
     )

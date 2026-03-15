@@ -13,7 +13,7 @@ from django.utils.dateparse import parse_datetime
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
-from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
+from apps.live_exam.constants import ACCESSORY_KEYS, AVATAR_KEYS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 
 User = get_user_model()
@@ -38,6 +38,7 @@ class LiveExamViewsImportTest(TestCase):
         self.assertTrue(hasattr(views, "live_host_presentation"))
         self.assertTrue(hasattr(views, "host_start_game"))
         self.assertTrue(hasattr(views, "host_next_question"))
+        self.assertTrue(hasattr(views, "host_skip_question_intro"))
         self.assertTrue(hasattr(views, "host_reveal"))
         self.assertTrue(hasattr(views, "host_finish"))
 
@@ -143,13 +144,16 @@ class LiveSessionCreationTest(TestCase):
         self.client.login(username="live_teacher", password="StrongPass123!")
         response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
 
-        # Should redirect to host lobby
+        # Should redirect to presentation view with controls enabled
         self.assertEqual(response.status_code, 302)
 
         # Session should be created
         session = LiveSession.objects.filter(exam=self.exam, host_user=self.teacher).first()
         self.assertIsNotNone(session)
-        self.assertEqual(response.url, reverse("liveExam:host_lobby", kwargs={"pin": session.pin}))
+        self.assertEqual(
+            response.url,
+            f"{reverse('liveExam:host_presentation', kwargs={'pin': session.pin})}?controls=1",
+        )
 
 
 class LiveJoinTest(TestCase):
@@ -206,6 +210,16 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("copy", response.context)
 
+    def test_pin_entry_redirects_to_join_page_for_prefilled_valid_pin(self):
+        """Test that a QR/link prefilled PIN skips straight to the join page."""
+        self.session.host_settings = {"theme_key": "winter"}
+        self.session.save(update_fields=["host_settings"])
+
+        response = self.client.get(reverse("liveExam:pin_entry"), {"pin": self.session.pin})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
     def test_pin_entry_redirects_to_join_page_for_valid_pin(self):
         """Test that a valid PIN redirects to the session join page."""
         response = self.client.post(reverse("liveExam:pin_entry"), {"pin": self.session.pin})
@@ -232,7 +246,7 @@ class LiveJoinTest(TestCase):
         """Test successful player join."""
         response = self.client.post(
             reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
-            {"nickname": "TestPlayer", "avatar_key": "avatar_1"},
+            {"nickname": "TestPlayer", "avatar_key": "avatar_1", "accessory_key": "accessory_none"},
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -244,6 +258,21 @@ class LiveJoinTest(TestCase):
         self.assertIsNotNone(player)
         self.assertEqual(player.avatar_key, "avatar_1")
         self.assertEqual(player.accessory_key, "accessory_none")
+
+    def test_join_enter_assigns_random_avatar_and_accessory_when_not_provided(self):
+        """Test join flow assigns a valid random identity when appearance is omitted."""
+        response = self.client.post(
+            reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),
+            {"nickname": "RandomizedPlayer"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+
+        player = LivePlayer.objects.filter(session=self.session, nickname="RandomizedPlayer").first()
+        self.assertIsNotNone(player)
+        self.assertIn(player.avatar_key, AVATAR_KEYS)
+        self.assertIn(player.accessory_key, ACCESSORY_KEYS)
+        self.assertNotEqual(player.accessory_key, "accessory_none")
 
     def test_join_enter_locked_session(self):
         """Test joining a locked session."""
@@ -426,6 +455,41 @@ class LiveStateAPITest(TestCase):
         self.assertGreater(ready_ends_at, started_at)
         self.assertGreater(answer_starts_at, ready_ends_at)
 
+    def test_state_json_uses_question_phase_override_when_present(self):
+        self._authenticate_player()
+        now = timezone.now()
+        ends_at = now + timezone.timedelta(seconds=15)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = now - timezone.timedelta(seconds=2)
+        self.session.question_ends_at = ends_at
+        self.session.host_settings = {
+            "_question_phase_override": {
+                "question_id": self.question.id,
+                "ready_ends_at": now.isoformat(),
+                "answer_starts_at": now.isoformat(),
+                "ends_at": ends_at.isoformat(),
+            }
+        }
+        self.session.save(
+            update_fields=[
+                "state",
+                "current_index",
+                "current_question_id",
+                "question_started_at",
+                "question_ends_at",
+                "host_settings",
+            ]
+        )
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        question = response.json()["question"]
+        self.assertEqual(parse_datetime(question["answer_starts_at"]), now)
+        self.assertEqual(parse_datetime(question["ends_at"]), ends_at)
+
     def test_state_json_allows_host_session_access(self):
         """Test that the host can resync live state via session auth."""
         now = timezone.now()
@@ -441,6 +505,35 @@ class LiveStateAPITest(TestCase):
         data = response.json()
         self.assertTrue(data["ok"])
         self.assertEqual(data["question"]["id"], self.question.id)
+
+    def test_host_can_skip_question_intro_to_open_answers(self):
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=20)
+        self.session.save(
+            update_fields=[
+                "state",
+                "current_index",
+                "current_question_id",
+                "question_started_at",
+                "question_ends_at",
+            ]
+        )
+
+        response = self.host_client.post(reverse("liveExam:host_skip_question_intro", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertTrue(response.json()["skipped"])
+
+        self.session.refresh_from_db()
+        override = self.session.host_settings.get("_question_phase_override")
+        self.assertIsNotNone(override)
+        self.assertEqual(override["question_id"], self.question.id)
+        self.assertIsNotNone(parse_datetime(override["answer_starts_at"]))
 
     def test_state_json_reveal_includes_correct_options(self):
         """Test that correct options are only exposed during reveal."""

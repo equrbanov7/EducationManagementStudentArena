@@ -5,24 +5,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
     <link rel="stylesheet" href="{% static 'css/host_lobby.css' %}">
+    <link rel="stylesheet" href="{% static 'css/host_lobby_shell.css' %}">
 </head>
-<body class="host-presentation-page">
+<body class="host-live-page host-presentation-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
     <div class="host-container host-container--presentation">
         <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
+        {% if presentation_controls %}
+        <button
+            id="sidebarEdgeToggle"
+            class="host-sidebar-edge-toggle"
+            type="button"
+            aria-label="Toggle sidebar"
+            aria-controls="controlBar"
+            aria-expanded="false">
+            <i class="fas fa-chevron-right"></i>
+            <span>Controls</span>
+        </button>
+        <div id="hostQuickActions" class="host-quick-actions" aria-label="Quick actions">
+            <button id="quickStartBtn" class="host-quick-action host-quick-action--start" type="button">
+                <i class="fas fa-play"></i>
+                <span>Start</span>
+            </button>
+            <button id="quickFlowBtn" class="host-quick-action host-quick-action--advance" type="button" hidden>
+                <i class="fas fa-forward-step"></i>
+                <span>Next</span>
+            </button>
+            <button
+                id="quickLockBtn"
+                class="host-quick-action host-quick-action--lock host-quick-action--icon"
+                type="button"
+                aria-pressed="false"
+                aria-label="Lobby open"
+                title="Lobby open">
+                <i class="fas fa-lock-open"></i>
+            </button>
+        </div>
+        <div id="hostSidebarBackdrop" class="host-sidebar-backdrop" hidden></div>
+        {% include "liveExam/_host_control_bar.html" with presentation_controls=True %}
+        <div class="host-hidden-ui" aria-hidden="true">
+            <div id="playersSection"></div>
+            <div id="playersCount">0</div>
+            <div id="playersList"></div>
+        </div>
+        {% endif %}
 
         <div id="gameArea" class="game-area presentation-game-area">
             <div id="presentationStage" class="presentation-stage" data-phase="idle">
                 <div class="presentation-stage__glow presentation-stage__glow--left"></div>
                 <div class="presentation-stage__glow presentation-stage__glow--right"></div>
                 <div class="presentation-stage__grid"></div>
+                <div class="presentation-stage__scene" aria-hidden="true">
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--ceiling"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--board"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-a"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-b"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-c"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--desk"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-a"></span>
+                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-b"></span>
+                </div>
                 <div class="presentation-stage__content" id="presentationContent"></div>
             </div>
         </div>
 
+        {% if not presentation_controls %}
         <div class="host-hidden-ui" aria-hidden="true">
-            <header id="lobbyHeader"></header>
             <div id="playersSection"></div>
             <div id="playersCount">0</div>
             <div id="playersList"></div>
@@ -39,7 +93,12 @@
             <button id="debugBtn" type="button"></button>
             <pre id="debugLog"></pre>
         </div>
+        {% endif %}
     </div>
+
+    {% if presentation_controls %}
+    {% include "liveExam/_host_settings_drawer.html" %}
+    {% endif %}
 
     <div id="finalPodium" class="final-podium">
         <div id="confetti" class="confetti-wrap"></div>
@@ -57,20 +116,38 @@
         </div>
     </div>
 
+    <div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
+        <img id="qrModalImage" src="{{ qr_url }}" alt="QR">
+        <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
+    </div>
+
+    {{ session_settings|json_script:"hostPresentationSessionSettings" }}
     <script>
     const CONFIG = {
         pin: "{{ session.pin }}",
         csrf: "{{ csrf_token }}",
-        maxQuestions: 999,
+        maxQuestions: {{ exam_total_questions }},
         examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        entryUrl: "{{ entry_url|escapejs }}",
+        qrUrl: "{{ qr_url|escapejs }}",
+        sessionSettings: JSON.parse(document.getElementById("hostPresentationSessionSettings").textContent),
+        sessionLocked: {{ session_locked|yesno:"true,false" }},
+        maxParticipantsCap: {{ max_participants_cap }},
+        languageCode: "{{ LANGUAGE_CODE|default:'az'|slice:':2'|lower }}",
         presentationOnly: true,
+        controlsEnabled: {{ presentation_controls|yesno:"true,false" }},
         autoFullscreen: {{ auto_fullscreen|default:"0" }},
         urls: {
+            start: "{% url 'liveExam:start_game' session.pin %}",
             state: "{% url 'liveExam:state_json' session.pin %}",
             reveal: "{% url 'liveExam:host_reveal' session.pin %}",
             next: "{% url 'liveExam:next_question' session.pin %}",
+            skipIntro: "{% url 'liveExam:host_skip_question_intro' session.pin %}",
             finish: "{% url 'liveExam:finish_game' session.pin %}",
-            present: "{% url 'liveExam:host_presentation' session.pin %}"
+            present: "{% url 'liveExam:host_presentation' session.pin %}",
+            lock: "{% url 'liveExam:host_toggle_lock' session.pin %}",
+            settings: "{% url 'liveExam:host_update_settings' session.pin %}",
+            removePlayer: "{% url 'liveExam:host_remove_player' session.pin %}"
         }
     };
     window.LIVE_EXAM_HOST_I18N = {
@@ -92,7 +169,7 @@
         lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
         playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
         postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
-        introTitle: "Quiz",
+        introTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
         introSubtitle: "Get ready for the next round",
         countdownLabel: "Starting now",
         questionStageLabel: "Question",
@@ -112,9 +189,27 @@
         revealCorrectTag: "Correct",
         revealWrongTag: "Incorrect"
     };
+
+    function currentLobbyQrUrl() {
+        const settings = window.LiveHostLobbyController?.getState?.().settings || CONFIG.sessionSettings || {};
+        const mode = settings.two_step_join === false ? "direct" : "pin";
+        return `${CONFIG.qrUrl}${CONFIG.qrUrl.includes("?") ? "&" : "?"}mode=${mode}`;
+    }
+
+    function toggleQR(show) {
+        const modal = document.getElementById("qrModal");
+        const image = document.getElementById("qrModalImage");
+        if (image) {
+            image.src = currentLobbyQrUrl();
+        }
+        modal.style.display = show ? "flex" : "none";
+    }
     </script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
     <script src="{% static 'js/host_lobby.js' %}"></script>
+    {% if presentation_controls %}
+    <script src="{% static 'js/host_lobby_shell.js' %}"></script>
+    {% endif %}
 </body>
 </html>

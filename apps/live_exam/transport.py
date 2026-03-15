@@ -5,6 +5,7 @@ Transport helpers for live exam HTTP and websocket payloads.
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.utils import timezone
@@ -16,6 +17,7 @@ from channels.layers import get_channel_layer
 
 from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
 from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
+from apps.live_exam.session_settings import get_session_settings, session_join_path
 from apps.live_exam.serializers import (
     serialize_answer_distribution,
     serialize_player_identity,
@@ -43,7 +45,10 @@ def get_public_base_url(request) -> str:
 
 
 def build_join_url(request, session) -> str:
-    return f"{get_public_base_url(request)}{session.join_url_path()}"
+    base_url = f"{get_public_base_url(request)}{session_join_path(session)}"
+    if get_session_settings(session).get("two_step_join", True):
+        return f"{base_url}?{urlencode({'pin': session.pin})}"
+    return base_url
 
 
 def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
@@ -83,11 +88,13 @@ def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
         return False, pgettext("live_exam.consumer.error", "bad_payload")
 
 
-def build_lobby_state_payload(session, *, limit: int = 50) -> dict[str, Any]:
+def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
     return {
         "type": "lobby_state",
         "count": session.players.count(),
         "players": serialize_players(session, limit=limit),
+        "is_locked": bool(session.is_locked),
+        "settings": get_session_settings(session),
     }
 
 
@@ -135,6 +142,33 @@ def build_question_payload(session, exam_question, *, idx: int, total: int):
         "previous_top": serialize_top(session, limit=10),
     }
     return payload, started_at, ends_at
+
+
+def build_question_phase_payload(
+    session,
+    exam_question,
+    *,
+    idx: int,
+    total: int,
+    started_at,
+    ready_ends_at,
+    answer_starts_at,
+    ends_at,
+):
+    return {
+        "type": "question_published",
+        "question": serialize_question(
+            session,
+            exam_question,
+            idx=idx,
+            total=total,
+            started_at=started_at,
+            ready_ends_at=ready_ends_at,
+            answer_starts_at=answer_starts_at,
+            ends_at=ends_at,
+        ),
+        "previous_top": serialize_top_before_question(session, exam_question.id, limit=10),
+    }
 
 
 def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict[str, Any]:

@@ -50,6 +50,7 @@ class LiveSession(models.Model):
 
     # ✅ Random seçilən sualların ID-ləri (order burada saxlanır)
     selected_question_ids = models.JSONField(default=list, blank=True)
+    host_settings = models.JSONField(default=dict, blank=True)
 
     def _ensure_unique_pin(self):
         tries = 0

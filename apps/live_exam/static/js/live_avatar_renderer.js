@@ -305,6 +305,30 @@
         `;
     }
 
+    function renderAvatarDataUrl(profile) {
+        const rendered = renderSvg(profile);
+        const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" aria-hidden="true" focusable="false">
+                <defs>
+                    <linearGradient id="avatarBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${rendered.config.bgStart}"></stop>
+                        <stop offset="100%" stop-color="${rendered.config.bgEnd}"></stop>
+                    </linearGradient>
+                    <radialGradient id="avatarGlow" cx="30%" cy="24%" r="56%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.92"></stop>
+                        <stop offset="0.34" stop-color="#ffffff" stop-opacity="0.38"></stop>
+                        <stop offset="0.68" stop-color="#ffffff" stop-opacity="0"></stop>
+                    </radialGradient>
+                </defs>
+                <rect width="140" height="140" rx="40" fill="url(#avatarBg)"></rect>
+                <rect width="140" height="140" rx="40" fill="url(#avatarGlow)"></rect>
+                ${rendered.markup}
+            </svg>
+        `.replace(/\s{2,}/g, " ").trim();
+
+        return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
     function mountAvatar(element, profile, options) {
         if (!element) return;
         element.innerHTML = renderAvatarMarkup(profile, options);
@@ -312,6 +336,7 @@
 
     window.LiveAvatarRenderer = {
         getProfile,
+        renderAvatarDataUrl,
         renderAvatarMarkup,
         mountAvatar
     };

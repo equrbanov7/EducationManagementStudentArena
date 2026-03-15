@@ -168,45 +168,45 @@ body.join-page {
 }
 
 .join-card {
-    width: min(520px, 100%);
-    padding: 22px;
-    border-radius: 30px;
+    width: min(480px, 100%);
+    padding: 20px;
+    border-radius: 28px;
     background: var(--join-surface);
     color: var(--join-ink);
     box-shadow: var(--join-shadow);
     display: grid;
-    gap: 18px;
+    gap: 12px;
 }
 
 .join-card__header {
     display: grid;
-    gap: 16px;
+    gap: 12px;
 }
 
 .join-card__preview {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    padding: 16px 18px;
-    border-radius: 24px;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 22px;
     background: linear-gradient(180deg, #ede9fe, #eff6ff);
 }
 
 .join-preview {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 24px;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.72);
     box-shadow: 0 18px 36px rgba(37, 99, 235, 0.12);
 }
 
 .join-preview__avatar-shell {
     display: inline-flex;
-    padding: 6px;
-    border-radius: 22px;
+    padding: 4px;
+    border-radius: 18px;
     background: linear-gradient(180deg, rgba(237, 233, 254, 0.94), rgba(224, 231, 255, 0.94));
 }
 
@@ -225,7 +225,7 @@ body.join-page {
 
 .join-preview__player-name {
     font-family: "Space Grotesk", sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     line-height: 1;
     letter-spacing: -0.04em;
 }
@@ -248,13 +248,13 @@ body.join-page {
 .join-preview__pin {
     display: inline-flex;
     align-items: center;
-    padding: 10px 14px;
-    border-radius: 16px;
+    padding: 9px 12px;
+    border-radius: 14px;
     background: linear-gradient(135deg, var(--join-accent), var(--join-accent-strong));
     color: #ffffff;
     font-family: "Space Grotesk", sans-serif;
-    font-size: 1.28rem;
-    letter-spacing: 0.22em;
+    font-size: 1.14rem;
+    letter-spacing: 0.18em;
     box-shadow: 0 16px 34px rgba(109, 40, 217, 0.24);
 }
 
@@ -267,7 +267,7 @@ body.join-page {
 }
 
 .join-card__copy p {
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     color: var(--join-ink-soft);
     line-height: 1.55;
     font-weight: 700;
@@ -278,7 +278,7 @@ body.join-page {
 }
 
 .join-resume {
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-radius: 20px;
     background: linear-gradient(135deg, rgba(237, 233, 254, 0.92), rgba(224, 231, 255, 0.96));
     border: 1px solid rgba(109, 40, 217, 0.14);
@@ -328,7 +328,7 @@ body.join-page {
 
 .join-form__section {
     display: grid;
-    gap: 10px;
+    gap: 8px;
 }
 
 .join-form__label {
@@ -378,11 +378,11 @@ body.join-page {
 .join-tabs__button {
     border: none;
     border-radius: 999px;
-    padding: 10px 16px;
+    padding: 9px 15px;
     background: transparent;
     color: var(--join-ink-soft);
     font: inherit;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 800;
 }
 
@@ -393,10 +393,10 @@ body.join-page {
 }
 
 .join-picker-panels {
-    border-radius: 24px;
+    border-radius: 22px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    padding: 16px;
+    padding: 14px;
 }
 
 .join-picker-panel {
@@ -409,14 +409,14 @@ body.join-page {
 
 .join-picker__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    gap: 10px;
 }
 
 .join-picker__chips {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+    gap: 8px;
 }
 
 .wait-room-picker__item,
@@ -430,7 +430,7 @@ body.join-page {
 .wait-room-picker__item {
     min-width: 0;
     aspect-ratio: 1;
-    border-radius: 22px;
+    border-radius: 20px;
     background: #ffffff;
     border: 2px solid transparent;
     display: inline-flex;
@@ -452,23 +452,23 @@ body.join-page {
 }
 
 .wait-room-picker__chip {
-    min-height: 54px;
-    padding: 12px 14px;
-    border-radius: 18px;
+    min-height: 48px;
+    padding: 10px 12px;
+    border-radius: 16px;
     background: #ffffff;
     border: 2px solid transparent;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 10px;
+    gap: 8px;
     text-align: left;
     color: var(--join-ink);
 }
 
 .wait-room-picker__chip-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
     background: #ede9fe;
     display: inline-flex;
     align-items: center;
@@ -476,15 +476,19 @@ body.join-page {
 }
 
 .wait-room-picker__chip-label {
-    font-size: 0.9rem;
+    font-size: 0.84rem;
     font-weight: 800;
 }
 
 .join-status {
-    min-height: 18px;
+    min-height: 0;
     color: var(--join-ink-soft);
     font-size: 0.9rem;
     font-weight: 700;
+}
+
+.join-status:empty {
+    display: none;
 }
 
 .join-status.is-error {
@@ -498,6 +502,7 @@ body.join-page {
 .join-btn {
     width: 100%;
     min-height: 56px;
+    margin-top: 2px;
     border-radius: 18px;
     background: linear-gradient(135deg, var(--join-accent), var(--join-accent-strong));
     color: #ffffff;

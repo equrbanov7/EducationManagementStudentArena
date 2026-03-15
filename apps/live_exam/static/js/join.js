@@ -4,11 +4,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const catalog = window.LiveAvatarCatalog || {};
     const nicknameTools = window.LiveWaitRoomNicknameEditor || {};
     const rememberedPlayer = CONFIG.rememberedPlayer || null;
+    const sessionSettings = Object.assign({}, CONFIG.sessionSettings || {});
+    const charactersEnabled = sessionSettings.characters_enabled !== false;
+    let themeSocket = null;
+    let themeReconnectTimer = null;
+    let themeReconnectAttempts = 0;
 
-    const avatarGrid = document.getElementById("avatarGrid");
-    const accessoryGrid = document.getElementById("accessoryGrid");
     const joinBtn = document.getElementById("joinBtn");
-    const accessoryTab = document.getElementById("joinTabAccessory");
     const nicknameInput = document.getElementById("nickname");
     const nicknameError = document.getElementById("joinNicknameError");
     const joinStatus = document.getElementById("joinStatus");
@@ -19,14 +21,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const resumeRestartBtn = document.getElementById("joinResumeRestart");
     const resumeCloseBtn = document.getElementById("joinResumeClose");
 
-    if (!avatarGrid || !accessoryGrid || !joinBtn || !nicknameInput || !preview) {
+    if (!joinBtn || !nicknameInput || !preview) {
         return;
     }
 
     const defaultAvatar = catalog.defaultAvatarKey || "avatar_1";
     const defaultAccessory = catalog.defaultAccessoryKey || "accessory_none";
+    const accessoryChoices = (catalog.accessoryKeys || []).filter((key) => key && key !== defaultAccessory);
     const renderAvatarMarkup = (player, size, className) =>
         window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
+    const randomChoice = (items, fallback) => {
+        const source = Array.isArray(items) ? items.filter(Boolean) : [];
+        if (!source.length) return fallback;
+        return source[Math.floor(Math.random() * source.length)] || fallback;
+    };
     const normalizeNickname = (value) =>
         typeof nicknameTools.normalizeNickname === "function" ? nicknameTools.normalizeNickname(value) : String(value || "").trim();
     const validateNickname = (value) =>
@@ -37,13 +45,21 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             : { valid: Boolean(normalizeNickname(value)), value: normalizeNickname(value), message: "" };
 
-    let selectedAvatar = rememberedPlayer?.avatar_key || defaultAvatar;
-    let selectedAccessory = rememberedPlayer?.accessory_key || defaultAccessory;
+    let selectedAvatar = charactersEnabled ? randomChoice(catalog.avatarKeys, defaultAvatar) : defaultAvatar;
+    let selectedAccessory = charactersEnabled ? randomChoice(accessoryChoices, defaultAccessory) : defaultAccessory;
     let allowFreshJoin = !rememberedPlayer;
     let isJoining = false;
 
+    if (!nicknameInput.value.trim() && CONFIG.generatedNickname) {
+        nicknameInput.value = CONFIG.generatedNickname;
+    }
     if (!nicknameInput.value.trim() && rememberedPlayer?.nickname) {
         nicknameInput.value = rememberedPlayer.nickname;
+    }
+
+    function applySessionSettings(nextSettings) {
+        Object.assign(sessionSettings, nextSettings || {});
+        document.body.dataset.liveTheme = sessionSettings.theme_key || "aurora";
     }
 
     function setStatus(message, kind) {
@@ -72,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         avatar_key: selectedAvatar,
                         accessory_key: selectedAccessory,
                     },
-                    92,
+                    78,
                     "join-preview__avatar"
                 )}
             </div>
@@ -101,6 +117,21 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!resumePrompt) return;
         resumePrompt.hidden = true;
         document.body.classList.remove("join-modal-open");
+        focusNicknameInput();
+    }
+
+    function focusNicknameInput() {
+        if (!nicknameInput || document.activeElement === nicknameInput) return;
+        if (resumePrompt && !resumePrompt.hidden) return;
+        window.requestAnimationFrame(() => {
+            nicknameInput.focus({ preventScroll: true });
+            const valueLength = nicknameInput.value.length;
+            try {
+                nicknameInput.setSelectionRange(valueLength, valueLength);
+            } catch (error) {
+                // Some mobile browsers block selection APIs on unsupported input modes.
+            }
+        });
     }
 
     function continuePreviousPlayer() {
@@ -110,27 +141,67 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function rerollAppearance() {
+        if (!charactersEnabled) {
+            selectedAvatar = defaultAvatar;
+            selectedAccessory = defaultAccessory;
+            return;
+        }
+        selectedAvatar = randomChoice(catalog.avatarKeys, defaultAvatar);
+        selectedAccessory = randomChoice(accessoryChoices, defaultAccessory);
+    }
+
     function shouldOfferResume(normalizedNickname) {
         if (!rememberedPlayer || allowFreshJoin) return false;
         return (
-            normalizeNickname(rememberedPlayer.nickname) === normalizedNickname &&
-            String(rememberedPlayer.avatar_key || defaultAvatar) === String(selectedAvatar) &&
-            String(rememberedPlayer.accessory_key || defaultAccessory) === String(selectedAccessory)
+            normalizeNickname(rememberedPlayer.nickname) === normalizedNickname
         );
     }
 
-    function switchPanel(target) {
-        document.querySelectorAll("[data-join-panel-target]").forEach((button) => {
-            const active = button.dataset.joinPanelTarget === target;
-            button.classList.toggle("is-active", active);
-            button.setAttribute("aria-selected", active ? "true" : "false");
-        });
+    function closeThemeSocket() {
+        if (themeReconnectTimer) {
+            window.clearTimeout(themeReconnectTimer);
+            themeReconnectTimer = null;
+        }
+        if (themeSocket) {
+            themeSocket.onclose = null;
+            themeSocket.close();
+            themeSocket = null;
+        }
+    }
 
-        document.querySelectorAll("[data-join-panel]").forEach((panel) => {
-            const active = panel.dataset.joinPanel === target;
-            panel.classList.toggle("is-active", active);
-            panel.hidden = !active;
-        });
+    function themeWsUrl() {
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        return `${protocol}//${window.location.host}/ws/live/${encodeURIComponent(CONFIG.pin)}/lobby/`;
+    }
+
+    function connectThemeSocket() {
+        closeThemeSocket();
+        if (!CONFIG.pin) return;
+
+        themeSocket = new WebSocket(themeWsUrl());
+
+        themeSocket.onopen = function () {
+            themeReconnectAttempts = 0;
+        };
+
+        themeSocket.onmessage = function (event) {
+            try {
+                const message = JSON.parse(event.data);
+                const payload = message.data || message;
+                if ((payload.type === "lobby_state" || payload.type === "session_settings") && payload.settings) {
+                    applySessionSettings(payload.settings);
+                }
+            } catch (error) {
+                console.error("join theme sync parse error", error);
+            }
+        };
+
+        themeSocket.onclose = function () {
+            if (themeReconnectAttempts >= 8) return;
+            themeReconnectAttempts += 1;
+            themeReconnectTimer = window.setTimeout(connectThemeSocket, Math.min(1000 * themeReconnectAttempts, 5000));
+        };
     }
 
     async function submitJoin(forceFresh) {
@@ -187,41 +258,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    const avatarPicker = typeof window.LiveWaitRoomAvatarPicker === "function"
-        ? new window.LiveWaitRoomAvatarPicker(avatarGrid, {
-            value: selectedAvatar,
-            previewAccessoryKey: selectedAccessory,
-            onChange: function (value) {
-                selectedAvatar = value;
-                renderPreview();
-            },
-        })
-        : null;
-
-    const accessoryPicker = typeof window.LiveWaitRoomAccessoryPicker === "function"
-        ? new window.LiveWaitRoomAccessoryPicker(accessoryGrid, {
-            value: selectedAccessory,
-            onChange: function (value) {
-                selectedAccessory = value;
-                avatarPicker?.setPreviewAccessoryKey(selectedAccessory);
-                renderPreview();
-            },
-        })
-        : null;
-
-    avatarPicker?.render();
-    accessoryPicker?.render();
-    if (accessoryTab) {
-        accessoryTab.textContent = tr("accessoryLabel", "Accessory");
-    }
+    applySessionSettings(sessionSettings);
     renderPreview();
     setStatus("");
-
-    document.querySelectorAll("[data-join-panel-target]").forEach((button) => {
-        button.addEventListener("click", function () {
-            switchPanel(button.dataset.joinPanelTarget || "avatar");
-        });
-    });
+    window.setTimeout(focusNicknameInput, 140);
 
     joinBtn.addEventListener("click", function () {
         if (!isJoining) {
@@ -253,6 +293,8 @@ document.addEventListener("DOMContentLoaded", function () {
     resumeRestartBtn?.addEventListener("click", function () {
         allowFreshJoin = true;
         closeResumePrompt();
+        rerollAppearance();
+        renderPreview();
         submitJoin(true);
     });
     resumeCloseBtn?.addEventListener("click", closeResumePrompt);
@@ -268,4 +310,7 @@ document.addEventListener("DOMContentLoaded", function () {
             closeResumePrompt();
         }
     });
+
+    connectThemeSocket();
+    window.addEventListener("beforeunload", closeThemeSocket);
 });

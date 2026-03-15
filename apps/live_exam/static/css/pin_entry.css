@@ -1,5 +1,8 @@
 :root {
-    --pin-bg: #1a082f;
+    --pin-bg-1: #1a082f;
+    --pin-bg-2: #2b0751;
+    --pin-bg-3: #5c239a;
+    --pin-bg-4: #7e3af2;
     --pin-surface: rgba(43, 7, 81, 0.5);
     --pin-surface-strong: rgba(255, 255, 255, 0.92);
     --pin-line: rgba(255, 255, 255, 0.14);
@@ -26,8 +29,8 @@ body.pin-entry-page {
     background:
         radial-gradient(circle at 18% 18%, rgba(251, 191, 36, 0.16), transparent 20%),
         radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.12), transparent 20%),
-        radial-gradient(circle at 50% 80%, rgba(167, 139, 250, 0.2), transparent 30%),
-        linear-gradient(150deg, #1a082f 0%, #2b0751 25%, #5c239a 60%, #7e3af2 100%);
+        radial-gradient(circle at 50% 80%, var(--pin-secondary), transparent 30%),
+        linear-gradient(150deg, var(--pin-bg-1) 0%, var(--pin-bg-2) 25%, var(--pin-bg-3) 60%, var(--pin-bg-4) 100%);
     color: var(--pin-text);
     overflow-x: hidden;
 }
@@ -59,7 +62,7 @@ body.pin-entry-page {
     height: 28rem;
     bottom: -8rem;
     left: -6rem;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.48) 0%, rgba(167, 139, 250, 0.04) 72%);
+    background: radial-gradient(circle, var(--pin-secondary) 0%, transparent 72%);
 }
 
 .pin-entry-grid {

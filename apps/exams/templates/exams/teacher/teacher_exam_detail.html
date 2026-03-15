@@ -59,7 +59,9 @@
                 {# Live başlat - YALNIZ TEST İMTAHANLARI ÜÇÜN #}
                 {% if exam.exam_type == "test" %}
                 <a href="{% url 'liveExam:create_session_slug' slug=exam.slug %}"
-                   class="btn btn-success">
+                   class="btn btn-success"
+                   target="_blank"
+                   rel="noopener noreferrer">
                     🚀 {% trans "action_start_live" context "exams.template.teacher_exam_detail" %}
                 </a>
                 {% endif %}

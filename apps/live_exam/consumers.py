@@ -23,8 +23,15 @@ from apps.live_exam.transport import (
 
 class LiveSessionSocketAuthMixin:
     @database_sync_to_async
-    def _authorize_connection(self, pin: str, user_id: int | None, token: str | None) -> dict[str, Any] | None:
-        return authorize_socket_connection(pin=pin, user_id=user_id, token=token)
+    def _authorize_connection(
+        self,
+        pin: str,
+        user_id: int | None,
+        token: str | None,
+        *,
+        allow_anonymous: bool = False,
+    ) -> dict[str, Any] | None:
+        return authorize_socket_connection(pin=pin, user_id=user_id, token=token, allow_anonymous=allow_anonymous)
 
 
 # -------------------------
@@ -47,7 +54,7 @@ class LiveLobbyConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
         user_id = user.id if getattr(user, "is_authenticated", False) else None
         token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
 
-        self.auth_context = await self._authorize_connection(self.pin, user_id, token)
+        self.auth_context = await self._authorize_connection(self.pin, user_id, token, allow_anonymous=True)
         if self.auth_context is None:
             await self.close(code=4401)
             return

@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id);
 
 const BOOTSTRAP = window.LIVE_EXAM_PLAYER_BOOTSTRAP || {};
 const I18N = window.LIVE_EXAM_PLAYER_I18N || {};
+const SESSION_SETTINGS = Object.assign({}, BOOTSTRAP.sessionSettings || {});
 const tr = (key, fallback) => I18N[key] || fallback;
 const fmt = (template, values) =>
     String(template || "").replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
@@ -65,6 +66,7 @@ const state = {
     lastTop: [],
     lastRoundSoundKey: "",
     lastScoreSoundKey: "",
+    lastFinalSoundKey: "",
     audioContext: null,
 };
 
@@ -77,6 +79,12 @@ const esc = (value) => {
 const ts = (value) => (value ? new Date(value).getTime() : 0);
 const avatarMarkup = (player, size, className = "") =>
     window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
+const showQuestionsOnDevices = () => Boolean(SESSION_SETTINGS.show_questions_on_devices);
+
+function applySessionSettings(nextSettings) {
+    Object.assign(SESSION_SETTINGS, nextSettings || {});
+    document.body.dataset.liveTheme = SESSION_SETTINGS.theme_key || "aurora";
+}
 
 function ordinal(value) {
     const number = Number(value);
@@ -291,7 +299,9 @@ function buildQuestionCard(question, extraMarkup = "") {
     return `
         <div class="question-card">
             <div class="question-card__eyebrow">Round ${Number(question.index || 0)} of ${Number(question.total || 0)}</div>
-            <div class="question-card__text">${esc(question.text || "")}</div>
+            <div class="question-card__text">${esc(
+                showQuestionsOnDevices() ? question.text || "" : tr("questionHiddenBody", "The question is on the main screen.")
+            )}</div>
             ${extraMarkup}
         </div>
     `;
@@ -404,6 +414,42 @@ function playLeaderboardSound(revealKey) {
     start();
 }
 
+function playFinalSound(finalKey) {
+    if (state.lastFinalSoundKey === finalKey) return;
+
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const start = () => {
+        const base = ctx.currentTime + 0.02;
+        [261.63, 329.63, 392, 523.25, 659.25].forEach((frequency, index) => {
+            playTone(ctx, {
+                startTime: base + index * 0.09,
+                duration: index === 4 ? 0.58 : 0.24,
+                frequency,
+                endFrequency: frequency * 1.015,
+                gain: index === 4 ? 0.048 : 0.032,
+                type: index < 3 ? "triangle" : "sine",
+            });
+        });
+        playTone(ctx, {
+            startTime: base + 0.03,
+            duration: 0.82,
+            frequency: 130.81,
+            endFrequency: 98,
+            gain: 0.018,
+            type: "sine",
+        });
+        state.lastFinalSoundKey = finalKey;
+    };
+
+    if (ctx.state === "suspended") {
+        ctx.resume().then(start).catch(() => {});
+        return;
+    }
+    start();
+}
+
 function animateNumber(element, fromValue, toValue, duration = 900) {
     if (!element) return;
     const from = Number(fromValue);
@@ -477,11 +523,15 @@ function renderIntro(question) {
                     question,
                     `
                         <div class="intro-progress">
-                            <div class="intro-progress__track">
-                                <div class="intro-progress__meter" data-intro-meter></div>
-                            </div>
-                            <div class="intro-progress__meta">
-                                <span>${esc(tr("introHint", "Read the question. Answers are about to appear."))}</span>
+                                <div class="intro-progress__track">
+                                    <div class="intro-progress__meter" data-intro-meter></div>
+                                </div>
+                                <div class="intro-progress__meta">
+                                <span>${esc(
+                                    showQuestionsOnDevices()
+                                        ? tr("introHint", "Read the question. Answers are about to appear.")
+                                        : tr("introHintMainScreen", "Look at the main screen. Answers unlock soon.")
+                                )}</span>
                                 <span data-intro-countdown></span>
                             </div>
                         </div>
@@ -492,7 +542,11 @@ function renderIntro(question) {
         state.phase = PHASES.INTRO;
     }
     updateIntroProgress(question);
-    setRoundHint(tr("introHint", "Read the question. Answers are about to appear."));
+    setRoundHint(
+        showQuestionsOnDevices()
+            ? tr("introHint", "Read the question. Answers are about to appear.")
+            : tr("introHintMainScreen", "Look at the main screen. Answers unlock soon.")
+    );
 }
 
 function updateIntroProgress(question) {
@@ -526,7 +580,9 @@ function renderOptions(question) {
         }
         button.innerHTML = `
             <span class="option-letter">${esc(option.label || letters[index] || String(index + 1))}</span>
-            <span class="option-text">${esc(option.text || "")}</span>
+            <span class="option-text">${esc(
+                showQuestionsOnDevices() ? option.text || "" : tr("optionHiddenBody", "Match this answer on the main screen.")
+            )}</span>
         `;
         button.addEventListener("click", () => handleOptionClick(button, option.id));
         UI.optionsContainer.appendChild(button);
@@ -799,23 +855,19 @@ function renderLeaderboard(payload) {
         element.style.transform = "translateY(0)";
     });
 
-    let hasScoreChange = false;
     currentRows.forEach((row) => {
         const element = rowElements.get(row._key);
         const scoreEl = element?.querySelector("[data-score-value]");
         const previousScore = previousScoreMap.get(row._key);
         if (!scoreEl) return;
         if (Number.isFinite(previousScore) && previousScore !== row.score) {
-            hasScoreChange = true;
             animateNumber(scoreEl, previousScore, row.score, 920);
             return;
         }
         scoreEl.textContent = String(Math.round(row.score));
     });
 
-    if (hasScoreChange) {
-        playLeaderboardSound(revealKey);
-    }
+    playLeaderboardSound(revealKey);
 
     setStoredTop(payload && payload.top);
     setRoundHint(tr("scoreboardTitle", "Leaderboard"));
@@ -829,6 +881,7 @@ function renderFinal(payload) {
     setQuestionChip(null);
     state.phase = PHASES.FINAL;
     state.revealPayload = null;
+    playFinalSound(String(payload?.finished_at || (payload.top || []).map((player) => `${Number(player?.player_id || player?.id || 0)}:${Number(player?.score || 0)}`).join("|") || "final"));
 
     const rows = (payload.top || []).slice(0, 10).map((player, index) => `
         <div class="final-row">
@@ -1047,6 +1100,10 @@ function applyStateSnapshot(snapshot) {
         return;
     }
 
+    if (snapshot.settings) {
+        applySessionSettings(snapshot.settings);
+    }
+
     state.totalPlayers = Number(snapshot.total_players || state.totalPlayers || 0);
     state.answeredCount = Number(snapshot.answered_count || 0);
 
@@ -1100,6 +1157,12 @@ function handleAnswerSaved(data) {
 function handleSocketMessage(message) {
     const data = message.data || message;
     switch (data.type) {
+        case "session_settings":
+            applySessionSettings(data.settings);
+            if (state.currentQuestion) {
+                syncQuestionPhase();
+            }
+            break;
         case "question_published":
             state.answeredCount = 0;
             state.totalPlayers = Math.max(state.totalPlayers, 0);
@@ -1144,6 +1207,7 @@ UI.submitBtn.addEventListener("click", () => {
 });
 
 renderPlayerIdentity();
+applySessionSettings(SESSION_SETTINGS);
 renderIdle();
 setConnection("connecting");
 
