@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.courses.models import Course
+from core.upload_security import FileUploadValidator
 
 User = get_user_model()
 
@@ -92,7 +93,7 @@ class ProjectSubmission(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="submissions")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_submissions")
     content = models.TextField(verbose_name=pgettext_lazy("projects.model.submission.field", "content"))
-    file = models.FileField(upload_to="projects/submissions/", blank=True, null=True)
+    file = models.FileField(upload_to="projects/submissions/", blank=True, null=True, validators=[FileUploadValidator()])
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     feedback = models.TextField(blank=True)

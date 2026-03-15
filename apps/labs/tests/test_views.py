@@ -6,6 +6,7 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -716,3 +717,183 @@ class RosterAPIAuthorizationTest(TestCase):
         self._login_as(self.unauthorized_user)
         response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
         self.assertEqual(response.status_code, 403)
+
+
+class LabUploadSecurityTest(TestCase):
+    """Tests that all lab upload surfaces pass through the centralized security layer."""
+
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("lab_upload_teacher", "lut@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("lab_upload_student", "lus@example.com", "StrongPass123!")
+        self.organization = Organization.objects.create(
+            name="Lab Upload Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
+        self.course = Course.objects.create(owner=self.teacher, title="Lab Upload Course", status="published")
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
+        self.lab = Lab.objects.create(
+            course=self.course,
+            title="Lab Upload Security",
+            description="Upload security test",
+            start_datetime=timezone.now() - timedelta(hours=1),
+            end_datetime=timezone.now() + timedelta(days=1),
+            max_score=100,
+            max_attempts=3,
+            status="published",
+            allow_file_upload=True,
+            created_by=self.teacher,
+        )
+        self.block = LabBlock.objects.create(lab=self.lab, title="Upload Block", order=1)
+        self.question = LabQuestion.objects.create(
+            block=self.block,
+            question_text="Upload test question",
+            question_number=1,
+            points=10,
+        )
+
+    def _login_teacher(self):
+        _login_with_org(self.client, self.teacher, self.organization)
+
+    def _login_student(self):
+        _login_with_org(self.client, self.student, self.organization)
+
+    # ── auto_save_answer (student file upload) ──────────────────────────
+
+    def test_auto_save_answer_rejects_php_file(self):
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile("shell.php", b"<?php echo 'pwn';", content_type="application/x-httpd-php"),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_exe_file(self):
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "virus.exe",
+                    b"MZ\x00\x00\x00\x00",
+                    content_type="application/x-msdownload",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_html_file(self):
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "xss.html",
+                    b"<script>alert(1)</script>",
+                    content_type="text/html",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_double_extension_file(self):
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "shell.php.zip",
+                    b"PK\x03\x04",
+                    content_type="application/zip",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_randomizes_filename_for_valid_upload(self):
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "my answer",
+                "answer_file": SimpleUploadedFile(
+                    "submission.pdf",
+                    b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n",
+                    content_type="application/pdf",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        lab_answer = LabAnswer.objects.filter(lab=self.lab, student=self.student).first()
+        self.assertIsNotNone(lab_answer)
+        self.assertTrue(lab_answer.answer_file.name.endswith(".pdf"))
+        self.assertNotIn("submission", lab_answer.answer_file.name)
+
+    # ── Teacher file upload via edit_lab ─────────────────────────────────
+
+    def test_edit_lab_teacher_file_rejects_php(self):
+        self._login_teacher()
+        response = self.client.post(
+            reverse("labs:edit_lab", kwargs={"pk": self.lab.id}),
+            {
+                "title": self.lab.title,
+                "description": self.lab.description,
+                "start_datetime": self.lab.start_datetime.strftime("%Y-%m-%dT%H:%M"),
+                "end_datetime": self.lab.end_datetime.strftime("%Y-%m-%dT%H:%M"),
+                "max_score": self.lab.max_score,
+                "max_attempts": self.lab.max_attempts,
+                "status": self.lab.status,
+                "max_file_size_mb": 50,
+                "teacher_files": SimpleUploadedFile(
+                    "shell.php",
+                    b"<?php echo 'pwn';",
+                    content_type="application/x-httpd-php",
+                ),
+            },
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+
+    def test_create_question_rejects_php_attachment(self):
+        self._login_teacher()
+        response = self.client.post(
+            reverse("labs:create_question", kwargs={"block_id": self.block.id}),
+            {
+                "question_text": "What is security?",
+                "points": 10,
+                "attachment": SimpleUploadedFile(
+                    "shell.php",
+                    b"<?php echo 'pwn';",
+                    content_type="application/x-httpd-php",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabQuestion.objects.filter(block=self.block).count(), 1)
