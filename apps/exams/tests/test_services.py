@@ -14,6 +14,8 @@ from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.services import parsing
 from apps.exams.models import Exam, ExamAttempt, ExamAnswer, ExamQuestion
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -32,6 +34,16 @@ class ExamAttemptManagementServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.exam = Exam.objects.create(
             title="Test Exam",
             author=self.teacher,
@@ -107,6 +119,16 @@ class ExamGradingServicesTest(TestCase):
             email="student@example.com",
             password="pass123"
         )
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.exam = Exam.objects.create(
             title="Test Exam",
             author=self.teacher,
@@ -159,6 +181,17 @@ class ExamAccessControlServicesTest(TestCase):
         )
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.student = User.objects.create_user(
             username="student",

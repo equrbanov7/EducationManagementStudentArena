@@ -13,6 +13,8 @@ from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 LOCMEM_CACHE_SETTINGS = {
@@ -100,6 +102,17 @@ class LiveSessionCreationTest(TestCase):
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
 
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.exam = Exam.objects.create(
             title="Live Exam Test",
             slug="live-exam-test",
@@ -158,6 +171,17 @@ class LiveJoinTest(TestCase):
         self.teacher = User.objects.create_user("join_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Join Test Exam",
@@ -238,6 +262,16 @@ class LiveJoinRateLimitTest(TestCase):
         cache.clear()
         self.client = Client()
         self.teacher = User.objects.create_user("join_limit_teacher", "joinlimit@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.exam = Exam.objects.create(
             title="Join Limit Exam",
             slug="join-limit-exam",
@@ -285,6 +319,17 @@ class LiveStateAPITest(TestCase):
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
         self.host_client.login(username="state_teacher", password="StrongPass123!")
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="State Test Exam",
@@ -397,6 +442,16 @@ class LiveStateRateLimitTest(TestCase):
         cache.clear()
         self.client = Client()
         self.teacher = User.objects.create_user("state_limit_teacher", "statelimit@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.exam = Exam.objects.create(
             title="State Limit Exam",
             slug="state-limit-exam",
@@ -436,6 +491,17 @@ class LivePlayerProtectedViewsTest(TestCase):
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
 
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.exam = Exam.objects.create(
             title="Protected Player Views Exam",
             slug="protected-player-views-exam",
@@ -473,8 +539,8 @@ class LivePlayerProtectedViewsTest(TestCase):
         response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["my_nickname"], player.nickname)
-        self.assertEqual(response.context["my_avatar_key"], player.avatar_key)
+        self.assertEqual(response.context["my_player"]["nickname"], player.nickname)
+        self.assertEqual(response.context["my_player"]["avatar_key"], player.avatar_key)
 
     def test_player_screen_requires_valid_player_token(self):
         """Test that player screen rejects unauthenticated access."""
@@ -537,6 +603,17 @@ class URLPatternTest(TestCase):
         self.teacher = User.objects.create_user("url_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="URL Test Exam",

@@ -16,7 +16,9 @@ from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.organizations.models import Organization
 from config.asgi import application
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -32,6 +34,17 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         self.teacher = User.objects.create_user("consumer_teacher", "teacher@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Consumer Exam",
@@ -178,6 +191,17 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
         self.teacher = User.objects.create_user("answer_teacher", "answer@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Answer Validation Exam",
