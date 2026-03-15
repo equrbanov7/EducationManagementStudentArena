@@ -9,7 +9,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 from apps.courses.models import Course
+from apps.organizations.models import Organization
 from apps.projects.models import Project, ProjectSubmission
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -20,6 +22,17 @@ class ProjectTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user("projectteacher", "pteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("projectstudent", "pstudent@example.com", "StrongPass123!")
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.course = Course.objects.create(
             owner=self.teacher,
@@ -164,6 +177,17 @@ class ProjectSubmissionTest(TestCase):
         self.teacher = User.objects.create_user("subteacher", "subteacher@example.com", "StrongPass123!")
         self.student = User.objects.create_user("substudent", "substudent@example.com", "StrongPass123!")
 
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
         self.course = Course.objects.create(
             owner=self.teacher,
             title="Submission Course",
@@ -250,6 +274,17 @@ class ProjectWorkflowTest(TestCase):
         self.teacher = User.objects.create_user("workflowteacher", "wteacher@example.com", "StrongPass123!")
         self.student1 = User.objects.create_user("wstudent1", "ws1@example.com", "StrongPass123!")
         self.student2 = User.objects.create_user("wstudent2", "ws2@example.com", "StrongPass123!")
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.course = Course.objects.create(
             owner=self.teacher,

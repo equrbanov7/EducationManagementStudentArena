@@ -11,6 +11,8 @@ from apps.exams.models import Exam
 from apps.live_exam.serializers import serialize_player_identity, serialize_players, serialize_top
 from apps.live_exam.models import LivePlayer, LiveSession
 from apps.live_exam.transport import build_lobby_state_payload, build_reaction_event_payload
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -20,6 +22,17 @@ class LiveExamSerializerTransportTest(TestCase):
         self.teacher = User.objects.create_user("service_teacher", "service@example.com", "StrongPass123!")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.exam = Exam.objects.create(
             title="Service Test Exam",

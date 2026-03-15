@@ -64,7 +64,7 @@ class ProjectDetailBackUrlTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Course", status="published")
+        self.course = Course.objects.create(owner=self.teacher, title="Project Course", status="published", organization=self.organization)
         self.project = Project.objects.create(
             course=self.course,
             title="Project Back Url",
@@ -124,7 +124,7 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Review Course", status="published")
+        self.course = Course.objects.create(owner=self.teacher, title="Project Review Course", status="published", organization=self.organization)
         self.project = Project.objects.create(
             course=self.course,
             title="Project Review",
@@ -274,7 +274,7 @@ class ProjectUploadSecurityTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Upload Course", status="published")
+        self.course = Course.objects.create(owner=self.teacher, title="Project Upload Course", status="published", organization=self.organization)
         self.project = Project.objects.create(
             course=self.course,
             title="Project Upload Security",
@@ -377,8 +377,8 @@ class ProjectTenantIsolationTest(TestCase):
             profile.role = role
             profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
-        self.course_a = Course.objects.create(owner=self.teacher_a, title="Project Course A", status="published")
-        self.course_b = Course.objects.create(owner=self.teacher_b, title="Project Course B", status="published")
+        self.course_a = Course.objects.create(owner=self.teacher_a, title="Project Course A", status="published", organization=self.org_a)
+        self.course_b = Course.objects.create(owner=self.teacher_b, title="Project Course B", status="published", organization=self.org_b)
 
         self.project_b = Project.objects.create(
             course=self.course_b,
@@ -424,7 +424,7 @@ class ProjectReviewVisibilityTest(TestCase):
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
-        self.course = Course.objects.create(owner=self.teacher, title="Project Visibility Course", status="published")
+        self.course = Course.objects.create(owner=self.teacher, title="Project Visibility Course", status="published", organization=self.organization)
         self.project = Project.objects.create(
             course=self.course,
             title="Project Visibility",
@@ -508,7 +508,7 @@ class RosterAPIAuthorizationTest(TestCase):
         _assign_user_to_org(self.unauthorized_user, self.organization, ProfileRole.STUDENT)
 
         # Create course
-        self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published")
+        self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published", organization=self.organization)
 
         # Add memberships
         from apps.courses.models import CourseMembership
