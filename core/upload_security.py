@@ -34,6 +34,14 @@ BLOCKED_UPLOAD_EXTENSIONS = {
     ".msi",
     ".dll",
     ".scr",
+    ".html",
+    ".htm",
+    ".svg",
+    ".js",
+    ".vbs",
+    ".wsf",
+    ".ps1",
+    ".sh",
 }
 
 BLOCKED_MIME_TYPES = {
@@ -71,6 +79,20 @@ IMAGE_ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".jfif", ".png", ".gif", ".webp"}
 
 def _normalized_extension(file_name: str) -> str:
     return PurePosixPath((file_name or "").lower()).suffix
+
+
+def _has_dangerous_stem_extension(file_name: str) -> bool:
+    """Return True if any non-final suffix in the filename is a blocked extension.
+
+    This detects double-extension attacks such as ``shell.php.jpg``.
+    """
+    suffixes = PurePosixPath((file_name or "").lower()).suffixes
+    if len(suffixes) <= 1:
+        return False
+    for ext in suffixes[:-1]:
+        if ext in BLOCKED_UPLOAD_EXTENSIONS:
+            return True
+    return False
 
 
 def _read_head(uploaded_file, size=16):
@@ -131,6 +153,9 @@ def validate_uploaded_file(
     if extension in BLOCKED_UPLOAD_EXTENSIONS:
         raise ValidationError(pgettext("upload.security.error", "Bu fayl tipi təhlükəsizlik səbəbi ilə bloklanıb."))
 
+    if _has_dangerous_stem_extension(getattr(uploaded_file, "name", "")):
+        raise ValidationError(pgettext("upload.security.error", "Bu fayl tipi təhlükəsizlik səbəbi ilə bloklanıb."))
+
     normalized_allowed_extensions = None
     if allowed_extensions:
         normalized_allowed_extensions = {f".{ext.lstrip('.').lower()}" for ext in allowed_extensions}
@@ -176,3 +201,49 @@ def randomize_uploaded_filename(uploaded_file):
     extension = _normalized_extension(getattr(uploaded_file, "name", ""))
     uploaded_file.name = f"{uuid4().hex}{extension}"
     return uploaded_file
+
+
+class FileUploadValidator:
+    """
+    Django model-field validator that runs ``validate_uploaded_file`` on newly
+    uploaded files.  Committed ``FieldFile`` objects (already stored on disk)
+    are skipped so that loading existing records does not trigger validation.
+
+    Usage::
+
+        file = models.FileField(validators=[FileUploadValidator()])
+        file = models.FileField(validators=[FileUploadValidator(
+            allowed_extensions={".pdf", ".zip"},
+            max_size_mb=10,
+        )])
+    """
+
+    def __init__(self, *, allowed_extensions=None, max_size_mb=None):
+        self.allowed_extensions = allowed_extensions
+        self.max_size_mb = max_size_mb
+
+    def __call__(self, value):
+        # value is None or a FieldFile for committed objects – skip those
+        if not value:
+            return
+        if getattr(value, "_committed", True):
+            return
+        validate_uploaded_file(
+            value,
+            allowed_extensions=self.allowed_extensions,
+            max_size_mb=self.max_size_mb,
+        )
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, FileUploadValidator)
+            and self.allowed_extensions == other.allowed_extensions
+            and self.max_size_mb == other.max_size_mb
+        )
+
+    def deconstruct(self):
+        return (
+            "core.upload_security.FileUploadValidator",
+            [],
+            {k: v for k, v in (("allowed_extensions", self.allowed_extensions), ("max_size_mb", self.max_size_mb)) if v is not None},
+        )

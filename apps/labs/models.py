@@ -19,6 +19,8 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
+from core.upload_security import FileUploadValidator
+
 User = get_user_model()
 
 
@@ -101,6 +103,7 @@ class Lab(models.Model):
         null=True,
         verbose_name="Müəllim faylı",
         help_text="PDF, ZIP, DOC və s.",
+        validators=[FileUploadValidator()],
     )
 
     teacher_instructions = models.TextField(
@@ -326,6 +329,7 @@ class LabQuestion(models.Model):
         blank=True,
         null=True,
         verbose_name="Əlavə fayl",
+        validators=[FileUploadValidator()],
     )
 
     # Sual balı (optional, əgər suallar fərqli bal daşıyırsa)
@@ -585,7 +589,7 @@ class LabAnswer(models.Model):
     attempt_number = models.PositiveIntegerField(default=1)
 
     answer = models.TextField(blank=True)
-    answer_file = models.FileField(upload_to="labs/answers/%Y/%m/", blank=True, null=True)
+    answer_file = models.FileField(upload_to="labs/answers/%Y/%m/", blank=True, null=True, validators=[FileUploadValidator()])
 
     is_draft = models.BooleanField(default=True)
     is_correct = models.BooleanField(null=True, blank=True)

@@ -432,6 +432,16 @@ def auto_save_answer(request, pk):
         from django.shortcuts import get_object_or_404
         question = get_object_or_404(_tenant_scoped_questions(request), id=question_id, block__lab=lab)
 
+        # Validate file BEFORE creating/updating the LabAnswer record so that
+        # a rejected upload never leaves a partially-saved answer in the DB.
+        if answer_file:
+            allowed_extensions = _normalize_extensions(lab.allowed_extensions)
+            _validate_and_prepare_lab_upload(
+                answer_file,
+                allowed_extensions=allowed_extensions,
+                max_size_mb=lab.max_file_size_mb or 25,
+            )
+
         # Bu cəhd üçün cavab yarat/yenilə
         lab_answer, created = LabAnswer.objects.get_or_create(
             lab=lab,
@@ -447,12 +457,6 @@ def auto_save_answer(request, pk):
             lab_answer.is_draft = True
 
         if answer_file:
-            allowed_extensions = _normalize_extensions(lab.allowed_extensions)
-            _validate_and_prepare_lab_upload(
-                answer_file,
-                allowed_extensions=allowed_extensions,
-                max_size_mb=lab.max_file_size_mb or 25,
-            )
             lab_answer.answer_file = answer_file
 
         lab_answer.save()
