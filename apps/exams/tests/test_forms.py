@@ -3,6 +3,8 @@ from django.test import TestCase
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
+from apps.organizations.models import Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -14,6 +16,16 @@ class ExamFormDefaultStateTests(TestCase):
             email="exam_form_teacher@example.com",
             password="StrongPass123!",
         )
+        self.org = Organization.objects.create(
+            name="Exam Form Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
     def test_create_form_marks_is_active_checked_by_default(self):
         form = ExamForm()

@@ -1833,3 +1833,112 @@ class TeacherQuestionsBankViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("from_section=my-courses", response.url)
         self.assertIn("return_to=%2Faccounts%2Fprofile%2F%3Fsection%3Dmy-courses", response.url)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Tenant Isolation: Null Organization Edge-Case Tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class ExamOrganizationRequiredTest(TestCase):
+    """
+    Tenant isolation: Exam cannot be created without an organization.
+    These tests cover the null-organization edge cases for tenant boundary enforcement.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="exam_org_req_teacher",
+            email="exam_org_req_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.org = Organization.objects.create(
+            name="Exam OrgRequired Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER)
+
+    def test_exam_model_raises_validation_error_without_organization(self):
+        """Exam.save() raises ValidationError when organization cannot be resolved."""
+        from django.core.exceptions import ValidationError
+
+        # Create a user with NO organization profile
+        orphan_teacher = User.objects.create_user(
+            username="orphan_exam_teacher",
+            email="orphan_exam_teacher@example.com",
+            password="StrongPass123!",
+        )
+
+        with self.assertRaises(ValidationError):
+            Exam.objects.create(
+                author=orphan_teacher,
+                title="Orphan Exam",
+                exam_type="test",
+                # organization intentionally omitted and profile has no org
+            )
+
+    def test_exam_model_auto_assigns_organization_from_author_profile(self):
+        """Exam.save() auto-assigns organization from author's profile when not set explicitly."""
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Auto Org Exam",
+            exam_type="test",
+            # organization intentionally omitted
+        )
+        self.assertEqual(exam.organization, self.org)
+
+    def test_exam_model_auto_assigns_organization_from_course(self):
+        """Exam.save() auto-assigns organization from the linked course's organization."""
+        from apps.courses.models import Course
+
+        course = Course.objects.create(
+            owner=self.teacher,
+            title="Source Course for Exam",
+            status="published",
+            organization=self.org,
+        )
+        exam = Exam.objects.create(
+            author=self.teacher,
+            course=course,
+            title="Course-Linked Exam",
+            exam_type="test",
+            # organization intentionally omitted — should be derived from course
+        )
+        self.assertEqual(exam.organization, self.org)
+
+    def test_create_exam_view_raises_permission_denied_without_active_organization(self):
+        """createAndEditExamView raises PermissionDenied when request has no organization."""
+        from apps.exams.views.teacher.exams import createAndEditExamView
+
+        request = RequestFactory().post(
+            reverse("exams:create_exam"),
+            {
+                "title": "No Org Exam",
+                "description": "Should not be created",
+                "exam_type": "test",
+                "is_active": "on",
+            },
+        )
+        request.user = self.teacher
+        request.organization = None
+        request.org_memberships = []
+        request.org_permissions = []
+
+        with self.assertRaises(PermissionDenied):
+            createAndEditExamView(request)
+
+        self.assertFalse(Exam.objects.filter(title="No Org Exam").exists())
+
+    def test_exam_with_explicit_organization_is_created_successfully(self):
+        """Exam explicitly bound to an organization is created without errors."""
+        exam = Exam.objects.create(
+            author=self.teacher,
+            title="Explicitly Bound Exam",
+            exam_type="test",
+            organization=self.org,
+        )
+        self.assertEqual(exam.organization, self.org)
+        self.assertIsNotNone(exam.pk)

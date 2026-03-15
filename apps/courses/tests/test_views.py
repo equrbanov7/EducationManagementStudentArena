@@ -421,3 +421,101 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(CourseMembership.objects.filter(course=self.course_a, user=self.external_student).exists())
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Tenant Isolation: Null Organization Edge-Case Tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class CourseOrganizationRequiredTest(TestCase):
+    """
+    Tenant isolation: Course cannot be created or updated without an
+    organization. These tests cover the null-organization edge cases.
+    """
+
+    def setUp(self):
+        from django.core.exceptions import ValidationError
+        self.teacher = User.objects.create_user(
+            username="org_req_teacher",
+            email="org_req_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.org = Organization.objects.create(
+            name="OrgRequired Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER)
+
+    def test_course_model_raises_validation_error_without_organization(self):
+        """Course.save() raises ValidationError when organization cannot be resolved."""
+        from django.core.exceptions import ValidationError
+
+        # Create a user with NO organization profile
+        orphan_teacher = User.objects.create_user(
+            username="orphan_teacher",
+            email="orphan_teacher@example.com",
+            password="StrongPass123!",
+        )
+
+        with self.assertRaises(ValidationError):
+            Course.objects.create(
+                owner=orphan_teacher,
+                title="Orphan Course",
+                status="draft",
+                # organization intentionally omitted and profile has no org
+            )
+
+    def test_course_model_auto_assigns_organization_from_owner_profile(self):
+        """Course.save() auto-assigns organization from owner profile when not set explicitly."""
+        course = Course.objects.create(
+            owner=self.teacher,
+            title="Auto Org Course",
+            status="draft",
+            # organization intentionally omitted
+        )
+        self.assertEqual(course.organization, self.org)
+
+    def test_create_course_view_raises_403_without_active_organization(self):
+        """CreateCourseView form_valid raises PermissionDenied when request has no organization."""
+        from django.core.exceptions import PermissionDenied
+        from apps.courses.views.crud import CreateCourseView
+
+        # Simulate a request with organization=None (no active org)
+        request = RequestFactory().post(
+            reverse("courses:create_course"),
+            {"title": "No Org Course", "description": "Should not be saved"},
+        )
+        request.user = self.teacher
+        request.organization = None
+        request.org_memberships = []
+        request.org_permissions = ["course.create"]
+
+        view = CreateCourseView()
+        view.request = request
+        view.args = []
+        view.kwargs = {}
+        view.object = None
+
+        from apps.courses.forms import CourseForm
+        form = CourseForm({"title": "No Org Course", "description": "Should not be saved"})
+        form.instance.owner = self.teacher
+
+        with self.assertRaises(PermissionDenied):
+            view.form_valid(form)
+
+        self.assertFalse(Course.objects.filter(title="No Org Course").exists())
+
+    def test_course_with_explicit_organization_is_created_successfully(self):
+        """Course explicitly bound to an organization is created without errors."""
+        course = Course.objects.create(
+            owner=self.teacher,
+            title="Explicitly Bound Course",
+            status="draft",
+            organization=self.org,
+        )
+        self.assertEqual(course.organization, self.org)
+        self.assertIsNotNone(course.pk)
