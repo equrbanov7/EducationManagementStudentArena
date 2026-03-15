@@ -33,12 +33,13 @@
                         {% trans "exams" context "nav" %}
                     </a>
                 </li>
-                <li class="blog-header__nav-item">
+               {% comment %} It is temporary deactivate {% endcomment %} 
+                {% comment %} <li class="blog-header__nav-item">
                     <a href="{{ subscribe_url }}"
                        class="blog-header__nav-link blog-header__nav-link--primary {% if request.resolver_match.url_name == 'subscribe' %}blog-header__nav-link--active{% endif %}">
                         {% trans "subscribe" context "nav" %}
                     </a>
-                </li>
+                </li> {% endcomment %}
             </ul>
 
             <div class="blog-header__auth">
