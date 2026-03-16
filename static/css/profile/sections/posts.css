@@ -495,6 +495,57 @@ textarea.form-control {
     color: #ffffff;
 }
 
+/* ---- Feedback history entries ---- */
+.post-feedback-entry {
+    border-bottom: 1px solid #e0e7ef;
+    padding: 0.5rem 0;
+}
+
+.post-feedback-entry:last-child {
+    border-bottom: none;
+}
+
+.post-feedback-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.post-feedback-entry-action {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+.feedback-approved {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.feedback-needs-changes {
+    background-color: #fef9c3;
+    color: #92400e;
+}
+
+.feedback-info {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.post-feedback-entry-date {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.post-feedback-entry-text {
+    font-size: 0.85rem;
+    color: #334155;
+    margin-top: 0.2rem;
+}
+
 @media (max-width: 768px) {
     .blog-grid-container {
         grid-template-columns: 1fr;

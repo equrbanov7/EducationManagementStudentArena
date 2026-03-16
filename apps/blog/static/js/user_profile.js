@@ -249,6 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const fileImage = this.dataset.fileImage || "";
       const isPublished = this.dataset.isPublished === "true";
       const requiresApproval = this.dataset.requiresApproval === "true";
+      const approvalStatus = this.dataset.approvalStatus || "";
       const slug = this.dataset.slug || "";
       const createdAt = this.dataset.createdAt || "";
       const updatedAt = this.dataset.updatedAt || "";
@@ -322,9 +323,13 @@ document.addEventListener("DOMContentLoaded", function () {
         is_published: requiresApproval ? false : isPublished,
       };
 
-      hasUnsavedChanges = false;
-      saveEditBtn.disabled = true;
-      saveEditBtn.classList.remove("active");
+      hasUnsavedChanges = approvalStatus === "needs_changes";
+      saveEditBtn.disabled = !hasUnsavedChanges;
+      if (hasUnsavedChanges) {
+        saveEditBtn.classList.add("active");
+      } else {
+        saveEditBtn.classList.remove("active");
+      }
 
       showModal(editModal);
     });

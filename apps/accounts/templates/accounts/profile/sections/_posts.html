@@ -56,39 +56,50 @@
                             </div>
 
                             {% include "partials/_blogCard.html" with post=post %}
-                            {% if post.requires_approval or post.latest_feedback_text %}
-                                {% with feedback_text=post.latest_feedback_text|default_if_none:'' %}
-                                    <details class="post-feedback-accordion{% if not feedback_text %} is-empty{% endif %}">
-                                        <summary class="post-feedback-summary">
-                                            <span class="post-feedback-title"><i class="fas fa-comment-dots"></i> Feedback</span>
-                                            <span class="post-feedback-preview">
-                                                {% if feedback_text %}
-                                                    {{ feedback_text|truncatechars:70 }}
-                                                {% elif post.approval_status == 'pending' %}
-                                                    Müəllim baxışı gözlənilir.
-                                                {% elif post.approval_status == 'needs_changes' %}
-                                                    Düzəliş üçün feedback əlavə edilə bilər.
-                                                {% else %}
-                                                    Hələ feedback yoxdur.
-                                                {% endif %}
-                                            </span>
-                                            <span class="post-feedback-chevron" aria-hidden="true">
-                                                <i class="fas fa-chevron-down"></i>
-                                            </span>
-                                        </summary>
-                                        <div class="post-feedback-content">
-                                            {% if feedback_text %}
-                                                {{ feedback_text|linebreaksbr }}
-                                            {% elif post.approval_status == 'needs_changes' %}
-                                                Müəllim “düzəliş tələb olunur” seçib, amma əlavə mətn yazmayıb.
+                            {% if post.requires_approval or post.approval_logs.all %}
+                                <details class="post-feedback-accordion">
+                                    <summary class="post-feedback-summary">
+                                        <span class="post-feedback-title"><i class="fas fa-comment-dots"></i> Feedback</span>
+                                        <span class="post-feedback-preview">
+                                            {% if post.approval_logs.all %}
+                                                {{ post.approval_logs.all.0.feedback|default:""|truncatechars:70 }}
                                             {% elif post.approval_status == 'pending' %}
-                                                Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.
+                                                Müəllim baxışı gözlənilir.
                                             {% else %}
-                                                Bu post üçün hələ feedback paylaşılmayıb.
+                                                Hələ feedback yoxdur.
                                             {% endif %}
-                                        </div>
-                                    </details>
-                                {% endwith %}
+                                        </span>
+                                        <span class="post-feedback-chevron" aria-hidden="true">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </span>
+                                    </summary>
+                                    <div class="post-feedback-content">
+                                        {% if post.approval_logs.all %}
+                                            {% for log in post.approval_logs.all %}
+                                                <div class="post-feedback-entry">
+                                                    <div class="post-feedback-entry-header">
+                                                        <span class="post-feedback-entry-action {% if log.action == 'approved' %}feedback-approved{% elif log.action == 'needs_changes' %}feedback-needs-changes{% else %}feedback-info{% endif %}">
+                                                            {% if log.action == 'approved' %}<i class="fas fa-check-circle"></i> Təsdiqləndi
+                                                            {% elif log.action == 'needs_changes' %}<i class="fas fa-pen"></i> Düzəliş tələb olundu
+                                                            {% else %}<i class="fas fa-comment"></i> Feedback
+                                                            {% endif %}
+                                                        </span>
+                                                        <span class="post-feedback-entry-date">{{ log.created_at|date:"d.m.Y H:i" }}</span>
+                                                    </div>
+                                                    {% if log.feedback %}
+                                                        <div class="post-feedback-entry-text">{{ log.feedback|linebreaksbr }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% elif post.approval_status == 'needs_changes' %}
+                                            Müəllim "düzəliş tələb olunur" seçib, amma əlavə mətn yazmayıb.
+                                        {% elif post.approval_status == 'pending' %}
+                                            Bu post hələ baxış mərhələsindədir. Feedback təsdiqdən sonra görünəcək.
+                                        {% else %}
+                                            Bu post üçün hələ feedback paylaşılmayıb.
+                                        {% endif %}
+                                    </div>
+                                </details>
                             {% endif %}
                         </article>
                     {% endfor %}
