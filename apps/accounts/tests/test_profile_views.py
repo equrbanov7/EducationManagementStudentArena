@@ -1828,7 +1828,9 @@ class GradingQueueViewTest(TestCase):
         self.assertContains(response, reverse("assignments:grade_submission", kwargs={"pk": self.submission.id}))
         self.assertContains(response, "/ 75")
         self.assertContains(response, "/media/assignments/submissions/queue-answer.pdf")
-        self.assertContains(response, "grading_queue_student")
+        # Student identity must be hidden during grading phase.
+        self.assertContains(response, "Anonim tələbə")
+        self.assertNotContains(response, "grading_queue_student")
 
 
 class PendingReviewViewTest(TestCase):
@@ -2001,6 +2003,7 @@ class PendingReviewViewTest(TestCase):
             content="Older pending answer",
             status="submitted",
         )
+        # Simulate a submission that was submitted more than 5 minutes ago.
         submission.submitted_at = timezone.now() - timedelta(minutes=6)
         submission.save(update_fields=["submitted_at"])
 
@@ -2010,10 +2013,12 @@ class PendingReviewViewTest(TestCase):
 
         items = response.context["review_items"]
         assignment_item = next(item for item in items if item["title"] == "Revealed Pending Assignment")
-        self.assertEqual(assignment_item["student_display"], student.username)
+        # Pending (submitted) submissions must ALWAYS remain anonymous —
+        # the student identity is only revealed after grading AND the re-check window closes.
+        self.assertEqual(assignment_item["student_display"], "Anonim tələbə")
         self.assertEqual(assignment_item["action_label"], "Yoxla")
-        self.assertContains(response, student.username)
-        self.assertNotContains(response, "Anonim tələbə")
+        self.assertContains(response, "Anonim tələbə")
+        self.assertNotContains(response, student.username)
 
     def test_pending_review_detail_allows_edit_within_window_and_locks_after(self):
         from datetime import timedelta

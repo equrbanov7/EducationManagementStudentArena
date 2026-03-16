@@ -65,13 +65,14 @@ def _standard_item_type_meta(raw_type):
 def _resolve_teacher_identity_window(*, submitted_at=None, reviewed_at=None, is_reviewed=False, now=None):
     current_time = now or timezone.now()
 
-    if is_reviewed and reviewed_at:
-        reveal_at = reviewed_at + REVIEW_EDIT_WINDOW
-    elif submitted_at:
-        reveal_at = submitted_at + REVIEW_EDIT_WINDOW
-    else:
-        return False, 0
+    # Identity is always hidden while the submission has not been reviewed yet.
+    # `reviewed_at` is only populated once grading has actually been completed,
+    # so it reliably indicates whether the teacher has reviewed the submission.
+    if not reviewed_at:
+        return True, 0
 
+    # Once reviewed, hide identity until the re-check window closes.
+    reveal_at = reviewed_at + REVIEW_EDIT_WINDOW
     if current_time >= reveal_at:
         return False, 0
 
