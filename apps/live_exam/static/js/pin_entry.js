@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitLabel = submitBtn.querySelector("span");
     const defaultLabel = submitLabel ? submitLabel.textContent : "";
 
-    const sanitize = (value) => String(value || "").replace(/\D/g, "").slice(0, 6);
+    const sanitize = (value) => String(value || "").replace(/\D/g, "").slice(0, 8);
     const applyTheme = (settings) => {
         if (!settings) return;
         document.body.dataset.liveTheme = settings.theme_key || document.body.dataset.liveTheme || "aurora";
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const connectThemeSocket = (pin) => {
         const normalizedPin = sanitize(pin);
-        if (normalizedPin.length !== 6) {
+        if (normalizedPin.length !== 8) {
             closeThemeSocket();
             return;
         }
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.addEventListener("submit", (event) => {
         syncValue();
-        if (input.value.length !== 6) {
+        if (input.value.length !== 8) {
             event.preventDefault();
             input.focus();
             input.setAttribute("aria-invalid", "true");
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const errorNode = document.getElementById("pinError");
             if (!errorNode) {
-                input.setCustomValidity(i18n.invalidPin || "Enter a 6-digit PIN.");
+                input.setCustomValidity(i18n.invalidPin || "Enter an 8-digit PIN.");
                 input.reportValidity();
                 input.setCustomValidity("");
             }
@@ -100,10 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
     syncValue();
 
     const searchPin = sanitize(new URLSearchParams(window.location.search).get("pin"));
-    if (searchPin.length === 6 && input.value === searchPin) {
+    if (searchPin.length === 8 && input.value === searchPin) {
         window.setTimeout(() => {
             syncValue();
-            if (!submitBtn.disabled && input.value.length === 6) {
+            if (!submitBtn.disabled && input.value.length === 8) {
                 if (typeof form.requestSubmit === "function") {
                     form.requestSubmit(submitBtn);
                 } else {

@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 
 from django.db import models
@@ -8,9 +8,11 @@ from django.utils.translation import pgettext_lazy
 from apps.exams.models import Exam, ExamQuestion
 from apps.live_exam.constants import DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
 
+PIN_LENGTH = 8
+
 
 def generate_pin():
-    return "".join(random.choices(string.digits, k=6))
+    return "".join(secrets.choice(string.digits) for _ in range(PIN_LENGTH))
 
 
 class LiveSession(models.Model):
@@ -29,7 +31,7 @@ class LiveSession(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name="live_sessions")
     host_user = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name="hosted_live_sessions")
 
-    pin = models.CharField(max_length=6, unique=True, default=generate_pin, db_index=True)
+    pin = models.CharField(max_length=PIN_LENGTH, unique=True, default=generate_pin, db_index=True)
     state = models.CharField(max_length=12, choices=STATE_CHOICES, default=STATE_LOBBY)
 
     is_locked = models.BooleanField(default=False)

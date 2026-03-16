@@ -60,9 +60,9 @@ PIN_ENTRY_COPY = {
     "az": {
         "title": "Canlı imtahana qoşul",
         "eyebrow": "EMSArena Live",
-        "subtitle": "Müəllimin göstərdiyi 6 rəqəmli PIN-i yaz, sonra adını seçib oyuna daxil ol.",
+        "subtitle": "Müəllimin göstərdiyi 8 rəqəmli PIN-i yaz, sonra adını seçib oyuna daxil ol.",
         "pin_label": "Oyun PIN-i",
-        "pin_placeholder": "Məsələn: 368121",
+        "pin_placeholder": "Məsələn: 36812194",
         "button": "Davam et",
         "hint": "PIN-i ekranda gördüyün kimi daxil et. Növbəti addımda ad və avatar seçəcəksən.",
         "feature_fast": "Saniyələr içində qoşul",
@@ -73,15 +73,15 @@ PIN_ENTRY_COPY = {
         "footer_left": "Müəllim ekranında PIN və QR kod görünür.",
         "footer_right": "Daxil olduqdan sonra avatar və ad seçimi gəlir.",
         "loading": "Yoxlanılır...",
-        "invalid_pin": "6 rəqəmli PIN daxil et.",
+        "invalid_pin": "8 rəqəmli PIN daxil et.",
         "session_not_found": "Bu PIN tapılmadı və ya oyun bağlanıb.",
     },
     "en": {
         "title": "Join a live exam",
         "eyebrow": "EMSArena Live",
-        "subtitle": "Enter the 6-digit PIN shown by the teacher, then choose your name and join the game.",
+        "subtitle": "Enter the 8-digit PIN shown by the teacher, then choose your name and join the game.",
         "pin_label": "Game PIN",
-        "pin_placeholder": "Example: 368121",
+        "pin_placeholder": "Example: 36812194",
         "button": "Continue",
         "hint": "Type the PIN exactly as shown on screen. You will choose your nickname and avatar next.",
         "feature_fast": "Join in seconds",
@@ -92,15 +92,15 @@ PIN_ENTRY_COPY = {
         "footer_left": "The teacher screen shows the PIN and QR code.",
         "footer_right": "After this step, students choose nickname and avatar.",
         "loading": "Checking...",
-        "invalid_pin": "Enter a 6-digit PIN.",
+        "invalid_pin": "Enter an 8-digit PIN.",
         "session_not_found": "This PIN was not found or the session is closed.",
     },
     "ru": {
         "title": "Присоединитесь к живому экзамену",
         "eyebrow": "EMSArena Live",
-        "subtitle": "Введите 6-значный PIN, который показал преподаватель, затем выберите имя и войдите в игру.",
+        "subtitle": "Введите 8-значный PIN, который показал преподаватель, затем выберите имя и войдите в игру.",
         "pin_label": "PIN игры",
-        "pin_placeholder": "Например: 368121",
+        "pin_placeholder": "Например: 36812194",
         "button": "Продолжить",
         "hint": "Введите PIN точно как на экране. На следующем шаге вы выберете ник и аватар.",
         "feature_fast": "Подключение за несколько секунд",
@@ -111,15 +111,15 @@ PIN_ENTRY_COPY = {
         "footer_left": "На экране преподавателя видны PIN и QR-код.",
         "footer_right": "После этого шага ученик выбирает ник и аватар.",
         "loading": "Проверяем...",
-        "invalid_pin": "Введите 6-значный PIN.",
+        "invalid_pin": "Введите 8-значный PIN.",
         "session_not_found": "Такой PIN не найден или сессия уже закрыта.",
     },
     "tr": {
         "title": "Canlı sınava katıl",
         "eyebrow": "EMSArena Live",
-        "subtitle": "Öğretmenin gösterdiği 6 haneli PIN kodunu gir, sonra adını seçip oyuna katıl.",
+        "subtitle": "Öğretmenin gösterdiği 8 haneli PIN kodunu gir, sonra adını seçip oyuna katıl.",
         "pin_label": "Oyun PIN'i",
-        "pin_placeholder": "Örnek: 368121",
+        "pin_placeholder": "Örnek: 36812194",
         "button": "Devam et",
         "hint": "PIN kodunu ekrandaki gibi gir. Sonraki adımda rumuz ve avatar seçeceksin.",
         "feature_fast": "Saniyeler içinde katıl",
@@ -130,7 +130,7 @@ PIN_ENTRY_COPY = {
         "footer_left": "Öğretmen ekranında PIN ve QR kod görünür.",
         "footer_right": "Bu adımdan sonra öğrenci ad ve avatar seçer.",
         "loading": "Kontrol ediliyor...",
-        "invalid_pin": "6 haneli bir PIN gir.",
+        "invalid_pin": "8 haneli bir PIN gir.",
         "session_not_found": "Bu PIN bulunamadı veya oturum kapanmış.",
     },
 }
@@ -198,7 +198,8 @@ def _pin_entry_copy() -> dict[str, str]:
 
 
 def _pin_entry_theme_key(pin_value: str, raw_theme: str | None = None) -> str:
-    if len(pin_value) == 6:
+    from apps.live_exam.models import PIN_LENGTH
+    if len(pin_value) == PIN_LENGTH:
         session = LiveSession.objects.filter(pin=pin_value).first()
         if session:
             return str(get_session_settings(session).get("theme_key") or "aurora")
@@ -217,7 +218,8 @@ def _join_resume_copy(nickname: str) -> dict[str, str]:
 
 
 def _normalize_pin(raw_pin: str | None) -> str:
-    return "".join(ch for ch in str(raw_pin or "") if ch.isdigit())[:6]
+    from apps.live_exam.models import PIN_LENGTH
+    return "".join(ch for ch in str(raw_pin or "") if ch.isdigit())[:PIN_LENGTH]
 
 
 def _nickname_conflict_message() -> str:
@@ -277,13 +279,14 @@ def _broadcast_lobby_state(session: LiveSession) -> None:
 
 
 def live_pin_entry(request):
+    from apps.live_exam.models import PIN_LENGTH
     copy = _pin_entry_copy()
     pin_value = _normalize_pin(request.POST.get("pin") if request.method == "POST" else request.GET.get("pin"))
     raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
     theme_key = _pin_entry_theme_key(pin_value, raw_theme)
     error_message = ""
     status_code = 200
-    session_exists = len(pin_value) == 6 and LiveSession.objects.filter(pin=pin_value).exists()
+    session_exists = len(pin_value) == PIN_LENGTH and LiveSession.objects.filter(pin=pin_value).exists()
 
     if request.method != "POST" and session_exists:
         return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=pin_value))
@@ -310,7 +313,7 @@ def live_pin_entry(request):
                 response.headers["Retry-After"] = str(retry_after)
             return _ensure_live_client_cookie(request, response)
 
-        if len(pin_value) != 6:
+        if len(pin_value) != PIN_LENGTH:
             record_rate_limit_hit(
                 LIVE_PIN_LIMIT_SCOPE,
                 settings.LIVE_EXAM_JOIN_RATE_LIMIT,
