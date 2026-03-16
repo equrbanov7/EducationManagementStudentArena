@@ -282,6 +282,12 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
         )
         return [(b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
 
+    def _host_session_headers(self):
+        client = Client()
+        client.login(username="answer_teacher", password="StrongPass123!")
+        session_cookie = client.cookies[settings.SESSION_COOKIE_NAME].value
+        return [(b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
+
     def _host_and_player_headers(self, player):
         host_client = Client()
         host_client.login(username="answer_teacher", password="StrongPass123!")
@@ -441,6 +447,7 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             self.assertTrue(connected2)
 
             try:
+                # ws1 answers — players no longer receive answer_progress
                 await ws1.send_json_to(
                     {
                         "type": "answer",
@@ -449,12 +456,11 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
                         "answer_ms": 250,
                     }
                 )
-                first_sender_messages = [
-                    await ws1.receive_json_from(timeout=1),
-                    await ws1.receive_json_from(timeout=1),
-                ]
-                first_other_message = await ws2.receive_json_from(timeout=1)
+                first_sender_response = await ws1.receive_json_from(timeout=1)
+                # ws2 receives nothing from ws1's answer (answer_progress now host-only)
+                ws2_has_pending = await ws2.receive_nothing(timeout=0.3)
 
+                # ws2 answers — triggers auto-reveal since all players answered
                 await ws2.send_json_to(
                     {
                         "type": "answer",
@@ -466,40 +472,46 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
                 second_sender_messages = [
                     await ws2.receive_json_from(timeout=1),
                     await ws2.receive_json_from(timeout=1),
-                    await ws2.receive_json_from(timeout=1),
                 ]
-                first_player_completion_messages = [
-                    await ws1.receive_json_from(timeout=1),
-                    await ws1.receive_json_from(timeout=1),
-                ]
+                # ws1 receives the reveal broadcast to the players group
+                first_player_reveal = await ws1.receive_json_from(timeout=1)
 
                 return (
-                    [message["type"] for message in first_sender_messages],
-                    first_other_message["type"],
+                    first_sender_response,
+                    ws2_has_pending,
                     [message["type"] for message in second_sender_messages],
-                    second_sender_messages[2],
-                    [message["type"] for message in first_player_completion_messages],
+                    second_sender_messages[1],
+                    first_player_reveal,
                 )
             finally:
                 await ws1.disconnect()
                 await ws2.disconnect()
 
         (
-            first_sender_types,
-            first_other_type,
+            first_sender_response,
+            ws2_no_message,
             second_sender_types,
             reveal_message,
-            first_player_completion_types,
+            first_player_reveal,
         ) = async_to_sync(scenario)()
 
-        self.assertEqual(first_sender_types, ["answer_saved", "answer_progress"])
-        self.assertEqual(first_other_type, "answer_progress")
-        self.assertEqual(second_sender_types, ["answer_saved", "answer_progress", "reveal"])
-        self.assertEqual(first_player_completion_types, ["answer_progress", "reveal"])
+        # ws1 only receives answer_saved (answer_progress is now host-only)
+        self.assertEqual(first_sender_response["type"], "answer_saved")
+        # ws2 receives nothing when ws1 answers (answer_progress is host-only)
+        self.assertTrue(ws2_no_message)
+        # ws2 receives answer_saved then reveal (no answer_progress for players)
+        self.assertEqual(second_sender_types, ["answer_saved", "reveal"])
+        # Reveal payload has correct structure for players
         self.assertIn("previous_top", reveal_message)
         self.assertIn("distribution", reveal_message)
         self.assertIn("next_question_at", reveal_message)
+        self.assertIn("correct_option_ids", reveal_message)
         self.assertTrue(any("player_id" in row for row in reveal_message["top"]))
+        # Player reveal does NOT include per-player results (host-only field)
+        self.assertNotIn("results", reveal_message)
+        # ws1 also receives reveal from the players group broadcast
+        self.assertEqual(first_player_reveal["type"], "reveal")
+        self.assertIn("correct_option_ids", first_player_reveal)
 
         self.session.refresh_from_db()
         self.assertEqual(self.session.state, LiveSession.STATE_REVEAL)
@@ -507,6 +519,115 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             LiveAnswer.objects.filter(session=self.session, question_id=self.question.id).count(),
             2,
         )
+
+    def test_answer_progress_reaches_host_not_players(self):
+        """answer_progress events must be delivered to the host group only."""
+        second_player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="Player Three",
+            avatar_key="avatar_3",
+            client_id="player-three-client",
+        )
+        host_headers = self._host_session_headers()
+
+        async def scenario():
+            # Connect player ws (players group)
+            player_ws = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            # Connect host ws (host group)
+            host_ws = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=host_headers,
+            )
+
+            connected_p, _ = await player_ws.connect()
+            connected_h, _ = await host_ws.connect()
+            self.assertTrue(connected_p)
+            self.assertTrue(connected_h)
+
+            try:
+                # Player one submits answer
+                await player_ws.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 200,
+                    }
+                )
+                # Player receives answer_saved (direct unicast)
+                player_direct = await player_ws.receive_json_from(timeout=1)
+                # Host receives answer_progress (host-only group broadcast)
+                host_msg = await host_ws.receive_json_from(timeout=1)
+                # Player should receive nothing else (no answer_progress)
+                player_no_progress = await player_ws.receive_nothing(timeout=0.3)
+
+                return player_direct, host_msg, player_no_progress
+            finally:
+                await player_ws.disconnect()
+                await host_ws.disconnect()
+
+        player_direct, host_msg, player_no_progress = async_to_sync(scenario)()
+        self.assertEqual(player_direct["type"], "answer_saved")
+        self.assertEqual(host_msg["type"], "answer_progress")
+        self.assertTrue(player_no_progress)
+
+    def test_host_reveal_payload_contains_results_field(self):
+        """Host reveal payload must include the per-player ``results`` field."""
+        host_headers = self._host_session_headers()
+
+        async def scenario():
+            host_ws = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=host_headers,
+            )
+            player_ws = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+
+            connected_h, _ = await host_ws.connect()
+            connected_p, _ = await player_ws.connect()
+            self.assertTrue(connected_h)
+            self.assertTrue(connected_p)
+
+            try:
+                # Player submits answer (only one player → auto-reveal)
+                await player_ws.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 150,
+                    }
+                )
+                # Player gets answer_saved then reveal (players group)
+                await player_ws.receive_json_from(timeout=1)
+                player_reveal = await player_ws.receive_json_from(timeout=1)
+                # Host gets answer_progress then reveal (host group)
+                await host_ws.receive_json_from(timeout=1)
+                host_reveal = await host_ws.receive_json_from(timeout=1)
+
+                return player_reveal, host_reveal
+            finally:
+                await player_ws.disconnect()
+                await host_ws.disconnect()
+
+        player_reveal, host_reveal = async_to_sync(scenario)()
+        # Both payloads are reveal events with correct_option_ids
+        self.assertEqual(player_reveal["type"], "reveal")
+        self.assertIn("correct_option_ids", player_reveal)
+        self.assertEqual(host_reveal["type"], "reveal")
+        self.assertIn("correct_option_ids", host_reveal)
+        # Host-only field present only in host payload
+        self.assertIn("results", host_reveal)
+        self.assertNotIn("results", player_reveal)
 
     def test_play_ws_prefers_player_cookie_when_host_session_is_also_present(self):
         headers = self._host_and_player_headers(self.player)

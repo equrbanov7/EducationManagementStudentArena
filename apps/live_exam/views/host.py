@@ -37,9 +37,13 @@ from apps.live_exam.session_settings import (
 )
 from apps.live_exam.transport import (
     broadcast,
+    broadcast_host,
+    broadcast_play,
+    broadcast_players,
     build_finished_payload,
     build_join_url,
     build_lobby_state_payload,
+    build_player_reveal_payload,
     build_question_phase_payload,
     build_question_payload,
     build_reveal_payload,
@@ -226,7 +230,7 @@ def host_start_game(request, pin):
     session.question_ends_at = ends
     session.save(update_fields=["current_question_id", "question_started_at", "question_ends_at"])
 
-    broadcast(pin, payload, "play")
+    broadcast_play(pin, payload)
 
     return JsonResponse(
         {
@@ -260,7 +264,7 @@ def host_next_question(request, pin):
         session.current_question_id = None
         session.save(update_fields=["state", "current_question_id"])
 
-        broadcast(pin, build_finished_payload(session, limit=50), "play")
+        broadcast_play(pin, build_finished_payload(session, limit=50))
         return JsonResponse({"ok": True, "finished": True})
 
     payload, now, ends = build_question_payload(session, eq, idx=idx, total=total)
@@ -282,7 +286,7 @@ def host_next_question(request, pin):
         ]
     )
 
-    broadcast(pin, payload, "play")
+    broadcast_play(pin, payload)
     return JsonResponse({"ok": True, "index": idx + 1, "total": total})
 
 
@@ -339,7 +343,7 @@ def host_skip_question_intro(request, pin):
         answer_starts_at=now,
         ends_at=ends_at,
     )
-    broadcast(pin, payload, "play")
+    broadcast_play(pin, payload)
     return JsonResponse({"ok": True, "skipped": True, "ends_at": ends_at.isoformat()})
 
 
@@ -364,8 +368,11 @@ def host_reveal(request, pin):
     clear_question_phase_override(session)
     session.save(update_fields=["state", "question_ends_at", "host_settings"])
 
-    payload = build_reveal_payload(session, eq.id, revealed_at=revealed_at)
-    broadcast(pin, payload, "play")
+    # Host receives the full reveal payload (includes per-player results for analytics)
+    broadcast_host(pin, build_reveal_payload(session, eq.id, revealed_at=revealed_at))
+    # Players receive a player-appropriate reveal payload (correct_option_ids visible at
+    # reveal stage, but without per-player result details which are host-only)
+    broadcast_players(pin, build_player_reveal_payload(session, eq.id, revealed_at=revealed_at))
 
     return JsonResponse({"ok": True, "question_id": eq.id})
 
@@ -383,7 +390,7 @@ def host_finish(request, pin):
     session.save(update_fields=["state", "current_question_id", "host_settings"])
 
     payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
-    broadcast(pin, payload, "play")
+    broadcast_play(pin, payload)
 
     return JsonResponse({"ok": True})
 
@@ -458,13 +465,12 @@ def host_update_settings(request, pin):
     settings = update_session_settings(session, updates, max_participants_cap=max_participants_cap)
 
     broadcast(pin, build_lobby_state_payload(session), "lobby")
-    broadcast(
+    broadcast_play(
         pin,
         {
             "type": "session_settings",
             "settings": settings,
             "is_locked": bool(session.is_locked),
         },
-        "play",
     )
     return JsonResponse({"ok": True, "settings": settings, "is_locked": bool(session.is_locked)})

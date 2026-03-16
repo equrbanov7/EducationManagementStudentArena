@@ -16,6 +16,7 @@ from apps.live_exam.scoring import get_answer_progress, save_answer_and_score
 from apps.live_exam.transport import (
     build_answer_progress_payload,
     build_lobby_state_payload,
+    build_player_reveal_payload,
     build_reveal_payload,
     parse_answer_submission,
 )
@@ -97,7 +98,6 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.pin = self.scope["url_route"]["kwargs"]["pin"]
-        self.group_name = f"live_{self.pin}_play"
         user = self.scope.get("user")
         user_id = user.id if getattr(user, "is_authenticated", False) else None
         token = (self.scope.get("cookies") or {}).get(PLAYER_COOKIE_NAME)
@@ -108,11 +108,21 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
             await self.close(code=4401)
             return
 
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        # Host and players join separate channel-layer groups so that
+        # host-only events (e.g. answer_progress) never reach players.
+        role = self.auth_context.get("role")
+        if role == "host":
+            self.play_group = f"live_{self.pin}_play_host"
+        else:
+            self.play_group = f"live_{self.pin}_play_players"
+
+        await self.channel_layer.group_add(self.play_group, self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        play_group = getattr(self, "play_group", None)
+        if play_group:
+            await self.channel_layer.group_discard(play_group, self.channel_name)
 
     async def receive_json(self, data, **kwargs):
         if (data or {}).get("type") != "answer":
@@ -145,10 +155,10 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
         await self.send_json({"type": "answer_saved", **result["answer"]})
 
-        # 4) progress -> group (host auto-reveal üçün)
+        # 4) progress -> host group only (players do not need this; host uses it for auto-reveal)
         prog = await self._get_answer_progress(self.pin, result["question_id"])
         await self.channel_layer.group_send(
-            self.group_name,
+            f"live_{self.pin}_play_host",
             {
                 "type": "play_event",
                 "data": build_answer_progress_payload(
@@ -160,8 +170,19 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
         )
 
         if result.get("reveal_question_id"):
-            reveal_payload = await self._get_reveal_payload(self.pin, result["reveal_question_id"])
-            await self.channel_layer.group_send(self.group_name, {"type": "play_event", "data": reveal_payload})
+            # Send host-specific reveal (includes per-player results) to host group
+            host_reveal = await self._get_reveal_payload(self.pin, result["reveal_question_id"])
+            await self.channel_layer.group_send(
+                f"live_{self.pin}_play_host",
+                {"type": "play_event", "data": host_reveal},
+            )
+            # Send player-appropriate reveal (correct_option_ids visible at reveal stage,
+            # but without per-player result details) to the players group
+            player_reveal = await self._get_player_reveal_payload(self.pin, result["reveal_question_id"])
+            await self.channel_layer.group_send(
+                f"live_{self.pin}_play_players",
+                {"type": "play_event", "data": player_reveal},
+            )
 
     async def play_event(self, event):
         # view -> group_send(... {"type":"play_event","data":{...}})
@@ -175,6 +196,11 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
     def _get_reveal_payload(self, pin: str, question_id: int) -> dict:
         session = LiveSession.objects.get(pin=pin)
         return build_reveal_payload(session, question_id, revealed_at=timezone.now())
+
+    @database_sync_to_async
+    def _get_player_reveal_payload(self, pin: str, question_id: int) -> dict:
+        session = LiveSession.objects.get(pin=pin)
+        return build_player_reveal_payload(session, question_id, revealed_at=timezone.now())
 
     @database_sync_to_async
     def _save_answer_and_score(self, pin, player_id, client_id, question_id, option_ids, answer_ms):
