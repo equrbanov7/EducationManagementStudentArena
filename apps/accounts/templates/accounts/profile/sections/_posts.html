@@ -29,6 +29,7 @@
                                 <div class="action-icons">
                                     <button class="icon-action-btn edit-btn js-edit-post"
                                             data-post-id="{{ post.pk }}"
+                                            data-edit-url="{% url 'post_edit_ajax' post.pk %}"
                                             data-title="{{ post.title|escape }}"
                                             data-content="{{ post.content|escape }}"
                                             data-category="{{ post.category.id|default_if_none:'' }}"

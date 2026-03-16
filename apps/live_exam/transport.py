@@ -52,6 +52,13 @@ def build_join_url(request, session) -> str:
 
 
 def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
+    """Broadcast a payload to a specific channel-layer group.
+
+    group_suffix can be:
+      - "lobby"           → live_<pin>_lobby  (lobby_event)
+      - "play_host"       → live_<pin>_play_host  (play_event, host only)
+      - "play_players"    → live_<pin>_play_players  (play_event, players only)
+    """
     try:
         layer = get_channel_layer()
     except (InvalidChannelLayerError, ModuleNotFoundError):
@@ -59,7 +66,7 @@ def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
     if layer is None:
         return
 
-    event_type = "play_event" if group_suffix == "play" else "lobby_event"
+    event_type = "lobby_event" if group_suffix == "lobby" else "play_event"
     try:
         async_to_sync(layer.group_send)(
             f"live_{pin}_{group_suffix}",
@@ -67,6 +74,22 @@ def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
         )
     except (InvalidChannelLayerError, ModuleNotFoundError):
         return
+
+
+def broadcast_host(pin: str, payload: dict[str, Any]) -> None:
+    """Broadcast a payload to the host-only play group."""
+    broadcast(pin, payload, "play_host")
+
+
+def broadcast_players(pin: str, payload: dict[str, Any]) -> None:
+    """Broadcast a payload to the players-only play group."""
+    broadcast(pin, payload, "play_players")
+
+
+def broadcast_play(pin: str, payload: dict[str, Any]) -> None:
+    """Broadcast a payload to both host and player play groups."""
+    broadcast_host(pin, payload)
+    broadcast_players(pin, payload)
 
 
 def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
@@ -198,6 +221,38 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
         "next_question_at": next_question_at.isoformat(),
     }
     return payload
+
+
+def build_player_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict[str, Any]:
+    """Reveal payload for players.
+
+    Includes correct_option_ids (appropriate at reveal stage), distribution, and leaderboard
+    data, but omits per-player answer details (``results``) which are host-only analytics.
+    """
+    from apps.exams.models import ExamQuestion
+    from apps.live_exam.domain.session import detect_multi
+
+    exam_question = ExamQuestion.objects.filter(exam=session.exam, id=question_id).first()
+    if not exam_question:
+        return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
+
+    revealed_at = revealed_at or timezone.now()
+    leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
+    _, _, correct_ids = detect_multi(exam_question)
+    return {
+        "type": "reveal",
+        "question_id": question_id,
+        "correct_option_ids": correct_ids,
+        "distribution": serialize_answer_distribution(session, question_id),
+        "top": serialize_top(session, limit=10),
+        "previous_top": serialize_top_before_question(session, question_id, limit=10),
+        "revealed_at": revealed_at.isoformat(),
+        "result_duration_ms": int(PLAYER_RESULT_SECONDS * 1000),
+        "leaderboard_duration_ms": int(PLAYER_LEADERBOARD_SECONDS * 1000),
+        "transition_duration_ms": int(PLAYER_REVEAL_TRANSITION_SECONDS * 1000),
+        "leaderboard_starts_at": leaderboard_starts_at.isoformat(),
+        "next_question_at": next_question_at.isoformat(),
+    }
 
 
 def build_finished_payload(session, *, finished_at=None, limit: int = 50) -> dict[str, Any]:
