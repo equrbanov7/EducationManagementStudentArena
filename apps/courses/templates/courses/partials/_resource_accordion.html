@@ -108,7 +108,7 @@
 </div>
 
 <!-- Delete Resource Script -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
 function deleteResource(courseId, resourceId) {
     if (confirm("{% trans 'confirm_delete_resource' context 'courses.partial.resource_accordion' %}")) {
         const form = document.createElement('form');

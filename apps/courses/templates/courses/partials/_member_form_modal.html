@@ -252,7 +252,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const MSG_MIN_ONE_STUDENT = "{% trans 'msg_min_one_student' context 'courses.partial.member_modal' %}";
         const MSG_MIN_ONE_GROUP = "{% trans 'msg_min_one_group' context 'courses.partial.member_modal' %}";

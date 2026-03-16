@@ -321,7 +321,7 @@
 <script src="{% static 'js/utils/escape.js' %}"></script>
 <script src="{% static 'labs/js/lab_modals.js' %}"></script>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function(){
     const COURSE_ID = {{ course.id }};
     const CSRF = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';

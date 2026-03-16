@@ -326,7 +326,7 @@
 </div>
 {% endif %}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     function showAvatarFallback(imageNode, fallbackNode) {
         if (imageNode) {

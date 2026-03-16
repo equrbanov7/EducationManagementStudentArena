@@ -412,7 +412,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('{{ form.cover_image.id_for_label }}');
     const currentImageBlock = document.getElementById('currentImageBlock');

@@ -65,7 +65,7 @@
 </div>
 
 <!-- Topic Form AJAX Handler -->
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const MSG_ADDING = "{% trans 'msg_adding' context 'courses.partial.topic_modal' %}";
 const MSG_ERROR_RETRY = "{% trans 'msg_error_retry' context 'courses.partial.topic_modal' %}";
 const MSG_ERRORS_HEADER = "{% trans 'msg_errors_header' context 'courses.partial.topic_modal' %}";

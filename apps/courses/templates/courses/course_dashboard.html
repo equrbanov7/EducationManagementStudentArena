@@ -229,7 +229,7 @@
     {% include "exams/components/_exam_modals.html" %}
 {% endif %}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const MSG_COURSE_DELETE_CONFIRM = "{% trans 'confirm_delete_course' context 'courses.dashboard' %}";
     const MSG_MEMBER_DELETE_SUFFIX = "{% trans 'confirm_delete_member_suffix' context 'courses.dashboard' %}";
     const MSG_GENERIC_ERROR = "{% trans 'generic_error' context 'courses.dashboard' %}";

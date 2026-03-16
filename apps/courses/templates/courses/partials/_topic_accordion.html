@@ -345,7 +345,7 @@
 
 
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     // Delete Topic
     function deleteTopic(courseId, topicId) {
         if (confirm("{% trans 'confirm_delete_topic' context 'courses.partial.topic_accordion' %}")) {

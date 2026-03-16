@@ -354,7 +354,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const I18N_QBANK = {
     blockNew: "{% trans 'block_new' context 'exams.template.create_question_bank' %}",
     actionDelete: "{% trans 'action_delete' context 'exams.template.create_question_bank' %}",

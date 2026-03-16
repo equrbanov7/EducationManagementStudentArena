@@ -304,7 +304,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 window.TEACHER_QUESTIONS_BANK_I18N = {
     confirmDelete: "{% trans 'confirm_delete_selected' context 'exams.template.teacher_questions_bank'|escapejs %}",
     selectedCount: "{% trans 'selected_count' context 'exams.template.teacher_questions_bank'|escapejs %}",

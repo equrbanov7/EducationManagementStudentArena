@@ -215,7 +215,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const gradeQueueSuccessMessage = "{% trans 'toast_success' context 'accounts.grading_queue_page' %}";
     const gradeQueueGenericErrorMessage = "{% trans 'toast_error_generic' context 'accounts.grading_queue_page' %}";
     const gradeQueueErrorPrefix = "{% trans 'toast_error_prefix' context 'accounts.grading_queue_page' %}";

@@ -133,7 +133,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 // Toggle file/url sections based on resource type
 document.querySelectorAll('input[name="resource_type"]').forEach(radio => {
     radio.addEventListener('change', function() {

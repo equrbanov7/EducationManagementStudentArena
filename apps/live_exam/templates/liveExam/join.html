@@ -105,7 +105,7 @@
 
     {{ remembered_player|json_script:"rememberedPlayerData" }}
     {{ session_settings|json_script:"joinSessionSettings" }}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         const CONFIG = {
             pin: "{{ session.pin }}",
             joinUrl: "{% url 'liveExam:join_enter' session.pin %}",

@@ -94,7 +94,7 @@
     </div>
 
     {{ session_settings|json_script:"hostSessionSettings" }}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
     const CONFIG = {
         pin: "{{ session.pin }}",
         csrf: "{{ csrf_token }}",

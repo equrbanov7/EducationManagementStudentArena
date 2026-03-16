@@ -154,7 +154,7 @@
     {% endif %}
 </section>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     var forms = document.querySelectorAll(".pending-post-approvals-filters[data-auto-filter-form]");
     forms.forEach(function (form) {

@@ -111,7 +111,7 @@
 }
 </style>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== '') {

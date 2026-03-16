@@ -340,7 +340,7 @@
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const projectReviewConfig = {
     selectedSubmissionId: "{{ selected_submission_id }}",
     gradeUrlTemplate: "/projects/submission/__ID__/grade/",

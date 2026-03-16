@@ -173,7 +173,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const I18N_STUDENT_EXAM_LIST = {
         modalAccessCodeTitle: "{% trans 'modal_access_code_title' context 'exams.template.student_exam_list' %}",
         modalAccessCodeDescriptionWithTitle: "{% trans 'modal_access_code_description_with_title' context 'exams.template.student_exam_list' %}"

@@ -37,7 +37,7 @@
     {% endif %}
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function() {
     const config = {
         selectId: "{{ field.id_for_label }}",
