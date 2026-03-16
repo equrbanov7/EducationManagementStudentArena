@@ -197,7 +197,7 @@
 {% endblock %}
 
 {% block extraJs %}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         window.TEACHER_CHECK_I18N = {
             modalTitleDetails: "{% trans 'modal_title_question_details' context 'exams.template.teacher_check_attempt' %}",
             noAnswer: "{% trans 'status_no_answer' context 'exams.template.teacher_check_attempt' %}",

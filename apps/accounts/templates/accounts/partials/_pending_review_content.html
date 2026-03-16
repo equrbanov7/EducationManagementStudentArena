@@ -129,7 +129,7 @@
     </div>
 {% endif %}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     function setupAutoFilterForm(form) {
         if (!form || form.dataset.autoFilterBound === "1") {

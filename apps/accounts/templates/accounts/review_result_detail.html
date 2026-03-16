@@ -111,7 +111,7 @@
         </section>
     </div>
 </div>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     Array.prototype.slice.call(document.querySelectorAll(".review-answer-toggle")).forEach(function (btn) {
         btn.addEventListener("click", function () {

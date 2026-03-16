@@ -631,7 +631,7 @@
         </div>
     </div>
 </div>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     var selectAll = document.getElementById("selectAllPendingStudents");
     var pendingCheckboxes = Array.from(document.querySelectorAll(".pending-student-checkbox"));

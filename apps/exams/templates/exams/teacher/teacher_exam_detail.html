@@ -223,7 +223,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 window.EXAM_CREATE_EDIT_MODAL_I18N = {
     loadingForm: "{% trans 'loading_form' context 'exams.template.create_exam_modal' %}",
     createTitle: "{% trans 'heading_create_exam' context 'exams.template.create_edit_exam' %}",

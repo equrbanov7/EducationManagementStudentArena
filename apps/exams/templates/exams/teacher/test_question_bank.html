@@ -280,7 +280,7 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
 {% block extraJs %}
 <script src="{% static 'exams/js/testQuestionBank.js' %}"></script>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 function syncBankSettings(){
     const rq = document.getElementById("rqInput");
     const dp = document.getElementById("dpInput");

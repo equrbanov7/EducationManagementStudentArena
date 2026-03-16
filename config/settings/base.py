@@ -187,36 +187,38 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# Content Security Policy (CSP) settings
-# XSS hücumlarına qarşı əlavə müdafiə təmin edir.
-# Note: the current templates still rely on inline styles/scripts and CDN-hosted
-# Bootstrap / Font Awesome assets, so the policy must explicitly allow them.
-CSP_SCRIPT_SOURCES = (
+# Content Security Policy (CSP) settings — django-csp 3.8
+# https://django-csp.readthedocs.io/en/latest/configuration.html
+#
+# 'unsafe-inline' is intentionally absent from script-src.  All inline
+# <script> blocks carry a per-request nonce ({{ request.csp_nonce }}) so
+# the browser will still execute them.  The nonce is automatically appended
+# to the script-src directive by CSPMiddleware when CSP_INCLUDE_NONCE_IN is
+# configured.
+#
+# 'unsafe-inline' is retained for style-src because inline style=""
+# attributes cannot carry a nonce; removing it would require rewriting every
+# HTML element that uses inline styles.
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = (
     "'self'",
-    "'unsafe-inline'",
     "https://cdn.jsdelivr.net",
     "https://cdnjs.cloudflare.com",
 )
-CSP_STYLE_SOURCES = (
+CSP_STYLE_SRC = (
     "'self'",
-    "'unsafe-inline'",
+    "'unsafe-inline'",  # Required for inline style="" attributes
     "https://fonts.googleapis.com",
     "https://cdn.jsdelivr.net",
     "https://cdnjs.cloudflare.com",
 )
-CSP_FONT_SOURCES = (
+CSP_FONT_SRC = (
     "'self'",
     "data:",
     "https://fonts.gstatic.com",
     "https://cdnjs.cloudflare.com",
 )
-
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        "default-src": ("'self'",),
-        "script-src": CSP_SCRIPT_SOURCES,
-        "style-src": CSP_STYLE_SOURCES,
-        "img-src": ("'self'", "data:"),
-        "font-src": CSP_FONT_SOURCES,
-    }
-}
+CSP_IMG_SRC = ("'self'", "data:")
+# Automatically appends 'nonce-<value>' to the listed directives so that
+# inline <script nonce="{{ request.csp_nonce }}"> blocks are allowed.
+CSP_INCLUDE_NONCE_IN = ["script-src"]

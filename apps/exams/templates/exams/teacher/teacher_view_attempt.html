@@ -239,7 +239,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     document.querySelectorAll('[data-review-countdown]').forEach(function (node) {
         let secondsLeft = parseInt(node.getAttribute('data-review-countdown'), 10);

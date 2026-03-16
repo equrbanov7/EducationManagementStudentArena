@@ -304,7 +304,7 @@
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script src="{% static 'js/review_countdown.js' %}"></script>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 {% if can_delete_submissions %}
 window.initResultsBulkActions({
     checkboxSelector: '.js-lab-submission-checkbox',

@@ -246,7 +246,7 @@
 <script src="{% static 'js/register_wizard.js' %}"></script>
 <script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     window.SIGNUP_LOOKUP_DATA = JSON.parse(document.getElementById('signup-lookup-data').textContent);
     window.REGISTER_I18N = {
         auto_role_info_owner: "{% trans 'auto_role_info_owner' context 'accounts.register' %}",

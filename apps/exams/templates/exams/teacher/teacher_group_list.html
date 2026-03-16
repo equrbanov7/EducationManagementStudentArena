@@ -256,7 +256,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
   const I18N_TEACHER_GROUP_LIST = {
     noDataFound: "{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list'|escapejs %}",

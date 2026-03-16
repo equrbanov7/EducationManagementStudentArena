@@ -102,7 +102,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const backdrop = document.getElementById("exam-code-backdrop");
     const titleEl = document.getElementById("exam-code-title");
     const textEl = document.getElementById("exam-code-text");

@@ -64,7 +64,7 @@
     <script src="{% static 'js/debounced_search_forms.js' %}"></script>
     <script src="{% static 'js/search_controls.js' %}"></script>
 
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         window.COURSES_I18N = {
             errorsLabel: "{% trans 'errors_label' context 'courses.common.js' %}",
             pleaseWait: "{% trans 'please_wait' context 'courses.common.js' %}",

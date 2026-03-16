@@ -67,7 +67,7 @@
     </div>
 
     {{ session_settings|json_script:"playerSessionSettings" }}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         window.LIVE_EXAM_PLAYER_BOOTSTRAP = {
             pin: "{{ session.pin }}",
             csrf: "{{ csrf_token }}",

@@ -297,7 +297,7 @@
         </div>
     </div>
 </div>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     var actionModal = document.getElementById("roleAssignmentActionConfirmModal");
     var actionForm = document.getElementById("roleAssignmentActionForm");

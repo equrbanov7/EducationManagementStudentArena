@@ -226,7 +226,7 @@
 
 {% block extraJs %}
 <script src="{% static 'js/review_countdown.js' %}"></script>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     document.addEventListener('DOMContentLoaded', function() {
         const i18n = {
             submitting: "{% trans 'submitting' context 'assignment.detail' %}",

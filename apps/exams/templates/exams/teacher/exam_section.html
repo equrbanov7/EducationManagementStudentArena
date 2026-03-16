@@ -365,7 +365,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
     var backdrop = document.getElementById("courseExamInfoBackdrop");
     var closeBtn = document.getElementById("courseExamInfoClose");

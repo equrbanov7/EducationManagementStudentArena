@@ -224,7 +224,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const I18N_TAKE_EXAM = {
     autosaveSaving: "{% trans 'autosave_saving' context 'exams.template.take_exam' %}",
     autosaveSaved: "{% trans 'autosave_saved' context 'exams.template.take_exam' %}",

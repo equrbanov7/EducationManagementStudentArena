@@ -123,12 +123,28 @@ class OrganizationRequiredMixin:
     Mixin to require an active organization for class-based views.
     """
 
-    def dispatch(self, request, *args, **kwargs):
+    def _check_organization_access(self, request):
+        """
+        Perform authentication and organization checks.
+
+        Returns an early response (redirect or forbidden) if a check fails,
+        or ``None`` when all checks pass.  Subclasses should call this helper
+        and return its result immediately if it is not ``None`` rather than
+        calling ``super().dispatch()``, which would execute the view body a
+        second time.
+        """
         if not request.user.is_authenticated:
             return self.handle_no_permission()
 
         if not hasattr(request, "organization") or request.organization is None:
             return redirect("organizations:select")
+
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+        response = self._check_organization_access(request)
+        if response is not None:
+            return response
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -146,12 +162,12 @@ class PermissionRequiredMixin(OrganizationRequiredMixin):
     permission_required = None
 
     def dispatch(self, request, *args, **kwargs):
-        # First check organization requirement
-        response = super().dispatch(request, *args, **kwargs)
-        if not isinstance(response, type(None)) and response.status_code != 200:
+        # Check authentication and organization access first.
+        response = self._check_organization_access(request)
+        if response is not None:
             return response
 
-        # Then check permission
+        # Then check the required permission.
         if self.permission_required:
             if not has_permission(request.org_permissions, self.permission_required):
                 return HttpResponseForbidden(
@@ -160,6 +176,8 @@ class PermissionRequiredMixin(OrganizationRequiredMixin):
                     )
                 )
 
+        # Bypass OrganizationRequiredMixin.dispatch() — its checks are already
+        # done above — and call the next class in MRO exactly once.
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
@@ -171,12 +189,12 @@ class LevelRequiredMixin(OrganizationRequiredMixin):
     min_level = 50
 
     def dispatch(self, request, *args, **kwargs):
-        # First check organization requirement
-        response = super().dispatch(request, *args, **kwargs)
-        if not isinstance(response, type(None)) and response.status_code != 200:
+        # Check authentication and organization access first.
+        response = self._check_organization_access(request)
+        if response is not None:
             return response
 
-        # Then check level
+        # Then check the role level.
         max_level = 0
         if request.org_memberships:
             max_level = max([m.role.level for m in request.org_memberships], default=0)
@@ -188,4 +206,6 @@ class LevelRequiredMixin(OrganizationRequiredMixin):
                 )
             )
 
+        # Bypass OrganizationRequiredMixin.dispatch() — its checks are already
+        # done above — and call the next class in MRO exactly once.
         return super(OrganizationRequiredMixin, self).dispatch(request, *args, **kwargs)

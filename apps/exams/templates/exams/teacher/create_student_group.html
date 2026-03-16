@@ -129,7 +129,7 @@
 {% endblock %}
 
 {% block extraJs %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 (function () {
   const searchInput = document.getElementById("primaryTeacherSearch");
   const teacherSelect = document.getElementById("{{ form.primary_teacher.id_for_label }}");

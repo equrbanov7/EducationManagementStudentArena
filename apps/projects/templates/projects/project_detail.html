@@ -192,7 +192,7 @@
         {% include "courses/partials/_action_confirm_modal.html" %}
     {% endif %}
 </div>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 window.projectDetailConfig = {
     submitUrl: '{% url "projects:submit_project" project.id %}',
     csrfToken: '{{ csrf_token }}',

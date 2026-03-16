@@ -343,7 +343,7 @@
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const reviewI18n = {
     noText: "{% trans 'no_text' context 'assignment.review_submissions' %}",
     download: "{% trans 'download' context 'assignment.review_submissions' %}",

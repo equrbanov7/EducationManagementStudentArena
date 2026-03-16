@@ -124,18 +124,10 @@ if sentry_dsn:
         send_default_pii=False,
     )
 
-# Content Security Policy (CSP) - Production settings (daha ciddi)
-# Base settings-dəki CSP-ni production üçün daha ciddi edirik
-CONTENT_SECURITY_POLICY = {
-    "DIRECTIVES": {
-        **CONTENT_SECURITY_POLICY["DIRECTIVES"],
-        "script-src": CSP_SCRIPT_SOURCES,
-        "style-src": CSP_STYLE_SOURCES,
-        "img-src": ("'self'", "data:", "https:"),  # HTTPS-dən şəkil yükləməyə icazə
-        "font-src": CSP_FONT_SOURCES,
-        "connect-src": ("'self'",),  # AJAX/WebSocket bağlantıları
-        "frame-ancestors": ("'none'",),  # Clickjacking-ə qarşı
-        "base-uri": ("'self'",),  # Base tag-ı məhdudlaşdırır
-        "form-action": ("'self'",),  # Form submission-ları məhdudlaşdırır
-    }
-}
+# Content Security Policy (CSP) - Production overrides (stricter than base)
+# Extends the base django-csp 3.8 settings with additional production directives.
+CSP_IMG_SRC = ("'self'", "data:", "https:")  # allow images over HTTPS
+CSP_CONNECT_SRC = ("'self'",)  # AJAX/WebSocket connections
+CSP_FRAME_ANCESTORS = ("'none'",)  # prevent clickjacking
+CSP_BASE_URI = ("'self'",)  # restrict <base> tag
+CSP_FORM_ACTION = ("'self'",)  # restrict form submissions

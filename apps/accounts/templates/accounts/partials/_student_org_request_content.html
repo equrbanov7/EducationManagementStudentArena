@@ -159,7 +159,7 @@
     </form>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
 document.addEventListener("DOMContentLoaded", function () {
     var messageInput = document.getElementById("studentOrgRequestMessage");
     if (!messageInput) return;

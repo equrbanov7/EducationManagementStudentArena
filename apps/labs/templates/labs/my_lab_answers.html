@@ -292,7 +292,7 @@
     {% endif %}
 
     {% if preopen_submission_id %}
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         window.LAB_ANSWERS_PREOPEN_MODAL = 'viewLabSubmission{{ preopen_submission_id }}';
     </script>
     {% endif %}
