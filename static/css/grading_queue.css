@@ -182,6 +182,11 @@
     font-size: 1rem;
 }
 
+.student-avatar--anonymous {
+    background: #9ca3af;
+    font-size: 0.875rem;
+}
+
 .student-name {
     font-weight: 600;
     color: #1f2937;

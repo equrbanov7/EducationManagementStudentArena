@@ -102,12 +102,11 @@
                     <tr data-submission-id="{{ submission.id }}">
                         <td>
                             <div class="student-info">
-                                <div class="student-avatar">
-                                    {{ submission.student.first_name.0|default:submission.student.username.0 }}{{ submission.student.last_name.0|default:"" }}
+                                <div class="student-avatar student-avatar--anonymous">
+                                    <i class="fas fa-user-secret"></i>
                                 </div>
                                 <div>
-                                    <div class="student-name">{{ submission.student.get_full_name|default:submission.student.username }}</div>
-                                    <div class="student-email">{{ submission.student.email }}</div>
+                                    <div class="student-name">Anonim tələbə</div>
                                 </div>
                             </div>
                         </td>
@@ -133,7 +132,7 @@
                             <a href="#"
                                class="view-link js-view-submission"
                                data-submission-id="{{ submission.id }}"
-                               data-student="{{ submission.student.get_full_name|default:submission.student.username }}"
+                               data-student=""
                                data-assignment="{{ submission.assignment.title }}">
                                 <i class="fas fa-eye"></i>
                                 {% trans "file_view" context "accounts.grading_queue_page" %}

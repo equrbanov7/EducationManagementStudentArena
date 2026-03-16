@@ -54,13 +54,14 @@ def resolve_recheck_window(submission, *, current_time=None):
 def resolve_identity_window(submission, *, current_time=None):
     now = current_time or timezone.now()
 
-    if submission.status == "graded" and submission.graded_at:
-        reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    elif submission.submitted_at:
-        reveal_at = submission.submitted_at + REVIEW_EDIT_LOCK_WINDOW
-    else:
-        return False, 0
+    # Identity is always hidden while the submission has not been graded yet.
+    # There is no time-based reveal for pending submissions — the teacher must
+    # never see the student's name before the re-check window has closed.
+    if submission.status != "graded" or not submission.graded_at:
+        return True, 0
 
+    # Once graded, hide identity until the re-check window closes.
+    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
     if now >= reveal_at:
         return False, 0
 

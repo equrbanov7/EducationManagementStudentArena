@@ -477,8 +477,9 @@ class LabTeacherReviewWindowTest(TestCase):
         self.assertEqual(response.status_code, 200)
         submissions = list(response.context["submissions"])
         pending_context = next(sub for sub in submissions if sub.id == pending_submission.id)
+        # Pending (submitted) submissions are always anonymous — no countdown timer.
         self.assertFalse(pending_context.can_view_student_identity)
-        self.assertGreater(pending_context.identity_window_seconds_left, 0)
+        self.assertEqual(pending_context.identity_window_seconds_left, 0)
         self.assertContains(response, "Anonim tələbə")
         self.assertNotContains(response, 'data-review-countdown="')
 

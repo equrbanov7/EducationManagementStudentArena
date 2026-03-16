@@ -207,13 +207,15 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         self.assertNotContains(response, self.student.username)
         self.assertNotContains(response, 'data-review-countdown="')
 
+        # Pending (submitted) submissions remain anonymous regardless of elapsed time —
+        # the teacher sees the student name only after grading AND the re-check window closes.
         self.submission.submitted_at = timezone.now() - timedelta(minutes=6)
         self.submission.save(update_fields=["submitted_at"])
 
-        revealed_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
-        self.assertEqual(revealed_response.status_code, 200)
-        self.assertContains(revealed_response, self.student.username)
-        self.assertNotContains(revealed_response, "Anonim tələbə")
+        still_anonymous_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+        self.assertEqual(still_anonymous_response.status_code, 200)
+        self.assertContains(still_anonymous_response, "Anonim tələbə")
+        self.assertNotContains(still_anonymous_response, self.student.username)
 
     def test_review_submissions_shows_recheck_then_view_after_window_closes(self):
         self.submission.status = "graded"
