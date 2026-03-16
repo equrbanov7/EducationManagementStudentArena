@@ -111,6 +111,7 @@
                                             data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
                                             data-is-published="{{ post.is_published|yesno:'true,false' }}"
                                             data-requires-approval="{{ post.requires_approval|yesno:'true,false' }}"
+                                            data-approval-status="{{ post.approval_status }}"
                                             data-slug="{{ post.slug|escape }}"
                                             data-created-at="{{ post.created_at|date:'d.m.Y H:i' }}"
                                             data-updated-at="{{ post.updated_at|date:'d.m.Y H:i' }}"
