@@ -212,9 +212,9 @@ class LiveJoinTest(TestCase):
 
     def test_pin_entry_shows_error_for_unknown_pin(self):
         """Test that an unknown PIN returns a friendly validation page."""
-        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, "999999", status_code=404)
+        self.assertContains(response, "99999999", status_code=404)
 
     def test_join_enter_requires_nickname(self):
         """Test that joining requires a nickname."""
@@ -283,10 +283,10 @@ class LiveJoinRateLimitTest(TestCase):
     def test_pin_entry_blocks_repeated_invalid_attempts(self):
         self.client.get(reverse("liveExam:pin_entry"))
 
-        first = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+        first = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
         self.assertEqual(first.status_code, 404)
 
-        blocked = self.client.post(reverse("liveExam:pin_entry"), {"pin": "999999"})
+        blocked = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
 
         self.assertEqual(blocked.status_code, 429)
         self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)

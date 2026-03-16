@@ -5,9 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
-from django.views.static import serve
 
 from core.views import health_check, ping, test_error
+from core.media_views import protected_media
 
 admin.site.site_url = reverse_lazy("home")
 
@@ -40,13 +40,14 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 elif getattr(settings, "SERVE_MEDIA", False):
+    # Use authenticated protected_media view instead of bare serve().
+    # This prevents unauthenticated access to private media files.
     media_prefix = settings.MEDIA_URL.lstrip("/")
     if media_prefix and not media_prefix.endswith("/"):
         media_prefix += "/"
     urlpatterns += [
         re_path(
             rf"^{re.escape(media_prefix)}(?P<path>.*)$",
-            serve,
-            {"document_root": settings.MEDIA_ROOT},
+            protected_media,
         )
     ]
