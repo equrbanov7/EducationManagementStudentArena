@@ -426,6 +426,11 @@ msgctxt "accounts.grading_queue_page"
 msgid "table_student"
 msgstr "Student"
 
+#: apps/accounts/templates/accounts/grading_queue.html:109
+msgctxt "accounts.grading_queue_page"
+msgid "anonymous_student"
+msgstr "Anonymous student"
+
 #: apps/accounts/templates/accounts/grading_queue.html:94
 msgctxt "accounts.grading_queue_page"
 msgid "table_assignment"
