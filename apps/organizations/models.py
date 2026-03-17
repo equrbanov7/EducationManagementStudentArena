@@ -232,14 +232,14 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         )
         if not descendants:
             return
+        to_update = []
         for desc in descendants:
-            # Replace old path prefix with the new one
             new_desc_path = new_path + desc["path"][len(old_path):]
-            new_level = new_desc_path.count("/")
-            OrgUnit.objects.filter(pk=desc["pk"]).update(
-                path=new_desc_path,
-                level=new_level,
-            )
+            obj = OrgUnit(pk=desc["pk"])
+            obj.path = new_desc_path
+            obj.level = new_desc_path.count("/")
+            to_update.append(obj)
+        OrgUnit.objects.bulk_update(to_update, ["path", "level"])
 
     def get_ancestors(self):
         """Get all ancestor units."""
