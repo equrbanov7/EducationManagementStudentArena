@@ -898,3 +898,80 @@ class LabUploadSecurityTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["success"])
         self.assertEqual(LabQuestion.objects.filter(block=self.block).count(), 1)
+
+    # ── Additional negative upload scenarios ─────────────────────────────────
+
+    def test_auto_save_answer_rejects_php_jpg_double_extension(self):
+        """A file named shell.php.jpg is blocked by the double-extension attack check."""
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "shell.php.jpg",
+                    b"\xff\xd8\xff\xe0",
+                    content_type="image/jpeg",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_mime_spoofed_image(self):
+        """A file with a .jpg extension but a blocked MIME type is rejected."""
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "image.jpg",
+                    b"\xff\xd8\xff\xe0",
+                    content_type="application/x-httpd-php",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_exe_signature_in_pdf(self):
+        """A .pdf file containing an MZ (EXE) signature is rejected by the signature check."""
+        self._login_student()
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile(
+                    "document.pdf",
+                    b"MZ\x90\x00\x03\x00\x00\x00",
+                    content_type="application/pdf",
+                ),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
+
+    def test_auto_save_answer_rejects_oversized_file(self):
+        """A file exceeding the lab's max_file_size_mb limit is rejected."""
+        self.lab.max_file_size_mb = 1
+        self.lab.save(update_fields=["max_file_size_mb"])
+        self._login_student()
+        big_content = b"X" * (1 * 1024 * 1024 + 1)
+        response = self.client.post(
+            reverse("labs:auto_save_answer", kwargs={"pk": self.lab.id}),
+            {
+                "question_id": self.question.id,
+                "answer": "",
+                "answer_file": SimpleUploadedFile("bigfile.pdf", big_content, content_type="application/pdf"),
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(LabAnswer.objects.count(), 0)
