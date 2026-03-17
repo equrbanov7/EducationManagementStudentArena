@@ -453,8 +453,12 @@ class HttpTenantIsolationTest(TestCase):
         available exams in the rendered page.
         """
         # Give student_a a second org membership so middleware cannot auto-select.
+        _login_with_org(self.client, self.student_a, self.org_a)
         _assign_user_to_org(self.student_a, self.org_b, ProfileRole.STUDENT)
-        self.client.force_login(self.student_a)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
         response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(response.status_code, 200)
         # exam_items is the paginator Page; when no org is active the list is empty.
