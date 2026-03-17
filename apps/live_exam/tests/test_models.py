@@ -4,9 +4,13 @@ Model tests for live_exam app.
 
 import secrets
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.live_exam.models import PIN_LENGTH, generate_pin
+from apps.exams.models import Exam
+from apps.live_exam.models import PIN_LENGTH, LiveSession, generate_pin
+
+User = get_user_model()
 
 
 class GeneratePinTest(TestCase):
@@ -43,3 +47,73 @@ class GeneratePinTest(TestCase):
         pins = {generate_pin() for _ in range(100)}
         # With 10^8 possible values it is astronomically unlikely all 100 match.
         self.assertGreater(len(pins), 1)
+
+
+class LiveSessionPinFieldTest(TestCase):
+    """
+    Regression tests for the LiveSession.pin field length.
+
+    The original database schema created pin as character varying(6).
+    PIN_LENGTH was later changed to 8 and migration 0006 widens the column.
+    These tests ensure the model field definition and the constant stay in sync,
+    so that a future PIN_LENGTH change without a matching migration is caught
+    immediately in CI.
+    """
+
+    def test_pin_field_max_length_matches_constant(self):
+        """LiveSession.pin max_length must equal PIN_LENGTH."""
+        field = LiveSession._meta.get_field("pin")
+        self.assertEqual(
+            field.max_length,
+            PIN_LENGTH,
+            f"LiveSession.pin max_length ({field.max_length}) does not match "
+            f"PIN_LENGTH ({PIN_LENGTH}). Create a migration to widen the column.",
+        )
+
+    def test_pin_field_max_length_is_eight(self):
+        """Pinpoint guard: PIN_LENGTH is 8 and pin field reflects that."""
+        self.assertEqual(PIN_LENGTH, 8)
+        field = LiveSession._meta.get_field("pin")
+        self.assertEqual(field.max_length, 8)
+
+    def test_create_live_session_with_eight_char_pin(self):
+        """
+        Creating a LiveSession must succeed when the pin is exactly PIN_LENGTH
+        characters long (regression for DataError: value too long for
+        character varying(6)).
+        """
+        from apps.accounts.models import ProfileRole
+        from apps.organizations.models import Organization
+        from core.constants import OrganizationType
+
+        teacher = User.objects.create_user(
+            username="pin_test_teacher",
+            email="pin_test@example.com",
+            password="StrongPass123!",
+        )
+        teacher.profile.role = ProfileRole.TEACHER
+        teacher.profile.save(update_fields=["role", "updated_at"])
+
+        org = Organization.objects.create(
+            name="Pin Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        teacher.profile.organization = org
+        teacher.profile.organization_type = org.org_type
+        teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        exam = Exam.objects.create(
+            title="Pin Length Regression Exam",
+            slug="pin-length-regression-exam",
+            author=teacher,
+            is_active=True,
+        )
+        session = LiveSession.objects.create(exam=exam, host_user=teacher)
+        self.assertEqual(len(session.pin), PIN_LENGTH)
+        self.assertTrue(session.pin.isdigit())
+        # Verify the saved row is retrievable (no silent DB truncation).
+        reloaded = LiveSession.objects.get(pk=session.pk)
+        self.assertEqual(reloaded.pin, session.pin)
