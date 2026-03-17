@@ -112,10 +112,11 @@ def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
 
 
 def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
+    players = serialize_players(session, limit=limit)
     return {
         "type": "lobby_state",
-        "count": session.players.count(),
-        "players": serialize_players(session, limit=limit),
+        "count": len(players),
+        "players": players,
         "is_locked": bool(session.is_locked),
         "settings": get_session_settings(session),
     }
@@ -198,7 +199,9 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
     from apps.exams.models import ExamQuestion
     from apps.live_exam.domain.session import detect_multi
 
-    exam_question = ExamQuestion.objects.filter(exam=session.exam, id=question_id).first()
+    exam_question = (
+        ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
+    )
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
@@ -232,7 +235,9 @@ def build_player_reveal_payload(session, question_id: int, *, revealed_at=None) 
     from apps.exams.models import ExamQuestion
     from apps.live_exam.domain.session import detect_multi
 
-    exam_question = ExamQuestion.objects.filter(exam=session.exam, id=question_id).first()
+    exam_question = (
+        ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
+    )
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 

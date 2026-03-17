@@ -11,8 +11,6 @@ from typing import Any
 
 from django.db.models import Sum
 from django.utils.translation import pgettext
-
-from apps.exams.models import ExamQuestionOption
 from apps.live_exam.domain.session import (
     detect_multi,
     get_option_label,
@@ -131,20 +129,23 @@ def serialize_answer_distribution(session: LiveSession, question_id: int) -> dic
 
 
 def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
-    speed_rank_lookup = {
-        answer.id: index + 1
-        for index, answer in enumerate(
-            LiveAnswer.objects.filter(session=session, question_id=question_id).order_by("answer_ms", "created_at", "id")
-        )
-    }
-    answers = (
+    # Single query: fetch all answers with related player, ordered by speed for rank calculation.
+    all_answers = list(
         LiveAnswer.objects.filter(session=session, question_id=question_id)
         .select_related("player")
-        .order_by("-awarded_points", "answer_ms", "created_at", "id")
+        .order_by("answer_ms", "created_at", "id")
+    )
+    # Compute speed rank in Python — avoids a second DB round-trip.
+    speed_rank_lookup = {answer.id: index + 1 for index, answer in enumerate(all_answers)}
+
+    # Sort for display: highest points first, then fastest answer.
+    sorted_answers = sorted(
+        all_answers,
+        key=lambda a: (-safe_int(a.awarded_points, 0), safe_int(a.answer_ms, 0), a.created_at, a.id),
     )[:limit]
 
     results: list[dict[str, Any]] = []
-    for answer in answers:
+    for answer in sorted_answers:
         results.append(
             {
                 "player_id": answer.player_id,
@@ -205,7 +206,8 @@ def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
 
 def build_options(exam_question, *, seed: int | None = None, randomize: bool = True) -> list[dict[str, Any]]:
     letters = ["A", "B", "C", "D", "E", "F"]
-    options = list(ExamQuestionOption.objects.filter(question=exam_question).order_by("id"))
+    # Materialise with list() first so we always iterate the queryset / prefetch cache exactly once.
+    options = sorted(list(exam_question.options.all()), key=lambda o: o.id)
     if randomize:
         rnd = random.Random(seed) if seed is not None else random
         rnd.shuffle(options)

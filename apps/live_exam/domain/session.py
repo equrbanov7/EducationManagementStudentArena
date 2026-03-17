@@ -9,7 +9,7 @@ from typing import Any
 
 from django.utils.dateparse import parse_datetime
 
-from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.exams.models import ExamQuestion
 from apps.live_exam.constants import (
     PLAYER_GET_READY_SECONDS,
     PLAYER_LEADERBOARD_SECONDS,
@@ -59,9 +59,9 @@ def get_question_by_index(session: LiveSession, index: int) -> ExamQuestion | No
     if selected:
         if index >= len(selected):
             return None
-        return ExamQuestion.objects.filter(exam=session.exam, id=selected[index]).first()
+        return ExamQuestion.objects.filter(exam=session.exam, id=selected[index]).prefetch_related("options").first()
 
-    questions = ExamQuestion.objects.filter(exam=session.exam).order_by("order", "id")
+    questions = ExamQuestion.objects.filter(exam=session.exam).prefetch_related("options").order_by("order", "id")
     try:
         return questions[index]
     except Exception:
@@ -75,7 +75,11 @@ def get_current_exam_question(session: LiveSession) -> ExamQuestion | None:
 def get_active_question(session: LiveSession) -> ExamQuestion | None:
     current_question_id = getattr(session, "current_question_id", None)
     if current_question_id:
-        return ExamQuestion.objects.filter(id=current_question_id, exam_id=session.exam_id).first()
+        return (
+            ExamQuestion.objects.filter(id=current_question_id, exam_id=session.exam_id)
+            .prefetch_related("options")
+            .first()
+        )
     return get_current_exam_question(session)
 
 
@@ -231,9 +235,9 @@ def get_option_label(option: Any) -> str:
 
 
 def detect_multi(exam_question: ExamQuestion) -> tuple[bool, int, list[int]]:
-    correct_ids = list(
-        ExamQuestionOption.objects.filter(question=exam_question, is_correct=True).values_list("id", flat=True)
-    )
+    # Use the options relation manager so callers that call prefetch_related("options")
+    # avoid an extra round-trip to the database.
+    correct_ids = [opt.id for opt in exam_question.options.all() if opt.is_correct]
     correct_count = len(correct_ids)
 
     flags = [

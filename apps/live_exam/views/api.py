@@ -70,20 +70,24 @@ def live_state_json(request, pin):
 
     total = get_total_questions(session)
 
-    data = {
+    data: dict = {
         "ok": True,
         "pin": session.pin,
         "state": session.state,
         "is_locked": bool(session.is_locked),
         "settings": get_session_settings(session),
-        "total_players": session.players.count(),
         "current_index": int(session.current_index or 0),
         "total_questions": total,
         "question_started_at": (session.question_started_at.isoformat() if session.question_started_at else None),
         "question_ends_at": (session.question_ends_at.isoformat() if session.question_ends_at else None),
     }
     if session.state == LiveSession.STATE_LOBBY:
-        data["players"] = serialize_players(session)
+        # Fetch player list once and derive the count from it to avoid a separate COUNT query.
+        players = serialize_players(session)
+        data["players"] = players
+        data["total_players"] = len(players)
+    else:
+        data["total_players"] = session.players.count()
     if session.state == LiveSession.STATE_FINISHED:
         data["top"] = serialize_top(session, limit=50)
         return JsonResponse(data)
