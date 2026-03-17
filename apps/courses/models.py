@@ -106,20 +106,24 @@ class Course(models.Model):
         help_text="Kursun aid olduğu təşkilat",
     )
 
-    unit_id = models.IntegerField(
+    unit = models.ForeignKey(
+        "organizations.OrgUnit",
         null=True,
         blank=True,
-        verbose_name="Kafedra/Şöbə ID",
-        help_text="Placeholder - gələcək OrgUnit FK",
-        db_index=True,
+        on_delete=models.SET_NULL,
+        related_name="courses",
+        verbose_name="Kafedra/Şöbə",
+        help_text="Kursun aid olduğu kafedra və ya şöbə",
     )
 
-    period_id = models.IntegerField(
+    period = models.ForeignKey(
+        "organizations.AcademicPeriod",
         null=True,
         blank=True,
-        verbose_name="Akademik Dövr ID",
-        help_text="Placeholder - gələcək AcademicPeriod FK",
-        db_index=True,
+        on_delete=models.SET_NULL,
+        related_name="courses",
+        verbose_name="Akademik Dövr",
+        help_text="Kursun aid olduğu akademik dövr (semestr, trisemestr, və s.)",
     )
 
     GRADING_TYPE_CHOICES = (

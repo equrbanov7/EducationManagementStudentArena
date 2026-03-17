@@ -57,6 +57,12 @@ class CourseAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "Təşkilat",
+            {
+                "fields": ("organization", "unit", "period"),
+            },
+        ),
+        (
             "URL",
             {
                 "fields": ("slug",),
