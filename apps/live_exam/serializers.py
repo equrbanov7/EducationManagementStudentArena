@@ -206,7 +206,7 @@ def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
 
 def build_options(exam_question, *, seed: int | None = None, randomize: bool = True) -> list[dict[str, Any]]:
     letters = ["A", "B", "C", "D", "E", "F"]
-    # Materialise with list() first so we always iterate the queryset / prefetch cache exactly once.
+    # Materialize with list() first so we always iterate the queryset / prefetch cache exactly once.
     options = sorted(list(exam_question.options.all()), key=lambda o: o.id)
     if randomize:
         rnd = random.Random(seed) if seed is not None else random
