@@ -1,7 +1,41 @@
 """
-Decorators for organization and permission-based access control.
+Canonical class-based-view authorization layer for EMS Arena.
+
+This module provides the **authoritative** set of class-based-view mixins and
+function-based-view decorators that enforce the organisation RBAC model.
+
+Canonical CBV API (preferred)
+------------------------------
+* ``OrganizationRequiredMixin``  – Ensures the user is logged in and has an
+  active organisation context.  Use as the base mixin for all org-scoped views.
+* ``PermissionRequiredMixin``  – Extends ``OrganizationRequiredMixin`` and
+  checks a specific RBAC permission string (e.g. ``'course.create'``).
+* ``LevelRequiredMixin``  – Extends ``OrganizationRequiredMixin`` and checks
+  that the user's highest role level meets a minimum threshold.
+
+Canonical FBV/inline API (preferred)
+--------------------------------------
+* ``core.permissions.request_has_permission(request, permission)``  – Boolean
+  check for inline use inside view functions.
+* ``core.permissions.ensure_request_permission(request, permission)``  – Raises
+  ``PermissionDenied`` when the permission is absent.
+
+Deprecated function decorators
+--------------------------------
+The following function-based decorators are **deprecated** in favour of the
+canonical CBV mixins or the ``core.permissions`` inline helpers above.  They
+still function but will emit ``DeprecationWarning`` at call-time.
+
+* ``org_required``  – use ``OrganizationRequiredMixin`` on CBVs or add a
+  ``@login_required`` + org guard in FBVs.
+* ``org_permission_required``  – use ``PermissionRequiredMixin`` or
+  ``ensure_request_permission``.
+* ``org_level_required``  – use ``LevelRequiredMixin``.
+* ``org_role_required``  – use ``PermissionRequiredMixin`` with an RBAC
+  permission that maps to the required role capability.
 """
 
+import warnings
 from functools import wraps
 
 from django.contrib.auth.decorators import login_required
@@ -12,16 +46,31 @@ from django.utils.translation import pgettext
 
 from .permissions import has_permission
 
+_FBV_DEPRECATION_HINT = (
+    "Use OrganizationRequiredMixin / PermissionRequiredMixin / LevelRequiredMixin "
+    "(class-based views) or core.permissions.ensure_request_permission (inline) instead."
+)
+
 
 def org_required(view_func):
     """
     Decorator to ensure user has an active organization selected.
     Redirects to organization selector if no organization is active.
+
+    .. deprecated::
+        Prefer ``apps.organizations.decorators.OrganizationRequiredMixin`` for
+        class-based views or a manual ``@login_required`` + org guard for
+        function-based views.
     """
 
     @wraps(view_func)
     @login_required
     def wrapper(request, *args, **kwargs):
+        warnings.warn(
+            "org_required is deprecated. " + _FBV_DEPRECATION_HINT,
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if not hasattr(request, "organization") or request.organization is None:
             # Redirect to organization selector
             return redirect("organizations:select")
@@ -36,12 +85,23 @@ def org_permission_required(permission):
 
     Args:
         permission: Permission string to check (e.g., 'course.create')
+
+    .. deprecated::
+        Prefer ``apps.organizations.decorators.PermissionRequiredMixin`` for
+        class-based views or ``core.permissions.ensure_request_permission``
+        for inline checks in function-based views.
     """
 
     def decorator(view_func):
         @wraps(view_func)
-        @org_required
         def wrapper(request, *args, **kwargs):
+            warnings.warn(
+                "org_permission_required is deprecated. " + _FBV_DEPRECATION_HINT,
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if not hasattr(request, "organization") or request.organization is None:
+                return redirect("organizations:select")
             if not has_permission(request.org_permissions, permission):
                 raise PermissionDenied(
                     pgettext("organizations.decorators.error", "missing_permission").format(permission=permission)
@@ -59,12 +119,22 @@ def org_level_required(min_level):
 
     Args:
         min_level: Minimum role level required (1-100)
+
+    .. deprecated::
+        Prefer ``apps.organizations.decorators.LevelRequiredMixin`` for
+        class-based views.
     """
 
     def decorator(view_func):
         @wraps(view_func)
-        @org_required
         def wrapper(request, *args, **kwargs):
+            warnings.warn(
+                "org_level_required is deprecated. " + _FBV_DEPRECATION_HINT,
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if not hasattr(request, "organization") or request.organization is None:
+                return redirect("organizations:select")
             # Get highest level from user's memberships
             max_level = 0
             if request.org_memberships:
@@ -91,14 +161,25 @@ def org_role_required(role_names):
 
     Args:
         role_names: List of role names or a single role name string
+
+    .. deprecated::
+        Role-name matching is fragile and ties code to role implementation details.
+        Prefer ``apps.organizations.decorators.PermissionRequiredMixin`` with an
+        RBAC permission string that captures the required capability.
     """
     if isinstance(role_names, str):
         role_names = [role_names]
 
     def decorator(view_func):
         @wraps(view_func)
-        @org_required
         def wrapper(request, *args, **kwargs):
+            warnings.warn(
+                "org_role_required is deprecated. " + _FBV_DEPRECATION_HINT,
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if not hasattr(request, "organization") or request.organization is None:
+                return redirect("organizations:select")
             user_roles = [m.role.name for m in request.org_memberships]
 
             if not any(role in user_roles for role in role_names):

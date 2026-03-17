@@ -1,9 +1,31 @@
 """
-Shared permission helpers for org-scoped request authorization.
+Primary authorization entry point for EMS Arena.
+
+This module is the single standard authorization layer for the project.
+
+Canonical authorization API
+----------------------------
+* ``request_has_permission(request, permission)``  – Boolean check (FBV / inline).
+* ``ensure_request_permission(request, permission)``  – Raises PermissionDenied.
+* ``apps.organizations.decorators.OrganizationRequiredMixin``  – CBV guard (login + org).
+* ``apps.organizations.decorators.PermissionRequiredMixin``  – CBV guard + RBAC permission.
+* ``apps.organizations.decorators.LevelRequiredMixin``  – CBV guard + role level.
+
+Deprecated helpers
+------------------
+The following group-based helpers bypass the RBAC model and are **deprecated**.
+They still function but emit ``DeprecationWarning`` at call-time:
+
+* ``teacher_required``  – use ``request_has_permission`` or RBAC-aware CBV mixins.
+* ``student_required``  – same as above.
+
+``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` are similarly
+deprecated; see ``core/mixins.py``.
 """
 
 from __future__ import annotations
 
+import warnings
 from functools import wraps
 
 from django.contrib import messages
@@ -24,8 +46,23 @@ def is_student(user):
 
 
 def teacher_required(view_func):
+    """
+    .. deprecated::
+        Use ``request_has_permission(request, '<permission>')`` or
+        ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
+        This decorator performs a simple group-based check and bypasses the
+        organisation RBAC model.
+    """
+
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
+        warnings.warn(
+            "teacher_required is deprecated and will be removed in a future release. "
+            "Use request_has_permission() or PermissionRequiredMixin from "
+            "apps.organizations.decorators instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if not request.user.is_authenticated:
             messages.error(request, "You must be logged in to access this page.")
             return redirect("accounts:login")
@@ -38,8 +75,23 @@ def teacher_required(view_func):
 
 
 def student_required(view_func):
+    """
+    .. deprecated::
+        Use ``request_has_permission(request, '<permission>')`` or
+        ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
+        This decorator performs a simple group-based check and bypasses the
+        organisation RBAC model.
+    """
+
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
+        warnings.warn(
+            "student_required is deprecated and will be removed in a future release. "
+            "Use request_has_permission() or PermissionRequiredMixin from "
+            "apps.organizations.decorators instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if not request.user.is_authenticated:
             messages.error(request, "You must be logged in to access this page.")
             return redirect("accounts:login")

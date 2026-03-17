@@ -12,6 +12,7 @@ Contains:
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -26,7 +27,7 @@ from apps.courses.models import Course
 from core.helpers import _safe_same_origin_redirect_path
 from core.tenancy import get_request_organization
 
-from ._helpers import IsCourseOwnerMixin, IsTeacherMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
+from ._helpers import IsCourseOwnerMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -34,13 +35,21 @@ from ._helpers import IsCourseOwnerMixin, IsTeacherMixin, _get_owner_course_or_4
 # ════════════════════════════════════════════════════════════════════════════
 
 
-class CreateCourseView(IsTeacherMixin, CreateView):
-    """Kurs yaratma view-u."""
+class CreateCourseView(LoginRequiredMixin, CreateView):
+    """Kurs yaratma view-u.
+
+    Authorization: user must be logged in and have the ``course.create``
+    RBAC permission in the active organisation (checked in ``dispatch``).
+    """
 
     model = Course
     form_class = CourseForm
     template_name = "courses/create_course.html"
     modal_form_template_name = "courses/partials/_create_course_modal_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_org_permission(request, "course.create")
+        return super().dispatch(request, *args, **kwargs)
 
     def _is_modal_request(self):
         return self.request.GET.get("modal") == "1"
@@ -59,7 +68,6 @@ class CreateCourseView(IsTeacherMixin, CreateView):
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        _require_org_permission(self.request, "course.create")
         organization = get_request_organization(self.request)
         if organization is None:
             raise PermissionDenied(
