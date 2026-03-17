@@ -343,6 +343,62 @@ class ProjectUploadSecurityTest(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(ProjectSubmission.objects.count(), 0)
 
+    def test_submit_project_rejects_html_upload(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile(
+                "page.html",
+                b"<script>alert(1)</script>",
+                content_type="text/html",
+            ),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
+    def test_submit_project_rejects_php_jpg_double_extension(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile(
+                "shell.php.jpg",
+                b"\xff\xd8\xff\xe0",
+                content_type="image/jpeg",
+            ),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
+    def test_submit_project_rejects_mime_spoofed_image(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile(
+                "image.jpg",
+                b"\xff\xd8\xff\xe0",
+                content_type="application/x-httpd-php",
+            ),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
+    def test_submit_project_rejects_exe_signature_in_pdf(self):
+        payload = {
+            "content": "malicious upload",
+            "file": SimpleUploadedFile(
+                "document.pdf",
+                b"MZ\x90\x00\x03\x00\x00\x00",
+                content_type="application/pdf",
+            ),
+        }
+        response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(ProjectSubmission.objects.count(), 0)
+
 
 class ProjectTenantIsolationTest(TestCase):
     def setUp(self):
