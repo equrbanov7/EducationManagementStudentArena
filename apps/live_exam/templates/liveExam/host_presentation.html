@@ -116,7 +116,7 @@
         </div>
     </div>
 
-    <div id="qrModal" class="qr-modal" onclick="toggleQR(false)">
+    <div id="qrModal" class="qr-modal">
         <img id="qrModalImage" src="{{ qr_url }}" alt="QR">
         <p>{% trans "qr_scan" context "live_exam.host_lobby" %}</p>
     </div>
@@ -204,6 +204,13 @@
         }
         modal.style.display = show ? "flex" : "none";
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const qrModal = document.getElementById("qrModal");
+        if (qrModal) {
+            qrModal.addEventListener("click", function () { toggleQR(false); });
+        }
+    });
     </script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>

@@ -3135,7 +3135,7 @@ body.host-presentation-page .scoreboard-row__score {
     cursor: pointer;
 }
 
-.qr-modal img { width: 280px; border-radius: 15px; }
+.qr-modal img { width: 420px; max-width: 90vmin; border-radius: 15px; }
 .qr-modal p { color: #fff; margin-top: 20px; font-size: 18px; font-weight: 700; }
 
 /* ═══════════════════════════════════════════════════════════════

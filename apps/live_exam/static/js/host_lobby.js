@@ -718,7 +718,7 @@ function renderIdleStage() {
                         <strong>${esc(CONFIG.pin)}</strong>
                         <small>${esc(audienceText)}</small>
                     </div>
-                    <button type="button" class="lobby-stage__qr" onclick="toggleQR(true)" aria-label="QR">
+                    <button type="button" class="lobby-stage__qr" data-action="open-qr" aria-label="QR">
                         <img src="${esc(currentQrUrl())}" alt="QR">
                     </button>
                 </header>
@@ -1673,6 +1673,10 @@ UI.revealBtn.onclick = revealQuestion;
 UI.nextBtn.onclick = nextQuestion;
 UI.finishBtn.onclick = finishGame;
 UI.presentationContent?.addEventListener("click", event => {
+    if (event.target.closest("[data-action='open-qr']")) {
+        if (typeof toggleQR === "function") toggleQR(true);
+        return;
+    }
     const button = event.target.closest("[data-remove-player-id]");
     if (!button || !controlsEnabled() || state.sessionState !== "lobby") return;
     button.disabled = true;

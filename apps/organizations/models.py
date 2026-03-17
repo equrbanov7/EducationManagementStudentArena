@@ -190,15 +190,56 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         if not self.slug:
             self.slug = slugify(self.name)
 
-        # Calculate level and path
-        if self.parent:
-            self.level = self.parent.level + 1
-            self.path = f"{self.parent.path}/{self.id}"
+        # Capture current DB path before updating (for descendant cascade)
+        old_path = None
+        if self.pk:
+            old_path = OrgUnit.objects.filter(pk=self.pk).values_list("path", flat=True).first()
+
+        # Calculate level and path, always fetching parent fresh from DB
+        # to avoid using a stale cached instance.
+        if self.parent_id:
+            try:
+                parent = OrgUnit.objects.get(pk=self.parent_id)
+                self.level = parent.level + 1
+                self.path = f"{parent.path}/{self.id}"
+            except OrgUnit.DoesNotExist:
+                self.parent_id = None
+                self.level = 0
+                self.path = str(self.id)
         else:
             self.level = 0
             self.path = str(self.id)
 
         super().save(*args, **kwargs)
+
+        # If this unit's path changed, cascade the update to all descendants.
+        if old_path is not None and old_path != self.path:
+            self._cascade_path_update(old_path)
+
+    def _cascade_path_update(self, old_path):
+        """
+        Bulk-update paths and levels for all descendants after this unit
+        was reparented or its own path changed.
+        """
+        new_path = self.path
+        descendants = list(
+            OrgUnit.objects.filter(
+                path__startswith=f"{old_path}/",
+                organization=self.organization,
+            )
+            .order_by("level")
+            .values("pk", "path")
+        )
+        if not descendants:
+            return
+        for desc in descendants:
+            # Replace old path prefix with the new one
+            new_desc_path = new_path + desc["path"][len(old_path):]
+            new_level = new_desc_path.count("/")
+            OrgUnit.objects.filter(pk=desc["pk"]).update(
+                path=new_desc_path,
+                level=new_level,
+            )
 
     def get_ancestors(self):
         """Get all ancestor units."""
