@@ -2,7 +2,18 @@
 courses/views/_helpers.py
 ──────────────────────────
 Course-specific helper functions and mixins.
+
+Authorization convention for this app
+--------------------------------------
+* **Inline RBAC checks** – use ``_require_org_permission(request, '<permission>')``
+  (wraps ``core.permissions.ensure_request_permission``).
+* **Object ownership guards** – use ``IsCourseOwnerMixin`` which scopes the
+  queryset to the current user's owned courses.
+* ``IsTeacherMixin`` is **deprecated** (simple group-based check). Prefer
+  ``LoginRequiredMixin`` combined with an inline ``_require_org_permission`` call.
 """
+
+import warnings
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
@@ -52,7 +63,23 @@ def _require_org_permission(request, permission):
 
 
 class IsTeacherMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər."""
+    """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər.
+
+    .. deprecated::
+        Uses the legacy group-based role check (``is_teacher_or_above``).  Prefer
+        ``LoginRequiredMixin`` combined with an inline
+        ``_require_org_permission(request, '<permission>')`` call inside the view
+        method that actually needs the RBAC guard.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        warnings.warn(
+            "IsTeacherMixin is deprecated. Use LoginRequiredMixin combined with "
+            "_require_org_permission() or core.permissions.ensure_request_permission() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
         return getattr(self.request.user, "is_teacher_or_above", False)
