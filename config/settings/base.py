@@ -5,6 +5,7 @@ Common settings shared across all environments.
 
 import os
 from pathlib import Path
+from csp.constants import NONCE
 
 from django.contrib.messages import constants as messages
 
@@ -187,38 +188,50 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# Content Security Policy (CSP) settings — django-csp 3.8
+# Content Security Policy (CSP) settings
 # https://django-csp.readthedocs.io/en/latest/configuration.html
 #
-# 'unsafe-inline' is intentionally absent from script-src.  All inline
-# <script> blocks carry a per-request nonce ({{ request.csp_nonce }}) so
-# the browser will still execute them.  The nonce is automatically appended
-# to the script-src directive by CSPMiddleware when CSP_INCLUDE_NONCE_IN is
-# configured.
+# 'unsafe-inline' is intentionally absent from script-src.
+# Inline <script> blocks must use a per-request nonce
+# via {{ request.csp_nonce }} and the NONCE constant in
+# CONTENT_SECURITY_POLICY["DIRECTIVES"]["script-src"].
 #
 # 'unsafe-inline' is retained for style-src because inline style=""
 # attributes cannot carry a nonce; removing it would require rewriting every
 # HTML element that uses inline styles.
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = (
-    "'self'",
-    "https://cdn.jsdelivr.net",
-    "https://cdnjs.cloudflare.com",
-)
-CSP_STYLE_SRC = (
-    "'self'",
-    "'unsafe-inline'",  # Required for inline style="" attributes
-    "https://fonts.googleapis.com",
-    "https://cdn.jsdelivr.net",
-    "https://cdnjs.cloudflare.com",
-)
-CSP_FONT_SRC = (
-    "'self'",
-    "data:",
-    "https://fonts.gstatic.com",
-    "https://cdnjs.cloudflare.com",
-)
-CSP_IMG_SRC = ("'self'", "data:")
-# Automatically appends 'nonce-<value>' to the listed directives so that
-# inline <script nonce="{{ request.csp_nonce }}"> blocks are allowed.
-CSP_INCLUDE_NONCE_IN = ["script-src"]
+
+
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "font-src": [
+            "'self'",
+            "data:",
+            "https://fonts.gstatic.com",
+            "https://cdnjs.cloudflare.com",
+        ],
+        "img-src": [
+            "'self'",
+            "data:",
+        ],
+        "script-src": [
+            "'self'",
+            "https://cdn.jsdelivr.net",
+            "https://cdnjs.cloudflare.com",
+            NONCE,
+        ],
+        "style-src": [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+            "https://cdn.jsdelivr.net",
+            "https://cdnjs.cloudflare.com",
+        ],
+        # Add this if WebSocket / fetch connections need it
+        "connect-src": [
+            "'self'",
+            "ws://127.0.0.1:8000",
+            "ws://localhost:8000",
+        ],
+    }
+}
