@@ -660,3 +660,60 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=self.question.id).count(),
             1,
         )
+
+    def test_play_ws_duplicate_answer_is_idempotent(self):
+        """A player who submits an answer twice receives answer_saved both times but only one LiveAnswer is stored."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(self.player),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                # First submission
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 300,
+                    }
+                )
+                first_response = await communicator.receive_json_from(timeout=1)
+
+                # Drain the auto-reveal broadcast triggered because this is the only player
+                auto_reveal_message = await communicator.receive_json_from(timeout=1)
+
+                # Second submission for the same question (duplicate)
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": self.correct_option.id,
+                        "answer_ms": 600,
+                    }
+                )
+                second_response = await communicator.receive_json_from(timeout=1)
+
+                return first_response, auto_reveal_message, second_response
+            finally:
+                await communicator.disconnect()
+
+        first_response, auto_reveal_message, second_response = async_to_sync(scenario)()
+
+        # First response is always answer_saved
+        self.assertEqual(first_response["type"], "answer_saved")
+        # Auto-reveal fires for single-player sessions
+        self.assertEqual(auto_reveal_message["type"], "reveal")
+        # Second submission (duplicate) also returns answer_saved gracefully
+        self.assertEqual(second_response["type"], "answer_saved")
+
+        # Only one LiveAnswer must exist in the database
+        self.assertEqual(
+            LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=self.question.id).count(),
+            1,
+            "Duplicate submission must not create a second LiveAnswer record",
+        )
