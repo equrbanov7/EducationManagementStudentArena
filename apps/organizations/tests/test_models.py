@@ -123,6 +123,177 @@ class OrgUnitModelTest(TestCase):
         self.assertEqual(child.level, 1)
         self.assertIn(str(parent.id), child.path)
 
+    def test_orgunit_root_path(self):
+        """Root unit path equals its own id string."""
+        root = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty of Arts",
+            slug="faculty-arts",
+        )
+        self.assertEqual(root.path, str(root.id))
+        self.assertEqual(root.level, 0)
+
+    def test_orgunit_child_path(self):
+        """Child unit path is parent.path/child.id."""
+        parent = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty of Engineering",
+            slug="faculty-eng",
+        )
+        child = OrgUnit.objects.create(
+            organization=self.org,
+            parent=parent,
+            unit_type="department",
+            name="Electrical Engineering",
+            slug="ee",
+        )
+        self.assertEqual(child.path, f"{parent.path}/{child.id}")
+        self.assertEqual(child.level, 1)
+
+    def test_orgunit_grandchild_path(self):
+        """Grandchild unit path is grandparent.path/parent.id/grandchild.id."""
+        grandparent = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty of Science",
+            slug="fos",
+        )
+        parent = OrgUnit.objects.create(
+            organization=self.org,
+            parent=grandparent,
+            unit_type="department",
+            name="Physics",
+            slug="physics",
+        )
+        child = OrgUnit.objects.create(
+            organization=self.org,
+            parent=parent,
+            unit_type="class",
+            name="Quantum Lab",
+            slug="quantum-lab",
+        )
+        self.assertEqual(child.path, f"{grandparent.path}/{parent.id}/{child.id}")
+        self.assertEqual(child.level, 2)
+
+    def test_orgunit_reparent_updates_unit_path(self):
+        """Changing a unit's parent updates its path and level."""
+        parent_a = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty A",
+            slug="faculty-a",
+        )
+        parent_b = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty B",
+            slug="faculty-b",
+        )
+        child = OrgUnit.objects.create(
+            organization=self.org,
+            parent=parent_a,
+            unit_type="department",
+            name="Dept X",
+            slug="dept-x",
+        )
+        self.assertEqual(child.path, f"{parent_a.path}/{child.id}")
+
+        # Reparent to B
+        child.parent = parent_b
+        child.save()
+        child.refresh_from_db()
+
+        self.assertEqual(child.path, f"{parent_b.path}/{child.id}")
+        self.assertEqual(child.level, 1)
+
+    def test_orgunit_reparent_cascades_to_descendants(self):
+        """Reparenting a unit cascades path updates to all its descendants."""
+        parent_a = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty A",
+            slug="fa",
+        )
+        parent_b = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty B",
+            slug="fb",
+        )
+        child = OrgUnit.objects.create(
+            organization=self.org,
+            parent=parent_a,
+            unit_type="department",
+            name="Dept",
+            slug="dept",
+        )
+        grandchild = OrgUnit.objects.create(
+            organization=self.org,
+            parent=child,
+            unit_type="class",
+            name="Class",
+            slug="class",
+        )
+
+        # Reparent child from A to B
+        child.parent = parent_b
+        child.save()
+
+        grandchild.refresh_from_db()
+        child.refresh_from_db()
+
+        self.assertEqual(child.path, f"{parent_b.path}/{child.id}")
+        self.assertEqual(grandchild.path, f"{parent_b.path}/{child.id}/{grandchild.id}")
+        self.assertEqual(grandchild.level, 2)
+
+    def test_orgunit_auto_slug(self):
+        """Slug is auto-generated from name if not provided."""
+        unit = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Faculty of Natural Sciences",
+        )
+        self.assertNotEqual(unit.slug, "")
+        self.assertIn("natural", unit.slug)
+
+    def test_orgunit_get_descendants_after_reparent(self):
+        """get_descendants() returns correct set after reparenting."""
+        root_a = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Root A",
+            slug="root-a",
+        )
+        root_b = OrgUnit.objects.create(
+            organization=self.org,
+            unit_type="faculty",
+            name="Root B",
+            slug="root-b",
+        )
+        child = OrgUnit.objects.create(
+            organization=self.org,
+            parent=root_a,
+            unit_type="department",
+            name="Child",
+            slug="child",
+        )
+
+        # Before reparent: child is under root_a
+        self.assertIn(child, root_a.get_descendants())
+        self.assertNotIn(child, root_b.get_descendants())
+
+        # Reparent child to root_b
+        child.parent = root_b
+        child.save()
+
+        root_a.refresh_from_db()
+        root_b.refresh_from_db()
+
+        self.assertNotIn(child, root_a.get_descendants())
+        self.assertIn(child, root_b.get_descendants())
+
 
 class RoleModelTest(TestCase):
     """Tests for Role model."""
