@@ -23,8 +23,6 @@ class OrganizationMiddleware:
             from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
             from .models import Organization
 
-            _materialize_legacy_teacher_membership(request.user)
-
             # Get organization from session (set by organization selector)
             org_slug = request.session.get("active_organization")
 
@@ -62,6 +60,10 @@ class OrganizationMiddleware:
                     request.session.pop("active_organization", None)
 
             if request.organization is None:
+                # Backfill legacy teacher membership before querying so that new/legacy
+                # users without explicit membership records are found in the query below.
+                _materialize_legacy_teacher_membership(request.user)
+
                 active_memberships = list(
                     request.user.memberships.filter(is_active=True, organization__is_active=True)
                     .select_related("organization", "role", "scope_unit")
