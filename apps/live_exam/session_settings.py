@@ -5,7 +5,7 @@ Session settings helpers for live exam hosting.
 from __future__ import annotations
 
 from copy import deepcopy
-import random
+import secrets
 from typing import Any
 
 from apps.accounts.models import ProfileRole
@@ -185,4 +185,8 @@ def session_join_path(session) -> str:
 
 
 def generate_guest_nickname() -> str:
-    return f"{random.choice(NICKNAME_ADJECTIVES)} {random.choice(NICKNAME_NOUNS)} {random.randint(10, 99)}"
+    return (
+        f"{secrets.choice(NICKNAME_ADJECTIVES)} "
+        f"{secrets.choice(NICKNAME_NOUNS)} "
+        f"{secrets.randbelow(90) + 10}"
+    )
