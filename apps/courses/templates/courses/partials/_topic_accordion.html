@@ -60,15 +60,18 @@
                                 
                                 <!-- Action Buttons (Owner only) - Stop propagation -->
                                 {% if is_owner %}
-                                    <div class="topic-actions" onclick="event.stopPropagation();">
+                                    <div class="topic-actions" data-stop-propagation>
                                         <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="editTopic({{ topic.id }}, '{{ topic.title|escapejs }}', '{{ topic.description|escapejs }}')"
+                                                data-edit-topic-id="{{ topic.id }}"
+                                                data-edit-topic-title="{{ topic.title|escapejs }}"
+                                                data-edit-topic-description="{{ topic.description|escapejs }}"
                                                 title="{% trans 'action_edit' context 'courses.partial.topic_accordion' %}">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                                onclick="deleteTopic({{ course.id }}, {{ topic.id }})"
+                                                data-delete-topic-course-id="{{ course.id }}"
+                                                data-delete-topic-id="{{ topic.id }}"
                                                 title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -120,7 +123,8 @@
                                                         
                                                         {% if is_owner %}
                                                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                                                    onclick="deleteResource({{ course.id }}, {{ resource.id }})"
+                                                                    data-delete-resource-course-id="{{ course.id }}"
+                                                                    data-delete-resource-id="{{ resource.id }}"
                                                                     title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
@@ -140,7 +144,8 @@
                                     {% if is_owner %}
                                         <div class="add-resource-btn-container">
                                             <button type="button" class="btn btn-sm btn-outline-primary w-100"
-                                                    onclick="openResourceModal({{ topic.id }}, '{{ topic.title|escapejs }}')">
+                                                    data-open-resource-modal-topic-id="{{ topic.id }}"
+                                                    data-open-resource-modal-title="{{ topic.title|escapejs }}">
                                                 <i class="fas fa-plus-circle"></i> {% trans "action_add_resource" context "courses.partial.topic_accordion" %}
                                             </button>
                                         </div>
@@ -346,6 +351,12 @@
 
 
 <script nonce="{{ request.csp_nonce }}">
+    document.querySelectorAll('[data-stop-propagation]').forEach(function (element) {
+        element.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+    });
+
     // Delete Topic
     function deleteTopic(courseId, topicId) {
         if (confirm("{% trans 'confirm_delete_topic' context 'courses.partial.topic_accordion' %}")) {

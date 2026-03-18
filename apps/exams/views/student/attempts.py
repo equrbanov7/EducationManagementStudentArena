@@ -223,7 +223,7 @@ def take_exam(request, slug, attempt_id):
                 if paint_enabled and paint_data_url.startswith("data:image/png;base64,"):
                     _save_paint_png_to_answer(ans, paint_data_url)
                 elif not paint_enabled:
-                    pass
+                    _clear_paint_from_answer(ans)
 
                 ans.save()
 

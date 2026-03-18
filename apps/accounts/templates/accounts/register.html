@@ -51,7 +51,7 @@
                     {% endif %}
                 </div>
                 <div class="wizard-nav">
-                    <button type="button" class="register-submit-btn" onclick="wizardNext(2)">
+                    <button type="button" class="register-submit-btn" data-wizard-next="2">
                         {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -129,10 +129,10 @@
                 </div>
 
                 <div class="wizard-nav">
-                    <button type="button" class="register-back-btn" onclick="wizardBack(1)">
+                    <button type="button" class="register-back-btn" data-wizard-back="1">
                         <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
-                    <button type="button" class="register-submit-btn" onclick="wizardNext(3)">
+                    <button type="button" class="register-submit-btn" data-wizard-next="3">
                         {% trans "continue" context "accounts.register" %} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -227,7 +227,7 @@
                 </div>
 
                 <div class="wizard-nav">
-                    <button type="button" class="register-back-btn" onclick="wizardBack(2)">
+                    <button type="button" class="register-back-btn" data-wizard-back="2">
                         <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
                     </button>
                     <button type="submit" class="register-submit-btn">{% trans "submit" context "accounts.register" %}</button>

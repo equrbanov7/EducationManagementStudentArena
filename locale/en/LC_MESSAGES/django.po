@@ -8621,37 +8621,37 @@ msgstr "Are you sure you want to remove this course-exam link?"
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
 msgid "label_paint_answer"
-msgstr "Answer"
+msgstr "Paint answer"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:26
 msgctxt "exams.partial.paint_answer"
 msgid "hint_paint_autosave"
-msgstr "Draw with pen/eraser, autosaved."
+msgstr "Draw with the pen or eraser; changes are saved automatically."
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "title_pen"
-msgstr "Example: Conditionals - Test 1"
+msgstr "Pen"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "action_pen"
-msgstr "open"
+msgstr "Pen"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "title_eraser"
-msgstr "Example: Conditionals - Test 1"
+msgstr "Eraser"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "action_eraser"
-msgstr "Save to memory"
+msgstr "Eraser"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:39
 msgctxt "exams.partial.paint_answer"
 msgid "label_color"
-msgstr "Score"
+msgstr "Color"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:44
 msgctxt "exams.partial.paint_answer"
@@ -8661,17 +8661,17 @@ msgstr "Thickness"
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "title_clear_all"
-msgstr "Example: Conditionals - Test 1"
+msgstr "Clear canvas"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "action_clear"
-msgstr "Add"
+msgstr "Clear"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
 msgid "title_save_image"
-msgstr "Upload new image (optional)"
+msgstr "Save drawing"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
@@ -9038,12 +9038,12 @@ msgstr "Question"
 #: apps/exams/templates/exams/student/take_exam.html:90
 msgctxt "exams.template.take_exam"
 msgid "video_not_supported"
-msgstr "This exam has not started yet. Start date: {start_str}"
+msgstr "Your browser does not support the video tag."
 
 #: apps/exams/templates/exams/student/take_exam.html:134
 msgctxt "exams.template.take_exam"
 msgid "placeholder_write_answer"
-msgstr "Placeholder answer"
+msgstr "Write your answer..."
 
 #: apps/exams/templates/exams/student/take_exam.html:151
 msgctxt "exams.template.take_exam"
@@ -9058,7 +9058,7 @@ msgstr "Add"
 #: apps/exams/templates/exams/student/take_exam.html:189
 msgctxt "exams.template.take_exam"
 msgid "action_previous"
-msgstr "First"
+msgstr "Previous"
 
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
@@ -9068,47 +9068,57 @@ msgstr "Next"
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
 msgid "action_save_as_draft"
-msgstr "Save Changes"
+msgstr "Save draft"
 
 #: apps/exams/templates/exams/student/take_exam.html:203
 msgctxt "exams.template.take_exam"
 msgid "action_finish_exam"
-msgstr "Create first exam"
+msgstr "Finish exam"
 
 #: apps/exams/templates/exams/student/take_exam.html:212
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_title"
-msgstr "Confirm delete title"
+msgstr "Finish the exam?"
 
 #: apps/exams/templates/exams/student/take_exam.html:213
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_description"
-msgstr "Create post description"
+msgstr "After you finish, you will not be able to return to this exam."
 
 #: apps/exams/templates/exams/student/take_exam.html:216
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_no_back"
-msgstr "After finishing, you cannot return to this exam. Continue?"
+msgstr "No, continue"
 
 #: apps/exams/templates/exams/student/take_exam.html:219
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_yes"
 msgstr "Yes, finish the exam"
 
+#: apps/exams/templates/exams/student/take_exam.html:240
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_unanswered_count"
+msgstr "Unanswered questions: {count}."
+
+#: apps/exams/templates/exams/student/take_exam.html:241
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_all_answered"
+msgstr "All questions have been answered."
+
 #: apps/exams/templates/exams/student/take_exam.html:227
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
-msgstr "Save Changes"
+msgstr "Saving..."
 
 #: apps/exams/templates/exams/student/take_exam.html:228
 msgctxt "exams.template.take_exam"
 msgid "autosave_saved"
-msgstr "Save to memory"
+msgstr "Saved"
 
 #: apps/exams/templates/exams/student/take_exam.html:229
 msgctxt "exams.template.take_exam"
 msgid "draft_saved"
-msgstr "Question bank saved successfully!"
+msgstr "Draft saved"
 
 #: apps/exams/templates/exams/student/take_exam.html:230
 msgctxt "exams.template.take_exam"
@@ -9133,12 +9143,12 @@ msgstr "Saving..."
 #: apps/exams/templates/exams/student/take_exam.html:234
 msgctxt "exams.template.take_exam"
 msgid "btn_saved"
-msgstr "Question bank saved successfully!"
+msgstr "Saved"
 
 #: apps/exams/templates/exams/student/take_exam.html:235
 msgctxt "exams.template.take_exam"
 msgid "btn_draft_saved"
-msgstr "Question bank saved successfully!"
+msgstr "Draft saved"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
@@ -9996,7 +10006,7 @@ msgstr "Empty visible groups"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
-msgstr "The subject name cannot be empty."
+msgstr "Written answer review"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
@@ -10015,7 +10025,7 @@ msgstr "Question"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:202
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_answer"
-msgstr "Closed"
+msgstr "No answer"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:40
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:203
@@ -10026,13 +10036,13 @@ msgstr "pts"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:42
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_empty_answer"
-msgstr "Submit answer"
+msgstr "Empty answer"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:44
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:204
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_not_checked"
-msgstr "Status archived"
+msgstr "Not reviewed"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:74
 msgctxt "exams.template.teacher_check_attempt"
@@ -10062,7 +10072,7 @@ msgstr "Back"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:151
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_changes"
-msgstr "Pending"
+msgstr "Save"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:168
 msgctxt "exams.template.teacher_check_attempt"
@@ -10077,12 +10087,12 @@ msgstr "Teacher feedback"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:178
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:179
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_confirm_temporary"
-msgstr "Confirm (temporary)"
+msgstr "Save"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:188
 msgctxt "exams.template.teacher_check_attempt"
@@ -10092,27 +10102,37 @@ msgstr "Unsaved changes"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:189
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
-msgstr "Save Changes"
+msgstr "You have unsaved changes. Are you sure you want to leave this page?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:191
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_no_return"
-msgstr "Unsaved changes"
+msgstr "No, go back"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:192
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_yes_close"
-msgstr "Close it"
+msgstr "Yes, leave"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:201
 msgctxt "exams.template.teacher_check_attempt"
 msgid "modal_title_question_details"
-msgstr "Institution default"
+msgstr "Question details"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:205
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_changes_present"
-msgstr "Table change roles"
+msgstr "Save"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:208
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_title"
+msgstr "Save review"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:209
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_message"
+msgstr "Are you sure you want to save and finalize this review?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"

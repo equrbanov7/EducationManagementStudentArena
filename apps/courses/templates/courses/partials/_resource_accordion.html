@@ -81,7 +81,8 @@
                                         <!-- Delete Button (Owner only) -->
                                         {% if is_owner %}
                                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                                    onclick="deleteResource({{ course.id }}, {{ resource.id }})"
+                                                    data-delete-resource-course-id="{{ course.id }}"
+                                                    data-delete-resource-id="{{ resource.id }}"
                                                     title="{% trans 'action_delete' context 'courses.partial.resource_accordion' %}">
                                                 <i class="fas fa-trash"></i>
                                             </button>

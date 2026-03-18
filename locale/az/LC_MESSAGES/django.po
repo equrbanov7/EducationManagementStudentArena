@@ -8644,37 +8644,37 @@ msgstr "Silmək istədiyinizə əminsiniz?"
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
 msgid "label_paint_answer"
-msgstr "Cavab"
+msgstr "Paint cavabı"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:26
 msgctxt "exams.partial.paint_answer"
 msgid "hint_paint_autosave"
-msgstr "Qələm/silgi ilə çək, avtomatik yadda saxlanır."
+msgstr "Qələm və ya silgi ilə çəkin, avtomatik yadda saxlanılır."
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "title_pen"
-msgstr "Məs: Şərt operatorları – Test 1"
+msgstr "Qələm"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "action_pen"
-msgstr "Aç"
+msgstr "Qələm"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "title_eraser"
-msgstr "Məs: Şərt operatorları – Test 1"
+msgstr "Silgi"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "action_eraser"
-msgstr "Yadda Saxla"
+msgstr "Silgi"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:39
 msgctxt "exams.partial.paint_answer"
 msgid "label_color"
-msgstr "Score"
+msgstr "Rəng"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:44
 msgctxt "exams.partial.paint_answer"
@@ -8684,17 +8684,17 @@ msgstr "Qalınlıq"
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "title_clear_all"
-msgstr "Məs: Şərt operatorları – Test 1"
+msgstr "Hamısını təmizlə"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "action_clear"
-msgstr "Əlavə Et"
+msgstr "Təmizlə"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
 msgid "title_save_image"
-msgstr "Yeni şəkil yüklə (optional)"
+msgstr "Şəkli yadda saxla"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
@@ -9118,6 +9118,16 @@ msgctxt "exams.template.take_exam"
 msgid "confirm_finish_yes"
 msgstr "Bəli, imtahanı bitir"
 
+#: apps/exams/templates/exams/student/take_exam.html:240
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_unanswered_count"
+msgstr "Cavablandırılmayan sual sayı: {count}."
+
+#: apps/exams/templates/exams/student/take_exam.html:241
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_all_answered"
+msgstr "Bütün suallar cavablandırılıb."
+
 #: apps/exams/templates/exams/student/take_exam.html:227
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
@@ -9136,7 +9146,7 @@ msgstr "Qaralama saxlanıldı"
 #: apps/exams/templates/exams/student/take_exam.html:230
 msgctxt "exams.template.take_exam"
 msgid "draft_saved_with_check"
-msgstr "Qaralama yoxlanılıb və saxlanılıb"
+msgstr "Qaralama uğurla saxlanıldı"
 
 #: apps/exams/templates/exams/student/take_exam.html:231
 msgctxt "exams.template.take_exam"
@@ -10117,7 +10127,7 @@ msgstr "Bu bölmə üçün görünən qrup yoxdur."
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
-msgstr "Mövzu adı boş ola bilməz."
+msgstr "Yazılı cavabların yoxlanması"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
@@ -10136,7 +10146,7 @@ msgstr "Sual"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:202
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_answer"
-msgstr "Bağlı"
+msgstr "Cavab yoxdur"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:40
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:203
@@ -10147,13 +10157,13 @@ msgstr "bal"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:42
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_empty_answer"
-msgstr "Cavab göndər"
+msgstr "Boş cavab"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:44
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:204
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_not_checked"
-msgstr "Arxivləndi"
+msgstr "Yoxlanmayıb"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:74
 msgctxt "exams.template.teacher_check_attempt"
@@ -10183,12 +10193,12 @@ msgstr "Geri"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:151
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_changes"
-msgstr "Pending"
+msgstr "Yadda saxla"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:168
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_score"
-msgstr "Score"
+msgstr "Bal"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:171
 msgctxt "exams.template.teacher_check_attempt"
@@ -10203,7 +10213,7 @@ msgstr "Ləğv et"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:179
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_confirm_temporary"
-msgstr "Təsdiqlə (müvəqqəti)"
+msgstr "Yadda saxla"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:188
 msgctxt "exams.template.teacher_check_attempt"
@@ -10213,27 +10223,37 @@ msgstr "Yadda saxlanılmamış dəyişikliklər"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:189
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
-msgstr "Dəyişiklikləri Yadda Saxla"
+msgstr "Yadda saxlanılmamış dəyişikliklər itiriləcək. Çıxmaq istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:191
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_no_return"
-msgstr "Yadda saxlanılmamış dəyişikliklər"
+msgstr "Xeyr, geri qayıt"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:192
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_yes_close"
-msgstr "Bağla"
+msgstr "Bəli, çıx"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:201
 msgctxt "exams.template.teacher_check_attempt"
 msgid "modal_title_question_details"
-msgstr "Institution default"
+msgstr "Sual detalları"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:205
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_changes_present"
-msgstr "Rolları dəyiş"
+msgstr "Yadda saxla"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:208
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_title"
+msgstr "Yoxlamanı yadda saxla"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:209
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_message"
+msgstr "Bu yoxlamanı yadda saxlayıb yekunlaşdırmaq istədiyinizə əminsiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"

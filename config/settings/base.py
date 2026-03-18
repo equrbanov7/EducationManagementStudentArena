@@ -5,7 +5,7 @@ Common settings shared across all environments.
 
 import os
 from pathlib import Path
-from csp.constants import NONCE
+from csp.constants import NONCE, NONE, SELF, UNSAFE_INLINE
 
 from django.contrib.messages import constants as messages
 
@@ -193,45 +193,46 @@ MESSAGE_TAGS = {
 #
 # 'unsafe-inline' is intentionally absent from script-src.
 # Inline <script> blocks must use a per-request nonce
-# via {{ request.csp_nonce }} and the NONCE constant in
-# CONTENT_SECURITY_POLICY["DIRECTIVES"]["script-src"].
+# via {{ request.csp_nonce }} and the NONCE sentinel.
 #
 # 'unsafe-inline' is retained for style-src because inline style=""
 # attributes cannot carry a nonce; removing it would require rewriting every
 # HTML element that uses inline styles.
-
-
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
-        "default-src": ["'self'"],
+        "default-src": [SELF],
         "font-src": [
-            "'self'",
+            SELF,
             "data:",
             "https://fonts.gstatic.com",
-            "https://cdnjs.cloudflare.com",
         ],
         "img-src": [
-            "'self'",
+            SELF,
             "data:",
+            "blob:",
+        ],
+        "media-src": [
+            SELF,
+            "blob:",
         ],
         "script-src": [
-            "'self'",
-            "https://cdn.jsdelivr.net",
-            "https://cdnjs.cloudflare.com",
+            SELF,
             NONCE,
         ],
         "style-src": [
-            "'self'",
-            "'unsafe-inline'",
+            SELF,
+            UNSAFE_INLINE,
             "https://fonts.googleapis.com",
-            "https://cdn.jsdelivr.net",
-            "https://cdnjs.cloudflare.com",
         ],
-        # Add this if WebSocket / fetch connections need it
         "connect-src": [
-            "'self'",
+            SELF,
             "ws://127.0.0.1:8000",
             "ws://localhost:8000",
+            "ws://0.0.0.0:8000",
         ],
+        "object-src": [NONE],
+        "base-uri": [SELF],
+        "frame-ancestors": [NONE],
+        "form-action": [SELF],
     }
 }

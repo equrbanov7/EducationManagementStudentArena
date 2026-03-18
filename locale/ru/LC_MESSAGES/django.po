@@ -8645,37 +8645,37 @@ msgstr "Вы уверены, что хотите удалить?"
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
 msgid "label_paint_answer"
-msgstr "Ответ"
+msgstr "Ответ рисунком"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:26
 msgctxt "exams.partial.paint_answer"
 msgid "hint_paint_autosave"
-msgstr "Рисуйте пером/ластиком, сохраняется автоматически."
+msgstr "Рисуйте пером или ластиком, изменения сохраняются автоматически."
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "title_pen"
-msgstr "Пример: Условные операторы - Тест 1"
+msgstr "Перо"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "action_pen"
-msgstr "открыть"
+msgstr "Перо"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "title_eraser"
-msgstr "Пример: Условные операторы - Тест 1"
+msgstr "Ластик"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "action_eraser"
-msgstr "Сохранить в память"
+msgstr "Ластик"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:39
 msgctxt "exams.partial.paint_answer"
 msgid "label_color"
-msgstr "Score"
+msgstr "Цвет"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:44
 msgctxt "exams.partial.paint_answer"
@@ -8685,17 +8685,17 @@ msgstr "Толщина"
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "title_clear_all"
-msgstr "Пример: Условные операторы - Тест 1"
+msgstr "Очистить холст"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "action_clear"
-msgstr "Добавлять"
+msgstr "Очистить"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
 msgid "title_save_image"
-msgstr "Загрузить новое изображение (необязательно)"
+msgstr "Сохранить рисунок"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
@@ -9062,7 +9062,7 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/student/take_exam.html:90
 msgctxt "exams.template.take_exam"
 msgid "video_not_supported"
-msgstr "Экзамен еще не начался. Начало: {start_str}"
+msgstr "Ваш браузер не поддерживает видео."
 
 #: apps/exams/templates/exams/student/take_exam.html:134
 msgctxt "exams.template.take_exam"
@@ -9077,12 +9077,12 @@ msgstr "Перетащите файлы сюда или нажмите для з
 #: apps/exams/templates/exams/student/take_exam.html:164
 msgctxt "exams.template.take_exam"
 msgid "action_add_file"
-msgstr "Добавлять"
+msgstr "Добавить файл"
 
 #: apps/exams/templates/exams/student/take_exam.html:189
 msgctxt "exams.template.take_exam"
 msgid "action_previous"
-msgstr "Первый"
+msgstr "Назад"
 
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
@@ -9092,49 +9092,57 @@ msgstr "Далее"
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
 msgid "action_save_as_draft"
-msgstr "Сохранить изменения"
+msgstr "Сохранить черновик"
 
 #: apps/exams/templates/exams/student/take_exam.html:203
 msgctxt "exams.template.take_exam"
 msgid "action_finish_exam"
-msgstr "Создайте первый тест"
+msgstr "Завершить экзамен"
 
 #: apps/exams/templates/exams/student/take_exam.html:212
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_title"
-msgstr "Подтвердить удаление"
+msgstr "Завершить экзамен?"
 
 #: apps/exams/templates/exams/student/take_exam.html:213
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_description"
-msgstr ""
-"Используйте кнопку ниже, чтобы создать новую публикацию в редакторе по "
-"умолчанию."
+msgstr "После завершения вы не сможете вернуться к экзамену."
 
 #: apps/exams/templates/exams/student/take_exam.html:216
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_no_back"
-msgstr "После завершения вы не сможете вернуться к экзамену. Продолжить?"
+msgstr "Нет, продолжить"
 
 #: apps/exams/templates/exams/student/take_exam.html:219
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_yes"
 msgstr "Да, завершить экзамен"
 
+#: apps/exams/templates/exams/student/take_exam.html:240
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_unanswered_count"
+msgstr "Без ответа осталось вопросов: {count}."
+
+#: apps/exams/templates/exams/student/take_exam.html:241
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_all_answered"
+msgstr "На все вопросы дан ответ."
+
 #: apps/exams/templates/exams/student/take_exam.html:227
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
-msgstr "Сохранить изменения"
+msgstr "Сохранение..."
 
 #: apps/exams/templates/exams/student/take_exam.html:228
 msgctxt "exams.template.take_exam"
 msgid "autosave_saved"
-msgstr "Сохранить в память"
+msgstr "Сохранено"
 
 #: apps/exams/templates/exams/student/take_exam.html:229
 msgctxt "exams.template.take_exam"
 msgid "draft_saved"
-msgstr "Банк вопросов успешно сохранен!"
+msgstr "Черновик сохранен"
 
 #: apps/exams/templates/exams/student/take_exam.html:230
 msgctxt "exams.template.take_exam"
@@ -9159,12 +9167,12 @@ msgstr "Сохранение..."
 #: apps/exams/templates/exams/student/take_exam.html:234
 msgctxt "exams.template.take_exam"
 msgid "btn_saved"
-msgstr "Банк вопросов успешно сохранен!"
+msgstr "Сохранено"
 
 #: apps/exams/templates/exams/student/take_exam.html:235
 msgctxt "exams.template.take_exam"
 msgid "btn_draft_saved"
-msgstr "Банк вопросов успешно сохранен!"
+msgstr "Черновик сохранен"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
@@ -10025,12 +10033,12 @@ msgstr "Для этого раздела нет видимой группы."
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
-msgstr "Имя субъекта не может быть пустым."
+msgstr "Проверка письменных ответов"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"
-msgstr "Это будет проверено"
+msgstr "На проверке"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:23
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:160
@@ -10044,7 +10052,7 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:202
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_answer"
-msgstr "Закрыто"
+msgstr "Ответ отсутствует"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:40
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:203
@@ -10055,13 +10063,13 @@ msgstr "балл"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:42
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_empty_answer"
-msgstr "Отправить ответ"
+msgstr "Пустой ответ"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:44
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:204
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_not_checked"
-msgstr "В архиве"
+msgstr "Не проверено"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:74
 msgctxt "exams.template.teacher_check_attempt"
@@ -10091,27 +10099,27 @@ msgstr "Назад"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:151
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_changes"
-msgstr "Pending"
+msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:168
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_score"
-msgstr "Score"
+msgstr "Балл"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:171
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_feedback"
-msgstr "Отзывы учителей"
+msgstr "Комментарий преподавателя"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:178
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:179
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_confirm_temporary"
-msgstr "Подтвердить (временно)"
+msgstr "Сохранить"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:188
 msgctxt "exams.template.teacher_check_attempt"
@@ -10121,27 +10129,37 @@ msgstr "Несохраненные изменения"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:189
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
-msgstr "Сохранить изменения"
+msgstr "У вас есть несохраненные изменения. Выйти без сохранения?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:191
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_no_return"
-msgstr "Несохраненные изменения"
+msgstr "Нет, вернуться"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:192
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_yes_close"
-msgstr "Закрой это"
+msgstr "Да, выйти"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:201
 msgctxt "exams.template.teacher_check_attempt"
 msgid "modal_title_question_details"
-msgstr "Institution default"
+msgstr "Детали вопроса"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:205
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_changes_present"
-msgstr "Поменяйтесь ролями"
+msgstr "Сохранить"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:208
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_title"
+msgstr "Сохранить проверку"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:209
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_message"
+msgstr "Вы уверены, что хотите сохранить и завершить эту проверку?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"

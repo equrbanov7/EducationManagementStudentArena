@@ -91,6 +91,10 @@
     font-weight: 800;
 }
 
+.avatar-placeholder.avatar-placeholder--fallback {
+    display: none;
+}
+
 .avatar-hint {
     margin-top: -4px;
     color: var(--profile-muted);
@@ -265,6 +269,10 @@
     width: 200px;
     height: 200px;
     margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     border-radius: 50%;
     padding: 8px;
     background: linear-gradient(135deg, #eff6ff, #dbeafe);
@@ -279,6 +287,12 @@
 .avatar-modal-preview img {
     display: block;
     object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: var(--shadow-sm);
+}
+
+.avatar-modal-preview .avatar-placeholder {
     border-radius: 50%;
     border: 4px solid #ffffff;
     box-shadow: var(--shadow-sm);
