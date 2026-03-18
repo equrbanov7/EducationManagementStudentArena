@@ -22,6 +22,10 @@ from core.constants import OrganizationType
 
 User = get_user_model()
 
+# Origin header required by AllowedHostsOriginValidator in the ASGI configuration.
+# All WebSocket connections in tests must include this header.
+_WS_ORIGIN_HEADER = (b"origin", b"http://testserver")
+
 TEST_CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
@@ -66,17 +70,17 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
             player_id=self.player.id,
             client_id=self.player.client_id,
         )
-        return [(b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
+        return [_WS_ORIGIN_HEADER, (b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
 
     def _host_session_headers(self):
         client = Client()
         client.login(username="consumer_teacher", password="StrongPass123!")
         session_cookie = client.cookies[settings.SESSION_COOKIE_NAME].value
-        return [(b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
+        return [_WS_ORIGIN_HEADER, (b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
 
     def test_lobby_ws_allows_viewer_without_auth(self):
         async def scenario():
-            communicator = WebsocketCommunicator(application, f"/ws/live/{self.session.pin}/lobby/")
+            communicator = WebsocketCommunicator(application, f"/ws/live/{self.session.pin}/lobby/", headers=[_WS_ORIGIN_HEADER])
             connected, _ = await communicator.connect()
             message = await communicator.receive_json_from() if connected else None
             if connected:
@@ -280,13 +284,13 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             player_id=player.id,
             client_id=player.client_id,
         )
-        return [(b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
+        return [_WS_ORIGIN_HEADER, (b"cookie", f"{PLAYER_COOKIE_NAME}={token}".encode())]
 
     def _host_session_headers(self):
         client = Client()
         client.login(username="answer_teacher", password="StrongPass123!")
         session_cookie = client.cookies[settings.SESSION_COOKIE_NAME].value
-        return [(b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
+        return [_WS_ORIGIN_HEADER, (b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
 
     def _host_and_player_headers(self, player):
         host_client = Client()
@@ -298,6 +302,7 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             client_id=player.client_id,
         )
         return [
+            _WS_ORIGIN_HEADER,
             (
                 b"cookie",
                 (
