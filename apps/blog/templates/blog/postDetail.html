@@ -12,7 +12,7 @@
     <a
         href="{% if post.author %}{% url 'accounts:public_profile' post.author.username %}{% else %}{% url 'home' %}{% endif %}"
         class="article-back-link"
-        onclick="if (window.history.length > 1) { window.history.back(); return false; }"
+        data-history-back
     >
         <i class="fas fa-arrow-left" aria-hidden="true"></i>
         Geri qayıt
@@ -44,7 +44,7 @@
         src="{{ post.get_image }}"
         alt="{{ post.title }}"
         class="article-featured-image"
-        onerror="this.onerror=null; this.src='{% static 'images/tech-placeholder.svg' %}';"
+        data-fallback-src="{% static 'images/tech-placeholder.svg' %}"
     >
 
         <div class="article-content">

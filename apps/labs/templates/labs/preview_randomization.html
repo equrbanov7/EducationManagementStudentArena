@@ -41,7 +41,7 @@
                         <i class="fas fa-user-graduate me-1 text-primary-blue"></i> 
                         {% trans "label_select_student" context "labs.template.preview_randomization" %}
                     </label>
-                    <select name="student" class="form-select form-select-modern" onchange="this.form.submit()">
+                    <select name="student" class="form-select form-select-modern" data-submit-on-change>
                         <option value="">{% trans "placeholder_select_student" context "labs.template.preview_randomization" %}</option>
                         {% for m in memberships %}
                         <option value="{{ m.user.id }}" {% if selected_student and selected_student.id == m.user.id %}selected{% endif %}>

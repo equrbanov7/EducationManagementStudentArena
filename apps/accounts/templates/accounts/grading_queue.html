@@ -143,7 +143,7 @@
                         <td>
                             <form class="grade-form"
                                   action="{% url 'assignments:grade_submission' submission.id %}"
-                                  onsubmit="submitGrade(event, {{ submission.id }}, false)">
+                                  data-submit-grade-id="{{ submission.id }}">
                                 {% csrf_token %}
                                 <div class="grade-input-group">
                                     <input 
@@ -168,7 +168,7 @@
                                     <button type="submit" class="grade-btn grade-btn-submit">
                                         <i class="fas fa-check"></i> {% trans "submit_grade" context "accounts.grading_queue_page" %}
                                     </button>
-                                    <button type="button" class="grade-btn grade-btn-next" onclick="submitGrade(event, {{ submission.id }}, true)">
+                                    <button type="button" class="grade-btn grade-btn-next" data-submit-grade-next="{{ submission.id }}">
                                         <i class="fas fa-forward"></i> {% trans "next_grade" context "accounts.grading_queue_page" %}
                                     </button>
                                 </div>
@@ -283,11 +283,20 @@
         // Create toast notification
         const toast = document.createElement('div');
         toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-        toast.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
+
+        const icon = document.createElement('i');
+        icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2`;
+
+        const messageNode = document.createTextNode(message);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn-close';
+        closeBtn.setAttribute('data-bs-dismiss', 'alert');
+
+        toast.appendChild(icon);
+        toast.appendChild(messageNode);
+        toast.appendChild(closeBtn);
         
         let container = document.querySelector('.toast-container');
         if (!container) {
