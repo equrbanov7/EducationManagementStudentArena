@@ -1,4 +1,3 @@
-import hashlib
 from datetime import datetime
 from urllib.parse import urlencode, urlsplit
 
@@ -10,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_http_methods
@@ -20,6 +20,9 @@ from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.permissions import request_has_permission
+
+ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
+ANONYMOUS_NAME_CODE_LENGTH = 6
 
 
 def _append_query_params(url, **params):
@@ -151,6 +154,16 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, seconds_remaining):
         "countdown_seconds": seconds_remaining if not can_view_name else 0,
         "countdown_mode": "identity" if not can_view_name and seconds_remaining else "",
     }
+
+
+def _build_anonymous_name(*, attempt_id: int, user_id: int, exam_id: int) -> str:
+    token = salted_hmac(
+        ANONYMOUS_NAME_TOKEN_SALT,
+        f"{attempt_id}:{user_id}:{exam_id}",
+    ).hexdigest()
+    return pgettext("exams.view.results.label", "anonymous_student").format(
+        code=token[:ANONYMOUS_NAME_CODE_LENGTH].upper()
+    )
 
 
 @login_required
@@ -291,10 +304,7 @@ def teacher_exam_results(request, slug):
     attempts_data = []
 
     for att in attempts_page:
-        # Anonim ad (deterministic)
-        hash_input = f"{att.id}-{att.user.id}-{exam.id}"
-        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
+        anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
 
         can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
         action_state = _resolve_attempt_action_state(
@@ -454,9 +464,11 @@ def teacher_view_attempt(request, slug, attempt_id):
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
     else:
-        hash_input = f"{attempt.id}-{attempt.user.id}-{attempt.exam.id}"
-        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
+        anonymous_name = _build_anonymous_name(
+            attempt_id=attempt.id,
+            user_id=attempt.user_id,
+            exam_id=attempt.exam_id,
+        )
         student_display = attempt.user.get_full_name() or attempt.user.username if can_view_name else anonymous_name
 
     search_query = (request.GET.get("q") or "").strip()
@@ -643,10 +655,7 @@ def teacher_pending_attempts(request):
     attempts_data = []
 
     for att in pending_attempts:
-        # Anonim ad (deterministic)
-        hash_input = f"{att.id}-{att.user.id}-{att.exam.id}"
-        hash_digest = hashlib.md5(hash_input.encode()).hexdigest()
-        anonymous_name = pgettext("exams.view.results.label", "anonymous_student").format(code=hash_digest[:6].upper())
+        anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=att.exam_id)
 
         can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
 
