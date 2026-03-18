@@ -241,23 +241,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-});
 
-function normalizeIntegerInput(input) {
-    if (!input) return;
-    const normalized = (input.value || '').trim().replace(',', '.');
-    if (!normalized) {
-        input.value = '';
-        return;
+    function normalizeIntegerInput(input) {
+        if (!input) return;
+        const normalized = (input.value || '').trim().replace(',', '.');
+        if (!normalized) {
+            input.value = '';
+            return;
+        }
+        const match = normalized.match(/^-?\d+/);
+        if (!match) {
+            input.value = '';
+            return;
+        }
+        let nextValue = parseInt(match[0], 10);
+        if (Number.isNaN(nextValue) || nextValue < 0) {
+            nextValue = 0;
+        }
+        input.value = String(nextValue);
     }
-    const match = normalized.match(/^-?\d+/);
-    if (!match) {
-        input.value = '';
-        return;
-    }
-    let nextValue = parseInt(match[0], 10);
-    if (Number.isNaN(nextValue) || nextValue < 0) {
-        nextValue = 0;
-    }
-    input.value = String(nextValue);
-}
+});
