@@ -6,6 +6,8 @@ Security-hardened configuration for production deployment.
 from __future__ import annotations
 
 import os
+from copy import deepcopy
+from urllib.parse import urlsplit
 
 import dj_database_url
 import sentry_sdk
@@ -18,6 +20,32 @@ from .base import *
 def _env_bool(name: str, default: bool) -> bool:
     value = os.getenv(name, str(default)).strip().lower()
     return value in {"1", "true", "yes", "on"}
+
+
+def _csp_connect_sources(*values: str) -> tuple[str, ...]:
+    sources = {"'self'"}
+
+    for value in values:
+        raw = (value or "").strip()
+        if not raw:
+            continue
+
+        if "://" not in raw:
+            sources.add(f"https://{raw}")
+            sources.add(f"wss://{raw}")
+            continue
+
+        parsed = urlsplit(raw)
+        if not parsed.netloc:
+            continue
+
+        sources.add(f"{parsed.scheme}://{parsed.netloc}")
+        if parsed.scheme == "https":
+            sources.add(f"wss://{parsed.netloc}")
+        elif parsed.scheme == "http":
+            sources.add(f"ws://{parsed.netloc}")
+
+    return tuple(sorted(sources))
 
 
 # STATICFILES_DIRS base-də tuple ola bilər, append üçün list edirik
@@ -130,9 +158,15 @@ if sentry_dsn:
     )
 
 # Content Security Policy (CSP) - Production overrides (stricter than base)
-# Extends the base django-csp 3.8 settings with additional production directives.
-CSP_IMG_SRC = ("'self'", "data:", "https:")  # allow images over HTTPS
-CSP_CONNECT_SRC = ("'self'",)  # AJAX/WebSocket connections
-CSP_FRAME_ANCESTORS = ("'none'",)  # prevent clickjacking
-CSP_BASE_URI = ("'self'",)  # restrict <base> tag
-CSP_FORM_ACTION = ("'self'",)  # restrict form submissions
+# Extends the base django-csp 4.0 dict with stricter production directives.
+CONTENT_SECURITY_POLICY = deepcopy(CONTENT_SECURITY_POLICY)
+CONTENT_SECURITY_POLICY["DIRECTIVES"].update(
+    {
+        "img-src": ["'self'", "data:", "blob:", "https:"],
+        "media-src": ["'self'", "blob:", "https:"],
+        "connect-src": list(_csp_connect_sources(SITE_URL, LIVE_EXAM_PUBLIC_HOST)),
+        "frame-ancestors": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+    }
+)

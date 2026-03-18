@@ -151,7 +151,7 @@
     display: flex;
 }
 
-.modal-content {
+.modal-overlay .modal-content {
     background: #ffffff;
     border-radius: 0.75rem;
     padding: 1.5rem;
@@ -172,7 +172,7 @@
     max-width: 800px;
 }
 
-.modal-header {
+.modal-overlay .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -181,12 +181,12 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
-.modal-header h3 {
+.modal-overlay .modal-header h3 {
     margin: 0;
     font-size: 1.25rem;
 }
 
-.modal-close-btn {
+.modal-overlay .modal-close-btn {
     background: transparent;
     border: none;
     color: #64748b;
@@ -222,11 +222,11 @@
     font-size: 0.9rem;
 }
 
-.form-group {
+.profile-posts-card .modal-overlay .form-group {
     margin-bottom: 1rem;
 }
 
-.form-group label {
+.profile-posts-card .modal-overlay .form-group label {
     display: block;
     font-weight: 600;
     color: #334155;
@@ -234,7 +234,7 @@
     font-size: 0.92rem;
 }
 
-.form-control {
+.profile-posts-card .modal-overlay .form-control {
     width: 100%;
     padding: 0.625rem 0.8rem;
     border: 1px solid #cbd5e1;
@@ -245,13 +245,13 @@
     background-color: #ffffff;
 }
 
-.form-control:focus {
+.profile-posts-card .modal-overlay .form-control:focus {
     border-color: #2563eb;
     outline: none;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-textarea.form-control {
+.profile-posts-card .modal-overlay textarea.form-control {
     resize: vertical;
 }
 
@@ -454,7 +454,7 @@ textarea.form-control {
     line-height: 1.35;
 }
 
-.modal-buttons {
+.modal-overlay .modal-buttons {
     margin-top: 1.25rem;
     padding-top: 0.875rem;
     border-top: 1px solid #e2e8f0;
@@ -463,9 +463,9 @@ textarea.form-control {
     gap: 0.625rem;
 }
 
-.modal-cancel-btn,
-.modal-confirm-btn,
-.warning-btn {
+.modal-overlay .modal-cancel-btn,
+.modal-overlay .modal-confirm-btn,
+.modal-overlay .warning-btn {
     padding: 0.625rem 1rem;
     border-radius: 0.5rem;
     border: none;
@@ -474,23 +474,23 @@ textarea.form-control {
     font-weight: 600;
 }
 
-.modal-cancel-btn {
+.modal-overlay .modal-cancel-btn {
     background-color: #f1f5f9;
     color: #475569;
 }
 
-.modal-confirm-btn:not(:disabled) {
+.modal-overlay .modal-confirm-btn:not(:disabled) {
     background-color: #2563eb;
     color: #ffffff;
 }
 
-.modal-confirm-btn:disabled {
+.modal-overlay .modal-confirm-btn:disabled {
     background-color: #93c5fd;
     color: #eff6ff;
     cursor: not-allowed;
 }
 
-.warning-btn {
+.modal-overlay .warning-btn {
     background-color: #f97316;
     color: #ffffff;
 }

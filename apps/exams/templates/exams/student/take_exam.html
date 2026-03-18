@@ -138,31 +138,30 @@
                                 
                             {# --- PAINT CAVABI --- #}
                             {% if exam.enable_paint or q.enable_paint %}
-                                {% include "partials/_paint_answer.html" with q=q ans=ans_data.answer %}
+                                {% include "exams/components/_paint_answer.html" with q=q ans=ans_data.answer %}
                             {% endif %}
                         
                         
                         
 
-                            <div class="file-dropzone" 
-                                 data-qid="{{ q.id }}" 
-                                 ondrop="handleDrop(event, {{ q.id }})"
-                                 ondragover="event.preventDefault(); this.classList.add('hover');"
-                                 ondragleave="this.classList.remove('hover');">
+                            <div class="file-dropzone"
+                                 data-qid="{{ q.id }}"
+                                 data-exam-dropzone-qid="{{ q.id }}">
 
                                 <p>{% trans "drop_files_here_or_click" context "exams.template.take_exam" %}</p>
 
                                 <input type="file" 
                                        name="file_{{ q.id }}[]" 
+                                       id="question-file-input-{{ q.id }}"
                                        class="file-input" 
                                        accept=".pdf,.png,.jpg,.jpeg,.zip"
                                        multiple 
-                                       onchange="handleFiles(event, {{ q.id }})">
+                                       data-take-exam-file-input="{{ q.id }}">
                             </div>
 
                             <button type="button"
                                     class="add-file-btn"
-                                    onclick="triggerFileInput({{ q.id }})">
+                                    data-file-input-target="#question-file-input-{{ q.id }}">
                                 + {% trans "action_add_file" context "exams.template.take_exam" %}
                             </button>
 
@@ -213,6 +212,9 @@
     <div class="confirm-modal-box">
         <h3>{% trans "confirm_finish_title" context "exams.template.take_exam" %}</h3>
         <p>{% trans "confirm_finish_description" context "exams.template.take_exam" %}</p>
+        <p class="confirm-modal-summary" id="finishConfirmSummary">
+            {% trans "confirm_finish_all_answered" context "exams.template.take_exam" %}
+        </p>
         <div class="confirm-actions">
             <button type="button" class="nav-btn btn-outline-secondary" id="cancelFinishBtn">
                 {% trans "confirm_finish_no_back" context "exams.template.take_exam" %}
@@ -234,7 +236,9 @@ const I18N_TAKE_EXAM = {
     saveErrorRetry: "{% trans 'save_error_retry' context 'exams.template.take_exam' %}",
     btnSaving: "{% trans 'btn_saving' context 'exams.template.take_exam' %}",
     btnSaved: "{% trans 'btn_saved' context 'exams.template.take_exam' %}",
-    btnDraftSaved: "{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}"
+    btnDraftSaved: "{% trans 'btn_draft_saved' context 'exams.template.take_exam' %}",
+    finishUnansweredCount: "{% trans 'confirm_finish_unanswered_count' context 'exams.template.take_exam' %}",
+    finishAllAnswered: "{% trans 'confirm_finish_all_answered' context 'exams.template.take_exam' %}"
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -258,22 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Exam type
     const examType = examForm.dataset.examType;
-    console.log('Exam Type:', examType);
-    console.log('Save Draft Button:', saveDraftBtn);
-    
-    // Debug: Yüklənmiş cavabları yoxla
-    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
-    const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-    console.log('Checked radios on load:', checkedRadios.length);
-    console.log('Checked checkboxes on load:', checkedCheckboxes.length);
-    
-    // Seçilmiş cavabları göstər
-    checkedRadios.forEach(radio => {
-        console.log('Radio checked:', radio.name, '=', radio.value);
-    });
-    checkedCheckboxes.forEach(checkbox => {
-        console.log('Checkbox checked:', checkbox.name, '=', checkbox.value);
-    });
 
     // localStorage üçün key
     const examId = examForm.dataset.examId;
@@ -282,6 +270,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fayl state
     const fileState = {};
+    document.querySelectorAll('.file-preview-area').forEach(container => {
+        container.dataset.existingFileCount = String(container.querySelectorAll('.file-preview-item').length);
+    });
 
     // ✅ ƏLAVƏ: Bildiriş funksiyaları
     function showNotification(message, type = "info", duration = 0) {
@@ -421,55 +412,116 @@ document.addEventListener('DOMContentLoaded', function() {
         updateProgress();
     }
 
-    function updateProgress() {
+    function slideHasSelectedOption(slide) {
+        return slide.querySelector('input[name^="q_"]:checked') !== null;
+    }
+
+    function slideHasWrittenText(slide) {
+        const textAnswer = slide.querySelector('textarea.written-answer');
+        return Boolean(textAnswer && textAnswer.value.trim().length > 0);
+    }
+
+    function slideHasAttachedFiles(slide) {
+        const fileInput = slide.querySelector('input[type="file"][data-take-exam-file-input]');
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            return true;
+        }
+        const previewArea = slide.querySelector('.file-preview-area');
+        if (previewArea && previewArea.querySelector('.file-preview-item') !== null) {
+            return true;
+        }
+        return Boolean(previewArea && Number(previewArea.dataset.existingFileCount || '0') > 0);
+    }
+
+    function slideHasPaintAnswer(slide) {
+        const paintCard = slide.querySelector('.paint-card');
+        if (!paintCard) {
+            return false;
+        }
+
+        const enabledHidden = paintCard.querySelector('.paint-enabled-hidden');
+        if (!enabledHidden || enabledHidden.value !== '1') {
+            return false;
+        }
+
+        const clearHidden = paintCard.querySelector('.paint-clear-hidden');
+        if (clearHidden && clearHidden.value === '1') {
+            return false;
+        }
+
+        const dataHidden = paintCard.querySelector('.paint-data-hidden');
+        if (dataHidden && dataHidden.value && dataHidden.value.length > 50) {
+            return true;
+        }
+
+        return Boolean(paintCard.dataset.existingUrl);
+    }
+
+    function isSlideAnswered(slide) {
+        return (
+            slideHasSelectedOption(slide) ||
+            slideHasWrittenText(slide) ||
+            slideHasAttachedFiles(slide) ||
+            slideHasPaintAnswer(slide)
+        );
+    }
+
+    function getAnsweredCount() {
         let answeredCount = 0;
         slides.forEach(slide => {
-            const inputs = slide.querySelectorAll('input[type="radio"]:checked:not(:disabled), input[type="checkbox"]:checked:not(:disabled)');
-            const textareas = slide.querySelectorAll('textarea:not(:disabled)');
-            let hasText = false;
-            if (textareas.length > 0) {
-                if (textareas[0].value.trim().length > 0) hasText = true;
-            }
-            if (inputs.length > 0 || hasText) {
+            if (isSlideAnswered(slide)) {
                 answeredCount++;
             }
         });
+        return answeredCount;
+    }
+
+    function getUnansweredCount() {
+        return Math.max(totalSlides - getAnsweredCount(), 0);
+    }
+
+    function updateProgress() {
+        const answeredCount = getAnsweredCount();
         answeredCountEl.textContent = answeredCount;
-        const percent = (answeredCount / totalSlides) * 100;
+        const percent = totalSlides > 0 ? (answeredCount / totalSlides) * 100 : 0;
         progressFill.style.width = percent + '%';
     }
+
+    window.updateProgress = updateProgress;
+
+    function queueAutoSave(delayMs = 1000) {
+        clearTimeout(window.autoSaveTimer);
+        window.autoSaveTimer = setTimeout(() => {
+            sendDraft("autosave");
+        }, delayMs);
+    }
+
+    function markAnswerChanged(delayMs = null) {
+        hasUnsavedChanges = true;
+        updateProgress();
+        if (typeof delayMs === 'number' && delayMs >= 0) {
+            queueAutoSave(delayMs);
+        }
+    }
+
+    window.markExamAnswerChanged = markAnswerChanged;
 
     // Test suallarında radio/checkbox dəyişikliyini izlə
     document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', function() {
-            console.log('Input changed:', this.name, this.value);
-            hasUnsavedChanges = true;
-            updateProgress();
-            
-            // ✅ ƏLAVƏ: Test suallarında avtomatik draft saxla
             if (examType === 'test') {
-                // Debounce ilə - 1 saniyə gözlə, sonra saxla
-                clearTimeout(window.autoSaveTimer);
-                window.autoSaveTimer = setTimeout(() => {
-                    console.log('Auto-saving test answer...');
-                    sendDraft("autosave");
-                }, 1000);
+                markAnswerChanged(1000);
+                return;
             }
+
+            updateProgress();
         });
     });
 
     // Yazılı cavablarda textarea dəyişikliyini izlə
     document.querySelectorAll('textarea.written-answer').forEach(textarea => {
         textarea.addEventListener('input', function() {
-            hasUnsavedChanges = true;
-            updateProgress();
-            
-            // ✅ ƏLAVƏ: Yazılı suallarda da avtomatik draft saxla (3 saniyə debounce)
-            clearTimeout(window.autoSaveTimer);
-            window.autoSaveTimer = setTimeout(() => {
-                console.log('Auto-saving written answer...');
-                sendDraft("autosave");
-            }, 3000); // Yazılı cavablar üçün 3 saniyə gözlə
+            markAnswerChanged(3000);
         });
     });
 
@@ -538,17 +590,33 @@ document.addEventListener('DOMContentLoaded', function() {
             if (nameLower.endsWith(".zip")) icon = "🗂️";
             if (f.type.startsWith("image/")) icon = "🖼️";
 
-            container.innerHTML += `
-                <div class="file-preview-item" data-index="${idx}">
-                    <div class="file-preview-left">
-                        <span class="file-icon">${icon}</span>
-                        <span class="file-name">${f.name}</span>
-                    </div>
-                    <button type="button" class="file-remove-btn" onclick="removeFile(${qid}, ${idx})">
-                        &times;
-                    </button>
-                </div>
-            `;
+            const item = document.createElement('div');
+            item.className = 'file-preview-item';
+            item.dataset.index = String(idx);
+
+            const left = document.createElement('div');
+            left.className = 'file-preview-left';
+
+            const iconEl = document.createElement('span');
+            iconEl.className = 'file-icon';
+            iconEl.textContent = icon;
+
+            const nameEl = document.createElement('span');
+            nameEl.className = 'file-name';
+            nameEl.textContent = f.name;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'file-remove-btn';
+            removeBtn.setAttribute('data-remove-file-question', qid);
+            removeBtn.setAttribute('data-remove-file-index', idx);
+            removeBtn.textContent = '×';
+
+            left.appendChild(iconEl);
+            left.appendChild(nameEl);
+            item.appendChild(left);
+            item.appendChild(removeBtn);
+            container.appendChild(item);
         });
     }
 
@@ -556,9 +624,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const selected = Array.from(event.target.files);
         if (!fileState[qid]) fileState[qid] = [];
         fileState[qid] = fileState[qid].concat(selected);
-        hasUnsavedChanges = true;
         syncInputFiles(qid);
         renderPreview(qid);
+        markAnswerChanged(1000);
     };
 
     window.handleDrop = function(event, qid) {
@@ -568,9 +636,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const selected = Array.from(event.dataTransfer.files);
         if (!fileState[qid]) fileState[qid] = [];
         fileState[qid] = fileState[qid].concat(selected);
-        hasUnsavedChanges = true;
         syncInputFiles(qid);
         renderPreview(qid);
+        markAnswerChanged(1000);
     };
 
     window.triggerFileInput = function(qid) {
@@ -583,19 +651,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.removeFile = function(qid, index) {
         if (!fileState[qid]) return;
         fileState[qid].splice(index, 1);
-        hasUnsavedChanges = true;
         syncInputFiles(qid);
         renderPreview(qid);
+        markAnswerChanged(1000);
     };
 
     // Draft / autosave – AJAX
     function sendDraft(action = "autosave") {
         if (action === "autosave" && !hasUnsavedChanges) {
-            console.log('No unsaved changes, skipping autosave');
             return;
         }
-
-        console.log('Sending draft, action:', action, 'hasUnsavedChanges:', hasUnsavedChanges);
 
         const formData = new FormData(examForm);
         formData.append("submit_action", action);
@@ -615,7 +680,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(data => {
-            console.log('Draft response:', data);
             hasUnsavedChanges = false;
 
             // ✅ ƏLAVƏ: Uğurlu bildiriş
@@ -643,7 +707,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(err => {
-            console.error("Draft save error:", err);
             if (notification) {
                 hideNotification(notification);
             }
@@ -658,8 +721,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Draft düyməsi click
     if (saveDraftBtn) {
         saveDraftBtn.addEventListener("click", function () {
-            console.log('Draft button clicked');
-            
             // Düyməni disable et
             const originalText = saveDraftBtn.innerHTML;
             saveDraftBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${I18N_TAKE_EXAM.btnSaving}`;
@@ -678,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                console.log('Manual draft response:', data);
                 hasUnsavedChanges = false;
 
                 if (data.finished && data.redirect_url) {
@@ -697,7 +757,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 2000);
             })
             .catch(err => {
-                console.error("Draft save error:", err);
                 saveDraftBtn.innerHTML = originalText;
                 saveDraftBtn.disabled = false;
                 showNotification(I18N_TAKE_EXAM.saveError, "error", 3000);
@@ -709,7 +768,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Amma təhlükəsizlik üçün saxlaya bilərik (backup kimi)
     setInterval(() => {
         if (hasUnsavedChanges) {
-            console.log('Periodic auto-save (backup)...');
             sendDraft("autosave");
         }
     }, 5 * 60 * 1000);
@@ -725,8 +783,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const finishConfirmBackdrop = document.getElementById('finishConfirmBackdrop');
     const cancelFinishBtn = document.getElementById('cancelFinishBtn');
     const confirmFinishBtn = document.getElementById('confirmFinishBtn');
+    const finishConfirmSummary = document.getElementById('finishConfirmSummary');
+
+    function updateFinishConfirmSummary() {
+        if (!finishConfirmSummary) {
+            return;
+        }
+
+        const unansweredCount = getUnansweredCount();
+        if (unansweredCount > 0) {
+            finishConfirmSummary.textContent = I18N_TAKE_EXAM.finishUnansweredCount.replace('{count}', unansweredCount);
+            finishConfirmSummary.classList.add('is-warning');
+            finishConfirmSummary.classList.remove('is-success');
+            return;
+        }
+
+        finishConfirmSummary.textContent = I18N_TAKE_EXAM.finishAllAnswered;
+        finishConfirmSummary.classList.add('is-success');
+        finishConfirmSummary.classList.remove('is-warning');
+    }
 
     finishBtn.addEventListener('click', () => {
+        updateFinishConfirmSummary();
         finishConfirmBackdrop.style.display = 'flex';
     });
 
@@ -772,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
  
 {% block extraJs %}
     <script src="{% static 'js/review_countdown.js' %}"></script>
-    <script src="{% static 'js/paint_answer.js' %}"></script>
+    <script src="{% static 'exams/js/paint_answer.js' %}"></script>
 {% endblock %}
 
 {% endblock %}

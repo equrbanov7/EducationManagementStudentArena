@@ -252,8 +252,8 @@
                                       placeholder="{% trans 'placeholder_answer' context 'labs.template.lab_detail' %}">{{ saved_answer }}</textarea>
                             {% endwith %}
                             
-                            <div class="file-upload-area p-4 text-center mb-3 shadow-sm" 
-                                 onclick="document.getElementById('file-{{ question.id }}').click()">
+                            <div class="file-upload-area p-4 text-center mb-3 shadow-sm"
+                                 data-file-input-target="#file-{{ question.id }}">
                                 <input type="file" name="file_{{ question.id }}" id="file-{{ question.id }}" 
                                        class="d-none file-input" accept="image/*,.pdf,.doc,.docx,.zip,.py,.java,.cpp,.txt">
                                 <div class="bg-white d-inline-flex p-3 rounded-circle mb-2 shadow-sm text-primary-blue">
@@ -268,7 +268,7 @@
                                     <i class="fas fa-file-alt me-2"></i>
                                     <span class="file-name"></span>
                                     <button type="button" class="btn-close btn-close-white ms-3 file-remove" 
-                                            onclick="event.stopPropagation(); removeFile({{ question.id }})"></button>
+                                            data-remove-file-question="{{ question.id }}"></button>
                                 </span>
                             </div>
                             

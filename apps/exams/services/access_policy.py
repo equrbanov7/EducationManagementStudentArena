@@ -9,7 +9,8 @@ def is_teacher_user(user):
         return True
 
     if hasattr(user, "has_role"):
-        return user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
+        if user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER):
+            return True
 
     profile = getattr(user, "profile", None)
     return getattr(profile, "role", None) in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}

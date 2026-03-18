@@ -112,7 +112,7 @@ def create_audit_log(
         "organization": organization,
         "action": action,
         "resource_type": resource_type,
-        "resource_id": str(resource_id),
+        "resource_id": str(resource_id or ""),
         "resource_repr": resource_repr,
         "old_values": old_values,
         "new_values": new_values,

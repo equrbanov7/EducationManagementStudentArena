@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs, urlparse
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -11,7 +13,29 @@ from ._helpers import (
     build_exam_history_url,
     build_exam_result_url,
     current_return_to,
+    safe_same_origin_redirect_path,
 )
+
+
+def _default_exam_back_url(exam):
+    if exam.course_id:
+        return reverse("courses:course_dashboard", kwargs={"course_id": exam.course_id})
+    return reverse("exams:student_exam_list")
+
+
+def _resolve_result_navigation(request, exam, return_to):
+    history_view_path = reverse("exams:student_exam_history")
+    default_back_url = _default_exam_back_url(exam)
+
+    if not return_to:
+        return default_back_url, build_exam_history_url(exam, return_to=default_back_url)
+
+    if history_view_path in return_to:
+        nested_return_to = parse_qs(urlparse(return_to).query).get("return_to", [""])[0]
+        safe_nested_return_to = safe_same_origin_redirect_path(request, nested_return_to)
+        return safe_nested_return_to or default_back_url, return_to
+
+    return return_to, build_exam_history_url(exam, return_to=return_to)
 
 
 @login_required
@@ -23,8 +47,7 @@ def exam_result(request, slug, attempt_id):
     exam = get_object_or_404(tenant_scoped_exams(request), slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
     return_to = current_return_to(request)
-    default_history_url = build_exam_history_url(exam, return_to=return_to)
-    history_url = return_to if return_to and reverse("exams:student_exam_history") in return_to else default_history_url
+    back_url, history_url = _resolve_result_navigation(request, exam, return_to)
 
     if not annotate_attempt_result_visibility([attempt])[0].can_view_result:
         messages.info(
@@ -70,7 +93,7 @@ def exam_result(request, slug, attempt_id):
             "questions": questions,
             "answers_by_qid": answers_by_qid,
             "history_url": history_url,
-            "back_url": return_to or history_url,
+            "back_url": back_url,
             "previous_attempts": previous_attempts,
             "previous_attempts_count": len(previous_attempts) + 1,
         },

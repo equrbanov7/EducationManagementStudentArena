@@ -77,12 +77,14 @@
                             {% endif %}
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-warning" 
-                                    onclick="editAssignment({{ assignment.id }})">
+                            <button type="button"
+                                    class="btn btn-sm btn-warning js-edit-assignment"
+                                    data-url="{% url 'assignments:edit_assignment' assignment.id %}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" 
-                                    onclick="deleteAssignment({{ assignment.id }})">
+                            <button type="button"
+                                    class="btn btn-sm btn-danger js-delete-assignment"
+                                    data-url="{% url 'assignments:delete_assignment' assignment.id %}">
                                 <i class="bi bi-trash"></i>
                             </button>
                             <a href="{% url 'assignments:review' assignment.id %}" 

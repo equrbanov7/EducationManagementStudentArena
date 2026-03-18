@@ -4,7 +4,6 @@
 {% block title %}{% trans "title_question_bank" context "exams.template.create_question_bank" %} - {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
     .bank-container {
         max-width: 900px;
@@ -261,7 +260,7 @@
 
                         <input type="hidden" class="block-db-id" name="block_db_id_{{ forloop.counter }}" value="{{ item.obj.id }}">
 
-                        <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                        <button type="button" class="btn-delete" data-delete-block-trigger>
                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.create_question_bank" %}
                         </button>
                     </div>
@@ -297,7 +296,7 @@
                     <div class="block-header">
                         <h5 class="block-title"><i class="fas fa-cube"></i> {% trans "block_default" context "exams.template.create_question_bank" %} 1</h5>
                         <input type="hidden" class="block-db-id" name="block_db_id_1" value="">
-                        <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                        <button type="button" class="btn-delete" data-delete-block-trigger>
                             <i class="fas fa-trash"></i> {% trans "action_delete" context "exams.template.create_question_bank" %}
                         </button>
                     </div>
@@ -348,8 +347,8 @@
             {% trans "confirm_delete_block_message" context "exams.template.create_question_bank" %}
         </p>
         <div class="modal-buttons">
-            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">{% trans "confirm_no_cancel" context "exams.template.create_question_bank" %}</button>
-            <button type="button" class="btn-confirm" onclick="confirmDelete()">{% trans "confirm_yes_delete" context "exams.template.create_question_bank" %}</button>
+            <button type="button" class="btn-cancel" data-delete-block-cancel>{% trans "confirm_no_cancel" context "exams.template.create_question_bank" %}</button>
+            <button type="button" class="btn-confirm" data-delete-block-confirm>{% trans "confirm_yes_delete" context "exams.template.create_question_bank" %}</button>
         </div>
     </div>
 </div>
@@ -384,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="block-header">
                     <h5 class="block-title"><i class="fas fa-cube"></i> ${I18N_QBANK.blockNew}</h5>
                     <input type="hidden" class="block-db-id" name="block_db_id_${uniqueID}" value="">
-                    <button type="button" class="btn-delete" onclick="openDeleteModal(this)">
+                    <button type="button" class="btn-delete" data-delete-block-trigger>
                         <i class="fas fa-trash"></i> ${I18N_QBANK.actionDelete}
                     </button>
                 </div>
@@ -467,9 +466,9 @@ function confirmDelete() {
     closeDeleteModal();
 }
 
-window.onclick = function(event) {
+window.addEventListener('click', function(event) {
     const modal = document.getElementById('deleteModal');
     if (event.target === modal) closeDeleteModal();
-}
+});
 </script>
 {% endblock %}

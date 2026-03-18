@@ -1421,7 +1421,45 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertContains(response, "Bax")
         self.assertNotContains(response, "İmtahana başla")
 
-    def test_take_exam_shows_previous_attempts_summary_and_history_link(self):
+    def test_exam_result_defaults_back_to_course_dashboard_and_keeps_history_link_distinct(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+        expected_back_url = reverse("courses:course_dashboard", args=[self.assigned_course.id])
+
+        response = self.client.get(reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["back_url"], expected_back_url)
+        self.assertEqual(
+            response.context["history_url"],
+            f'{reverse("exams:student_exam_history")}?{urlencode({"exam": self.course_assigned_exam.slug, "return_to": expected_back_url})}',
+        )
+        self.assertContains(response, expected_back_url)
+
+    def test_exam_result_restores_original_back_url_when_opened_from_history(self):
+        attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.course_assigned_exam,
+            status="submitted",
+            attempt_number=1,
+        )
+        expected_back_url = reverse("courses:course_dashboard", args=[self.assigned_course.id])
+        history_url = f'{reverse("exams:student_exam_history")}?{urlencode({"exam": self.course_assigned_exam.slug, "return_to": expected_back_url})}'
+
+        response = self.client.get(
+            reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]),
+            {"return_to": history_url},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["history_url"], history_url)
+        self.assertEqual(response.context["back_url"], expected_back_url)
+
+    def test_take_exam_hides_previous_attempts_summary_while_attempt_is_active(self):
         previous_attempt = ExamAttempt.objects.create(
             user=self.student,
             exam=self.course_assigned_exam,
@@ -1438,12 +1476,13 @@ class StudentExamVisibilityFilteringTest(TestCase):
         take_response = self.client.get(start_response.url)
 
         self.assertEqual(take_response.status_code, 200)
-        self.assertContains(take_response, "Əvvəlki cəhdlər")
-        self.assertContains(take_response, "Cavablarım (1)")
-        self.assertContains(
+        self.assertNotContains(take_response, "Əvvəlki cəhdlər")
+        self.assertNotContains(take_response, "Cavablarım (1)")
+        self.assertNotContains(
             take_response,
             reverse("exams:exam_result", args=[self.course_assigned_exam.slug, previous_attempt.id]),
         )
+        self.assertContains(take_response, "exams/js/paint_answer.js")
 
 
 class TeacherViewAttemptSearchPaginationTest(TestCase):

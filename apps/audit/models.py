@@ -34,6 +34,12 @@ class AuditLog(models.Model):
     )
     action = models.CharField(max_length=20, choices=AuditAction.CHOICES)
 
+    # Legacy resource fields remain available because large parts of the app
+    # and audit queries still filter by this denormalized metadata.
+    resource_type = models.CharField(max_length=100, blank=True)
+    resource_id = models.CharField(max_length=255, blank=True)
+    resource_repr = models.CharField(max_length=500, blank=True)
+
     # Generic relation to any model
     content_type = models.ForeignKey(
         ContentType,
@@ -64,6 +70,7 @@ class AuditLog(models.Model):
             models.Index(fields=["user", "-created_at"]),
             models.Index(fields=["organization", "-created_at"]),
             models.Index(fields=["action", "-created_at"]),
+            models.Index(fields=["resource_type", "resource_id"]),
             models.Index(fields=["content_type", "object_id"]),
             models.Index(fields=["request_id"]),
         ]
@@ -79,6 +86,10 @@ class AuditLog(models.Model):
         """Get a display string for the resource."""
         if self.content_object:
             return str(self.content_object)
+        elif self.resource_repr:
+            return self.resource_repr
+        elif self.resource_type and self.resource_id:
+            return f"{self.resource_type} #{self.resource_id}"
         elif self.content_type and self.object_id:
             return f"{self.content_type.model} #{self.object_id}"
         return "Unknown Resource"

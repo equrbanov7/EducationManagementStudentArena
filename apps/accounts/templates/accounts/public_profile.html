@@ -117,7 +117,7 @@
                                                 src="{{ post.get_image }}"
                                                 alt="{{ post.title }}"
                                                 loading="lazy"
-                                                onerror="this.onerror=null;this.src='{% static 'images/tech-placeholder.svg' %}';"
+                                                data-fallback-src="{% static 'images/tech-placeholder.svg' %}"
                                             >
                                             {% if post.category %}
                                                 <span class="public-post-card__badge">{{ post.category.name }}</span>

@@ -204,8 +204,8 @@
             pointsUnit: "{% trans 'unit_points' context 'exams.template.teacher_check_attempt' %}",
             statusNotChecked: "{% trans 'status_not_checked' context 'exams.template.teacher_check_attempt' %}",
             saveButtonDirty: "{% trans 'status_changes_present' context 'exams.template.teacher_check_attempt' %}",
-            confirmTitle: "Qiymətləndirməni təsdiqləyin",
-            confirmMessage: "Bu yoxlamanı yekunlaşdırıb saxlamaq istədiyinizə əminsiniz?"
+            confirmTitle: "{% trans 'confirm_save_review_title' context 'exams.template.teacher_check_attempt' %}",
+            confirmMessage: "{% trans 'confirm_save_review_message' context 'exams.template.teacher_check_attempt' %}"
         };
     </script>
     <script src="{% static 'exams/js/teacher_check_attempt.js' %}"></script>

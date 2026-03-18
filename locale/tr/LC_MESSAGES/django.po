@@ -8632,37 +8632,37 @@ msgstr "Silmek istediğinizden emin misiniz?"
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
 msgid "label_paint_answer"
-msgstr "Cevap"
+msgstr "Çizim cevabı"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:26
 msgctxt "exams.partial.paint_answer"
 msgid "hint_paint_autosave"
-msgstr "Kalem/silgi ile çiz, otomatik kaydedilir."
+msgstr "Kalem veya silgi ile çizin, değişiklikler otomatik kaydedilir."
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "title_pen"
-msgstr "Örn: Koşul operatörleri - Test 1"
+msgstr "Kalem"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:33
 msgctxt "exams.partial.paint_answer"
 msgid "action_pen"
-msgstr "açık"
+msgstr "Kalem"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "title_eraser"
-msgstr "Örn: Koşul operatörleri - Test 1"
+msgstr "Silgi"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:34
 msgctxt "exams.partial.paint_answer"
 msgid "action_eraser"
-msgstr "Belleğe kaydet"
+msgstr "Silgi"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:39
 msgctxt "exams.partial.paint_answer"
 msgid "label_color"
-msgstr "Score"
+msgstr "Renk"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:44
 msgctxt "exams.partial.paint_answer"
@@ -8672,17 +8672,17 @@ msgstr "Kalınlık"
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "title_clear_all"
-msgstr "Örn: Koşul operatörleri - Test 1"
+msgstr "Tuvali temizle"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:49
 msgctxt "exams.partial.paint_answer"
 msgid "action_clear"
-msgstr "Eklemek"
+msgstr "Temizle"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
 msgid "title_save_image"
-msgstr "Yeni görsel yükle (isteğe bağlı)"
+msgstr "Çizimi kaydet"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:53
 msgctxt "exams.partial.paint_answer"
@@ -9049,7 +9049,7 @@ msgstr "Soru"
 #: apps/exams/templates/exams/student/take_exam.html:90
 msgctxt "exams.template.take_exam"
 msgid "video_not_supported"
-msgstr "Bu sınav henüz başlamadı. Başlangıç: {start_str}"
+msgstr "Tarayıcınız video etiketini desteklemiyor."
 
 #: apps/exams/templates/exams/student/take_exam.html:134
 msgctxt "exams.template.take_exam"
@@ -9064,12 +9064,12 @@ msgstr "Dosyaları buraya bırakın veya yüklemek için tıklayın"
 #: apps/exams/templates/exams/student/take_exam.html:164
 msgctxt "exams.template.take_exam"
 msgid "action_add_file"
-msgstr "Eklemek"
+msgstr "Dosya ekle"
 
 #: apps/exams/templates/exams/student/take_exam.html:189
 msgctxt "exams.template.take_exam"
 msgid "action_previous"
-msgstr "Birinci"
+msgstr "Önceki"
 
 #: apps/exams/templates/exams/student/take_exam.html:193
 msgctxt "exams.template.take_exam"
@@ -9079,49 +9079,57 @@ msgstr "Sonraki"
 #: apps/exams/templates/exams/student/take_exam.html:198
 msgctxt "exams.template.take_exam"
 msgid "action_save_as_draft"
-msgstr "Değişiklikleri Kaydet"
+msgstr "Taslağı kaydet"
 
 #: apps/exams/templates/exams/student/take_exam.html:203
 msgctxt "exams.template.take_exam"
 msgid "action_finish_exam"
-msgstr "İlk testi oluşturun"
+msgstr "Sınavı bitir"
 
 #: apps/exams/templates/exams/student/take_exam.html:212
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_title"
-msgstr "Silmeyi onayla"
+msgstr "Sınav bitsin mi?"
 
 #: apps/exams/templates/exams/student/take_exam.html:213
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_description"
-msgstr ""
-"Varsayılan düzenleyicide yeni bir gönderi oluşturmak için aşağıdaki düğmeyi "
-"kullanın."
+msgstr "Sınavı bitirdikten sonra geri dönemezsiniz."
 
 #: apps/exams/templates/exams/student/take_exam.html:216
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_no_back"
-msgstr "Sınavı bitirdikten sonra geri dönemezsiniz. Devam edilsin mi?"
+msgstr "Hayır, devam et"
 
 #: apps/exams/templates/exams/student/take_exam.html:219
 msgctxt "exams.template.take_exam"
 msgid "confirm_finish_yes"
 msgstr "Evet, sınavı bitir"
 
+#: apps/exams/templates/exams/student/take_exam.html:240
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_unanswered_count"
+msgstr "Cevaplanmayan soru sayısı: {count}."
+
+#: apps/exams/templates/exams/student/take_exam.html:241
+msgctxt "exams.template.take_exam"
+msgid "confirm_finish_all_answered"
+msgstr "Tüm sorular cevaplandı."
+
 #: apps/exams/templates/exams/student/take_exam.html:227
 msgctxt "exams.template.take_exam"
 msgid "autosave_saving"
-msgstr "Değişiklikleri Kaydet"
+msgstr "Kaydediliyor..."
 
 #: apps/exams/templates/exams/student/take_exam.html:228
 msgctxt "exams.template.take_exam"
 msgid "autosave_saved"
-msgstr "Belleğe kaydet"
+msgstr "Kaydedildi"
 
 #: apps/exams/templates/exams/student/take_exam.html:229
 msgctxt "exams.template.take_exam"
 msgid "draft_saved"
-msgstr "Soru bankası başarıyla kaydedildi!"
+msgstr "Taslak kaydedildi"
 
 #: apps/exams/templates/exams/student/take_exam.html:230
 msgctxt "exams.template.take_exam"
@@ -9146,12 +9154,12 @@ msgstr "Kaydediliyor..."
 #: apps/exams/templates/exams/student/take_exam.html:234
 msgctxt "exams.template.take_exam"
 msgid "btn_saved"
-msgstr "Soru bankası başarıyla kaydedildi!"
+msgstr "Kaydedildi"
 
 #: apps/exams/templates/exams/student/take_exam.html:235
 msgctxt "exams.template.take_exam"
 msgid "btn_draft_saved"
-msgstr "Soru bankası başarıyla kaydedildi!"
+msgstr "Taslak kaydedildi"
 
 #: apps/exams/templates/exams/teacher/add_exam_question.html:6
 msgctxt "exams.template.add_exam_question"
@@ -10007,12 +10015,12 @@ msgstr "Bu bölüm için görünür bir grup bulunmamaktadır."
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
 msgid "title_review"
-msgstr "Konu adı boş olamaz."
+msgstr "Yazılı cevapların değerlendirilmesi"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:13
 msgctxt "exams.template.teacher_check_attempt"
 msgid "heading_review"
-msgstr "Kontrol edilecek"
+msgstr "İncelenecek"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:23
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:160
@@ -10026,7 +10034,7 @@ msgstr "Soru"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:202
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_answer"
-msgstr "Kapalı"
+msgstr "Yanıt yok"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:40
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:203
@@ -10037,13 +10045,13 @@ msgstr "puan"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:42
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_empty_answer"
-msgstr "Yanıt gönder"
+msgstr "Boş yanıt"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:44
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:204
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_not_checked"
-msgstr "Arşivlendi"
+msgstr "Henüz değerlendirilmedi"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:74
 msgctxt "exams.template.teacher_check_attempt"
@@ -10053,7 +10061,7 @@ msgstr "Paint ile cevaplandı"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:86
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_uploaded_files"
-msgstr "İndirilen dosyalar"
+msgstr "Yüklenen dosyalar"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:128
 msgctxt "exams.template.teacher_check_attempt"
@@ -10073,12 +10081,12 @@ msgstr "Geri"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:151
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_no_changes"
-msgstr "Pending"
+msgstr "Kaydet"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:168
 msgctxt "exams.template.teacher_check_attempt"
 msgid "label_score"
-msgstr "Score"
+msgstr "Puan"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:171
 msgctxt "exams.template.teacher_check_attempt"
@@ -10093,7 +10101,7 @@ msgstr "İptal et"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:179
 msgctxt "exams.template.teacher_check_attempt"
 msgid "action_confirm_temporary"
-msgstr "Onayla (geçici)"
+msgstr "Kaydet"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:188
 msgctxt "exams.template.teacher_check_attempt"
@@ -10103,27 +10111,37 @@ msgstr "Kaydedilmemiş değişiklikler"
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:189
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_unsaved_changes_desc"
-msgstr "Değişiklikleri Kaydet"
+msgstr "Kaydedilmemiş değişiklikleriniz var. Bu sayfadan çıkmak istediğinize emin misiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:191
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_no_return"
-msgstr "Kaydedilmemiş değişiklikler"
+msgstr "Hayır, geri dön"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:192
 msgctxt "exams.template.teacher_check_attempt"
 msgid "warning_yes_close"
-msgstr "Kapat onu"
+msgstr "Evet, çık"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:201
 msgctxt "exams.template.teacher_check_attempt"
 msgid "modal_title_question_details"
-msgstr "Institution default"
+msgstr "Soru ayrıntıları"
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:205
 msgctxt "exams.template.teacher_check_attempt"
 msgid "status_changes_present"
-msgstr "Rolleri değiştir"
+msgstr "Kaydet"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:208
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_title"
+msgstr "Değerlendirmeyi kaydet"
+
+#: apps/exams/templates/exams/teacher/teacher_check_attempt.html:209
+msgctxt "exams.template.teacher_check_attempt"
+msgid "confirm_save_review_message"
+msgstr "Bu değerlendirmeyi kaydedip tamamlamak istediğinize emin misiniz?"
 
 #: apps/exams/templates/exams/teacher/teacher_exam_detail.html:16
 msgctxt "exams.template.teacher_exam_detail"

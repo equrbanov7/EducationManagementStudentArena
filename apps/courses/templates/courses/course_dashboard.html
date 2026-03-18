@@ -139,7 +139,7 @@
                             <a href="{% url 'courses:edit_course' course.id %}" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-edit"></i> {% trans "action_edit" context "courses.dashboard" %}
                             </a>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteCourse({{ course.id }})">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-delete-course-id="{{ course.id }}">
                                 <i class="fas fa-trash"></i> {% trans "action_delete" context "courses.dashboard" %}
                             </button>
                         </div>

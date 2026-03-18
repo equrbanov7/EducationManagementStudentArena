@@ -209,7 +209,7 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Geri qayıt")
         self.assertContains(response, reverse("accounts:public_profile", args=[self.teacher.username]))
-        self.assertContains(response, "window.history.back()")
+        self.assertContains(response, "data-history-back")
 
     def test_legacy_blog_article_detail_redirects_to_article_route(self):
         response = self.client.get(f"/blog/posts/{self.teacher_post.slug}/")

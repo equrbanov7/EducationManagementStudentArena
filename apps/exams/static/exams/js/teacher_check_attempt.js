@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
         noAnswer: i18n.noAnswer || "label_no_answer",
         pointsUnit: i18n.pointsUnit || "unit_points",
         statusNotChecked: i18n.statusNotChecked || "status_not_checked",
-        saveButtonDirty: i18n.saveButtonDirty || "action_save_changes",
-        confirmTitle: i18n.confirmTitle || "Qiymətləndirməni təsdiqləyin",
-        confirmMessage: i18n.confirmMessage || "Bu yoxlamanı yekunlaşdırıb saxlamaq istədiyinizə əminsiniz?",
+        saveButtonDirty: i18n.saveButtonDirty || "Save",
+        confirmTitle: i18n.confirmTitle || "Save review",
+        confirmMessage: i18n.confirmMessage || "Are you sure you want to save and finalize this review?",
     };
 
     // Elementlər

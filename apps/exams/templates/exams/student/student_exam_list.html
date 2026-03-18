@@ -26,7 +26,7 @@
         </div>
     
         <div class="filter-box">
-            <select name="type" class="form-select" onchange="this.form.submit()">
+            <select name="type" class="form-select" data-submit-on-change>
                 <option value="">{% trans "filter_all_types" context "exams.template.student_exam_list" %}</option>
                 <option value="test" {% if request.GET.type == 'test' %}selected{% endif %}>
                     {% trans "filter_test" context "exams.template.student_exam_list" %}
@@ -111,7 +111,7 @@
                                     class="btn btn-outline-primary customBtn"
                                     data-exam-slug="{{ exam.slug }}"
                                     data-exam-title="{{ exam.title }}"
-                                    onclick="openExamCodeModal(this)">
+                                    data-open-exam-code-modal>
                                 {% trans "action_start_exam" context "exams.template.student_exam_list" %}
                             </button>
                         {% else %}
@@ -151,7 +151,7 @@
 {# ================= KOD MODALI (Olduğu kimi qalır) ================= #}
 <div id="exam-code-backdrop" class="exam-code-backdrop">
     <div class="exam-code-modal">
-        <button type="button" class="exam-code-close-btn" onclick="closeExamCodeModal()">
+        <button type="button" class="exam-code-close-btn" data-close-exam-code-modal>
             <i class="fas fa-times"></i>
         </button>
 
@@ -166,7 +166,7 @@
                 <input type="text" name="access_code" id="exam-code-input" class="exam-code-input" maxlength="6" placeholder="• • • • • •" autocomplete="off" inputmode="numeric" required>
             </div>
             <div class="exam-code-actions">
-                <button type="button" class="btn-modal btn-cancel" onclick="closeExamCodeModal()">{% trans "action_cancel" context "exams.template.student_exam_list" %}</button>
+                <button type="button" class="btn-modal btn-cancel" data-close-exam-code-modal>{% trans "action_cancel" context "exams.template.student_exam_list" %}</button>
                 <button type="submit" class="btn-modal btn-confirm">{% trans "action_confirm" context "exams.template.student_exam_list" %}</button>
             </div>
         </form>
@@ -181,8 +181,7 @@
 
     // ============================================================
     // 1. MODAL MƏNTİQİ (GLOBAL SCOPE)
-    // HTML-də onclick="openExamCodeModal()" işləsin deyə bu funksiyalar
-    // DOMContentLoaded daxilində deyil, çöldə qalmalıdır.
+    // Bu funksiyalar qlobal qalır ki, data-attribute event binder onları çağıra bilsin.
     // ============================================================
     const backdrop = document.getElementById("exam-code-backdrop");
     const titleEl = document.getElementById("exam-code-title");

@@ -70,8 +70,9 @@
                                 {# ✅ SİL düyməsi - yalnız owner görsün və teacher silinməsin #}
                                 {% if is_owner and member.role != 'teacher' %}
                                 <button type="button" 
-                                    onclick="deleteMember({{ member.id }}, '{{ member.user.username }}')" 
-                                    class="btn btn-sm btn-outline-danger">
+                                    class="btn btn-sm btn-outline-danger js-delete-member"
+                                    data-url="{% url 'courses:delete_member' course.id member.id %}"
+                                    data-member-id="{{ member.id }}">
                                    <i class="fas fa-trash"></i>
                                 </button>
                                 {% endif %}

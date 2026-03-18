@@ -1,6 +1,17 @@
 // static/js/paint_answer.js
 (function () {
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function notifyExamChange(delayMs) {
+      if (typeof window.markExamAnswerChanged === "function") {
+        window.markExamAnswerChanged(delayMs);
+        return;
+      }
+
+      if (typeof window.updateProgress === "function") {
+        window.updateProgress();
+      }
+    }
    
     function initPaintCard(card) {
       const qid = card.dataset.qid;
@@ -35,7 +46,7 @@
       function scheduleSave(ms = 500) {
         if (saveTimer) clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
-          exportToHidden();
+          exportToHidden({ notifyChange: true });
         }, ms);
       }
   
@@ -127,20 +138,49 @@
         const rect = canvas.getBoundingClientRect();
         ctx.globalCompositeOperation = "source-over";
         ctx.clearRect(0, 0, rect.width, rect.height);
-  
+
         clearHidden.value = "1";
         dataHidden.value = "";
-  
-        // progress update (əgər var)
-        if (typeof window.updateProgress === "function") window.updateProgress();
+        notifyExamChange(400);
       }
-  
-      function exportToHidden() {
+
+      function canvasHasVisiblePixels() {
+        if (!canvas.width || !canvas.height) {
+          return false;
+        }
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        for (let index = 3; index < imageData.length; index += 4) {
+          if (imageData[index] !== 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function exportToHidden(options = {}) {
+        const notifyChange = options.notifyChange !== false;
+
+        if (!canvasHasVisiblePixels()) {
+          dataHidden.value = "";
+          clearHidden.value = "1";
+          if (notifyChange) {
+            notifyExamChange(700);
+          } else if (typeof window.updateProgress === "function") {
+            window.updateProgress();
+          }
+          return;
+        }
+
         const dataUrl = canvas.toDataURL("image/png");
         dataHidden.value = dataUrl;
         clearHidden.value = "0";
-  
-        if (typeof window.updateProgress === "function") window.updateProgress();
+
+        if (notifyChange) {
+          notifyExamChange(1000);
+        } else if (typeof window.updateProgress === "function") {
+          window.updateProgress();
+        }
       }
   
       function loadExistingToCanvas(url) {
@@ -152,7 +192,7 @@
           ctx.globalCompositeOperation = "source-over";
           ctx.drawImage(img, 0, 0, rect.width, rect.height);
           // hidden-ə də yaz (autosave üçün)
-          exportToHidden();
+          exportToHidden({ notifyChange: false });
         };
         img.src = url;
       }
@@ -162,7 +202,7 @@
         const isOn = enabledCheckbox.checked;
         enabledHidden.value = isOn ? "1" : "0";
         body.style.display = isOn ? "block" : "none";
-  
+
         if (isOn) {
           resizeCanvasKeepDrawing();
           // əvvəlki image varsa yüklə (canvas boşdursa)
@@ -171,8 +211,11 @@
           } else {
             scheduleSave(200);
           }
+        } else {
+          clearHidden.value = "1";
+          dataHidden.value = "";
         }
-        if (typeof window.updateProgress === "function") window.updateProgress();
+        notifyExamChange(500);
       });
   
       // toolbar
@@ -184,7 +227,7 @@
       });
   
       btnClear.addEventListener("click", clearAll);
-      btnSave.addEventListener("click", exportToHidden);
+      btnSave.addEventListener("click", () => exportToHidden({ notifyChange: true }));
   
       // pointer events (touch + mouse + stylus)
       canvas.addEventListener("pointerdown", startDraw);

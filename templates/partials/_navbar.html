@@ -59,7 +59,7 @@
                                     <img src="{% url 'accounts:profile_avatar' request.user.id %}?v={{ nav_profile.updated_at|date:'U' }}"
                                          alt="{{ request.user.username }}"
                                          class="blog-header__user-avatar-image"
-                                         onerror="this.classList.add('d-none'); this.parentElement.querySelector('.blog-header__user-avatar-initials').classList.remove('d-none');">
+                                         data-fallback-target=".blog-header__user-avatar-initials">
                                     <span class="blog-header__user-avatar-initials d-none">
                                         {{ request.user.first_name|first|default:request.user.username|first|upper }}
                                     </span>

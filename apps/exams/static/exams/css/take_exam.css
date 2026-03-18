@@ -79,6 +79,77 @@ body {
     transition: width 0.4s ease;
 }
 
+.attempt-history-summary {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.attempt-history-summary p {
+    margin: 4px 0 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.attempt-history-summary__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.attempt-history-summary__link:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.attempt-history-list {
+    margin-top: 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.attempt-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+.attempt-history-item__label {
+    display: block;
+    font-weight: 700;
+    color: #111827;
+}
+
+.attempt-history-item small {
+    color: #6b7280;
+}
+
+.attempt-history-item__link {
+    color: #2563eb;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.attempt-history-item__link:hover {
+    color: #1d4ed8;
+}
+
 /* --- SLAYDLAR (Slides) --- */
 .slides-wrapper {
     position: relative;
@@ -420,6 +491,20 @@ body {
     margin-bottom: 16px;
     color: #4b5563;
 }
+.confirm-modal-summary {
+    border-radius: 12px;
+    font-weight: 600;
+    margin-bottom: 0;
+    padding: 12px 14px;
+}
+.confirm-modal-summary.is-warning {
+    background: #fff7ed;
+    color: #c2410c;
+}
+.confirm-modal-summary.is-success {
+    background: #ecfdf5;
+    color: #047857;
+}
 .confirm-actions {
     display: flex;
     justify-content: flex-end;
@@ -521,5 +606,15 @@ body {
     .nav-btn {
         flex: 1;
         padding: 12px 15px;
+    }
+    .attempt-history-summary,
+    .attempt-history-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .attempt-history-summary__link,
+    .attempt-history-item__link {
+        width: 100%;
+        text-align: center;
     }
 }

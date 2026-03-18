@@ -5,7 +5,6 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank.css' %}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 {% endblock %}
 
 {% block content %} 
@@ -58,7 +57,7 @@
     </header>
 
     <div class="main-card">
-        <form method="post" enctype="multipart/form-data" class="split-layout" onsubmit="return syncBankSettings();">
+        <form method="post" enctype="multipart/form-data" class="split-layout" data-sync-bank-settings>
             {% csrf_token %}
             <input type="hidden" name="action" value="preview"/>
             {% if navigation_from_section %}
@@ -75,7 +74,7 @@
             <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
             
             <aside class="upload-sidebar">
-                <h5 class="section-title"><i class="bi bi-file-earmark-arrow-up"></i> {% trans "section_upload_file" context "exams.template.test_question_bank" %}</h5>
+                <h5 class="section-title"><i class="fas fa-file-upload"></i> {% trans "section_upload_file" context "exams.template.test_question_bank" %}</h5>
                 <p class="section-desc">{% trans "section_upload_file_desc" context "exams.template.test_question_bank" %}</p>
                 
                 <div class="upload-zone-wrapper">
@@ -84,9 +83,9 @@
                     name="upload_file"
                     id="fileInput"
                     accept=".docx,.pdf,.txt"
-                    onchange="fileSelected(this)">
+                    data-file-selected-callback="fileSelected">
                                  <label for="fileInput" class="upload-zone" id="dropZone">
-                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                        <i class="fas fa-cloud-upload-alt"></i>
                         <strong>{% trans "upload_choose_file" context "exams.template.test_question_bank" %}</strong>
                         <span>{% trans "upload_or_drag_here" context "exams.template.test_question_bank" %}</span>
                         <div id="fileNameDisplay" class="file-name-tag"></div>
@@ -104,17 +103,17 @@
         
             <main class="editor-main">
                 <div class="editor-toolbar">
-                    <h5 class="section-title"><i class="bi bi-code-square"></i> {% trans "section_editor" context "exams.template.test_question_bank" %}</h5>
+                    <h5 class="section-title"><i class="fas fa-code"></i> {% trans "section_editor" context "exams.template.test_question_bank" %}</h5>
 
                     <div class="toolbar-actions">
 
                         <button class="clear-btn" type="button" id="clearBtn">
-                            {% trans "action_clear" context "exams.template.test_question_bank" %} <i class="bi bi-trash3"></i>
+                            {% trans "action_clear" context "exams.template.test_question_bank" %} <i class="fas fa-trash"></i>
                         </button>
                           
 
                         <button class="preview-btn" type="submit">
-                            {% trans "action_preview" context "exams.template.test_question_bank" %} <i class="bi bi-eye-fill"></i>
+                            {% trans "action_preview" context "exams.template.test_question_bank" %} <i class="fas fa-eye"></i>
                         </button>
                 
                         
@@ -125,7 +124,7 @@
 
                 <div class="textarea-container">
                     <div class="textarea-header compact-guide">
-                        <span class="guide-label"><i class="bi bi-info-circle-fill"></i> {% trans "guide_rules" context "exams.template.test_question_bank" %}:</span>
+                        <span class="guide-label"><i class="fas fa-circle-info"></i> {% trans "guide_rules" context "exams.template.test_question_bank" %}:</span>
                         
                         <div class="rule-group">
                             <span class="rule-item" title="{% trans 'rule_title_default_a' context 'exams.template.test_question_bank' %}">
@@ -195,16 +194,16 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
                 <p>{% trans "heading_review_result_desc" context "exams.template.test_question_bank" %}</p>
             </div>
             <div class="action-btns">
-                <button type="button" class="btn-action select-all" onclick="toggleAll(true)">
-                    <i class="bi bi-check2-all"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}
+                <button type="button" class="btn-action select-all" data-toggle-all="true">
+                    <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}
                 </button>
-                <button type="button" class="btn-action deselect-all" onclick="toggleAll(false)">
-                    <i class="bi bi-x-circle"></i> {% trans "action_deselect_all" context "exams.template.test_question_bank" %}
+                <button type="button" class="btn-action deselect-all" data-toggle-all="false">
+                    <i class="fas fa-circle-xmark"></i> {% trans "action_deselect_all" context "exams.template.test_question_bank" %}
                 </button>
             </div>
         </div>
 
-        <form method="post" id="saveForm" onsubmit="return syncBankSettings();">
+        <form method="post" id="saveForm" data-sync-bank-settings>
             {% csrf_token %}
             <input type="hidden" name="action" value="save"/>
             {% if navigation_from_section %}
@@ -222,7 +221,7 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
 
             <div class="question-list">
                 {% for q in parsed %}
-                <div class="q-card" onclick="toggleRow(this, event)">
+                <div class="q-card" data-toggle-row-card>
                     <div class="q-checkbox-wrapper">
                         <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}">
                     </div>
@@ -256,7 +255,7 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
                         {% if q.warnings %}
                         <div class="warning-box">
                             {% for w in q.warnings %}
-                            <div class="warning-msg"><i class="bi bi-exclamation-circle"></i> {{ w.msg }}</div>
+                            <div class="warning-msg"><i class="fas fa-circle-exclamation"></i> {{ w.msg }}</div>
                             {% endfor %}
                         </div>
                         {% endif %}
@@ -269,7 +268,7 @@ Cavab: A,B,D">{{ raw_text }}</textarea>
               
             <div class="sticky-footer">
                 <button class="save-btn" type="submit">
-                    <i class="bi bi-cloud-check"></i> {% trans "action_save_selected" context "exams.template.test_question_bank" %}
+                    <i class="fas fa-cloud"></i> {% trans "action_save_selected" context "exams.template.test_question_bank" %}
                 </button>
             </div>
         </form>
