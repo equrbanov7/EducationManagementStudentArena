@@ -1,8 +1,8 @@
 from django.core.exceptions import PermissionDenied
-from django.utils import timezone
 
 from apps.courses.models import CourseMembership
-from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+from apps.task_submission_core.access import can_user_access_course_roster
+from apps.task_submission_core.review import resolve_identity_window, resolve_recheck_window
 
 from .models import LabSubmission
 
@@ -23,49 +23,6 @@ def ensure_student_can_access_lab(lab, user):
 def ensure_teacher_can_access_lab(lab, user, *, message="You do not have permission to access this lab."):
     if not can_teacher_access_lab(lab, user):
         raise PermissionDenied(message)
-
-
-def can_user_access_course_roster(user, course):
-    """
-    User must be the course owner or have teacher/assistant membership.
-    """
-    if course.owner == user:
-        return True
-
-    return CourseMembership.objects.filter(
-        course=course,
-        user=user,
-        role__in=["teacher", "assistant"],
-    ).exists()
-
-
-def resolve_recheck_window(submission, *, current_time=None):
-    if submission.status != "graded" or not submission.graded_at:
-        return False, 0
-
-    now = current_time or timezone.now()
-    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
-
-
-def resolve_identity_window(submission, *, current_time=None):
-    now = current_time or timezone.now()
-
-    # Identity is always hidden while the submission has not been graded yet.
-    # There is no time-based reveal for pending submissions — the teacher must
-    # never see the student's name before the re-check window has closed.
-    if submission.status != "graded" or not submission.graded_at:
-        return True, 0
-
-    # Once graded, hide identity until the re-check window closes.
-    reveal_at = submission.graded_at + REVIEW_EDIT_LOCK_WINDOW
-    if now >= reveal_at:
-        return False, 0
-
-    return True, max(0, int((reveal_at - now).total_seconds()))
 
 
 def get_lab_submissions(lab, status=None, group_name=None):
