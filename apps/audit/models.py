@@ -44,11 +44,6 @@ class AuditLog(models.Model):
     object_id = models.CharField(max_length=255, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
 
-    # Legacy fields for backward compatibility
-    resource_type = models.CharField(max_length=100, blank=True)
-    resource_id = models.CharField(max_length=255, blank=True)
-    resource_repr = models.CharField(max_length=500, blank=True)
-
     # Change tracking
     old_values = models.JSONField(null=True, blank=True)
     new_values = models.JSONField(null=True, blank=True)
@@ -70,7 +65,6 @@ class AuditLog(models.Model):
             models.Index(fields=["organization", "-created_at"]),
             models.Index(fields=["action", "-created_at"]),
             models.Index(fields=["content_type", "object_id"]),
-            models.Index(fields=["resource_type", "resource_id"]),
             models.Index(fields=["request_id"]),
         ]
         verbose_name = "Audit Log"
@@ -85,8 +79,6 @@ class AuditLog(models.Model):
         """Get a display string for the resource."""
         if self.content_object:
             return str(self.content_object)
-        elif self.resource_repr:
-            return self.resource_repr
-        elif self.resource_type and self.resource_id:
-            return f"{self.resource_type} #{self.resource_id}"
+        elif self.content_type and self.object_id:
+            return f"{self.content_type.model} #{self.object_id}"
         return "Unknown Resource"

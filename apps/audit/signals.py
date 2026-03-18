@@ -4,6 +4,7 @@ Placeholder for future signal receivers.
 """
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 
 from core.constants import AuditAction
@@ -18,9 +19,8 @@ def log_user_login(sender, request, user, **kwargs):
     AuditLog.objects.create(
         user=user,
         action=AuditAction.LOGIN,
-        resource_type="User",
-        resource_id=str(user.pk),
-        resource_repr=user.username,
+        content_type=ContentType.objects.get_for_model(user),
+        object_id=str(user.pk),
         ip_address=get_client_ip(request),
         user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
     )
@@ -35,9 +35,8 @@ def log_user_logout(sender, request, user, **kwargs):
         AuditLog.objects.create(
             user=user,
             action=AuditAction.LOGOUT,
-            resource_type="User",
-            resource_id=str(user.pk),
-            resource_repr=user.username,
+            content_type=ContentType.objects.get_for_model(user),
+            object_id=str(user.pk),
             ip_address=get_client_ip(request),
             user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
         )

@@ -2,7 +2,7 @@
 OTP queries for accounts.
 """
 
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 
 
 def get_latest_pending_otp(user):

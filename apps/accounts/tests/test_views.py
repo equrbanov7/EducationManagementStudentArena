@@ -11,8 +11,8 @@ from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
-from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, EmailOTP, Post
+from apps.accounts.models import EmailOTP, ProfileRole
+from apps.blog.models import Category, Post
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 

@@ -11,7 +11,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import pgettext_lazy
 
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes

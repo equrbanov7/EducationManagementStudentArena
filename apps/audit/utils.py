@@ -52,9 +52,6 @@ def log_action(
     if obj:
         log_data["content_type"] = ContentType.objects.get_for_model(obj)
         log_data["object_id"] = str(obj.pk)
-        log_data["resource_type"] = obj.__class__.__name__
-        log_data["resource_id"] = str(obj.pk)
-        log_data["resource_repr"] = str(obj)
 
     # Add request information if provided
     if request:

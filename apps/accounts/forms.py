@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import pgettext_lazy
 
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes

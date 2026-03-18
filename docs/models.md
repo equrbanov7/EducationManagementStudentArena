@@ -165,7 +165,6 @@ Comprehensive audit logging.
 - `action` (CharField): Action type (create, update, delete, login, logout, etc.)
 - `content_type` (FK → ContentType): Type of object acted upon
 - `object_id` (CharField): ID of object
-- `resource_type`, `resource_id`, `resource_repr` (CharField): Legacy fields
 - `old_values` (JSONField): Values before change
 - `new_values` (JSONField): Values after change
 - `changes` (JSONField): Specific changes

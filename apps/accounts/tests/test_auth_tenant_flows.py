@@ -12,7 +12,7 @@ from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.audit.models import AuditLog
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Country, Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType

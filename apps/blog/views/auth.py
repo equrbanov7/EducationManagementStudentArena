@@ -8,9 +8,9 @@ from django.utils.translation import pgettext
 
 from core.utils import get_auth_otp_expiry_seconds
 
+from apps.accounts.models import EmailOTP
 from apps.accounts.services import issue_email_otp
 from ..forms import RegisterForm
-from ..models import EmailOTP
 from ..utils import send_verify_email
 
 User = get_user_model()

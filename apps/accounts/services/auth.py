@@ -6,7 +6,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 from apps.blog.utils import generate_otp, send_verify_email
 from core.utils import get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds
 
