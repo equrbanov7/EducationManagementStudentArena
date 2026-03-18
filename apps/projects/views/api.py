@@ -13,24 +13,9 @@ from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 
 from apps.courses.models import CourseMembership
+from apps.task_submission_core.access import can_user_access_course_roster
 
 from ._helpers import _get_tenant_course_or_404
-
-
-def _user_can_access_course_roster(user, course):
-    """
-    Check if user can access course roster (groups/students).
-    User must be course owner OR have teacher/assistant role in the course.
-    """
-    if course.owner == user:
-        return True
-
-    # Check if user has teacher or assistant role in the course
-    return CourseMembership.objects.filter(
-        course=course,
-        user=user,
-        role__in=["teacher", "assistant"]
-    ).exists()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -54,7 +39,7 @@ def api_get_groups(request):
     course = _get_tenant_course_or_404(request, course_id)
 
     # Authorization check: user must be course owner or have teacher/assistant role
-    if not _user_can_access_course_roster(request.user, course):
+    if not can_user_access_course_roster(request.user, course):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
     # Unique qrup adlarını tap
@@ -92,7 +77,7 @@ def api_get_students(request):
     course = _get_tenant_course_or_404(request, course_id)
 
     # Authorization check: user must be course owner or have teacher/assistant role
-    if not _user_can_access_course_roster(request.user, course):
+    if not can_user_access_course_roster(request.user, course):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
     group_names = [g.strip() for g in groups_param.split(",") if g.strip()]
