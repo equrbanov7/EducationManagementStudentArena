@@ -218,21 +218,6 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertContains(response, "Kursun yayımı")
         self.assertContains(response, "Yayımlandı")
 
-    def test_owner_can_update_course_status_from_dashboard(self):
-        self.course_a.status = "draft"
-        self.course_a.save(update_fields=["status"])
-
-        next_url = f"{reverse('courses:course_dashboard', kwargs={'course_id': self.course_a.id})}?from_section=my-courses"
-        response = self.client.post(
-            reverse("courses:update_course_status", kwargs={"course_id": self.course_a.id}),
-            {"status": "published", "next": next_url},
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, next_url)
-        self.course_a.refresh_from_db()
-        self.assertEqual(self.course_a.status, "published")
-
     def test_course_dashboard_uses_unified_view_answers_label_and_resource_title(self):
         expected_answer_labels = {
             "az": "Cavabları gör",

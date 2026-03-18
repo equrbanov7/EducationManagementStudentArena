@@ -158,7 +158,7 @@
 <div class="modal-content-wrapper" id="questionModal">
     <div class="modal-header">
         <span id="modalTitle">{% trans "label_question" context "exams.template.teacher_check_attempt" %}</span>
-        <button type="button" class="close-btn" onclick="attemptCloseModal()">&times;</button>
+        <button type="button" class="close-btn" id="modalCloseBtn">&times;</button>
     </div>
     <div class="modal-body">
         <div class="question-detail" id="modalQuestionText"></div>
@@ -175,8 +175,8 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="attemptCloseModal()">{% trans "action_cancel" context "exams.template.teacher_check_attempt" %}</button>
-        <button type="button" class="btn btn-primary" onclick="saveFromModal()">{% trans "action_confirm_temporary" context "exams.template.teacher_check_attempt" %}</button>
+        <button type="button" class="btn btn-secondary" id="modalCancelBtn">{% trans "action_cancel" context "exams.template.teacher_check_attempt" %}</button>
+        <button type="button" class="btn btn-primary" id="modalSaveBtn">{% trans "action_confirm_temporary" context "exams.template.teacher_check_attempt" %}</button>
     </div>
 </div> 
 
@@ -188,8 +188,8 @@
         <h3>{% trans "warning_unsaved_changes_title" context "exams.template.teacher_check_attempt" %}</h3>
         <p>{% trans "warning_unsaved_changes_desc" context "exams.template.teacher_check_attempt" %}</p>
         <div class="alert-actions">
-            <button class="btn btn-secondary" onclick="closeWarningModal()">{% trans "warning_no_return" context "exams.template.teacher_check_attempt" %}</button>
-            <button class="btn btn-danger" onclick="forceCloseModal()">{% trans "warning_yes_close" context "exams.template.teacher_check_attempt" %}</button>
+            <button class="btn btn-secondary" id="warningCancelBtn">{% trans "warning_no_return" context "exams.template.teacher_check_attempt" %}</button>
+            <button class="btn btn-danger" id="warningConfirmBtn">{% trans "warning_yes_close" context "exams.template.teacher_check_attempt" %}</button>
         </div>
     </div>
 </div>
