@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===============================================
     
     // Sual modalından çıxmağa cəhd edəndə
-    window.attemptCloseModal = function() {
+    function attemptCloseModal() {
         if (isModalDirty) {
             warningModal.style.display = 'flex'; 
         } else {
@@ -119,13 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // "Xeyr" (Qayıt)
-    window.closeWarningModal = function() {
+    function closeWarningModal() {
         warningModal.style.display = 'none';
         pendingNavigationUrl = null; // Gediləcək yolu sıfırla
     }
 
     // "Bəli" (Məcburi Bağla/Get) - ƏSAS DƏYİŞİKLİK BURADADIR
-    window.forceCloseModal = function() {
+    function forceCloseModal() {
         warningModal.style.display = 'none';
         
         // SENARİ 1: İstifadəçi "Geri" düyməsinə basıb səhifədən getmək istəyir
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 5. Yadda Saxla (Modal daxili)
-    window.saveFromModal = function() {
+    function saveFromModal() {
         const qId = document.getElementById('currentQuestionId').value;
         normalizeIntegerInput(modalScoreInput);
         const newScore = document.getElementById('modalScoreInput').value;
@@ -171,6 +171,19 @@ document.addEventListener('DOMContentLoaded', () => {
         isModalDirty = false;
         closeMainModal();
     }
+
+    // Wire up modal button event listeners (CSP-compliant: no inline onclick)
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+    const modalSaveBtn = document.getElementById('modalSaveBtn');
+    const warningCancelBtn = document.getElementById('warningCancelBtn');
+    const warningConfirmBtn = document.getElementById('warningConfirmBtn');
+
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', attemptCloseModal);
+    if (modalCancelBtn) modalCancelBtn.addEventListener('click', attemptCloseModal);
+    if (modalSaveBtn) modalSaveBtn.addEventListener('click', saveFromModal);
+    if (warningCancelBtn) warningCancelBtn.addEventListener('click', closeWarningModal);
+    if (warningConfirmBtn) warningConfirmBtn.addEventListener('click', forceCloseModal);
 
     // 6. Əsas Form statusu
     function markFormAsDirty() {
@@ -229,21 +242,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    function normalizeIntegerInput(input) {
-        if (!input) return;
-        const normalized = (input.value || '').trim().replace(',', '.');
-        if (!normalized) {
-            input.value = '';
-            return;
-        }
-        const match = normalized.match(/^-?\d+/);
-        if (!match) {
-            input.value = '';
-            return;
-        }
-        let nextValue = parseInt(match[0], 10);
-        if (Number.isNaN(nextValue) || nextValue < 0) {
-            nextValue = 0;
-        }
-        input.value = String(nextValue);
+
+function normalizeIntegerInput(input) {
+    if (!input) return;
+    const normalized = (input.value || '').trim().replace(',', '.');
+    if (!normalized) {
+        input.value = '';
+        return;
     }
+    const match = normalized.match(/^-?\d+/);
+    if (!match) {
+        input.value = '';
+        return;
+    }
+    let nextValue = parseInt(match[0], 10);
+    if (Number.isNaN(nextValue) || nextValue < 0) {
+        nextValue = 0;
+    }
+    input.value = String(nextValue);
+}
