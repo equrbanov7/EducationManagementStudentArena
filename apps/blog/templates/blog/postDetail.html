@@ -22,8 +22,8 @@
 
         <header class="article-header">
             {% if post.category %}
-                <a href="#" class="article-category">
-                    <i class="fas fa-tag"></i> {{ post.category.name }}
+                <a href="{% url 'category_detail' post.category.slug %}" class="article-category">
+                    <i class="fas fa-tag"></i> {{ post.category.localized_full_name }}
                 </a>
             {% endif %}
 

@@ -10,7 +10,9 @@
         >
     </div>
     <div class="card-body">
-        <span class="card-category">{{ post.category }}</span>
+        {% if post.category %}
+            <a href="{% url 'category_detail' post.category.slug %}" class="card-category">{{ post.category.localized_name }}</a>
+        {% endif %}
         <h2 class="card-title">
             <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
         </h2>

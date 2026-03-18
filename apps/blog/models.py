@@ -3,10 +3,13 @@ import itertools
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.text import slugify
+
+from .taxonomy import get_category_placeholder_static_path, get_localized_category_name
 
 User = get_user_model()
 
@@ -16,14 +19,101 @@ User = get_user_model()
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True)
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+    )
+    sort_order = models.PositiveIntegerField(default=0)
+    show_in_navbar = models.BooleanField(default=False, db_index=True)
+    is_default = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         verbose_name = "Kateqoriya"
         verbose_name_plural = "Kateqoriyalar"
-        ordering = ["name"]
+        ordering = ["sort_order", "name"]
 
     def __str__(self):
         return self.name
+
+    @property
+    def localized_name(self):
+        return get_localized_category_name(self.slug, self.name) if self.is_default else self.name
+
+    @property
+    def full_name(self):
+        names = [self.name]
+        current = self.parent
+        visited_ids = {self.pk}
+
+        while current and current.pk not in visited_ids:
+            names.append(current.name)
+            visited_ids.add(current.pk)
+            current = current.parent
+
+        return " / ".join(reversed(names))
+
+    @property
+    def localized_full_name(self):
+        names = [self.localized_name]
+        current = self.parent
+        visited_ids = {self.pk}
+
+        while current and current.pk not in visited_ids:
+            names.append(current.localized_name)
+            visited_ids.add(current.pk)
+            current = current.parent
+
+        return " / ".join(reversed(names))
+
+    def get_root(self):
+        current = self
+        visited_ids = {self.pk}
+
+        while current.parent and current.parent.pk not in visited_ids:
+            current = current.parent
+            visited_ids.add(current.pk)
+
+        return current
+
+    def get_ancestors(self, include_self=False):
+        ancestors = [self] if include_self else []
+        current = self.parent
+        visited_ids = {self.pk}
+
+        while current and current.pk not in visited_ids:
+            ancestors.append(current)
+            visited_ids.add(current.pk)
+            current = current.parent
+
+        return list(reversed(ancestors))
+
+    def get_descendant_ids(self, include_self=True):
+        category_rows = Category.objects.values_list("id", "parent_id")
+        children_by_parent = {}
+        for category_id, parent_id in category_rows:
+            children_by_parent.setdefault(parent_id, []).append(category_id)
+
+        descendant_ids = [self.pk] if include_self else []
+        pending_ids = list(children_by_parent.get(self.pk, []))
+
+        while pending_ids:
+            current_id = pending_ids.pop()
+            descendant_ids.append(current_id)
+            pending_ids.extend(children_by_parent.get(current_id, []))
+
+        return descendant_ids
+
+    def clean(self):
+        super().clean()
+
+        if self.parent_id and self.pk and self.parent_id == self.pk:
+            raise ValidationError({"parent": "Kateqoriya özü-özünün valideyni ola bilməz."})
+
+        if self.parent_id and self.pk and self.pk in self.parent.get_descendant_ids(include_self=True):
+            raise ValidationError({"parent": "Kateqoriya öz övladlarından birinin altına köçürülə bilməz."})
 
     def save(self, *args, **kwargs):
         # Slug boşdursa və ya dəyişdirilibsə yenilə
@@ -37,6 +127,7 @@ class Category(models.Model):
                     break
                 self.slug = "%s-%d" % (original_slug, x)
 
+        self.full_clean()
         super().save(*args, **kwargs)
 
 
@@ -143,7 +234,11 @@ class Post(models.Model):
         elif self.image_url:
             return self.image_url
         else:
-            return static("images/tech-placeholder.svg")  # Default placeholder image
+            category_slug = None
+            if self.category_id and self.category:
+                category_slug = self.category.get_root().slug
+
+            return static(get_category_placeholder_static_path(category_slug))
 
     @property
     def is_pending_approval(self):

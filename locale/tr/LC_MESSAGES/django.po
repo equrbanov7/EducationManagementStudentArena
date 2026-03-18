@@ -364,7 +364,7 @@ msgstr "Grading queue"
 #: apps/accounts/templates/accounts/grading_queue.html:20
 msgctxt "accounts.grading_queue_page"
 msgid "back"
-msgstr "Back"
+msgstr "Geri"
 
 #: apps/accounts/templates/accounts/grading_queue.html:29
 msgctxt "accounts.grading_queue_page"

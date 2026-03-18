@@ -1,0 +1,18 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="36" fill="url(#bg)"/>
+  <circle cx="430" cy="242" r="32" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="600" cy="188" r="32" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="770" cy="242" r="32" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="498" cy="388" r="32" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="702" cy="388" r="32" fill="rgba(255,255,255,0.22)"/>
+  <path d="M430 242L600 188L770 242L702 388H498L430 242Z" stroke="white" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M600 188V330" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="600" cy="330" r="28" fill="rgba(255,255,255,0.18)"/>
+  <text x="600" y="585" text-anchor="middle" fill="white" font-size="56" font-family="Arial, sans-serif" font-weight="700">SCIENCE</text>
+  <defs>
+    <linearGradient id="bg" x1="88" y1="74" x2="1110" y2="609" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#12354E"/>
+      <stop offset="1" stop-color="#2F9BA0"/>
+    </linearGradient>
+  </defs>
+</svg>

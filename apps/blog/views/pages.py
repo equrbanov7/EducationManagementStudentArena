@@ -1,10 +1,13 @@
 # blog/views/pages.py
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 
 from ..models import Category, Post
+from ..selectors import DEFAULT_TECHNOLOGY_CATEGORY_SLUG, get_popular_topics, get_sidebar_categories
+from .categories import render_category_page
 
 
 def home(request):
@@ -21,15 +24,17 @@ def home(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    categories = (
-        Category.objects.annotate(post_count=Count("posts", filter=Q(posts__is_published=True)))
-        .filter(post_count__gt=0)
-        .order_by("name")
+    categories = get_sidebar_categories(
+        posts_queryset=Post.objects.filter(is_published=True),
+        include_empty=True,
     )
+    popular_topics = get_popular_topics(limit=5)
 
     context = {
         "page_obj": page_obj,
         "categories": categories,
+        "popular_topics": popular_topics,
+        "active_category_slug": "",
         "search_query": query,
         "query": query,  # Also pass as 'query' for template compatibility
     }
@@ -42,24 +47,5 @@ def about(request):
 
 
 def technology(request):
-
-    TECH_CATEGORIES = [
-        "proqramlasdirma",
-        "suni-intellekt",
-        "python",
-        "django",
-        "texnologiya",
-        "backend",
-    ]
-
-    post_list = (
-        Post.objects.filter(category__slug__in=TECH_CATEGORIES)
-        .select_related("category", "author")
-        .order_by("-created_at")
-    )
-
-    paginator = Paginator(post_list, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, "blog/technology.html", {"page_obj": page_obj})
+    category = get_object_or_404(Category.objects.select_related("parent"), slug=DEFAULT_TECHNOLOGY_CATEGORY_SLUG)
+    return render_category_page(request, category)

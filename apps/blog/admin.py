@@ -14,7 +14,11 @@ class HiddenFromSidebarAdminMixin:
 
 @admin.register(Category)
 class CategoryAdmin(HiddenFromSidebarAdminMixin, admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "parent", "show_in_navbar", "is_default", "sort_order", "slug")
+    list_filter = ("show_in_navbar", "is_default", "parent")
+    search_fields = ("name", "slug", "parent__name")
+    list_editable = ("show_in_navbar", "is_default", "sort_order")
+    autocomplete_fields = ("parent",)
     prepopulated_fields = {"slug": ("name",)}
 
 

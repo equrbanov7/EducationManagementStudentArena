@@ -1,0 +1,19 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="36" fill="url(#bg)"/>
+  <rect x="146" y="138" width="908" height="400" rx="32" fill="rgba(255,255,255,0.12)"/>
+  <rect x="210" y="188" width="780" height="300" rx="24" fill="rgba(255,255,255,0.08)"/>
+  <path d="M344 220H856" stroke="rgba(255,255,255,0.22)" stroke-width="3"/>
+  <path d="M344 264H780" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+  <path d="M344 308H820" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+  <path d="M344 352H764" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+  <path d="M344 396H828" stroke="rgba(255,255,255,0.18)" stroke-width="3"/>
+  <circle cx="876" cy="408" r="44" fill="rgba(255,255,255,0.18)"/>
+  <path d="M852 408L868 424L902 390" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="600" y="585" text-anchor="middle" fill="white" font-size="56" font-family="Arial, sans-serif" font-weight="700">EDUCATION</text>
+  <defs>
+    <linearGradient id="bg" x1="86" y1="76" x2="1114" y2="623" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#126C68"/>
+      <stop offset="1" stop-color="#49B89F"/>
+    </linearGradient>
+  </defs>
+</svg>

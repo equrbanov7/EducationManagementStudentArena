@@ -120,7 +120,7 @@
                                                 data-fallback-src="{% static 'images/tech-placeholder.svg' %}"
                                             >
                                             {% if post.category %}
-                                                <span class="public-post-card__badge">{{ post.category.name }}</span>
+                                                <span class="public-post-card__badge">{{ post.category.localized_name }}</span>
                                             {% endif %}
                                         </div>
                                     </a>
@@ -216,11 +216,11 @@
                         <nav class="public-category-list" aria-label="Kateqoriyalar">
                             {% for item in category_items %}
                                 <a
-                                    href="{% url 'accounts:public_profile' profile_user.username %}{% if selected_category == item.category__slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% else %}?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}category={{ item.category__slug|urlencode }}{% endif %}"
-                                    class="public-category-list__item{% if selected_category == item.category__slug %} is-active{% endif %}"
+                                    href="{% url 'accounts:public_profile' profile_user.username %}{% if selected_category == item.slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% else %}?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}category={{ item.slug|urlencode }}{% endif %}"
+                                    class="public-category-list__item public-category-list__item--depth-{{ item.tree_depth }}{% if selected_category == item.slug %} is-active{% endif %}"
                                 >
-                                    <span>{{ item.category__name }}</span>
-                                    <strong>{{ item.total }}</strong>
+                                    <span>{{ item.display_name }}</span>
+                                    <strong>{{ item.post_count }}</strong>
                                 </a>
                             {% endfor %}
                         </nav>

@@ -355,3 +355,53 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, "Show more")
         self.assertContains(response, "data-pending-post-toggle")
         self.assertContains(response, "data-pending-post-full")
+
+
+class BlogCategoryHierarchyTest(TestCase):
+    def setUp(self):
+        self.author = User.objects.create_user(
+            username="categoryauthor",
+            email="categoryauthor@example.com",
+            password="StrongPass123!",
+        )
+        self.parent_category = Category.objects.get(slug="technology")
+        self.child_category = Category.objects.get(slug="programming")
+
+        Post.objects.create(
+            author=self.author,
+            category=self.parent_category,
+            title="Technology Parent Post",
+            content="Parent category content",
+            is_published=True,
+        )
+        Post.objects.create(
+            author=self.author,
+            category=self.child_category,
+            title="Programming Child Post",
+            content="Child category content",
+            is_published=True,
+        )
+
+    def test_parent_category_page_includes_child_category_posts(self):
+        response = self.client.get(reverse("category_detail", args=[self.parent_category.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Technology Parent Post")
+        self.assertContains(response, "Programming Child Post")
+
+    def test_technology_page_uses_default_category_scope(self):
+        response = self.client.get(reverse("technology"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Technology Parent Post")
+        self.assertContains(response, "Programming Child Post")
+
+    def test_section_sidebar_prioritizes_most_populated_category_and_hides_root_row(self):
+        response = self.client.get(reverse("category_detail", args=[self.parent_category.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        category_slugs = [category.slug for category in response.context["categories"]]
+
+        self.assertGreater(len(category_slugs), 0)
+        self.assertEqual(category_slugs[0], "programming")
+        self.assertNotIn("technology", category_slugs)

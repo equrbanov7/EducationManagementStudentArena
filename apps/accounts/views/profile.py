@@ -95,7 +95,8 @@ def user_profile(request):
     Ensures profile exists before rendering.
     Now accessible to ALL users (not just teachers).
     """
-    from apps.blog.models import Category, Post
+    from apps.blog.models import Post
+    from apps.blog.selectors import get_category_assignment_choices
     from apps.blog.services import (
         author_requires_post_approval,
         can_user_create_post_category,
@@ -294,7 +295,7 @@ def user_profile(request):
         )
         posts_count = user_posts_qs.count()
         user_posts = Paginator(user_posts_qs, 6).get_page(request.GET.get("page"))
-        categories = Category.objects.all().order_by("name")
+        categories = get_category_assignment_choices()
         post_creation_requires_approval = author_requires_post_approval(request.user)
         can_create_post_categories = can_user_create_post_category(request.user)
 
@@ -1076,9 +1077,10 @@ def public_user_profile(request, username):
     Public user profile showing only published posts and non-confidential profile information.
     """
     from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-    from django.db.models import Count, Q
+    from django.db.models import Q
 
-    from apps.blog.models import Post
+    from apps.blog.models import Category, Post
+    from apps.blog.selectors import filter_posts_by_category_scope, get_flat_category_tree
 
     profile_user = get_object_or_404(User, username=username)
 
@@ -1105,14 +1107,13 @@ def public_user_profile(request, username):
         )
 
     if selected_category:
-        user_posts_list = user_posts_list.filter(category__slug=selected_category)
+        selected_category_obj = Category.objects.select_related("parent").filter(slug=selected_category).first()
+        if selected_category_obj:
+            user_posts_list = filter_posts_by_category_scope(user_posts_list, selected_category_obj)
+        else:
+            user_posts_list = user_posts_list.none()
 
-    category_items = list(
-        published_posts.exclude(category__isnull=True)
-        .values("category__name", "category__slug")
-        .annotate(total=Count("id"))
-        .order_by("-total", "category__name")
-    )
+    category_items = get_flat_category_tree(posts_queryset=published_posts, include_empty=False)
 
     paginator = Paginator(user_posts_list, 6)
     page_number = request.GET.get("page")

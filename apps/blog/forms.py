@@ -7,6 +7,7 @@ from django.utils.translation import pgettext_lazy
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Comment, Post, Question
+from .selectors import get_category_assignment_queryset_and_labels
 from .services import can_user_create_post_category
 
 
@@ -80,6 +81,14 @@ class RegisterForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    class CategoryChoiceField(forms.ModelChoiceField):
+        def __init__(self, *args, label_map=None, **kwargs):
+            self.label_map = label_map or {}
+            super().__init__(*args, **kwargs)
+
+        def label_from_instance(self, obj):
+            return self.label_map.get(obj.pk, obj.name)
+
     new_category = forms.CharField(
         label=pgettext_lazy("blog.form.post", "new_category_label"),
         required=False,
@@ -144,6 +153,14 @@ class PostForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         author = kwargs.pop("author", None)
         super().__init__(*args, **kwargs)
+        category_queryset, category_labels = get_category_assignment_queryset_and_labels()
+        self.fields["category"] = self.CategoryChoiceField(
+            queryset=category_queryset,
+            label=self.fields["category"].label,
+            required=False,
+            widget=self.fields["category"].widget,
+            label_map=category_labels,
+        )
         self.allow_new_category = can_user_create_post_category(author)
         self.fields["category"].required = False
         self.fields["category"].empty_label = pgettext_lazy("blog.form.post", "category_empty_label")
