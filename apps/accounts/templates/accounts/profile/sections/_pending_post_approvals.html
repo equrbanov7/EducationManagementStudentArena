@@ -60,7 +60,7 @@
                             <div class="post-date pending-post-meta">
                                 <span><i class="fas fa-user"></i> {{ item.author_name }}</span>
                                 {% if item.post.category %}
-                                    <span><i class="fas fa-tag"></i> {{ item.post.category.name }}</span>
+                                    <span><i class="fas fa-tag"></i> {{ item.post.category.localized_name }}</span>
                                 {% endif %}
                                 {% if item.group_names %}
                                     <span><i class="fas fa-users"></i> {{ item.group_names|join:", " }}</span>

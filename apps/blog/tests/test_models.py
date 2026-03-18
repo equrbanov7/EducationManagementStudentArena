@@ -78,6 +78,14 @@ class EmailOTPTest(TestCase):
 class CategoryTest(TestCase):
     """Test Category model functionality."""
 
+    def test_default_category_tree_seeded(self):
+        technology = Category.objects.get(slug="technology")
+        programming = Category.objects.get(slug="programming")
+
+        self.assertTrue(technology.is_default)
+        self.assertTrue(technology.show_in_navbar)
+        self.assertEqual(programming.parent, technology)
+
     def test_category_creation(self):
         """Test that Category can be created."""
         category = Category.objects.create(name="Python")
@@ -110,7 +118,7 @@ class PostTest(TestCase):
 
     def setUp(self):
         self.author = User.objects.create_user("postauthor", "author@example.com", "StrongPass123!")
-        self.category = Category.objects.create(name="Technology")
+        self.category = Category.objects.get(slug="technology")
 
     def test_post_creation(self):
         """Test that Post can be created."""
@@ -159,7 +167,24 @@ class PostTest(TestCase):
             content="Content",
         )
         # Without image, should return default
-        self.assertIn("placeholder", post.get_image)
+        self.assertIn("tech-placeholder.svg", post.get_image)
+
+    def test_post_get_image_uses_root_category_placeholder(self):
+        education_post = Post.objects.create(
+            author=self.author,
+            category=Category.objects.get(slug="study-tips"),
+            title="Education Image Post",
+            content="Content",
+        )
+
+        self.assertIn("category-education.svg", education_post.get_image)
+
+    def test_default_demo_content_seeded_with_comments(self):
+        demo_post = Post.objects.get(slug="ai-saglamliq-analizinde-nece-komek-edir")
+
+        self.assertTrue(demo_post.is_published)
+        self.assertEqual(demo_post.category.slug, "data-ai")
+        self.assertGreaterEqual(demo_post.comments.count(), 2)
 
     def test_post_approval_status_default(self):
         """Test that approval status defaults correctly."""

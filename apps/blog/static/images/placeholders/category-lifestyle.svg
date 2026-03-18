@@ -1,0 +1,16 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="36" fill="url(#bg)"/>
+  <rect x="228" y="152" width="744" height="368" rx="34" fill="rgba(255,255,255,0.12)"/>
+  <path d="M338 412C402 332 470 290 542 290C626 290 690 356 758 356C816 356 868 328 914 276" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="410" cy="246" r="26" fill="rgba(255,255,255,0.26)"/>
+  <circle cx="796" cy="218" r="22" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="672" cy="248" r="14" fill="rgba(255,255,255,0.18)"/>
+  <circle cx="512" cy="206" r="14" fill="rgba(255,255,255,0.18)"/>
+  <text x="600" y="585" text-anchor="middle" fill="white" font-size="56" font-family="Arial, sans-serif" font-weight="700">LIFESTYLE</text>
+  <defs>
+    <linearGradient id="bg" x1="114" y1="78" x2="1090" y2="611" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B06B1A"/>
+      <stop offset="1" stop-color="#F2B653"/>
+    </linearGradient>
+  </defs>
+</svg>

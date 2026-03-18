@@ -1,0 +1,19 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="36" fill="url(#bg)"/>
+  <rect x="94" y="92" width="1012" height="491" rx="28" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="600" cy="258" r="96" fill="rgba(255,255,255,0.12)"/>
+  <path d="M584 212L540 258L584 304" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M616 212L660 258L616 304" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M366 136H834" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M366 188H834" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M366 334H834" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M366 386H834" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <path d="M366 438H834" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+  <text x="600" y="470" text-anchor="middle" fill="white" font-size="56" font-family="Arial, sans-serif" font-weight="700">TECHNOLOGY</text>
+  <defs>
+    <linearGradient id="bg" x1="84" y1="54" x2="1116" y2="621" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#113B73"/>
+      <stop offset="1" stop-color="#3F7AE0"/>
+    </linearGradient>
+  </defs>
+</svg>

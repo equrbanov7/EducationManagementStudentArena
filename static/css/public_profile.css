@@ -506,6 +506,14 @@
     color: #334155;
 }
 
+.public-category-list__item--depth-1 {
+    margin-left: 16px;
+}
+
+.public-category-list__item--depth-2 {
+    margin-left: 32px;
+}
+
 .public-category-list__item:hover,
 .public-category-list__item.is-active {
     border-color: rgba(79, 70, 229, 0.2);

@@ -1,6 +1,5 @@
 {% load static i18n %}
 {% url 'home' as home_url %}
-{% url 'technology' as technology_url %}
 {% url 'about' as about_url %}
 {% url 'subscribe' as subscribe_url %}
 <header class="blog-header">
@@ -15,12 +14,14 @@
                         {% trans "home" context "nav" %}
                     </a>
                 </li>
-                <li class="blog-header__nav-item">
-                    <a href="{{ technology_url }}"
-                       class="blog-header__nav-link {% if request.resolver_match.url_name == 'technology' %}blog-header__nav-link--active{% endif %}">
-                        {% trans "technology" context "nav" %}
-                    </a>
-                </li>
+                {% for nav_category in blog_navbar_categories %}
+                    <li class="blog-header__nav-item">
+                        <a href="{% url 'category_detail' nav_category.slug %}"
+                           class="blog-header__nav-link {% if active_blog_nav_slug == nav_category.slug %}blog-header__nav-link--active{% endif %}">
+                            {{ nav_category.localized_name }}
+                        </a>
+                    </li>
+                {% endfor %}
                 <li class="blog-header__nav-item">
                     <a href="{{ about_url }}"
                        class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">
@@ -114,12 +115,14 @@
             {% trans "home" context "nav" %}
         </a>
     </li>
-    <li class="blog-header__nav-item">
-        <a href="{{ technology_url }}"
-           class="blog-header__nav-link {% if request.resolver_match.url_name == 'technology' %}blog-header__nav-link--active{% endif %}">
-            {% trans "technology" context "nav" %}
-        </a>
-    </li>
+    {% for nav_category in blog_navbar_categories %}
+        <li class="blog-header__nav-item">
+            <a href="{% url 'category_detail' nav_category.slug %}"
+               class="blog-header__nav-link {% if active_blog_nav_slug == nav_category.slug %}blog-header__nav-link--active{% endif %}">
+                {{ nav_category.localized_name }}
+            </a>
+        </li>
+    {% endfor %}
     <li class="blog-header__nav-item">
         <a href="{{ about_url }}"
            class="blog-header__nav-link {% if request.resolver_match.url_name == 'about' %}blog-header__nav-link--active{% endif %}">

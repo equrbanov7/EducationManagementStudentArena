@@ -151,7 +151,7 @@
                         <select id="createCategory" name="category" class="form-control">
                             <option value="">--- {% trans "option_select_category" context "profile.posts" %} ---</option>
                             {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                <option value="{{ category.id }}">{{ category.display_name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -252,7 +252,7 @@
                         <select id="editCategory" name="category" class="form-control" required>
                             <option value="" disabled>{% trans "option_select_category" context "profile.posts" %}</option>
                             {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                <option value="{{ category.id }}">{{ category.display_name }}</option>
                             {% endfor %}
                         </select>
                     </div>

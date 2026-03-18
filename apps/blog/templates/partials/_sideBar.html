@@ -4,27 +4,29 @@
       <h3>{% trans "categories" context "blog.partial.sidebar" %}</h3>
       <ul class="category-list">
           {% for category in categories %}
-              <li>
-                  <a href="{% url 'category_detail' category.slug %}">
-                      {{ category.name }}
+              <li class="category-list__item category-list__item--depth-{{ category.tree_depth }}">
+                  <a href="{% url 'category_detail' category.slug %}" class="{% if active_category_slug == category.slug %}is-active{% endif %}">
+                      <span class="category-list__label">{{ category.sidebar_name|default:category.localized_name }}</span>
                       <span class="category-count">({{ category.post_count }})</span>
                   </a>
               </li>
           {% empty %}
-              <li><a href="#">{% trans "empty_categories" context "blog.partial.sidebar" %}</a></li>
+              <li class="category-list__empty">{% trans "empty_categories" context "blog.partial.sidebar" %}</li>
           {% endfor %}
       </ul>
   </div>
 
-  <div class="widget">
-      <h3>{% trans "popular_tags" context "blog.partial.sidebar" %}</h3>
-      <div class="tags-container">
-          <span class="tag-item">Javascript</span>
-          <span class="tag-item">CSS</span>
-          <span class="tag-item">Python</span>
-          <span class="tag-item">Django</span>
-          <span class="tag-item">Front-end</span>
-          <span class="tag-item">AI</span>
+  {% if popular_topics %}
+      <div class="widget">
+          <h3>{% trans "popular_tags" context "blog.partial.sidebar" %}</h3>
+          <div class="tags-container">
+              {% for topic in popular_topics %}
+                  <a href="{% url 'category_detail' topic.slug %}"
+                     class="tag-item{% if active_category_slug == topic.slug %} is-active{% endif %}">
+                      {{ topic.localized_name }}
+                  </a>
+              {% endfor %}
+          </div>
       </div>
-  </div>
+  {% endif %}
 </aside>
