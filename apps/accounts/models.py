@@ -3,10 +3,74 @@ User profile models for EMS Arena.
 Extends Django's User model with additional profile information.
 """
 
+from datetime import timedelta
+
 from django.conf import settings
+from django.contrib.auth.hashers import check_password, identify_hasher, make_password
 from django.db import models
+from django.utils import timezone
+from django.utils.crypto import constant_time_compare
 
 from core.constants import OrganizationType
+from core.utils import get_auth_otp_expiry_seconds
+
+
+class EmailOTP(models.Model):
+    """One-time password for email verification, belonging to the accounts domain."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="email_otps")
+    code = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Email OTP"
+        verbose_name_plural = "Email OTPs"
+
+    @staticmethod
+    def _code_is_hashed(value):
+        try:
+            identify_hasher(value)
+            return True
+        except Exception:
+            return False
+
+    def save(self, *args, **kwargs):
+        if self.code and not self._code_is_hashed(self.code):
+            self.code = make_password(str(self.code).strip())
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(seconds=get_auth_otp_expiry_seconds())
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def matches_code(self, raw_code):
+        candidate = str(raw_code or "").strip()
+        if not candidate:
+            return False
+        if self._code_is_hashed(self.code):
+            return check_password(candidate, self.code)
+        return constant_time_compare(candidate, self.code)
+
+    @classmethod
+    def get_matching_otp(cls, *, user, code):
+        candidate = str(code or "").strip()
+        if not candidate:
+            return None
+
+        queryset = cls.objects.filter(
+            user=user,
+            is_used=False,
+            expires_at__gte=timezone.now(),
+        ).order_by("-created_at")
+
+        for otp in queryset[:10]:
+            if otp.matches_code(candidate):
+                return otp
+
+        return None
 
 
 class ProfileRole:

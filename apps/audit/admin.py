@@ -19,13 +19,11 @@ class AuditLogAdmin(admin.ModelAdmin):
         "organization",
         "ip_address",
     ]
-    list_filter = ["action", "organization", "resource_type", "created_at"]
+    list_filter = ["action", "organization", "created_at"]
     search_fields = [
         "user__username",
         "user__email",
-        "resource_type",
-        "resource_id",
-        "resource_repr",
+        "object_id",
         "reason",
         "request_id",
         "ip_address",
@@ -37,9 +35,6 @@ class AuditLogAdmin(admin.ModelAdmin):
         "action",
         "content_type",
         "object_id",
-        "resource_type",
-        "resource_id",
-        "resource_repr",
         "old_values",
         "new_values",
         "changes",

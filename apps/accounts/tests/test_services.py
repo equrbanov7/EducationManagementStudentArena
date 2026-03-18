@@ -9,7 +9,7 @@ from django.test import TestCase
 
 from apps.accounts import services
 from apps.accounts.models import ProfileRole
-from apps.blog.models import EmailOTP
+from apps.accounts.models import EmailOTP
 from apps.courses.models import Course, CourseMembership
 from apps.organizations.models import Country, Membership, Organization
 from core.constants import OrganizationType
