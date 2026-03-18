@@ -2,7 +2,7 @@
 Protected media download view.
 
 Private media files (submissions, exam uploads, lab files) must only be
-accessible to authenticated users with verified ownership or organisation
+accessible to authenticated users with verified ownership or organization
 membership. This view enforces authentication and tenant/ownership checks
 before serving files from MEDIA_ROOT.
 
@@ -17,7 +17,7 @@ Access-control model
 * For all other authenticated users access is verified by looking up the
   owning model record in the database and checking that the requester is
   either the file owner or has an active membership in the resource's
-  organisation at an appropriate role level.
+  organization at an appropriate role level.
 * If ownership cannot be determined the request is **denied** (HTTP 403).
 """
 
@@ -75,7 +75,7 @@ def _check_exam_upload_access(user, path: str) -> bool:
     Verify access to ``exam_uploads/`` files.
 
     The student who submitted the file or any teacher-level member of the
-    exam's organisation may access it.
+    exam's organization may access it.
     """
     try:
         from apps.exams.domain.attempts import ExamAnswerFile
@@ -98,7 +98,7 @@ def _check_exam_paint_access(user, path: str) -> bool:
     Verify access to ``exam_paints/`` files.
 
     The student whose answer painting it is, or any teacher-level member of
-    the exam's organisation, may access it.
+    the exam's organization, may access it.
     """
     try:
         from apps.exams.domain.attempts import ExamAnswer
@@ -121,7 +121,7 @@ def _check_project_submission_access(user, path: str) -> bool:
     Verify access to ``projects/submissions/`` files.
 
     The student who submitted, or any teacher-level member of the project's
-    course organisation, may access it.
+    course organization, may access it.
     """
     try:
         from apps.projects.models import ProjectSubmission
@@ -206,7 +206,7 @@ def _check_course_resource_access(user, path: str) -> bool:
     """
     Verify access to ``course_resources/`` files.
 
-    Any active member of the resource's course organisation may access it.
+    Any active member of the resource's course organization may access it.
     """
     try:
         from apps.courses.models import CourseResource

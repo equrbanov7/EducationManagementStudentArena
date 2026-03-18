@@ -65,7 +65,7 @@ class IsTeacherMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     .. removed::
         This mixin has been disabled. It used the legacy group-based role check
-        (``is_teacher_or_above``) which bypasses the organisation RBAC model.
+        (``is_teacher_or_above``) which bypasses the organization RBAC model.
         Use ``LoginRequiredMixin`` combined with an inline
         ``_require_org_permission(request, '<permission>')`` call inside the view
         method that actually needs the RBAC guard.
@@ -73,7 +73,7 @@ class IsTeacherMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     def dispatch(self, request, *args, **kwargs):
         raise ImproperlyConfigured(
-            "IsTeacherMixin has been removed because it bypassed the organisation RBAC model "
+            "IsTeacherMixin has been removed because it bypassed the organization RBAC model "
             "and could allow cross-tenant data access. "
             "Use LoginRequiredMixin combined with _require_org_permission() or "
             "core.permissions.ensure_request_permission() instead."

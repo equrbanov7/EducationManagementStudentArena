@@ -3,7 +3,7 @@ Core view mixins for EMS Arena project.
 
 .. removed::
     ``TeacherRequiredMixin`` and ``StudentRequiredMixin`` have been **disabled**
-    because they relied on group-based role checks that bypass the organisation
+    because they relied on group-based role checks that bypass the organization
     RBAC model and could allow cross-tenant data access.
 
     Preferred replacements
@@ -19,7 +19,7 @@ from django.contrib.auth.mixins import AccessMixin
 from django.core.exceptions import ImproperlyConfigured
 
 _REMOVED_MSG = (
-    "{name} has been removed because it bypassed the organisation RBAC model "
+    "{name} has been removed because it bypassed the organization RBAC model "
     "and could allow cross-tenant data access. "
     "Use apps.organizations.decorators.PermissionRequiredMixin (CBV) or "
     "core.permissions.request_has_permission / ensure_request_permission instead."
@@ -30,7 +30,7 @@ class TeacherRequiredMixin(AccessMixin):
     """
     .. removed::
         This mixin has been disabled. It used the legacy group-based role system
-        (``is_teacher_or_above``) which bypasses the organisation RBAC model.
+        (``is_teacher_or_above``) which bypasses the organization RBAC model.
         Use ``apps.organizations.decorators.PermissionRequiredMixin`` with an
         appropriate RBAC permission instead.
     """
@@ -45,7 +45,7 @@ class StudentRequiredMixin(AccessMixin):
     """
     .. removed::
         This mixin has been disabled. It used the legacy group-based role system
-        (``is_student``) which bypasses the organisation RBAC model.
+        (``is_student``) which bypasses the organization RBAC model.
         Use ``apps.organizations.decorators.PermissionRequiredMixin`` with an
         appropriate RBAC permission instead.
     """
