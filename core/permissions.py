@@ -14,7 +14,7 @@ Canonical authorization API
 Removed legacy helpers
 ----------------------
 The following group-based helpers have been **removed** because they bypassed
-the organisation RBAC model and allowed cross-tenant access:
+the organization RBAC model and allowed cross-tenant access:
 
 * ``teacher_required``  – use ``request_has_permission`` or RBAC-aware CBV mixins.
 * ``student_required``  – same as above.
@@ -34,7 +34,7 @@ from apps.organizations.permissions import has_permission
 from core.tenancy import request_has_active_organization_context
 
 _REMOVED_MSG = (
-    "{name} has been removed because it bypassed the organisation RBAC model "
+    "{name} has been removed because it bypassed the organization RBAC model "
     "and could allow cross-tenant data access. "
     "Use apps.organizations.decorators.PermissionRequiredMixin (CBV) or "
     "core.permissions.request_has_permission / ensure_request_permission (FBV) instead."
@@ -52,7 +52,7 @@ def is_student(user):
 def teacher_required(view_func):
     """
     .. removed::
-        This decorator has been disabled because it bypasses the organisation
+        This decorator has been disabled because it bypasses the organization
         RBAC model. Use ``request_has_permission(request, '<permission>')`` or
         ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
     """
@@ -69,7 +69,7 @@ def teacher_required(view_func):
 def student_required(view_func):
     """
     .. removed::
-        This decorator has been disabled because it bypasses the organisation
+        This decorator has been disabled because it bypasses the organization
         RBAC model. Use ``request_has_permission(request, '<permission>')`` or
         ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
     """
