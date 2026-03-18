@@ -8,7 +8,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.blog.models import Category, Comment, EmailOTP, Post, Question, Subscriber
+from apps.accounts.models import EmailOTP
+from apps.blog.models import Category, Comment, Post, Question, Subscriber
 
 User = get_user_model()
 
