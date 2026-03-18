@@ -11,7 +11,7 @@ Modellər:
 5. LabSubmission - Tələbənin cavabı
 """
 
-import random
+import secrets
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -22,6 +22,7 @@ from django.utils import timezone
 from core.upload_security import FileUploadValidator
 
 User = get_user_model()
+secure_random = secrets.SystemRandom()
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -451,7 +452,7 @@ class LabAssignment(models.Model):
 
             if block.questions_to_pick > 0 and block.questions_to_pick < len(block_questions):
                 # Bu blokdan məhdud sayda seç
-                selected = random.sample(block_questions, block.questions_to_pick)
+                selected = secure_random.sample(block_questions, block.questions_to_pick)
             else:
                 # Bütün sualları götür
                 selected = block_questions
@@ -460,7 +461,7 @@ class LabAssignment(models.Model):
 
         # Əgər lab səviyyəsində limit varsa
         if self.lab.questions_per_student > 0 and self.lab.questions_per_student < len(all_questions):
-            all_questions = random.sample(all_questions, self.lab.questions_per_student)
+            all_questions = secure_random.sample(all_questions, self.lab.questions_per_student)
 
         # Sualları təyin et
         self.assigned_questions.set(all_questions)
