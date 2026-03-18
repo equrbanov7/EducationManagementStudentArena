@@ -1,0 +1,20 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" rx="36" fill="url(#bg)"/>
+  <rect x="186" y="154" width="148" height="276" rx="18" fill="rgba(255,255,255,0.16)"/>
+  <rect x="378" y="256" width="148" height="174" rx="18" fill="rgba(255,255,255,0.16)"/>
+  <rect x="570" y="210" width="148" height="220" rx="18" fill="rgba(255,255,255,0.16)"/>
+  <rect x="762" y="120" width="148" height="310" rx="18" fill="rgba(255,255,255,0.16)"/>
+  <path d="M176 470H944" stroke="rgba(255,255,255,0.24)" stroke-width="4"/>
+  <path d="M252 138L412 246L632 194L842 106" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="252" cy="138" r="12" fill="white"/>
+  <circle cx="412" cy="246" r="12" fill="white"/>
+  <circle cx="632" cy="194" r="12" fill="white"/>
+  <circle cx="842" cy="106" r="12" fill="white"/>
+  <text x="600" y="585" text-anchor="middle" fill="white" font-size="56" font-family="Arial, sans-serif" font-weight="700">BUSINESS</text>
+  <defs>
+    <linearGradient id="bg" x1="114" y1="62" x2="1098" y2="607" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5A2F8F"/>
+      <stop offset="1" stop-color="#B658B2"/>
+    </linearGradient>
+  </defs>
+</svg>

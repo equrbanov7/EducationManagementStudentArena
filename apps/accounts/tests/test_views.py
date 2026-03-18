@@ -487,3 +487,23 @@ class PublicProfileViewTest(TestCase):
             f'href="{reverse("accounts:public_profile", args=[self.owner.username])}?q=Alpha"',
             html=False,
         )
+
+    def test_public_profile_parent_category_filter_includes_child_category_posts(self):
+        programming = Category.objects.get(slug="programming")
+        Post.objects.create(
+            author=self.owner,
+            category=programming,
+            title="Programming Article",
+            excerpt="Hierarchy excerpt",
+            content="Hierarchy content",
+            is_published=True,
+        )
+
+        response = self.client.get(
+            reverse("accounts:public_profile", args=[self.owner.username]),
+            {"category": "technology"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Programming Article")
+        self.assertNotContains(response, "Backend Public Post")

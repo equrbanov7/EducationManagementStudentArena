@@ -1,23 +1,36 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{{ category.name }} | {% trans "title_suffix" context "blog.category_detail_page" %}{% endblock %}
+{% block title %}{{ category.localized_name }} | {% trans "title_suffix" context "blog.category_detail_page" %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/categoryDetail.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/sideBar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
 {% endblock %}
 
 {% block content %}
 
 <section class="category-hero-section">
     <div class="category-container">
+        <a href="{{ back_link_url }}" class="category-back-link" data-history-back>
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+            <span>{% trans "back" %}</span>
+        </a>
+        {% if category_ancestors %}
+            <nav class="category-breadcrumbs">
+                {% for ancestor in category_ancestors %}
+                    <a href="{% url 'category_detail' ancestor.slug %}">{{ ancestor.localized_name }}</a>
+                {% endfor %}
+                <span>{{ category.localized_name }}</span>
+            </nav>
+        {% endif %}
         <span class="category-label">{% trans "hero_label" context "blog.category_detail_page" %}</span>
-        <h1 class="category-hero-title">{{ category.name }}</h1>
+        <h1 class="category-hero-title">{{ category.localized_name }}</h1>
         <p class="category-hero-desc">
             {% trans "posts_found_prefix" context "blog.category_detail_page" %}
-            {{ posts.count }}
+            {{ page_obj.paginator.count }}
             {% trans "posts_found_suffix" context "blog.category_detail_page" %}
         </p>
     </div>
@@ -28,18 +41,19 @@
 
         <div class="category-content-area">
             <div class="category-grid">
-                {% for post in posts %}
+                {% for post in page_obj %}
                     {% include "partials/_blogCard.html" with post=post %}
                 {% empty %}
                     <div class="category-empty-state">
                         <h3>{% trans "empty_title" context "blog.category_detail_page" %}</h3>
-                        <a href="{% url 'home' %}" class="category-back-btn">{% trans "back_home" context "blog.category_detail_page" %}</a>
                     </div>
                 {% endfor %}
             </div>
+
+            {% include "partials/_pagination.html" with page_obj=page_obj %}
         </div>
 
-        {% include "partials/_sideBar.html" with categories=categories %}
+        {% include "partials/_sideBar.html" with categories=categories popular_topics=popular_topics active_category_slug=active_category_slug %}
 
     </div>
 </div>
