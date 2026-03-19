@@ -7,6 +7,10 @@ from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
 
 from core.views import health_check, ping, test_error
+from core.views import handler400 as handler400  # noqa: PLC0414
+from core.views import handler403 as handler403  # noqa: PLC0414
+from core.views import handler404 as handler404  # noqa: PLC0414
+from core.views import handler500 as handler500  # noqa: PLC0414
 from core.media_views import protected_media
 
 admin.site.site_url = reverse_lazy("home")
@@ -51,3 +55,8 @@ elif getattr(settings, "SERVE_MEDIA", False):
             protected_media,
         )
     ]
+
+# Django looks for these module-level names in ROOT_URLCONF when DEBUG=False
+# to dispatch 4xx/5xx responses.  The aliased imports above ensure the names
+# exist at module scope explicitly.  See Django docs: "Customizing error views".
+
