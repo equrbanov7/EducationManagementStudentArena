@@ -7,7 +7,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/take_exam.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/paint_answer.css' %}">
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         @keyframes slideIn {
             from {
                 transform: translateX(100%);

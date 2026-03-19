@@ -3,15 +3,16 @@ Profile views: user profile management and avatar serving.
 """
 
 import mimetypes
+import re
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -68,14 +69,78 @@ from ._helpers import (
 User = get_user_model()
 PUBLIC_PROFILE_SEARCH_MAX_LENGTH = 100
 PUBLIC_PROFILE_CATEGORY_MAX_LENGTH = 120
+PROFILE_AVATAR_VERSION_MAX_LENGTH = 64
+PUBLIC_PROFILE_PAGE_NUMBER_PATTERN = re.compile(r"^[0-9]+$")
+PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION = frozenset({" ", "-", "_", ".", ",", "@", "#", "+"})
+PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-zA-Z]")
+PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
+PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
 
 
 def _normalize_public_profile_query_value(raw_value, *, max_length):
     normalized = " ".join(str(raw_value or "").split())
     return normalized[:max_length]
 
+
+def _sanitize_public_profile_search_query(raw_value):
+    normalized = _normalize_public_profile_query_value(raw_value, max_length=PUBLIC_PROFILE_SEARCH_MAX_LENGTH)
+    if not normalized:
+        return "", False
+
+    if PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN.search(normalized):
+        return "", True
+
+    sanitized = "".join(
+        character
+        for character in normalized
+        if character.isalnum() or character in PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION
+    ).strip()
+    return sanitized[:PUBLIC_PROFILE_SEARCH_MAX_LENGTH], sanitized != normalized
+
+
+def _validate_public_profile_category(raw_value, *, allowed_slugs):
+    normalized = _normalize_public_profile_query_value(raw_value, max_length=PUBLIC_PROFILE_CATEGORY_MAX_LENGTH).lower()
+    if not normalized:
+        return "", False
+
+    if not PUBLIC_PROFILE_CATEGORY_PATTERN.fullmatch(normalized):
+        return "", True
+
+    if normalized not in allowed_slugs:
+        return "", True
+
+    return normalized, False
+
+
+def _parse_public_profile_page_number(raw_value):
+    normalized = str(raw_value or "").strip()
+    if not normalized:
+        return None
+
+    if not PUBLIC_PROFILE_PAGE_NUMBER_PATTERN.fullmatch(normalized):
+        return None
+
+    return int(normalized)
+
+
+def _validate_profile_avatar_version(raw_value):
+    normalized = _normalize_public_profile_query_value(raw_value, max_length=PROFILE_AVATAR_VERSION_MAX_LENGTH)
+    if not normalized:
+        return ""
+
+    if not PROFILE_AVATAR_VERSION_PATTERN.fullmatch(normalized):
+        raise ValidationError("Invalid avatar version parameter.")
+
+    return normalized
+
+
 def profile_avatar(request, user_id):
     """Serve profile avatar through Django to avoid direct MEDIA URL dependency."""
+    try:
+        _validate_profile_avatar_version(request.GET.get("v"))
+    except ValidationError:
+        return HttpResponseBadRequest("Invalid avatar version parameter.")
+
     target_user = get_object_or_404(User, id=user_id, is_active=True)
     target_profile = UserProfile.objects.filter(user=target_user).only("avatar", "updated_at").first()
     if not target_profile or not target_profile.avatar:
@@ -1083,7 +1148,6 @@ def public_user_profile(request, username):
     """
     Public user profile showing only published posts and non-confidential profile information.
     """
-    from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
     from django.db.models import Q
 
     from apps.blog.models import Category, Post
@@ -1102,24 +1166,26 @@ def public_user_profile(request, username):
         .order_by("-created_at")
     )
 
-    search_query = _normalize_public_profile_query_value(
-        request.GET.get("q"),
-        max_length=PUBLIC_PROFILE_SEARCH_MAX_LENGTH,
-    )
-    selected_category = _normalize_public_profile_query_value(
+    allowed_category_slugs = set(Category.objects.values_list("slug", flat=True))
+    search_query, invalid_search_query = _sanitize_public_profile_search_query(request.GET.get("q"))
+    selected_category, invalid_category = _validate_public_profile_category(
         request.GET.get("category"),
-        max_length=PUBLIC_PROFILE_CATEGORY_MAX_LENGTH,
+        allowed_slugs=allowed_category_slugs,
     )
 
     user_posts_list = published_posts
-    if search_query:
+    if invalid_search_query and not search_query:
+        user_posts_list = user_posts_list.none()
+    elif search_query:
         user_posts_list = user_posts_list.filter(
             Q(title__icontains=search_query)
             | Q(excerpt__icontains=search_query)
             | Q(content__icontains=search_query)
         )
 
-    if selected_category:
+    if invalid_category:
+        user_posts_list = user_posts_list.none()
+    elif selected_category:
         selected_category_obj = Category.objects.select_related("parent").filter(slug=selected_category).first()
         if selected_category_obj:
             user_posts_list = filter_posts_by_category_scope(user_posts_list, selected_category_obj)
@@ -1128,21 +1194,23 @@ def public_user_profile(request, username):
 
     category_items = get_flat_category_tree(posts_queryset=published_posts, include_empty=False)
 
+    raw_page_number = request.GET.get("page")
+    page_number = _parse_public_profile_page_number(raw_page_number)
+    if raw_page_number not in (None, "") and page_number is None:
+        return HttpResponseBadRequest("Invalid page parameter.")
+
     paginator = Paginator(user_posts_list, 6)
-    page_number = request.GET.get("page")
-    try:
-        posts = paginator.page(page_number)
-    except PageNotAnInteger:
-        posts = paginator.page(1)
-    except EmptyPage:
-        posts = paginator.page(paginator.num_pages)
+    posts = paginator.get_page(page_number)
 
     display_name = (f"{profile_user.first_name} {profile_user.last_name}").strip() or profile_user.username
     profile_bio = (profile.bio or "").strip()
     profile_location = (profile.location or "").strip()
 
-    query_params = request.GET.copy()
-    query_params.pop("page", None)
+    query_params = QueryDict(mutable=True)
+    if search_query:
+        query_params["q"] = search_query
+    if selected_category:
+        query_params["category"] = selected_category
     extra_query = query_params.urlencode()
 
     context = {

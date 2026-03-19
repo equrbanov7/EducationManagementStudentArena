@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "csp.middleware.CSPMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -48,7 +49,6 @@ MIDDLEWARE = [
     "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
-    "csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -163,6 +163,9 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+# WhiteNoise adds a wildcard ACAO header by default; keep static assets same-origin
+# unless cross-origin delivery is explicitly configured at the edge.
+WHITENOISE_ALLOW_ALL_ORIGINS = False
 
 # Media files (Uploaded by users)
 MEDIA_URL = "/media/"
@@ -197,9 +200,9 @@ MESSAGE_TAGS = {
 # Inline <script> blocks must use a per-request nonce
 # via {{ request.csp_nonce }} and the NONCE sentinel.
 #
-# 'unsafe-inline' is retained for style-src because inline style=""
-# attributes cannot carry a nonce; removing it would require rewriting every
-# HTML element that uses inline styles.
+# Inline <style> blocks must also use a per-request nonce. Inline style=""
+# attributes are temporarily scoped to style-src-attr so style-src itself can
+# remain strict while the remaining templates are migrated off inline attrs.
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": [SELF],
@@ -223,8 +226,11 @@ CONTENT_SECURITY_POLICY = {
         ],
         "style-src": [
             SELF,
-            UNSAFE_INLINE,
+            NONCE,
             "https://fonts.googleapis.com",
+        ],
+        "style-src-attr": [
+            UNSAFE_INLINE,
         ],
         "connect-src": [
             SELF,

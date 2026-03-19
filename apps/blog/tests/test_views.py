@@ -69,6 +69,17 @@ class SubscribeRateLimitTest(TestCase):
         self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
         self.assertEqual(len(mail.outbox), 1)
 
+    def test_subscribe_rejects_malformed_email_payloads_without_500(self):
+        for payload in ("'", '"', ";", "'("):
+            with self.subTest(payload=payload):
+                cache.clear()
+                mail.outbox = []
+                response = self.client.post(self.subscribe_url, {"email": payload})
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(len(mail.outbox), 0)
+                self.assertIn("email", response.context["form"].errors)
+
 
 class BlogRoleAccessTest(TestCase):
     def _activate_org(self, user):
@@ -123,6 +134,42 @@ class BlogRoleAccessTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "blog/home.html")
+
+    def test_homepage_treats_malformed_q_payload_as_plain_text(self):
+        response = self.client.get("/?q=ZAP%27%28")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["query"], "ZAP'(")
+        self.assertEqual(list(response.context["page_obj"]), [])
+
+    def test_homepage_rejects_non_numeric_page_payload_with_trailing_quote_and_paren(self):
+        response = self.client.get("/?page=1%27%28")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "Invalid page parameter.", status_code=400)
+
+    def test_homepage_rejects_non_numeric_page_payload_with_trailing_quote(self):
+        response = self.client.get("/?page=4%27")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "Invalid page parameter.", status_code=400)
+
+    def test_homepage_preserves_valid_search_and_pagination_behavior(self):
+        for index in range(1, 7):
+            Post.objects.create(
+                author=self.teacher,
+                title=f"Teacher Search Result {index}",
+                content="Teacher content",
+                is_published=True,
+            )
+
+        response = self.client.get(reverse("home"), {"q": "Teacher", "page": "2"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["query"], "Teacher")
+        self.assertEqual(response.context["page_obj"].number, 2)
+        self.assertEqual(response.context["page_obj"].paginator.count, 7)
+        self.assertContains(response, "?q=Teacher&page=1")
 
     def test_legacy_blog_home_redirects_to_root(self):
         response = self.client.get("/blog/?q=Teacher&page=2")
@@ -398,6 +445,7 @@ class BlogCategoryHierarchyTest(TestCase):
         )
         self.parent_category = Category.objects.get(slug="technology")
         self.child_category = Category.objects.get(slug="programming")
+        self.demo_category = Category.objects.create(name="Demo xəbərlər", slug="demo-xeberler")
 
         Post.objects.create(
             author=self.author,
@@ -411,6 +459,13 @@ class BlogCategoryHierarchyTest(TestCase):
             category=self.child_category,
             title="Programming Child Post",
             content="Child category content",
+            is_published=True,
+        )
+        Post.objects.create(
+            author=self.author,
+            category=self.demo_category,
+            title="Demo Category Post",
+            content="Demo category content",
             is_published=True,
         )
 
@@ -437,3 +492,14 @@ class BlogCategoryHierarchyTest(TestCase):
         self.assertGreater(len(category_slugs), 0)
         self.assertEqual(category_slugs[0], "programming")
         self.assertNotIn("technology", category_slugs)
+
+    def test_category_detail_rejects_non_numeric_page_payloads(self):
+        for payload in ("'", '"', ";", "'("):
+            with self.subTest(payload=payload):
+                response = self.client.get(
+                    reverse("category_detail", args=[self.demo_category.slug]),
+                    {"page": payload},
+                )
+
+                self.assertEqual(response.status_code, 400)
+                self.assertContains(response, "Invalid page parameter.", status_code=400)
