@@ -13,6 +13,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country
+from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes
 from core.utils import get_client_ip
@@ -36,6 +37,8 @@ LOGIN_LIMIT_SCOPE_IP = "accounts.login.ip"
 LOGIN_LIMIT_SCOPE_IDENTITY = "accounts.login.identity"
 OTP_VERIFY_LIMIT_SCOPE = "accounts.otp.verify"
 OTP_RESEND_LIMIT_SCOPE = "accounts.otp.resend"
+AUTH_REDIRECT_MAX_LENGTH = 2048
+AUTH_REDIRECT_DISALLOWED_CHARS = frozenset({"'", '"', "\\", "\r", "\n", "\t"})
 
 
 def _login_limit_keys(request, username):
@@ -54,12 +57,36 @@ def _otp_limit_key(request, email):
     )
 
 
+def _sanitize_auth_redirect_target(request, candidate_url):
+    safe_path = _safe_same_origin_redirect_path(request, candidate_url)
+    if not safe_path:
+        return ""
+
+    if len(safe_path) > AUTH_REDIRECT_MAX_LENGTH:
+        return ""
+
+    if not safe_path.startswith("/"):
+        return ""
+
+    if any(character in AUTH_REDIRECT_DISALLOWED_CHARS for character in safe_path):
+        return ""
+
+    return safe_path
+
+
 class CustomLoginView(LoginView):
     """Login view with custom form and suspended-organization checks."""
 
     template_name = "accounts/login.html"
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
+
+    def get_redirect_url(self):
+        redirect_to = self.request.POST.get(
+            self.redirect_field_name,
+            self.request.GET.get(self.redirect_field_name),
+        )
+        return _sanitize_auth_redirect_target(self.request, redirect_to)
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()

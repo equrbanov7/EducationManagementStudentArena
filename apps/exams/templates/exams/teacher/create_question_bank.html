@@ -4,7 +4,7 @@
 {% block title %}{% trans "title_question_bank" context "exams.template.create_question_bank" %} - {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     .bank-container {
         max-width: 900px;
         margin: 40px auto;

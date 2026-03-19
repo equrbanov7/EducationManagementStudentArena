@@ -574,9 +574,41 @@ class ProfileViewTest(TestCase):
         self.assertEqual(avatar_response.status_code, 200)
         self.assertEqual(avatar_response["Content-Type"], "image/png")
 
+        versioned_avatar_response = self.client.get(
+            reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id}),
+            {"v": "1710000000"},
+        )
+        self.assertEqual(versioned_avatar_response.status_code, 200)
+        self.assertEqual(versioned_avatar_response["Content-Type"], "image/png")
+
         profile_response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
         self.assertEqual(profile_response.status_code, 200)
         self.assertContains(profile_response, "blog-header__user-avatar-image")
+
+    def test_profile_avatar_rejects_invalid_version_parameter(self):
+        tiny_png = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+            b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDATx\x9cc`\x00"
+            b"\x00\x00\x02\x00\x01\xe2!\xbc3\x00\x00\x00\x00IEND\xaeB`\x82"
+        )
+        self.user.profile.avatar = SimpleUploadedFile("avatar.png", tiny_png, content_type="image/png")
+        self.user.profile.save(update_fields=["avatar", "updated_at"])
+
+        avatar_url = reverse("accounts:profile_avatar", kwargs={"user_id": self.user.id})
+
+        for payload in (
+            "1773691661' AND '1'='1' --",
+            "1773691663-2",
+            "'(",
+            '"',
+            ";",
+            "()",
+            "ZAP%n%s%n%s",
+            "ZAP%x%x%x%x",
+        ):
+            with self.subTest(payload=payload):
+                response = self.client.get(avatar_url, {"v": payload})
+                self.assertEqual(response.status_code, 400)
 
     def test_student_profile_keeps_single_assigned_courses_sidebar_entry(self):
         owner = User.objects.create_user(

@@ -13,7 +13,7 @@ from django.urls import reverse
 
 from apps.accounts.models import EmailOTP, ProfileRole
 from apps.blog.models import Category, Post
-from apps.organizations.models import Organization
+from apps.organizations.models import Country, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -66,6 +66,53 @@ class LoginViewTest(TestCase):
         response = self.client.get(self.login_url)
         # Should still be accessible or redirect
         self.assertIn(response.status_code, [200, 302])
+
+    def test_login_preserves_safe_local_next_parameter(self):
+        safe_next = reverse("accounts:profile")
+
+        get_response = self.client.get(self.login_url, {"next": safe_next})
+        self.assertEqual(get_response.status_code, 200)
+        self.assertContains(get_response, f'name="next" value="{safe_next}"', html=False)
+
+        post_response = self.client.post(
+            self.login_url,
+            {"username": "loginuser", "password": "StrongPass123!", "next": safe_next},
+        )
+
+        self.assertRedirects(post_response, safe_next)
+
+    def test_login_rejects_boolean_condition_next_payload(self):
+        payload = f"{reverse('accounts:profile')}' AND '1'='1' --"
+
+        get_response = self.client.get(self.login_url, {"next": payload})
+        self.assertEqual(get_response.status_code, 200)
+        self.assertNotContains(get_response, f'name="next" value="{payload}"', html=False)
+
+        post_response = self.client.post(
+            self.login_url,
+            {"username": "loginuser", "password": "StrongPass123!", "next": payload},
+        )
+
+        self.assertRedirects(post_response, "/")
+
+    def test_login_reported_zap_format_string_payloads_do_not_break(self):
+        for payload in ("ZAP%n%s%n%s", "ZAP%x%x%x%x"):
+            with self.subTest(payload=payload):
+                cache.clear()
+
+                get_response = self.client.get(self.login_url, {"next": payload})
+                self.assertEqual(get_response.status_code, 200)
+                self.assertNotContains(get_response, f'name="next" value="{payload}"', html=False)
+
+                post_response = self.client.post(
+                    self.login_url,
+                    {"username": payload, "password": "wrongpassword", "next": payload},
+                )
+
+                self.assertIn(post_response.status_code, [200, 302])
+                if post_response.status_code == 302:
+                    self.assertNotEqual(post_response.url, payload)
+                    self.assertTrue(post_response.url.startswith("/"))
 
 
 @override_settings(CACHES=LOCMEM_CACHE_SETTINGS, LOGIN_RATE_LIMIT="2/1m")
@@ -205,6 +252,14 @@ class PasswordResetViewTest(TestCase):
         )
         self.assertRedirects(complete_response, self.password_reset_complete_url)
 
+    def test_password_reset_rejects_malformed_email_payloads_without_500(self):
+        for payload in ("'", '"', ";", "'("):
+            with self.subTest(payload=payload):
+                response = self.client.post(self.password_reset_url, {"email": payload})
+
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("email", response.context["form"].errors)
+
 
 class RegisterViewTest(TestCase):
     """Test registration view functionality."""
@@ -212,6 +267,7 @@ class RegisterViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.register_url = reverse("accounts:register")
+        Country.objects.get_or_create(code="AZ", defaults={"name": "Azerbaijan", "is_active": True})
 
     def test_register_page_accessible(self):
         """Test that register page is accessible."""
@@ -265,6 +321,33 @@ class RegisterViewTest(TestCase):
         )
         # Registration should work
         self.assertIn(response.status_code, [200, 302])
+
+    def test_register_rejects_malformed_identity_payloads_without_500(self):
+        response = self.client.post(
+            self.register_url,
+            {
+                "username": "bad'(",
+                "email": "'(",
+                "password": "StrongPass123!",
+                "password2": "StrongPass123!",
+                "first_name": "Bad",
+                "last_name": "Input",
+                "country": "'(",
+                "organization_type": OrganizationType.INDIVIDUAL,
+                "join_organization": "",
+                "institution": "",
+                "institution_not_listed_name": "",
+                "organization_identifier": "",
+                "organization_license_identifier": "",
+                "initial_role": ProfileRole.MEMBER,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("username", response.context["form"].errors)
+        self.assertIn("email", response.context["form"].errors)
+        self.assertIn("country", response.context["form"].errors)
+        self.assertFalse(User.objects.filter(username="bad'(").exists())
 
 
 class ProfileViewTest(TestCase):
@@ -383,8 +466,24 @@ class PublicProfileViewTest(TestCase):
         self.client = Client()
         self.owner = User.objects.create_user("publicowner", "publicowner@example.com", "StrongPass123!")
         self.viewer = User.objects.create_user("publicviewer", "publicviewer@example.com", "StrongPass123!")
+        self.reported_zap_usernames = (
+            "wcu",
+            "individual_teacher_1",
+            "individual_teacher_2",
+            "kelvin",
+            "learnhub_coach",
+            "learnhub_editor",
+            "school_teacher_1",
+            "school_teacher_2",
+            "university_teacher_1",
+            "university_teacher_2",
+            "tmp_img_user3",
+            "tmp_img_user4",
+        )
+        self.reported_zap_payloads = ("'", '"', ";", "'(", "ZAP%n%s%n%s", "ZAP%x%x%x%x")
         self.category = Category.objects.create(name="Frontend", slug="frontend")
         self.other_category = Category.objects.create(name="Backend", slug="backend")
+        self.demo_category = Category.objects.create(name="Demo Xəbərlər", slug="demo-xeberler")
 
         owner_profile = self.owner.profile
         owner_profile.bio = "Açıq bio məlumatı"
@@ -435,6 +534,28 @@ class PublicProfileViewTest(TestCase):
             is_published=True,
         )
 
+        for username in self.reported_zap_usernames:
+            user, created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    "email": f"{username}@example.com",
+                },
+            )
+            if created:
+                user.set_password("StrongPass123!")
+                user.save(update_fields=["password"])
+            user.profile.save(update_fields=["updated_at"])
+            Post.objects.get_or_create(
+                author=user,
+                category=self.demo_category,
+                title=f"{username} demo post",
+                defaults={
+                    "excerpt": "Visible excerpt",
+                    "content": "Visible content",
+                    "is_published": True,
+                },
+            )
+
     def test_public_profile_is_accessible_anonymously_and_hides_private_sections(self):
         response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
 
@@ -473,15 +594,72 @@ class PublicProfileViewTest(TestCase):
         self.assertEqual(page_response.status_code, 200)
         self.assertEqual(page_response.context["posts"].number, 2)
 
-    def test_public_profile_treats_semicolon_search_as_plain_text(self):
+    def test_public_profile_rejects_semicolon_only_search_with_empty_results(self):
         response = self.client.get(
             reverse("accounts:public_profile", args=[self.owner.username]),
             {"q": ";"},
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["search_query"], ";")
+        self.assertEqual(response.context["search_query"], "")
         self.assertEqual(response.context["posts"].paginator.count, 0)
+
+    def test_public_profile_malicious_query_params_return_empty_results(self):
+        payloads = (
+            {"q": "'("},
+            {"q": '"'},
+            {"q": "()"},
+            {"category": ";"},
+            {"category": "demo-xeberler", "q": "'("},
+        )
+
+        for params in payloads:
+            with self.subTest(params=params):
+                response = self.client.get(
+                    reverse("accounts:public_profile", args=[self.owner.username]),
+                    params,
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.context["posts"].paginator.count, 0)
+                self.assertNotIn("%27", response.context["extra_query"])
+                self.assertNotIn(";", response.context["extra_query"])
+
+    def test_public_profile_rejects_non_numeric_page_payloads(self):
+        for username in ("wcu", "school_teacher_1", "university_teacher_1", "tmp_img_user3"):
+            for payload in ("'", '"', ";", "'("):
+                with self.subTest(username=username, payload=payload):
+                    response = self.client.get(
+                        reverse("accounts:public_profile", args=[username]),
+                        {"page": payload},
+                    )
+
+                    self.assertEqual(response.status_code, 400)
+                    self.assertContains(response, "Invalid page parameter.", status_code=400)
+
+    def test_public_profile_reported_zap_payloads_never_return_500(self):
+        for username in self.reported_zap_usernames:
+            for payload in self.reported_zap_payloads:
+                for params, expected_extra_query, expected_category in (
+                    ({"category": payload}, "", ""),
+                    ({"q": payload}, "", ""),
+                    ({"category": self.demo_category.slug, "q": payload}, f"category={self.demo_category.slug}", self.demo_category.slug),
+                ):
+                    with self.subTest(username=username, params=params):
+                        response = self.client.get(
+                            reverse("accounts:public_profile", args=[username]),
+                            params,
+                        )
+
+                        self.assertEqual(response.status_code, 200)
+                        self.assertEqual(response.context["posts"].paginator.count, 0)
+                        self.assertEqual(response.context["search_query"], "")
+                        self.assertEqual(response.context["selected_category"], expected_category)
+                        self.assertEqual(response.context["extra_query"], expected_extra_query)
+                        self.assertNotIn("%27", response.context["extra_query"])
+                        self.assertNotIn("%22", response.context["extra_query"])
+                        self.assertNotIn("%3B", response.context["extra_query"])
+                        self.assertNotIn("%28", response.context["extra_query"])
 
     def test_public_profile_active_category_link_toggles_filter_off(self):
         response = self.client.get(
