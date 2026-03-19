@@ -13,7 +13,7 @@ from django.core import signing
 from apps.live_exam.models import LivePlayer, LiveSession
 
 PLAYER_COOKIE_NAME = "live_player_token"
-PLAYER_TOKEN_SALT = "liveExam.player"
+PLAYER_TOKEN_SALT = "liveExam.player"  # nosec B105
 PLAYER_TOKEN_MAX_AGE = 60 * 60 * 6
 LIVE_CLIENT_ID_COOKIE_NAME = "live_client_id"
 LIVE_CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 30

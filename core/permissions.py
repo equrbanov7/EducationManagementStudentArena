@@ -11,30 +11,34 @@ Canonical authorization API
 * ``apps.organizations.decorators.PermissionRequiredMixin``  – CBV guard + RBAC permission.
 * ``apps.organizations.decorators.LevelRequiredMixin``  – CBV guard + role level.
 
-Deprecated helpers
-------------------
-The following group-based helpers bypass the RBAC model and are **deprecated**.
-They still function but emit ``DeprecationWarning`` at call-time:
+Removed legacy helpers
+----------------------
+The following group-based helpers have been **removed** because they bypassed
+the organization RBAC model and allowed cross-tenant access:
 
 * ``teacher_required``  – use ``request_has_permission`` or RBAC-aware CBV mixins.
 * ``student_required``  – same as above.
 
 ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` are similarly
-deprecated; see ``core/mixins.py``.
+removed; see ``core/mixins.py``.
 """
 
 from __future__ import annotations
 
-import warnings
 from functools import wraps
 
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.utils.translation import pgettext
 
 from apps.organizations.permissions import has_permission
 from core.tenancy import request_has_active_organization_context
+
+_REMOVED_MSG = (
+    "{name} has been removed because it bypassed the organization RBAC model "
+    "and could allow cross-tenant data access. "
+    "Use apps.organizations.decorators.PermissionRequiredMixin (CBV) or "
+    "core.permissions.request_has_permission / ensure_request_permission (FBV) instead."
+)
 
 
 def is_teacher(user):
@@ -47,58 +51,34 @@ def is_student(user):
 
 def teacher_required(view_func):
     """
-    .. deprecated::
-        Use ``request_has_permission(request, '<permission>')`` or
+    .. removed::
+        This decorator has been disabled because it bypasses the organization
+        RBAC model. Use ``request_has_permission(request, '<permission>')`` or
         ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
-        This decorator performs a simple group-based check and bypasses the
-        organisation RBAC model.
     """
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        warnings.warn(
-            "teacher_required is deprecated and will be removed in a future release. "
-            "Use request_has_permission() or PermissionRequiredMixin from "
-            "apps.organizations.decorators instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        raise ImproperlyConfigured(
+            _REMOVED_MSG.format(name="teacher_required")
         )
-        if not request.user.is_authenticated:
-            messages.error(request, "You must be logged in to access this page.")
-            return redirect("accounts:login")
-        if not is_teacher(request.user):
-            messages.error(request, "You must be a teacher to access this page.")
-            return redirect("home")
-        return view_func(request, *args, **kwargs)
 
     return _wrapped_view
 
 
 def student_required(view_func):
     """
-    .. deprecated::
-        Use ``request_has_permission(request, '<permission>')`` or
+    .. removed::
+        This decorator has been disabled because it bypasses the organization
+        RBAC model. Use ``request_has_permission(request, '<permission>')`` or
         ``apps.organizations.decorators.PermissionRequiredMixin`` instead.
-        This decorator performs a simple group-based check and bypasses the
-        organisation RBAC model.
     """
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        warnings.warn(
-            "student_required is deprecated and will be removed in a future release. "
-            "Use request_has_permission() or PermissionRequiredMixin from "
-            "apps.organizations.decorators instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        raise ImproperlyConfigured(
+            _REMOVED_MSG.format(name="student_required")
         )
-        if not request.user.is_authenticated:
-            messages.error(request, "You must be logged in to access this page.")
-            return redirect("accounts:login")
-        if not is_student(request.user):
-            messages.error(request, "You must be a student to access this page.")
-            return redirect("home")
-        return view_func(request, *args, **kwargs)
 
     return _wrapped_view
 

@@ -209,7 +209,7 @@ def build_options(exam_question, *, seed: int | None = None, randomize: bool = T
     # Materialize with list() first so we always iterate the queryset / prefetch cache exactly once.
     options = sorted(list(exam_question.options.all()), key=lambda o: o.id)
     if randomize:
-        rnd = random.Random(seed) if seed is not None else random
+        rnd = random.Random(seed) if seed is not None else random  # nosec B311
         rnd.shuffle(options)
 
     payload: list[dict[str, Any]] = []

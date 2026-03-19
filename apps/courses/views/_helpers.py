@@ -9,14 +9,12 @@ Authorization convention for this app
   (wraps ``core.permissions.ensure_request_permission``).
 * **Object ownership guards** – use ``IsCourseOwnerMixin`` which scopes the
   queryset to the current user's owned courses.
-* ``IsTeacherMixin`` is **deprecated** (simple group-based check). Prefer
+* ``IsTeacherMixin`` has been **disabled** (bypassed RBAC model). Use
   ``LoginRequiredMixin`` combined with an inline ``_require_org_permission`` call.
 """
 
-import warnings
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
@@ -65,24 +63,24 @@ def _require_org_permission(request, permission):
 class IsTeacherMixin(LoginRequiredMixin, UserPassesTestMixin):
     """Yalnız müəllim (is_teacher_or_above) bu view-a girə bilər.
 
-    .. deprecated::
-        Uses the legacy group-based role check (``is_teacher_or_above``).  Prefer
-        ``LoginRequiredMixin`` combined with an inline
+    .. removed::
+        This mixin has been disabled. It used the legacy group-based role check
+        (``is_teacher_or_above``) which bypasses the organization RBAC model.
+        Use ``LoginRequiredMixin`` combined with an inline
         ``_require_org_permission(request, '<permission>')`` call inside the view
         method that actually needs the RBAC guard.
     """
 
     def dispatch(self, request, *args, **kwargs):
-        warnings.warn(
-            "IsTeacherMixin is deprecated. Use LoginRequiredMixin combined with "
-            "_require_org_permission() or core.permissions.ensure_request_permission() instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        raise ImproperlyConfigured(
+            "IsTeacherMixin has been removed because it bypassed the organization RBAC model "
+            "and could allow cross-tenant data access. "
+            "Use LoginRequiredMixin combined with _require_org_permission() or "
+            "core.permissions.ensure_request_permission() instead."
         )
-        return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
-        return getattr(self.request.user, "is_teacher_or_above", False)
+        return False  # unreachable; dispatch raises before this is called
 
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:

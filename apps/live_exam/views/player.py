@@ -7,7 +7,7 @@ Player views for live exam sessions.
 from __future__ import annotations
 
 import io
-import random
+import secrets
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -228,12 +228,12 @@ def _nickname_conflict_message() -> str:
 
 
 def _random_join_avatar_key() -> str:
-    return random.choice(AVATAR_KEYS) if AVATAR_KEYS else DEFAULT_AVATAR_KEY
+    return secrets.choice(AVATAR_KEYS) if AVATAR_KEYS else DEFAULT_AVATAR_KEY
 
 
 def _random_join_accessory_key() -> str:
     candidates = [key for key in ACCESSORY_KEYS if key and key != DEFAULT_ACCESSORY_KEY]
-    return random.choice(candidates) if candidates else DEFAULT_ACCESSORY_KEY
+    return secrets.choice(candidates) if candidates else DEFAULT_ACCESSORY_KEY
 
 
 def _nickname_is_taken(

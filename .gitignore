@@ -32,6 +32,8 @@ env.bak/
 # =========================
 db.sqlite3
 *.sqlite3
+*.sqlite
+*.db
 /staticfiles/
 /static_root/
 /media/
@@ -132,5 +134,5 @@ db.sqlite3
 # Secret Readme File
 # =========================
 
-security_best_practices_report.md
 test.db
+security_best_practices_report.md
