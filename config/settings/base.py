@@ -130,8 +130,32 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# Keep CSRF cookie in Lax mode to reduce cross-site request risks on POST endpoints.
+# ---------------------------------------------------------------------------
+# Cookie security settings
+# ---------------------------------------------------------------------------
+# Session cookie: HttpOnly prevents JS access; Lax blocks cross-site POST.
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+
+# CSRF cookie: SameSite=Lax protects against CSRF on cross-site requests.
+# HttpOnly must be False so the JS CSRF helper can read the token.
+CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = "Lax"
+
+# Language cookie: HttpOnly and SameSite to protect the i18n cookie
+# set by /i18n/setlang/.
+LANGUAGE_COOKIE_HTTPONLY = True
+LANGUAGE_COOKIE_SAMESITE = "Lax"
+
+# ---------------------------------------------------------------------------
+# Security headers (apply to all environments; stricter values in production)
+# ---------------------------------------------------------------------------
+# Prevent the browser from MIME-sniffing a response away from the declared
+# content-type.
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Instruct browsers not to render this site inside a frame (clickjacking).
+X_FRAME_OPTIONS = "DENY"
 
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
