@@ -3,7 +3,10 @@ View tests for blog app.
 """
 
 from django.contrib.auth import get_user_model
+from django.core import mail
+from django.core.cache import cache
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
@@ -13,6 +16,12 @@ from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
+LOCMEM_CACHE_SETTINGS = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "blog-rate-limit-tests",
+    }
+}
 
 
 def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
@@ -36,6 +45,29 @@ def _assign_user_to_org(user, organization, profile_role, *, membership_role_nam
             "is_active": True,
         },
     )
+
+
+@override_settings(
+    CACHES=LOCMEM_CACHE_SETTINGS,
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    SUBSCRIBE_RATE_LIMIT="1/1m",
+)
+class SubscribeRateLimitTest(TestCase):
+    def setUp(self):
+        cache.clear()
+        mail.outbox = []
+        self.subscribe_url = reverse("subscribe")
+
+    def test_subscribe_blocks_after_rate_limit(self):
+        first = self.client.post(self.subscribe_url, {"email": "rate-limit@example.com"})
+        self.assertEqual(first.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+
+        blocked = self.client.post(self.subscribe_url, {"email": "rate-limit@example.com"})
+
+        self.assertEqual(blocked.status_code, 429)
+        self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
+        self.assertEqual(len(mail.outbox), 1)
 
 
 class BlogRoleAccessTest(TestCase):
