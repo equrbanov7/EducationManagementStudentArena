@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import http_date
 from django.utils.translation import pgettext_lazy
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
 from apps.blog.models import Post
@@ -66,6 +66,13 @@ from ._helpers import (
 )
 
 User = get_user_model()
+PUBLIC_PROFILE_SEARCH_MAX_LENGTH = 100
+PUBLIC_PROFILE_CATEGORY_MAX_LENGTH = 120
+
+
+def _normalize_public_profile_query_value(raw_value, *, max_length):
+    normalized = " ".join(str(raw_value or "").split())
+    return normalized[:max_length]
 
 def profile_avatar(request, user_id):
     """Serve profile avatar through Django to avoid direct MEDIA URL dependency."""
@@ -1071,7 +1078,7 @@ def user_profile(request):
 
     return render(request, "accounts/profile.html", context)
 
-
+@require_safe
 def public_user_profile(request, username):
     """
     Public user profile showing only published posts and non-confidential profile information.
@@ -1095,8 +1102,14 @@ def public_user_profile(request, username):
         .order_by("-created_at")
     )
 
-    search_query = (request.GET.get("q") or "").strip()
-    selected_category = (request.GET.get("category") or "").strip()
+    search_query = _normalize_public_profile_query_value(
+        request.GET.get("q"),
+        max_length=PUBLIC_PROFILE_SEARCH_MAX_LENGTH,
+    )
+    selected_category = _normalize_public_profile_query_value(
+        request.GET.get("category"),
+        max_length=PUBLIC_PROFILE_CATEGORY_MAX_LENGTH,
+    )
 
     user_posts_list = published_posts
     if search_query:

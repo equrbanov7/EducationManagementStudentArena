@@ -473,6 +473,16 @@ class PublicProfileViewTest(TestCase):
         self.assertEqual(page_response.status_code, 200)
         self.assertEqual(page_response.context["posts"].number, 2)
 
+    def test_public_profile_treats_semicolon_search_as_plain_text(self):
+        response = self.client.get(
+            reverse("accounts:public_profile", args=[self.owner.username]),
+            {"q": ";"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["search_query"], ";")
+        self.assertEqual(response.context["posts"].paginator.count, 0)
+
     def test_public_profile_active_category_link_toggles_filter_off(self):
         response = self.client.get(
             reverse("accounts:public_profile", args=[self.owner.username]),
