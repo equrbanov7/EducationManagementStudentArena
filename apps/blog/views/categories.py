@@ -1,11 +1,24 @@
 # blog/views/categories.py
+import re
 
 from django.core.paginator import Paginator
-from django.urls import reverse
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from ..models import Category, Post
 from ..selectors import filter_posts_by_category_scope, get_popular_topics, get_sidebar_categories
+
+_PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
+
+
+def _parse_category_page_number(raw_value):
+    normalized = str(raw_value or "").strip()
+    if not normalized:
+        return None
+    if not _PAGE_NUMBER_RE.fullmatch(normalized):
+        return None
+    return int(normalized)
 
 
 def render_category_page(request, category, *, template_name="blog/category_detail.html"):
@@ -16,7 +29,11 @@ def render_category_page(request, category, *, template_name="blog/category_deta
         published_posts,
         category,
     ).order_by("-created_at")
-    page_obj = Paginator(post_list, 6).get_page(request.GET.get("page"))
+    raw_page_number = request.GET.get("page")
+    page_number = _parse_category_page_number(raw_page_number)
+    if raw_page_number not in (None, "") and page_number is None:
+        return HttpResponseBadRequest("Invalid page parameter.")
+    page_obj = Paginator(post_list, 6).get_page(page_number)
 
     categories = get_sidebar_categories(
         posts_queryset=published_posts,

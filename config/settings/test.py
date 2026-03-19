@@ -18,9 +18,6 @@ SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
 # Debug should be False for tests to catch issues
 DEBUG = False
 
-# The local test environment may not have django-csp installed.
-MIDDLEWARE = [mw for mw in MIDDLEWARE if mw != "csp.middleware.CSPMiddleware"]
-
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 # Use in-memory SQLite for fast tests
@@ -56,6 +53,8 @@ SITE_URL = "http://testserver"
 
 # Static files - simple storage for tests
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 # Add live_exam static files directory
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
