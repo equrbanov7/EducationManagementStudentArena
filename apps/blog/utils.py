@@ -1,5 +1,5 @@
-import random
 import re
+import secrets
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -13,7 +13,7 @@ signer = TimestampSigner()
 
 
 def generate_otp():
-    return f"{random.randint(0, 999999):06d}"
+    return f"{secrets.randbelow(1_000_000):06d}"
 
 
 def send_verify_email(user, code: str, *, request=None, expires_at=None):

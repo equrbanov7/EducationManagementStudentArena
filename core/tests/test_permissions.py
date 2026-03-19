@@ -4,9 +4,9 @@ Tests for the unified RBAC authorization layer.
 Covers:
 * ``core.permissions.request_has_permission`` – primary inline check.
 * ``core.permissions.ensure_request_permission`` – raises PermissionDenied.
-* ``core.permissions.teacher_required`` / ``student_required`` – deprecated decorators.
-* ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` – deprecated mixins.
-* ``apps.courses.views._helpers.IsTeacherMixin`` – deprecated local mixin.
+* ``core.permissions.teacher_required`` / ``student_required`` – removed decorators.
+* ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` – removed mixins.
+* ``apps.courses.views._helpers.IsTeacherMixin`` – removed local mixin.
 * ``apps.organizations.decorators`` FBV decorators – deprecated.
 """
 
@@ -17,7 +17,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.test import RequestFactory, TestCase
 
 from core.permissions import (
@@ -175,75 +175,53 @@ class EnsureRequestPermissionTest(TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Deprecated core.permissions decorator tests
+# Removed legacy core.permissions decorator tests
 # ---------------------------------------------------------------------------
 
 
-class DeprecatedDecoratorTest(TestCase):
-    """Deprecated ``teacher_required`` and ``student_required`` emit DeprecationWarning."""
+class RemovedDecoratorTest(TestCase):
+    """Removed ``teacher_required`` and ``student_required`` raise ImproperlyConfigured."""
 
-    def test_teacher_required_emits_deprecation_warning(self):
+    def test_teacher_required_raises_improperly_configured(self):
         @teacher_required
         def dummy_view(request):
             return "ok"
 
-        # Use SimpleNamespace so we can freely set the group-based property
-        # that the deprecated decorator checks.
-        user = SimpleNamespace(
-            is_authenticated=True,
-            is_teacher_or_above=True,
-        )
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = user
-        request.session = {}
-        request._messages = MagicMock()
+        request.user = SimpleNamespace(is_authenticated=True)
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             dummy_view(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("teacher_required" in str(w.message) for w in deprecation_warnings),
-            "teacher_required should emit a DeprecationWarning",
-        )
+        self.assertIn("teacher_required", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))
 
-    def test_student_required_emits_deprecation_warning(self):
+    def test_student_required_raises_improperly_configured(self):
         @student_required
         def dummy_view(request):
             return "ok"
 
-        user = SimpleNamespace(
-            is_authenticated=True,
-            is_student=True,
-        )
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = user
-        request.session = {}
-        request._messages = MagicMock()
+        request.user = SimpleNamespace(is_authenticated=True)
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             dummy_view(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("student_required" in str(w.message) for w in deprecation_warnings),
-            "student_required should emit a DeprecationWarning",
-        )
+        self.assertIn("student_required", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))
 
 
 # ---------------------------------------------------------------------------
-# Deprecated core.mixins mixin tests
+# Removed core.mixins mixin tests
 # ---------------------------------------------------------------------------
 
 
-class DeprecatedMixinsTest(TestCase):
-    """Deprecated ``core.mixins`` classes emit DeprecationWarning on dispatch."""
+class RemovedMixinsTest(TestCase):
+    """Removed ``core.mixins`` classes raise ImproperlyConfigured on dispatch."""
 
-    def test_teacher_required_mixin_emits_deprecation_warning(self):
+    def test_teacher_required_mixin_raises_improperly_configured(self):
         from django.http import HttpResponse
         from django.views import View
 
@@ -253,26 +231,17 @@ class DeprecatedMixinsTest(TestCase):
             def get(self, request, *args, **kwargs):
                 return HttpResponse("ok")
 
-        # Use SimpleNamespace so we can freely set the group-based property.
-        user = SimpleNamespace(
-            is_authenticated=True,
-            is_teacher_or_above=True,
-        )
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = user
-        request._messages = MagicMock()
+        request.user = SimpleNamespace(is_authenticated=True)
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             _View.as_view()(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("TeacherRequiredMixin" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("TeacherRequiredMixin", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))
 
-    def test_student_required_mixin_emits_deprecation_warning(self):
+    def test_student_required_mixin_raises_improperly_configured(self):
         from django.http import HttpResponse
         from django.views import View
 
@@ -282,23 +251,15 @@ class DeprecatedMixinsTest(TestCase):
             def get(self, request, *args, **kwargs):
                 return HttpResponse("ok")
 
-        user = SimpleNamespace(
-            is_authenticated=True,
-            is_student=True,
-        )
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = user
-        request._messages = MagicMock()
+        request.user = SimpleNamespace(is_authenticated=True)
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             _View.as_view()(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("StudentRequiredMixin" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("StudentRequiredMixin", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))
 
 
 # ---------------------------------------------------------------------------
@@ -381,14 +342,14 @@ class DeprecatedOrgDecoratorsTest(TestCase):
 
 
 # ---------------------------------------------------------------------------
-# IsTeacherMixin deprecation
+# IsTeacherMixin removal
 # ---------------------------------------------------------------------------
 
 
-class IsTeacherMixinDeprecationTest(TestCase):
-    """IsTeacherMixin in courses.views._helpers emits DeprecationWarning."""
+class IsTeacherMixinRemovedTest(TestCase):
+    """IsTeacherMixin in courses.views._helpers raises ImproperlyConfigured."""
 
-    def test_is_teacher_mixin_emits_deprecation_warning(self):
+    def test_is_teacher_mixin_raises_improperly_configured(self):
         from django.http import HttpResponse
         from django.views import View
 
@@ -398,20 +359,12 @@ class IsTeacherMixinDeprecationTest(TestCase):
             def get(self, request, *args, **kwargs):
                 return HttpResponse("ok")
 
-        # Use SimpleNamespace so we can freely set the group-based property.
-        user = SimpleNamespace(
-            is_authenticated=True,
-            is_teacher_or_above=True,
-        )
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = user
+        request.user = SimpleNamespace(is_authenticated=True)
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             _CourseView.as_view()(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("IsTeacherMixin" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("IsTeacherMixin", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))

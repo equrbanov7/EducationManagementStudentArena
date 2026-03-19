@@ -3,7 +3,7 @@ Core utility functions for EMS Arena project.
 Reusable helper functions used across the application.
 """
 
-import random
+import secrets
 import string
 
 from django.conf import settings
@@ -16,21 +16,22 @@ def generate_otp(length=6):
     """
     Generate a random OTP (One-Time Password) of specified length.
     """
-    return "".join(random.choices(string.digits, k=length))
+    return "".join(secrets.choice(string.digits) for _ in range(length))
 
 
 def generate_pin(length=4):
     """
     Generate a random PIN of specified length.
     """
-    return "".join(random.choices(string.digits, k=length))
+    return "".join(secrets.choice(string.digits) for _ in range(length))
 
 
 def generate_code(length=8):
     """
     Generate a random alphanumeric code of specified length.
     """
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    alphabet = string.ascii_uppercase + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def send_template_email(subject, template_name, context, recipient_list, from_email=None):
@@ -61,12 +62,13 @@ def get_public_base_url(request=None):
     """
     Resolve the externally reachable site origin for links sent to users.
     """
-    if request is not None:
-        try:
-            return request.build_absolute_uri("/").rstrip("/")
-        except Exception:
-            pass
-    return str(getattr(settings, "SITE_URL", "http://127.0.0.1:8000")).rstrip("/")
+    fallback_url = str(getattr(settings, "SITE_URL", "http://127.0.0.1:8000")).rstrip("/")
+    if request is None:
+        return fallback_url
+    try:
+        return request.build_absolute_uri("/").rstrip("/")
+    except Exception:
+        return fallback_url
 
 
 def build_absolute_url(path="", request=None):

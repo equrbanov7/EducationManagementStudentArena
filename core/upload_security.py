@@ -110,7 +110,7 @@ def _read_head(uploaded_file, size=16):
             try:
                 uploaded_file.seek(current_pos)
             except Exception:
-                pass
+                current_pos = None
     return chunk or b""
 
 

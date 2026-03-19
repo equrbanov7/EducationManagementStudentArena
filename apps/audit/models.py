@@ -2,14 +2,88 @@
 Models for the audit app.
 """
 
+import logging
 import uuid
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import connections, models
 
 from core.constants import AuditAction
+
+logger = logging.getLogger(__name__)
+
+
+class AuditLogManager(models.Manager):
+    """
+    Keep audit log reads and writes working during schema drift windows.
+
+    Some environments may still have the `audit.0003` table shape during a
+    rolling deploy, which means the legacy resource columns are absent even
+    though the model expects them. When that happens, defer those fields on
+    reads and omit them from inserts until the repair migration is applied.
+    """
+
+    _LEGACY_RESOURCE_FIELDS = frozenset({"resource_type", "resource_id", "resource_repr"})
+    _compat_warning_emitted = False
+
+    def _missing_field_names(self, using: str) -> set[str]:
+        connection = connections[using]
+        table_name = self.model._meta.db_table
+        with connection.cursor() as cursor:
+            description = connection.introspection.get_table_description(cursor, table_name)
+        normalize = connection.introspection.identifier_converter
+        existing_columns = {normalize(column.name) for column in description}
+        return {
+            field.name
+            for field in self.model._meta.local_concrete_fields
+            if not field.generated and normalize(field.column) not in existing_columns
+        }
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        missing_legacy_fields = self._missing_field_names(queryset.db) & self._LEGACY_RESOURCE_FIELDS
+        if missing_legacy_fields:
+            return queryset.defer(*sorted(missing_legacy_fields))
+        return queryset
+
+    def create(self, **kwargs):
+        using = self.db
+        missing_field_names = self._missing_field_names(using)
+        if not missing_field_names:
+            return super().create(**kwargs)
+
+        obj = self.model(**kwargs)
+        fields = [
+            field
+            for field in self.model._meta.local_concrete_fields
+            if not field.generated
+            and field.name not in missing_field_names
+            and (obj.pk is not None or field is not self.model._meta.auto_field)
+        ]
+        returning_fields = [
+            field for field in self.model._meta.db_returning_fields if field.name not in missing_field_names
+        ]
+        results = super().get_queryset()._insert(
+            [obj],
+            fields=fields,
+            returning_fields=returning_fields,
+            using=using,
+            raw=False,
+        )
+        if results:
+            for value, field in zip(results[0], returning_fields):
+                setattr(obj, field.attname, value)
+        obj._state.adding = False
+        obj._state.db = using
+
+        if not self._compat_warning_emitted and missing_field_names & self._LEGACY_RESOURCE_FIELDS:
+            logger.warning(
+                "AuditLog table is missing legacy resource columns; compatibility mode is active until migrations repair the schema."
+            )
+            self._compat_warning_emitted = True
+        return obj
 
 
 class AuditLog(models.Model):
@@ -63,6 +137,8 @@ class AuditLog(models.Model):
 
     # Timestamp
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    objects = AuditLogManager()
 
     class Meta:
         ordering = ["-created_at"]
