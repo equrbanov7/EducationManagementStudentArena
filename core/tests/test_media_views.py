@@ -8,6 +8,7 @@ import os
 import tempfile
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.test import Client, TestCase, override_settings
 
 User = get_user_model()
@@ -15,8 +16,8 @@ User = get_user_model()
 
 class ProtectedMediaViewTest(TestCase):
     """
-    Verify that private media files are only accessible to authenticated users,
-    and that public files are freely accessible.
+    Verify that private media files redirect unauthenticated users and that
+    public files are freely accessible.
     """
 
     def setUp(self):
@@ -24,6 +25,11 @@ class ProtectedMediaViewTest(TestCase):
         self.user = User.objects.create_user(
             username="media_test_user",
             email="media@example.com",
+            password="StrongPass123!",
+        )
+        self.superuser = User.objects.create_superuser(
+            username="media_superuser",
+            email="media_super@example.com",
             password="StrongPass123!",
         )
         # Create a temporary directory to act as MEDIA_ROOT for tests
@@ -58,14 +64,33 @@ class ProtectedMediaViewTest(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertIn("login", response["Location"].lower())
 
-    def test_private_file_accessible_to_authenticated_user(self):
-        """Authenticated users can access private media files that exist on disk."""
+    def test_private_file_forbidden_for_authenticated_user_without_ownership(self):
+        """Authenticated user with no file ownership or org membership gets 403."""
         from core.media_views import protected_media
         from django.test import RequestFactory
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
-        request.user = self.user
+        request.user = self.user  # regular user, no ownership record in DB
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path="projects/submissions/sample.txt")
+
+    def test_private_file_accessible_to_superuser(self):
+        """Superusers can access any private media file regardless of ownership."""
+        from core.media_views import protected_media
+        from django.test import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get("/media/projects/submissions/sample.txt")
+        request.user = self.superuser
 
         with override_settings(
             MEDIA_ROOT=self.media_tmp,
@@ -101,14 +126,13 @@ class ProtectedMediaViewTest(TestCase):
     def test_path_traversal_returns_404(self):
         """Path traversal attempts must be rejected."""
         from core.media_views import protected_media
-        from django.contrib.auth.models import AnonymousUser
         from django.core.exceptions import SuspiciousFileOperation
         from django.http import Http404
         from django.test import RequestFactory
 
         factory = RequestFactory()
         request = factory.get("/media/../../etc/passwd")
-        request.user = self.user  # authenticated, so auth check passes
+        request.user = self.superuser  # superuser to bypass auth; path check comes first
 
         with override_settings(
             MEDIA_ROOT=self.media_tmp,
@@ -157,13 +181,13 @@ class ProtectedMediaViewTest(TestCase):
             self.assertEqual(response.status_code, 200)
 
     def test_x_accel_redirect_header_set_for_private_file(self):
-        """When MEDIA_ACCEL_REDIRECT_URL is set, response uses X-Accel-Redirect."""
+        """When MEDIA_ACCEL_REDIRECT_URL is set, response uses X-Accel-Redirect (superuser)."""
         from core.media_views import protected_media
         from django.test import RequestFactory
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
-        request.user = self.user  # authenticated
+        request.user = self.superuser  # superuser bypasses ownership check
 
         with override_settings(
             MEDIA_ROOT=self.media_tmp,
@@ -179,6 +203,16 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_serve_media_false_does_not_expose_media_in_production(self):
         """SERVE_MEDIA=False in production means no Django-based media serving."""
+        import importlib
+        import sys
+        from django.urls import clear_url_caches
+
+        # Force URL module re-import so the test is not affected by previous
+        # tests that temporarily set SERVE_MEDIA=True (which causes the URL to
+        # be registered in sys.modules["config.urls"].urlpatterns).
+        sys.modules.pop("config.urls", None)
+        clear_url_caches()
+
         # When SERVE_MEDIA is False (the production default), the /media/ URL
         # pattern is not registered at all, so requests return 404.
         with override_settings(
@@ -188,3 +222,226 @@ class ProtectedMediaViewTest(TestCase):
         ):
             response = self.client.get("/media/projects/submissions/sample.txt")
             self.assertEqual(response.status_code, 404)
+
+        # Restore URL module for subsequent tests
+        sys.modules.pop("config.urls", None)
+        clear_url_caches()
+
+
+class ProtectedMediaOwnershipTest(TestCase):
+    """
+    Verify that private media access is tenant-aware and owner-aware.
+
+    Tests cover:
+    * File owner may access their own submission.
+    * Teacher-level org member may access files in their org.
+    * Cross-org access is denied.
+    * Unauthenticated access is always redirected.
+    """
+
+    def setUp(self):
+        from apps.courses.models import Course
+        from apps.organizations.models import Membership, Organization
+        from apps.projects.models import Project, ProjectSubmission
+        from core.constants import OrganizationType
+
+        self.media_tmp = tempfile.mkdtemp()
+
+        # Create two users
+        self.student = User.objects.create_user(
+            username="media_owner_student",
+            email="media_owner_student@example.com",
+            password="StrongPass123!",
+        )
+        self.teacher = User.objects.create_user(
+            username="media_owner_teacher",
+            email="media_owner_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.other_user = User.objects.create_user(
+            username="media_other_user",
+            email="media_other@example.com",
+            password="StrongPass123!",
+        )
+
+        # Create organization A (where the file belongs)
+        self.org_a = Organization.objects.create(
+            name="Media Test Org A",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+
+        # Create organization B (for cross-org denial tests)
+        self.org_b = Organization.objects.create(
+            name="Media Test Org B",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.other_user,
+            status="active",
+            is_active=True,
+        )
+
+        # Assign teacher to org A with teacher role
+        teacher_role_a = self.org_a.roles.get(name="teacher")
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org_a,
+            role=teacher_role_a,
+            is_primary=True,
+            is_active=True,
+        )
+
+        # Assign student to org A with student role
+        student_role_a = self.org_a.roles.get(name="student")
+        Membership.objects.create(
+            user=self.student,
+            organization=self.org_a,
+            role=student_role_a,
+            is_primary=True,
+            is_active=True,
+        )
+
+        # Assign other_user only to org B (so they have no access to org A resources)
+        teacher_role_b = self.org_b.roles.get(name="teacher")
+        Membership.objects.create(
+            user=self.other_user,
+            organization=self.org_b,
+            role=teacher_role_b,
+            is_primary=True,
+            is_active=True,
+        )
+
+        # Create course and project in org A
+        self.course = Course.objects.create(
+            owner=self.teacher,
+            title="Media Test Course",
+            status="published",
+            organization=self.org_a,
+        )
+        self.project = Project.objects.create(
+            course=self.course,
+            title="Media Test Project",
+            description="For media access tests",
+            start_date="2024-01-01 00:00:00+00:00",
+            deadline="2099-01-01 00:00:00+00:00",
+            status="active",
+        )
+
+        # Create a submission from the student
+        self.file_path = "projects/submissions/media_test_file.pdf"
+        self.submission = ProjectSubmission.objects.create(
+            project=self.project,
+            student=self.student,
+            content="Test submission content",
+            file=self.file_path,
+        )
+
+        # Create the physical file in the temporary media directory
+        file_dir = os.path.join(self.media_tmp, "projects", "submissions")
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "media_test_file.pdf"), "w") as f:
+            f.write("test content")
+
+    def _make_request(self, user, path):
+        from django.test import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{path}")
+        request.user = user
+        return request
+
+    def test_file_owner_can_access_own_submission(self):
+        """The student who submitted a file can access it."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.student, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_teacher_in_same_org_can_access_submission(self):
+        """A teacher-level member of the same org can access submissions in their org."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.teacher, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_cross_org_user_cannot_access_submission(self):
+        """A user from a different org cannot access another org's submission files."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.other_user, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=self.file_path)
+
+    def test_unauthenticated_user_redirected_to_login(self):
+        """Unauthenticated users are always redirected to login for private files."""
+        from core.media_views import protected_media
+        from django.contrib.auth.models import AnonymousUser
+
+        from django.test import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{self.file_path}")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_file_not_in_db_returns_403(self):
+        """Files that cannot be matched to a DB record are denied (deny-by-default)."""
+        from core.media_views import protected_media
+
+        # This path doesn't exist in the database
+        unknown_path = "projects/submissions/unknown_file_not_in_db.pdf"
+
+        # Create the physical file
+        file_dir = os.path.join(self.media_tmp, "projects", "submissions")
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "unknown_file_not_in_db.pdf"), "w") as f:
+            f.write("orphan file")
+
+        request = self._make_request(self.teacher, unknown_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=unknown_path)

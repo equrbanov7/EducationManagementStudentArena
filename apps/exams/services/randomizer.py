@@ -8,7 +8,7 @@ from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
 def build_shuffled_options(attempt_id, question):
     opts = list(question.options.all())
-    rnd = random.Random(f"{attempt_id}:{question.id}")
+    rnd = random.Random(f"{attempt_id}:{question.id}")  # nosec B311
     rnd.shuffle(opts)
     packed = []
     for i, opt in enumerate(opts):
