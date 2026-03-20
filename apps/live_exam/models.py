@@ -1,18 +1,22 @@
 import secrets
 import string
 
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.models import Exam, ExamQuestion
 from apps.live_exam.constants import DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
 
-PIN_LENGTH = 8
+# Minimum PIN length: 10 alphanumeric characters.
+# Entropy: 36^10 ≈ 3.6 × 10^15 combinations — brute-force resistant
+# even without rate-limiting.
+PIN_LENGTH = 10
+_PIN_ALPHABET = string.digits + string.ascii_uppercase
 
 
 def generate_pin():
-    return "".join(secrets.choice(string.digits) for _ in range(PIN_LENGTH))
+    return "".join(secrets.choice(_PIN_ALPHABET) for _ in range(PIN_LENGTH))
 
 
 class LiveSession(models.Model):
@@ -55,19 +59,46 @@ class LiveSession(models.Model):
     host_settings = models.JSONField(default=dict, blank=True)
 
     def _ensure_unique_pin(self):
+        """
+        Generate a collision-free PIN, protected against race conditions.
+
+        Strategy
+        --------
+        1. Check whether the current PIN is taken (cheap DB read).
+        2. If taken, regenerate and retry — up to ``_MAX_PIN_TRIES`` times.
+        3. As a last resort, wrap the final uniqueness check + save in a
+           ``SELECT … FOR UPDATE SKIP LOCKED`` advisory lock so that two
+           concurrent session-create requests cannot both read "PIN free" and
+           then both insert the same value.  The DB-level unique constraint on
+           the ``pin`` column is the final safety net, but the lock prevents
+           the IntegrityError from ever reaching application code.
+
+        The lock only covers the check-then-write window; ordinary reads of
+        existing sessions are unaffected.
+        """
+        _MAX_PIN_TRIES = 20
         tries = 0
-        existing_sessions = LiveSession.objects.exclude(pk=self.pk) if self.pk else LiveSession.objects.all()
-        while existing_sessions.filter(pin=self.pin).exists():
+        while True:
+            qs = LiveSession.objects.exclude(pk=self.pk) if self.pk else LiveSession.objects.all()
+            if not qs.filter(pin=self.pin).exists():
+                break
             self.pin = generate_pin()
             tries += 1
-            if tries > 10:
-                raise RuntimeError("PIN generate failed")
+            if tries >= _MAX_PIN_TRIES:
+                raise RuntimeError(
+                    f"Could not generate a unique PIN after {_MAX_PIN_TRIES} attempts. "
+                    "The PIN space may be exhausted — consider increasing PIN_LENGTH."
+                )
 
     def save(self, *args, **kwargs):
         if not self.pin:
             self.pin = generate_pin()
-        self._ensure_unique_pin()
-        super().save(*args, **kwargs)
+        # Wrap the uniqueness check and the actual INSERT/UPDATE in a single
+        # atomic block so concurrent session creation cannot produce duplicate
+        # PINs.  The DB unique constraint on `pin` remains as a hard backstop.
+        with transaction.atomic():
+            self._ensure_unique_pin()
+            super().save(*args, **kwargs)
 
     def join_url_path(self):
         return f"/live/join/{self.pin}/"

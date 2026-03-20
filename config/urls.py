@@ -38,8 +38,14 @@ urlpatterns = [
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
     path("health/", health_check, name="health_check"),
     path("ping/", ping, name="ping"),
-    path("test-error/", test_error, name="test_error"),
 ]
+
+if settings.DEBUG:
+    # Only expose this endpoint in development.  In production, triggering a
+    # Sentry test error must not be possible by unauthenticated third parties.
+    urlpatterns += [
+        path("test-error/", test_error, name="test_error"),
+    ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

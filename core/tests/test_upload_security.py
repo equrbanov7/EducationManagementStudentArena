@@ -196,3 +196,52 @@ class UploadSecurityFilenameRandomizationTest(TestCase):
         randomize_uploaded_filename(f1)
         randomize_uploaded_filename(f2)
         self.assertNotEqual(f1.name, f2.name)
+
+
+# ---------------------------------------------------------------------------
+# Task 8 — Required named tests
+# ---------------------------------------------------------------------------
+
+
+class UploadSecurityRequiredNamedTests(TestCase):
+    """
+    Canonical test methods required by the Task 8 acceptance criteria.
+
+    Each test maps to the exact name listed in the problem statement so that
+    CI can verify their presence.  Where equivalent coverage already exists in
+    the classes above these tests use the same helpers to avoid duplication.
+    """
+
+    def _make_file(self, filename, content=b"safe content", content_type="application/octet-stream"):
+        return SimpleUploadedFile(filename, content, content_type=content_type)
+
+    def test_exe_upload_blocked(self):
+        """Files with an ``.exe`` extension must be rejected."""
+        f = self._make_file("malware.exe", b"MZ\x90\x00", "application/x-msdownload")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)
+
+    def test_double_extension_attack_blocked(self):
+        """A file like ``shell.php.jpg`` must be rejected due to the hidden ``.php``."""
+        f = SimpleUploadedFile("shell.php.jpg", b"\xff\xd8\xff\xe0", content_type="image/jpeg")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)
+
+    def test_file_size_limit_enforced(self):
+        """A file exceeding the configured size limit must be rejected."""
+        oversized = b"X" * (1 * 1024 * 1024 + 1)
+        f = self._make_file("big.pdf", oversized, "application/pdf")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f, max_size_mb=1)
+
+    def test_pe_magic_bytes_blocked(self):
+        """
+        A file whose first two bytes are the PE magic number (``MZ`` / ``4D 5A``)
+        must be blocked even when it carries an innocent extension such as
+        ``.pdf``.  This catches EXE/DLL files smuggled with renamed extensions.
+        """
+        # DOS/PE header: MZ followed by the standard DOS stub header bytes.
+        pe_content = b"MZ\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00"
+        f = self._make_file("document.pdf", pe_content, "application/pdf")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)
