@@ -100,6 +100,10 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # access controls. Use the /media/download/<path>/ endpoint for authenticated access.
 SERVE_MEDIA = False
 
+# Nginx internal redirect prefix for X-Accel-Redirect (Task 6: private media).
+# Nginx must define a matching `location /internal_media/ { internal; ... }` block.
+MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_media")
+
 # Add live_exam static files directory
 STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 

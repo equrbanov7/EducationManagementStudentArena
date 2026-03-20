@@ -22,8 +22,21 @@ RUN pip install --no-cache-dir -r /app/requirements/production.txt
 COPY . /app/
 RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Build-time arguments: dummy values used only during the collectstatic RUN
+# step so that production.py can be imported without real secrets.
+# These ARGs are NOT written into the final image's ENV and are never used
+# at runtime — runtime values are supplied via docker-compose / orchestrator.
+ARG BUILD_SECRET_KEY=build-placeholder-not-for-production
+ARG BUILD_DATABASE_URL=sqlite:////tmp/build.db
+ARG BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Collect static files using only the dummy build-time values.
+# Passing them inline to the RUN command ensures they are scoped to this
+# single layer and do not persist in the image environment.
+RUN SECRET_KEY="${BUILD_SECRET_KEY}" \
+    DATABASE_URL="${BUILD_DATABASE_URL}" \
+    ALLOWED_HOSTS="${BUILD_ALLOWED_HOSTS}" \
+    python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000

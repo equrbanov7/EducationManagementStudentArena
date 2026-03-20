@@ -477,9 +477,8 @@ jobs:
           DATABASE_URL: sqlite:///db.sqlite3
         run: |
           echo "::group::📦 Collecting Static Files"
-          python manage.py collectstatic --noinput --clear || echo "⚠️ collectstatic skipped"
+          python manage.py collectstatic --noinput --clear
           echo "::endgroup::"
-        continue-on-error: true
 
       # ───────────────────────────────────────────────────────────────────
       # Check for missing migrations
@@ -500,24 +499,187 @@ jobs:
           echo "::endgroup::"
 
   # ─────────────────────────────────────────────────────────────────────────
-  # JOB 5: CI SUCCESS (Final status)
+  # JOB 5: DOCKER PROD BUILD
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Production image-in uğurla build olduğunu yoxlamaq
+  # 📌 BEST PRACTICE: Docker Layer Caching - CI-da sürətli build
+  docker-prod-build:
+    name: 🐳 Docker Prod Build
+    runs-on: ubuntu-latest
+    needs: [lint]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ───────────────────────────────────────────────────────────────────
+      # Docker Buildx - Advanced build features + caching
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ───────────────────────────────────────────────────────────────────
+      # Build production image — uses GitHub Actions cache for layer caching.
+      # Build ARGs supply dummy values so collectstatic can run at build
+      # time without real runtime secrets (see Dockerfile.prod).
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🏗️ Build production Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 6: PROD SMOKE TEST
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Production stack-in ayağa qalxdığını və traffic serve etdiyini yoxlamaq
+  # 📌 BEST PRACTICE: /health/ və /ping/ endpoint-lərini poll et
+  prod-smoke:
+    name: 🔥 Prod Smoke Test
+    runs-on: ubuntu-latest
+    needs: [docker-prod-build]
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ───────────────────────────────────────────────────────────────────
+      # Docker Buildx (required to reuse the GHA layer cache)
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ───────────────────────────────────────────────────────────────────
+      # Rebuild from cache so docker compose can reference the local image.
+      # load: true exports the image to the local docker daemon.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🏗️ Load production image from cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          load: true
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+      # ───────────────────────────────────────────────────────────────────
+      # Spin up the production stack with CI-safe dummy secrets.
+      # SECURE_SSL_REDIRECT=False: avoids HTTPS redirect inside plain HTTP CI.
+      # APP_IMAGE points compose to the pre-built local image.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🚀 Start production stack
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+          SECURE_SSL_REDIRECT: "False"
+          SESSION_COOKIE_SECURE: "False"
+          CSRF_COOKIE_SECURE: "False"
+        run: |
+          docker compose -f docker-compose.prod.yml up -d --no-build
+
+      # ───────────────────────────────────────────────────────────────────
+      # Poll /health/ and /ping/ with retries (up to 120 s)
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🩺 Poll health and ping endpoints
+        run: |
+          echo "Waiting for the stack to be ready..."
+          MAX=24
+          for i in $(seq 1 $MAX); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ping/ 2>/dev/null || echo "000")
+            if [[ "$STATUS" == "200" ]]; then
+              echo "✅ /ping/ returned HTTP 200 after $((i * 5))s"
+              break
+            fi
+            echo "Attempt $i/$MAX — /ping/ returned HTTP $STATUS. Retrying in 5s..."
+            sleep 5
+            if [[ $i -eq $MAX ]]; then
+              echo "::error::❌ /ping/ did not return 200 within 120 s."
+              exit 1
+            fi
+          done
+
+          HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health/ 2>/dev/null || echo "000")
+          if [[ "$HEALTH" != "200" && "$HEALTH" != "207" ]]; then
+            echo "::error::❌ /health/ returned unexpected status: $HEALTH"
+            exit 1
+          fi
+          echo "✅ /health/ returned HTTP $HEALTH — stack is serving traffic."
+
+      # ───────────────────────────────────────────────────────────────────
+      # Always dump container logs for debugging, then tear down
+      # ───────────────────────────────────────────────────────────────────
+      - name: 📋 Dump container logs
+        if: always()
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          echo "=== Container logs ==="
+          docker compose -f docker-compose.prod.yml logs --no-color || true
+
+      - name: 🧹 Tear down production stack
+        if: always()
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 7: CI SUCCESS (Final status)
   # ─────────────────────────────────────────────────────────────────────────
   # 📌 NİYƏ?: Bütün job-ların uğurla bitdiyini bir yerdə göstərmək
   # 📌 BEST PRACTICE: Branch protection üçün bu job-u istifadə et
   ci-success:
     name: ✅ CI Success
     runs-on: ubuntu-latest
-    needs: [lint, security, test, build]
+    needs: [lint, security, test, build, docker-prod-build, prod-smoke]
     if: always()
     
     steps:
       - name: 📋 Check all jobs status
         run: |
           echo "=== CI Pipeline Summary ==="
-          echo "Lint:     ${{ needs.lint.result }}"
-          echo "Security: ${{ needs.security.result }}"
-          echo "Test:     ${{ needs.test.result }}"
-          echo "Build:    ${{ needs.build.result }}"
+          echo "Lint:             ${{ needs.lint.result }}"
+          echo "Security:         ${{ needs.security.result }}"
+          echo "Test:             ${{ needs.test.result }}"
+          echo "Build:            ${{ needs.build.result }}"
+          echo "Docker Prod Build:${{ needs.docker-prod-build.result }}"
+          echo "Prod Smoke:       ${{ needs.prod-smoke.result }}"
           echo "=========================="
           
           if [[ "${{ needs.lint.result }}" == "failure" ]]; then
@@ -537,6 +699,16 @@ jobs:
           
           if [[ "${{ needs.build.result }}" == "failure" ]]; then
             echo "❌ Build job failed! Missing migrations or build errors must be resolved."
+            exit 1
+          fi
+
+          if [[ "${{ needs.docker-prod-build.result }}" == "failure" ]]; then
+            echo "❌ Docker Prod Build job failed! The production image must build successfully."
+            exit 1
+          fi
+
+          if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
+            echo "❌ Prod Smoke Test failed! The production stack must start and serve traffic."
             exit 1
           fi
           
