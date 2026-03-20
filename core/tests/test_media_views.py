@@ -260,6 +260,53 @@ class ProtectedMediaViewTest(TestCase):
             self.assertEqual(response.status_code, 302)
             self.assertIn("login", response["Location"].lower())
 
+    def test_unauthenticated_user_cannot_access_private_media(self):
+        """
+        Acceptance criteria: an unauthenticated (anonymous) user must never
+        receive a successful response (HTTP 200) for any private media path.
+        The view must redirect them to the login page (HTTP 302) instead.
+
+        Covers multiple private prefixes to ensure the guard is applied
+        consistently regardless of the specific private path family.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+
+        private_paths = [
+            "projects/submissions/report.pdf",
+            "exam_uploads/answer.pdf",
+            "exam_paints/drawing.png",
+            "labs/submissions/lab.zip",
+        ]
+
+        for path in private_paths:
+            with self.subTest(path=path):
+                request = factory.get(f"/media/{path}")
+                request.user = AnonymousUser()
+
+                with override_settings(
+                    MEDIA_ROOT=self.media_tmp,
+                    MEDIA_URL="/media/",
+                    SERVE_MEDIA=True,
+                    DEBUG=False,
+                    MEDIA_ACCEL_REDIRECT_URL="",
+                ):
+                    response = protected_media(request, path=path)
+                    self.assertEqual(
+                        response.status_code,
+                        302,
+                        f"Unauthenticated user must be redirected for private path: {path}",
+                    )
+                    self.assertIn(
+                        "login",
+                        response["Location"].lower(),
+                        f"Redirect must point to login for path: {path}",
+                    )
+
     def test_dev_public_media_accessible_without_auth(self):
         """
         In DEBUG mode, public media paths (post_images/) must remain accessible

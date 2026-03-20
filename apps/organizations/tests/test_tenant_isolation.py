@@ -336,6 +336,9 @@ class RequestTenantContextTest(TestCase):
         request_valid = self._request(organization=self.org_a, memberships=[self.membership_a])
         self.assertTrue(scoped_by_organization(Role.objects.all(), request_valid).exists())
 
+    # Required named alias for acceptance criteria
+    test_scoped_by_organization_returns_none_without_org = test_scoped_by_organization_returns_none_without_context
+
 
 class HttpTenantIsolationTest(TestCase):
     """
@@ -619,6 +622,28 @@ class HttpTenantIsolationTest(TestCase):
         course_titles = [c.title for c in response.context["courses"]]
         self.assertIn(self.course_a.title, course_titles, "Teacher A must see their own org-a course")
         self.assertNotIn(self.course_b.title, course_titles, "Teacher A must NOT see org-b course")
+
+    def test_user_from_org_A_cannot_see_org_B_courses(self):
+        """
+        Acceptance criteria alias: a user logged in under Org-A must never see
+        courses that belong to Org-B in any course listing view.
+        """
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(reverse("courses:my_courses"))
+        self.assertEqual(response.status_code, 200)
+        course_titles = [c.title for c in response.context["courses"]]
+        self.assertNotIn(self.course_b.title, course_titles, "Org-A user must not see Org-B courses")
+
+    def test_user_from_org_A_cannot_see_org_B_exams(self):
+        """
+        Acceptance criteria: a user logged in under Org-A must never see
+        exams that belong to Org-B in the teacher exam list view.
+        """
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(reverse("exams:teacher_exam_list"))
+        self.assertEqual(response.status_code, 200)
+        exam_titles = [e.title for e in response.context["exams"]]
+        self.assertNotIn(self.exam_b.title, exam_titles, "Org-A user must not see Org-B exams")
 
     def test_user_org_a_cannot_download_org_b_media(self):
         """
