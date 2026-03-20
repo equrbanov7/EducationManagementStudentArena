@@ -249,6 +249,27 @@ def createAndEditExamView(request, slug=None):
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
 
+            from apps.audit.utils import log_action
+            from core.constants import AuditAction
+
+            log_action(
+                action=AuditAction.UPDATE if is_editing else AuditAction.CREATE,
+                user=request.user,
+                organization=organization,
+                obj=exam_instance,
+                new_values={"title": exam_instance.title, "is_active": str(exam_instance.is_active)},
+                reason="exam_updated" if is_editing else "exam_created",
+                request=request,
+            )
+
+            # Invalidate cached exam metadata so subsequent reads are fresh.
+            try:
+                from core.cache import invalidate_exam_metadata_cache
+
+                invalidate_exam_metadata_cache(exam_instance.pk)
+            except Exception:
+                pass
+
             messages.success(
                 request,
                 (
@@ -376,7 +397,27 @@ def delete_exam(request, slug):
         raise PermissionDenied(pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
 
     if request.method == "POST":
+        from apps.audit.utils import log_action
+        from core.constants import AuditAction
+
+        log_action(
+            action=AuditAction.DELETE,
+            user=request.user,
+            organization=exam.organization,
+            obj=exam,
+            old_values={"title": exam.title, "slug": exam.slug},
+            reason="exam_deleted",
+            request=request,
+        )
+        _exam_pk = exam.pk
         exam.delete()
+        try:
+            from core.cache import invalidate_exam_metadata_cache, invalidate_exam_question_ids_cache
+
+            invalidate_exam_metadata_cache(_exam_pk)
+            invalidate_exam_question_ids_cache(_exam_pk)
+        except Exception:
+            pass
         return redirect("exams:teacher_exam_list")
 
     return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})

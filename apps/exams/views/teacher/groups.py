@@ -154,7 +154,19 @@ def teacher_create_group(request):
 
     form = _group_form_for_request(request, organization, data=request.POST)
     if form.is_valid():
-        form.save()
+        group = form.save()
+        from apps.audit.utils import log_action
+        from core.constants import AuditAction
+
+        log_action(
+            action=AuditAction.CREATE,
+            user=request.user,
+            organization=organization,
+            obj=group,
+            new_values={"name": group.name},
+            reason="group_created",
+            request=request,
+        )
         messages.success(request, pgettext_lazy("exams.view.groups.message", "group_created"))
         next_url = _resolve_next_url(request)
         if next_url:
@@ -186,7 +198,19 @@ def teacher_update_group(request, group_id):
     form = _group_form_for_request(request, organization, data=request.POST, instance=group)
 
     if form.is_valid():
-        form.save()
+        group = form.save()
+        from apps.audit.utils import log_action
+        from core.constants import AuditAction
+
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=organization,
+            obj=group,
+            new_values={"name": group.name},
+            reason="group_updated",
+            request=request,
+        )
         messages.success(request, pgettext_lazy("exams.view.groups.message", "group_updated"))
         next_url = _resolve_next_url(request)
         if next_url:
@@ -222,6 +246,18 @@ def teacher_delete_group(request, group_id):
         return redirect("accounts:profile")
 
     group = get_object_or_404(_group_queryset_for_actor(request, organization), id=group_id)
+    from apps.audit.utils import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.DELETE,
+        user=request.user,
+        organization=organization,
+        obj=group,
+        old_values={"name": group.name},
+        reason="group_deleted",
+        request=request,
+    )
     group.delete()
     messages.success(request, pgettext_lazy("exams.view.groups.message", "group_deleted"))
     next_url = _resolve_next_url(request)
