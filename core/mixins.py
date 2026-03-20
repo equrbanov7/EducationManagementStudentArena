@@ -58,27 +58,21 @@ class StudentRequiredMixin(AccessMixin):
 
 class OwnerRequiredMixin(AccessMixin):
     """
-    Mixin that requires the user to be the owner of the object.
+    .. removed::
+        This mixin has been disabled. It relied on per-object ownership checks
+        that bypass the organization RBAC model and could allow cross-tenant
+        data access.
 
-    .. deprecated::
-        Use object-level permission checks (e.g. ``get_object_or_404`` scoped to
-        the current user) combined with ``core.permissions.request_has_permission``
-        for RBAC enforcement instead of this mixin.
+        Preferred replacements
+        ~~~~~~~~~~~~~~~~~~~~~~
+        * Scope ``get_object_or_404`` to the current user's owned objects and
+          combine with ``core.permissions.request_has_permission`` for RBAC
+          enforcement.
+        * ``apps.organizations.decorators.PermissionRequiredMixin``  – RBAC
+          permission guard for class-based views.
     """
 
     def dispatch(self, request, *args, **kwargs):
-        import warnings
-        warnings.warn(
-            "OwnerRequiredMixin is deprecated. "
-            "Use apps.organizations.decorators.OrganizationRequiredMixin / "
-            "PermissionRequiredMixin, or core.permissions.request_has_permission instead.",
-            DeprecationWarning,
-            stacklevel=2,
+        raise ImproperlyConfigured(
+            _REMOVED_MSG.format(name="OwnerRequiredMixin")
         )
-        from django.contrib import messages
-        from django.shortcuts import redirect
-        obj = self.get_object()
-        if obj.user != request.user:
-            messages.error(request, "You don't have permission to access this page.")
-            return redirect("home")
-        return super().dispatch(request, *args, **kwargs)

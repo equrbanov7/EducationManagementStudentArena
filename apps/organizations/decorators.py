@@ -20,11 +20,11 @@ Canonical FBV/inline API (preferred)
 * ``core.permissions.ensure_request_permission(request, permission)``  – Raises
   ``PermissionDenied`` when the permission is absent.
 
-Deprecated function decorators
---------------------------------
-The following function-based decorators are **deprecated** in favour of the
-canonical CBV mixins or the ``core.permissions`` inline helpers above.  They
-still function but will emit ``DeprecationWarning`` at call-time.
+Removed function decorators
+-----------------------------
+The following function-based decorators have been **removed** and will raise
+``ImproperlyConfigured`` if called.  Migrate all usages to the canonical
+CBV mixins or the ``core.permissions`` inline helpers above.
 
 * ``org_required``  – use ``OrganizationRequiredMixin`` on CBVs or add a
   ``@login_required`` + org guard in FBVs.
@@ -35,18 +35,16 @@ still function but will emit ``DeprecationWarning`` at call-time.
   permission that maps to the required role capability.
 """
 
-import warnings
 from functools import wraps
 
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.utils.translation import pgettext
 
 from .permissions import has_permission
 
-_FBV_DEPRECATION_HINT = (
+_FBV_REMOVED_HINT = (
     "Use OrganizationRequiredMixin / PermissionRequiredMixin / LevelRequiredMixin "
     "(class-based views) or core.permissions.ensure_request_permission (inline) instead."
 )
@@ -54,40 +52,31 @@ _FBV_DEPRECATION_HINT = (
 
 def org_required(view_func):
     """
-    Decorator to ensure user has an active organization selected.
-    Redirects to organization selector if no organization is active.
+    .. removed::
+        This decorator has been removed. It relied on a simple org-presence
+        check that bypasses the organization RBAC model.
 
-    .. deprecated::
-        Prefer ``apps.organizations.decorators.OrganizationRequiredMixin`` for
+        Use ``apps.organizations.decorators.OrganizationRequiredMixin`` for
         class-based views or a manual ``@login_required`` + org guard for
         function-based views.
     """
 
     @wraps(view_func)
-    @login_required
     def wrapper(request, *args, **kwargs):
-        warnings.warn(
-            "org_required is deprecated. " + _FBV_DEPRECATION_HINT,
-            DeprecationWarning,
-            stacklevel=2,
+        raise ImproperlyConfigured(
+            "org_required has been removed. " + _FBV_REMOVED_HINT
         )
-        if not hasattr(request, "organization") or request.organization is None:
-            # Redirect to organization selector
-            return redirect("organizations:select")
-        return view_func(request, *args, **kwargs)
 
     return wrapper
 
 
 def org_permission_required(permission):
     """
-    Decorator to check if user has a specific permission in the active organization.
+    .. removed::
+        This decorator has been removed. It relied on a permission check that
+        bypasses the organization RBAC model.
 
-    Args:
-        permission: Permission string to check (e.g., 'course.create')
-
-    .. deprecated::
-        Prefer ``apps.organizations.decorators.PermissionRequiredMixin`` for
+        Use ``apps.organizations.decorators.PermissionRequiredMixin`` for
         class-based views or ``core.permissions.ensure_request_permission``
         for inline checks in function-based views.
     """
@@ -95,18 +84,9 @@ def org_permission_required(permission):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            warnings.warn(
-                "org_permission_required is deprecated. " + _FBV_DEPRECATION_HINT,
-                DeprecationWarning,
-                stacklevel=2,
+            raise ImproperlyConfigured(
+                "org_permission_required has been removed. " + _FBV_REMOVED_HINT
             )
-            if not hasattr(request, "organization") or request.organization is None:
-                return redirect("organizations:select")
-            if not has_permission(request.org_permissions, permission):
-                raise PermissionDenied(
-                    pgettext("organizations.decorators.error", "missing_permission").format(permission=permission)
-                )
-            return view_func(request, *args, **kwargs)
 
         return wrapper
 
@@ -115,40 +95,20 @@ def org_permission_required(permission):
 
 def org_level_required(min_level):
     """
-    Decorator to check if user has a role with at least the specified level.
+    .. removed::
+        This decorator has been removed. It relied on role-level checks that
+        bypass the organization RBAC model.
 
-    Args:
-        min_level: Minimum role level required (1-100)
-
-    .. deprecated::
-        Prefer ``apps.organizations.decorators.LevelRequiredMixin`` for
+        Use ``apps.organizations.decorators.LevelRequiredMixin`` for
         class-based views.
     """
 
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            warnings.warn(
-                "org_level_required is deprecated. " + _FBV_DEPRECATION_HINT,
-                DeprecationWarning,
-                stacklevel=2,
+            raise ImproperlyConfigured(
+                "org_level_required has been removed. " + _FBV_REMOVED_HINT
             )
-            if not hasattr(request, "organization") or request.organization is None:
-                return redirect("organizations:select")
-            # Get highest level from user's memberships
-            max_level = 0
-            if request.org_memberships:
-                max_level = max([m.role.level for m in request.org_memberships], default=0)
-
-            if max_level < min_level:
-                raise PermissionDenied(
-                    pgettext("organizations.decorators.error", "insufficient_role_level").format(
-                        required=min_level,
-                        current=max_level,
-                    )
-                )
-
-            return view_func(request, *args, **kwargs)
 
         return wrapper
 
@@ -157,39 +117,20 @@ def org_level_required(min_level):
 
 def org_role_required(role_names):
     """
-    Decorator to check if user has one of the specified roles.
+    .. removed::
+        This decorator has been removed. Role-name matching is fragile and ties
+        code to role implementation details.
 
-    Args:
-        role_names: List of role names or a single role name string
-
-    .. deprecated::
-        Role-name matching is fragile and ties code to role implementation details.
-        Prefer ``apps.organizations.decorators.PermissionRequiredMixin`` with an
+        Use ``apps.organizations.decorators.PermissionRequiredMixin`` with an
         RBAC permission string that captures the required capability.
     """
-    if isinstance(role_names, str):
-        role_names = [role_names]
 
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            warnings.warn(
-                "org_role_required is deprecated. " + _FBV_DEPRECATION_HINT,
-                DeprecationWarning,
-                stacklevel=2,
+            raise ImproperlyConfigured(
+                "org_role_required has been removed. " + _FBV_REMOVED_HINT
             )
-            if not hasattr(request, "organization") or request.organization is None:
-                return redirect("organizations:select")
-            user_roles = [m.role.name for m in request.org_memberships]
-
-            if not any(role in user_roles for role in role_names):
-                raise PermissionDenied(
-                    pgettext("organizations.decorators.error", "required_role").format(
-                        roles=", ".join(role_names),
-                    )
-                )
-
-            return view_func(request, *args, **kwargs)
 
         return wrapper
 
