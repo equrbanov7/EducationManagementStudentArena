@@ -470,7 +470,12 @@ def host_finish(request, pin):
         request=request,
     )
 
-    return JsonResponse({"ok": True})(request, pin):
+    return JsonResponse({"ok": True})
+
+
+@require_POST
+@login_required
+def host_toggle_lock(request, pin):
     session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()

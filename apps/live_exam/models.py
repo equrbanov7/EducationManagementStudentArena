@@ -143,7 +143,28 @@ class LivePlayer(models.Model):
         return f"{self.nickname} ({self.session.pin})"
 
 
+class LiveAnswerQuerySet(models.QuerySet):
+    @staticmethod
+    def _normalize_kwargs(kwargs):
+        normalized = dict(kwargs)
+        if "question" in normalized and "question_id" not in normalized:
+            question = normalized.pop("question")
+            normalized["question_id"] = getattr(question, "id", question)
+        return normalized
+
+    def filter(self, *args, **kwargs):
+        return super().filter(*args, **self._normalize_kwargs(kwargs))
+
+    def exclude(self, *args, **kwargs):
+        return super().exclude(*args, **self._normalize_kwargs(kwargs))
+
+    def get(self, *args, **kwargs):
+        return super().get(*args, **self._normalize_kwargs(kwargs))
+
+
 class LiveAnswer(models.Model):
+    objects = LiveAnswerQuerySet.as_manager()
+
     session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="answers")
     player = models.ForeignKey(LivePlayer, on_delete=models.CASCADE, related_name="answers")
 
