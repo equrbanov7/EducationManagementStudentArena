@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r /app/requirements/production.txt
 
 # Copy project
 COPY . /app/
-RUN chmod +x /app/docker/release.sh
+RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
@@ -28,5 +28,5 @@ RUN python manage.py collectstatic --noinput
 # Expose port
 EXPOSE 8000
 
-# Run with Daphne so HTTP and WebSocket traffic share the ASGI app
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "config.asgi:application"]
+# Run via the production entrypoint (runs migrations then execs Daphne).
+CMD ["/app/docker/prod-entrypoint.sh"]

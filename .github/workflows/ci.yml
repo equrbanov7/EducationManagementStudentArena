@@ -244,19 +244,25 @@ jobs:
       # ───────────────────────────────────────────────────────────────────
       # 📌 NİYƏ?: Production deployment üçün Django təhlükəsizlik yoxlaması
       # 📌 BEST PRACTICE: CSP və digər security header-lərin konfiqurasiyasını yoxlayır
+      # 📌 NOTE: Production requirements are installed here so that
+      #          config.settings.production (and its imports) can be loaded.
       - name: 🔐 Django deployment security check
         env:
-          SECRET_KEY: test-secret-key-for-deploy-check-only
+          DJANGO_SETTINGS_MODULE: config.settings.production
+          SECRET_KEY: ci-deploy-check-QzNyXk9mVpLsJeWuHqRtGdFbAcOiMnKlYhTgPwEv2x8j5f3z7a4r6s1o0uBCDIU
           DEBUG: "False"
           ALLOWED_HOSTS: "localhost,127.0.0.1"
           DATABASE_URL: sqlite:///db.sqlite3
+          REDIS_URL: redis://localhost:6379/0
         run: |
+          pip install -r requirements/production.txt
           echo "::group::🔐 Django Deployment Check"
           python manage.py check --deploy --fail-level WARNING || {
-            echo "::warning::⚠️ Django deployment check found issues"
+            echo "::error::❌ Django deployment check found configuration issues. Fix them before merging."
+            exit 1
           }
+          echo "✅ Django deployment check passed!"
           echo "::endgroup::"
-        continue-on-error: true
 
   # ──────────────────────────────────���──────────────────────────────────────
   # JOB 3: TESTS
