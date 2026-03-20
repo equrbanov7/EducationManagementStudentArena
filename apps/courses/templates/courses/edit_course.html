@@ -5,7 +5,7 @@
 {% block title %}{{ course.title }} - {% trans "page_suffix_edit" context "courses.edit_page" %} - EMSArena{% endblock %}
 
 {% block extraCss%}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     :root {
         --edit-primary: #d97706; /* Amber 600 - İsti kəhrəba rəngi */
         --edit-primary-hover: #b45309; /* Amber 700 */

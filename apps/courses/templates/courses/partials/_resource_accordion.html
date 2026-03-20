@@ -127,7 +127,7 @@ function deleteResource(courseId, resourceId) {
 }
 </script>
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
     .border-left-success {
         border-left: 4px solid #28a745 !important;
     }

@@ -47,7 +47,7 @@
       <button class="register-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
     </form>
 
-    <form method="post" action="{% url 'accounts:resend_code' %}" style="margin-top:12px;">
+    <form method="post" action="{% url 'accounts:resend_code' %}" class="register-resend-form">
       {% csrf_token %}
       <button class="register-submit-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
     </form>

@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.db import connection
 from django.http import JsonResponse
+from django.shortcuts import render
 
 logger = logging.getLogger(__name__)
 
@@ -56,3 +57,32 @@ def test_error(request):
 
     # Exception raise et
     raise Exception("This is a test error for logging!")
+
+
+# ---------------------------------------------------------------------------
+# Custom error handlers
+# ---------------------------------------------------------------------------
+# These handlers prevent Django from exposing internal application details
+# (stack traces, settings, installed apps) in error responses, which would
+# constitute Application Error Disclosure (CWE-209).
+
+
+def handler400(request, exception=None):
+    """Custom 400 Bad Request handler - prevents application detail exposure."""
+    return render(request, "errors/400.html", status=400)
+
+
+def handler403(request, exception=None):
+    """Custom 403 Forbidden handler - prevents application detail exposure."""
+    return render(request, "errors/403.html", status=403)
+
+
+def handler404(request, exception=None):
+    """Custom 404 Not Found handler - prevents application detail exposure."""
+    return render(request, "errors/404.html", status=404)
+
+
+def handler500(request):
+    """Custom 500 Internal Server Error handler - prevents stack trace exposure."""
+    logger.error("Internal server error at %s", request.path, exc_info=True)
+    return render(request, "errors/500.html", status=500)

@@ -5,7 +5,7 @@
 {% block title %}{{ assignment.title }}{% endblock %}
 
 {% block content %}
-<style>
+<style nonce="{{ request.csp_nonce }}">
     /* Rəng Palitrası və Xüsusi Dizaynlar */
     :root {
         --blue-primary: #2563eb;
