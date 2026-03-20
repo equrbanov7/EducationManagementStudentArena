@@ -3,7 +3,6 @@ Pytest configuration and fixtures for EMS Arena project.
 """
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.db.models.signals import post_save
 
 import pytest
@@ -26,22 +25,66 @@ def create_user():
 @pytest.fixture
 def teacher_user(create_user, db):
     """
-    Fixture to create a teacher user.
+    Fixture to create a teacher user with RBAC membership.
     """
+    from apps.accounts.models import ProfileRole
+    from apps.organizations.models import Membership, Organization
+    from core.constants import OrganizationType
+
     user = create_user(username="teacher", email="teacher@example.com")
-    teacher_group, _ = Group.objects.get_or_create(name="teacher")
-    user.groups.add(teacher_group)
+    org = Organization.objects.create(
+        name="Teacher Test Org",
+        slug="teacher-test-org",
+        org_type=OrganizationType.UNIVERSITY,
+        owner=user,
+        status="active",
+        is_active=True,
+    )
+    profile = user.profile
+    profile.organization = org
+    profile.organization_type = org.org_type
+    profile.role = ProfileRole.TEACHER
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+    Membership.objects.create(
+        user=user,
+        organization=org,
+        role=org.roles.get(name="teacher"),
+        is_primary=True,
+        is_active=True,
+    )
     return user
 
 
 @pytest.fixture
 def student_user(create_user, db):
     """
-    Fixture to create a student user.
+    Fixture to create a student user with RBAC membership.
     """
+    from apps.accounts.models import ProfileRole
+    from apps.organizations.models import Membership, Organization
+    from core.constants import OrganizationType
+
     user = create_user(username="student", email="student@example.com")
-    student_group, _ = Group.objects.get_or_create(name="student")
-    user.groups.add(student_group)
+    org = Organization.objects.create(
+        name="Student Test Org",
+        slug="student-test-org",
+        org_type=OrganizationType.UNIVERSITY,
+        owner=user,
+        status="active",
+        is_active=True,
+    )
+    profile = user.profile
+    profile.organization = org
+    profile.organization_type = org.org_type
+    profile.role = ProfileRole.STUDENT
+    profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+    Membership.objects.create(
+        user=user,
+        organization=org,
+        role=org.roles.get(name="student"),
+        is_primary=True,
+        is_active=True,
+    )
     return user
 
 
