@@ -9,8 +9,11 @@ import random
 from datetime import datetime
 from typing import Any
 
-from django.db.models import Sum
+from django.db.models import F, IntegerField, OuterRef, Subquery, Sum, Value
+from django.db.models.expressions import ExpressionWrapper
+from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext
+
 from apps.live_exam.domain.session import (
     detect_multi,
     get_option_label,
@@ -58,42 +61,48 @@ def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]
 
 
 def serialize_top_before_question(session: LiveSession, question_id: int, limit: int = 10) -> list[dict[str, Any]]:
-    awarded_lookup = {
-        int(row["player_id"]): safe_int(row["awarded_total"], 0)
-        for row in (
-            LiveAnswer.objects.filter(session=session, question_id=question_id)
-            .values("player_id")
-            .annotate(awarded_total=Sum("awarded_points"))
+    # Subquery: total awarded_points for this player on this question.
+    awarded_subquery = (
+        LiveAnswer.objects.filter(
+            session=session,
+            question_id=question_id,
+            player_id=OuterRef("id"),
         )
-    }
-
-    players = list(
-        session.players.values(
-            "id",
-            "nickname",
-            "avatar_key",
-            "accessory_key",
-            "score",
-            "created_at",
-        )
+        .values("player_id")
+        .annotate(total=Sum("awarded_points"))
+        .values("total")[:1]
     )
 
-    rows: list[dict[str, Any]] = []
-    for row in players:
-        score_before = safe_int(row["score"], 0) - safe_int(awarded_lookup.get(int(row["id"]), 0), 0)
-        rows.append(
-            {
-                "player_id": row["id"],
-                "nickname": row["nickname"],
-                "avatar_key": row["avatar_key"],
-                "accessory_key": row["accessory_key"],
-                "score": max(0, score_before),
-                "_created_at": row["created_at"],
-            }
+    # Annotate each player with score_before = score - awarded_for_question,
+    # then sort and limit entirely in the DB — no full-list Python sort required.
+    players = (
+        session.players.annotate(
+            awarded_for_question=Coalesce(
+                Subquery(awarded_subquery, output_field=IntegerField()),
+                Value(0),
+            ),
+            score_before=ExpressionWrapper(
+                F("score") - F("awarded_for_question"),
+                output_field=IntegerField(),
+            ),
         )
+        # Tiebreaker: ascending `id` is the player's primary key, equivalent
+        # to the original `player_id` tiebreaker in the Python sort.
+        .order_by("-score_before", "created_at", "id").values(
+            "id", "nickname", "avatar_key", "accessory_key", "score_before"
+        )[:limit]
+    )
 
-    rows.sort(key=lambda item: (-safe_int(item["score"], 0), item["_created_at"], safe_int(item["player_id"], 0)))
-    return [{key: value for key, value in row.items() if key != "_created_at"} for row in rows[:limit]]
+    return [
+        {
+            "player_id": row["id"],
+            "nickname": row["nickname"],
+            "avatar_key": row["avatar_key"],
+            "accessory_key": row["accessory_key"],
+            "score": max(0, safe_int(row["score_before"], 0)),
+        }
+        for row in players
+    ]
 
 
 def serialize_answer_distribution(session: LiveSession, question_id: int) -> dict[str, Any]:
@@ -162,7 +171,9 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
     return results
 
 
-def serialize_player_question_result(session: LiveSession, question_id: int, player_id: int | None) -> dict[str, Any] | None:
+def serialize_player_question_result(
+    session: LiveSession, question_id: int, player_id: int | None
+) -> dict[str, Any] | None:
     if not player_id:
         return None
 
@@ -249,8 +260,14 @@ def serialize_question(
         "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
         "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,
         "ends_at": ends_at.isoformat() if ends_at else None,
-        "get_ready_duration_ms": int(max(0, (ready_ends_at - started_at).total_seconds() * 1000)) if ready_ends_at and started_at else 0,
-        "intro_duration_ms": int(max(0, (answer_starts_at - ready_ends_at).total_seconds() * 1000)) if answer_starts_at and ready_ends_at else 0,
+        "get_ready_duration_ms": (
+            int(max(0, (ready_ends_at - started_at).total_seconds() * 1000)) if ready_ends_at and started_at else 0
+        ),
+        "intro_duration_ms": (
+            int(max(0, (answer_starts_at - ready_ends_at).total_seconds() * 1000))
+            if answer_starts_at and ready_ends_at
+            else 0
+        ),
         "index": safe_int(idx, 0) + 1,
         "total": safe_int(total, 0),
     }

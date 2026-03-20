@@ -2,14 +2,14 @@
 Consumer tests for live_exam websocket auth.
 """
 
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.test import Client, TransactionTestCase, override_settings
+from django.utils import timezone
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from channels.testing import WebsocketCommunicator
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.test import Client, TransactionTestCase
-from django.test import override_settings
-from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
@@ -31,6 +31,7 @@ TEST_CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     }
 }
+
 
 @override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
 class LiveExamConsumerAuthTest(TransactionTestCase):
@@ -80,7 +81,9 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
 
     def test_lobby_ws_allows_viewer_without_auth(self):
         async def scenario():
-            communicator = WebsocketCommunicator(application, f"/ws/live/{self.session.pin}/lobby/", headers=[_WS_ORIGIN_HEADER])
+            communicator = WebsocketCommunicator(
+                application, f"/ws/live/{self.session.pin}/lobby/", headers=[_WS_ORIGIN_HEADER]
+            )
             connected, _ = await communicator.connect()
             message = await communicator.receive_json_from() if connected else None
             if connected:
@@ -254,8 +257,6 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         message broadcast to players must not contain ``is_correct``,
         ``correct_option_ids``, or ``correct_ids`` fields.
         """
-        from apps.live_exam.transport import broadcast as _broadcast
-        from channels.layers import get_channel_layer
         from asgiref.sync import async_to_sync as _async_to_sync
 
         # Connect as a player
@@ -277,15 +278,14 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
 
         # Directly verify that the serializer does not expose answer keys.
         # This tests the data layer that feeds the websocket broadcast.
-        from apps.exams.models import ExamQuestion, ExamQuestionOption
-        from apps.live_exam.serializers import build_options, serialize_question
         from django.utils import timezone
+
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
         from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
+        from apps.live_exam.serializers import serialize_question
 
         exam = self.session.exam
-        question = ExamQuestion.objects.create(
-            exam=exam, text="Security check Q", order=99, points=500
-        )
+        question = ExamQuestion.objects.create(exam=exam, text="Security check Q", order=99, points=500)
         ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
         ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
 
@@ -295,9 +295,14 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         ends_at = answer_starts_at + timezone.timedelta(seconds=15)
 
         payload = serialize_question(
-            self.session, question, idx=0, total=1,
-            started_at=now, ready_ends_at=ready_ends_at,
-            answer_starts_at=answer_starts_at, ends_at=ends_at,
+            self.session,
+            question,
+            idx=0,
+            total=1,
+            started_at=now,
+            ready_ends_at=ready_ends_at,
+            answer_starts_at=answer_starts_at,
+            ends_at=ends_at,
         )
         self.assertNotIn("correct_option_ids", payload, "Player payload must not leak correct_option_ids")
         self.assertNotIn("correct_ids", payload, "Player payload must not leak correct_ids")
@@ -309,18 +314,15 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         Submitting the same answer twice via WebSocket must not create more
         than one ``LiveAnswer`` record in the database.
         """
-        from apps.exams.models import ExamQuestion, ExamQuestionOption
-        from apps.live_exam.models import LiveAnswer
-        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
         from django.utils import timezone
 
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
+        from apps.live_exam.models import LiveAnswer
+
         exam = self.session.exam
-        question = ExamQuestion.objects.create(
-            exam=exam, text="Dup check Q", order=98, points=500
-        )
-        correct_option = ExamQuestionOption.objects.create(
-            question=question, text="Right", is_correct=True
-        )
+        question = ExamQuestion.objects.create(exam=exam, text="Dup check Q", order=98, points=500)
+        correct_option = ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
         ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
 
         now = timezone.now()
@@ -332,8 +334,7 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         )
         self.session.question_ends_at = now + timezone.timedelta(seconds=15)
         self.session.save(
-            update_fields=["state", "current_index", "current_question_id",
-                           "question_started_at", "question_ends_at"]
+            update_fields=["state", "current_index", "current_question_id", "question_started_at", "question_ends_at"]
         )
 
         async def scenario():
@@ -345,25 +346,30 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
             connected, _ = await communicator.connect()
             self.assertTrue(connected)
             try:
-                await communicator.send_json_to({
-                    "type": "answer",
-                    "question_id": question.id,
-                    "option_id": correct_option.id,
-                    "answer_ms": 300,
-                })
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": question.id,
+                        "option_id": correct_option.id,
+                        "answer_ms": 300,
+                    }
+                )
                 first = await communicator.receive_json_from(timeout=1)
                 # Drain the auto-reveal that fires for single-player sessions.
                 import asyncio
+
                 try:
                     await asyncio.wait_for(communicator.receive_json_from(), timeout=0.5)
                 except asyncio.TimeoutError:
                     pass
-                await communicator.send_json_to({
-                    "type": "answer",
-                    "question_id": question.id,
-                    "option_id": correct_option.id,
-                    "answer_ms": 600,
-                })
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": question.id,
+                        "option_id": correct_option.id,
+                        "answer_ms": 600,
+                    }
+                )
                 second = await communicator.receive_json_from(timeout=1)
                 return first, second
             finally:
@@ -373,9 +379,7 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         self.assertEqual(first["type"], "answer_saved")
         self.assertEqual(second["type"], "answer_saved")
         self.assertEqual(
-            LiveAnswer.objects.filter(
-                session=self.session, player=self.player, question_id=question.id
-            ).count(),
+            LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=question.id).count(),
             1,
             "Only one LiveAnswer must exist after duplicate submission",
         )
@@ -385,18 +389,14 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         Submitting an answer after ``question_ends_at`` must be rejected
         (no LiveAnswer is created and no ``answer_saved`` is received).
         """
-        from apps.exams.models import ExamQuestion, ExamQuestionOption
-        from apps.live_exam.models import LiveAnswer
-        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
         from django.utils import timezone
 
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.live_exam.models import LiveAnswer
+
         exam = self.session.exam
-        question = ExamQuestion.objects.create(
-            exam=exam, text="Late answer Q", order=97, points=500
-        )
-        option = ExamQuestionOption.objects.create(
-            question=question, text="Answer", is_correct=True
-        )
+        question = ExamQuestion.objects.create(exam=exam, text="Late answer Q", order=97, points=500)
+        option = ExamQuestionOption.objects.create(question=question, text="Answer", is_correct=True)
         ExamQuestionOption.objects.create(question=question, text="Other", is_correct=False)
 
         now = timezone.now()
@@ -407,8 +407,7 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         self.session.question_started_at = now - timezone.timedelta(seconds=60)
         self.session.question_ends_at = now - timezone.timedelta(seconds=1)
         self.session.save(
-            update_fields=["state", "current_index", "current_question_id",
-                           "question_started_at", "question_ends_at"]
+            update_fields=["state", "current_index", "current_question_id", "question_started_at", "question_ends_at"]
         )
 
         async def scenario():
@@ -420,15 +419,18 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
             connected, _ = await communicator.connect()
             self.assertTrue(connected)
             try:
-                await communicator.send_json_to({
-                    "type": "answer",
-                    "question_id": question.id,
-                    "option_id": option.id,
-                    "answer_ms": 100,
-                })
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": question.id,
+                        "option_id": option.id,
+                        "answer_ms": 100,
+                    }
+                )
                 # Should receive an error or nothing (the communicator will
                 # time-out if no message is sent back).
                 import asyncio
+
                 try:
                     msg = await asyncio.wait_for(communicator.receive_json_from(), timeout=0.5)
                     return msg
@@ -437,12 +439,10 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
             finally:
                 await communicator.disconnect()
 
-        result = async_to_sync(scenario)()
+        async_to_sync(scenario)()
         # Late answer must not create a LiveAnswer record.
         self.assertEqual(
-            LiveAnswer.objects.filter(
-                session=self.session, player=self.player, question_id=question.id
-            ).count(),
+            LiveAnswer.objects.filter(session=self.session, player=self.player, question_id=question.id).count(),
             0,
             "No LiveAnswer must be created for a late submission",
         )
@@ -564,11 +564,8 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             _WS_ORIGIN_HEADER,
             (
                 b"cookie",
-                (
-                    f"{settings.SESSION_COOKIE_NAME}={session_cookie}; "
-                    f"{PLAYER_COOKIE_NAME}={player_cookie}"
-                ).encode(),
-            )
+                (f"{settings.SESSION_COOKIE_NAME}={session_cookie}; " f"{PLAYER_COOKIE_NAME}={player_cookie}").encode(),
+            ),
         ]
 
     def test_play_ws_rejects_non_current_question_answers(self):
@@ -786,7 +783,7 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
 
     def test_answer_progress_reaches_host_not_players(self):
         """answer_progress events must be delivered to the host group only."""
-        second_player = LivePlayer.objects.create(
+        LivePlayer.objects.create(
             session=self.session,
             nickname="Player Three",
             avatar_key="avatar_3",
@@ -981,3 +978,152 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             1,
             "Duplicate submission must not create a second LiveAnswer record",
         )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# WebSocket security tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class WebSocketOriginValidationTest(TransactionTestCase):
+    """
+    Verify that foreign-origin WebSocket connections are rejected by
+    AllowedHostsOriginValidator and that players cannot send host-only
+    commands.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("ws_origin_teacher", "wsorigin@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="WS Origin Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="WS Origin Exam",
+            slug="ws-origin-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="Q?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="A", is_correct=True)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        # Set started_at far enough in the past so the answer window is open
+        # (ready period=4s + intro period=5s = 9s total before answers accepted).
+        self.session.question_started_at = timezone.now() - timezone.timedelta(seconds=15)
+        self.session.question_ends_at = timezone.now() + timezone.timedelta(seconds=30)
+        self.session.save()
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="WSPlayer",
+            avatar_key="avatar_1",
+            client_id="ws-origin-client",
+        )
+        self._player_token = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def _player_headers(self):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+        ]
+
+    def test_foreign_origin_lobby_connection_is_rejected(self):
+        """A foreign-origin WebSocket connection to the lobby must be refused."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/lobby/",
+                headers=[(b"origin", b"http://evil.example.com")],
+            )
+            connected, _ = await communicator.connect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(connected, "Foreign-origin lobby connection must be refused by AllowedHostsOriginValidator")
+
+    def test_foreign_origin_play_connection_is_rejected(self):
+        """A foreign-origin WebSocket connection to the play socket must be refused."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=[
+                    (b"origin", b"https://attacker.invalid"),
+                    (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+                ],
+            )
+            connected, _ = await communicator.connect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(connected, "Foreign-origin play connection must be refused by AllowedHostsOriginValidator")
+
+    def test_player_cannot_send_non_answer_commands(self):
+        """Non-'answer' messages sent by players are silently ignored (not forwarded)."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                # Player sends an unsupported command type
+                await communicator.send_json_to({"type": "host_reveal", "question_id": self.question.id})
+                # The consumer must ignore unknown types — no response should arrive
+                received_nothing = await communicator.receive_nothing(timeout=0.5)
+                return received_nothing
+            finally:
+                await communicator.disconnect()
+
+        received_nothing = async_to_sync(scenario)()
+        self.assertTrue(received_nothing, "Players must not receive a response to unsupported command types")
+
+    def test_player_answer_accepted_on_valid_origin(self):
+        """Sanity check: player answer is accepted when origin is valid (testserver)."""
+        correct_option_id = ExamQuestionOption.objects.filter(
+            question=self.question, is_correct=True
+        ).values_list("id", flat=True).first()
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": correct_option_id,
+                        "answer_ms": 500,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "answer_saved")

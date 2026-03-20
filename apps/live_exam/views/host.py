@@ -11,6 +11,7 @@ import random
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -44,10 +45,43 @@ from apps.live_exam.transport import (
     build_join_url,
     build_lobby_state_payload,
     build_player_reveal_payload,
-    build_question_phase_payload,
     build_question_payload,
+    build_question_phase_payload,
     build_reveal_payload,
 )
+from apps.audit.utils import log_action
+from core.constants import AuditAction
+from core.permissions import request_has_permission
+
+# ════════════════════════════════════════════════════════════════════════════
+# Authorization helpers
+# ════════════════════════════════════════════════════════════════════════════
+
+
+def _ensure_host_org_permission(request, exam_organization) -> None:
+    """
+    Enforce organization-level RBAC for all host endpoints.
+
+    Checks (in order):
+    1. An active organization context exists in the request.
+    2. The exam's organization matches the request's active organization.
+    3. The organization is not suspended or inactive.
+    4. The requesting user holds the ``exam.manage`` permission.
+
+    Raises ``PermissionDenied`` on any violation.
+    """
+    org = getattr(request, "organization", None)
+    if org is None:
+        raise PermissionDenied(pgettext("live_exam.view.permission", "org_context_required"))
+
+    if exam_organization is None or org.id != exam_organization.id:
+        raise PermissionDenied(pgettext("live_exam.view.permission", "cross_org_access_denied"))
+
+    if org.is_suspended:
+        raise PermissionDenied(pgettext("live_exam.view.permission", "org_suspended_or_inactive"))
+
+    if not request_has_permission(request, "exam.manage"):
+        raise PermissionDenied(pgettext("live_exam.view.permission", "exam_manage_required"))
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -57,7 +91,7 @@ from apps.live_exam.transport import (
 
 @login_required
 def live_create_session_by_slug(request, slug):
-    exam = get_object_or_404(Exam, slug=slug)
+    exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
 
     if not getattr(request.user, "is_teacher", False):
         raise Http404(pgettext("live_exam.view.permission", "host_teacher_only"))
@@ -65,7 +99,17 @@ def live_create_session_by_slug(request, slug):
     if exam.author != request.user:
         raise Http404(pgettext("live_exam.view.permission", "host_author_only"))
 
+    _ensure_host_org_permission(request, exam.organization)
+
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
+    log_action(
+        action=AuditAction.CREATE,
+        user=request.user,
+        organization=exam.organization,
+        obj=session,
+        new_values={"exam": str(exam.pk), "pin": session.pin},
+        request=request,
+    )
     presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": session.pin})
     return redirect(f"{presentation_url}?controls=1")
 
@@ -96,10 +140,12 @@ def _host_session_context(request, session: LiveSession, *, auto_fullscreen: str
 
 @login_required
 def live_host_lobby(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
 
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     context = _host_session_context(request, session)
     return render(request, "liveExam/host_lobby.html", context)
@@ -107,10 +153,12 @@ def live_host_lobby(request, pin):
 
 @login_required
 def live_host_presentation(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
 
     if session.host_user != request.user:
         raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     controls_enabled = str(request.GET.get("controls") or "").strip().lower() in {"1", "true", "yes", "on"}
     context = _host_session_context(request, session, auto_fullscreen="1" if request.GET.get("autofs") == "1" else "0")
@@ -126,9 +174,11 @@ def live_host_presentation(request, pin):
 @require_POST
 @login_required
 def host_start_game(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     # 1) Host neçə sual istəyir? (form input name="question_count")
     raw = (request.POST.get("question_count") or "").strip()
@@ -232,6 +282,16 @@ def host_start_game(request, pin):
 
     broadcast_play(pin, payload)
 
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=session.exam.organization,
+        obj=session,
+        new_values={"state": session.state, "question_count": len(selected_ids)},
+        reason="game_started",
+        request=request,
+    )
+
     return JsonResponse(
         {
             "ok": True,
@@ -245,9 +305,11 @@ def host_start_game(request, pin):
 @require_POST
 @login_required
 def host_next_question(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     # Kahoot axını:
     # Reveal mərhələsindən sonra növbəti sual üçün index++ edirik
@@ -293,9 +355,11 @@ def host_next_question(request, pin):
 @require_POST
 @login_required
 def host_skip_question_intro(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     if session.state != LiveSession.STATE_QUESTION or session.question_started_at is None:
         return JsonResponse(
@@ -350,9 +414,11 @@ def host_skip_question_intro(request, pin):
 @require_POST
 @login_required
 def host_reveal(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     idx = int(session.current_index or 0)
     eq = get_question_by_index(session, idx)
@@ -380,9 +446,11 @@ def host_reveal(request, pin):
 @require_POST
 @login_required
 def host_finish(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     session.state = LiveSession.STATE_FINISHED
     session.current_question_id = None
@@ -392,15 +460,27 @@ def host_finish(request, pin):
     payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
     broadcast_play(pin, payload)
 
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=session.exam.organization,
+        obj=session,
+        new_values={"state": LiveSession.STATE_FINISHED},
+        reason="game_finished",
+        request=request,
+    )
+
     return JsonResponse({"ok": True})
 
 
 @require_POST
 @login_required
 def host_toggle_lock(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     raw_locked = request.POST.get("locked")
     if raw_locked is None:
@@ -418,9 +498,11 @@ def host_toggle_lock(request, pin):
 @require_POST
 @login_required
 def host_remove_player(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     if session.state != LiveSession.STATE_LOBBY:
         return JsonResponse(
@@ -451,9 +533,11 @@ def host_remove_player(request, pin):
 @require_POST
 @login_required
 def host_update_settings(request, pin):
-    session = get_object_or_404(LiveSession, pin=pin)
+    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()
+
+    _ensure_host_org_permission(request, session.exam.organization)
 
     try:
         payload = json.loads(request.body.decode("utf-8") or "{}")

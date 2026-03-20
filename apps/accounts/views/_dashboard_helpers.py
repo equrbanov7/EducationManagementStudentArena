@@ -2,9 +2,6 @@
 Helper functions for dashboard data collection.
 """
 
-from decimal import Decimal, InvalidOperation
-from pathlib import PurePosixPath
-
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.urls import reverse
@@ -14,29 +11,23 @@ from django.utils.translation import pgettext_lazy
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAttempt
-from apps.labs.models import Lab, LabAnswer, LabSubmission
+from apps.labs.models import Lab, LabSubmission
 from apps.projects.models import Project, ProjectSubmission
 
 from ._helpers import (
-    ASSIGNED_TASK_FILTER_CHOICES,
-    PENDING_ANSWER_FILTER_CHOICES,
     PENDING_REVIEW_STATUS_CHOICES,
     PENDING_REVIEW_TYPE_CHOICES,
-    RESULT_FILTER_CHOICES,
     REVIEW_EDIT_WINDOW,
     _append_query_params,
     _assigned_courses_queryset,
     _assigned_exams_queryset,
     _csv_to_int_set,
     _csv_to_lower_token_set,
-    _extract_assignment_attachments,
     _is_result_visible_to_student,
-    _is_review_window_closed,
     _is_review_window_open,
     _normalize_assigned_tasks_filter,
     _normalize_pending_answers_filter,
     _normalize_results_filter,
-    _parse_decimal_score,
     _pending_review_type_label,
     _result_status_badge,
     _review_window_seconds_left,
@@ -46,6 +37,7 @@ from ._helpers import (
 )
 
 User = get_user_model()
+
 
 def _standard_item_type_meta(raw_type):
     normalized = (raw_type or "").lower()
@@ -158,7 +150,9 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
 
     counts["courses"] = assigned_courses_qs.count()
 
-    assigned_exams_qs = _assigned_exams_queryset(request, user, active_only=True).order_by("-start_datetime", "-created_at")
+    assigned_exams_qs = _assigned_exams_queryset(request, user, active_only=True).order_by(
+        "-start_datetime", "-created_at"
+    )
     counts["exams"] = assigned_exams_qs.count()
     if filter_type in {"all", "exams"}:
         for exam in assigned_exams_qs:
@@ -833,21 +827,19 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                 exam__in=teacher_exams,
                 status__in=["submitted", "expired"],
             )
-            .filter(
-                Q(checked_by_teacher=False)
-                | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff)
-            )
+            .filter(Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
             .exclude(exam__exam_type="test")
             .select_related("exam", "user", "exam__course")
         )
         if search_query:
             attempts = attempts.filter(
-                Q(exam__title__icontains=search_query)
-                | Q(exam__course__title__icontains=search_query)
+                Q(exam__title__icontains=search_query) | Q(exam__course__title__icontains=search_query)
             )
         for attempt in attempts:
             course = attempt.exam.course
-            is_recheck = bool(attempt.checked_by_teacher and _is_review_window_open(attempt.teacher_checked_at, now=current_time))
+            is_recheck = bool(
+                attempt.checked_by_teacher and _is_review_window_open(attempt.teacher_checked_at, now=current_time)
+            )
             is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
                 submitted_at=attempt.finished_at or attempt.started_at,
                 reviewed_at=attempt.teacher_checked_at,
@@ -855,9 +847,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
                 now=current_time,
             )
             student_display = (
-                "Anonim tələbə"
-                if is_identity_hidden
-                else (attempt.user.get_full_name() or attempt.user.username)
+                "Anonim tələbə" if is_identity_hidden else (attempt.user.get_full_name() or attempt.user.username)
             )
             items.append(
                 {
@@ -891,20 +881,22 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
 
     if normalized_type in {"all", "assignments"}:
-        submissions = Submission.objects.filter(
-            assignment__course__in=teacher_courses,
-        ).filter(
-            Q(status="submitted")
-            | Q(status="graded", graded_at__gte=review_cutoff)
-        ).select_related("assignment", "user", "assignment__course")
+        submissions = (
+            Submission.objects.filter(
+                assignment__course__in=teacher_courses,
+            )
+            .filter(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff))
+            .select_related("assignment", "user", "assignment__course")
+        )
         if search_query:
             submissions = submissions.filter(
-                Q(assignment__title__icontains=search_query)
-                | Q(assignment__course__title__icontains=search_query)
+                Q(assignment__title__icontains=search_query) | Q(assignment__course__title__icontains=search_query)
             )
         for submission in submissions:
             course = submission.assignment.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_recheck = submission.status == "graded" and _is_review_window_open(
+                submission.graded_at, now=current_time
+            )
             is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
                 submitted_at=submission.submitted_at,
                 reviewed_at=submission.graded_at,
@@ -946,20 +938,22 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             )
 
     if normalized_type in {"all", "projects"}:
-        project_submissions = ProjectSubmission.objects.filter(
-            project__course__in=teacher_courses,
-        ).filter(
-            Q(status="pending")
-            | Q(status="graded", graded_at__gte=review_cutoff)
-        ).select_related("project", "project__course", "student")
+        project_submissions = (
+            ProjectSubmission.objects.filter(
+                project__course__in=teacher_courses,
+            )
+            .filter(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff))
+            .select_related("project", "project__course", "student")
+        )
         if search_query:
             project_submissions = project_submissions.filter(
-                Q(project__title__icontains=search_query)
-                | Q(project__course__title__icontains=search_query)
+                Q(project__title__icontains=search_query) | Q(project__course__title__icontains=search_query)
             )
         for submission in project_submissions:
             course = submission.project.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_recheck = submission.status == "graded" and _is_review_window_open(
+                submission.graded_at, now=current_time
+            )
             is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
                 submitted_at=submission.submitted_at,
                 reviewed_at=submission.graded_at,
@@ -1005,10 +999,7 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
             LabSubmission.objects.filter(
                 assignment__lab__course__in=teacher_courses,
             )
-            .filter(
-                Q(status__in=["submitted", "late"])
-                | Q(status="graded", graded_at__gte=review_cutoff)
-            )
+            .filter(Q(status__in=["submitted", "late"]) | Q(status="graded", graded_at__gte=review_cutoff))
             .select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student")
         )
         if search_query:
@@ -1019,7 +1010,9 @@ def _collect_pending_review_items(request, search=None, filter_type=None, filter
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course
-            is_recheck = submission.status == "graded" and _is_review_window_open(submission.graded_at, now=current_time)
+            is_recheck = submission.status == "graded" and _is_review_window_open(
+                submission.graded_at, now=current_time
+            )
             is_identity_hidden, identity_window_seconds_left = _resolve_teacher_identity_window(
                 submitted_at=submission.submitted_at,
                 reviewed_at=submission.graded_at,

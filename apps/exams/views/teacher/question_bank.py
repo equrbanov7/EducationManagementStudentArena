@@ -10,7 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
-from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.parsing import extract_text_from_upload, parse_bulk_mcq
 from apps.exams.services.utils import _norm
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404

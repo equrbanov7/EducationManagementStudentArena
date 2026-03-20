@@ -18,16 +18,8 @@ class CourseEnrollmentServicesTest(TestCase):
     """Test course enrollment service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Enrollment Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -44,12 +36,7 @@ class CourseEnrollmentServicesTest(TestCase):
 
     def test_enroll_user_in_course(self):
         """Test enrolling a user in a course."""
-        membership = services.enroll_user_in_course(
-            self.course,
-            self.student,
-            role="student",
-            group_name="Group A"
-        )
+        membership = services.enroll_user_in_course(self.course, self.student, role="student", group_name="Group A")
 
         self.assertIsNotNone(membership)
         self.assertEqual(membership.user, self.student)
@@ -63,23 +50,14 @@ class CourseEnrollmentServicesTest(TestCase):
         removed = services.remove_user_from_course(self.course, self.student)
 
         self.assertTrue(removed)
-        self.assertFalse(
-            CourseMembership.objects.filter(
-                course=self.course,
-                user=self.student
-            ).exists()
-        )
+        self.assertFalse(CourseMembership.objects.filter(course=self.course, user=self.student).exists())
 
 
 class RosterManagementServicesTest(TestCase):
     """Test roster management service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Roster Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -94,11 +72,7 @@ class RosterManagementServicesTest(TestCase):
             organization=self.org,
         )
         self.students = [
-            User.objects.create_user(
-                username=f"student{i}",
-                email=f"student{i}@example.com",
-                password="pass123"
-            )
+            User.objects.create_user(username=f"student{i}", email=f"student{i}@example.com", password="pass123")
             for i in range(3)
         ]
 
@@ -107,51 +81,85 @@ class RosterManagementServicesTest(TestCase):
         student_ids = [s.id for s in self.students]
 
         created, existing = services.bulk_add_members_to_course(
-            self.course,
-            student_ids,
-            role="student",
-            group_name="Group A"
+            self.course, student_ids, role="student", group_name="Group A"
         )
 
         self.assertEqual(created, 3)
         self.assertEqual(existing, 0)
-        self.assertEqual(
-            CourseMembership.objects.filter(course=self.course).count(),
-            3
+        self.assertEqual(CourseMembership.objects.filter(course=self.course).count(), 3)
+
+    def test_bulk_add_members_idempotent(self):
+        """Re-enrolling existing members does not create duplicates."""
+        student_ids = [s.id for s in self.students]
+        services.bulk_add_members_to_course(self.course, student_ids)
+        created, existing = services.bulk_add_members_to_course(self.course, student_ids)
+
+        self.assertEqual(created, 0)
+        self.assertEqual(existing, 3)
+        self.assertEqual(CourseMembership.objects.filter(course=self.course).count(), 3)
+
+    def test_add_students_from_group_to_course(self):
+        """Students in a StudentGroup are enrolled in a single batch."""
+        from apps.accounts.models import ProfileRole
+
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["organization", "role", "updated_at"])
+
+        group = StudentGroup.objects.create(
+            name="Group A",
+            teacher=self.teacher,
+            organization=self.org,
         )
+        for student in self.students:
+            group.students.add(student)
+
+        created, existing = services.add_students_from_group_to_course(self.course, group, group_name="Group A")
+
+        self.assertEqual(created, 3)
+        self.assertEqual(existing, 0)
+        self.assertEqual(CourseMembership.objects.filter(course=self.course, group_name="Group A").count(), 3)
+
+    def test_add_students_from_group_updates_existing_group_name(self):
+        """Existing student members get their group name updated when re-added."""
+        from apps.accounts.models import ProfileRole
+
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["organization", "role", "updated_at"])
+
+        group = StudentGroup.objects.create(
+            name="Old Group",
+            teacher=self.teacher,
+            organization=self.org,
+        )
+        for student in self.students:
+            group.students.add(student)
+            services.enroll_user_in_course(self.course, student, group_name="Old Group")
+
+        created, existing = services.add_students_from_group_to_course(self.course, group, group_name="New Group")
+
+        self.assertEqual(created, 0)
+        self.assertEqual(existing, 3)
+        self.assertEqual(CourseMembership.objects.filter(course=self.course, group_name="New Group").count(), 3)
 
     def test_remove_group_from_course(self):
         """Test removing a group from a course."""
         for student in self.students:
-            services.enroll_user_in_course(
-                self.course,
-                student,
-                group_name="Group A"
-            )
+            services.enroll_user_in_course(self.course, student, group_name="Group A")
 
         deleted_count = services.remove_group_from_course(self.course, "Group A")
 
         self.assertEqual(deleted_count, 3)
-        self.assertEqual(
-            CourseMembership.objects.filter(course=self.course).count(),
-            0
-        )
+        self.assertEqual(CourseMembership.objects.filter(course=self.course).count(), 0)
 
 
 class CourseQueryServicesTest(TestCase):
     """Test course query service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Query Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -165,11 +173,7 @@ class CourseQueryServicesTest(TestCase):
             status="published",
             organization=self.org,
         )
-        services.enroll_user_in_course(
-            self.course,
-            self.student,
-            group_name="Group A"
-        )
+        services.enroll_user_in_course(self.course, self.student, group_name="Group A")
 
     def test_get_course_members(self):
         """Test getting course members."""
@@ -188,11 +192,7 @@ class CourseQueryServicesTest(TestCase):
         """Test checking if user is enrolled."""
         self.assertTrue(services.is_user_enrolled_in_course(self.course, self.student))
 
-        other_user = User.objects.create_user(
-            username="other",
-            email="other@example.com",
-            password="pass123"
-        )
+        other_user = User.objects.create_user(username="other", email="other@example.com", password="pass123")
         self.assertFalse(services.is_user_enrolled_in_course(self.course, other_user))
 
 

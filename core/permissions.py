@@ -59,9 +59,7 @@ def teacher_required(view_func):
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="teacher_required")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="teacher_required"))
 
     return _wrapped_view
 
@@ -76,9 +74,7 @@ def student_required(view_func):
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="student_required")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="student_required"))
 
     return _wrapped_view
 
@@ -117,6 +113,5 @@ def ensure_request_permission(request, permission: str, message: str | None = No
         raise PermissionDenied(message or pgettext("core.permission.error", "An active organization is required."))
 
     raise PermissionDenied(
-        message
-        or pgettext("core.permission.error", "required_permission_missing").format(permission=permission)
+        message or pgettext("core.permission.error", "required_permission_missing").format(permission=permission)
     )

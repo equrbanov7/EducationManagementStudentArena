@@ -21,7 +21,12 @@ from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
-from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path, _tenant_scoped_courses
+from core.helpers import (
+    ASSIGNED_TASK_FILTER_CHOICES,
+    REVIEW_EDIT_LOCK_WINDOW,
+    _safe_same_origin_redirect_path,
+    _tenant_scoped_courses,
+)
 from core.tenancy import get_request_organization, scoped_by_organization
 
 from ._helpers import _student_users_queryset
@@ -137,9 +142,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         elif context["is_student"]:
             # TƏLƏBƏ - arxivlənmişlər istisna (status != 'inactive' filter)
             assignments_qs = (
-                course.assignments.filter(assigned_students=user)
-                .exclude(status="inactive")
-                .order_by("-created_at")
+                course.assignments.filter(assigned_students=user).exclude(status="inactive").order_by("-created_at")
             )
 
             # Hər assignment üçün user-specific məlumat hazırla
@@ -182,9 +185,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # TƏLƏBƏ - arxivlənmişlər istisna
             try:
                 projects_qs = (
-                    course.projects.filter(assigned_students=user)
-                    .exclude(status="archived")
-                    .order_by("-created_at")
+                    course.projects.filter(assigned_students=user).exclude(status="archived").order_by("-created_at")
                 )
 
                 # Hər project üçün user-specific məlumat hazırla

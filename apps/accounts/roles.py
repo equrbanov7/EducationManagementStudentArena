@@ -255,9 +255,7 @@ User.add_to_class("is_owner", property(lambda self: _has_role(self, "owner")))
 User.add_to_class(
     "is_superadmin",
     property(
-        lambda self: bool(
-            self.is_superuser or getattr(_get_profile_safe(self), "role", None) == ProfileRole.SUPERADMIN
-        )
+        lambda self: bool(self.is_superuser or getattr(_get_profile_safe(self), "role", None) == ProfileRole.SUPERADMIN)
     ),
 )
 User.add_to_class("is_org_owner", property(lambda self: _has_role(self, ProfileRole.ORG_OWNER)))

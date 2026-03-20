@@ -8,7 +8,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.utils import _attempt_has_any_answer, _effective_needed_count
 
@@ -86,7 +85,10 @@ def _start_or_resume_attempt(request, exam: Exam):
     user = request.user
     return_to = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next") or request.POST.get("return_to") or request.POST.get("next"),
+        request.GET.get("return_to")
+        or request.GET.get("next")
+        or request.POST.get("return_to")
+        or request.POST.get("next"),
     )
 
     current = get_active_attempt_for_user(exam, user)
@@ -97,7 +99,11 @@ def _start_or_resume_attempt(request, exam: Exam):
         if current_count != desired and not _attempt_has_any_answer(current):
             generate_random_questions_for_attempt(current, force_rebuild=True)
 
-        return redirect(_append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": current.id}), return_to))
+        return redirect(
+            _append_return_to(
+                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": current.id}), return_to
+            )
+        )
 
     finished_qs = get_finished_attempts_for_user(exam, user)
     finished_count = finished_qs.count()
@@ -129,4 +135,6 @@ def _start_or_resume_attempt(request, exam: Exam):
         request,
         pgettext("exams.service.attempt.message", "exam_started").format(attempt_number=next_attempt_number),
     )
-    return redirect(_append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to))
+    return redirect(
+        _append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to)
+    )

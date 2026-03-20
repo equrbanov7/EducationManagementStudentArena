@@ -8,9 +8,15 @@ import re
 import uuid
 from typing import Any
 
+from django.conf import settings
 from django.core import signing
 
 from apps.live_exam.models import LivePlayer, LiveSession
+
+try:
+    import jwt
+except ImportError:  # pragma: no cover - optional dependency during partial installs
+    jwt = None
 
 PLAYER_COOKIE_NAME = "live_player_token"
 PLAYER_TOKEN_SALT = "liveExam.player"  # nosec B105
@@ -30,27 +36,83 @@ def get_client_id(request) -> str:
     return client_id or uuid.uuid4().hex
 
 
-def build_player_token(*, pin: str, player_id: int, client_id: str) -> str:
+def _resolve_session_pin(session_or_pin=None, *, pin: str | None = None, session=None) -> str:
+    if pin is not None and session is not None:
+        raise TypeError("Use either pin= or session=, not both.")
+
+    candidate = pin
+    if candidate is None and session is not None:
+        candidate = getattr(session, "pin", session)
+    if candidate is None and session_or_pin is not None:
+        candidate = getattr(session_or_pin, "pin", session_or_pin)
+    if candidate is None:
+        raise TypeError("A session or pin is required.")
+
+    return str(candidate)
+
+
+def build_player_token(*args, pin: str | None = None, player_id: int | None = None, client_id: str | None = None) -> str:
+    if args:
+        if len(args) != 2 or any(value is not None for value in (pin, player_id, client_id)):
+            raise TypeError("Use either build_player_token(player, session) or keyword arguments.")
+        player, session = args
+        pin = _resolve_session_pin(session)
+        player_id = int(getattr(player, "id", player))
+        client_id = str(getattr(player, "client_id", "") or "")
+
+    if pin is None or player_id is None:
+        raise TypeError("pin and player_id are required.")
+
+    normalized_pin = str(pin)
     return signing.dumps(
         {
-            "pin": str(pin),
+            "pin": normalized_pin,
+            "session_pin": normalized_pin,
             "player_id": int(player_id),
-            "client_id": str(client_id),
+            "client_id": str(client_id or ""),
         },
         salt=PLAYER_TOKEN_SALT,
     )
 
 
-def load_player_token_payload(token: str | None, *, pin: str) -> dict[str, Any] | None:
-    if not token:
-        return None
-
+def _load_signed_player_token_payload(token: str) -> dict[str, Any] | None:
     try:
         payload = signing.loads(token, salt=PLAYER_TOKEN_SALT, max_age=PLAYER_TOKEN_MAX_AGE)
     except Exception:
         return None
 
-    if str(payload.get("pin")) != str(pin):
+    return payload if isinstance(payload, dict) else None
+
+
+def _load_legacy_jwt_player_token_payload(token: str) -> dict[str, Any] | None:
+    if jwt is None:
+        return None
+
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+    except Exception:
+        return None
+
+    return payload if isinstance(payload, dict) else None
+
+
+def load_player_token_payload(
+    token: str | None,
+    session_or_pin=None,
+    *,
+    pin: str | None = None,
+    session=None,
+) -> dict[str, Any] | None:
+    if not token:
+        return None
+
+    expected_pin = _resolve_session_pin(session_or_pin, pin=pin, session=session)
+    payload = _load_signed_player_token_payload(token) or _load_legacy_jwt_player_token_payload(token)
+    if payload is None:
+        return None
+
+    token_pin = str(payload.get("pin") or payload.get("session_pin") or "")
+    if token_pin != expected_pin:
         return None
 
     try:
@@ -59,11 +121,11 @@ def load_player_token_payload(token: str | None, *, pin: str) -> dict[str, Any] 
         return None
 
     client_id = str(payload.get("client_id") or "").strip()
-    if player_id <= 0 or not client_id:
+    if player_id <= 0:
         return None
 
     return {
-        "pin": str(pin),
+        "pin": expected_pin,
         "player_id": player_id,
         "client_id": client_id,
     }
@@ -74,15 +136,16 @@ def authenticate_player_token(token: str | None, *, pin: str) -> tuple[dict[str,
     if payload is None:
         return None, None
 
-    player = (
-        LivePlayer.objects.select_related("session")
-        .filter(
-            id=payload["player_id"],
-            session__pin=str(pin),
-            client_id=payload["client_id"],
-        )
-        .first()
+    player_qs = LivePlayer.objects.select_related("session").filter(
+        id=payload["player_id"],
+        session__pin=str(pin),
     )
+    if payload["client_id"]:
+        player_qs = player_qs.filter(client_id=payload["client_id"])
+    else:
+        player_qs = player_qs.filter(client_id="")
+
+    player = player_qs.first()
     if player is None:
         return None, None
 

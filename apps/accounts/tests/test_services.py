@@ -8,10 +8,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.accounts import services
-from apps.accounts.models import ProfileRole
-from apps.accounts.models import EmailOTP
-from apps.courses.models import Course, CourseMembership
-from apps.organizations.models import Country, Membership, Organization
+from apps.accounts.models import EmailOTP, ProfileRole
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()

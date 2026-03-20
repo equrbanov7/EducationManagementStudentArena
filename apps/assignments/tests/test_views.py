@@ -197,7 +197,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
-        self.course = Course.objects.create(owner=self.teacher, title="Assignment Regression Course", status="published")
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Assignment Regression Course", status="published"
+        )
         self.assignment = Assignment.objects.create(
             course=self.course,
             title="Assignment Regression",
@@ -233,7 +235,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(detail_response.status_code, 200)
         self.assertEqual(list(detail_response.context["user_submissions"]), [submission])
 
-        my_submissions_response = self.client.get(reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id}))
+        my_submissions_response = self.client.get(
+            reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(my_submissions_response.status_code, 200)
         self.assertEqual(list(my_submissions_response.context["submissions"]), [submission])
 
@@ -292,7 +296,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         )
 
         self._login_teacher()
-        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+        response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id})
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["can_delete_submissions"])
@@ -309,7 +315,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         )
 
         self._login_teacher()
-        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+        response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id})
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Anonim tələbə")
@@ -341,7 +349,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         )
 
         self._login_teacher()
-        response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+        response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id})
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Yenidən yoxla")
@@ -352,7 +362,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
         submission.graded_at = timezone.now() - timedelta(minutes=6)
         submission.save(update_fields=["graded_at"])
 
-        locked_response = self.client.get(reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id}))
+        locked_response = self.client.get(
+            reverse("assignments:review_assignment_submissions", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(locked_response.status_code, 200)
         self.assertContains(locked_response, "Bax")
         self.assertContains(locked_response, self.student.username)
@@ -431,7 +443,9 @@ class AssignmentSubmissionRegressionTest(TestCase):
 
         submission = Submission.objects.get()
 
-        my_submissions_response = self.client.get(reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id}))
+        my_submissions_response = self.client.get(
+            reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(my_submissions_response.status_code, 200)
         self.assertContains(my_submissions_response, "flow.pdf")
 
@@ -457,13 +471,17 @@ class AssignmentSubmissionRegressionTest(TestCase):
         self.assertEqual(submission.feedback, "Looks good")
 
         self._login_student()
-        hidden_detail_response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
+        hidden_detail_response = self.client.get(
+            reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(hidden_detail_response.status_code, 200)
         self.assertFalse(hidden_detail_response.context["user_submissions"][0].show_review_data)
         self.assertContains(hidden_detail_response, 'data-review-countdown="')
         self.assertNotContains(hidden_detail_response, "5 dəq. sonra")
 
-        hidden_submissions_response = self.client.get(reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id}))
+        hidden_submissions_response = self.client.get(
+            reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(hidden_submissions_response.status_code, 200)
         self.assertFalse(hidden_submissions_response.context["submissions"][0].show_review_data)
         self.assertNotContains(hidden_submissions_response, "Looks good")
@@ -473,12 +491,16 @@ class AssignmentSubmissionRegressionTest(TestCase):
         submission.graded_at = timezone.now() - timedelta(minutes=6)
         submission.save(update_fields=["graded_at"])
 
-        visible_detail_response = self.client.get(reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id}))
+        visible_detail_response = self.client.get(
+            reverse("assignments:assignment_detail", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(visible_detail_response.status_code, 200)
         self.assertTrue(visible_detail_response.context["user_submissions"][0].show_review_data)
         self.assertContains(visible_detail_response, "95")
 
-        visible_submissions_response = self.client.get(reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id}))
+        visible_submissions_response = self.client.get(
+            reverse("assignments:my_submissions", kwargs={"pk": self.assignment.id})
+        )
         self.assertEqual(visible_submissions_response.status_code, 200)
         self.assertTrue(visible_submissions_response.context["submissions"][0].show_review_data)
         self.assertContains(visible_submissions_response, "Looks good")
@@ -530,28 +552,36 @@ class RosterAPIAuthorizationTest(TestCase):
     def test_search_students_owner_can_access(self):
         """Course owner should be able to search students"""
         self._login_as(self.owner)
-        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        response = self.client.get(
+            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_teacher_can_access(self):
         """Teacher should be able to search students"""
         self._login_as(self.teacher)
-        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        response = self.client.get(
+            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_assistant_can_access(self):
         """Assistant should be able to search students"""
         self._login_as(self.assistant)
-        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        response = self.client.get(
+            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
 
     def test_search_students_unauthorized_denied(self):
         """Unauthorized user should be denied"""
         self._login_as(self.unauthorized_user)
-        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"})
+        response = self.client.get(
+            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_search_groups_owner_can_access(self):
@@ -577,19 +607,25 @@ class RosterAPIAuthorizationTest(TestCase):
     def test_students_by_groups_owner_can_access(self):
         """Course owner should be able to get students by groups"""
         self._login_as(self.owner)
-        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_students_by_groups_teacher_can_access(self):
         """Teacher should be able to get students by groups"""
         self._login_as(self.teacher)
-        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_students_by_groups_unauthorized_denied(self):
         """Unauthorized user should be denied"""
         self._login_as(self.unauthorized_user)
-        response = self.client.get(reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("assignments:students_by_groups"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 403)

@@ -17,7 +17,6 @@ from channels.layers import get_channel_layer
 
 from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
 from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
-from apps.live_exam.session_settings import get_session_settings, session_join_path
 from apps.live_exam.serializers import (
     serialize_answer_distribution,
     serialize_player_identity,
@@ -27,12 +26,11 @@ from apps.live_exam.serializers import (
     serialize_top,
     serialize_top_before_question,
 )
+from apps.live_exam.session_settings import get_session_settings, session_join_path
 
 
 def get_public_base_url(request) -> str:
-    configured = (
-        getattr(settings, "LIVE_EXAM_PUBLIC_HOST", None) or getattr(settings, "LAN_HOST", None) or ""
-    ).strip()
+    configured = (getattr(settings, "LIVE_EXAM_PUBLIC_HOST", None) or getattr(settings, "LAN_HOST", None) or "").strip()
 
     if configured:
         configured = configured.rstrip("/")
@@ -195,13 +193,20 @@ def build_question_phase_payload(
     }
 
 
-def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict[str, Any]:
+def build_reveal_payload(
+    session,
+    question_id: int,
+    *,
+    revealed_at=None,
+    exam_question=None,
+) -> dict[str, Any]:
     from apps.exams.models import ExamQuestion
     from apps.live_exam.domain.session import detect_multi
 
-    exam_question = (
-        ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
-    )
+    if exam_question is None:
+        exam_question = (
+            ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
+        )
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 
@@ -226,7 +231,13 @@ def build_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict
     return payload
 
 
-def build_player_reveal_payload(session, question_id: int, *, revealed_at=None) -> dict[str, Any]:
+def build_player_reveal_payload(
+    session,
+    question_id: int,
+    *,
+    revealed_at=None,
+    exam_question=None,
+) -> dict[str, Any]:
     """Reveal payload for players.
 
     Includes correct_option_ids (appropriate at reveal stage), distribution, and leaderboard
@@ -235,9 +246,10 @@ def build_player_reveal_payload(session, question_id: int, *, revealed_at=None) 
     from apps.exams.models import ExamQuestion
     from apps.live_exam.domain.session import detect_multi
 
-    exam_question = (
-        ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
-    )
+    if exam_question is None:
+        exam_question = (
+            ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
+        )
     if not exam_question:
         return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
 

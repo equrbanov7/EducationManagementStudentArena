@@ -19,21 +19,11 @@ from .crud import CreateCourseView, DeleteCourseView, EditCourseView, MyCoursesL
 from .dashboard import CourseDashboardView
 
 # ═══════════════════════════════════════════════════════════════
-# Topics
-# ═══════════════════════════════════════════════════════════════
-from .topics import AddTopicView, DeleteTopicView, EditTopicView
-
-# ═══════════════════════════════════════════════════════════════
-# Resources
-# ═══════════════════════════════════════════════════════════════
-from .resources import AddResourceView, DeleteResourceView
-
-# ═══════════════════════════════════════════════════════════════
 # Membership
 # ═══════════════════════════════════════════════════════════════
 from .membership import (
-    AddMemberView,
     AddMembersBulkView,
+    AddMemberView,
     AvailableStudentsView,
     CourseMembersView,
     DeleteGroupFromCourseView,
@@ -42,6 +32,16 @@ from .membership import (
     link_exam_to_course,
     unlink_exam_from_course,
 )
+
+# ═══════════════════════════════════════════════════════════════
+# Resources
+# ═══════════════════════════════════════════════════════════════
+from .resources import AddResourceView, DeleteResourceView
+
+# ═══════════════════════════════════════════════════════════════
+# Topics
+# ═══════════════════════════════════════════════════════════════
+from .topics import AddTopicView, DeleteTopicView, EditTopicView
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Explicit exports

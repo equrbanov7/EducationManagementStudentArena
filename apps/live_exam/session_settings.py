@@ -4,8 +4,8 @@ Session settings helpers for live exam hosting.
 
 from __future__ import annotations
 
-from copy import deepcopy
 import secrets
+from copy import deepcopy
 from typing import Any
 
 from apps.accounts.models import ProfileRole
@@ -94,6 +94,7 @@ def _coerce_bool(value: Any, default: bool) -> bool:
             return False
     return default
 
+
 def allowed_max_participants_for_user(user) -> int:
     if user is None:
         return DEFAULT_MAX_PARTICIPANTS
@@ -176,6 +177,15 @@ def update_session_settings(
                 merged[key] = value
     session.host_settings = merged
     session.save(update_fields=["host_settings"])
+
+    # Invalidate the cache so the next read picks up the fresh settings.
+    try:
+        from core.cache import invalidate_session_settings_cache
+
+        invalidate_session_settings_cache(session)
+    except Exception:
+        pass
+
     return merged
 
 
@@ -186,7 +196,5 @@ def session_join_path(session) -> str:
 
 def generate_guest_nickname() -> str:
     return (
-        f"{secrets.choice(NICKNAME_ADJECTIVES)} "
-        f"{secrets.choice(NICKNAME_NOUNS)} "
-        f"{secrets.randbelow(90) + 10}"
+        f"{secrets.choice(NICKNAME_ADJECTIVES)} " f"{secrets.choice(NICKNAME_NOUNS)} " f"{secrets.randbelow(90) + 10}"
     )

@@ -5,8 +5,8 @@ View tests for accounts app.
 import re
 
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.core import mail
+from django.core.cache import cache
 from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -643,7 +643,11 @@ class PublicProfileViewTest(TestCase):
                 for params, expected_extra_query, expected_category in (
                     ({"category": payload}, "", ""),
                     ({"q": payload}, "", ""),
-                    ({"category": self.demo_category.slug, "q": payload}, f"category={self.demo_category.slug}", self.demo_category.slug),
+                    (
+                        {"category": self.demo_category.slug, "q": payload},
+                        f"category={self.demo_category.slug}",
+                        self.demo_category.slug,
+                    ),
                 ):
                     with self.subTest(username=username, params=params):
                         response = self.client.get(
