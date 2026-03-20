@@ -177,6 +177,15 @@ def update_session_settings(
                 merged[key] = value
     session.host_settings = merged
     session.save(update_fields=["host_settings"])
+
+    # Invalidate the cache so the next read picks up the fresh settings.
+    try:
+        from core.cache import invalidate_session_settings_cache
+
+        invalidate_session_settings_cache(session)
+    except Exception:
+        pass
+
     return merged
 
 

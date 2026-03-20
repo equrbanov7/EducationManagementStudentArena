@@ -49,6 +49,8 @@ from apps.live_exam.transport import (
     build_question_phase_payload,
     build_reveal_payload,
 )
+from apps.audit.utils import log_action
+from core.constants import AuditAction
 from core.permissions import request_has_permission
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -100,6 +102,14 @@ def live_create_session_by_slug(request, slug):
     _ensure_host_org_permission(request, exam.organization)
 
     session = LiveSession.objects.create(exam=exam, host_user=request.user)
+    log_action(
+        action=AuditAction.CREATE,
+        user=request.user,
+        organization=exam.organization,
+        obj=session,
+        new_values={"exam": str(exam.pk), "pin": session.pin},
+        request=request,
+    )
     presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": session.pin})
     return redirect(f"{presentation_url}?controls=1")
 
@@ -272,6 +282,16 @@ def host_start_game(request, pin):
 
     broadcast_play(pin, payload)
 
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=session.exam.organization,
+        obj=session,
+        new_values={"state": session.state, "question_count": len(selected_ids)},
+        reason="game_started",
+        request=request,
+    )
+
     return JsonResponse(
         {
             "ok": True,
@@ -440,12 +460,17 @@ def host_finish(request, pin):
     payload = build_finished_payload(session, finished_at=timezone.now(), limit=50)
     broadcast_play(pin, payload)
 
-    return JsonResponse({"ok": True})
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=session.exam.organization,
+        obj=session,
+        new_values={"state": LiveSession.STATE_FINISHED},
+        reason="game_finished",
+        request=request,
+    )
 
-
-@require_POST
-@login_required
-def host_toggle_lock(request, pin):
+    return JsonResponse({"ok": True})(request, pin):
     session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
     if session.host_user_id != request.user.id:
         raise Http404()

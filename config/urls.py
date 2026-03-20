@@ -36,6 +36,8 @@ urlpatterns = [
     ),
     # audit
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
+    # API versioned endpoints
+    path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),
     path("ping/", ping, name="ping"),
 ]

@@ -265,6 +265,14 @@ def add_exam_question(request, slug):
 
             question.save()
 
+            # Invalidate the cached question ID list so live sessions see the change.
+            try:
+                from core.cache import invalidate_exam_question_ids_cache
+
+                invalidate_exam_question_ids_cache(exam.pk)
+            except Exception:
+                pass
+
             # Əgər exam tipi testdirsə → variantları yarat
             if exam.exam_type == "test":
                 form.create_options(question)
@@ -444,6 +452,13 @@ def delete_exam_question(request, slug, question_id):
 
     if request.method == "POST":
         question.delete()
+        # Invalidate the cached question ID list for this exam.
+        try:
+            from core.cache import invalidate_exam_question_ids_cache
+
+            invalidate_exam_question_ids_cache(exam.pk)
+        except Exception:
+            pass
         return redirect(
             _append_navigation_query(
                 reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
