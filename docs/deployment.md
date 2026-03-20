@@ -30,10 +30,14 @@ pip install -r requirements/local.txt
 ```
 
 ### 4. Configure Environment Variables
-Create a `.env` file based on `.env.example`:
-```bash
-cp .env.example .env
-# Edit .env with your configuration
+Create a `.env` file in the project root and add the required values:
+```env
+SECRET_KEY=change-me
+DATABASE_URL=postgres://emsarena:password@localhost:5432/emsarena
+REDIS_URL=redis://127.0.0.1:6379/0
+
+# Required when using the production Docker stack
+REDIS_PASSWORD=change-me-strong-redis-password
 ```
 
 ### 5. Run Migrations

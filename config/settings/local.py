@@ -35,7 +35,7 @@ if not SECRET_KEY:
         "The application cannot start without a secret key — this prevents\n"
         "session forgery and token tampering in any environment.\n\n"
         "Quick fix:\n"
-        "  1. Copy .env.example to .env\n"
+        "  1. Create a .env file in the project root\n"
         '  2. Generate a key: python -c "import secrets; print(secrets.token_urlsafe(64))"\n'
         "  3. Set SECRET_KEY=<generated-key> in your .env file\n"
     )
