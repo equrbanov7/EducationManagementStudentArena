@@ -251,10 +251,12 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
     def test_pin_entry_shows_error_for_unknown_pin(self):
-        """Test that an unknown PIN returns a friendly validation page."""
-        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
+        """Test that an unknown PIN of correct length returns a friendly validation page."""
+        # Use a 10-char alphanumeric PIN that cannot match any real session.
+        unknown_pin = "9999999999"
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": unknown_pin})
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, "99999999", status_code=404)
+        self.assertContains(response, unknown_pin, status_code=404)
 
     def test_join_enter_requires_nickname(self):
         """Test that joining requires a nickname."""
@@ -357,10 +359,12 @@ class LiveJoinRateLimitTest(TestCase):
     def test_pin_entry_blocks_repeated_invalid_attempts(self):
         self.client.get(reverse("liveExam:pin_entry"))
 
-        first = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
+        # Use a 10-char PIN of correct length but non-existent to get 404 (not found).
+        unknown_pin = "9999999999"
+        first = self.client.post(reverse("liveExam:pin_entry"), {"pin": unknown_pin})
         self.assertEqual(first.status_code, 404)
 
-        blocked = self.client.post(reverse("liveExam:pin_entry"), {"pin": "99999999"})
+        blocked = self.client.post(reverse("liveExam:pin_entry"), {"pin": unknown_pin})
 
         self.assertEqual(blocked.status_code, 429)
         self.assertContains(blocked, "Çox sayda cəhd edildi", status_code=429)
