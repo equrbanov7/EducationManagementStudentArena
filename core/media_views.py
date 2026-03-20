@@ -37,7 +37,6 @@ from django.views.decorators.http import require_GET
 _PUBLIC_PREFIXES: tuple[str, ...] = (
     "post_images/",
     "course_covers/",
-    "question_media/",
 )
 
 # Paths that always require authentication.
@@ -48,6 +47,7 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "exam_uploads/",
     "exam_paints/",
     "labs/",
+    "question_media/",
 )
 
 # Minimum role level considered "teacher-level" for access to sensitive files
@@ -202,6 +202,37 @@ def _check_lab_file_access(user, path: str) -> bool:
     return False
 
 
+def _check_question_media_access(user, path: str) -> bool:
+    """
+    Verify access to ``question_media/`` files.
+
+    Question images and videos belong to an exam within an organization.
+    Any active member of that organization (including students) may access
+    question media while taking or reviewing an exam.
+
+    Path format: ``question_media/exam_{exam_id}/q_{question_id}/{filename}``
+    """
+    clean = path.lstrip("/")
+    # Extract exam_id from the path segment "exam_{exam_id}"
+    parts = clean.split("/")
+    if len(parts) < 2:
+        return False
+    exam_segment = parts[1]  # e.g. "exam_42"
+    if not exam_segment.startswith("exam_"):
+        return False
+    exam_id_str = exam_segment[len("exam_"):]
+    if not exam_id_str.isdigit():
+        return False
+
+    try:
+        from apps.exams.models import Exam
+
+        exam = Exam.objects.select_related("organization").get(pk=int(exam_id_str))
+        return _user_has_org_membership(user, exam.organization, min_level=0)
+    except (Exam.DoesNotExist, ValueError):
+        return False
+
+
 def _check_course_resource_access(user, path: str) -> bool:
     """
     Verify access to ``course_resources/`` files.
@@ -253,6 +284,9 @@ def _check_private_media_access(request, path: str) -> bool:
 
     if clean.startswith("course_resources/"):
         return _check_course_resource_access(user, path)
+
+    if clean.startswith("question_media/"):
+        return _check_question_media_access(user, path)
 
     # Unknown private path — deny by default.
     return False

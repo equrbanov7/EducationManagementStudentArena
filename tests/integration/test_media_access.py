@@ -169,3 +169,131 @@ class MediaViewCrossTenantExamUploadTest(TestCase):
         response = protected_media(request, path=self.file_path)
         self.assertEqual(response.status_code, 302)
         self.assertIn("login", response["Location"].lower())
+
+
+class QuestionMediaProtectionIntegrationTest(TestCase):
+    """
+    Integration tests for the ``question_media/`` hardening.
+
+    Verifies that question media (images, videos attached to exam questions)
+    is no longer publicly accessible and enforces org-membership checks.
+    """
+
+    def setUp(self):
+        import os
+        import tempfile
+
+        from apps.exams.models import Exam, ExamQuestion
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.factory = RequestFactory()
+        self.media_tmp = tempfile.mkdtemp()
+
+        # Users
+        self.member = User.objects.create_user(
+            username="qm_int_member",
+            email="qm_int_member@example.com",
+            password="TestPass123!",
+        )
+        self.stranger = User.objects.create_user(
+            username="qm_int_stranger",
+            email="qm_int_stranger@example.com",
+            password="TestPass123!",
+        )
+        self.superadmin = User.objects.create_superuser(
+            username="qm_int_super",
+            email="qm_int_super@example.com",
+            password="TestPass123!",
+        )
+
+        # Organization + exam
+        self.org = Organization.objects.create(
+            name="QM Integration Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.member,
+            status="active",
+            is_active=True,
+        )
+        student_role = self.org.roles.get(name="student")
+        Membership.objects.create(
+            user=self.member,
+            organization=self.org,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        self.exam = Exam.objects.create(
+            title="QM Integration Exam",
+            author=self.member,
+            organization=self.org,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Sample question?",
+            order=1,
+            points=5,
+        )
+
+        # Physical file
+        self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/sample.jpg"
+        file_dir = os.path.join(
+            self.media_tmp,
+            "question_media",
+            f"exam_{self.exam.pk}",
+            f"q_{self.question.pk}",
+        )
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "sample.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+    @override_settings(
+        MEDIA_ACCEL_REDIRECT_URL="/internal_media",
+    )
+    def test_unauthenticated_cannot_access_question_media(self):
+        """Unauthenticated access to question_media/ must be redirected to login."""
+        request = self.factory.get(f"/media/{self.file_path}")
+        request.user = AnonymousUser()
+
+        response = protected_media(request, path=self.file_path)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("login", response["Location"].lower())
+
+    @override_settings(
+        MEDIA_ACCEL_REDIRECT_URL="/internal_media",
+    )
+    def test_org_member_can_access_question_media(self):
+        """An authenticated org member can access question media (X-Accel path)."""
+        request = self.factory.get(f"/media/{self.file_path}")
+        request.user = self.member
+
+        response = protected_media(request, path=self.file_path)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("X-Accel-Redirect", response)
+
+    @override_settings(
+        MEDIA_ACCEL_REDIRECT_URL="/internal_media",
+    )
+    def test_cross_org_user_denied_question_media(self):
+        """A user with no org membership is denied access to question media."""
+        from django.core.exceptions import PermissionDenied
+
+        request = self.factory.get(f"/media/{self.file_path}")
+        request.user = self.stranger
+
+        with self.assertRaises(PermissionDenied):
+            protected_media(request, path=self.file_path)
+
+    @override_settings(
+        MEDIA_ACCEL_REDIRECT_URL="/internal_media",
+    )
+    def test_superadmin_can_access_question_media(self):
+        """Superadmin can access any question media regardless of org membership."""
+        request = self.factory.get(f"/media/{self.file_path}")
+        request.user = self.superadmin
+
+        response = protected_media(request, path=self.file_path)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("X-Accel-Redirect", response)
