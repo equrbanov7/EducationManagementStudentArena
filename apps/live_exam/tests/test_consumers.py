@@ -216,6 +216,33 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         connected = async_to_sync(scenario)()
         self.assertFalse(connected, "An expired player token must cause the WebSocket handshake to be rejected")
 
+    # Required named alias for acceptance criteria
+    test_expired_token_rejected = test_expired_player_token_rejected
+
+    def test_websocket_rejects_invalid_origin(self):
+        """
+        A WebSocket connection from an origin not in ALLOWED_HOSTS must be
+        rejected by AllowedHostsOriginValidator before reaching the consumer.
+        The connection must not be established.
+        """
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                # Provide a foreign origin that is not in ALLOWED_HOSTS /
+                # testserver.  AllowedHostsOriginValidator must block this.
+                headers=[(b"origin", b"http://evil.attacker.example.com")],
+            )
+            connected, _ = await communicator.connect()
+            await communicator.wait()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(
+            connected,
+            "AllowedHostsOriginValidator must reject connections from non-whitelisted origins",
+        )
+
     def test_player_token_pin_mismatch_rejected(self):
         """
         A valid token signed for a *different* session PIN must not grant
@@ -836,6 +863,9 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
         self.assertEqual(player_direct["type"], "answer_saved")
         self.assertEqual(host_msg["type"], "answer_progress")
         self.assertTrue(player_no_progress)
+
+    # Required named alias for acceptance criteria
+    test_player_cannot_receive_answer_progress = test_answer_progress_reaches_host_not_players
 
     def test_host_reveal_payload_contains_results_field(self):
         """Host reveal payload must include the per-player ``results`` field."""

@@ -8,15 +8,9 @@ import re
 import uuid
 from typing import Any
 
-from django.conf import settings
 from django.core import signing
 
 from apps.live_exam.models import LivePlayer, LiveSession
-
-try:
-    import jwt
-except ImportError:  # pragma: no cover - optional dependency during partial installs
-    jwt = None
 
 PLAYER_COOKIE_NAME = "live_player_token"
 PLAYER_TOKEN_SALT = "liveExam.player"  # nosec B105
@@ -84,18 +78,6 @@ def _load_signed_player_token_payload(token: str) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
-def _load_legacy_jwt_player_token_payload(token: str) -> dict[str, Any] | None:
-    if jwt is None:
-        return None
-
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-    except Exception:
-        return None
-
-    return payload if isinstance(payload, dict) else None
-
-
 def load_player_token_payload(
     token: str | None,
     session_or_pin=None,
@@ -107,7 +89,7 @@ def load_player_token_payload(
         return None
 
     expected_pin = _resolve_session_pin(session_or_pin, pin=pin, session=session)
-    payload = _load_signed_player_token_payload(token) or _load_legacy_jwt_player_token_payload(token)
+    payload = _load_signed_player_token_payload(token)
     if payload is None:
         return None
 

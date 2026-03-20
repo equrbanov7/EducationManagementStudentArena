@@ -6,7 +6,7 @@ Base models that can be inherited by app models.
 import itertools
 import uuid
 
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.utils.text import slugify
 
 
@@ -66,7 +66,11 @@ class TitleSlugModel(models.Model):
 
     Slug collisions are resolved automatically by appending an incrementing
     numeric suffix (e.g. ``my-title``, ``my-title-1``, ``my-title-2``, …).
-    An ``IntegrityError`` is never raised for duplicate slugs.
+
+    Concurrent saves are safe: each candidate slug is attempted inside its own
+    ``SAVEPOINT`` so that an ``IntegrityError`` from a parallel writer is caught
+    and the loop moves on to the next suffix without aborting the outer
+    transaction.
     """
 
     title = models.CharField(max_length=255)
@@ -78,14 +82,16 @@ class TitleSlugModel(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
-            self.slug = base_slug
-            for x in itertools.count(1):
-                qs = self.__class__.objects.filter(slug=self.slug)
-                if self.pk:
-                    qs = qs.exclude(pk=self.pk)
-                if not qs.exists():
-                    break
-                self.slug = f"{base_slug}-{x}"
+            for x in itertools.count(0):
+                self.slug = base_slug if x == 0 else f"{base_slug}-{x}"
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                    return
+                except IntegrityError:
+                    # Another concurrent writer claimed this slug; try the next.
+                    self.slug = ""
+                    continue
         super().save(*args, **kwargs)
 
 

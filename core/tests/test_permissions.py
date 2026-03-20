@@ -13,7 +13,7 @@ Covers:
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
@@ -137,6 +137,32 @@ class RequestHasPermissionTest(TestCase):
             org_memberships=[_membership_stub(50)],
         )
         self.assertTrue(request_has_permission(request, "exam.delete"))
+
+    def test_superadmin_cross_org_audit_log_failure_does_not_block_request(self):
+        """Audit log exception must not block a superadmin cross-org request; logger.exception() is called."""
+        from apps.organizations.models import Organization
+
+        org = MagicMock(spec=Organization)
+        superuser = User.objects.create_superuser(
+            username="perm_superuser_audit",
+            email="superaudit@example.com",
+            password="testpass123",
+        )
+        request = _make_request(
+            user=superuser,
+            organization=org,
+            org_permissions=[],
+            org_memberships=[],
+        )
+
+        with patch(
+            "apps.audit.utils.log_superadmin_cross_org_action",
+            side_effect=Exception("audit failure"),
+        ), patch("core.permissions.logger") as mock_logger:
+            result = request_has_permission(request, "course.delete")
+
+        self.assertTrue(result)
+        mock_logger.exception.assert_called_once_with("Failed to log superadmin cross-org action")
 
 
 # ---------------------------------------------------------------------------
