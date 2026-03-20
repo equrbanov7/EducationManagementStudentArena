@@ -11,6 +11,8 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.cache import caches
+from django.core.cache.backends.dummy import DummyCache
+from django.core.cache.backends.locmem import LocMemCache
 
 _RATE_RE = re.compile(
     r"^\s*(?P<count>\d+)\s*/\s*(?:(?P<window>\d+)\s*(?P<unit>[smhd])|(?P<short_unit>[smhd]))\s*$",
@@ -22,6 +24,7 @@ _WINDOW_MULTIPLIERS = {
     "h": 60 * 60,
     "d": 60 * 60 * 24,
 }
+_RATE_LIMIT_FALLBACK_CACHE = LocMemCache("rate-limit-fallback", {})
 
 
 @dataclass(frozen=True)
@@ -51,7 +54,12 @@ def normalize_rate_identity(value) -> str:
 
 def _rate_limit_cache():
     cache_alias = getattr(settings, "RATELIMIT_USE_CACHE", "default")
-    return caches[cache_alias]
+    cache = caches[cache_alias]
+    # DummyCache disables persistence entirely, which makes rate-limiting a no-op.
+    # Fall back to a process-local cache so throttling still works in test/dev setups.
+    if isinstance(cache, DummyCache):
+        return _RATE_LIMIT_FALLBACK_CACHE
+    return cache
 
 
 def _cache_keys(scope: str, key_parts: tuple[object, ...]) -> tuple[str, str]:
