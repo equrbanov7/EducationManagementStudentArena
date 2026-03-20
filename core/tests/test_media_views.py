@@ -234,6 +234,111 @@ class ProtectedMediaViewTest(TestCase):
         sys.modules.pop("config.urls", None)
         clear_url_caches()
 
+    def test_dev_private_media_requires_auth(self):
+        """
+        In DEBUG mode, private media paths must still require authentication.
+        Unauthenticated requests to private paths (e.g. exam_uploads/) must be
+        redirected to the login page — not served openly.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/exam_uploads/secret.pdf")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="exam_uploads/secret.pdf")
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_unauthenticated_user_cannot_access_private_media(self):
+        """
+        Acceptance criteria: an unauthenticated (anonymous) user must never
+        receive a successful response (HTTP 200) for any private media path.
+        The view must redirect them to the login page (HTTP 302) instead.
+
+        Covers multiple private prefixes to ensure the guard is applied
+        consistently regardless of the specific private path family.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+
+        private_paths = [
+            "projects/submissions/report.pdf",
+            "exam_uploads/answer.pdf",
+            "exam_paints/drawing.png",
+            "labs/submissions/lab.zip",
+        ]
+
+        for path in private_paths:
+            with self.subTest(path=path):
+                request = factory.get(f"/media/{path}")
+                request.user = AnonymousUser()
+
+                with override_settings(
+                    MEDIA_ROOT=self.media_tmp,
+                    MEDIA_URL="/media/",
+                    SERVE_MEDIA=True,
+                    DEBUG=False,
+                    MEDIA_ACCEL_REDIRECT_URL="",
+                ):
+                    response = protected_media(request, path=path)
+                    self.assertEqual(
+                        response.status_code,
+                        302,
+                        f"Unauthenticated user must be redirected for private path: {path}",
+                    )
+                    self.assertIn(
+                        "login",
+                        response["Location"].lower(),
+                        f"Redirect must point to login for path: {path}",
+                    )
+
+    def test_dev_public_media_accessible_without_auth(self):
+        """
+        In DEBUG mode, public media paths (post_images/) must remain accessible
+        without authentication.
+        """
+        import os
+
+        public_dir = os.path.join(self.media_tmp, "post_images")
+        os.makedirs(public_dir, exist_ok=True)
+        with open(os.path.join(public_dir, "cover.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/post_images/cover.jpg")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="post_images/cover.jpg")
+            # Public files must be served (200), not redirected
+            self.assertEqual(response.status_code, 200)
+
 
 class ProtectedMediaOwnershipTest(TestCase):
     """
@@ -634,3 +739,120 @@ class QuestionMediaAccessTest(TestCase):
         ):
             with self.assertRaises(PermissionDenied):
                 protected_media(request, path=bad_path)
+
+
+# ---------------------------------------------------------------------------
+# Tests required by Task 6 (P1): explicit access-checker registry
+# ---------------------------------------------------------------------------
+
+
+class QuestionMediaAccessCheckerRegistryTest(TestCase):
+    """
+    Tests for the ``_ACCESS_CHECKERS`` registry introduced in Task 6.
+
+    Success criteria:
+    * ``question_media/`` has a dedicated entry in ``_ACCESS_CHECKERS``.
+    * Access is granted only to active members of the exam's organization.
+    * Non-members and unauthenticated users are strictly denied.
+    """
+
+    def setUp(self):
+        from apps.exams.models import Exam
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.allowed_user = User.objects.create_user(
+            username="checker_member",
+            email="checker_member@example.com",
+            password="StrongPass123!",
+        )
+        self.denied_user = User.objects.create_user(
+            username="checker_outsider",
+            email="checker_outsider@example.com",
+            password="StrongPass123!",
+        )
+
+        self.org = Organization.objects.create(
+            name="Checker Registry Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.allowed_user,
+            status="active",
+            is_active=True,
+        )
+        student_role = self.org.roles.get(name="student")
+        Membership.objects.create(
+            user=self.allowed_user,
+            organization=self.org,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        self.exam = Exam.objects.create(
+            title="Registry Test Exam",
+            author=self.allowed_user,
+            organization=self.org,
+            is_active=True,
+        )
+        self.path = f"question_media/exam_{self.exam.pk}/q_1/test.png"
+
+    def test_question_media_access_checker_exists(self):
+        """
+        ``_ACCESS_CHECKERS`` must contain an entry for the ``question_media/`` prefix.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        self.assertIn(
+            "question_media/",
+            _ACCESS_CHECKERS,
+            "question_media/ must have a dedicated entry in _ACCESS_CHECKERS",
+        )
+        checker = _ACCESS_CHECKERS["question_media/"]
+        self.assertTrue(callable(checker), "_ACCESS_CHECKERS['question_media/'] must be callable")
+
+    def test_question_media_access_only_for_allowed_org_members(self):
+        """
+        Only active members of the exam's organization may access question_media files.
+        Non-members are denied regardless of authentication status.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+
+        # Allowed: user is an active member of the exam's org
+        self.assertTrue(
+            checker(self.allowed_user, self.path),
+            "Active org member must be granted access to question_media",
+        )
+
+        # Denied: user has no membership in the exam's org
+        self.assertFalse(
+            checker(self.denied_user, self.path),
+            "Non-member must be denied access to question_media",
+        )
+
+    def test_question_media_checker_denies_nonexistent_exam(self):
+        """
+        Checker must deny (fail-closed) when the exam ID does not exist in the DB.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+        bad_path = "question_media/exam_999999/q_1/img.png"
+        self.assertFalse(
+            checker(self.allowed_user, bad_path),
+            "Path with non-existent exam ID must be denied",
+        )
+
+    def test_question_media_checker_denies_malformed_path(self):
+        """
+        Checker must deny paths that do not contain a recognisable exam segment.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+        malformed = "question_media/unknown/file.png"
+        self.assertFalse(
+            checker(self.allowed_user, malformed),
+            "Malformed question_media path must be denied",
+        )

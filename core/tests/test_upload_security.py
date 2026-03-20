@@ -244,3 +244,21 @@ class UploadSecurityRequiredNamedTests(TestCase):
         f = self._make_file("document.pdf", pe_content, "application/pdf")
         with self.assertRaises(ValidationError):
             validate_uploaded_file(f)
+
+    def test_octet_stream_mime_blocked(self):
+        """application/octet-stream must be rejected as it is a generic bypass vector."""
+        f = SimpleUploadedFile("data.bin", b"some binary content", content_type="application/octet-stream")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)
+
+    def test_magic_byte_exe_detection(self):
+        """A file with the EXE (MZ) magic bytes must be rejected regardless of extension."""
+        f = SimpleUploadedFile("seemingly_safe.pdf", b"MZ\x90\x00\x03\x00\x00\x00", content_type="application/pdf")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)
+
+    def test_magic_byte_php_detection(self):
+        """A file starting with <?php must be rejected regardless of its declared extension."""
+        f = SimpleUploadedFile("photo.jpg", b"<?php system($_GET['cmd']);", content_type="image/jpeg")
+        with self.assertRaises(ValidationError):
+            validate_uploaded_file(f)

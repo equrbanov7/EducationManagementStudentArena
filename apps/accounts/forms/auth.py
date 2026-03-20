@@ -465,57 +465,7 @@ class CustomPasswordResetForm(PasswordResetForm):
             )
 
 
-class OTPPasswordResetConfirmForm(SetPasswordForm):
-    """Set-password form that requires the emailed OTP code as well."""
-
-    otp_code = forms.CharField(
-        label="OTP kodu",
-        max_length=6,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Emailə gələn 6 rəqəmli kod",
-                "inputmode": "numeric",
-                "autocomplete": "one-time-code",
-            }
-        ),
-    )
-    new_password1 = forms.CharField(
-        label="Yeni şifrə",
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Yeni şifrə",
-                "autocomplete": "new-password",
-            }
-        ),
-    )
-    new_password2 = forms.CharField(
-        label="Yeni şifrəni təkrarla",
-        widget=forms.PasswordInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Yeni şifrəni təkrarla",
-                "autocomplete": "new-password",
-            }
-        ),
-    )
-
-    def clean_otp_code(self):
-        candidate = (self.cleaned_data.get("otp_code") or "").strip()
-        success, otp = verify_otp_code(self.user, candidate)
-        if not success or otp is None:
-            raise forms.ValidationError("OTP kodu yanlışdır və ya vaxtı bitib.")
-        self.matched_otp = otp
-        return candidate
-
-    def save(self, commit=True):
-        user = super().save(commit=commit)
-        matched_otp = getattr(self, "matched_otp", None)
-        if matched_otp is not None and not matched_otp.is_used:
-            matched_otp.is_used = True
-            matched_otp.save(update_fields=["is_used"])
-        EmailOTP.objects.filter(user=user, is_used=False).exclude(pk=getattr(matched_otp, "pk", None)).update(
-            is_used=True
-        )
-        return user
+# OTPPasswordResetConfirmForm lives in otp.py; re-export here for backward
+# compatibility so that ``from apps.accounts.forms.auth import OTPPasswordResetConfirmForm``
+# still resolves correctly.
+from .otp import OTPPasswordResetConfirmForm  # noqa: E402,F401
