@@ -219,7 +219,7 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         access to the current session's WebSocket endpoint.
         """
         # Build a token for the correct player/client but for a non-existent PIN.
-        wrong_pin = "00000000"
+        wrong_pin = "0000000000"  # 10 chars — valid length but guaranteed not to match
         wrong_token = build_player_token(
             pin=wrong_pin,
             player_id=self.player.id,
