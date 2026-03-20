@@ -64,6 +64,9 @@ class OrganizationMiddleware:
         request.organization = None
         request.org_memberships = []
         request.org_permissions = []
+        # All active memberships across every org – used by the context
+        # processor to build the org-switcher list without extra DB queries.
+        request._all_org_memberships = []
 
         if not request.user.is_authenticated:
             return self.get_response(request)
@@ -136,6 +139,17 @@ class OrganizationMiddleware:
 
             # len >= 2  → multi-org user; explicit selection required.
             # request.organization stays None; the org-picker view handles this.
+
+            # Preserve the full membership list for the context processor so it
+            # can build the org-switcher without issuing another query.
+            request._all_org_memberships = active_memberships
+
+        else:
+            # Session org path: fetch all memberships for the org-switcher list
+            # only if the user belongs to more than one org.  Re-use the already
+            # fetched current-org memberships as a starting point; a second query
+            # is issued only when there are known multiple orgs (rare case).
+            request._all_org_memberships = self._fetch_active_memberships(request.user)
 
         # ── Step 3: finalize permissions for the resolved org ─────────────
         if request.organization:

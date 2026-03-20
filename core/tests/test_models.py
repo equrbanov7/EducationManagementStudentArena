@@ -162,3 +162,60 @@ class SoftDeleteModelTest(TransactionTestCase):
         """all_objects.filter() must be able to find deleted rows by name."""
         count_all = ConcreteSoftDeleteModel.all_objects.filter(name="deleted").count()
         self.assertEqual(count_all, 1)
+
+
+# ---------------------------------------------------------------------------
+# Task 8: concurrent slug generation (race-condition hardening)
+# ---------------------------------------------------------------------------
+
+
+class TitleSlugModelConcurrencyTest(TransactionTestCase):
+    """
+    Verify that the ``IntegrityError`` retry loop in ``TitleSlugModel.save()``
+    correctly handles slug collisions without surfacing errors to callers.
+
+    The IntegrityError path is exercised by pre-inserting a row that occupies
+    the first candidate slug, so that the ``super().save()`` call inside
+    ``transaction.atomic()`` raises ``IntegrityError`` and the retry loop
+    advances to the next suffix.
+
+    TransactionTestCase is required so that savepoint-based error handling
+    works correctly (it must not be wrapped in the test transaction).
+    """
+
+    def setUp(self):
+        _drop_table_if_exists(ConcreteSlugModel)
+        _create_table(ConcreteSlugModel)
+
+    def tearDown(self):
+        _drop_table_if_exists(ConcreteSlugModel)
+
+    def test_integrity_error_retry_resolves_slug_collision(self):
+        """
+        When a concurrent writer has already taken the base slug,
+        ``TitleSlugModel.save()`` must catch the ``IntegrityError`` raised by
+        the unique constraint and succeed by retrying with the next suffix.
+        """
+        # Pre-occupy the base slug – simulates the "other writer wins" scenario.
+        ConcreteSlugModel.objects.create(title="Collision Test", slug="collision-test")
+
+        # Create a second object with the same title and no explicit slug.
+        # The retry loop must survive the IntegrityError on "collision-test"
+        # and save successfully with "collision-test-1".
+        obj = ConcreteSlugModel(title="Collision Test")
+        obj.save()  # Must NOT raise IntegrityError
+
+        self.assertIsNotNone(obj.pk)
+        self.assertTrue(
+            obj.slug.startswith("collision-test-"),
+            f"Expected 'collision-test-<N>', got '{obj.slug}'",
+        )
+
+    def test_sequential_creation_produces_unique_slugs(self):
+        """
+        Creating multiple objects with the same title sequentially must
+        produce distinct slugs without any errors.
+        """
+        objects = [ConcreteSlugModel.objects.create(title="Same Title") for _ in range(5)]
+        slugs = [o.slug for o in objects]
+        self.assertEqual(len(set(slugs)), 5, f"Duplicate slugs detected: {slugs}")
