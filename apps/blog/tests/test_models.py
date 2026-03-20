@@ -278,7 +278,9 @@ class SubscriberTest(TestCase):
         """Test that subscriber email must be unique."""
         Subscriber.objects.create(email="unique@example.com")
 
-        with self.assertRaises(Exception):
+        from django.db import IntegrityError
+
+        with self.assertRaises(IntegrityError):
             Subscriber.objects.create(email="unique@example.com")
 
     def test_subscriber_string_representation(self):

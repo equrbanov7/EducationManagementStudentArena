@@ -19,6 +19,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from apps.audit.utils import log_action
 from apps.exams.models import Exam, ExamQuestion
 from apps.live_exam.domain.session import (
     build_question_phase_times,
@@ -49,7 +50,6 @@ from apps.live_exam.transport import (
     build_question_phase_payload,
     build_reveal_payload,
 )
-from apps.audit.utils import log_action
 from core.constants import AuditAction
 from core.permissions import request_has_permission
 

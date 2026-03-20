@@ -240,7 +240,7 @@ def _check_question_media_access(user, path: str) -> bool:
     exam_segment = parts[1]  # e.g. "exam_42"
     if not exam_segment.startswith("exam_"):
         return False
-    exam_id_str = exam_segment[len("exam_"):]
+    exam_id_str = exam_segment[len("exam_") :]
     if not exam_id_str.isdigit():
         return False
 

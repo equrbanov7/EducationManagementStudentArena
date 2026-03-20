@@ -17,7 +17,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
@@ -25,9 +25,9 @@ from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import build_player_token, load_player_token_payload
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.scoring import save_answer_and_score
-from apps.organizations.models import Membership, Organization, Role
+from apps.organizations.models import Organization
 from apps.organizations.signals import create_default_roles
-from core.constants import AuditAction, OrganizationType, RoleScopeType
+from core.constants import AuditAction, OrganizationType
 from core.rate_limit import record_rate_limit_hit
 
 User = get_user_model()
@@ -99,9 +99,7 @@ def _make_live_session(exam, teacher):
     now = timezone.now()
     session.question_started_at = now - timezone.timedelta(seconds=15)
     session.question_ends_at = now + timezone.timedelta(seconds=30)
-    session.save(
-        update_fields=["state", "current_index", "question_started_at", "question_ends_at"]
-    )
+    session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
     return session
 
 
@@ -177,9 +175,7 @@ class PlayerTokenSecurityTest(TestCase):
 
     def setUp(self):
         self.teacher, self.org = _make_org_with_teacher()
-        exam, self.question, self.correct, self.wrong = _make_exam_with_question(
-            self.teacher, self.org
-        )
+        exam, self.question, self.correct, self.wrong = _make_exam_with_question(self.teacher, self.org)
         self.session = _make_live_session(exam, self.teacher)
         self.player = _make_player(self.session)
 
@@ -247,9 +243,7 @@ class CheatingPreventionTest(TestCase):
 
     def setUp(self):
         self.teacher, self.org = _make_org_with_teacher()
-        exam, self.question, self.correct, self.wrong = _make_exam_with_question(
-            self.teacher, self.org
-        )
+        exam, self.question, self.correct, self.wrong = _make_exam_with_question(self.teacher, self.org)
         self.session = _make_live_session(exam, self.teacher)
         self.player = _make_player(self.session)
 
@@ -344,7 +338,7 @@ class TenantIsolationTest(TestCase):
         # player_a is attached to session_a; submitting to session_b is cross-tenant
         result = save_answer_and_score(
             session=self.session_b,
-            player=self.player_a,   # Wrong session!
+            player=self.player_a,  # Wrong session!
             question=self.q_b,
             option_ids=[self.correct_b.id],
             submitted_at=timezone.now(),
@@ -484,7 +478,6 @@ class AuditLogCoverageTest(TestCase):
         from apps.audit.utils import log_action
 
         exam, _, _, _ = _make_exam_with_question(self.teacher, self.org)
-        exam_pk = exam.pk
         title = exam.title
 
         log_action(
@@ -684,9 +677,7 @@ class LiveExamServiceLayerTest(TestCase):
 
     def setUp(self):
         self.teacher, self.org = _make_org_with_teacher()
-        exam, self.question, self.correct, self.wrong = _make_exam_with_question(
-            self.teacher, self.org
-        )
+        exam, self.question, self.correct, self.wrong = _make_exam_with_question(self.teacher, self.org)
         self.exam = exam
 
     def test_create_live_session_returns_session_in_lobby(self):

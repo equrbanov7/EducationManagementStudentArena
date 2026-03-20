@@ -45,7 +45,9 @@ def _resolve_session_pin(session_or_pin=None, *, pin: str | None = None, session
     return str(candidate)
 
 
-def build_player_token(*args, pin: str | None = None, player_id: int | None = None, client_id: str | None = None) -> str:
+def build_player_token(
+    *args, pin: str | None = None, player_id: int | None = None, client_id: str | None = None
+) -> str:
     if args:
         if len(args) != 2 or any(value is not None for value in (pin, player_id, client_id)):
             raise TypeError("Use either build_player_token(player, session) or keyword arguments.")
