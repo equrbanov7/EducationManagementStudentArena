@@ -49,10 +49,7 @@ def _build_direct_post_count_map(posts_queryset):
     queryset = (posts_queryset if posts_queryset is not None else Post.objects.filter(is_published=True)).exclude(
         category__isnull=True
     )
-    return {
-        row["category_id"]: row["total"]
-        for row in queryset.values("category_id").annotate(total=Count("id"))
-    }
+    return {row["category_id"]: row["total"] for row in queryset.values("category_id").annotate(total=Count("id"))}
 
 
 def get_category_subtree_ids(category, *, category_queryset=None):
@@ -181,11 +178,7 @@ def get_category_assignment_queryset_and_labels():
 
 def get_navbar_categories():
     navbar_categories = get_flat_category_tree(include_empty=True)
-    return [
-        category
-        for category in navbar_categories
-        if category.tree_depth == 0 and category.show_in_navbar
-    ]
+    return [category for category in navbar_categories if category.tree_depth == 0 and category.show_in_navbar]
 
 
 def get_popular_topics(*, active_category=None, limit=5):

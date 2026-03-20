@@ -3,9 +3,10 @@ Core abstract models for EMS Arena project.
 Base models that can be inherited by app models.
 """
 
+import itertools
 import uuid
 
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.utils.text import slugify
 
 
@@ -32,13 +33,28 @@ class UUIDModel(models.Model):
         abstract = True
 
 
+class SoftDeleteManager(models.Manager):
+    """
+    Default manager for SoftDeleteModel — excludes soft-deleted rows.
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class SoftDeleteModel(models.Model):
     """
     Abstract model that provides soft delete functionality.
+
+    Default manager (``objects``) automatically excludes soft-deleted rows.
+    Use ``all_objects`` to bypass the filter and access every row.
     """
 
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
 
     class Meta:
         abstract = True
@@ -47,6 +63,14 @@ class SoftDeleteModel(models.Model):
 class TitleSlugModel(models.Model):
     """
     Abstract model that provides title and auto-generated slug fields.
+
+    Slug collisions are resolved automatically by appending an incrementing
+    numeric suffix (e.g. ``my-title``, ``my-title-1``, ``my-title-2``, …).
+
+    Concurrent saves are safe: each candidate slug is attempted inside its own
+    ``SAVEPOINT`` so that an ``IntegrityError`` from a parallel writer is caught
+    and the loop moves on to the next suffix without aborting the outer
+    transaction.
     """
 
     title = models.CharField(max_length=255)
@@ -57,7 +81,17 @@ class TitleSlugModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            for x in itertools.count(0):
+                self.slug = base_slug if x == 0 else f"{base_slug}-{x}"
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                    return
+                except IntegrityError:
+                    # Another concurrent writer claimed this slug; try the next.
+                    self.slug = ""
+                    continue
         super().save(*args, **kwargs)
 
 

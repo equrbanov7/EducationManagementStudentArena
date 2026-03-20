@@ -15,7 +15,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.exams.forms import ExamQuestionCreateForm
 from apps.exams.models import ExamQuestion, QuestionBlock
-from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 
@@ -265,6 +265,14 @@ def add_exam_question(request, slug):
 
             question.save()
 
+            # Invalidate the cached question ID list so live sessions see the change.
+            try:
+                from core.cache import invalidate_exam_question_ids_cache
+
+                invalidate_exam_question_ids_cache(exam.pk)
+            except Exception:
+                pass
+
             # Əgər exam tipi testdirsə → variantları yarat
             if exam.exam_type == "test":
                 form.create_options(question)
@@ -276,7 +284,9 @@ def add_exam_question(request, slug):
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
                 return redirect(
-                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                    _append_navigation_query(
+                        reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                    )
                 )
             else:
                 # Sadəcə imtahan detalına qayıt
@@ -369,7 +379,9 @@ def edit_exam_question(request, slug, question_id):
 
             if "save_and_continue" in request.POST:
                 return redirect(
-                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                    _append_navigation_query(
+                        reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                    )
                 )
 
             return redirect(
@@ -440,6 +452,13 @@ def delete_exam_question(request, slug, question_id):
 
     if request.method == "POST":
         question.delete()
+        # Invalidate the cached question ID list for this exam.
+        try:
+            from core.cache import invalidate_exam_question_ids_cache
+
+            invalidate_exam_question_ids_cache(exam.pk)
+        except Exception:
+            pass
         return redirect(
             _append_navigation_query(
                 reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),

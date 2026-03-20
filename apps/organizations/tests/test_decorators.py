@@ -18,7 +18,7 @@ from django.views import View
 from core.constants import OrganizationType
 
 from ..decorators import LevelRequiredMixin, OrganizationRequiredMixin, PermissionRequiredMixin
-from ..models import Membership, Organization, Role
+from ..models import Membership, Organization
 
 User = get_user_model()
 

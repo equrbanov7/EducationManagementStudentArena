@@ -174,7 +174,9 @@ ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 DATABASE_URL=postgresql://username:password@localhost:5432/emsarena
 
 # Redis (for WebSockets)
-REDIS_URL=redis://127.0.0.1:6379
+REDIS_URL=redis://127.0.0.1:6379/0
+# Production Docker stack only
+REDIS_PASSWORD=change-me-strong-redis-password
 
 # Email Configuration (Gmail SMTP example)
 EMAIL_HOST_USER=your-email@gmail.com
@@ -336,7 +338,6 @@ emsarena/
 ├── media/                 # User uploads
 ├── staticfiles/           # Collected static files (production)
 ├── .env                   # Environment variables (create this)
-├── .env.example           # Example env file
 ├── docker-compose.yml     # Docker setup
 ├── manage.py              # Django management script
 ├── requirements.txt       # Python dependencies
@@ -684,5 +685,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **⭐ If you find this project useful, please consider giving it a star on GitHub!**
-
 

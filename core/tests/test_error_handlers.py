@@ -9,7 +9,6 @@ internals — addressing the Application Error Disclosure vulnerability.
 from __future__ import annotations
 
 from django.test import Client, TestCase, override_settings
-from django.urls import reverse
 
 
 @override_settings(DEBUG=False)

@@ -1,8 +1,9 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
-from .models import Assignment, AssignmentSubmission
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+
+from .models import Assignment, AssignmentSubmission
 
 
 class AssignmentForm(forms.ModelForm):

@@ -13,7 +13,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from apps.courses.models import CourseMembership
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
-from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
@@ -153,11 +153,7 @@ def _build_group_student_map(form):
     group_qs = group_field.queryset.prefetch_related("students")
 
     for group in group_qs:
-        member_ids = [
-            student.id
-            for student in group.students.all()
-            if student.id in allowed_user_ids
-        ]
+        member_ids = [student.id for student in group.students.all() if student.id in allowed_user_ids]
         group_student_map[str(group.id)] = [str(member_id) for member_id in member_ids]
 
     return group_student_map
@@ -165,10 +161,7 @@ def _build_group_student_map(form):
 
 def _get_requested_course_for_exam(request):
     raw_course_id = (
-        request.POST.get("course_id")
-        or request.GET.get("course")
-        or request.GET.get("course_id")
-        or ""
+        request.POST.get("course_id") or request.GET.get("course") or request.GET.get("course_id") or ""
     ).strip()
     if not raw_course_id.isdigit():
         return None
@@ -255,6 +248,27 @@ def createAndEditExamView(request, slug=None):
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
+
+            from apps.audit.utils import log_action
+            from core.constants import AuditAction
+
+            log_action(
+                action=AuditAction.UPDATE if is_editing else AuditAction.CREATE,
+                user=request.user,
+                organization=organization,
+                obj=exam_instance,
+                new_values={"title": exam_instance.title, "is_active": str(exam_instance.is_active)},
+                reason="exam_updated" if is_editing else "exam_created",
+                request=request,
+            )
+
+            # Invalidate cached exam metadata so subsequent reads are fresh.
+            try:
+                from core.cache import invalidate_exam_metadata_cache
+
+                invalidate_exam_metadata_cache(exam_instance.pk)
+            except Exception:
+                pass
 
             messages.success(
                 request,
@@ -383,7 +397,27 @@ def delete_exam(request, slug):
         raise PermissionDenied(pgettext("exams.view.exams.permission", "delete_blocked_due_to_attempts"))
 
     if request.method == "POST":
+        from apps.audit.utils import log_action
+        from core.constants import AuditAction
+
+        log_action(
+            action=AuditAction.DELETE,
+            user=request.user,
+            organization=exam.organization,
+            obj=exam,
+            old_values={"title": exam.title, "slug": exam.slug},
+            reason="exam_deleted",
+            request=request,
+        )
+        _exam_pk = exam.pk
         exam.delete()
+        try:
+            from core.cache import invalidate_exam_metadata_cache, invalidate_exam_question_ids_cache
+
+            invalidate_exam_metadata_cache(_exam_pk)
+            invalidate_exam_question_ids_cache(_exam_pk)
+        except Exception:
+            pass
         return redirect("exams:teacher_exam_list")
 
     return render(request, "exams/teacher/confirm_delete_exam.html", {"exam": exam})

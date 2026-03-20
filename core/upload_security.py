@@ -67,7 +67,6 @@ DEFAULT_ALLOWED_MIME_TYPES = {
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     "application/json",
     "application/xml",
-    "application/octet-stream",
     "text/plain",
     "text/csv",
 }
@@ -245,5 +244,9 @@ class FileUploadValidator:
         return (
             "core.upload_security.FileUploadValidator",
             [],
-            {k: v for k, v in (("allowed_extensions", self.allowed_extensions), ("max_size_mb", self.max_size_mb)) if v is not None},
+            {
+                k: v
+                for k, v in (("allowed_extensions", self.allowed_extensions), ("max_size_mb", self.max_size_mb))
+                if v is not None
+            },
         )

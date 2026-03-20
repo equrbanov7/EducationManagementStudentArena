@@ -336,6 +336,9 @@ class RequestTenantContextTest(TestCase):
         request_valid = self._request(organization=self.org_a, memberships=[self.membership_a])
         self.assertTrue(scoped_by_organization(Role.objects.all(), request_valid).exists())
 
+    # Required named alias for acceptance criteria
+    test_scoped_by_organization_returns_none_without_org = test_scoped_by_organization_returns_none_without_context
+
 
 class HttpTenantIsolationTest(TestCase):
     """
@@ -544,33 +547,25 @@ class HttpTenantIsolationTest(TestCase):
     def test_org_a_teacher_cannot_access_org_b_course_dashboard(self):
         """An Org-A teacher gets 404 when accessing an Org-B course dashboard."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(
-            reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id})
-        )
+        response = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_student_cannot_access_org_b_course_dashboard(self):
         """An Org-A student gets 404 when accessing an Org-B course dashboard."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(
-            reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id})
-        )
+        response = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_teacher_cannot_view_org_b_exam_detail(self):
         """An Org-A teacher gets 404 when accessing an Org-B exam detail page."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(
-            reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam_b.slug})
-        )
+        response = self.client.get(reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam_b.slug}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_student_cannot_start_org_b_exam(self):
         """An Org-A student gets 404 when attempting to start an Org-B exam."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(
-            reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug})
-        )
+        response = self.client.get(reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug}))
         self.assertEqual(response.status_code, 404)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -628,6 +623,28 @@ class HttpTenantIsolationTest(TestCase):
         self.assertIn(self.course_a.title, course_titles, "Teacher A must see their own org-a course")
         self.assertNotIn(self.course_b.title, course_titles, "Teacher A must NOT see org-b course")
 
+    def test_user_from_org_A_cannot_see_org_B_courses(self):
+        """
+        Acceptance criteria alias: a user logged in under Org-A must never see
+        courses that belong to Org-B in any course listing view.
+        """
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(reverse("courses:my_courses"))
+        self.assertEqual(response.status_code, 200)
+        course_titles = [c.title for c in response.context["courses"]]
+        self.assertNotIn(self.course_b.title, course_titles, "Org-A user must not see Org-B courses")
+
+    def test_user_from_org_A_cannot_see_org_B_exams(self):
+        """
+        Acceptance criteria: a user logged in under Org-A must never see
+        exams that belong to Org-B in the teacher exam list view.
+        """
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+        response = self.client.get(reverse("exams:teacher_exam_list"))
+        self.assertEqual(response.status_code, 200)
+        exam_titles = [e.title for e in response.context["exams"]]
+        self.assertNotIn(self.exam_b.title, exam_titles, "Org-A user must not see Org-B exams")
+
     def test_user_org_a_cannot_download_org_b_media(self):
         """
         The protected media view must deny an Org-A user access to a file
@@ -660,9 +677,7 @@ class HttpTenantIsolationTest(TestCase):
         A superuser must be able to switch to any organization via the org
         picker and see that org's courses.
         """
-        superuser = User.objects.create_superuser(
-            "superadmin_test", "superadmin@example.com", "SuperSecretPass123!"
-        )
+        superuser = User.objects.create_superuser("superadmin_test", "superadmin@example.com", "SuperSecretPass123!")
         # Set the active org to org_b for the superadmin
         _login_with_org(self.client, superuser, self.org_b)
         response = self.client.get(reverse("courses:my_courses"))

@@ -12,8 +12,8 @@ from django.test import TestCase
 
 from apps.accounts.models import ProfileRole
 from apps.exams import services
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 from apps.exams.services import parsing
-from apps.exams.models import Exam, ExamAttempt, ExamAnswer, ExamQuestion
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -24,16 +24,8 @@ class ExamAttemptManagementServicesTest(TestCase):
     """Test exam attempt management service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -44,21 +36,11 @@ class ExamAttemptManagementServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.exam = Exam.objects.create(
-            title="Test Exam",
-            author=self.teacher,
-            is_active=True,
-            max_attempts_per_user=3
-        )
+        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True, max_attempts_per_user=3)
 
     def test_get_active_attempt_for_user(self):
         """Test getting active attempt for user."""
-        attempt = ExamAttempt.objects.create(
-            user=self.student,
-            exam=self.exam,
-            attempt_number=1,
-            status="in_progress"
-        )
+        attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, attempt_number=1, status="in_progress")
 
         active_attempt = services.get_active_attempt_for_user(self.exam, self.student)
 
@@ -73,12 +55,7 @@ class ExamAttemptManagementServicesTest(TestCase):
 
     def test_cannot_start_attempt_when_active_exists(self):
         """Test cannot start new attempt when active exists."""
-        ExamAttempt.objects.create(
-            user=self.student,
-            exam=self.exam,
-            attempt_number=1,
-            status="in_progress"
-        )
+        ExamAttempt.objects.create(user=self.student, exam=self.exam, attempt_number=1, status="in_progress")
 
         can_start, reason = services.can_user_start_new_attempt(self.exam, self.student)
 
@@ -109,16 +86,8 @@ class ExamGradingServicesTest(TestCase):
     """Test exam grading service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -129,16 +98,9 @@ class ExamGradingServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.exam = Exam.objects.create(
-            title="Test Exam",
-            author=self.teacher,
-            is_active=True
-        )
+        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
         self.attempt = ExamAttempt.objects.create(
-            user=self.student,
-            exam=self.exam,
-            attempt_number=1,
-            status="submitted"
+            user=self.student, exam=self.exam, attempt_number=1, status="submitted"
         )
         self.question = ExamQuestion.objects.create(
             exam=self.exam,
@@ -153,11 +115,7 @@ class ExamGradingServicesTest(TestCase):
 
     def test_grade_exam_answer(self):
         """Test grading an exam answer."""
-        graded_answer = services.grade_exam_answer(
-            self.answer,
-            8,
-            self.teacher
-        )
+        graded_answer = services.grade_exam_answer(self.answer, 8, self.teacher)
 
         self.assertEqual(graded_answer.teacher_score, 8)
 
@@ -174,11 +132,7 @@ class ExamAccessControlServicesTest(TestCase):
     """Test exam access control service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
         self.teacher.profile.role = ProfileRole.TEACHER
         self.teacher.profile.save(update_fields=["role", "updated_at"])
 
@@ -193,16 +147,8 @@ class ExamAccessControlServicesTest(TestCase):
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
-        self.exam = Exam.objects.create(
-            title="Test Exam",
-            author=self.teacher,
-            is_active=True
-        )
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
+        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
 
     def test_is_teacher_user(self):
         """Test checking if user is teacher."""

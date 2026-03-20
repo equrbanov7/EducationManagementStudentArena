@@ -2,16 +2,15 @@
 import re
 
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
 
-from core.views import health_check, ping, test_error
-from core.views import handler400 as handler400  # noqa: PLC0414
-from core.views import handler403 as handler403  # noqa: PLC0414
-from core.views import handler404 as handler404  # noqa: PLC0414
-from core.views import handler500 as handler500  # noqa: PLC0414
 from core.media_views import protected_media
+from core.views import handler400 as handler400  # noqa: F401
+from core.views import handler403 as handler403  # noqa: F401
+from core.views import handler404 as handler404  # noqa: F401
+from core.views import handler500 as handler500  # noqa: F401
+from core.views import health_check, ping, test_error
 
 admin.site.site_url = reverse_lazy("home")
 
@@ -36,6 +35,8 @@ urlpatterns = [
     ),
     # audit
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
+    # API versioned endpoints
+    path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),
     path("ping/", ping, name="ping"),
 ]
@@ -47,11 +48,14 @@ if settings.DEBUG:
         path("test-error/", test_error, name="test_error"),
     ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-elif getattr(settings, "SERVE_MEDIA", False):
-    # Use authenticated protected_media view instead of bare serve().
-    # This prevents unauthenticated access to private media files.
+if settings.DEBUG or getattr(settings, "SERVE_MEDIA", False):
+    # In DEBUG mode, route ALL media paths through protected_media so that
+    # authentication is enforced for private paths (exam_uploads/, labs/,
+    # projects/submissions/, etc.) even in development.  The protected_media
+    # view differentiates between public and private paths internally.
+    # In non-DEBUG mode this branch is only reached when SERVE_MEDIA=True
+    # (simple/staging deployments); production nginx/caddy should serve media
+    # directly with SERVE_MEDIA=False.
     media_prefix = settings.MEDIA_URL.lstrip("/")
     if media_prefix and not media_prefix.endswith("/"):
         media_prefix += "/"
@@ -65,4 +69,3 @@ elif getattr(settings, "SERVE_MEDIA", False):
 # Django looks for these module-level names in ROOT_URLCONF when DEBUG=False
 # to dispatch 4xx/5xx responses.  The aliased imports above ensure the names
 # exist at module scope explicitly.  See Django docs: "Customizing error views".
-

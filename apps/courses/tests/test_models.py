@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.courses.models import Course
-from apps.organizations.models import AcademicPeriod, OrgUnit, Organization
+from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
 from core.constants import OrganizationType
 
 User = get_user_model()

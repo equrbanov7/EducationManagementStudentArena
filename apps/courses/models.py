@@ -196,9 +196,7 @@ class Course(models.Model):
             self.organization = getattr(profile, "organization", None)
 
         if self.organization_id is None:
-            raise ValidationError(
-                pgettext_lazy("courses.model.course.error", "organization_required")
-            )
+            raise ValidationError(pgettext_lazy("courses.model.course.error", "organization_required"))
 
         super().save(*args, **kwargs)
 

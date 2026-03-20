@@ -22,16 +22,8 @@ class ProjectSubmissionServicesTest(TestCase):
     """Test project submission service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -42,11 +34,7 @@ class ProjectSubmissionServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.course = Course.objects.create(
-            title="Test Course",
-            owner=self.teacher,
-            status="published"
-        )
+        self.course = Course.objects.create(title="Test Course", owner=self.teacher, status="published")
         self.project = Project.objects.create(
             title="Test Project",
             course=self.course,
@@ -57,11 +45,7 @@ class ProjectSubmissionServicesTest(TestCase):
 
     def test_create_project_submission(self):
         """Test creating a project submission."""
-        submission = services.create_project_submission(
-            self.project,
-            self.student,
-            submission_text="Test submission"
-        )
+        submission = services.create_project_submission(self.project, self.student, submission_text="Test submission")
 
         self.assertIsNotNone(submission)
         self.assertEqual(submission.project, self.project)
@@ -71,16 +55,9 @@ class ProjectSubmissionServicesTest(TestCase):
 
     def test_update_project_submission(self):
         """Test updating a project submission."""
-        submission = services.create_project_submission(
-            self.project,
-            self.student,
-            submission_text="Original text"
-        )
+        submission = services.create_project_submission(self.project, self.student, submission_text="Original text")
 
-        updated = services.update_project_submission(
-            submission,
-            submission_text="Updated text"
-        )
+        updated = services.update_project_submission(submission, submission_text="Updated text")
 
         self.assertEqual(updated.content, "Updated text")
 
@@ -89,16 +66,8 @@ class ProjectGradingServicesTest(TestCase):
     """Test project grading service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -109,11 +78,7 @@ class ProjectGradingServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.course = Course.objects.create(
-            title="Test Course",
-            owner=self.teacher,
-            status="published"
-        )
+        self.course = Course.objects.create(title="Test Course", owner=self.teacher, status="published")
         self.project = Project.objects.create(
             title="Test Project",
             course=self.course,
@@ -122,20 +87,12 @@ class ProjectGradingServicesTest(TestCase):
             status="active",
         )
         self.submission = ProjectSubmission.objects.create(
-            project=self.project,
-            student=self.student,
-            content="Needs grading",
-            status="pending"
+            project=self.project, student=self.student, content="Needs grading", status="pending"
         )
 
     def test_grade_project_submission(self):
         """Test grading a project submission."""
-        graded = services.grade_project_submission(
-            self.submission,
-            Decimal("90"),
-            "Excellent work!",
-            self.teacher
-        )
+        graded = services.grade_project_submission(self.submission, Decimal("90"), "Excellent work!", self.teacher)
 
         self.assertEqual(graded.grade, Decimal("90"))
         self.assertEqual(graded.feedback, "Excellent work!")

@@ -6,20 +6,18 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
-from apps.organizations.models import Membership
 from core.constants import OrganizationType
 
+from ..models import ProfileRole, UserProfile
 from ._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
-    STUDENT_PENDING_INVITE_TITLE,
     STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH,
+    STUDENT_PENDING_INVITE_TITLE,
     _build_student_org_management_section,
     _build_student_org_request_section,
     _close_other_pending_student_requests,
@@ -30,17 +28,15 @@ from ._helpers import (
     _map_org_role_to_profile_role,
     _normalized_org_name,
     _pending_student_request_queryset,
-    _resolve_next_url,
     _resolve_membership_role,
+    _resolve_next_url,
     _role_capabilities,
     _set_student_org_request_status,
     _sync_profile_pending_request_snapshot,
-    _user_has_any_role,
 )
 
-from ..models import ProfileRole, UserProfile
-
 User = get_user_model()
+
 
 @login_required
 def student_organization_management(request):
@@ -412,7 +408,9 @@ def student_organization_management(request):
                 selected_user_ids = {int(reject_user_id)}
                 is_single_reject = True
             if not selected_user_ids:
-                selected_user_ids = {int(user_id) for user_id in request.POST.getlist("selected_pending_user_ids") if user_id.isdigit()}
+                selected_user_ids = {
+                    int(user_id) for user_id in request.POST.getlist("selected_pending_user_ids") if user_id.isdigit()
+                }
             if not selected_user_ids:
                 if bulk_reject_mode:
                     messages.error(request, "Silmək üçün ən azı bir tələbə seçin.")
@@ -468,7 +466,9 @@ def student_organization_management(request):
                 is_single_invite = True
             if not selected_user_ids:
                 selected_user_ids = {
-                    int(user_id) for user_id in request.POST.getlist("selected_unassigned_user_ids") if user_id.isdigit()
+                    int(user_id)
+                    for user_id in request.POST.getlist("selected_unassigned_user_ids")
+                    if user_id.isdigit()
                 }
             if not selected_user_ids:
                 messages.error(request, "Dəvət göndərmək üçün ən azı bir tələbə seçin.")
@@ -508,7 +508,9 @@ def student_organization_management(request):
                 is_single_revoke = True
             if not selected_user_ids:
                 selected_user_ids = {
-                    int(user_id) for user_id in request.POST.getlist("selected_sent_invite_user_ids") if user_id.isdigit()
+                    int(user_id)
+                    for user_id in request.POST.getlist("selected_sent_invite_user_ids")
+                    if user_id.isdigit()
                 }
             if not selected_user_ids:
                 messages.error(request, "Geri çəkmək üçün ən azı bir dəvət seçin.")
@@ -959,12 +961,15 @@ def student_leave_organization(request):
         messages.error(request, "Hazırda bağlı olduğunuz təşkilat yoxdur.")
         return redirect(back_url)
 
-    is_student_user = profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT} or Membership.objects.filter(
-        user=request.user,
-        organization=organization,
-        is_active=True,
-        role__name="student",
-    ).exists()
+    is_student_user = (
+        profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
+        or Membership.objects.filter(
+            user=request.user,
+            organization=organization,
+            is_active=True,
+            role__name="student",
+        ).exists()
+    )
     if not is_student_user:
         messages.error(request, "Bu əməliyyat yalnız tələbələr üçün aktivdir.")
         return redirect(back_url)

@@ -50,7 +50,9 @@ def render_category_page(request, category, *, template_name="blog/category_deta
         "categories": categories,
         "popular_topics": popular_topics,
         "active_category_slug": category.slug,
-        "back_link_url": reverse("category_detail", args=[parent_category.slug]) if parent_category else reverse("home"),
+        "back_link_url": (
+            reverse("category_detail", args=[parent_category.slug]) if parent_category else reverse("home")
+        ),
     }
 
     return render(request, template_name, context)

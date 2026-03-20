@@ -23,7 +23,6 @@ from apps.courses.models import Course
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # Helper Functions
 # ════════════════════════════════════════════════════════════════════════════

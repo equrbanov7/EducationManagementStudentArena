@@ -19,6 +19,19 @@ Access-control model
   either the file owner or has an active membership in the resource's
   organization at an appropriate role level.
 * If ownership cannot be determined the request is **denied** (HTTP 403).
+
+Access-checker registry (``_ACCESS_CHECKERS``)
+-----------------------------------------------
+Each private path prefix maps to a dedicated checker callable with the
+signature ``(user, path: str) -> bool``.  Adding a new private prefix is a
+two-step operation:
+
+1. Register the path prefix in ``_PRIVATE_PREFIXES``.
+2. Register a checker under the **same** prefix key in ``_ACCESS_CHECKERS``.
+
+``_check_private_media_access`` iterates ``_ACCESS_CHECKERS`` in order and
+dispatches to the first matching checker.  Unknown private prefixes are denied
+by default.
 """
 
 from __future__ import annotations
@@ -37,7 +50,6 @@ from django.views.decorators.http import require_GET
 _PUBLIC_PREFIXES: tuple[str, ...] = (
     "post_images/",
     "course_covers/",
-    "question_media/",
 )
 
 # Paths that always require authentication.
@@ -48,6 +60,7 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "exam_uploads/",
     "exam_paints/",
     "labs/",
+    "question_media/",
 )
 
 # Minimum role level considered "teacher-level" for access to sensitive files
@@ -202,6 +215,46 @@ def _check_lab_file_access(user, path: str) -> bool:
     return False
 
 
+def _check_question_media_access(user, path: str) -> bool:
+    """
+    Verify access to ``question_media/`` files.
+
+    Question images and videos belong to an ``Exam`` that is scoped to an
+    ``Organization``.  Access is granted to any user who holds an **active
+    membership** in that organization (students, teachers, and admins alike).
+
+    Path format: ``question_media/exam_{exam_id}/q_{question_id}/{filename}``
+    The ``exam_{exam_id}`` segment is used to resolve the owning Exam and its
+    Organization; all other path segments are ignored for access purposes.
+
+    Returns ``False`` (deny) when:
+    * the path does not contain a recognisable ``exam_*`` segment, or
+    * the exam does not exist in the database, or
+    * the user has no active membership in the exam's organization.
+    """
+    clean = path.lstrip("/")
+    # Expected format: question_media/exam_{exam_id}/...
+    parts = clean.split("/")
+    if len(parts) < 2:
+        return False
+    exam_segment = parts[1]  # e.g. "exam_42"
+    if not exam_segment.startswith("exam_"):
+        return False
+    exam_id_str = exam_segment[len("exam_"):]
+    if not exam_id_str.isdigit():
+        return False
+
+    try:
+        from apps.exams.models import Exam
+
+        exam = Exam.objects.select_related("organization").get(pk=int(exam_id_str))
+        if exam.organization is None:
+            return False
+        return _user_has_org_membership(user, exam.organization, min_level=0)
+    except (Exam.DoesNotExist, ValueError):
+        return False
+
+
 def _check_course_resource_access(user, path: str) -> bool:
     """
     Verify access to ``course_resources/`` files.
@@ -217,13 +270,44 @@ def _check_course_resource_access(user, path: str) -> bool:
         return False
 
 
+def _check_avatar_access(user, path: str) -> bool:  # noqa: ARG001
+    """Profile avatars are low-risk; any authenticated user may access them."""
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Access-checker registry
+# ---------------------------------------------------------------------------
+# Maps a private path prefix to the callable that decides whether *user* may
+# access a file under that prefix.  The dict is ordered (Python 3.7+) so the
+# iteration in ``_check_private_media_access`` is deterministic.
+#
+# To add a new private prefix:
+#   1. Add the prefix to ``_PRIVATE_PREFIXES`` above.
+#   2. Register a checker here under the same prefix key.
+# ---------------------------------------------------------------------------
+
+_ACCESS_CHECKERS: dict[str, object] = {
+    "avatars/": _check_avatar_access,
+    "exam_uploads/": _check_exam_upload_access,
+    "exam_paints/": _check_exam_paint_access,
+    "projects/submissions/": _check_project_submission_access,
+    "labs/": _check_lab_file_access,
+    "course_resources/": _check_course_resource_access,
+    "question_media/": _check_question_media_access,
+}
+
+
 def _check_private_media_access(request, path: str) -> bool:
     """
     Return True if the requesting user is authorised to access the private
     media file at *path*.
 
     Access is **denied by default** when the owning record cannot be found
-    in the database.
+    in the database or the path prefix is not registered in ``_ACCESS_CHECKERS``.
+
+    Dispatches to the appropriate checker via the ``_ACCESS_CHECKERS`` registry
+    so that every private prefix has an explicit, auditable access rule.
     """
     user = request.user
     if not user.is_authenticated:
@@ -235,24 +319,9 @@ def _check_private_media_access(request, path: str) -> bool:
 
     clean = path.lstrip("/")
 
-    # Profile avatars are low-risk and needed across the system.
-    if clean.startswith("avatars/"):
-        return True
-
-    if clean.startswith("exam_uploads/"):
-        return _check_exam_upload_access(user, path)
-
-    if clean.startswith("exam_paints/"):
-        return _check_exam_paint_access(user, path)
-
-    if clean.startswith("projects/submissions/"):
-        return _check_project_submission_access(user, path)
-
-    if clean.startswith("labs/"):
-        return _check_lab_file_access(user, path)
-
-    if clean.startswith("course_resources/"):
-        return _check_course_resource_access(user, path)
+    for prefix, checker in _ACCESS_CHECKERS.items():
+        if clean.startswith(prefix):
+            return checker(user, path)
 
     # Unknown private path — deny by default.
     return False
@@ -276,6 +345,7 @@ def protected_media(request, path: str):
     if _is_private(path):
         if not request.user.is_authenticated:
             from django.contrib.auth.views import redirect_to_login
+
             return redirect_to_login(request.get_full_path())
         if not _check_private_media_access(request, path):
             raise PermissionDenied
@@ -287,9 +357,7 @@ def protected_media(request, path: str):
         clean_path = posixpath.normpath(path).lstrip("/")
         response = HttpResponse()
         response["X-Accel-Redirect"] = f"{accel_url}/{clean_path}"
-        response["Content-Type"] = (
-            mimetypes.guess_type(path)[0] or "application/octet-stream"
-        )
+        response["Content-Type"] = mimetypes.guess_type(path)[0] or "application/octet-stream"
         response["X-Content-Type-Options"] = "nosniff"
         if _is_private(path):
             response["Cache-Control"] = "private, no-store"
