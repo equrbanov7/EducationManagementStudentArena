@@ -1,11 +1,11 @@
 import logging
 
-import redis as redis_client
-
 from django.conf import settings
 from django.db import connection
 from django.http import JsonResponse
 from django.shortcuts import render
+
+import redis as redis_client
 
 logger = logging.getLogger(__name__)
 
