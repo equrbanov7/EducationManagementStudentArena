@@ -21,7 +21,6 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
-from apps.blog.models import Post
 from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
@@ -51,9 +50,9 @@ from ._helpers import (
     _assigned_courses_queryset,
     _assigned_exams_queryset,
     _bind_active_role_context,
-    _build_user_organization_access_rows,
     _build_student_org_management_section,
     _build_student_org_request_section,
+    _build_user_organization_access_rows,
     _collect_actor_permissions,
     _decorate_manage_role_profiles,
     _ensure_profile_admin_membership,
@@ -458,10 +457,7 @@ def user_profile(request):
                 exam__in=my_exams_qs,
                 status__in=["submitted", "expired"],
             )
-            .filter(
-                Q(checked_by_teacher=False)
-                | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff)
-            )
+            .filter(Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
             .exclude(exam__exam_type="test")
             .count()
         )
@@ -732,12 +728,16 @@ def user_profile(request):
                 request.user,
                 management_org,
             )
-            management_can_assign_roles = capabilities["is_superadmin"] or has_permission(
-                list(management_actor_permissions),
-                "role.assign",
-            ) or has_permission(
-                list(management_actor_permissions),
-                "org.manage_members",
+            management_can_assign_roles = (
+                capabilities["is_superadmin"]
+                or has_permission(
+                    list(management_actor_permissions),
+                    "role.assign",
+                )
+                or has_permission(
+                    list(management_actor_permissions),
+                    "org.manage_members",
+                )
             )
             management_min_level_ok = capabilities["is_superadmin"] or management_user_level >= 50
 
@@ -1143,6 +1143,7 @@ def user_profile(request):
 
     return render(request, "accounts/profile.html", context)
 
+
 @require_safe
 def public_user_profile(request, username):
     """
@@ -1161,9 +1162,7 @@ def public_user_profile(request, username):
     profile, _ = UserProfile.objects.get_or_create(user=profile_user)
 
     published_posts = (
-        Post.objects.filter(author=profile_user, is_published=True)
-        .select_related("category")
-        .order_by("-created_at")
+        Post.objects.filter(author=profile_user, is_published=True).select_related("category").order_by("-created_at")
     )
 
     allowed_category_slugs = set(Category.objects.values_list("slug", flat=True))
@@ -1178,9 +1177,7 @@ def public_user_profile(request, username):
         user_posts_list = user_posts_list.none()
     elif search_query:
         user_posts_list = user_posts_list.filter(
-            Q(title__icontains=search_query)
-            | Q(excerpt__icontains=search_query)
-            | Q(content__icontains=search_query)
+            Q(title__icontains=search_query) | Q(excerpt__icontains=search_query) | Q(content__icontains=search_query)
         )
 
     if invalid_category:

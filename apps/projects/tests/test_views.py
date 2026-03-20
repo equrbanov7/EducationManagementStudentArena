@@ -64,7 +64,9 @@ class ProjectDetailBackUrlTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Course", status="published", organization=self.organization)
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Project Course", status="published", organization=self.organization
+        )
         self.project = Project.objects.create(
             course=self.course,
             title="Project Back Url",
@@ -113,8 +115,12 @@ class ProjectDetailBackUrlTest(TestCase):
 class ProjectReviewSubmissionNavigationTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.teacher = User.objects.create_user("project_review_teacher", "project_review_teacher@example.com", "StrongPass123!")
-        self.student = User.objects.create_user("project_review_student", "project_review_student@example.com", "StrongPass123!")
+        self.teacher = User.objects.create_user(
+            "project_review_teacher", "project_review_teacher@example.com", "StrongPass123!"
+        )
+        self.student = User.objects.create_user(
+            "project_review_student", "project_review_student@example.com", "StrongPass123!"
+        )
         self.organization = Organization.objects.create(
             name="Project Review Org",
             org_type=OrganizationType.SCHOOL,
@@ -124,7 +130,9 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Review Course", status="published", organization=self.organization)
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Project Review Course", status="published", organization=self.organization
+        )
         self.project = Project.objects.create(
             course=self.course,
             title="Project Review",
@@ -212,7 +220,9 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         self.submission.submitted_at = timezone.now() - timedelta(minutes=6)
         self.submission.save(update_fields=["submitted_at"])
 
-        still_anonymous_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+        still_anonymous_response = self.client.get(
+            reverse("projects:review_project_submissions", kwargs={"pk": self.project.id})
+        )
         self.assertEqual(still_anonymous_response.status_code, 200)
         self.assertContains(still_anonymous_response, "Anonim tələbə")
         self.assertNotContains(still_anonymous_response, self.student.username)
@@ -236,7 +246,9 @@ class ProjectReviewSubmissionNavigationTest(TestCase):
         self.submission.graded_at = timezone.now() - timedelta(minutes=6)
         self.submission.save(update_fields=["graded_at"])
 
-        locked_response = self.client.get(reverse("projects:review_project_submissions", kwargs={"pk": self.project.id}))
+        locked_response = self.client.get(
+            reverse("projects:review_project_submissions", kwargs={"pk": self.project.id})
+        )
         self.assertEqual(locked_response.status_code, 200)
         self.assertContains(locked_response, "Bax")
         self.assertContains(locked_response, self.student.username)
@@ -276,7 +288,9 @@ class ProjectUploadSecurityTest(TestCase):
         )
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-        self.course = Course.objects.create(owner=self.teacher, title="Project Upload Course", status="published", organization=self.organization)
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Project Upload Course", status="published", organization=self.organization
+        )
         self.project = Project.objects.create(
             course=self.course,
             title="Project Upload Security",
@@ -315,7 +329,9 @@ class ProjectUploadSecurityTest(TestCase):
     def test_submit_project_randomizes_filename_for_allowed_file(self):
         payload = {
             "content": "safe upload",
-            "file": SimpleUploadedFile("report.pdf", b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n", content_type="application/pdf"),
+            "file": SimpleUploadedFile(
+                "report.pdf", b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n", content_type="application/pdf"
+            ),
         }
         response = self.client.post(reverse("projects:submit_project", kwargs={"pk": self.project.id}), data=payload)
 
@@ -435,8 +451,12 @@ class ProjectTenantIsolationTest(TestCase):
             profile.role = role
             profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
-        self.course_a = Course.objects.create(owner=self.teacher_a, title="Project Course A", status="published", organization=self.org_a)
-        self.course_b = Course.objects.create(owner=self.teacher_b, title="Project Course B", status="published", organization=self.org_b)
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a, title="Project Course A", status="published", organization=self.org_a
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b, title="Project Course B", status="published", organization=self.org_b
+        )
 
         self.project_b = Project.objects.create(
             course=self.course_b,
@@ -482,7 +502,9 @@ class ProjectReviewVisibilityTest(TestCase):
         _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
-        self.course = Course.objects.create(owner=self.teacher, title="Project Visibility Course", status="published", organization=self.organization)
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Project Visibility Course", status="published", organization=self.organization
+        )
         self.project = Project.objects.create(
             course=self.course,
             title="Project Visibility",
@@ -512,7 +534,9 @@ class ProjectReviewVisibilityTest(TestCase):
         self.assertNotContains(hidden_detail_response, "88.25")
         self.assertContains(hidden_detail_response, 'data-review-countdown="')
 
-        hidden_submissions_response = self.client.get(reverse("projects:my_submissions", kwargs={"pk": self.project.id}))
+        hidden_submissions_response = self.client.get(
+            reverse("projects:my_submissions", kwargs={"pk": self.project.id})
+        )
         self.assertEqual(hidden_submissions_response.status_code, 200)
         self.assertFalse(hidden_submissions_response.context["submissions"][0].show_review_data)
         self.assertNotContains(hidden_submissions_response, "Project feedback should wait")
@@ -527,7 +551,9 @@ class ProjectReviewVisibilityTest(TestCase):
         self.assertTrue(visible_detail_response.context["user_submissions"][0].show_review_data)
         self.assertContains(visible_detail_response, "88,25")
 
-        visible_submissions_response = self.client.get(reverse("projects:my_submissions", kwargs={"pk": self.project.id}))
+        visible_submissions_response = self.client.get(
+            reverse("projects:my_submissions", kwargs={"pk": self.project.id})
+        )
         self.assertEqual(visible_submissions_response.status_code, 200)
         self.assertTrue(visible_submissions_response.context["submissions"][0].show_review_data)
         self.assertContains(visible_submissions_response, "Project feedback should wait")
@@ -566,7 +592,9 @@ class RosterAPIAuthorizationTest(TestCase):
         _assign_user_to_org(self.unauthorized_user, self.organization, ProfileRole.STUDENT)
 
         # Create course
-        self.course = Course.objects.create(owner=self.owner, title="Test Course", status="published", organization=self.organization)
+        self.course = Course.objects.create(
+            owner=self.owner, title="Test Course", status="published", organization=self.organization
+        )
 
         # Add memberships
         from apps.courses.models import CourseMembership
@@ -614,32 +642,42 @@ class RosterAPIAuthorizationTest(TestCase):
     def test_api_get_students_owner_can_access(self):
         """Course owner should be able to access students"""
         self._login_as(self.owner)
-        response = self.client.get(reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_teacher_can_access(self):
         """Teacher with teacher role should be able to access students"""
         self._login_as(self.teacher)
-        response = self.client.get(reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_assistant_can_access(self):
         """User with assistant role should be able to access students"""
         self._login_as(self.assistant)
-        response = self.client.get(reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_student_denied(self):
         """Student should be denied access to students list"""
         self._login_as(self.student)
-        response = self.client.get(reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_api_get_students_unauthorized_user_denied(self):
         """Unauthorized user should be denied access to students list"""
         self._login_as(self.unauthorized_user)
-        response = self.client.get(reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"})
+        response = self.client.get(
+            reverse("projects:api_get_students"), {"course_id": self.course.id, "groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 403)

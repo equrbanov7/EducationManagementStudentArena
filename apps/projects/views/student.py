@@ -14,7 +14,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
 
@@ -24,7 +23,6 @@ from apps.task_submission_core.uploads import prepare_submission_upload
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 from ._helpers import _append_return_to, _get_tenant_project_or_404, _project_back_url, _student_return_to
-
 
 REVIEW_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 
@@ -63,7 +61,9 @@ def project_detail(request, pk):
             return redirect("courses:course_dashboard", course_id=project.course.id)
 
     # İstifadəçinin əvvəlki cavablarını al
-    user_submissions = _annotate_review_state(project.submissions.filter(student=request.user).order_by("-submitted_at"))
+    user_submissions = _annotate_review_state(
+        project.submissions.filter(student=request.user).order_by("-submitted_at")
+    )
     user_attempts = len(user_submissions)
     return_to_url = _student_return_to(request)
 

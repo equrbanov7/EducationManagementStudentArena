@@ -1,0 +1,24 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA - Development Override
+# ═══════════════════════════════════════════════════════════════════════════
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This file extends the production compose stack with development-only
+# services that must NOT be exposed in production (e.g. pgAdmin).
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: emsarena-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - emsarena-network

@@ -5,9 +5,11 @@ Common settings shared across all environments.
 
 import os
 from pathlib import Path
-from csp.constants import NONCE, NONE, SELF, UNSAFE_INLINE
+from urllib.parse import urlsplit, urlunsplit
 
 from django.contrib.messages import constants as messages
+
+from csp.constants import NONCE, NONE, SELF, UNSAFE_INLINE
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -74,8 +76,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+
+def _redis_url_with_db(redis_url: str, db: int) -> str:
+    parsed = urlsplit(redis_url)
+    if not parsed.scheme or not parsed.netloc:
+        return redis_url
+
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if path_parts and path_parts[-1].isdigit():
+        path_parts[-1] = str(db)
+    else:
+        path_parts.append(str(db))
+
+    return urlunsplit(parsed._replace(path="/" + "/".join(path_parts)))
+
+
 # Channel Layers for WebSocket support
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0").strip()
+REDIS_CACHE_URL = _redis_url_with_db(REDIS_URL, 1)
 
 CHANNEL_LAYERS = {
     "default": {
@@ -90,10 +108,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "db": 1,  # Use database 1 for cache (0 is used by Channels)
-        },
+        "LOCATION": REDIS_CACHE_URL,
     }
 }
 

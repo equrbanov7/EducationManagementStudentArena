@@ -78,15 +78,9 @@ class RBACCourseCreationTest(TestCase):
 
         self.client = Client()
 
-        self.teacher = User.objects.create_user(
-            "rbac_teacher", "rbac_teacher@example.com", "StrongPass123!"
-        )
-        self.student = User.objects.create_user(
-            "rbac_student", "rbac_student@example.com", "StrongPass123!"
-        )
-        self.teacher_b = User.objects.create_user(
-            "rbac_teacher_b", "rbac_teacher_b@example.com", "StrongPass123!"
-        )
+        self.teacher = User.objects.create_user("rbac_teacher", "rbac_teacher@example.com", "StrongPass123!")
+        self.student = User.objects.create_user("rbac_student", "rbac_student@example.com", "StrongPass123!")
+        self.teacher_b = User.objects.create_user("rbac_teacher_b", "rbac_teacher_b@example.com", "StrongPass123!")
 
         self.org_a = Organization.objects.create(
             name="RBAC Org A",
@@ -228,7 +222,7 @@ class RBACCourseCreationTest(TestCase):
         teacher's actual org context (Org-A), not Org-B.
         """
         _login_with_org(self.client, self.teacher, self.org_b)
-        response = self.client.get(reverse("courses:create_course"))
+        self.client.get(reverse("courses:create_course"))
         # After the request, the active org in the session must NOT be org_b.
         active_slug = self.client.session.get("active_organization")
         self.assertNotEqual(
@@ -244,9 +238,7 @@ class WildcardPermissionTest(TestCase):
     def setUp(self):
         post_save.disconnect(create_default_roles, sender=Organization)
 
-        self.user = User.objects.create_user(
-            "wildcard_user", "wildcard@example.com", "StrongPass123!"
-        )
+        self.user = User.objects.create_user("wildcard_user", "wildcard@example.com", "StrongPass123!")
         self.org = Organization.objects.create(
             name="Wildcard Org",
             slug="wildcard-org",

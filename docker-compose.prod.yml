@@ -1,0 +1,148 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA - Production Stack
+# ═══════════════════════════════════════════════════════════════════════════
+# Usage: docker compose -f docker-compose.prod.yml up -d
+#
+# Required environment variables (set in .env or export before running):
+#   SECRET_KEY, DATABASE_URL (or POSTGRES_* vars), REDIS_PASSWORD,
+#   ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SITE_URL
+#
+# Security notes:
+#   - Redis is NOT exposed externally; it is reachable only inside the
+#     emsarena-network bridge network.
+#   - Redis is password-protected via REDIS_PASSWORD.
+#   - PostgreSQL is NOT exposed externally.
+#   - Only nginx (ports 80 / 443) is accessible from outside.
+# ═══════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # PostgreSQL — primary data store
+  # No external port binding; accessible only within emsarena-network.
+  # ─────────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: emsarena-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Redis — channel layer (DB 0) and cache (DB 1)
+  # No external port binding; accessible only within emsarena-network.
+  # Password enforced via --requirepass; REDISCLI_AUTH is set so the
+  # health check can authenticate without passing the password on the
+  # command line (which would be visible in process listings).
+  # ─────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: emsarena-redis
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - ${REDIS_PASSWORD}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # App — Daphne ASGI server (HTTP + WebSocket)
+  # Runs database migrations on startup via prod-entrypoint.sh, then starts
+  # Daphne. Not exposed externally; nginx proxies all traffic to it.
+  # ─────────────────────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    container_name: emsarena-app
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
+      SITE_URL: ${SITE_URL}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@emsarena.az}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    command: ["/app/docker/prod-entrypoint.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "python -c \"import socket; s=socket.socket(); s.settimeout(5); s.connect(('localhost', 8000)); s.close()\""
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Nginx — reverse proxy and static/media file server
+  # The only service with external port bindings (80 and 443).
+  # ─────────────────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: emsarena-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_data:/var/www/staticfiles:ro
+      - media_data:/var/www/media:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - emsarena-network
+
+networks:
+  emsarena-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  static_data:

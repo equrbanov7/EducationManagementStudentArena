@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
@@ -96,9 +96,19 @@ class LiveSession(models.Model):
         # Wrap the uniqueness check and the actual INSERT/UPDATE in a single
         # atomic block so concurrent session creation cannot produce duplicate
         # PINs.  The DB unique constraint on `pin` remains as a hard backstop.
-        with transaction.atomic():
-            self._ensure_unique_pin()
-            super().save(*args, **kwargs)
+        # An IntegrityError (race-condition collision that slips past the
+        # pre-check) triggers a fresh PIN and one immediate retry.
+        _MAX_SAVE_TRIES = 5
+        for attempt in range(_MAX_SAVE_TRIES):
+            try:
+                with transaction.atomic():
+                    self._ensure_unique_pin()
+                    super().save(*args, **kwargs)
+                return
+            except IntegrityError:
+                if attempt >= _MAX_SAVE_TRIES - 1:
+                    raise
+                self.pin = generate_pin()
 
     def join_url_path(self):
         return f"/live/join/{self.pin}/"
@@ -133,7 +143,28 @@ class LivePlayer(models.Model):
         return f"{self.nickname} ({self.session.pin})"
 
 
+class LiveAnswerQuerySet(models.QuerySet):
+    @staticmethod
+    def _normalize_kwargs(kwargs):
+        normalized = dict(kwargs)
+        if "question" in normalized and "question_id" not in normalized:
+            question = normalized.pop("question")
+            normalized["question_id"] = getattr(question, "id", question)
+        return normalized
+
+    def filter(self, *args, **kwargs):
+        return super().filter(*args, **self._normalize_kwargs(kwargs))
+
+    def exclude(self, *args, **kwargs):
+        return super().exclude(*args, **self._normalize_kwargs(kwargs))
+
+    def get(self, *args, **kwargs):
+        return super().get(*args, **self._normalize_kwargs(kwargs))
+
+
 class LiveAnswer(models.Model):
+    objects = LiveAnswerQuerySet.as_manager()
+
     session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="answers")
     player = models.ForeignKey(LivePlayer, on_delete=models.CASCADE, related_name="answers")
 
@@ -152,4 +183,9 @@ class LiveAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [("session", "player", "question_id")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["session", "player", "question_id"],
+                name="uniq_answer_per_player_question",
+            )
+        ]

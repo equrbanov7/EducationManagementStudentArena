@@ -544,33 +544,25 @@ class HttpTenantIsolationTest(TestCase):
     def test_org_a_teacher_cannot_access_org_b_course_dashboard(self):
         """An Org-A teacher gets 404 when accessing an Org-B course dashboard."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(
-            reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id})
-        )
+        response = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_student_cannot_access_org_b_course_dashboard(self):
         """An Org-A student gets 404 when accessing an Org-B course dashboard."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(
-            reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id})
-        )
+        response = self.client.get(reverse("courses:course_dashboard", kwargs={"course_id": self.course_b.id}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_teacher_cannot_view_org_b_exam_detail(self):
         """An Org-A teacher gets 404 when accessing an Org-B exam detail page."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(
-            reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam_b.slug})
-        )
+        response = self.client.get(reverse("exams:teacher_exam_detail", kwargs={"slug": self.exam_b.slug}))
         self.assertEqual(response.status_code, 404)
 
     def test_org_a_student_cannot_start_org_b_exam(self):
         """An Org-A student gets 404 when attempting to start an Org-B exam."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(
-            reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug})
-        )
+        response = self.client.get(reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug}))
         self.assertEqual(response.status_code, 404)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -660,9 +652,7 @@ class HttpTenantIsolationTest(TestCase):
         A superuser must be able to switch to any organization via the org
         picker and see that org's courses.
         """
-        superuser = User.objects.create_superuser(
-            "superadmin_test", "superadmin@example.com", "SuperSecretPass123!"
-        )
+        superuser = User.objects.create_superuser("superadmin_test", "superadmin@example.com", "SuperSecretPass123!")
         # Set the active org to org_b for the superadmin
         _login_with_org(self.client, superuser, self.org_b)
         response = self.client.get(reverse("courses:my_courses"))

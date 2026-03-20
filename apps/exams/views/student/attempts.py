@@ -16,6 +16,7 @@ from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
@@ -101,7 +102,9 @@ def take_exam(request, slug, attempt_id):
         )
 
     if not answers_qs.exists():
-        message_key = "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
+        message_key = (
+            "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
+        )
         messages.error(request, pgettext("exams.view.access.message", message_key))
         return redirect(_resolve_exam_failure_redirect(request))
 
@@ -208,7 +211,12 @@ def take_exam(request, slug, attempt_id):
                             if is_ajax:
                                 return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
                             messages.error(request, exc.messages[0])
-                            return redirect(append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to))
+                            return redirect(
+                                append_return_to(
+                                    reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+                                    return_to,
+                                )
+                            )
                         randomize_uploaded_filename(f)
                         ExamAnswerFile.objects.create(answer=ans, file=f)
 
@@ -254,7 +262,11 @@ def take_exam(request, slug, attempt_id):
             return JsonResponse({"success": True, "finished": False})
 
         # ✅ Normal POST (AJAX deyilsə) - səhifəni yenilə
-        return redirect(append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to))
+        return redirect(
+            append_return_to(
+                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to
+            )
+        )
 
     # GET sorğusu
     context = {

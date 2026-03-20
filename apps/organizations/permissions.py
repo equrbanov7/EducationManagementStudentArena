@@ -4,7 +4,6 @@ Permission definitions and checking functions for the organizations app.
 
 from typing import List, Set
 
-
 PERMISSION_PREFIX_ALIASES = {
     "grade": "grading",
     "grading": "grade",
@@ -80,6 +79,7 @@ PERMISSION_CATEGORIES = {
         "exam.view",
         "exam.create",
         "exam.edit",
+        "exam.manage",
         "exam.host",
         "exam.delete",
     ],

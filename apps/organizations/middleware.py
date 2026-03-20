@@ -4,8 +4,8 @@ Middleware for handling organization context in requests.
 Organization resolution order
 ------------------------------
 1. If ``active_organization`` is set in the session, load that org and verify
-   the current user has an active membership (or is a super-admin / profile
-   owner-admin).  If the org is inactive or the user is no longer a member the
+   the current user has an active membership (or is a super-admin).
+   If the org is inactive or the user is no longer a member the
    slug is removed from the session and resolution continues.
 
 2. If no session org is present, query the user's **active** memberships
@@ -55,22 +55,6 @@ class OrganizationMiddleware:
             result.setdefault(m.organization_id, m.organization)
         return result
 
-    @staticmethod
-    def _can_bootstrap_admin(user, organization):
-        """
-        Return True when the user's legacy profile marks them as org-owner or
-        org-admin for *organization* but no explicit Membership row exists yet.
-        This prevents locking out legacy admins during the transition period.
-        """
-        from apps.accounts.models import ProfileRole
-
-        profile = getattr(user, "profile", None)
-        return (
-            profile is not None
-            and getattr(profile, "organization_id", None) == organization.id
-            and getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
-        )
-
     # ------------------------------------------------------------------
     # Main entry-point
     # ------------------------------------------------------------------
@@ -85,33 +69,41 @@ class OrganizationMiddleware:
             return self.get_response(request)
 
         from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
+
         from .models import Organization
 
         # ── Step 1: restore org from session ──────────────────────────────
         org_slug = request.session.get("active_organization")
         if org_slug:
-            try:
-                candidate = Organization.objects.get(slug=org_slug, is_active=True)
-            except Organization.DoesNotExist:
-                # Org has been deactivated or deleted — purge from session.
-                request.session.pop("active_organization", None)
-                candidate = None
-
-            if candidate is not None:
-                memberships = list(
-                    request.user.memberships.filter(organization=candidate, is_active=True)
-                    .select_related("role", "scope_unit")
-                    .order_by("-is_primary", "-role__level")
+            # Single query: join memberships → organization to avoid a
+            # separate Organization.objects.get() round-trip.
+            memberships = list(
+                request.user.memberships.filter(
+                    organization__slug=org_slug,
+                    organization__is_active=True,
+                    is_active=True,
                 )
-                is_superuser = getattr(request.user, "is_superuser", False) or getattr(
-                    request.user, "is_superadmin", False
-                )
-                if memberships or is_superuser or self._can_bootstrap_admin(request.user, candidate):
-                    request.organization = candidate
-                    request.org_memberships = memberships
-                else:
-                    # User is no longer a member of the session org — clear it.
+                .select_related("organization", "role", "scope_unit")
+                .order_by("-is_primary", "-role__level")
+            )
+            is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+            if memberships:
+                # All memberships share the same organization because the slug
+                # column has a UNIQUE constraint — memberships[0].organization
+                # is always the correct org object.
+                request.organization = memberships[0].organization
+                request.org_memberships = memberships
+            elif is_superuser:
+                # Superusers may have no membership rows; fall back to a
+                # direct org lookup so they can still access the org.
+                try:
+                    request.organization = Organization.objects.get(slug=org_slug, is_active=True)
+                    request.org_memberships = []
+                except Organization.DoesNotExist:
                     request.session.pop("active_organization", None)
+            else:
+                # User is no longer a member of the session org — clear it.
+                request.session.pop("active_organization", None)
 
         # ── Step 2: auto-select when no session org is available ──────────
         if request.organization is None:

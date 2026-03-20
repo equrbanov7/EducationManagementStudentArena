@@ -58,9 +58,7 @@ class CourseDeletionCascadeTest(TestCase):
 
     def setUp(self):
         post_save.disconnect(create_default_roles, sender=Organization)
-        self.owner = User.objects.create_user(
-            username="owner", email="owner@test.com", password="pass"
-        )
+        self.owner = User.objects.create_user(username="owner", email="owner@test.com", password="pass")
         self.org = Organization.objects.create(
             name="Test Org",
             slug="test-org",
@@ -140,12 +138,8 @@ class OrganizationDeletionCascadeTest(TestCase):
 
     def setUp(self):
         post_save.disconnect(create_default_roles, sender=Organization)
-        self.owner = User.objects.create_user(
-            username="owner2", email="owner2@test.com", password="pass"
-        )
-        self.member = User.objects.create_user(
-            username="member", email="member@test.com", password="pass"
-        )
+        self.owner = User.objects.create_user(username="owner2", email="owner2@test.com", password="pass")
+        self.member = User.objects.create_user(username="member", email="member@test.com", password="pass")
         self.org = Organization.objects.create(
             name="University",
             slug="university",
@@ -178,9 +172,7 @@ class OrganizationDeletionCascadeTest(TestCase):
 
     def test_multiple_memberships_deleted_when_organization_deleted(self):
         """All memberships for a deleted organization are removed."""
-        extra_user = User.objects.create_user(
-            username="extra", email="extra@test.com", password="pass"
-        )
+        extra_user = User.objects.create_user(username="extra", email="extra@test.com", password="pass")
         extra_membership = Membership.objects.create(
             user=extra_user,
             organization=self.org,
@@ -239,12 +231,8 @@ class AuditLogPreservationOnUserDeleteTest(TestCase):
 
     def setUp(self):
         post_save.disconnect(create_default_roles, sender=Organization)
-        self.owner = User.objects.create_user(
-            username="org_owner", email="org_owner@test.com", password="pass"
-        )
-        self.user = User.objects.create_user(
-            username="audited", email="audited@test.com", password="pass"
-        )
+        self.owner = User.objects.create_user(username="org_owner", email="org_owner@test.com", password="pass")
+        self.user = User.objects.create_user(username="audited", email="audited@test.com", password="pass")
         self.org = Organization.objects.create(
             name="Audit Org",
             slug="audit-org",

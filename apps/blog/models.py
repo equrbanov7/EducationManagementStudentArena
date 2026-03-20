@@ -14,8 +14,6 @@ from .taxonomy import get_category_placeholder_static_path, get_localized_catego
 User = get_user_model()
 
 
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True)

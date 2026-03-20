@@ -160,9 +160,8 @@ def annotate_teacher_review_state(submissions, *, student_attr, current_time=Non
         submission.review_countdown_seconds = (
             review_window_seconds_left if in_recheck_window else identity_window_seconds_left
         )
-        submission.review_countdown_mode = "recheck" if in_recheck_window else (
-            "identity" if identity_window_seconds_left > 0 else ""
+        submission.review_countdown_mode = (
+            "recheck" if in_recheck_window else ("identity" if identity_window_seconds_left > 0 else "")
         )
 
     return submissions
-

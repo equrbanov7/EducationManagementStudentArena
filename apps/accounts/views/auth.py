@@ -15,8 +15,7 @@ from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country
 from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
-from core.utils import get_auth_otp_expiry_minutes
-from core.utils import get_client_ip
+from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
 from ..models import ProfileRole

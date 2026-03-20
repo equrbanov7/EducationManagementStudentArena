@@ -185,9 +185,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
             self.organization = getattr(profile, "organization", None)
 
         if self.organization_id is None:
-            raise ValidationError(
-                pgettext_lazy("exams.model.exam.error", "organization_required")
-            )
+            raise ValidationError(pgettext_lazy("exams.model.exam.error", "organization_required"))
 
         if not self.slug:
             base_slug = slugify(self.title)

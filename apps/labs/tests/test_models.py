@@ -31,7 +31,9 @@ class LabAssignmentReassignmentTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.course = Course.objects.create(owner=self.teacher, title="Lab Course M", status="published", organization=self.org)
+        self.course = Course.objects.create(
+            owner=self.teacher, title="Lab Course M", status="published", organization=self.org
+        )
         CourseMembership.objects.create(course=self.course, user=self.student, role="student", group_name="A1")
         self.lab = Lab.objects.create(
             course=self.course,
