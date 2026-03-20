@@ -163,7 +163,7 @@ class ProtectedMediaViewTest(TestCase):
 
         self.assertFalse(_is_private("post_images/cover.jpg"))
         self.assertFalse(_is_private("course_covers/cover.png"))
-        self.assertFalse(_is_private("question_media/exam_1/q_1/image.jpg"))
+        self.assertTrue(_is_private("question_media/exam_1/q_1/image.jpg"))
 
     def test_public_file_accessible_without_login(self):
         """Blog post images (post_images/) must be accessible without authentication."""
@@ -452,3 +452,185 @@ class ProtectedMediaOwnershipTest(TestCase):
         ):
             with self.assertRaises(PermissionDenied):
                 protected_media(request, path=unknown_path)
+
+
+class QuestionMediaAccessTest(TestCase):
+    """
+    Verify that ``question_media/`` files are now treated as private.
+
+    Tests cover:
+    * Unauthenticated users are redirected to login.
+    * An authenticated org member (student level) can access question media.
+    * A cross-org user is denied access.
+    * A path with a non-existent exam ID is denied (fail-closed).
+    """
+
+    def setUp(self):
+        from apps.exams.models import Exam, ExamQuestion
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.media_tmp = tempfile.mkdtemp()
+
+        self.student = User.objects.create_user(
+            username="qm_student",
+            email="qm_student@example.com",
+            password="StrongPass123!",
+        )
+        self.other_user = User.objects.create_user(
+            username="qm_other",
+            email="qm_other@example.com",
+            password="StrongPass123!",
+        )
+        self.superuser = User.objects.create_superuser(
+            username="qm_superuser",
+            email="qm_super@example.com",
+            password="StrongPass123!",
+        )
+
+        # Create org and enroll student
+        self.org = Organization.objects.create(
+            name="QM Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.student,
+            status="active",
+            is_active=True,
+        )
+        student_role = self.org.roles.get(name="student")
+        Membership.objects.create(
+            user=self.student,
+            organization=self.org,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        # Create exam in org
+        self.exam = Exam.objects.create(
+            title="QM Test Exam",
+            author=self.student,
+            organization=self.org,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="What is 2+2?",
+            order=1,
+            points=1,
+        )
+
+        self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/img.jpg"
+
+        # Create the physical file
+        file_dir = os.path.join(
+            self.media_tmp, "question_media", f"exam_{self.exam.pk}", f"q_{self.question.pk}"
+        )
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "img.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+    def _make_request(self, user, path):
+        from django.test import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{path}")
+        request.user = user
+        return request
+
+    def test_question_media_is_now_private(self):
+        """_is_private must return True for question_media/ paths."""
+        from core.media_views import _is_private
+
+        self.assertTrue(_is_private(self.file_path))
+
+    def test_unauthenticated_redirected_for_question_media(self):
+        """Unauthenticated users are redirected to login for question_media files."""
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{self.file_path}")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_org_member_can_access_question_media(self):
+        """An authenticated member of the exam's org can access question media."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.student, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_cross_org_user_denied_question_media(self):
+        """A user with no membership in the exam's org is denied access."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.other_user, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=self.file_path)
+
+    def test_superuser_can_access_question_media(self):
+        """Superusers bypass ownership checks and can access any question media."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.superuser, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_nonexistent_exam_id_denied(self):
+        """A question_media path with a non-existent exam ID is denied (fail-closed)."""
+        from core.media_views import protected_media
+
+        bad_path = "question_media/exam_999999/q_1/img.jpg"
+        file_dir = os.path.join(self.media_tmp, "question_media", "exam_999999", "q_1")
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "img.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+        request = self._make_request(self.student, bad_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=bad_path)
