@@ -9,6 +9,11 @@ This allows the existing urls.py to continue working with:
 """
 
 # ═══════════════════════════════════════════════════════════════
+# API Views
+# ═══════════════════════════════════════════════════════════════
+from .api import api_get_groups, api_get_students
+
+# ═══════════════════════════════════════════════════════════════
 # CRUD
 # ═══════════════════════════════════════════════════════════════
 from .crud import create_project, delete_project, edit_project
@@ -22,11 +27,6 @@ from .student import my_submissions, project_detail, submit_project
 # Teacher Views
 # ═══════════════════════════════════════════════════════════════
 from .teacher import delete_submissions, grade_submission, review_submissions
-
-# ═══════════════════════════════════════════════════════════════
-# API Views
-# ═══════════════════════════════════════════════════════════════
-from .api import api_get_groups, api_get_students
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Explicit exports

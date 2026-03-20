@@ -1,7 +1,7 @@
 import logging
 
-from django.test import Client, SimpleTestCase, override_settings
 from django.http import HttpResponse
+from django.test import Client, SimpleTestCase, override_settings
 from django.urls import path
 
 from core.logging_filters import SensitiveDataFilter

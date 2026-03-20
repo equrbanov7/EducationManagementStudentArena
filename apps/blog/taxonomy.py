@@ -1,6 +1,5 @@
 from django.utils.translation import get_language
 
-
 DEFAULT_CATEGORY_TRANSLATIONS = {
     "technology": {
         "az": "Texnologiya",

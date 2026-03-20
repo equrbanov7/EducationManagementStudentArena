@@ -18,7 +18,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
 from core.upload_security import (
-    BLOCKED_UPLOAD_EXTENSIONS,
     randomize_uploaded_filename,
     validate_uploaded_file,
 )

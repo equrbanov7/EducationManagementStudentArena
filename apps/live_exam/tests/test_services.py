@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam
-from apps.live_exam.serializers import serialize_player_identity, serialize_players, serialize_top
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.serializers import serialize_player_identity, serialize_players, serialize_top
 from apps.live_exam.transport import build_lobby_state_payload, build_reaction_event_payload
 from apps.organizations.models import Organization
 from core.constants import OrganizationType

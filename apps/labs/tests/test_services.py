@@ -22,16 +22,8 @@ class LabSubmissionServicesTest(TestCase):
     """Test lab submission service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Lab Submission Services Org",
             org_type=OrganizationType.SCHOOL,
@@ -56,10 +48,7 @@ class LabSubmissionServicesTest(TestCase):
             end_datetime=timezone.now() + timedelta(days=1),
         )
         self.block = LabBlock.objects.create(lab=self.lab, title="Block 1")
-        self.assignment = LabAssignment.objects.create(
-            lab=self.lab,
-            student=self.student
-        )
+        self.assignment = LabAssignment.objects.create(lab=self.lab, student=self.student)
 
     def test_create_lab_submission(self):
         """Test creating a lab submission."""
@@ -72,42 +61,22 @@ class LabSubmissionServicesTest(TestCase):
 
     def test_auto_save_lab_answers(self):
         """Test auto-saving lab answers."""
-        question = LabQuestion.objects.create(
-            block=self.block,
-            question_text="Test question",
-            points=10
-        )
+        question = LabQuestion.objects.create(block=self.block, question_text="Test question", points=10)
 
-        answers_data = {
-            question.id: "Test answer"
-        }
+        answers_data = {question.id: "Test answer"}
 
         count = services.auto_save_lab_answers(self.assignment, answers_data)
 
         self.assertEqual(count, 1)
-        self.assertTrue(
-            LabAnswer.objects.filter(
-                lab=self.lab,
-                student=self.student,
-                question=question
-            ).exists()
-        )
+        self.assertTrue(LabAnswer.objects.filter(lab=self.lab, student=self.student, question=question).exists())
 
 
 class LabGradingServicesTest(TestCase):
     """Test lab grading service functions."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="teacher",
-            email="teacher@example.com",
-            password="pass123"
-        )
-        self.student = User.objects.create_user(
-            username="student",
-            email="student@example.com",
-            password="pass123"
-        )
+        self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
+        self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
         self.org = Organization.objects.create(
             name="Lab Grading Services Org",
             org_type=OrganizationType.SCHOOL,
@@ -131,23 +100,12 @@ class LabGradingServicesTest(TestCase):
             start_datetime=timezone.now(),
             end_datetime=timezone.now() + timedelta(days=1),
         )
-        self.assignment = LabAssignment.objects.create(
-            lab=self.lab,
-            student=self.student
-        )
-        self.submission = LabSubmission.objects.create(
-            assignment=self.assignment,
-            status="submitted"
-        )
+        self.assignment = LabAssignment.objects.create(lab=self.lab, student=self.student)
+        self.submission = LabSubmission.objects.create(assignment=self.assignment, status="submitted")
 
     def test_grade_lab_submission(self):
         """Test grading a lab submission."""
-        graded_submission = services.grade_lab_submission(
-            self.submission,
-            Decimal("85.5"),
-            "Good work!",
-            self.teacher
-        )
+        graded_submission = services.grade_lab_submission(self.submission, Decimal("85.5"), "Good work!", self.teacher)
 
         self.assertEqual(graded_submission.score, Decimal("85.5"))
         self.assertEqual(graded_submission.feedback, "Good work!")

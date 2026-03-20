@@ -10,9 +10,8 @@ from django.test import Client, TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
 
-from apps.accounts.models import ProfileRole
+from apps.accounts.models import EmailOTP, ProfileRole
 from apps.audit.models import AuditLog
-from apps.accounts.models import EmailOTP
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Country, Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
@@ -128,7 +127,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertEqual(profile.organization_type, OrganizationType.SCHOOL)
         self.assertEqual(profile.country, "Azerbaijan")
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
-        self.assertTrue(Membership.objects.filter(user=user, organization=profile.organization, is_primary=True).exists())
+        self.assertTrue(
+            Membership.objects.filter(user=user, organization=profile.organization, is_primary=True).exists()
+        )
 
     def test_course_center_signup_uses_manual_name(self):
         response = self.client.post(
@@ -872,7 +873,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
     def test_pending_students_empty_state_outside_table_and_bulk_disabled(self):
         self.unassigned_user.profile.requested_organization = None
         self.unassigned_user.profile.requested_organization_name = ""
-        self.unassigned_user.profile.save(update_fields=["requested_organization", "requested_organization_name", "updated_at"])
+        self.unassigned_user.profile.save(
+            update_fields=["requested_organization", "requested_organization_name", "updated_at"]
+        )
 
         StudentOrganizationRequest.objects.filter(
             user=self.unassigned_user,
@@ -884,9 +887,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
         self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
         self.assertContains(response, "js-pending-add-bulk-label")
-        self.assertContains(response, "data-selected-label=\"Seçilənləri təşkilata əlavə et ({count} seçildi)\"")
-        self.assertContains(response, "data-disabled-tooltip=\"Ən az 1 tələbə seçin\"")
-        self.assertContains(response, "id=\"selectAllPendingStudents\"")
+        self.assertContains(response, 'data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"')
+        self.assertContains(response, 'data-disabled-tooltip="Ən az 1 tələbə seçin"')
+        self.assertContains(response, 'id="selectAllPendingStudents"')
 
     def test_org_admin_can_reject_pending_student_request(self):
         free_profile = self.unassigned_user.profile

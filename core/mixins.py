@@ -36,9 +36,7 @@ class TeacherRequiredMixin(AccessMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="TeacherRequiredMixin")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="TeacherRequiredMixin"))
 
 
 class StudentRequiredMixin(AccessMixin):
@@ -51,9 +49,7 @@ class StudentRequiredMixin(AccessMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="StudentRequiredMixin")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="StudentRequiredMixin"))
 
 
 class OwnerRequiredMixin(AccessMixin):
@@ -73,6 +69,4 @@ class OwnerRequiredMixin(AccessMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="OwnerRequiredMixin")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="OwnerRequiredMixin"))

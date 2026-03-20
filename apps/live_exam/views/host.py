@@ -44,11 +44,10 @@ from apps.live_exam.transport import (
     build_join_url,
     build_lobby_state_payload,
     build_player_reveal_payload,
-    build_question_phase_payload,
     build_question_payload,
+    build_question_phase_payload,
     build_reveal_payload,
 )
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # Host / Session

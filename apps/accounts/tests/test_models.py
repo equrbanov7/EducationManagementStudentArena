@@ -86,7 +86,9 @@ class ProfileRoleHierarchyTest(TestCase):
         self.assertGreater(ProfileRole.LEVELS[ProfileRole.ORG_OWNER], ProfileRole.LEVELS[ProfileRole.ORG_ADMIN])
         self.assertGreater(ProfileRole.LEVELS[ProfileRole.ORG_ADMIN], ProfileRole.LEVELS[ProfileRole.TEACHER])
         self.assertGreater(ProfileRole.LEVELS[ProfileRole.TEACHER], ProfileRole.LEVELS[ProfileRole.ASSISTANT_TEACHER])
-        self.assertGreater(ProfileRole.LEVELS[ProfileRole.ASSISTANT_TEACHER], ProfileRole.LEVELS[ProfileRole.LEAD_STUDENT])
+        self.assertGreater(
+            ProfileRole.LEVELS[ProfileRole.ASSISTANT_TEACHER], ProfileRole.LEVELS[ProfileRole.LEAD_STUDENT]
+        )
         self.assertGreater(ProfileRole.LEVELS[ProfileRole.LEAD_STUDENT], ProfileRole.LEVELS[ProfileRole.STUDENT])
 
     def test_role_level_property(self):
@@ -159,7 +161,14 @@ class ProfileOrganizationTest(TestCase):
         profile.requested_organization = self.org
         profile.requested_organization_name = "Custom School Name"
         profile.requested_organization_message = "Please let me join"
-        profile.save(update_fields=["requested_organization", "requested_organization_name", "requested_organization_message", "updated_at"])
+        profile.save(
+            update_fields=[
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
 
         self.assertEqual(profile.requested_organization, self.org)
         self.assertEqual(profile.requested_organization_name, "Custom School Name")

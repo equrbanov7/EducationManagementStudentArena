@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
-from apps.live_exam.auth import PLAYER_TOKEN_MAX_AGE, build_player_token, load_player_token_payload
+from apps.live_exam.auth import build_player_token, load_player_token_payload
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
@@ -74,9 +74,7 @@ def _make_session_with_question():
     # phases are already past and the answer window is open.
     session.question_started_at = now - timezone.timedelta(seconds=15)
     session.question_ends_at = now + timezone.timedelta(seconds=30)
-    session.save(
-        update_fields=["state", "current_index", "question_started_at", "question_ends_at"]
-    )
+    session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
 
     return teacher, session, question, correct, wrong
 
@@ -85,9 +83,7 @@ class LiveExamPlayerRevealPayloadTest(TestCase):
     """Player reveal payload must not expose host-only fields."""
 
     def setUp(self):
-        self.teacher, self.session, self.question, self.correct, self.wrong = (
-            _make_session_with_question()
-        )
+        self.teacher, self.session, self.question, self.correct, self.wrong = _make_session_with_question()
 
     def test_player_cannot_see_host_reveal_payload(self):
         """
@@ -128,9 +124,7 @@ class LiveExamAnswerWindowTest(TestCase):
     """Answers submitted after the time window closes must be rejected."""
 
     def setUp(self):
-        self.teacher, self.session, self.question, self.correct, self.wrong = (
-            _make_session_with_question()
-        )
+        self.teacher, self.session, self.question, self.correct, self.wrong = _make_session_with_question()
 
     def test_answer_outside_time_window_rejected(self):
         """
@@ -142,9 +136,7 @@ class LiveExamAnswerWindowTest(TestCase):
         now = timezone.now()
         self.session.question_started_at = now - timezone.timedelta(seconds=60)
         self.session.question_ends_at = now - timezone.timedelta(seconds=5)
-        self.session.save(
-            update_fields=["question_started_at", "question_ends_at"]
-        )
+        self.session.save(update_fields=["question_started_at", "question_ends_at"])
 
         player = LivePlayer.objects.create(
             session=self.session,
@@ -196,9 +188,7 @@ class LiveExamDuplicateAnswerTest(TestCase):
     """Duplicate answers from the same player must be idempotent."""
 
     def setUp(self):
-        self.teacher, self.session, self.question, self.correct, self.wrong = (
-            _make_session_with_question()
-        )
+        self.teacher, self.session, self.question, self.correct, self.wrong = _make_session_with_question()
 
     def test_duplicate_answer_returns_existing(self):
         """
@@ -233,9 +223,7 @@ class LiveExamDuplicateAnswerTest(TestCase):
         )
         self.assertTrue(ok2, "Second (duplicate) call must still return ok=True")
 
-        answer_count = LiveAnswer.objects.filter(
-            session=self.session, player=player
-        ).count()
+        answer_count = LiveAnswer.objects.filter(session=self.session, player=player).count()
         self.assertEqual(
             answer_count,
             1,
@@ -247,9 +235,7 @@ class LiveExamExpiredTokenTest(TestCase):
     """Expired player tokens must be rejected by the auth helper."""
 
     def setUp(self):
-        self.teacher, self.session, self.question, self.correct, self.wrong = (
-            _make_session_with_question()
-        )
+        self.teacher, self.session, self.question, self.correct, self.wrong = _make_session_with_question()
         self.player = LivePlayer.objects.create(
             session=self.session,
             nickname="TokenPlayer",
@@ -276,9 +262,7 @@ class LiveExamExpiredTokenTest(TestCase):
             client_id=self.player.client_id,
         )
 
-        with patch.object(
-            signing, "loads", side_effect=signing.SignatureExpired("expired")
-        ):
+        with patch.object(signing, "loads", side_effect=signing.SignatureExpired("expired")):
             result = load_player_token_payload(token, pin=self.session.pin)
 
         self.assertIsNone(

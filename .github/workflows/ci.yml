@@ -206,7 +206,7 @@ jobs:
           safety check -r requirements/base.txt --full-report || true
           echo "::endgroup::"
           echo "::group::🔐 Pip Audit (CRITICAL only — blocks merge)"
-          pip-audit -r requirements/base.txt --desc on --fix-dry-run || {
+          pip-audit -r requirements/base.txt --desc on || {
             echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
             exit 1
           }

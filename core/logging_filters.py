@@ -24,9 +24,7 @@ class SensitiveDataFilter(logging.Filter):
         r"([\"']?[^\"'\s,}\]]+[\"']?)"
     )
     _QUERY_VALUE_RE = re.compile(
-        r"(?ix)"
-        r"((?:password|pass|pwd|token|authorization|email|phone)\s*=\s*)"
-        r"([^&\s]+)"
+        r"(?ix)" r"((?:password|pass|pwd|token|authorization|email|phone)\s*=\s*)" r"([^&\s]+)"
     )
 
     def filter(self, record: logging.LogRecord) -> bool:

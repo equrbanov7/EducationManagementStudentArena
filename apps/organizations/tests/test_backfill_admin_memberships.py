@@ -70,16 +70,12 @@ class BackfillAdminMembershipsCommandTest(TestCase):
         """A user with ORG_OWNER profile but no membership gets one created."""
         _make_admin_profile(self.owner, self.org, ProfileRole.ORG_OWNER)
 
-        self.assertFalse(
-            Membership.objects.filter(user=self.owner, organization=self.org).exists()
-        )
+        self.assertFalse(Membership.objects.filter(user=self.owner, organization=self.org).exists())
 
         out = StringIO()
         call_command("backfill_admin_memberships", stdout=out, verbosity=1)
 
-        self.assertTrue(
-            Membership.objects.filter(user=self.owner, organization=self.org, is_active=True).exists()
-        )
+        self.assertTrue(Membership.objects.filter(user=self.owner, organization=self.org, is_active=True).exists())
         self.assertIn("Created", out.getvalue())
 
     def test_creates_membership_for_legacy_org_admin(self):
@@ -90,9 +86,7 @@ class BackfillAdminMembershipsCommandTest(TestCase):
         out = StringIO()
         call_command("backfill_admin_memberships", stdout=out, verbosity=1)
 
-        self.assertTrue(
-            Membership.objects.filter(user=user, organization=self.org, is_active=True).exists()
-        )
+        self.assertTrue(Membership.objects.filter(user=user, organization=self.org, is_active=True).exists())
 
     def test_skips_user_with_existing_active_membership(self):
         """Users who already have an active membership are not touched."""
@@ -124,9 +118,7 @@ class BackfillAdminMembershipsCommandTest(TestCase):
         out = StringIO()
         call_command("backfill_admin_memberships", "--dry-run", stdout=out, verbosity=1)
 
-        self.assertFalse(
-            Membership.objects.filter(user=self.owner, organization=self.org).exists()
-        )
+        self.assertFalse(Membership.objects.filter(user=self.owner, organization=self.org).exists())
         self.assertIn("Would create", out.getvalue())
         self.assertIn("DRY-RUN", out.getvalue())
 

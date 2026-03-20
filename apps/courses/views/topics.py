@@ -22,7 +22,6 @@ from apps.courses.models import CourseTopic
 
 from ._helpers import IsCourseOwnerMixin, _get_owner_course_or_404, _owner_courses_queryset
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # Add Topic
 # ════════════════════════════════════════════════════════════════════════════

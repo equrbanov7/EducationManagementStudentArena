@@ -17,7 +17,6 @@ from apps.task_submission_core.access import can_user_access_course_roster
 
 from ._helpers import _get_tenant_course_or_404
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # API Get Groups
 # ════════════════════════════════════════════════════════════════════════════
