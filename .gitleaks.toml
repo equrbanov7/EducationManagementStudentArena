@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Gitleaks configuration — EMS Arena
+# ═══════════════════════════════════════════════════════════════════════════
+# Gitleaks scans git history for accidentally committed secrets.
+# This baseline config extends the default rule-set and adds explicit
+# allowlists for known false positives (CI placeholder values, test keys,
+# and documentation examples that are not real credentials).
+#
+# Reference: https://github.com/gitleaks/gitleaks#configuration
+# ═══════════════════════════════════════════════════════════════════════════
+
+title = "EMS Arena Gitleaks Config"
+
+# ── Extend the upstream default rule-set ────────────────────────────────
+[extend]
+useDefault = true
+
+# ── Global allowlist ────────────────────────────────────────────────────
+# Patterns listed here are never treated as secrets regardless of which
+# rule triggered the match.  Only add entries that are provably NOT real
+# credentials (e.g. CI dummy values, documentation examples, test keys).
+[allowlist]
+description = "Known CI placeholder values and test/documentation examples"
+
+# Regex patterns that match the *entire* secret value captured by a rule.
+# These are the dummy keys used in CI workflow steps and documented examples.
+regexes = [
+    # Django SECRET_KEY placeholders used in CI jobs
+    '''^ci-build-placeholder-not-for-production$''',
+    '''^ci-smoke-secret-key-not-for-production-use$''',
+    '''^ci-deploy-check-QzNyXk9mVpLsJeWuHqRtGdFbAcOiMnKlYhTgPwEv2x8j5f3z7a4r6s1o0uBCDIU$''',
+    '''^test-secret-key-for-ci-only-not-production$''',
+    '''^build-check-secret-key$''',
+
+    # Database / Redis passwords used exclusively in CI smoke tests
+    '''^ci-smoke-postgres-password$''',
+    '''^ci-smoke-redis-password$''',
+
+    # SQLite paths used for build-time checks (no real DB)
+    '''^sqlite:////tmp/build\.db$''',
+    '''^sqlite:///db\.sqlite3$''',
+]
+
+# Specific file paths to exclude entirely from scanning.
+paths = [
+    # Compiled translation files are binary and never contain secrets
+    '''.*/locale/.*/LC_MESSAGES/django\.(mo|po)$''',
+    # Python bytecode cache
+    '''.*/__pycache__/.*''',
+    # Generated coverage reports
+    '''htmlcov/.*''',
+    '''coverage\.xml''',
+]

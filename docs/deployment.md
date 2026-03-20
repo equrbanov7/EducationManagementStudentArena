@@ -1,74 +1,417 @@
-# EMS Arena Deployment Guide
+# EMS Arena — Production Deployment Guide
 
-## Prerequisites
-- Python 3.11+
-- PostgreSQL 15+
-- Redis 7+
-- Ubuntu 22.04 or similar Linux distribution
+> **Audience:** Engineers performing a first-time or update deployment of EMS Arena.
+> After reading this document you should be able to deploy the application from
+> scratch using only Docker Compose and the environment variables listed here.
 
-## Environment Setup
+---
 
-### 1. Clone Repository
+## Table of Contents
+
+1. [Architecture Overview](#1-architecture-overview)
+2. [Prerequisites](#2-prerequisites)
+3. [Environment Variables Reference](#3-environment-variables-reference)
+   - [Build-time vs. Runtime Variables](#build-time-vs-runtime-variables)
+4. [First-Time Deployment](#4-first-time-deployment)
+5. [Update / Re-deploy](#5-update--re-deploy)
+6. [Static & Private Media Handling](#6-static--private-media-handling)
+7. [Health Check & Smoke Test Verification](#7-health-check--smoke-test-verification)
+8. [Rollback Plan](#8-rollback-plan)
+9. [Secrets Management Checklist](#9-secrets-management-checklist)
+
+---
+
+## 1. Architecture Overview
+
+```
+Internet
+   │  HTTPS (443)
+   ▼
+Load Balancer  ← SSL/TLS terminates here (cert managed externally)
+   │  HTTP (80)  + X-Forwarded-Proto: https
+   ▼
+┌──────────────────────────────────────────────────┐
+│  Docker host (emsarena-network bridge)           │
+│                                                  │
+│  ┌─────────┐   HTTP   ┌─────────────────────┐   │
+│  │  Nginx  │ ──────▶  │  Daphne (port 8000) │   │
+│  │  :80    │          │  Django ASGI app     │   │
+│  └────┬────┘          └─────────┬───────────┘   │
+│       │                         │                │
+│  Static / Media            ┌────┴────┐  ┌──────┐ │
+│  (Docker volumes)          │Postgres │  │Redis │ │
+└──────────────────────────────────────────────────┘
+```
+
+**SSL termination strategy — Option B (External Load Balancer):**
+- The Load Balancer (AWS ALB, Cloudflare, HAProxy, …) handles all TLS.
+- Nginx only listens on **port 80** inside the container.
+- The LB adds `X-Forwarded-Proto: https` so Django and Nginx both know the
+  original connection was secure.
+- Django is pre-configured with `SECURE_PROXY_SSL_HEADER` and
+  `USE_X_FORWARDED_HOST = True` to trust this header.
+
+---
+
+## 2. Prerequisites
+
+| Tool | Minimum version | Notes |
+|------|----------------|-------|
+| Docker Engine | 24.x | `docker --version` |
+| Docker Compose plugin | 2.20 | `docker compose version` |
+| Git | 2.x | For pulling the repository |
+| An external Load Balancer | — | Must support X-Forwarded-Proto |
+
+No Python, PostgreSQL, or Redis installation is needed on the host — all
+services run inside Docker containers.
+
+---
+
+## 3. Environment Variables Reference
+
+Create a `.env` file in the repository root (next to `docker-compose.prod.yml`)
+before running any `docker compose` command.  Never commit this file.
+
+### Required variables
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `SECRET_KEY` | `<50+ random chars>` | Django secret key. Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `POSTGRES_DB` | `emsarena` | PostgreSQL database name |
+| `POSTGRES_USER` | `emsarena` | PostgreSQL username |
+| `POSTGRES_PASSWORD` | `<strong password>` | PostgreSQL password |
+| `DATABASE_URL` | `postgres://emsarena:<pw>@postgres:5432/emsarena` | Full database URL passed to Django |
+| `REDIS_PASSWORD` | `<strong password>` | Redis `--requirepass` value |
+| `REDIS_URL` | `redis://:${REDIS_PASSWORD}@redis:6379/0` | Full Redis URL (channel layer) |
+| `ALLOWED_HOSTS` | `emsarena.az,www.emsarena.az` | Comma-separated list of valid `Host` headers |
+| `CSRF_TRUSTED_ORIGINS` | `https://emsarena.az` | Comma-separated origins for CSRF validation |
+| `SITE_URL` | `https://emsarena.az` | Canonical site URL (used in emails, WebSocket CSP) |
+
+### Optional / feature variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
+| `EMAIL_HOST_USER` | _(empty)_ | SMTP username for outbound email |
+| `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
+| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.az` | From address for system emails |
+| `SENTRY_DSN` | _(empty)_ | Sentry error-tracking DSN. Leave blank to disable |
+| `LIVE_EXAM_PUBLIC_HOST` | _(empty)_ | Publicly reachable hostname for live-exam WebSocket connections |
+| `LAN_HOST` | `emsarena.az` | Internal hostname used in certain generated links |
+| `MEDIA_ACCEL_REDIRECT_URL` | `/internal_media` | Nginx X-Accel-Redirect prefix for private media |
+| `DJANGO_LOG_LEVEL` | `INFO` | Log level for the Django logger (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
+| `SECURE_SSL_REDIRECT` | `True` | Set to `False` only in CI or behind a TLS-terminating proxy that already enforces HTTPS |
+| `SESSION_COOKIE_SECURE` | `True` | Keep `True` in production |
+| `CSRF_COOKIE_SECURE` | `True` | Keep `True` in production |
+| `SECURE_HSTS_SECONDS` | `31536000` | HSTS max-age in seconds. Set to `0` only during initial TLS testing |
+| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `True` | Include `includeSubDomains` in HSTS header |
+| `SECURE_HSTS_PRELOAD` | `True` | Include `preload` in HSTS header |
+
+### Build-time vs. Runtime variables
+
+Two categories of environment variables exist:
+
+**Build-time ARGs** (only used during `docker build`, not present in the
+running container):
+
+| ARG | Purpose |
+|-----|---------|
+| `BUILD_SECRET_KEY` | Dummy SECRET_KEY so `collectstatic` can import production settings without real secrets |
+| `BUILD_DATABASE_URL` | Dummy DB URL (`sqlite:////tmp/build.db`) so settings load cleanly |
+| `BUILD_ALLOWED_HOSTS` | Dummy hosts (`localhost,127.0.0.1`) for the settings import |
+
+These are passed via `build-args` in `docker compose build` or the CI
+workflow.  They contain placeholder values and are **never written to the
+final image's environment**.
+
+**Runtime ENV variables** (injected at container start via `.env` or
+orchestrator secrets):
+
+All variables in the Required/Optional tables above are runtime variables.
+They are read by `config/settings/production.py` when Django starts.
+Never bake real secrets into the image; always inject them at runtime.
+
+---
+
+## 4. First-Time Deployment
+
+### Step 1 — Clone and configure
+
 ```bash
 git clone https://github.com/equrbanov7/EducationManagementStudentArena.git
 cd EducationManagementStudentArena
+
+# Create the runtime secrets file (never commit this)
+cp /dev/null .env
 ```
 
-### 2. Create Virtual Environment
+Populate `.env` with all **required** variables from the table above, for example:
+
+```dotenv
+SECRET_KEY=<generate with the django command above>
+POSTGRES_DB=emsarena
+POSTGRES_USER=emsarena
+POSTGRES_PASSWORD=<strong-password>
+DATABASE_URL=postgres://emsarena:<strong-password>@postgres:5432/emsarena
+REDIS_PASSWORD=<strong-redis-password>
+REDIS_URL=redis://:<strong-redis-password>@redis:6379/0
+ALLOWED_HOSTS=emsarena.az,www.emsarena.az
+CSRF_TRUSTED_ORIGINS=https://emsarena.az,https://www.emsarena.az
+SITE_URL=https://emsarena.az
+```
+
+### Step 2 — Build the production image
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+docker compose -f docker-compose.prod.yml build
 ```
 
-### 3. Install Dependencies
+Static files are collected inside the image during the build step using
+dummy build-time ARGs (no real secrets needed for the build).
+
+### Step 3 — Start the stack
+
 ```bash
-# For production
-pip install -r requirements/production.txt
-
-# For development
-pip install -r requirements/local.txt
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-### 4. Configure Environment Variables
-Create a `.env` file in the project root and add the required values:
-```env
-SECRET_KEY=change-me
-DATABASE_URL=postgres://emsarena:password@localhost:5432/emsarena
-REDIS_URL=redis://127.0.0.1:6379/0
+Docker Compose starts the services in dependency order:
+`postgres` → `redis` → `app` (runs migrations via `prod-entrypoint.sh`) → `nginx`.
 
-# Required when using the production Docker stack
-REDIS_PASSWORD=change-me-strong-redis-password
-```
+### Step 4 — Create the superuser
 
-### 5. Run Migrations
 ```bash
-python manage.py migrate
+docker compose -f docker-compose.prod.yml exec app \
+    python manage.py createsuperuser
 ```
 
-### 6. Collect Static Files
+### Step 5 — Verify the deployment
+
+See [Section 7 — Health Check & Smoke Test Verification](#7-health-check--smoke-test-verification).
+
+### Step 6 — Point the Load Balancer
+
+Configure your external LB to:
+- Accept HTTPS traffic on port 443 using your TLS certificate.
+- Forward plain HTTP to the Docker host on **port 80**.
+- Set the `X-Forwarded-Proto: https` header on forwarded requests.
+- Set `X-Forwarded-For` to the real client IP.
+
+---
+
+## 5. Update / Re-deploy
+
+### Pull new code and rebuild
+
 ```bash
-python manage.py collectstatic --noinput
+# Fetch latest code
+git pull origin main
+
+# Rebuild the image (only changed layers are rebuilt thanks to layer caching)
+docker compose -f docker-compose.prod.yml build
+
+# Replace containers one by one without full downtime
+docker compose -f docker-compose.prod.yml up -d --no-deps app nginx
 ```
 
-### 7. Create Superuser
+The `prod-entrypoint.sh` script automatically runs `python manage.py migrate`
+before starting Daphne, so database migrations are applied on every restart.
+
+### Zero-downtime update checklist
+
+1. `git pull origin main`
+2. `docker compose -f docker-compose.prod.yml build`
+3. `docker compose -f docker-compose.prod.yml up -d --no-deps app`
+4. Wait for the new `app` container to pass its health check (see Step 7).
+5. `docker compose -f docker-compose.prod.yml up -d --no-deps nginx` (if nginx config changed).
+
+---
+
+## 6. Static & Private Media Handling
+
+### Static files
+
+Static files (CSS, JS, images bundled with the application) are collected
+into the `static_data` Docker volume during the image build step
+(`python manage.py collectstatic --noinput`).  Nginx serves them directly
+from this volume at `/static/` without touching Django.
+
+### Public media files
+
+Two media directories are served directly by Nginx without Django involvement:
+
+| URL prefix | Nginx alias |
+|------------|-------------|
+| `/media/post_images/` | `/var/www/media/post_images/` |
+| `/media/course_covers/` | `/var/www/media/course_covers/` |
+
+### Private media files
+
+All other files under `/media/` (avatars, exam files, submission attachments,
+lab files, etc.) are **not** served directly.  Access is controlled by Django:
+
+1. The browser requests `/media/<private_path>/`.
+2. Nginx proxies the request to Django (the `app` container).
+3. Django's `protected_media` view checks authentication/authorisation.
+4. On success, Django responds with an `X-Accel-Redirect: /internal_media/<path>` header.
+5. Nginx intercepts this header and serves the file from the `media_data` volume
+   via the `location /internal_media/ { internal; ... }` block — the file data
+   never passes through Django.
+6. On failure, Django returns 403/404 directly.
+
+The `MEDIA_ACCEL_REDIRECT_URL` environment variable controls the prefix
+(default `/internal_media`) and must match the Nginx `location` block.
+
+### Storage volume management
+
 ```bash
-python manage.py createsuperuser
+# List volumes
+docker volume ls | grep emsarena
+
+# Back up media files
+docker run --rm \
+  -v emsarena_media_data:/source:ro \
+  -v $(pwd)/backup:/backup \
+  alpine tar czf /backup/media-$(date +%Y%m%d).tar.gz -C /source .
 ```
 
-## Production Deployment
+---
 
-### Using Gunicorn
+## 7. Health Check & Smoke Test Verification
+
+### Automated container health checks
+
+Docker Compose defines health checks for every service.  Check their status:
+
 ```bash
-gunicorn config.wsgi:application --bind 0.0.0.0:8000
+docker compose -f docker-compose.prod.yml ps
 ```
 
-### Using Daphne (for WebSocket support)
+All services should show `(healthy)`.
+
+### HTTP endpoint checks
+
 ```bash
-daphne -b 0.0.0.0 -p 8000 config.asgi:application
+# Basic liveness ping — must return HTTP 200
+curl -sf http://localhost/ping/ && echo "✅ Ping OK"
+
+# Detailed health check — returns 200 (all OK) or 207 (some issues)
+curl -sf http://localhost/health/ && echo "✅ Health OK"
 ```
 
-## Docker Deployment
-TODO: Add Docker deployment instructions
+From the internet (via the Load Balancer):
 
-## Nginx Configuration
-TODO: Add Nginx configuration example
+```bash
+curl -sf https://emsarena.az/ping/ && echo "✅ Public ping OK"
+curl -sf https://emsarena.az/health/ && echo "✅ Public health OK"
+```
+
+### Smoke test checklist (manual)
+
+Run these steps in a browser to verify the core user flow:
+
+- [ ] `https://emsarena.az/accounts/login/` — login page loads, form is visible.
+- [ ] Log in with a test account — redirected to the dashboard.
+- [ ] `https://emsarena.az/organizations/` — organisation dashboard renders.
+- [ ] `https://emsarena.az/exams/` — exam list page loads.
+- [ ] WebSocket test: open a live exam session; the WebSocket connection
+      establishes (no browser console errors).
+
+### Automated E2E smoke tests (optional)
+
+The CI pipeline runs Playwright smoke tests against the production stack.
+To run them locally against a deployed environment:
+
+```bash
+pip install pytest pytest-playwright playwright
+playwright install chromium
+
+BASE_URL=https://emsarena.az \
+E2E_USERNAME=<your-test-user> \
+E2E_PASSWORD=<your-test-password> \
+    pytest tests/e2e/ -v
+```
+
+---
+
+## 8. Rollback Plan
+
+### Identify the previous working image
+
+```bash
+# List recent Docker images
+docker images emsarena-prod --format "table {{.Tag}}\t{{.CreatedAt}}\t{{.ID}}"
+```
+
+Tag your images with the Git commit SHA when building for production:
+
+```bash
+docker compose -f docker-compose.prod.yml build
+docker tag emsarena-prod:latest emsarena-prod:$(git rev-parse --short HEAD)
+```
+
+### Roll back the application container
+
+```bash
+# Replace the app container with the previous image tag
+# (substitute <previous-sha> with the tag from the list above)
+APP_IMAGE=emsarena-prod:<previous-sha> \
+    docker compose -f docker-compose.prod.yml up -d --no-deps app
+```
+
+The entrypoint will re-run migrations on startup.  If the rollback involves
+reverting a migration, run the reverse migration first:
+
+```bash
+# Check current migration state
+docker compose -f docker-compose.prod.yml exec app \
+    python manage.py showmigrations
+
+# Revert to a specific migration (example)
+docker compose -f docker-compose.prod.yml exec app \
+    python manage.py migrate <app_label> <migration_name>
+```
+
+### Roll back with git + full rebuild
+
+```bash
+# Find the last known-good commit
+git log --oneline -20
+
+# Check out that commit
+git checkout <good-commit-sha>
+
+# Rebuild and redeploy
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### Database rollback
+
+> ⚠️ **Always back up the database before deploying a migration-heavy release.**
+
+```bash
+# Back up (run before every deployment)
+docker compose -f docker-compose.prod.yml exec postgres \
+    pg_dump -U ${POSTGRES_USER} ${POSTGRES_DB} \
+    > backup-$(date +%Y%m%d-%H%M).sql
+
+# Restore
+docker compose -f docker-compose.prod.yml exec -T postgres \
+    psql -U ${POSTGRES_USER} ${POSTGRES_DB} \
+    < backup-<timestamp>.sql
+```
+
+---
+
+## 9. Secrets Management Checklist
+
+- [ ] `SECRET_KEY` is at least 50 random characters and unique per environment.
+- [ ] `POSTGRES_PASSWORD` and `REDIS_PASSWORD` are strong random strings (≥32 chars).
+- [ ] The `.env` file is listed in `.gitignore` and never committed.
+- [ ] Secrets are rotated if they have ever been exposed in a commit or log.
+- [ ] CI secrets (`E2E_USERNAME`, `E2E_PASSWORD`) are stored as repository
+      Actions secrets, not hardcoded in workflow files.
+- [ ] Gitleaks is enabled in CI to catch future accidental secret commits.
+- [ ] Sentry DSN (if used) is treated as a secret and injected at runtime only.
+
