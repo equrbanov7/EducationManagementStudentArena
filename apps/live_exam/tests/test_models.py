@@ -2,7 +2,10 @@
 Model tests for live_exam app.
 """
 
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import TestCase
 
 from apps.exams.models import Exam
@@ -124,3 +127,91 @@ class LiveSessionPinFieldTest(TestCase):
         # Verify the saved row is retrievable (no silent DB truncation).
         reloaded = LiveSession.objects.get(pk=session.pk)
         self.assertEqual(reloaded.pin, session.pin)
+
+
+class LiveSessionPinIntegrityRetryTest(TestCase):
+    """
+    Verify that LiveSession.save() retries when an IntegrityError is raised
+    by the DB unique constraint on `pin` (race-condition window).
+    """
+
+    def _make_exam_and_teacher(self):
+        from apps.accounts.models import ProfileRole
+        from apps.organizations.models import Organization
+        from core.constants import OrganizationType
+
+        teacher = User.objects.create_user(
+            username="pin_retry_teacher",
+            email="pin_retry@example.com",
+            password="StrongPass123!",
+        )
+        teacher.profile.role = ProfileRole.TEACHER
+        teacher.profile.save(update_fields=["role", "updated_at"])
+
+        org = Organization.objects.create(
+            name="Pin Retry Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        teacher.profile.organization = org
+        teacher.profile.organization_type = org.org_type
+        teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        exam = Exam.objects.create(
+            title="Pin Retry Exam",
+            slug="pin-retry-exam",
+            author=teacher,
+            is_active=True,
+        )
+        return exam, teacher
+
+    def test_integrity_error_triggers_pin_retry(self):
+        """
+        Simulates a single IntegrityError on the first save attempt and verifies
+        that LiveSession.save() recovers by regenerating the PIN and retrying.
+        """
+        from unittest.mock import patch
+
+        from django.db import models as django_models
+
+        exam, teacher = self._make_exam_and_teacher()
+
+        call_count = [0]
+        original_model_save = django_models.Model.save
+
+        def _raise_once_then_succeed(self_inner, *args, **kwargs):
+            call_count[0] += 1
+            if call_count[0] == 1:
+                raise IntegrityError("Simulated duplicate PIN collision")
+            return original_model_save(self_inner, *args, **kwargs)
+
+        session = LiveSession(exam=exam, host_user=teacher)
+        with patch("django.db.models.Model.save", _raise_once_then_succeed):
+            session.save()
+
+        # The session was saved successfully on the second attempt.
+        self.assertEqual(call_count[0], 2)
+        self.assertIsNotNone(session.pk)
+        self.assertEqual(len(session.pin), PIN_LENGTH)
+
+    def test_repeated_integrity_error_raises_after_max_tries(self):
+        """
+        If every save attempt raises IntegrityError, the exception must propagate
+        after the maximum number of retries is exhausted.
+        """
+        exam, teacher = self._make_exam_and_teacher()
+        exam.slug = "pin-retry-exam-exhaust"
+        exam.save(update_fields=["slug"])
+
+        always_raise = IntegrityError("Persistent collision")
+
+        # Patch _ensure_unique_pin to be a no-op and super().save to always raise.
+        with (
+            patch.object(LiveSession, "_ensure_unique_pin", return_value=None),
+            patch("django.db.models.Model.save", side_effect=always_raise),
+        ):
+            session = LiveSession(exam=exam, host_user=teacher)
+            with self.assertRaises(IntegrityError):
+                session.save()

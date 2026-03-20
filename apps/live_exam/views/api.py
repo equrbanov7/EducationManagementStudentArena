@@ -136,12 +136,12 @@ def live_state_json(request, pin):
     if session.state == LiveSession.STATE_REVEAL:
         if is_host:
             # Host receives the full reveal payload including per-player result details.
-            reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends)
+            reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
             data["results"] = reveal_payload["results"]
         else:
             # Players receive the player-appropriate reveal payload: correct answers and
             # leaderboard data are included, but per-player result details are host-only.
-            reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends)
+            reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
         data["top"] = reveal_payload["top"]
         data["previous_top"] = reveal_payload["previous_top"]
         data["distribution"] = reveal_payload["distribution"]
