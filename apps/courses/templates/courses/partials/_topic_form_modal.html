@@ -141,7 +141,7 @@ function showNotification(message, type = 'info') {
 }
 </script>
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
     #topicForm .form-label {
         font-weight: 600;
         color: #333;

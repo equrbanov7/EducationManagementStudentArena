@@ -9,15 +9,41 @@ from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.utils.translation import pgettext
 
+from core.rate_limit import normalize_rate_identity, record_rate_limit_hit
+from core.utils import get_client_ip
+
 from ..forms import SubscriptionForm
 from ..models import Subscriber
 
 logger = logging.getLogger(__name__)
+SUBSCRIBE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+SUBSCRIBE_LIMIT_SCOPE_IP = "blog.subscribe.ip"
+SUBSCRIBE_LIMIT_SCOPE_IDENTITY = "blog.subscribe.identity"
+
+
+def _subscribe_limit_keys(request, email):
+    client_ip = get_client_ip(request) or "unknown"
+    normalized_email = normalize_rate_identity(email)
+    return [
+        (SUBSCRIBE_LIMIT_SCOPE_IP, client_ip),
+        (SUBSCRIBE_LIMIT_SCOPE_IDENTITY, client_ip, normalized_email),
+    ]
 
 
 def subscribe_page(request):
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
+        raw_email = request.POST.get("email", "")
+
+        for scope, *key_parts in _subscribe_limit_keys(request, raw_email):
+            is_limited, retry_after = record_rate_limit_hit(scope, settings.SUBSCRIBE_RATE_LIMIT, *key_parts)
+            if is_limited:
+                messages.error(request, SUBSCRIBE_RATE_LIMIT_MESSAGE)
+                response = render(request, "blog/subscribe.html", {"form": form}, status=429)
+                if retry_after:
+                    response.headers["Retry-After"] = str(retry_after)
+                return response
+
         if form.is_valid():
             email = form.cleaned_data["email"]
 

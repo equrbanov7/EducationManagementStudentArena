@@ -1,7 +1,10 @@
 # blog/views/pages.py
+import re
+from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 
@@ -9,10 +12,25 @@ from ..models import Category, Post
 from ..selectors import DEFAULT_TECHNOLOGY_CATEGORY_SLUG, get_popular_topics, get_sidebar_categories
 from .categories import render_category_page
 
+HOME_SEARCH_MAX_LENGTH = 200
+_PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
+
+
+def _normalize_home_search_query(raw_value, *, max_length=HOME_SEARCH_MAX_LENGTH):
+    return " ".join(str(raw_value or "").split())[:max_length]
+
+
+def _parse_home_page_number(raw_value):
+    normalized = str(raw_value or "").strip()
+    if not normalized:
+        return None
+    if not _PAGE_NUMBER_RE.fullmatch(normalized):
+        return None
+    return int(normalized)
+
 
 def home(request):
-
-    query = request.GET.get("q", "").strip()
+    query = _normalize_home_search_query(request.GET.get("q"))
     post_list = Post.objects.filter(is_published=True).select_related("category", "author").order_by("-created_at")
 
     if query:
@@ -20,9 +38,14 @@ def home(request):
             Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(content__icontains=query)
         ).distinct()
 
+    raw_page_number = request.GET.get("page")
+    page_number = _parse_home_page_number(raw_page_number)
+    if raw_page_number not in (None, "") and page_number is None:
+        return HttpResponseBadRequest("Invalid page parameter.")
+
     paginator = Paginator(post_list, 6)
-    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+    extra_query = urlencode({"q": query}) if query else ""
 
     categories = get_sidebar_categories(
         posts_queryset=Post.objects.filter(is_published=True),
@@ -37,6 +60,7 @@ def home(request):
         "active_category_slug": "",
         "search_query": query,
         "query": query,  # Also pass as 'query' for template compatibility
+        "extra_query": extra_query,
     }
 
     return render(request, "blog/home.html", context)

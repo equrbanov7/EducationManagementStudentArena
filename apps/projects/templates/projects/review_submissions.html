@@ -6,7 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         .results-modal-answer {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
