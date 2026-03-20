@@ -540,6 +540,111 @@ jobs:
             BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
 
   # ─────────────────────────────────────────────────────────────────────────
+  # JOB 5b: SECRET SCANNING (Gitleaks)
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Repository-yə commit edilmiş gizli açarları / tokenləri tapmaq
+  # 📌 BEST PRACTICE: Hər PR-da bütün dəyişiklikləri skan et; pozitivləri
+  #    .gitleaks.toml faylında allowlist ilə idarə et
+  secret-scan:
+    name: 🔑 Secret Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout code (full history for diff-aware scan)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ───────────────────────────────────────────────────────────────────
+      # Gitleaks — scans the current commit diff (pull_request) or the
+      # full history (push / workflow_dispatch).  The .gitleaks.toml
+      # allowlist prevents known CI placeholder values from failing the job.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🔑 Run Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Point to our project-level baseline config
+          GITLEAKS_CONFIG: .gitleaks.toml
+          # Exit with a non-zero code when secrets are found (blocks merge)
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 5c: CONTAINER IMAGE VULNERABILITY SCAN (Trivy)
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Production Docker image-dəki CVE-ləri audit etmək
+  # 📌 BEST PRACTICE: docker-prod-build job-undan sonra — eyni GHA cache-dən
+  #    image-i yükləyərək Trivy ilə skan edirik.  HIGH/CRITICAL tapılarsa
+  #    build bloklanır.
+  container-scan:
+    name: 🛡️ Container Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [docker-prod-build]
+    permissions:
+      contents: read
+      security-events: write   # SARIF upload to Security tab
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ───────────────────────────────────────────────────────────────────
+      # Rebuild from the GHA layer cache and load into local Docker daemon.
+      # This avoids a full rebuild; only changed layers are fetched.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Load production image from cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          load: true
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+      # ───────────────────────────────────────────────────────────────────
+      # Trivy — scan the local image for OS and library CVEs.
+      # Severity threshold: HIGH and CRITICAL block the build.
+      # Results are also uploaded as a SARIF artifact to the Security tab.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🛡️ Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: emsarena-prod:ci
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: 📤 Upload Trivy SARIF to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container-scan
+
+      - name: 📊 Print Trivy table report (for log readability)
+        if: always()
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: emsarena-prod:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+
+  # ─────────────────────────────────────────────────────────────────────────
   # JOB 6: PROD SMOKE TEST
   # ─────────────────────────────────────────────────────────────────────────
   # 📌 NİYƏ?: Production stack-in ayağa qalxdığını və traffic serve etdiyini yoxlamaq
@@ -664,6 +769,158 @@ jobs:
           docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
 
   # ─────────────────────────────────────────────────────────────────────────
+  # JOB 6b: E2E SMOKE TESTS (Playwright)
+  # ─────────────────────────────────────────────────────────────────────────
+  # 📌 NİYƏ?: Kritik UI axınlarında reqressiyaları tutmaq (login, dashboard,
+  #           exam list)
+  # 📌 BEST PRACTICE: Production-a yaxın Docker stack-ə qarşı sınaq —
+  #    prod-smoke stack-dan istifadə edir (artıq ayağa qaldırılıb).
+  e2e-smoke:
+    name: 🎭 E2E Smoke Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [docker-prod-build]
+    permissions:
+      contents: read
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ───────────────────────────────────────────────────────────────────
+      # Rebuild from cache and load into local daemon (same pattern as
+      # prod-smoke / container-scan).
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Load production image from cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          push: false
+          load: true
+          tags: emsarena-prod:ci
+          cache-from: type=gha
+          build-args: |
+            BUILD_SECRET_KEY=ci-build-placeholder-not-for-production
+            BUILD_DATABASE_URL=sqlite:////tmp/build.db
+            BUILD_ALLOWED_HOSTS=localhost,127.0.0.1
+
+      # ───────────────────────────────────────────────────────────────────
+      # Start the production stack (same CI-safe secrets as prod-smoke).
+      # SECURE_SSL_REDIRECT=False prevents HTTPS redirects inside plain-HTTP
+      # CI so Playwright can reach the app on http://localhost.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🚀 Start production stack
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+          SECURE_SSL_REDIRECT: "False"
+          SESSION_COOKIE_SECURE: "False"
+          CSRF_COOKIE_SECURE: "False"
+        run: |
+          docker compose -f docker-compose.prod.yml up -d --no-build
+
+      # ───────────────────────────────────────────────────────────────────
+      # Wait for the stack to become healthy before running tests.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🩺 Wait for stack to be ready
+        run: |
+          MAX=24
+          for i in $(seq 1 $MAX); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ping/ 2>/dev/null || echo "000")
+            if [[ "$STATUS" == "200" ]]; then
+              echo "✅ Stack ready after $((i * 5))s"
+              break
+            fi
+            echo "Attempt $i/$MAX — /ping/ = $STATUS. Retrying in 5s..."
+            sleep 5
+            if [[ $i -eq $MAX ]]; then
+              echo "::error::❌ Stack did not become ready within 120 s."
+              exit 1
+            fi
+          done
+
+      # ───────────────────────────────────────────────────────────────────
+      # Install Python + Playwright for the E2E test runner.
+      # Only the Chromium browser is installed to keep install time short.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📥 Install Playwright and pytest-playwright
+        run: |
+          pip install pytest pytest-playwright playwright
+          playwright install chromium --with-deps
+
+      # ───────────────────────────────────────────────────────────────────
+      # Run the E2E smoke suite.
+      # E2E_USERNAME / E2E_PASSWORD are intentionally NOT set in CI so that
+      # the authenticated test cases are auto-skipped (the unauthenticated
+      # smoke checks still run and validate basic reachability).
+      # To run the full authenticated suite, set these secrets in the repo.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 🎭 Run E2E smoke tests
+        env:
+          BASE_URL: "http://localhost"
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        run: |
+          echo "::group::🎭 Playwright E2E Smoke Tests"
+          pytest tests/e2e/ \
+            -v \
+            --tb=short \
+            --timeout=60 || {
+            echo "::error::❌ E2E smoke tests failed! Critical UI regression detected."
+            exit 1
+          }
+          echo "✅ E2E smoke tests passed!"
+          echo "::endgroup::"
+
+      # ───────────────────────────────────────────────────────────────────
+      # Always dump container logs and tear down, even on failure.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 📋 Dump container logs
+        if: always()
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          docker compose -f docker-compose.prod.yml logs --no-color || true
+
+      - name: 🧹 Tear down production stack
+        if: always()
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          docker compose -f docker-compose.prod.yml down -v --remove-orphans || true
+
+  # ─────────────────────────────────────────────────────────────────────────
   # JOB 7: CI SUCCESS (Final status)
   # ─────────────────────────────────────────────────────────────────────────
   # 📌 NİYƏ?: Bütün job-ların uğurla bitdiyini bir yerdə göstərmək
@@ -671,7 +928,7 @@ jobs:
   ci-success:
     name: ✅ CI Success
     runs-on: ubuntu-latest
-    needs: [lint, security, test, build, docker-prod-build, prod-smoke]
+    needs: [lint, security, test, build, docker-prod-build, prod-smoke, secret-scan, container-scan, e2e-smoke]
     if: always()
     
     steps:
@@ -684,6 +941,9 @@ jobs:
           echo "Build:            ${{ needs.build.result }}"
           echo "Docker Prod Build:${{ needs.docker-prod-build.result }}"
           echo "Prod Smoke:       ${{ needs.prod-smoke.result }}"
+          echo "Secret Scan:      ${{ needs.secret-scan.result }}"
+          echo "Container Scan:   ${{ needs.container-scan.result }}"
+          echo "E2E Smoke:        ${{ needs.e2e-smoke.result }}"
           echo "=========================="
           
           if [[ "${{ needs.lint.result }}" == "failure" ]]; then
@@ -713,6 +973,21 @@ jobs:
 
           if [[ "${{ needs.prod-smoke.result }}" == "failure" ]]; then
             echo "❌ Prod Smoke Test failed! The production stack must start and serve traffic."
+            exit 1
+          fi
+
+          if [[ "${{ needs.secret-scan.result }}" == "failure" ]]; then
+            echo "❌ Secret Scan failed! Plaintext secrets were detected in the commit. Remove them before merging."
+            exit 1
+          fi
+
+          if [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
+            echo "❌ Container Scan failed! HIGH/CRITICAL CVEs found in the production image. Fix them before merging."
+            exit 1
+          fi
+
+          if [[ "${{ needs.e2e-smoke.result }}" == "failure" ]]; then
+            echo "❌ E2E Smoke Test failed! Critical UI breakage detected. Fix before merging."
             exit 1
           fi
           

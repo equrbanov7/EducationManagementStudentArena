@@ -7,12 +7,21 @@
 #   SECRET_KEY, DATABASE_URL (or POSTGRES_* vars), REDIS_PASSWORD,
 #   ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, SITE_URL
 #
+# TLS / SSL Architecture — Option B (External Load Balancer termination):
+#   SSL/TLS is terminated at the upstream Load Balancer (e.g. AWS ALB,
+#   Cloudflare, or HAProxy).  The LB decrypts HTTPS traffic and forwards
+#   plain HTTP to nginx on port 80, setting the X-Forwarded-Proto: https
+#   header so that Django and nginx know the original connection was secure.
+#   Nginx therefore only listens on port 80 inside the container; the LB
+#   handles all certificate management and HTTPS redirection externally.
+#   Do NOT add a 443 binding here — certificates live on the LB, not nginx.
+#
 # Security notes:
 #   - Redis is NOT exposed externally; it is reachable only inside the
 #     emsarena-network bridge network.
 #   - Redis is password-protected via REDIS_PASSWORD.
 #   - PostgreSQL is NOT exposed externally.
-#   - Only nginx (ports 80 / 443) is accessible from outside.
+#   - Only nginx (port 80) is accessible from outside; the LB provides HTTPS.
 # ═══════════════════════════════════════════════════════════════════════════
 
 services:
@@ -122,7 +131,6 @@ services:
     container_name: emsarena-nginx
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_data:/var/www/staticfiles:ro
