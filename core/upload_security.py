@@ -67,7 +67,6 @@ DEFAULT_ALLOWED_MIME_TYPES = {
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     "application/json",
     "application/xml",
-    "application/octet-stream",
     "text/plain",
     "text/csv",
 }

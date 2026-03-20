@@ -47,10 +47,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.accounts.middleware.SessionTimeoutMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
+    "apps.accounts.middleware.SuspendedOrganizationMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
