@@ -121,6 +121,11 @@ def add_students_from_group_to_course(course, student_group, group_name=""):
             )
 
     # Single INSERT for all new members.
+    # ignore_conflicts=True guards against the TOCTOU race: two concurrent
+    # requests can both read "no membership" and then race to insert the same
+    # row.  The atomic transaction prevents phantom reads under SERIALIZABLE
+    # isolation, but PostgreSQL defaults to READ COMMITTED, so the defensive
+    # ignore is necessary for safety.
     if new_memberships:
         CourseMembership.objects.bulk_create(new_memberships, ignore_conflicts=True)
 
@@ -171,6 +176,11 @@ def bulk_add_members_to_course(course, user_ids, role="student", group_name=""):
     ]
 
     # Single INSERT for all new members.
+    # ignore_conflicts=True guards against the TOCTOU race: two concurrent
+    # requests can both read "no membership" and then race to insert the same
+    # row.  The atomic transaction prevents phantom reads under SERIALIZABLE
+    # isolation, but PostgreSQL defaults to READ COMMITTED, so the defensive
+    # ignore is necessary for safety.
     if new_memberships:
         CourseMembership.objects.bulk_create(new_memberships, ignore_conflicts=True)
 

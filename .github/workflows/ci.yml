@@ -235,7 +235,7 @@ jobs:
           echo "::group::🔍 Bandit Security Scan (MEDIUM severity — advisory)"
           bandit -r . \
             -x ./tests,./venv,./.venv,./migrations \
-            -ll \
+            --severity-level medium \
             --format txt || echo "⚠️ Bandit found medium-severity issues — review recommended."
           echo "::endgroup::"
 
