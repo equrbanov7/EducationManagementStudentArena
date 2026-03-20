@@ -4,8 +4,7 @@ from urllib.parse import urlencode, urlsplit
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Sum
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -335,7 +334,9 @@ def teacher_exam_results(request, slug):
     # Statistikalar (əvvəlki kimi)
     # ═══════════════════════════════════════════════════════════════════
     filtered_attempts = list(attempts)
-    fastest_attempts = sorted([a for a in filtered_attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[:5]
+    fastest_attempts = sorted([a for a in filtered_attempts if a.duration_seconds], key=lambda a: a.duration_seconds)[
+        :5
+    ]
 
     questions = exam.questions.all()
     hardest_questions = sorted(questions, key=lambda q: q.correct_ratio)[:5]
@@ -481,11 +482,7 @@ def teacher_view_attempt(request, slug, attempt_id):
             question_text = (question.text or "").lower()
             answer_text = (getattr(answer, "text_answer", "") or "").lower()
             options_text = " ".join(opt.text for opt in question.options.all()).lower()
-            if (
-                search_token in question_text
-                or search_token in answer_text
-                or search_token in options_text
-            ):
+            if search_token in question_text or search_token in answer_text or search_token in options_text:
                 filtered.append(item)
         qa_list = filtered
 

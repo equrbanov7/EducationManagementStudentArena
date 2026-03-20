@@ -36,7 +36,7 @@ if not SECRET_KEY:
         "session forgery and token tampering in any environment.\n\n"
         "Quick fix:\n"
         "  1. Copy .env.example to .env\n"
-        "  2. Generate a key: python -c \"import secrets; print(secrets.token_urlsafe(64))\"\n"
+        '  2. Generate a key: python -c "import secrets; print(secrets.token_urlsafe(64))"\n'
         "  3. Set SECRET_KEY=<generated-key> in your .env file\n"
     )
 
@@ -64,9 +64,11 @@ DATABASES = {
 # - Otherwise, use SMTP when credentials exist; fallback to console backend.
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
-    "django.core.mail.backends.smtp.EmailBackend"
-    if os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
-    else "django.core.mail.backends.console.EmailBackend",
+    (
+        "django.core.mail.backends.smtp.EmailBackend"
+        if os.getenv("EMAIL_HOST_USER") and os.getenv("EMAIL_HOST_PASSWORD")
+        else "django.core.mail.backends.console.EmailBackend"
+    ),
 )
 EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", EMAIL_PORT))

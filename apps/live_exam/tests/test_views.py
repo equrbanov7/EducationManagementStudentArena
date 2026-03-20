@@ -225,7 +225,9 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["remembered_player"]["nickname"], "Remembered Player")
         self.assertEqual(response.context["remembered_player"]["avatar_key"], "avatar_4")
-        self.assertEqual(response.context["resume_url"], reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+        self.assertEqual(
+            response.context["resume_url"], reverse("liveExam:wait_room", kwargs={"pin": self.session.pin})
+        )
         self.assertIn("remembered_join_copy", response.context)
 
     def test_pin_entry_page_accessible(self):
@@ -423,7 +425,9 @@ class LiveStateAPITest(TestCase):
             text="Test Question",
             order=1,
         )
-        self.correct_option = ExamQuestionOption.objects.create(question=self.question, text="Option A", is_correct=True)
+        self.correct_option = ExamQuestionOption.objects.create(
+            question=self.question, text="Option A", is_correct=True
+        )
         ExamQuestionOption.objects.create(question=self.question, text="Option B", is_correct=False)
 
     def _authenticate_player(self, client=None):
@@ -976,6 +980,7 @@ class LiveWaitRoomReactionRateLimitTest(TestCase):
         )
         self.assertEqual(blocked.status_code, 429)
         self.assertFalse(blocked.json()["ok"])
+
 
 class HelperFunctionsTest(TestCase):
     """Test helper functions."""

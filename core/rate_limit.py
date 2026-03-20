@@ -12,7 +12,6 @@ from dataclasses import dataclass
 from django.conf import settings
 from django.core.cache import caches
 
-
 _RATE_RE = re.compile(
     r"^\s*(?P<count>\d+)\s*/\s*(?:(?P<window>\d+)\s*(?P<unit>[smhd])|(?P<short_unit>[smhd]))\s*$",
     re.IGNORECASE,

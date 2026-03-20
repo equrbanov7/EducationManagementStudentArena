@@ -6,8 +6,7 @@ Backward-compatible helper re-exports for live exam views.
 
 from __future__ import annotations
 
-from apps.live_exam.auth import PLAYER_COOKIE_NAME, PLAYER_TOKEN_SALT, clean_nickname, get_client_id
-from apps.live_exam.constants import AVATAR_KEYS
+from apps.live_exam.auth import clean_nickname, get_client_id
 from apps.live_exam.domain.session import (
     detect_multi,
     get_current_exam_question,
@@ -33,9 +32,9 @@ from apps.live_exam.serializers import (
 )
 from apps.live_exam.transport import (
     broadcast,
-    build_reaction_event_payload,
     build_join_url,
     build_question_payload,
+    build_reaction_event_payload,
     build_reveal_payload,
     get_public_base_url,
 )

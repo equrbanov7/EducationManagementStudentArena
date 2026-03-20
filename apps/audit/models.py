@@ -65,12 +65,16 @@ class AuditLogManager(models.Manager):
         returning_fields = [
             field for field in self.model._meta.db_returning_fields if field.name not in missing_field_names
         ]
-        results = super().get_queryset()._insert(
-            [obj],
-            fields=fields,
-            returning_fields=returning_fields,
-            using=using,
-            raw=False,
+        results = (
+            super()
+            .get_queryset()
+            ._insert(
+                [obj],
+                fields=fields,
+                returning_fields=returning_fields,
+                using=using,
+                raw=False,
+            )
         )
         if results:
             for value, field in zip(results[0], returning_fields):

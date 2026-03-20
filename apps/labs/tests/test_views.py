@@ -271,9 +271,15 @@ class LabAccessControlTest(TestCase):
         self.client = Client()
         self.owner = User.objects.create_user("lab_owner", "lab_owner@example.com", "StrongPass123!")
         self.other_teacher = User.objects.create_user("other_teacher", "other_teacher@example.com", "StrongPass123!")
-        self.allowed_student = User.objects.create_user("allowed_student", "allowed_student@example.com", "StrongPass123!")
-        self.blocked_student = User.objects.create_user("blocked_student", "blocked_student@example.com", "StrongPass123!")
-        self.unenrolled_student = User.objects.create_user("unenrolled_student", "unenrolled_student@example.com", "StrongPass123!")
+        self.allowed_student = User.objects.create_user(
+            "allowed_student", "allowed_student@example.com", "StrongPass123!"
+        )
+        self.blocked_student = User.objects.create_user(
+            "blocked_student", "blocked_student@example.com", "StrongPass123!"
+        )
+        self.unenrolled_student = User.objects.create_user(
+            "unenrolled_student", "unenrolled_student@example.com", "StrongPass123!"
+        )
 
         self.organization = Organization.objects.create(
             name="Lab Access Org",
@@ -349,7 +355,9 @@ class LabAccessControlTest(TestCase):
 class LabQuestionImportTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.teacher = User.objects.create_user("lab_import_teacher", "lab_import_teacher@example.com", "StrongPass123!")
+        self.teacher = User.objects.create_user(
+            "lab_import_teacher", "lab_import_teacher@example.com", "StrongPass123!"
+        )
         self.organization = Organization.objects.create(
             name="Lab Import Org",
             org_type=OrganizationType.SCHOOL,
@@ -396,8 +404,12 @@ class LabQuestionImportTest(TestCase):
 class LabTeacherReviewWindowTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.teacher = User.objects.create_user("lab_review_teacher", "lab_review_teacher@example.com", "StrongPass123!")
-        self.student = User.objects.create_user("lab_review_student", "lab_review_student@example.com", "StrongPass123!")
+        self.teacher = User.objects.create_user(
+            "lab_review_teacher", "lab_review_teacher@example.com", "StrongPass123!"
+        )
+        self.student = User.objects.create_user(
+            "lab_review_student", "lab_review_student@example.com", "StrongPass123!"
+        )
         self.organization = Organization.objects.create(
             name="Lab Teacher Review Org",
             org_type=OrganizationType.SCHOOL,
@@ -695,28 +707,36 @@ class RosterAPIAuthorizationTest(TestCase):
     def test_api_get_students_owner_can_access(self):
         """Course owner should be able to access students"""
         self._login_as(self.owner)
-        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        response = self.client.get(
+            reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_teacher_can_access(self):
         """Teacher should be able to access students"""
         self._login_as(self.teacher)
-        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        response = self.client.get(
+            reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_assistant_can_access(self):
         """Assistant should be able to access students"""
         self._login_as(self.assistant)
-        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        response = self.client.get(
+            reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("students", response.json())
 
     def test_api_get_students_unauthorized_denied(self):
         """Unauthorized user should be denied"""
         self._login_as(self.unauthorized_user)
-        response = self.client.get(reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"})
+        response = self.client.get(
+            reverse("labs:api_get_students", kwargs={"course_id": self.course.id}), {"groups": "Group A"}
+        )
         self.assertEqual(response.status_code, 403)
 
 
@@ -773,7 +793,9 @@ class LabUploadSecurityTest(TestCase):
             {
                 "question_id": self.question.id,
                 "answer": "",
-                "answer_file": SimpleUploadedFile("shell.php", b"<?php echo 'pwn';", content_type="application/x-httpd-php"),
+                "answer_file": SimpleUploadedFile(
+                    "shell.php", b"<?php echo 'pwn';", content_type="application/x-httpd-php"
+                ),
             },
         )
         self.assertEqual(response.status_code, 400)

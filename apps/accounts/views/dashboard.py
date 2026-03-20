@@ -9,7 +9,6 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -18,11 +17,10 @@ from django.utils.translation import pgettext_lazy
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
-from apps.labs.models import Lab, LabAnswer, LabSubmission
-from apps.projects.models import Project, ProjectSubmission
+from apps.labs.models import LabAnswer, LabSubmission
+from apps.projects.models import ProjectSubmission
 
 from ._dashboard_helpers import (
-    _collect_assigned_tasks,
     _collect_evaluated_review_items,
     _collect_my_results,
     _collect_pending_answer_items,
@@ -36,14 +34,9 @@ from ._helpers import (
     _assigned_courses_queryset,
     _assigned_exams_queryset,
     _extract_assignment_attachments,
-    _get_active_organization,
     _is_result_visible_to_student,
     _is_review_window_closed,
-    _is_superadmin_user,
-    _normalize_assigned_tasks_filter,
     _normalize_pending_answers_filter,
-    _normalize_pending_review_status,
-    _normalize_pending_review_type,
     _normalize_results_filter,
     _normalize_review_result_item_type,
     _parse_decimal_score,
@@ -54,10 +47,7 @@ from ._helpers import (
     _safe_same_origin_redirect_path,
     _tenant_scoped_courses,
     _tenant_scoped_exams,
-    _user_has_any_role,
 )
-
-from ..models import ProfileRole
 
 User = get_user_model()
 
@@ -161,12 +151,16 @@ def student_dashboard(request):
     enrolled_courses = _assigned_courses_queryset(request, request.user)[:6]
 
     # Get pending assignments
-    pending_assignments = Assignment.objects.filter(
-        course__in=enrolled_courses,
-        assigned_students=request.user,
-        due_date__gte=timezone.now(),
-        status__in=["published", "active"],
-    ).distinct().order_by("due_date")[:5]
+    pending_assignments = (
+        Assignment.objects.filter(
+            course__in=enrolled_courses,
+            assigned_students=request.user,
+            due_date__gte=timezone.now(),
+            status__in=["published", "active"],
+        )
+        .distinct()
+        .order_by("due_date")[:5]
+    )
 
     # Get upcoming exams
     upcoming_exams = (
@@ -612,11 +606,7 @@ def pending_review_detail(request, item_type, item_id):
         )
         max_score = Decimal(str(submission.assignment.max_score or 100))
         is_locked = _is_review_window_closed(submission.graded_at)
-        is_recheck_window = bool(
-            submission.status == "graded"
-            and submission.graded_at
-            and not is_locked
-        )
+        is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
         student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
             student=submission.user,
             submitted_at=submission.submitted_at,
@@ -685,11 +675,7 @@ def pending_review_detail(request, item_type, item_id):
         )
         max_score = Decimal(str(submission.project.max_score or 100))
         is_locked = _is_review_window_closed(submission.graded_at)
-        is_recheck_window = bool(
-            submission.status == "graded"
-            and submission.graded_at
-            and not is_locked
-        )
+        is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
         student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
             student=submission.student,
             submitted_at=submission.submitted_at,
@@ -755,17 +741,15 @@ def pending_review_detail(request, item_type, item_id):
         return render(request, "accounts/pending_review_detail.html", context)
 
     submission = get_object_or_404(
-        LabSubmission.objects.select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student"),
+        LabSubmission.objects.select_related(
+            "assignment", "assignment__lab", "assignment__lab__course", "assignment__student"
+        ),
         id=item_id,
         assignment__lab__course__in=teacher_courses,
     )
     max_score = Decimal(str(submission.assignment.lab.max_score or 100))
     is_locked = _is_review_window_closed(submission.graded_at)
-    is_recheck_window = bool(
-        submission.status == "graded"
-        and submission.graded_at
-        and not is_locked
-    )
+    is_recheck_window = bool(submission.status == "graded" and submission.graded_at and not is_locked)
     student_display, is_identity_hidden, identity_window_seconds_left = _resolve_pending_review_identity(
         student=submission.assignment.student,
         submitted_at=submission.submitted_at,
@@ -995,7 +979,9 @@ def review_result_detail(request, item_type, item_id):
         return render(request, "accounts/review_result_detail.html", context)
 
     submission = get_object_or_404(
-        LabSubmission.objects.select_related("assignment", "assignment__lab", "assignment__lab__course", "assignment__student"),
+        LabSubmission.objects.select_related(
+            "assignment", "assignment__lab", "assignment__lab__course", "assignment__student"
+        ),
         id=item_id,
         assignment__lab__course__in=teacher_courses,
     )

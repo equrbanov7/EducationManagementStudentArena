@@ -44,9 +44,10 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_redirects_unauthenticated_user(self):
         """Private files (projects/submissions/) must redirect unauthenticated users to login."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -66,8 +67,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_forbidden_for_authenticated_user_without_ownership(self):
         """Authenticated user with no file ownership or org membership gets 403."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -85,8 +87,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_accessible_to_superuser(self):
         """Superusers can access any private media file regardless of ownership."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -104,9 +107,10 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_labs_submission_redirects_unauthenticated(self):
         """Labs submission files must not be publicly accessible."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/labs/submissions/sample.txt")
@@ -125,10 +129,11 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_path_traversal_returns_404(self):
         """Path traversal attempts must be rejected."""
-        from core.media_views import protected_media
         from django.core.exceptions import SuspiciousFileOperation
         from django.http import Http404
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/../../etc/passwd")
@@ -162,9 +167,10 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_public_file_accessible_without_login(self):
         """Blog post images (post_images/) must be accessible without authentication."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/post_images/sample.txt")
@@ -182,8 +188,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_x_accel_redirect_header_set_for_private_file(self):
         """When MEDIA_ACCEL_REDIRECT_URL is set, response uses X-Accel-Redirect (superuser)."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -203,8 +210,8 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_serve_media_false_does_not_expose_media_in_production(self):
         """SERVE_MEDIA=False in production means no Django-based media serving."""
-        import importlib
         import sys
+
         from django.urls import clear_url_caches
 
         # Force URL module re-import so the test is not affected by previous
@@ -401,10 +408,10 @@ class ProtectedMediaOwnershipTest(TestCase):
 
     def test_unauthenticated_user_redirected_to_login(self):
         """Unauthenticated users are always redirected to login for private files."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
-
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get(f"/media/{self.file_path}")

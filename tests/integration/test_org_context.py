@@ -203,9 +203,7 @@ class MultiOrgExplicitSelectionTest(TestCase):
             password="testpass123",
         )
         self.org_a = _make_org("Multi Org A", "multi-org-a-ctx", self.user)
-        self.org_b = _make_org(
-            "Multi Org B", "multi-org-b-ctx", self.user, OrganizationType.SCHOOL
-        )
+        self.org_b = _make_org("Multi Org B", "multi-org-b-ctx", self.user, OrganizationType.SCHOOL)
 
         role_a = _make_role(self.org_a, name="teacher")
         role_b = _make_role(self.org_b, name="member", level=20, permissions=[])

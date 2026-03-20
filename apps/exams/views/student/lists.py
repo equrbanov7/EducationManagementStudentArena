@@ -7,6 +7,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+
 from ._helpers import build_exam_history_url
 
 

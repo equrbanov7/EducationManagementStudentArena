@@ -4,7 +4,6 @@ Permission definitions and checking functions for the organizations app.
 
 from typing import List, Set
 
-
 PERMISSION_PREFIX_ALIASES = {
     "grade": "grading",
     "grading": "grade",

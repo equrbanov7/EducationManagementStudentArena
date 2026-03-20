@@ -2,8 +2,6 @@
 Model tests for live_exam app.
 """
 
-import secrets
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -30,6 +28,7 @@ class GeneratePinTest(TestCase):
     def test_pin_contains_only_digits(self):
         """Generated PINs must consist of uppercase alphanumeric characters (digits + A-Z)."""
         import string
+
         allowed = set(string.digits + string.ascii_uppercase)
         for _ in range(50):
             pin = generate_pin()
@@ -39,6 +38,7 @@ class GeneratePinTest(TestCase):
     def test_pin_uses_secrets_module(self):
         """generate_pin() must not rely on the non-cryptographic random module."""
         import inspect
+
         import apps.live_exam.models as models_module
 
         source = inspect.getsource(models_module.generate_pin)
@@ -118,6 +118,7 @@ class LiveSessionPinFieldTest(TestCase):
         self.assertEqual(len(session.pin), PIN_LENGTH)
         # PIN is now alphanumeric (digits + A-Z), not purely numeric.
         import string
+
         allowed = set(string.digits + string.ascii_uppercase)
         self.assertTrue(set(session.pin).issubset(allowed))
         # Verify the saved row is retrievable (no silent DB truncation).

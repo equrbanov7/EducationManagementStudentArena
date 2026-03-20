@@ -49,4 +49,3 @@ def build_teacher_review_back_url(request, *, course_id):
         return f"{reverse('accounts:profile')}?section={source_section}"
 
     return reverse("courses:course_dashboard", kwargs={"course_id": course_id})
-

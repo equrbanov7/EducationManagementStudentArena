@@ -276,6 +276,7 @@ def protected_media(request, path: str):
     if _is_private(path):
         if not request.user.is_authenticated:
             from django.contrib.auth.views import redirect_to_login
+
             return redirect_to_login(request.get_full_path())
         if not _check_private_media_access(request, path):
             raise PermissionDenied
@@ -287,9 +288,7 @@ def protected_media(request, path: str):
         clean_path = posixpath.normpath(path).lstrip("/")
         response = HttpResponse()
         response["X-Accel-Redirect"] = f"{accel_url}/{clean_path}"
-        response["Content-Type"] = (
-            mimetypes.guess_type(path)[0] or "application/octet-stream"
-        )
+        response["Content-Type"] = mimetypes.guess_type(path)[0] or "application/octet-stream"
         response["X-Content-Type-Options"] = "nosniff"
         if _is_private(path):
             response["Cache-Control"] = "private, no-store"

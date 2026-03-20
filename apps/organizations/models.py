@@ -234,7 +234,7 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
             return
         to_update = []
         for desc in descendants:
-            new_desc_path = new_path + desc["path"][len(old_path):]
+            new_desc_path = new_path + desc["path"][len(old_path) :]
             obj = OrgUnit(pk=desc["pk"])
             obj.path = new_desc_path
             obj.level = new_desc_path.count("/")

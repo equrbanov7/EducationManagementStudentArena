@@ -100,9 +100,7 @@ class Command(BaseCommand):
 
         if already_exists:
             if verbosity >= 2:
-                self.stdout.write(
-                    f"  SKIP  {user.username} ({profile_role_label}) — active membership already exists"
-                )
+                self.stdout.write(f"  SKIP  {user.username} ({profile_role_label}) — active membership already exists")
             return "skipped"
 
         role = self._select_admin_role(organization)
@@ -127,9 +125,7 @@ class Command(BaseCommand):
                     user=user,
                     organization=organization,
                     role=role,
-                    is_primary=not Membership.objects.filter(
-                        user=user, is_primary=True
-                    ).exists(),
+                    is_primary=not Membership.objects.filter(user=user, is_primary=True).exists(),
                     is_active=True,
                     assigned_by=None,
                 )
@@ -158,13 +154,12 @@ class Command(BaseCommand):
             except Organization.DoesNotExist:
                 raise CommandError(f"Organization with slug {org_slug!r} does not exist.")
         else:
-            target_orgs = None  # Will be resolved per-profile below.
+            target_orgs = None  # noqa: F841 – resolved per-profile below when org_slug is absent
 
         # Fetch legacy admin profiles.
         admin_roles = {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
-        profiles_qs = (
-            UserProfile.objects.filter(role__in=admin_roles, organization__isnull=False)
-            .select_related("user", "organization")
+        profiles_qs = UserProfile.objects.filter(role__in=admin_roles, organization__isnull=False).select_related(
+            "user", "organization"
         )
         if org_slug:
             profiles_qs = profiles_qs.filter(organization__slug=org_slug)
@@ -190,9 +185,7 @@ class Command(BaseCommand):
             # Guard: skip if the org itself is not active.
             if not org.is_active:
                 if verbosity >= 2:
-                    self.stdout.write(
-                        f"  SKIP  {user.username} — org {org.slug!r} is inactive"
-                    )
+                    self.stdout.write(f"  SKIP  {user.username} — org {org.slug!r} is inactive")
                 continue
 
             result = self._backfill_user(
@@ -216,8 +209,4 @@ class Command(BaseCommand):
         )
 
         if dry_run:
-            self.stdout.write(
-                self.style.WARNING(
-                    "\nDRY-RUN complete. Re-run without --dry-run to apply changes."
-                )
-            )
+            self.stdout.write(self.style.WARNING("\nDRY-RUN complete. Re-run without --dry-run to apply changes."))

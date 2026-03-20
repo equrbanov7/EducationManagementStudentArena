@@ -12,8 +12,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
@@ -22,6 +21,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
+
+from apps.courses.models import CourseMembership
+from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
+from core.permissions import request_has_permission
 
 from ..lab_access import (
     can_student_access_lab,
@@ -32,14 +35,10 @@ from ..lab_access import (
 from ..lab_assignment_service import get_lab_assignment_for_student
 from ..lab_grading_service import format_decimal_input, parse_decimal_input
 from ..lab_submission_service import finalize_submission_answers, get_next_attempt_number, is_lab_open
-from apps.courses.models import CourseMembership
-from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
-from core.permissions import request_has_permission
-
 from ..models import LabAnswer, LabAssignment, LabSubmission
 from ._helpers import (
-    _get_tenant_submission_or_404,
     _get_tenant_lab_or_404,
+    _get_tenant_submission_or_404,
     _lab_back_url,
     _normalize_extensions,
     _tenant_scoped_questions,
@@ -148,9 +147,7 @@ def lab_submissions(request, pk):
             else "Anonim tələbə"
         )
         submission.student_display_email = (
-            submission.assignment.student.email
-            if submission.can_view_student_identity
-            else "Anonim görünüş"
+            submission.assignment.student.email if submission.can_view_student_identity else "Anonim görünüş"
         )
 
     # Statistika
@@ -326,13 +323,8 @@ def grade_submission_page(request, pk):
             score_raw = (request.POST.get("score", "") or "").strip()
             entered_total = parse_decimal_input(score_raw)
             use_manual_total = request.POST.get("use_manual_total") == "1"
-            should_use_manual_total = (
-                entered_total is not None
-                and (
-                    use_manual_total
-                    or not has_posted_answer_scores
-                    or entered_total != auto_total
-                )
+            should_use_manual_total = entered_total is not None and (
+                use_manual_total or not has_posted_answer_scores or entered_total != auto_total
             )
             final_score = entered_total if should_use_manual_total else auto_total
 
@@ -430,6 +422,7 @@ def auto_save_answer(request, pk):
             update_answer_text = bool((answer or "").strip())
 
         from django.shortcuts import get_object_or_404
+
         question = get_object_or_404(_tenant_scoped_questions(request), id=question_id, block__lab=lab)
 
         # Validate file BEFORE creating/updating the LabAnswer record so that

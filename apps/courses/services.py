@@ -8,8 +8,7 @@ from django.db.models import Q
 
 from apps.exams.models import StudentGroup
 
-from .models import Course, CourseMembership
-
+from .models import CourseMembership
 
 # ════════════════════════════════════════════════════════════════════════════
 # Course Enrollment Services
@@ -96,10 +95,7 @@ def add_students_from_group_to_course(course, student_group, group_name=""):
         return 0, 0
 
     # Single query: fetch all existing memberships for these students.
-    existing_by_user = {
-        m.user_id: m
-        for m in CourseMembership.objects.filter(course=course, user_id__in=student_ids)
-    }
+    existing_by_user = {m.user_id: m for m in CourseMembership.objects.filter(course=course, user_id__in=student_ids)}
 
     new_memberships = []
     to_update = []
@@ -292,9 +288,7 @@ def get_available_student_groups(organization, teacher):
     Returns:
         QuerySet: StudentGroup queryset
     """
-    qs = StudentGroup.objects.filter(
-        Q(teacher=teacher) | Q(teachers=teacher)
-    ).distinct()
+    qs = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
 
     if organization is not None:
         qs = qs.filter(organization=organization)

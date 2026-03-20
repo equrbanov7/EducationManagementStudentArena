@@ -8,7 +8,6 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("technology/", views.technology, name="technology"),
     path("subscribe/", views.subscribe_page, name="subscribe"),
-  
     # --- Postlarla bağlı URL-lər ---
     path("posts/create/", views.create_post, name="create_post"),
     path("articles/<slug:slug>/", views.post_detail, name="article_detail"),

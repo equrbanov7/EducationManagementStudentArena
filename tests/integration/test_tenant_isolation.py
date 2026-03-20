@@ -68,12 +68,8 @@ class TenantIsolationCourseTest(TestCase):
     """
 
     def setUp(self):
-        self.user_a = User.objects.create_user(
-            username="tenant_user_a", email="ta@orga.com", password="testpass123"
-        )
-        self.user_b = User.objects.create_user(
-            username="tenant_user_b", email="tb@orgb.com", password="testpass123"
-        )
+        self.user_a = User.objects.create_user(username="tenant_user_a", email="ta@orga.com", password="testpass123")
+        self.user_b = User.objects.create_user(username="tenant_user_b", email="tb@orgb.com", password="testpass123")
 
         self.org_a = _make_org("Org A", "org-a-ti", self.user_a)
         self.org_b = _make_org("Org B", "org-b-ti", self.user_b, OrganizationType.SCHOOL)

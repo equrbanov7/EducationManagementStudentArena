@@ -276,7 +276,9 @@ def add_exam_question(request, slug):
             if "save_and_continue" in request.POST:
                 # eyni imtahan üçün yenidən boş formada aç
                 return redirect(
-                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                    _append_navigation_query(
+                        reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                    )
                 )
             else:
                 # Sadəcə imtahan detalına qayıt
@@ -369,7 +371,9 @@ def edit_exam_question(request, slug, question_id):
 
             if "save_and_continue" in request.POST:
                 return redirect(
-                    _append_navigation_query(reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query)
+                    _append_navigation_query(
+                        reverse("exams:add_exam_question", kwargs={"slug": exam.slug}), navigation_query
+                    )
                 )
 
             return redirect(

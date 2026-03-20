@@ -10,7 +10,6 @@ from apps.accounts.models import ProfileRole
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from apps.organizations.models import Membership
 
-
 STUDENT_PENDING_INVITE_TITLE = "__student_pending_invite__"
 
 

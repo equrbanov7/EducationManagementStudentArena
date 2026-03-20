@@ -69,6 +69,7 @@ class OrganizationMiddleware:
             return self.get_response(request)
 
         from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
+
         from .models import Organization
 
         # ── Step 1: restore org from session ──────────────────────────────
@@ -85,9 +86,7 @@ class OrganizationMiddleware:
                 .select_related("organization", "role", "scope_unit")
                 .order_by("-is_primary", "-role__level")
             )
-            is_superuser = getattr(request.user, "is_superuser", False) or getattr(
-                request.user, "is_superadmin", False
-            )
+            is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
             if memberships:
                 # All memberships share the same organization because the slug
                 # column has a UNIQUE constraint — memberships[0].organization

@@ -9,6 +9,11 @@ This allows the existing urls.py to continue working with:
 """
 
 # ═══════════════════════════════════════════════════════════════
+# API Views
+# ═══════════════════════════════════════════════════════════════
+from .api import search_groups, search_students, students_by_groups
+
+# ═══════════════════════════════════════════════════════════════
 # CRUD
 # ═══════════════════════════════════════════════════════════════
 from .crud import create_assignment, delete_assignment, edit_assignment
@@ -22,11 +27,6 @@ from .student import assignment_detail, my_submissions, submit_assignment
 # Teacher Views
 # ═══════════════════════════════════════════════════════════════
 from .teacher import delete_submissions, grade_submission, review_submissions
-
-# ═══════════════════════════════════════════════════════════════
-# API Views
-# ═══════════════════════════════════════════════════════════════
-from .api import search_groups, search_students, students_by_groups
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Explicit exports

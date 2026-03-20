@@ -1,6 +1,5 @@
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
-
 ALLOWED_SUBMISSION_EXTENSIONS = {
     ".zip",
     ".rar",

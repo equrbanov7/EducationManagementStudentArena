@@ -37,7 +37,7 @@ CBV mixins or the ``core.permissions`` inline helpers above.
 
 from functools import wraps
 
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.utils.translation import pgettext
@@ -63,9 +63,7 @@ def org_required(view_func):
 
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            "org_required has been removed. " + _FBV_REMOVED_HINT
-        )
+        raise ImproperlyConfigured("org_required has been removed. " + _FBV_REMOVED_HINT)
 
     return wrapper
 
@@ -84,9 +82,7 @@ def org_permission_required(permission):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            raise ImproperlyConfigured(
-                "org_permission_required has been removed. " + _FBV_REMOVED_HINT
-            )
+            raise ImproperlyConfigured("org_permission_required has been removed. " + _FBV_REMOVED_HINT)
 
         return wrapper
 
@@ -106,9 +102,7 @@ def org_level_required(min_level):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            raise ImproperlyConfigured(
-                "org_level_required has been removed. " + _FBV_REMOVED_HINT
-            )
+            raise ImproperlyConfigured("org_level_required has been removed. " + _FBV_REMOVED_HINT)
 
         return wrapper
 
@@ -128,9 +122,7 @@ def org_role_required(role_names):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            raise ImproperlyConfigured(
-                "org_role_required has been removed. " + _FBV_REMOVED_HINT
-            )
+            raise ImproperlyConfigured("org_role_required has been removed. " + _FBV_REMOVED_HINT)
 
         return wrapper
 

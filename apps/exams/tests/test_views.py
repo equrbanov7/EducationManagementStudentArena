@@ -855,7 +855,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         attempt.save(update_fields=["teacher_checked_at"])
 
         locked_response = self.client.get(reverse("exams:teacher_exam_results", args=[written_exam.slug]))
-        locked_item = next(item for item in locked_response.context["attempts_data"] if item["attempt"].id == attempt.id)
+        locked_item = next(
+            item for item in locked_response.context["attempts_data"] if item["attempt"].id == attempt.id
+        )
         self.assertTrue(locked_item["can_view_name"])
         self.assertEqual(locked_item["action_label"], "Bax")
         self.assertContains(locked_response, "Bax")

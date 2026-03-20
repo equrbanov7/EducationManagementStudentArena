@@ -75,9 +75,7 @@ class MediaViewCrossTenantExamUploadTest(TestCase):
         self.factory = RequestFactory()
 
         # Org A owns the exam / submission
-        self.owner = User.objects.create_user(
-            username="media_owner", email="owner@orga.com", password="testpass123"
-        )
+        self.owner = User.objects.create_user(username="media_owner", email="owner@orga.com", password="testpass123")
         # Intruder belongs to a completely different org
         self.intruder = User.objects.create_user(
             username="media_intruder", email="intruder@orgb.com", password="testpass123"

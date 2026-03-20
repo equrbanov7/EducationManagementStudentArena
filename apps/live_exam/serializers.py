@@ -13,6 +13,7 @@ from django.db.models import F, IntegerField, OuterRef, Subquery, Sum, Value
 from django.db.models.expressions import ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext
+
 from apps.live_exam.domain.session import (
     detect_multi,
     get_option_label,
@@ -87,8 +88,9 @@ def serialize_top_before_question(session: LiveSession, question_id: int, limit:
         )
         # Tiebreaker: ascending `id` is the player's primary key, equivalent
         # to the original `player_id` tiebreaker in the Python sort.
-        .order_by("-score_before", "created_at", "id")
-        .values("id", "nickname", "avatar_key", "accessory_key", "score_before")[:limit]
+        .order_by("-score_before", "created_at", "id").values(
+            "id", "nickname", "avatar_key", "accessory_key", "score_before"
+        )[:limit]
     )
 
     return [
@@ -169,7 +171,9 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
     return results
 
 
-def serialize_player_question_result(session: LiveSession, question_id: int, player_id: int | None) -> dict[str, Any] | None:
+def serialize_player_question_result(
+    session: LiveSession, question_id: int, player_id: int | None
+) -> dict[str, Any] | None:
     if not player_id:
         return None
 
@@ -256,8 +260,14 @@ def serialize_question(
         "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
         "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,
         "ends_at": ends_at.isoformat() if ends_at else None,
-        "get_ready_duration_ms": int(max(0, (ready_ends_at - started_at).total_seconds() * 1000)) if ready_ends_at and started_at else 0,
-        "intro_duration_ms": int(max(0, (answer_starts_at - ready_ends_at).total_seconds() * 1000)) if answer_starts_at and ready_ends_at else 0,
+        "get_ready_duration_ms": (
+            int(max(0, (ready_ends_at - started_at).total_seconds() * 1000)) if ready_ends_at and started_at else 0
+        ),
+        "intro_duration_ms": (
+            int(max(0, (answer_starts_at - ready_ends_at).total_seconds() * 1000))
+            if answer_starts_at and ready_ends_at
+            else 0
+        ),
         "index": safe_int(idx, 0) + 1,
         "total": safe_int(total, 0),
     }

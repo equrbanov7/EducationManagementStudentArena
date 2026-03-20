@@ -27,7 +27,9 @@ class Project(models.Model):
         verbose_name=pgettext_lazy("projects.model.project.field", "course"),
     )
     title = models.CharField(max_length=255, verbose_name=pgettext_lazy("projects.model.project.field", "title"))
-    description = models.TextField(blank=True, verbose_name=pgettext_lazy("projects.model.project.field", "description"))
+    description = models.TextField(
+        blank=True, verbose_name=pgettext_lazy("projects.model.project.field", "description")
+    )
     start_date = models.DateTimeField(verbose_name=pgettext_lazy("projects.model.project.field", "start_date"))
     deadline = models.DateTimeField(verbose_name=pgettext_lazy("projects.model.project.field", "deadline"))
     max_attempts = models.PositiveIntegerField(
@@ -93,7 +95,9 @@ class ProjectSubmission(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="submissions")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="project_submissions")
     content = models.TextField(verbose_name=pgettext_lazy("projects.model.submission.field", "content"))
-    file = models.FileField(upload_to="projects/submissions/", blank=True, null=True, validators=[FileUploadValidator()])
+    file = models.FileField(
+        upload_to="projects/submissions/", blank=True, null=True, validators=[FileUploadValidator()]
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     feedback = models.TextField(blank=True)
