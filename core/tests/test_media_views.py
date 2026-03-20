@@ -234,6 +234,64 @@ class ProtectedMediaViewTest(TestCase):
         sys.modules.pop("config.urls", None)
         clear_url_caches()
 
+    def test_dev_private_media_requires_auth(self):
+        """
+        In DEBUG mode, private media paths must still require authentication.
+        Unauthenticated requests to private paths (e.g. exam_uploads/) must be
+        redirected to the login page — not served openly.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/exam_uploads/secret.pdf")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="exam_uploads/secret.pdf")
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_dev_public_media_accessible_without_auth(self):
+        """
+        In DEBUG mode, public media paths (post_images/) must remain accessible
+        without authentication.
+        """
+        import os
+
+        public_dir = os.path.join(self.media_tmp, "post_images")
+        os.makedirs(public_dir, exist_ok=True)
+        with open(os.path.join(public_dir, "cover.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/post_images/cover.jpg")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="post_images/cover.jpg")
+            # Public files must be served (200), not redirected
+            self.assertEqual(response.status_code, 200)
+
 
 class ProtectedMediaOwnershipTest(TestCase):
     """

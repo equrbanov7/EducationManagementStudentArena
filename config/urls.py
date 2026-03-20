@@ -2,7 +2,6 @@
 import re
 
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path, reverse_lazy
 
@@ -50,7 +49,21 @@ if settings.DEBUG:
     ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # In DEBUG mode, route ALL media paths through protected_media.
+    # The protected_media view internally differentiates between public and
+    # private paths: private paths (exam_uploads/, labs/, projects/submissions/,
+    # etc.) require authentication, while public paths (post_images/, etc.) are
+    # served openly.  This ensures authentication is enforced for sensitive files
+    # even in development.
+    media_prefix = settings.MEDIA_URL.lstrip("/")
+    if media_prefix and not media_prefix.endswith("/"):
+        media_prefix += "/"
+    urlpatterns += [
+        re_path(
+            rf"^{re.escape(media_prefix)}(?P<path>.*)$",
+            protected_media,
+        )
+    ]
 elif getattr(settings, "SERVE_MEDIA", False):
     # Use authenticated protected_media view instead of bare serve().
     # This prevents unauthenticated access to private media files.
