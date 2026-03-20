@@ -25,6 +25,7 @@ removed; see ``core/mixins.py``.
 
 from __future__ import annotations
 
+import logging
 from functools import wraps
 
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
@@ -32,6 +33,8 @@ from django.utils.translation import pgettext
 
 from apps.organizations.permissions import has_permission
 from core.tenancy import request_has_active_organization_context
+
+logger = logging.getLogger(__name__)
 
 _REMOVED_MSG = (
     "{name} has been removed because it bypassed the organization RBAC model "
@@ -111,7 +114,7 @@ def request_has_permission(request, permission: str) -> bool:
                     reason=f"Superadmin permission check bypassed membership for '{permission}'",
                 )
             except Exception:
-                pass  # Never block a request due to a logging failure.
+                logger.exception("Failed to log superadmin cross-org action")
         return True
 
     memberships = list(getattr(request, "org_memberships", []) or [])
