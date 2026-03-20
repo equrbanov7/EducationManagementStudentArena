@@ -15,8 +15,8 @@ from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.live_exam.auth import PLAYER_COOKIE_NAME, build_player_token
 from apps.live_exam.constants import ACCESSORY_KEYS, AVATAR_KEYS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
-from apps.organizations.models import Organization
-from core.constants import OrganizationType
+from apps.organizations.models import Membership, Organization, Role
+from core.constants import OrganizationType, RoleScopeType
 
 User = get_user_model()
 LOCMEM_CACHE_SETTINGS = {
@@ -25,6 +25,42 @@ LOCMEM_CACHE_SETTINGS = {
         "LOCATION": "live-exam-rate-limit-tests",
     }
 }
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Test helpers for org RBAC context
+# ════════════════════════════════════════════════════════════════════════════
+
+
+def _create_org_role_and_membership(user, org, permissions=None):
+    """
+    Create a Role with the given permissions (defaults to ['exam.manage']) and
+    a Membership linking *user* to *org* with that role.  Returns the Membership.
+    """
+    role = Role.objects.create(
+        organization=org,
+        name=f"teacher-{user.pk}",
+        display_name="Teacher",
+        level=50,
+        scope_type=RoleScopeType.ORGANIZATION,
+        permissions=permissions if permissions is not None else ["exam.manage"],
+        is_system=False,
+        is_active=True,
+    )
+    return Membership.objects.create(
+        user=user,
+        organization=org,
+        role=role,
+        is_active=True,
+        is_primary=True,
+    )
+
+
+def _set_active_org(client, org):
+    """Persist the active organization slug in the test client's session."""
+    session = client.session
+    session["active_organization"] = org.slug
+    session.save()
 
 
 class LiveExamViewsImportTest(TestCase):
@@ -119,6 +155,9 @@ class LiveSessionCreationTest(TestCase):
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
+        # Set up RBAC membership so the teacher has exam.manage in their org.
+        _create_org_role_and_membership(self.teacher, self.org)
+
         self.exam = Exam.objects.create(
             title="Live Exam Test",
             slug="live-exam-test",
@@ -155,6 +194,8 @@ class LiveSessionCreationTest(TestCase):
     def test_create_session_success(self):
         """Test successful session creation."""
         self.client.login(username="live_teacher", password="StrongPass123!")
+        # Activate the org in the session so the RBAC check succeeds.
+        _set_active_org(self.client, self.org)
         response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
 
         # Should redirect to presentation view with controls enabled
@@ -410,6 +451,11 @@ class LiveStateAPITest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        # Set up RBAC membership so the teacher has exam.manage in their org.
+        _create_org_role_and_membership(self.teacher, self.org)
+        # Activate the org in the host client session for host endpoint tests.
+        _set_active_org(self.host_client, self.org)
 
         self.exam = Exam.objects.create(
             title="State Test Exam",
@@ -1082,3 +1128,407 @@ class URLPatternTest(TestCase):
                 url = reverse(url_name, kwargs=kwargs)
                 self.assertIsNotNone(url)
                 self.assertTrue(url.startswith("/"))
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Security tests – host RBAC / org enforcement
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class HostOrgRBACTest(TestCase):
+    """
+    Verify that all host endpoints enforce organization-level RBAC.
+    Cross-org access and missing org context must be rejected with 403.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        # Primary org and teacher
+        self.teacher = User.objects.create_user("rbac_teacher", "rbac@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Primary Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        _create_org_role_and_membership(self.teacher, self.org)
+
+        self.exam = Exam.objects.create(
+            title="RBAC Test Exam",
+            slug="rbac-test-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+        # Second organization (belongs to the same teacher but is a different org)
+        self.other_org = Organization.objects.create(
+            name="Other Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        _create_org_role_and_membership(self.teacher, self.other_org, permissions=["exam.manage"])
+
+        self.client.login(username="rbac_teacher", password="StrongPass123!")
+
+    def _host_urls(self):
+        """Return all host management endpoint URLs for this session."""
+        return [
+            ("liveExam:host_lobby", {"pin": self.session.pin}),
+            ("liveExam:host_presentation", {"pin": self.session.pin}),
+        ]
+
+    def _host_post_urls(self):
+        return [
+            ("liveExam:host_start_game", {"pin": self.session.pin}),
+            ("liveExam:host_next_question", {"pin": self.session.pin}),
+            ("liveExam:host_skip_question_intro", {"pin": self.session.pin}),
+            ("liveExam:host_reveal", {"pin": self.session.pin}),
+            ("liveExam:host_finish", {"pin": self.session.pin}),
+            ("liveExam:host_toggle_lock", {"pin": self.session.pin}),
+            ("liveExam:host_remove_player", {"pin": self.session.pin}),
+            ("liveExam:host_update_settings", {"pin": self.session.pin}),
+        ]
+
+    def test_host_endpoints_require_org_context(self):
+        """Host endpoints must return 403 when no active org context is in the session."""
+        # No active org set — request.organization will be None after middleware
+        # resolves 2+ orgs (teacher is in both self.org and self.other_org).
+        for url_name, kwargs in self._host_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(response.status_code, 403, f"{url_name} should return 403 without org context")
+
+        for url_name, kwargs in self._host_post_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(response.status_code, 403, f"{url_name} should return 403 without org context")
+
+    def test_cross_org_host_access_is_blocked(self):
+        """Host cannot access a session via a different organization context."""
+        # Activate the OTHER org in the session — exam belongs to self.org
+        _set_active_org(self.client, self.other_org)
+
+        for url_name, kwargs in self._host_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(response.status_code, 403, f"{url_name} should block cross-org access")
+
+        for url_name, kwargs in self._host_post_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(response.status_code, 403, f"{url_name} should block cross-org access")
+
+    def test_host_with_correct_org_context_is_allowed(self):
+        """Host can access session when the active org matches the exam's organization."""
+        _set_active_org(self.client, self.org)
+
+        for url_name, kwargs in self._host_urls():
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name, kwargs=kwargs))
+                # 200 OK for page views, not 403/404
+                self.assertNotEqual(response.status_code, 403, f"{url_name} should allow access with correct org")
+                self.assertNotEqual(response.status_code, 404, f"{url_name} should allow access with correct org")
+
+    def test_missing_exam_manage_permission_blocks_host_access(self):
+        """A user without exam.manage permission cannot perform host actions."""
+        # Create a user with a role that has NO exam.manage permission
+        no_perm_user = User.objects.create_user("no_perm_host", "noperm@example.com", "StrongPass123!")
+        no_perm_user.profile.role = ProfileRole.TEACHER
+        no_perm_user.profile.save(update_fields=["role", "updated_at"])
+        _create_org_role_and_membership(no_perm_user, self.org, permissions=["exam.view"])
+
+        no_perm_client = Client()
+        no_perm_client.login(username="no_perm_host", password="StrongPass123!")
+        _set_active_org(no_perm_client, self.org)
+
+        # Create a session owned by this user
+        session = LiveSession.objects.create(exam=self.exam, host_user=no_perm_user)
+
+        for url_name, kwargs in [
+            ("liveExam:host_lobby", {"pin": session.pin}),
+        ]:
+            with self.subTest(url_name=url_name):
+                response = no_perm_client.get(reverse(url_name, kwargs=kwargs))
+                self.assertEqual(
+                    response.status_code,
+                    403,
+                    f"{url_name} should return 403 when exam.manage is missing",
+                )
+
+
+class SuspendedOrgHostActionTest(TestCase):
+    """
+    Verify that host actions are blocked when the active organization is suspended
+    or inactive, even if the user is the session host with the correct org context.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+        self.teacher = User.objects.create_user("suspended_teacher", "suspended@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Suspended Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        _create_org_role_and_membership(self.teacher, self.org)
+
+        self.exam = Exam.objects.create(
+            title="Suspended Org Exam",
+            slug="suspended-org-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+        self.client.login(username="suspended_teacher", password="StrongPass123!")
+        _set_active_org(self.client, self.org)
+
+    def _assert_host_action_blocked(self, status="suspended"):
+        """Suspend or deactivate the org and assert that host actions are blocked."""
+        if status == "suspended":
+            self.org.status = "suspended"
+        else:
+            self.org.is_active = False
+        self.org.save()
+
+        response = self.client.post(
+            reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin})
+        )
+        # Blocked access may be a redirect-to-login (302) from SuspendedOrganizationMiddleware
+        # or a PermissionDenied (403) from the RBAC check in the view.  Both are correct.
+        self.assertIn(
+            response.status_code,
+            {302, 403},
+            f"host_start_game must block suspended/inactive org users (got {response.status_code})",
+        )
+
+        response = self.client.post(
+            reverse("liveExam:host_toggle_lock", kwargs={"pin": self.session.pin})
+        )
+        self.assertIn(
+            response.status_code,
+            {302, 403},
+            f"host_toggle_lock must block suspended/inactive org users (got {response.status_code})",
+        )
+
+    def test_suspended_org_blocks_host_actions(self):
+        """Suspended organization must prevent all host management actions."""
+        self._assert_host_action_blocked(status="suspended")
+
+    def test_inactive_org_blocks_host_actions(self):
+        """Inactive organization must prevent all host management actions."""
+        self._assert_host_action_blocked(status="inactive")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Security tests – player payload hardening
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class PlayerPayloadHardeningTest(TestCase):
+    """
+    Verify that host-only data (per-player ``results``) never appears in
+    player-facing state payloads.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.host_client = Client()
+
+        self.teacher = User.objects.create_user("payload_teacher", "payload@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Payload Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        _create_org_role_and_membership(self.teacher, self.org)
+
+        self.exam = Exam.objects.create(
+            title="Payload Test Exam",
+            slug="payload-test-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="Q1", order=1)
+        self.correct_option = ExamQuestionOption.objects.create(
+            question=self.question, text="Correct", is_correct=True
+        )
+        ExamQuestionOption.objects.create(question=self.question, text="Wrong", is_correct=False)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+        # Set up player
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="PayloadPlayer",
+            avatar_key="avatar_1",
+            client_id="payload-client",
+        )
+        self.client.cookies["live_client_id"] = self.player.client_id
+        self.client.cookies[PLAYER_COOKIE_NAME] = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+        # Set up host client
+        self.host_client.login(username="payload_teacher", password="StrongPass123!")
+        _set_active_org(self.host_client, self.org)
+
+    def _put_session_in_reveal(self):
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_REVEAL
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        self.session.question_started_at = now - timezone.timedelta(seconds=10)
+        self.session.question_ends_at = now
+        self.session.save(
+            update_fields=[
+                "state",
+                "current_index",
+                "current_question_id",
+                "question_started_at",
+                "question_ends_at",
+            ]
+        )
+
+    def test_player_payload_does_not_contain_results_during_reveal(self):
+        """Player must NOT see per-player ``results`` in the reveal-state API response."""
+        self._put_session_in_reveal()
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["state"], LiveSession.STATE_REVEAL)
+        self.assertNotIn("results", data, "Player payload must not include per-player results")
+
+    def test_host_payload_contains_results_during_reveal(self):
+        """Host MUST see per-player ``results`` in the reveal-state API response."""
+        self._put_session_in_reveal()
+
+        response = self.host_client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["state"], LiveSession.STATE_REVEAL)
+        self.assertIn("results", data, "Host payload must include per-player results")
+
+    def test_correct_option_ids_hidden_during_question_phase(self):
+        """correct_option_ids must be empty list while the question is active (not reveal)."""
+        now = timezone.now()
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.question_started_at = now
+        self.session.question_ends_at = now + timezone.timedelta(seconds=20)
+        self.session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(
+            data["correct_option_ids"],
+            [],
+            "correct_option_ids must be hidden during the question phase",
+        )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Security tests – expired / invalid player token
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class PlayerTokenSecurityTest(TestCase):
+    """
+    Verify that invalid, expired or tampered player tokens are rejected.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user("token_teacher", "token@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="Token Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+        self.exam = Exam.objects.create(
+            title="Token Test Exam",
+            slug="token-test-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+
+    def test_invalid_player_token_is_rejected_on_state_json(self):
+        """A garbage token must cause the state API to return 403."""
+        self.client.cookies[PLAYER_COOKIE_NAME] = "totally.invalid.token"
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(response.json()["ok"])
+
+    def test_token_for_different_pin_is_rejected(self):
+        """A valid token issued for a different session pin must be rejected."""
+        # Create another session and issue a token for it
+        other_session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        player = LivePlayer.objects.create(
+            session=other_session,
+            nickname="CrossPlayer",
+            avatar_key="avatar_1",
+            client_id="cross-client",
+        )
+        # Token is valid for other_session but we're querying self.session
+        token = build_player_token(
+            pin=other_session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+        )
+        self.client.cookies[PLAYER_COOKIE_NAME] = token
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_unauthenticated_wait_room_redirects_to_join(self):
+        """Unauthenticated access to the wait room redirects to the join page."""
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+    def test_unauthenticated_player_screen_redirects_to_join(self):
+        """Unauthenticated access to the player screen redirects to the join page."""
+        response = self.client.get(reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))

@@ -978,3 +978,152 @@ class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):
             1,
             "Duplicate submission must not create a second LiveAnswer record",
         )
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# WebSocket security tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+@override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
+class WebSocketOriginValidationTest(TransactionTestCase):
+    """
+    Verify that foreign-origin WebSocket connections are rejected by
+    AllowedHostsOriginValidator and that players cannot send host-only
+    commands.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("ws_origin_teacher", "wsorigin@example.com", "StrongPass123!")
+        self.org = Organization.objects.create(
+            name="WS Origin Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="WS Origin Exam",
+            slug="ws-origin-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(exam=self.exam, text="Q?", order=1)
+        ExamQuestionOption.objects.create(question=self.question, text="A", is_correct=True)
+
+        self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        self.session.state = LiveSession.STATE_QUESTION
+        self.session.current_index = 0
+        self.session.current_question_id = self.question.id
+        # Set started_at far enough in the past so the answer window is open
+        # (ready period=4s + intro period=5s = 9s total before answers accepted).
+        self.session.question_started_at = timezone.now() - timezone.timedelta(seconds=15)
+        self.session.question_ends_at = timezone.now() + timezone.timedelta(seconds=30)
+        self.session.save()
+
+        self.player = LivePlayer.objects.create(
+            session=self.session,
+            nickname="WSPlayer",
+            avatar_key="avatar_1",
+            client_id="ws-origin-client",
+        )
+        self._player_token = build_player_token(
+            pin=self.session.pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+
+    def _player_headers(self):
+        return [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+        ]
+
+    def test_foreign_origin_lobby_connection_is_rejected(self):
+        """A foreign-origin WebSocket connection to the lobby must be refused."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/lobby/",
+                headers=[(b"origin", b"http://evil.example.com")],
+            )
+            connected, _ = await communicator.connect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(connected, "Foreign-origin lobby connection must be refused by AllowedHostsOriginValidator")
+
+    def test_foreign_origin_play_connection_is_rejected(self):
+        """A foreign-origin WebSocket connection to the play socket must be refused."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=[
+                    (b"origin", b"https://attacker.invalid"),
+                    (b"cookie", f"{PLAYER_COOKIE_NAME}={self._player_token}".encode()),
+                ],
+            )
+            connected, _ = await communicator.connect()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(connected, "Foreign-origin play connection must be refused by AllowedHostsOriginValidator")
+
+    def test_player_cannot_send_non_answer_commands(self):
+        """Non-'answer' messages sent by players are silently ignored (not forwarded)."""
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                # Player sends an unsupported command type
+                await communicator.send_json_to({"type": "host_reveal", "question_id": self.question.id})
+                # The consumer must ignore unknown types — no response should arrive
+                received_nothing = await communicator.receive_nothing(timeout=0.5)
+                return received_nothing
+            finally:
+                await communicator.disconnect()
+
+        received_nothing = async_to_sync(scenario)()
+        self.assertTrue(received_nothing, "Players must not receive a response to unsupported command types")
+
+    def test_player_answer_accepted_on_valid_origin(self):
+        """Sanity check: player answer is accepted when origin is valid (testserver)."""
+        correct_option_id = ExamQuestionOption.objects.filter(
+            question=self.question, is_correct=True
+        ).values_list("id", flat=True).first()
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to(
+                    {
+                        "type": "answer",
+                        "question_id": self.question.id,
+                        "option_id": correct_option_id,
+                        "answer_ms": 500,
+                    }
+                )
+                return await communicator.receive_json_from(timeout=1)
+            finally:
+                await communicator.disconnect()
+
+        message = async_to_sync(scenario)()
+        self.assertEqual(message["type"], "answer_saved")

@@ -4,6 +4,8 @@ assignments/views/_helpers.py
 Assignment-specific helper functions.
 """
 
+from urllib.parse import urlencode
+
 from django.shortcuts import get_object_or_404
 
 from apps.assignments.models import Assignment, AssignmentSubmission
@@ -63,3 +65,10 @@ def _student_return_to(request):
 def _assignment_back_url(request, assignment):
     """Generate the back URL for an assignment (for students)."""
     return build_student_task_back_url(request, course_id=assignment.course.id)
+
+
+def _append_return_to(url, return_to):
+    if not return_to:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode({'return_to': return_to})}"
