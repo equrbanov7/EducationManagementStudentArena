@@ -205,22 +205,39 @@ jobs:
           echo "::group::🛡️ Safety Check"
           safety check -r requirements/base.txt --full-report || true
           echo "::endgroup::"
-          echo "::group::🔐 Pip Audit"
-          pip-audit -r requirements/base.txt || true
+          echo "::group::🔐 Pip Audit (CRITICAL only — blocks merge)"
+          pip-audit -r requirements/base.txt --desc on --fix-dry-run || {
+            echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
+            exit 1
+          }
+          echo "✅ No critical dependency vulnerabilities found."
           echo "::endgroup::"
-        continue-on-error: true  # Xəbərdarlıq - bloklama yox
 
       # ───────────────────────────────────────────────────────────────────
       # Bandit - Python security linter
       # ───────────────────────────────────────────────────────────────────
       # 📌 NİYƏ?: Kod-da təhlükəsizlik problemləri tapmaq (SQL injection, etc.)
+      # 📌 -lll: Yalnız HIGH severity — bunlar merge-i bloklayır
       - name: 🔍 Scan code with Bandit
         run: |
           pip install bandit[toml]
-          echo "::group::🔍 Bandit Security Scan"
-          bandit -r . -x ./tests,./venv,./.venv,./migrations -ll --format txt || true
+          echo "::group::🔍 Bandit Security Scan (HIGH severity — blocks merge)"
+          bandit -r . \
+            -x ./tests,./venv,./.venv,./migrations \
+            --severity-level high \
+            --confidence-level high \
+            --format txt || {
+            echo "::error::❌ Bandit found HIGH/CRITICAL security issues! Fix them before merging."
+            exit 1
+          }
+          echo "✅ No high-severity security issues found."
           echo "::endgroup::"
-        continue-on-error: true
+          echo "::group::🔍 Bandit Security Scan (MEDIUM severity — advisory)"
+          bandit -r . \
+            -x ./tests,./venv,./.venv,./migrations \
+            -ll \
+            --format txt || echo "⚠️ Bandit found medium-severity issues — review recommended."
+          echo "::endgroup::"
 
       # ───────────────────────────────────────────────────────────────────
       # Django deployment check
@@ -379,10 +396,8 @@ jobs:
             --cov-fail-under=60 \
             -v \
             --tb=short \
-            --timeout=300 \
-            || echo "⚠️ No tests found or tests failed"
+            --timeout=300
           echo "::endgroup::"
-        continue-on-error: true  # Test olmasa belə davam et
 
       # ───────────────────────────────────────────────────────────────────
       # Upload coverage report
@@ -472,10 +487,11 @@ jobs:
         run: |
           echo "::group::🔍 Migration Check"
           python manage.py makemigrations --check --dry-run || {
-            echo "::warning::⚠️ There are missing migrations!"
+            echo "::error::❌ Missing migrations detected! Run 'python manage.py makemigrations' locally."
+            exit 1
           }
+          echo "✅ No missing migrations."
           echo "::endgroup::"
-        continue-on-error: true
 
   # ─────────────────────────────────────────────────────────────────────────
   # JOB 5: CI SUCCESS (Final status)
@@ -492,24 +508,29 @@ jobs:
       - name: 📋 Check all jobs status
         run: |
           echo "=== CI Pipeline Summary ==="
-          echo "Lint: ${{ needs.lint.result }}"
+          echo "Lint:     ${{ needs.lint.result }}"
           echo "Security: ${{ needs.security.result }}"
-          echo "Test: ${{ needs.test.result }}"
-          echo "Build: ${{ needs.build.result }}"
+          echo "Test:     ${{ needs.test.result }}"
+          echo "Build:    ${{ needs.build.result }}"
           echo "=========================="
           
           if [[ "${{ needs.lint.result }}" == "failure" ]]; then
             echo "❌ Lint job failed!"
             exit 1
           fi
+
+          if [[ "${{ needs.security.result }}" == "failure" ]]; then
+            echo "❌ Security scan failed! Critical vulnerabilities or HIGH-severity code issues must be resolved."
+            exit 1
+          fi
           
           if [[ "${{ needs.test.result }}" == "failure" ]]; then
-            echo "❌ Test job failed!"
+            echo "❌ Test job failed! All tests must pass and coverage must meet the minimum threshold."
             exit 1
           fi
           
           if [[ "${{ needs.build.result }}" == "failure" ]]; then
-            echo "❌ Build job failed!"
+            echo "❌ Build job failed! Missing migrations or build errors must be resolved."
             exit 1
           fi
           

@@ -1,11 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.exams.models import Exam
+from apps.exams.models import Exam, ExamAttempt
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from ._helpers import build_exam_history_url
 
@@ -13,6 +13,16 @@ from ._helpers import build_exam_history_url
 @login_required
 def assigned_student_exam_list(request):
     user = request.user
+
+    # Annotate each exam with this user's non-draft attempt count in a single
+    # subquery so we avoid one COUNT query per exam in the loop below.
+    user_attempt_count_sq = (
+        ExamAttempt.objects.filter(exam=OuterRef("pk"), user=user)
+        .exclude(status="draft")
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt")
+    )
 
     # 1) BAZA SORĞUSU (İlkin Filter)
     # Fərq burdadır: yalnız user-ə təyin olunmuş aktiv imtahanlar
@@ -29,7 +39,8 @@ def assigned_student_exam_list(request):
             )
         )
         .distinct()
-        .select_related("author"),
+        .select_related("author", "organization")
+        .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
     )
 
     # --- SEARCH (Axtarış) ---
@@ -77,7 +88,7 @@ def assigned_student_exam_list(request):
             {
                 "exam": exam,
                 "left": left,
-                "attempt_count": exam.attempts.filter(user=user).exclude(status="draft").count(),
+                "attempt_count": exam.user_attempt_count or 0,
                 "requires_code": requires_code,
                 "access_label": access_label,
                 "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
@@ -110,6 +121,16 @@ def student_exam_list(request):
     user = request.user
     now = timezone.now()
 
+    # Annotate each exam with this user's non-draft attempt count in a single
+    # subquery so we avoid one COUNT query per exam in the loop below.
+    user_attempt_count_sq = (
+        ExamAttempt.objects.filter(exam=OuterRef("pk"), user=user)
+        .exclude(status="draft")
+        .values("exam")
+        .annotate(cnt=Count("id"))
+        .values("cnt")
+    )
+
     # 1) BAZA SORĞUSU (aktiv + tarixi keçmiş olmayanlar)
     exams_qs = tenant_scoped_exams(
         request,
@@ -127,7 +148,8 @@ def student_exam_list(request):
         )
         .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # ✅ keçmişləri gizlədir
         .distinct()
-        .select_related("author"),
+        .select_related("author", "organization")
+        .annotate(user_attempt_count=Subquery(user_attempt_count_sq)),
     )
 
     # --- SEARCH ---
@@ -170,7 +192,7 @@ def student_exam_list(request):
             {
                 "exam": exam,
                 "left": left,
-                "attempt_count": exam.attempts.filter(user=user).exclude(status="draft").count(),
+                "attempt_count": exam.user_attempt_count or 0,
                 "requires_code": requires_code,
                 "access_label": access_label,
                 "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
