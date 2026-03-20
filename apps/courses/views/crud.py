@@ -29,7 +29,6 @@ from core.tenancy import get_request_organization
 
 from ._helpers import IsCourseOwnerMixin, _get_owner_course_or_404, _owner_courses_queryset, _require_org_permission
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # Create Course
 # ════════════════════════════════════════════════════════════════════════════
@@ -70,9 +69,7 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         organization = get_request_organization(self.request)
         if organization is None:
-            raise PermissionDenied(
-                pgettext("courses.view.permission", "active_organization_required")
-            )
+            raise PermissionDenied(pgettext("courses.view.permission", "active_organization_required"))
         form.instance.owner = self.request.user
         form.instance.status = "draft"
         form.instance.organization = organization

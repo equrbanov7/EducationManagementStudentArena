@@ -20,7 +20,6 @@ from apps.courses.models import CourseResource
 
 from ._helpers import IsCourseOwnerMixin, _get_owner_course_or_404
 
-
 # ════════════════════════════════════════════════════════════════════════════
 # Add Resource
 # ════════════════════════════════════════════════════════════════════════════

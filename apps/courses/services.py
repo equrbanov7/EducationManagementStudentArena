@@ -3,16 +3,12 @@ Business logic layer for courses app.
 This module contains service functions that encapsulate business operations.
 """
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 
 from apps.exams.models import StudentGroup
 
-from .models import Course, CourseMembership
-
-User = get_user_model()
-
+from .models import CourseMembership
 
 # ════════════════════════════════════════════════════════════════════════════
 # Course Enrollment Services
@@ -79,6 +75,11 @@ def add_students_from_group_to_course(course, student_group, group_name=""):
     """
     Add all students from a StudentGroup to a course.
 
+    Uses bulk_create + bulk_update to avoid N+1 queries: all existing
+    memberships are fetched in a single query, new ones are inserted in a
+    single batch, and group-name updates for existing student members are
+    applied in a single bulk_update call.
+
     Args:
         course: Course instance
         student_group: StudentGroup instance
@@ -88,30 +89,48 @@ def add_students_from_group_to_course(course, student_group, group_name=""):
         tuple: (created_count, existing_count)
     """
     assigned_group_name = group_name or student_group.name
-    students = student_group.students.all()
+    student_ids = list(student_group.students.values_list("id", flat=True))
 
-    created_count = 0
-    existing_count = 0
+    if not student_ids:
+        return 0, 0
 
-    for student in students:
-        membership, created = CourseMembership.objects.get_or_create(
-            course=course,
-            user=student,
-            defaults={
-                "role": "student",
-                "group_name": assigned_group_name,
-            },
-        )
+    # Single query: fetch all existing memberships for these students.
+    existing_by_user = {m.user_id: m for m in CourseMembership.objects.filter(course=course, user_id__in=student_ids)}
 
-        if created:
-            created_count += 1
-        else:
-            existing_count += 1
-            # Update group name for existing membership
-            if membership.role == "student":
+    new_memberships = []
+    to_update = []
+
+    for student_id in student_ids:
+        if student_id in existing_by_user:
+            membership = existing_by_user[student_id]
+            if membership.role == "student" and membership.group_name != assigned_group_name:
                 membership.group_name = assigned_group_name
-                membership.save()
+                to_update.append(membership)
+        else:
+            new_memberships.append(
+                CourseMembership(
+                    course=course,
+                    user_id=student_id,
+                    role="student",
+                    group_name=assigned_group_name,
+                )
+            )
 
+    # Single INSERT for all new members.
+    # ignore_conflicts=True guards against the TOCTOU race: two concurrent
+    # requests can both read "no membership" and then race to insert the same
+    # row.  The atomic transaction prevents phantom reads under SERIALIZABLE
+    # isolation, but PostgreSQL defaults to READ COMMITTED, so the defensive
+    # ignore is necessary for safety.
+    if new_memberships:
+        CourseMembership.objects.bulk_create(new_memberships, ignore_conflicts=True)
+
+    # Single UPDATE for existing members whose group name changed.
+    if to_update:
+        CourseMembership.objects.bulk_update(to_update, ["group_name"])
+
+    created_count = len(new_memberships)
+    existing_count = len(existing_by_user)
     return created_count, existing_count
 
 
@@ -119,6 +138,9 @@ def add_students_from_group_to_course(course, student_group, group_name=""):
 def bulk_add_members_to_course(course, user_ids, role="student", group_name=""):
     """
     Add multiple users to a course.
+
+    Uses bulk_create to avoid N+1 queries: all existing memberships are
+    fetched in a single query, and new ones are inserted in a single batch.
 
     Args:
         course: Course instance
@@ -129,26 +151,37 @@ def bulk_add_members_to_course(course, user_ids, role="student", group_name=""):
     Returns:
         tuple: (created_count, existing_count)
     """
-    users = User.objects.filter(id__in=user_ids)
+    user_ids = list(user_ids)
+    if not user_ids:
+        return 0, 0
 
-    created_count = 0
-    existing_count = 0
+    # Single query: find which users are already members.
+    existing_user_ids = set(
+        CourseMembership.objects.filter(course=course, user_id__in=user_ids).values_list("user_id", flat=True)
+    )
 
-    for user in users:
-        membership, created = CourseMembership.objects.get_or_create(
+    new_memberships = [
+        CourseMembership(
             course=course,
-            user=user,
-            defaults={
-                "role": role,
-                "group_name": group_name if role == "student" else "",
-            },
+            user_id=uid,
+            role=role,
+            group_name=group_name if role == "student" else "",
         )
+        for uid in user_ids
+        if uid not in existing_user_ids
+    ]
 
-        if created:
-            created_count += 1
-        else:
-            existing_count += 1
+    # Single INSERT for all new members.
+    # ignore_conflicts=True guards against the TOCTOU race: two concurrent
+    # requests can both read "no membership" and then race to insert the same
+    # row.  The atomic transaction prevents phantom reads under SERIALIZABLE
+    # isolation, but PostgreSQL defaults to READ COMMITTED, so the defensive
+    # ignore is necessary for safety.
+    if new_memberships:
+        CourseMembership.objects.bulk_create(new_memberships, ignore_conflicts=True)
 
+    created_count = len(new_memberships)
+    existing_count = len(existing_user_ids)
     return created_count, existing_count
 
 
@@ -255,9 +288,7 @@ def get_available_student_groups(organization, teacher):
     Returns:
         QuerySet: StudentGroup queryset
     """
-    qs = StudentGroup.objects.filter(
-        Q(teacher=teacher) | Q(teachers=teacher)
-    ).distinct()
+    qs = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
 
     if organization is not None:
         qs = qs.filter(organization=organization)

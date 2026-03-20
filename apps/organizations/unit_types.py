@@ -2,8 +2,9 @@
 Unit type configuration and validation for different organization types.
 """
 
-from core.constants import OrganizationType, OrgUnitType
 from django.utils.translation import pgettext, pgettext_lazy
+
+from core.constants import OrganizationType, OrgUnitType
 
 # Valid unit types for each organization type
 UNIT_TYPES_BY_ORG = {

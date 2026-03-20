@@ -44,9 +44,10 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_redirects_unauthenticated_user(self):
         """Private files (projects/submissions/) must redirect unauthenticated users to login."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -66,8 +67,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_forbidden_for_authenticated_user_without_ownership(self):
         """Authenticated user with no file ownership or org membership gets 403."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -85,8 +87,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_private_file_accessible_to_superuser(self):
         """Superusers can access any private media file regardless of ownership."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -104,9 +107,10 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_labs_submission_redirects_unauthenticated(self):
         """Labs submission files must not be publicly accessible."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/labs/submissions/sample.txt")
@@ -125,10 +129,11 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_path_traversal_returns_404(self):
         """Path traversal attempts must be rejected."""
-        from core.media_views import protected_media
         from django.core.exceptions import SuspiciousFileOperation
         from django.http import Http404
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/../../etc/passwd")
@@ -158,13 +163,14 @@ class ProtectedMediaViewTest(TestCase):
 
         self.assertFalse(_is_private("post_images/cover.jpg"))
         self.assertFalse(_is_private("course_covers/cover.png"))
-        self.assertFalse(_is_private("question_media/exam_1/q_1/image.jpg"))
+        self.assertTrue(_is_private("question_media/exam_1/q_1/image.jpg"))
 
     def test_public_file_accessible_without_login(self):
         """Blog post images (post_images/) must be accessible without authentication."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/post_images/sample.txt")
@@ -182,8 +188,9 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_x_accel_redirect_header_set_for_private_file(self):
         """When MEDIA_ACCEL_REDIRECT_URL is set, response uses X-Accel-Redirect (superuser)."""
-        from core.media_views import protected_media
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get("/media/projects/submissions/sample.txt")
@@ -203,8 +210,8 @@ class ProtectedMediaViewTest(TestCase):
 
     def test_serve_media_false_does_not_expose_media_in_production(self):
         """SERVE_MEDIA=False in production means no Django-based media serving."""
-        import importlib
         import sys
+
         from django.urls import clear_url_caches
 
         # Force URL module re-import so the test is not affected by previous
@@ -226,6 +233,111 @@ class ProtectedMediaViewTest(TestCase):
         # Restore URL module for subsequent tests
         sys.modules.pop("config.urls", None)
         clear_url_caches()
+
+    def test_dev_private_media_requires_auth(self):
+        """
+        In DEBUG mode, private media paths must still require authentication.
+        Unauthenticated requests to private paths (e.g. exam_uploads/) must be
+        redirected to the login page — not served openly.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/exam_uploads/secret.pdf")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="exam_uploads/secret.pdf")
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_unauthenticated_user_cannot_access_private_media(self):
+        """
+        Acceptance criteria: an unauthenticated (anonymous) user must never
+        receive a successful response (HTTP 200) for any private media path.
+        The view must redirect them to the login page (HTTP 302) instead.
+
+        Covers multiple private prefixes to ensure the guard is applied
+        consistently regardless of the specific private path family.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+
+        private_paths = [
+            "projects/submissions/report.pdf",
+            "exam_uploads/answer.pdf",
+            "exam_paints/drawing.png",
+            "labs/submissions/lab.zip",
+        ]
+
+        for path in private_paths:
+            with self.subTest(path=path):
+                request = factory.get(f"/media/{path}")
+                request.user = AnonymousUser()
+
+                with override_settings(
+                    MEDIA_ROOT=self.media_tmp,
+                    MEDIA_URL="/media/",
+                    SERVE_MEDIA=True,
+                    DEBUG=False,
+                    MEDIA_ACCEL_REDIRECT_URL="",
+                ):
+                    response = protected_media(request, path=path)
+                    self.assertEqual(
+                        response.status_code,
+                        302,
+                        f"Unauthenticated user must be redirected for private path: {path}",
+                    )
+                    self.assertIn(
+                        "login",
+                        response["Location"].lower(),
+                        f"Redirect must point to login for path: {path}",
+                    )
+
+    def test_dev_public_media_accessible_without_auth(self):
+        """
+        In DEBUG mode, public media paths (post_images/) must remain accessible
+        without authentication.
+        """
+        import os
+
+        public_dir = os.path.join(self.media_tmp, "post_images")
+        os.makedirs(public_dir, exist_ok=True)
+        with open(os.path.join(public_dir, "cover.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get("/media/post_images/cover.jpg")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=True,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path="post_images/cover.jpg")
+            # Public files must be served (200), not redirected
+            self.assertEqual(response.status_code, 200)
 
 
 class ProtectedMediaOwnershipTest(TestCase):
@@ -401,10 +513,10 @@ class ProtectedMediaOwnershipTest(TestCase):
 
     def test_unauthenticated_user_redirected_to_login(self):
         """Unauthenticated users are always redirected to login for private files."""
-        from core.media_views import protected_media
         from django.contrib.auth.models import AnonymousUser
-
         from django.test import RequestFactory
+
+        from core.media_views import protected_media
 
         factory = RequestFactory()
         request = factory.get(f"/media/{self.file_path}")
@@ -445,3 +557,302 @@ class ProtectedMediaOwnershipTest(TestCase):
         ):
             with self.assertRaises(PermissionDenied):
                 protected_media(request, path=unknown_path)
+
+
+class QuestionMediaAccessTest(TestCase):
+    """
+    Verify that ``question_media/`` files are now treated as private.
+
+    Tests cover:
+    * Unauthenticated users are redirected to login.
+    * An authenticated org member (student level) can access question media.
+    * A cross-org user is denied access.
+    * A path with a non-existent exam ID is denied (fail-closed).
+    """
+
+    def setUp(self):
+        from apps.exams.models import Exam, ExamQuestion
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.media_tmp = tempfile.mkdtemp()
+
+        self.student = User.objects.create_user(
+            username="qm_student",
+            email="qm_student@example.com",
+            password="StrongPass123!",
+        )
+        self.other_user = User.objects.create_user(
+            username="qm_other",
+            email="qm_other@example.com",
+            password="StrongPass123!",
+        )
+        self.superuser = User.objects.create_superuser(
+            username="qm_superuser",
+            email="qm_super@example.com",
+            password="StrongPass123!",
+        )
+
+        # Create org and enroll student
+        self.org = Organization.objects.create(
+            name="QM Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.student,
+            status="active",
+            is_active=True,
+        )
+        student_role = self.org.roles.get(name="student")
+        Membership.objects.create(
+            user=self.student,
+            organization=self.org,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        # Create exam in org
+        self.exam = Exam.objects.create(
+            title="QM Test Exam",
+            author=self.student,
+            organization=self.org,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="What is 2+2?",
+            order=1,
+            points=1,
+        )
+
+        self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/img.jpg"
+
+        # Create the physical file
+        file_dir = os.path.join(
+            self.media_tmp, "question_media", f"exam_{self.exam.pk}", f"q_{self.question.pk}"
+        )
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "img.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+    def _make_request(self, user, path):
+        from django.test import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{path}")
+        request.user = user
+        return request
+
+    def test_question_media_is_now_private(self):
+        """_is_private must return True for question_media/ paths."""
+        from core.media_views import _is_private
+
+        self.assertTrue(_is_private(self.file_path))
+
+    def test_unauthenticated_redirected_for_question_media(self):
+        """Unauthenticated users are redirected to login for question_media files."""
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+
+        from core.media_views import protected_media
+
+        factory = RequestFactory()
+        request = factory.get(f"/media/{self.file_path}")
+        request.user = AnonymousUser()
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
+
+    def test_org_member_can_access_question_media(self):
+        """An authenticated member of the exam's org can access question media."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.student, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_cross_org_user_denied_question_media(self):
+        """A user with no membership in the exam's org is denied access."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.other_user, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=self.file_path)
+
+    def test_superuser_can_access_question_media(self):
+        """Superusers bypass ownership checks and can access any question media."""
+        from core.media_views import protected_media
+
+        request = self._make_request(self.superuser, self.file_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            response = protected_media(request, path=self.file_path)
+            self.assertEqual(response.status_code, 200)
+
+    def test_nonexistent_exam_id_denied(self):
+        """A question_media path with a non-existent exam ID is denied (fail-closed)."""
+        from core.media_views import protected_media
+
+        bad_path = "question_media/exam_999999/q_1/img.jpg"
+        file_dir = os.path.join(self.media_tmp, "question_media", "exam_999999", "q_1")
+        os.makedirs(file_dir, exist_ok=True)
+        with open(os.path.join(file_dir, "img.jpg"), "wb") as f:
+            f.write(b"\xff\xd8\xff\xe0")
+
+        request = self._make_request(self.student, bad_path)
+
+        with override_settings(
+            MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
+            SERVE_MEDIA=True,
+            DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
+        ):
+            with self.assertRaises(PermissionDenied):
+                protected_media(request, path=bad_path)
+
+
+# ---------------------------------------------------------------------------
+# Tests required by Task 6 (P1): explicit access-checker registry
+# ---------------------------------------------------------------------------
+
+
+class QuestionMediaAccessCheckerRegistryTest(TestCase):
+    """
+    Tests for the ``_ACCESS_CHECKERS`` registry introduced in Task 6.
+
+    Success criteria:
+    * ``question_media/`` has a dedicated entry in ``_ACCESS_CHECKERS``.
+    * Access is granted only to active members of the exam's organization.
+    * Non-members and unauthenticated users are strictly denied.
+    """
+
+    def setUp(self):
+        from apps.exams.models import Exam
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
+        self.allowed_user = User.objects.create_user(
+            username="checker_member",
+            email="checker_member@example.com",
+            password="StrongPass123!",
+        )
+        self.denied_user = User.objects.create_user(
+            username="checker_outsider",
+            email="checker_outsider@example.com",
+            password="StrongPass123!",
+        )
+
+        self.org = Organization.objects.create(
+            name="Checker Registry Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.allowed_user,
+            status="active",
+            is_active=True,
+        )
+        student_role = self.org.roles.get(name="student")
+        Membership.objects.create(
+            user=self.allowed_user,
+            organization=self.org,
+            role=student_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        self.exam = Exam.objects.create(
+            title="Registry Test Exam",
+            author=self.allowed_user,
+            organization=self.org,
+            is_active=True,
+        )
+        self.path = f"question_media/exam_{self.exam.pk}/q_1/test.png"
+
+    def test_question_media_access_checker_exists(self):
+        """
+        ``_ACCESS_CHECKERS`` must contain an entry for the ``question_media/`` prefix.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        self.assertIn(
+            "question_media/",
+            _ACCESS_CHECKERS,
+            "question_media/ must have a dedicated entry in _ACCESS_CHECKERS",
+        )
+        checker = _ACCESS_CHECKERS["question_media/"]
+        self.assertTrue(callable(checker), "_ACCESS_CHECKERS['question_media/'] must be callable")
+
+    def test_question_media_access_only_for_allowed_org_members(self):
+        """
+        Only active members of the exam's organization may access question_media files.
+        Non-members are denied regardless of authentication status.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+
+        # Allowed: user is an active member of the exam's org
+        self.assertTrue(
+            checker(self.allowed_user, self.path),
+            "Active org member must be granted access to question_media",
+        )
+
+        # Denied: user has no membership in the exam's org
+        self.assertFalse(
+            checker(self.denied_user, self.path),
+            "Non-member must be denied access to question_media",
+        )
+
+    def test_question_media_checker_denies_nonexistent_exam(self):
+        """
+        Checker must deny (fail-closed) when the exam ID does not exist in the DB.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+        bad_path = "question_media/exam_999999/q_1/img.png"
+        self.assertFalse(
+            checker(self.allowed_user, bad_path),
+            "Path with non-existent exam ID must be denied",
+        )
+
+    def test_question_media_checker_denies_malformed_path(self):
+        """
+        Checker must deny paths that do not contain a recognisable exam segment.
+        """
+        from core.media_views import _ACCESS_CHECKERS
+
+        checker = _ACCESS_CHECKERS["question_media/"]
+        malformed = "question_media/unknown/file.png"
+        self.assertFalse(
+            checker(self.allowed_user, malformed),
+            "Malformed question_media path must be denied",
+        )

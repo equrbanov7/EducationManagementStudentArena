@@ -14,21 +14,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import get_language
-from django.utils.translation import pgettext
+from django.utils.translation import get_language, pgettext
 from django.views.decorators.http import require_POST
 
 import qrcode
 
-from apps.live_exam.constants import (
-    ACCESSORY_KEYS,
-    AVATAR_KEYS,
-    DEFAULT_ACCESSORY_KEY,
-    DEFAULT_AVATAR_KEY,
-    REACTIONS,
-    REACTION_KEYS,
-    build_wait_room_catalog,
-)
 from apps.live_exam.auth import (
     LIVE_CLIENT_ID_COOKIE_MAX_AGE,
     LIVE_CLIENT_ID_COOKIE_NAME,
@@ -39,14 +29,23 @@ from apps.live_exam.auth import (
     get_client_id,
     get_request_player,
 )
+from apps.live_exam.constants import (
+    ACCESSORY_KEYS,
+    AVATAR_KEYS,
+    DEFAULT_ACCESSORY_KEY,
+    DEFAULT_AVATAR_KEY,
+    REACTION_KEYS,
+    REACTIONS,
+    build_wait_room_catalog,
+)
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.serializers import serialize_player_identity, serialize_players
 from apps.live_exam.session_settings import (
     DEFAULT_MAX_PARTICIPANTS,
     THEME_KEYS,
     generate_guest_nickname,
     get_session_settings,
 )
-from apps.live_exam.serializers import serialize_player_identity, serialize_players
 from apps.live_exam.transport import (
     broadcast,
     build_join_url,
@@ -199,6 +198,7 @@ def _pin_entry_copy() -> dict[str, str]:
 
 def _pin_entry_theme_key(pin_value: str, raw_theme: str | None = None) -> str:
     from apps.live_exam.models import PIN_LENGTH
+
     if len(pin_value) == PIN_LENGTH:
         session = LiveSession.objects.filter(pin=pin_value).first()
         if session:
@@ -226,6 +226,7 @@ def _normalize_pin(raw_pin: str | None) -> str:
     characters are removed.
     """
     from apps.live_exam.models import PIN_LENGTH
+
     return "".join(ch for ch in str(raw_pin or "").upper() if ch.isalnum())[:PIN_LENGTH]
 
 
@@ -287,6 +288,7 @@ def _broadcast_lobby_state(session: LiveSession) -> None:
 
 def live_pin_entry(request):
     from apps.live_exam.models import PIN_LENGTH
+
     copy = _pin_entry_copy()
     pin_value = _normalize_pin(request.POST.get("pin") if request.method == "POST" else request.GET.get("pin"))
     raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
@@ -428,7 +430,9 @@ def live_join_enter(request, pin):
         return JsonResponse(
             {
                 "ok": False,
-                "message": pgettext("live_exam.view.message", "participant_limit_reached").format(limit=max_participants),
+                "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
+                    limit=max_participants
+                ),
             },
             status=403,
         )

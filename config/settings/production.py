@@ -9,10 +9,11 @@ import os
 from copy import deepcopy
 from urllib.parse import urlsplit
 
+from django.core.exceptions import ImproperlyConfigured
+
 import dj_database_url
 import sentry_sdk
 from dotenv import load_dotenv
-from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
@@ -87,12 +88,8 @@ CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
 
 # HSTS settings
-SECURE_HSTS_SECONDS = int(
-    os.getenv("SECURE_HSTS_SECONDS", "31536000" if SECURE_SSL_REDIRECT else "0")
-)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", SECURE_HSTS_SECONDS > 0
-)
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if SECURE_SSL_REDIRECT else "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", SECURE_HSTS_SECONDS > 0)
 SECURE_HSTS_PRELOAD = _env_bool("SECURE_HSTS_PRELOAD", SECURE_HSTS_SECONDS > 0)
 
 # Static files - WhiteNoise for production

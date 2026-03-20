@@ -57,10 +57,14 @@ class SuspendedOrganizationMiddleware:
 
     def __call__(self, request):
         if request.user.is_authenticated and not request.user.is_superuser:
-            profile = getattr(request.user, "profile", None)
-            organization = getattr(profile, "organization", None) if profile else None
+            # Use request.organization set by OrganizationMiddleware (new membership model).
+            organization = getattr(request, "organization", None)
 
-            if organization and (organization.status == "suspended" or not organization.is_active):
+            # Block when the organization is not in "active" status (covers both
+            # "suspended" and "inactive" status values).  OrganizationMiddleware
+            # already handles is_active=False by clearing the session org, so we
+            # only need to check the status field here.
+            if organization and organization.status != "active":
                 if not getattr(request.user, "is_superadmin", False):
                     logout(request)
                     messages.error(

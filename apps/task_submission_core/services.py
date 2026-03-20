@@ -150,9 +150,7 @@ def assign_task_to_group(task, student_group):
 
 
 def get_task_submissions(*, submission_model, task_field_name, task, student_field_name, status=None, group_name=None):
-    qs = submission_model.objects.filter(
-        **{task_field_name: task}
-    ).select_related(
+    qs = submission_model.objects.filter(**{task_field_name: task}).select_related(
         student_field_name,
         f"{student_field_name}__profile",
         "graded_by",
@@ -207,4 +205,3 @@ def parse_score_value(value, *, default=None):
         return Decimal(str(value).strip())
     except (InvalidOperation, ValueError, AttributeError):
         return default
-

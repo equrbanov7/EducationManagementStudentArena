@@ -25,9 +25,6 @@ def health_check(request):
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = "error"
 
-    # Debug mode check
-    health_status["checks"]["debug_mode"] = settings.DEBUG
-
     # Response
     status_code = 200 if health_status["status"] == "healthy" else 503
     return JsonResponse(health_status, status=status_code)

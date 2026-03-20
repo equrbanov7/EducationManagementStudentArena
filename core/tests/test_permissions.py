@@ -5,16 +5,15 @@ Covers:
 * ``core.permissions.request_has_permission`` – primary inline check.
 * ``core.permissions.ensure_request_permission`` – raises PermissionDenied.
 * ``core.permissions.teacher_required`` / ``student_required`` – removed decorators.
-* ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` – removed mixins.
+* ``core.mixins.TeacherRequiredMixin`` / ``StudentRequiredMixin`` / ``OwnerRequiredMixin`` – removed mixins.
 * ``apps.courses.views._helpers.IsTeacherMixin`` – removed local mixin.
-* ``apps.organizations.decorators`` FBV decorators – deprecated.
+* ``apps.organizations.decorators`` FBV decorators – removed (hard-fail).
 """
 
 from __future__ import annotations
 
-import warnings
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
@@ -139,6 +138,32 @@ class RequestHasPermissionTest(TestCase):
         )
         self.assertTrue(request_has_permission(request, "exam.delete"))
 
+    def test_superadmin_cross_org_audit_log_failure_does_not_block_request(self):
+        """Audit log exception must not block a superadmin cross-org request; logger.exception() is called."""
+        from apps.organizations.models import Organization
+
+        org = MagicMock(spec=Organization)
+        superuser = User.objects.create_superuser(
+            username="perm_superuser_audit",
+            email="superaudit@example.com",
+            password="testpass123",
+        )
+        request = _make_request(
+            user=superuser,
+            organization=org,
+            org_permissions=[],
+            org_memberships=[],
+        )
+
+        with patch(
+            "apps.audit.utils.log_superadmin_cross_org_action",
+            side_effect=Exception("audit failure"),
+        ), patch("core.permissions.logger") as mock_logger:
+            result = request_has_permission(request, "course.delete")
+
+        self.assertTrue(result)
+        mock_logger.exception.assert_called_once_with("Failed to log superadmin cross-org action")
+
 
 # ---------------------------------------------------------------------------
 # ensure_request_permission tests
@@ -261,84 +286,94 @@ class RemovedMixinsTest(TestCase):
         self.assertIn("StudentRequiredMixin", str(ctx.exception))
         self.assertIn("RBAC", str(ctx.exception))
 
+    def test_owner_required_mixin_raises_improperly_configured(self):
+        from django.http import HttpResponse
+        from django.views import View
 
-# ---------------------------------------------------------------------------
-# Deprecated org decorators tests
-# ---------------------------------------------------------------------------
+        from core.mixins import OwnerRequiredMixin
 
+        class _View(OwnerRequiredMixin, View):
+            def get(self, request, *args, **kwargs):
+                return HttpResponse("ok")
 
-class DeprecatedOrgDecoratorsTest(TestCase):
-    """Deprecated FBV decorators in apps.organizations.decorators emit DeprecationWarning."""
-
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username="org_dec_user",
-            email="orgdec@example.com",
-            password="testpass123",
-        )
-
-    def _make_org_request(self, org_permissions=None, level=50):
         factory = RequestFactory()
         request = factory.get("/")
-        request.user = self.user
-        request.organization = MagicMock()
-        request.org_permissions = org_permissions or []
-        request.org_memberships = [_membership_stub(level)]
-        return request
+        request.user = SimpleNamespace(is_authenticated=True)
 
-    def test_org_permission_required_emits_deprecation_warning(self):
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            _View.as_view()(request)
+
+        self.assertIn("OwnerRequiredMixin", str(ctx.exception))
+        self.assertIn("RBAC", str(ctx.exception))
+
+
+# ---------------------------------------------------------------------------
+# Removed org decorators tests
+# ---------------------------------------------------------------------------
+
+
+class RemovedOrgDecoratorsTest(TestCase):
+    """Removed FBV decorators in apps.organizations.decorators raise ImproperlyConfigured."""
+
+    def test_org_required_raises_improperly_configured(self):
+        from apps.organizations.decorators import org_required
+
+        @org_required
+        def dummy_view(request):
+            return "ok"
+
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        with self.assertRaises(ImproperlyConfigured) as ctx:
+            dummy_view(request)
+
+        self.assertIn("org_required", str(ctx.exception))
+
+    def test_org_permission_required_raises_improperly_configured(self):
         from apps.organizations.decorators import org_permission_required
 
         @org_permission_required("course.create")
         def dummy_view(request):
             return "ok"
 
-        request = self._make_org_request(org_permissions=["course.create"])
+        factory = RequestFactory()
+        request = factory.get("/")
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             dummy_view(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("org_permission_required" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("org_permission_required", str(ctx.exception))
 
-    def test_org_level_required_emits_deprecation_warning(self):
+    def test_org_level_required_raises_improperly_configured(self):
         from apps.organizations.decorators import org_level_required
 
         @org_level_required(10)
         def dummy_view(request):
             return "ok"
 
-        request = self._make_org_request(level=50)
+        factory = RequestFactory()
+        request = factory.get("/")
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             dummy_view(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("org_level_required" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("org_level_required", str(ctx.exception))
 
-    def test_org_role_required_emits_deprecation_warning(self):
+    def test_org_role_required_raises_improperly_configured(self):
         from apps.organizations.decorators import org_role_required
 
         @org_role_required("teacher")
         def dummy_view(request):
             return "ok"
 
-        request = self._make_org_request()
+        factory = RequestFactory()
+        request = factory.get("/")
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with self.assertRaises(ImproperlyConfigured) as ctx:
             dummy_view(request)
 
-        deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        self.assertTrue(
-            any("org_role_required" in str(w.message) for w in deprecation_warnings),
-        )
+        self.assertIn("org_role_required", str(ctx.exception))
 
 
 # ---------------------------------------------------------------------------

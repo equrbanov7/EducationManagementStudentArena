@@ -10,7 +10,9 @@ def blog_navigation_context(request):
         if resolver_match.url_name == "category_detail":
             category_slug = resolver_match.kwargs.get("slug")
             if category_slug:
-                category = Category.objects.select_related("parent", "parent__parent").filter(slug=category_slug).first()
+                category = (
+                    Category.objects.select_related("parent", "parent__parent").filter(slug=category_slug).first()
+                )
                 if category:
                     active_category_slug = category.get_root().slug
         elif resolver_match.url_name == "technology":

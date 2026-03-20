@@ -25,6 +25,7 @@ removed; see ``core/mixins.py``.
 
 from __future__ import annotations
 
+import logging
 from functools import wraps
 
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
@@ -32,6 +33,8 @@ from django.utils.translation import pgettext
 
 from apps.organizations.permissions import has_permission
 from core.tenancy import request_has_active_organization_context
+
+logger = logging.getLogger(__name__)
 
 _REMOVED_MSG = (
     "{name} has been removed because it bypassed the organization RBAC model "
@@ -59,9 +62,7 @@ def teacher_required(view_func):
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="teacher_required")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="teacher_required"))
 
     return _wrapped_view
 
@@ -76,9 +77,7 @@ def student_required(view_func):
 
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="student_required")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="student_required"))
 
     return _wrapped_view
 
@@ -91,14 +90,31 @@ def request_has_permission(request, permission: str) -> bool:
     """
     Permission policy:
     - active organization context is required
-    - superadmin/superuser: allowed within an active organization
+    - superadmin/superuser: allowed within an active organization; their
+      cross-org actions are recorded in the audit log automatically.
     - user with active-org memberships: must have the requested permission
     - missing org context or memberships: deny
     """
     if not request_has_active_organization_context(request):
         return False
 
-    if is_superadmin_user(getattr(request, "user", None)):
+    user = getattr(request, "user", None)
+    if is_superadmin_user(user):
+        # When the superadmin has no membership in the current org they are
+        # operating cross-org.  Record an audit trail entry so that every such
+        # permission check is traceable.
+        memberships = list(getattr(request, "org_memberships", []) or [])
+        if not memberships:
+            try:
+                from apps.audit.utils import log_superadmin_cross_org_action
+
+                log_superadmin_cross_org_action(
+                    request,
+                    action="view",
+                    reason=f"Superadmin permission check bypassed membership for '{permission}'",
+                )
+            except Exception:
+                logger.exception("Failed to log superadmin cross-org action")
         return True
 
     memberships = list(getattr(request, "org_memberships", []) or [])
@@ -117,6 +133,5 @@ def ensure_request_permission(request, permission: str, message: str | None = No
         raise PermissionDenied(message or pgettext("core.permission.error", "An active organization is required."))
 
     raise PermissionDenied(
-        message
-        or pgettext("core.permission.error", "required_permission_missing").format(permission=permission)
+        message or pgettext("core.permission.error", "required_permission_missing").format(permission=permission)
     )

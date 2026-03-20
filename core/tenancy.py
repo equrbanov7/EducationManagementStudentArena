@@ -2,6 +2,7 @@
 Shared helpers for request-scoped tenant filtering.
 """
 
+
 def get_request_organization(request):
     """
     Resolve the active organization selected on this request.

@@ -18,7 +18,7 @@ from django.views.decorators.http import require_http_methods
 
 from apps.courses.models import CourseMembership
 
-from ._helpers import _get_tenant_course_or_404, _get_tenant_assignment_or_404
+from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
 
 User = get_user_model()
 
