@@ -5,7 +5,7 @@ This module contains service functions that encapsulate business operations.
 
 from django.utils import timezone
 
-from apps.task_submission_core.services import (
+from apps.task_submission_core.services import (  # noqa: F401
     apply_grade,
     assign_task_to_group,
     assign_task_to_students,
@@ -13,6 +13,7 @@ from apps.task_submission_core.services import (
     create_submission,
     get_pending_task_submissions,
     get_task_submissions,
+    parse_score_value,
     update_submission,
 )
 
