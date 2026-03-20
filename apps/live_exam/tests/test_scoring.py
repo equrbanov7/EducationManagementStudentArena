@@ -384,3 +384,143 @@ class LiveExamLockedSessionTest(TestCase):
         )
         self.assertIn(response.status_code, [200, 201])
         self.assertTrue(response.json()["ok"])
+
+
+# ---------------------------------------------------------------------------
+# Task 8 — Required named tests (service-layer, no websocket required)
+# ---------------------------------------------------------------------------
+
+
+class ScoringRequiredNamedTests(TestCase):
+    """
+    Canonical test methods required by the Task 8 acceptance criteria.
+
+    Each test uses the same service-layer helpers as the classes above but
+    carries the exact method name specified in the problem statement.
+    """
+
+    def setUp(self):
+        self.teacher = User.objects.create_user("named_teacher", "named@example.com", "StrongPass123!")
+        self.teacher.profile.role = ProfileRole.TEACHER
+        self.teacher.profile.save(update_fields=["role", "updated_at"])
+
+        self.org = Organization.objects.create(
+            name="Named Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = self.org
+        self.teacher.profile.organization_type = self.org.org_type
+        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+
+        self.exam = Exam.objects.create(
+            title="Named Test Exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Named test question",
+            order=1,
+            points=1000,
+        )
+        self.correct_option = ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Correct",
+            is_correct=True,
+        )
+        ExamQuestionOption.objects.create(
+            question=self.question,
+            text="Wrong",
+            is_correct=False,
+        )
+
+    def _make_active_session_and_player(self):
+        """Create a session that is in the answer window."""
+        now = timezone.now()
+        session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        session.state = LiveSession.STATE_QUESTION
+        session.current_index = 0
+        session.question_started_at = now - timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS + 1
+        )
+        session.question_ends_at = now + timezone.timedelta(seconds=15)
+        session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+        player = LivePlayer.objects.create(
+            session=session,
+            nickname="NamedPlayer",
+            avatar_key="avatar_1",
+            client_id=f"named-client-{session.pin}",
+        )
+        return session, player
+
+    def test_duplicate_answer_prevented(self):
+        """
+        A second submission for the same question by the same player must not
+        create a duplicate ``LiveAnswer`` record.
+        """
+        session, player = self._make_active_session_and_player()
+
+        ok1, _ = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=self.question.id,
+            option_ids=[self.correct_option.id],
+            answer_ms=400,
+        )
+        self.assertTrue(ok1)
+
+        ok2, result2 = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=self.question.id,
+            option_ids=[self.correct_option.id],
+            answer_ms=700,
+        )
+        # Idempotent — second call is still ok but must not create another record.
+        self.assertTrue(ok2)
+        self.assertEqual(
+            LiveAnswer.objects.filter(session=session, player=player).count(),
+            1,
+            "Only one LiveAnswer must exist after duplicate submission",
+        )
+
+    def test_answer_after_time_expires_rejected(self):
+        """
+        An answer submitted after ``question_ends_at`` must be rejected and
+        no ``LiveAnswer`` must be created.
+        """
+        now = timezone.now()
+        session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
+        session.state = LiveSession.STATE_QUESTION
+        session.current_index = 0
+        # The answer window already closed 5 seconds ago.
+        session.question_started_at = now - timezone.timedelta(seconds=60)
+        session.question_ends_at = now - timezone.timedelta(seconds=5)
+        session.save(update_fields=["state", "current_index", "question_started_at", "question_ends_at"])
+        player = LivePlayer.objects.create(
+            session=session,
+            nickname="LatePlayer",
+            avatar_key="avatar_1",
+            client_id=f"late-client-{session.pin}",
+        )
+
+        ok, _ = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=self.question.id,
+            option_ids=[self.correct_option.id],
+            answer_ms=100,
+        )
+
+        self.assertFalse(ok, "Late answers must be rejected")
+        self.assertEqual(
+            LiveAnswer.objects.filter(session=session, player=player).count(),
+            0,
+            "No LiveAnswer must be created for a late submission",
+        )

@@ -6,7 +6,6 @@ Development environment configuration.
 from __future__ import annotations
 
 import os
-import warnings
 from pathlib import Path
 
 import dj_database_url
@@ -28,17 +27,18 @@ load_dotenv(BASE_DIR / ".env")
 # SECURITY WARNING: SECRET_KEY must come from environment for local/dev too.
 SECRET_KEY = (os.getenv("SECRET_KEY") or "").strip()
 if not SECRET_KEY:
-    _INSECURE_FALLBACK_KEY = "django-insecure-local-dev-fallback-key-do-not-use-in-production"
-    warnings.warn(
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
         "\n"
         "SECRET_KEY is not set in your environment or .env file.\n"
-        "Using an insecure fallback key — management commands will work, but\n"
-        "do NOT use this configuration for any real data or production.\n"
-        "Create a .env file based on .env.example and set SECRET_KEY there.",
-        UserWarning,
-        stacklevel=2,
+        "The application cannot start without a secret key — this prevents\n"
+        "session forgery and token tampering in any environment.\n\n"
+        "Quick fix:\n"
+        "  1. Copy .env.example to .env\n"
+        "  2. Generate a key: python -c \"import secrets; print(secrets.token_urlsafe(64))\"\n"
+        "  3. Set SECRET_KEY=<generated-key> in your .env file\n"
     )
-    SECRET_KEY = _INSECURE_FALLBACK_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True") == "True"
