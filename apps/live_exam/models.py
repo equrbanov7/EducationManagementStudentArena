@@ -152,4 +152,9 @@ class LiveAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = [("session", "player", "question_id")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["session", "player", "question_id"],
+                name="uniq_answer_per_player_question",
+            )
+        ]
