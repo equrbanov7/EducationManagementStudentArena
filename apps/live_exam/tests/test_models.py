@@ -22,16 +22,19 @@ class GeneratePinTest(TestCase):
         self.assertEqual(len(pin), PIN_LENGTH)
 
     def test_pin_is_eight_digits(self):
-        """PIN_LENGTH is 8; generated PINs must be 8 characters long."""
-        self.assertEqual(PIN_LENGTH, 8)
+        """PIN_LENGTH is now 10 (increased for security); generated PINs must be 10 characters long."""
+        self.assertEqual(PIN_LENGTH, 10)
         pin = generate_pin()
-        self.assertEqual(len(pin), 8)
+        self.assertEqual(len(pin), 10)
 
     def test_pin_contains_only_digits(self):
-        """Generated PINs must consist entirely of decimal digits."""
+        """Generated PINs must consist of uppercase alphanumeric characters (digits + A-Z)."""
+        import string
+        allowed = set(string.digits + string.ascii_uppercase)
         for _ in range(50):
             pin = generate_pin()
-            self.assertTrue(pin.isdigit(), f"Non-digit character found in PIN: {pin!r}")
+            invalid = set(pin) - allowed
+            self.assertFalse(invalid, f"Unexpected characters in PIN: {invalid!r} (PIN={pin!r})")
 
     def test_pin_uses_secrets_module(self):
         """generate_pin() must not rely on the non-cryptographic random module."""
@@ -71,10 +74,10 @@ class LiveSessionPinFieldTest(TestCase):
         )
 
     def test_pin_field_max_length_is_eight(self):
-        """Pinpoint guard: PIN_LENGTH is 8 and pin field reflects that."""
-        self.assertEqual(PIN_LENGTH, 8)
+        """Guard: PIN_LENGTH is now 10 (increased for security) and pin field reflects that."""
+        self.assertEqual(PIN_LENGTH, 10)
         field = LiveSession._meta.get_field("pin")
-        self.assertEqual(field.max_length, 8)
+        self.assertEqual(field.max_length, 10)
 
     def test_create_live_session_with_eight_char_pin(self):
         """
@@ -113,7 +116,10 @@ class LiveSessionPinFieldTest(TestCase):
         )
         session = LiveSession.objects.create(exam=exam, host_user=teacher)
         self.assertEqual(len(session.pin), PIN_LENGTH)
-        self.assertTrue(session.pin.isdigit())
+        # PIN is now alphanumeric (digits + A-Z), not purely numeric.
+        import string
+        allowed = set(string.digits + string.ascii_uppercase)
+        self.assertTrue(set(session.pin).issubset(allowed))
         # Verify the saved row is retrievable (no silent DB truncation).
         reloaded = LiveSession.objects.get(pk=session.pk)
         self.assertEqual(reloaded.pin, session.pin)
