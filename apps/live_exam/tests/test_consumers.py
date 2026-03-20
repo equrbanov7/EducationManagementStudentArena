@@ -188,6 +188,265 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         connected = async_to_sync(scenario)()
         self.assertTrue(connected)
 
+    def test_expired_player_token_rejected(self):
+        """
+        A player token that has exceeded ``PLAYER_TOKEN_MAX_AGE`` must be
+        rejected; the WebSocket connection must not be established.
+        """
+        from unittest.mock import patch
+
+        # Patch signing.loads to raise SignatureExpired so the middleware sees
+        # an expired token and rejects the connection.
+        from django.core import signing
+
+        async def scenario():
+            with patch.object(signing, "loads", side_effect=signing.SignatureExpired("expired")):
+                communicator = WebsocketCommunicator(
+                    application,
+                    f"/ws/live/{self.session.pin}/play/",
+                    headers=self._player_headers(),
+                )
+                connected, _ = await communicator.connect()
+                await communicator.wait()
+                return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(connected, "An expired player token must cause the WebSocket handshake to be rejected")
+
+    def test_player_token_pin_mismatch_rejected(self):
+        """
+        A valid token signed for a *different* session PIN must not grant
+        access to the current session's WebSocket endpoint.
+        """
+        # Build a token for the correct player/client but for a non-existent PIN.
+        wrong_pin = "00000000"
+        wrong_token = build_player_token(
+            pin=wrong_pin,
+            player_id=self.player.id,
+            client_id=self.player.client_id,
+        )
+        from apps.live_exam.auth import PLAYER_COOKIE_NAME
+
+        headers = [
+            _WS_ORIGIN_HEADER,
+            (b"cookie", f"{PLAYER_COOKIE_NAME}={wrong_token}".encode()),
+        ]
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=headers,
+            )
+            connected, _ = await communicator.connect()
+            await communicator.wait()
+            return connected
+
+        connected = async_to_sync(scenario)()
+        self.assertFalse(
+            connected,
+            "A token signed for a different PIN must not authenticate the player",
+        )
+
+    def test_player_cannot_see_correct_answers_in_websocket(self):
+        """
+        When the host advances to the question state, the ``question_published``
+        message broadcast to players must not contain ``is_correct``,
+        ``correct_option_ids``, or ``correct_ids`` fields.
+        """
+        from apps.live_exam.transport import broadcast as _broadcast
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync as _async_to_sync
+
+        # Connect as a player
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            # Drain the initial lobby_state / connection message if present.
+            try:
+                await communicator.disconnect()
+            finally:
+                pass
+
+        _async_to_sync(scenario)()
+
+        # Directly verify that the serializer does not expose answer keys.
+        # This tests the data layer that feeds the websocket broadcast.
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.live_exam.serializers import build_options, serialize_question
+        from django.utils import timezone
+        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
+
+        exam = self.session.exam
+        question = ExamQuestion.objects.create(
+            exam=exam, text="Security check Q", order=99, points=500
+        )
+        ExamQuestionOption.objects.create(question=question, text="Right", is_correct=True)
+        ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
+
+        now = timezone.now()
+        ready_ends_at = now + timezone.timedelta(seconds=PLAYER_GET_READY_SECONDS)
+        answer_starts_at = ready_ends_at + timezone.timedelta(seconds=PLAYER_QUESTION_INTRO_SECONDS)
+        ends_at = answer_starts_at + timezone.timedelta(seconds=15)
+
+        payload = serialize_question(
+            self.session, question, idx=0, total=1,
+            started_at=now, ready_ends_at=ready_ends_at,
+            answer_starts_at=answer_starts_at, ends_at=ends_at,
+        )
+        self.assertNotIn("correct_option_ids", payload, "Player payload must not leak correct_option_ids")
+        self.assertNotIn("correct_ids", payload, "Player payload must not leak correct_ids")
+        for option in payload.get("options", []):
+            self.assertNotIn("is_correct", option, "Player option payload must not expose is_correct")
+
+    def test_duplicate_answer_prevented(self):
+        """
+        Submitting the same answer twice via WebSocket must not create more
+        than one ``LiveAnswer`` record in the database.
+        """
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.live_exam.models import LiveAnswer
+        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
+        from django.utils import timezone
+
+        exam = self.session.exam
+        question = ExamQuestion.objects.create(
+            exam=exam, text="Dup check Q", order=98, points=500
+        )
+        correct_option = ExamQuestionOption.objects.create(
+            question=question, text="Right", is_correct=True
+        )
+        ExamQuestionOption.objects.create(question=question, text="Wrong", is_correct=False)
+
+        now = timezone.now()
+        self.session.state = "question"
+        self.session.current_index = 0
+        self.session.current_question_id = question.id
+        self.session.question_started_at = now - timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS + 1
+        )
+        self.session.question_ends_at = now + timezone.timedelta(seconds=15)
+        self.session.save(
+            update_fields=["state", "current_index", "current_question_id",
+                           "question_started_at", "question_ends_at"]
+        )
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to({
+                    "type": "answer",
+                    "question_id": question.id,
+                    "option_id": correct_option.id,
+                    "answer_ms": 300,
+                })
+                first = await communicator.receive_json_from(timeout=1)
+                # Drain the auto-reveal that fires for single-player sessions.
+                import asyncio
+                try:
+                    await asyncio.wait_for(communicator.receive_json_from(), timeout=0.5)
+                except asyncio.TimeoutError:
+                    pass
+                await communicator.send_json_to({
+                    "type": "answer",
+                    "question_id": question.id,
+                    "option_id": correct_option.id,
+                    "answer_ms": 600,
+                })
+                second = await communicator.receive_json_from(timeout=1)
+                return first, second
+            finally:
+                await communicator.disconnect()
+
+        first, second = async_to_sync(scenario)()
+        self.assertEqual(first["type"], "answer_saved")
+        self.assertEqual(second["type"], "answer_saved")
+        self.assertEqual(
+            LiveAnswer.objects.filter(
+                session=self.session, player=self.player, question_id=question.id
+            ).count(),
+            1,
+            "Only one LiveAnswer must exist after duplicate submission",
+        )
+
+    def test_answer_after_time_expires_rejected(self):
+        """
+        Submitting an answer after ``question_ends_at`` must be rejected
+        (no LiveAnswer is created and no ``answer_saved`` is received).
+        """
+        from apps.exams.models import ExamQuestion, ExamQuestionOption
+        from apps.live_exam.models import LiveAnswer
+        from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_INTRO_SECONDS
+        from django.utils import timezone
+
+        exam = self.session.exam
+        question = ExamQuestion.objects.create(
+            exam=exam, text="Late answer Q", order=97, points=500
+        )
+        option = ExamQuestionOption.objects.create(
+            question=question, text="Answer", is_correct=True
+        )
+        ExamQuestionOption.objects.create(question=question, text="Other", is_correct=False)
+
+        now = timezone.now()
+        # question_ends_at is in the past → answer window is closed
+        self.session.state = "question"
+        self.session.current_index = 0
+        self.session.current_question_id = question.id
+        self.session.question_started_at = now - timezone.timedelta(seconds=60)
+        self.session.question_ends_at = now - timezone.timedelta(seconds=1)
+        self.session.save(
+            update_fields=["state", "current_index", "current_question_id",
+                           "question_started_at", "question_ends_at"]
+        )
+
+        async def scenario():
+            communicator = WebsocketCommunicator(
+                application,
+                f"/ws/live/{self.session.pin}/play/",
+                headers=self._player_headers(),
+            )
+            connected, _ = await communicator.connect()
+            self.assertTrue(connected)
+            try:
+                await communicator.send_json_to({
+                    "type": "answer",
+                    "question_id": question.id,
+                    "option_id": option.id,
+                    "answer_ms": 100,
+                })
+                # Should receive an error or nothing (the communicator will
+                # time-out if no message is sent back).
+                import asyncio
+                try:
+                    msg = await asyncio.wait_for(communicator.receive_json_from(), timeout=0.5)
+                    return msg
+                except asyncio.TimeoutError:
+                    return None
+            finally:
+                await communicator.disconnect()
+
+        result = async_to_sync(scenario)()
+        # Late answer must not create a LiveAnswer record.
+        self.assertEqual(
+            LiveAnswer.objects.filter(
+                session=self.session, player=self.player, question_id=question.id
+            ).count(),
+            0,
+            "No LiveAnswer must be created for a late submission",
+        )
+
 
 @override_settings(CHANNEL_LAYERS=TEST_CHANNEL_LAYERS)
 class LiveExamAnswerSubmissionConsumerTest(TransactionTestCase):

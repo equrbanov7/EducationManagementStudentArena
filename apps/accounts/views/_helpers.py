@@ -292,11 +292,53 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
 
 def _materialize_legacy_teacher_membership(user, organization=None, *, memberships=None):
     """
-    Backfill tenant-scoped memberships from the legacy single-org profile.
+    Back-fill tenant-scoped ``Membership`` rows from the legacy single-org
+    profile, and (when the caller is the org admin/owner) ensure that any
+    teacher/assistant-teacher group hints are reflected as explicit membership
+    records.
 
-    Authorization still reads memberships only. This helper simply materializes
-    missing memberships for the profile's legacy organization so older data
-    continues to work inside the same tenant without leaking into others.
+    Behaviour summary
+    -----------------
+    Called with *organization=None* (no org context yet):
+        Reads the user's ``profile.organization`` (the old single-org field).
+        If the profile points at an org, and no active ``Membership`` for that
+        org exists yet, creates one whose role matches ``profile.role``.  The
+        effect is that legacy users without an explicit Membership row are
+        "materialized" so the rest of the auth stack can read memberships
+        uniformly.
+
+        **This path must only be invoked when the user has zero active
+        memberships** — calling it before counting memberships is the main
+        source of unexpected silent org-assignment (the new
+        ``OrganizationMiddleware`` only calls this path when the count is 0).
+
+    Called with *organization=<org>* and *memberships=<list>* (org confirmed):
+        Checks whether the user's legacy ``profile.role`` or Django group
+        membership implies a teacher/assistant-teacher role that is not yet
+        represented in the provided membership list.  If so, and if the caller
+        has admin context in the org, it creates the missing role record.
+
+        Unlike the no-org path this is safe to call on every request because
+        it always scopes its work to the already-verified *organization*.
+
+    Returns
+    -------
+    list[Membership]
+        The final (possibly extended) list of active memberships for the user
+        in *target_organization*.  When called with *organization=None*, the
+        return value is the raw membership list for the profile's org (may be
+        empty).
+
+    Notes
+    -----
+    * Writes are guarded by ``update_or_create`` — repeated calls are
+      idempotent.
+    * The function **never** touches organizations other than the profile's
+      primary org (no-org path) or the explicitly supplied *organization*
+      (with-org path), so cross-tenant leakage is not possible here.
+    * This is intentionally kept in ``apps.accounts.views._helpers`` for
+      historical reasons; do not move it without updating all callers
+      (``OrganizationMiddleware``, account view helpers, and tests).
     """
     from apps.organizations.models import Membership
 
