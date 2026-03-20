@@ -9,7 +9,7 @@
 # CORE DJANGO
 # ═══════════════════════════════════════════════════════════════════════════
 Django==5.2.8
-sqlparse==0.4.2
+sqlparse==0.5.0
 asgiref==3.11.0
 tzdata==2024.2
 typing_extensions==4.15.0
@@ -53,7 +53,7 @@ constantly==23.10.4
 cryptography==46.0.3
 hyperlink==21.0.0
 Incremental==24.11.0
-pyasn1==0.6.1
+pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==2.23
 pyOpenSSL==25.3.0
@@ -72,7 +72,7 @@ phonenumbers==8.13.50
 # SECURITY - RATE LIMITING
 # ═══════════════════════════════════════════════════════════════════════════
 django-ratelimit==4.1.0
-PyJWT==2.10.1
+PyJWT==2.12.0
 
 # ═══════════════════════════════════════════════════════════════════════════
 # SECURITY - CONTENT SECURITY POLICY
@@ -87,7 +87,7 @@ django-haystack==3.3.0
 # ═══════════════════════════════════════════════════════════════════════════
 # MARKDOWN SUPPORT (Blog Posts)
 # ═══════════════════════════════════════════════════════════════════════════
-Markdown==3.2.1
+Markdown==3.8.1
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DOCUMENT PROCESSING
@@ -122,6 +122,6 @@ packaging==25.0
 # SERIALIZATION & PERFORMANCE (Optional but included)
 # ═══════════════════════════════════════════════════════════════════════════
 msgpack==1.1.2
-ujson==5.11.0
+ujson==5.12.0
 cbor2==5.8.0
 py-ubjson==0.16.1

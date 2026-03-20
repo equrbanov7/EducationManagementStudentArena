@@ -155,10 +155,13 @@ class RequestHasPermissionTest(TestCase):
             org_memberships=[],
         )
 
-        with patch(
-            "apps.audit.utils.log_superadmin_cross_org_action",
-            side_effect=Exception("audit failure"),
-        ), patch("core.permissions.logger") as mock_logger:
+        with (
+            patch(
+                "apps.audit.utils.log_superadmin_cross_org_action",
+                side_effect=Exception("audit failure"),
+            ),
+            patch("core.permissions.logger") as mock_logger,
+        ):
             result = request_has_permission(request, "course.delete")
 
         self.assertTrue(result)

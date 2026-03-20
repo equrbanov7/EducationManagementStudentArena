@@ -5,12 +5,12 @@ Tests for accounts middleware: SuspendedOrganizationMiddleware and SessionTimeou
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase, RequestFactory, override_settings
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.accounts.middleware import SessionTimeoutMiddleware
 from apps.accounts.models import ProfileRole
-from apps.accounts.middleware import SessionTimeoutMiddleware, SuspendedOrganizationMiddleware
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
 
@@ -175,6 +175,7 @@ class SessionTimeoutMiddlewareTest(TestCase):
 
         def get_response(request):
             from django.http import HttpResponse
+
             return HttpResponse("ok")
 
         with override_settings(SESSION_INACTIVITY_TIMEOUT=timeout_seconds):
@@ -185,7 +186,6 @@ class SessionTimeoutMiddlewareTest(TestCase):
 
     def test_last_activity_set_on_first_request(self):
         """last_activity must be written to the session on the first authenticated request."""
-        from django.test import RequestFactory
         from django.contrib.sessions.backends.db import SessionStore
 
         client = Client()
@@ -195,7 +195,9 @@ class SessionTimeoutMiddlewareTest(TestCase):
         client.get(reverse("home"))
 
         # The session must now have a last_activity key
-        session_key = client.cookies[__import__("django.conf", fromlist=["settings"]).settings.SESSION_COOKIE_NAME].value
+        session_key = client.cookies[
+            __import__("django.conf", fromlist=["settings"]).settings.SESSION_COOKIE_NAME
+        ].value
         store = SessionStore(session_key)
         self.assertIn("last_activity", store)
 
