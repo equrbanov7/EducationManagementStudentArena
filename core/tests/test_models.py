@@ -15,7 +15,6 @@ from django.utils import timezone
 
 from core.models import SoftDeleteModel, TitleSlugModel
 
-
 # ---------------------------------------------------------------------------
 # Concrete models for testing (not backed by migrations)
 # ---------------------------------------------------------------------------

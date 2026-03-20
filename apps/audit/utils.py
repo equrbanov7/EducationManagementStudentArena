@@ -105,6 +105,8 @@ def log_superadmin_cross_org_action(request, action: str, *, target_org=None, ob
         reason=reason or f"Superadmin cross-org access to organization '{org.name}' ({org.pk})",
         request=request,
     )
+
+
 class AuditLogMixin:
     """
     Mixin for models to automatically log save and delete actions.

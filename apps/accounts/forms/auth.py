@@ -4,20 +4,19 @@ Authentication and registration forms (accounts app).
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import pgettext_lazy
 
-from apps.accounts.models import EmailOTP
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from ..models import ProfileRole
-from ..services import issue_email_otp, verify_otp_code
+from ..services import issue_email_otp
 
 User = get_user_model()
 

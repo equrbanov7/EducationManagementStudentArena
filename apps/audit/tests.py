@@ -157,8 +157,8 @@ class SuperadminCrossOrgAuditTest(TransactionTestCase):
 
     def test_same_org_member_superadmin_does_not_log(self):
         """No cross-org log entry when the superadmin has membership in the org."""
-        from apps.organizations.models import Membership
         from apps.audit.utils import log_superadmin_cross_org_action
+        from apps.organizations.models import Membership
 
         student_role = self.target_org.roles.get(name="student")
         membership = Membership.objects.create(
