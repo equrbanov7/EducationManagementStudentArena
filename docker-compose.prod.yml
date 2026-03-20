@@ -74,6 +74,7 @@ services:
   # Daphne. Not exposed externally; nginx proxies all traffic to it.
   # ─────────────────────────────────────────────────────────────────────────
   app:
+    image: ${APP_IMAGE:-emsarena-prod:latest}
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
@@ -90,6 +91,7 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@emsarena.az}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      MEDIA_ACCEL_REDIRECT_URL: /internal_media
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
