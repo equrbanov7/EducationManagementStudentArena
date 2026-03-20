@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
@@ -96,9 +96,19 @@ class LiveSession(models.Model):
         # Wrap the uniqueness check and the actual INSERT/UPDATE in a single
         # atomic block so concurrent session creation cannot produce duplicate
         # PINs.  The DB unique constraint on `pin` remains as a hard backstop.
-        with transaction.atomic():
-            self._ensure_unique_pin()
-            super().save(*args, **kwargs)
+        # An IntegrityError (race-condition collision that slips past the
+        # pre-check) triggers a fresh PIN and one immediate retry.
+        _MAX_SAVE_TRIES = 5
+        for attempt in range(_MAX_SAVE_TRIES):
+            try:
+                with transaction.atomic():
+                    self._ensure_unique_pin()
+                    super().save(*args, **kwargs)
+                return
+            except IntegrityError:
+                if attempt >= _MAX_SAVE_TRIES - 1:
+                    raise
+                self.pin = generate_pin()
 
     def join_url_path(self):
         return f"/live/join/{self.pin}/"

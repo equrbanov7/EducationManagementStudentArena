@@ -3,6 +3,7 @@ Core abstract models for EMS Arena project.
 Base models that can be inherited by app models.
 """
 
+import itertools
 import uuid
 
 from django.db import models
@@ -32,13 +33,28 @@ class UUIDModel(models.Model):
         abstract = True
 
 
+class SoftDeleteManager(models.Manager):
+    """
+    Default manager for SoftDeleteModel — excludes soft-deleted rows.
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class SoftDeleteModel(models.Model):
     """
     Abstract model that provides soft delete functionality.
+
+    Default manager (``objects``) automatically excludes soft-deleted rows.
+    Use ``all_objects`` to bypass the filter and access every row.
     """
 
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
 
     class Meta:
         abstract = True
@@ -47,6 +63,10 @@ class SoftDeleteModel(models.Model):
 class TitleSlugModel(models.Model):
     """
     Abstract model that provides title and auto-generated slug fields.
+
+    Slug collisions are resolved automatically by appending an incrementing
+    numeric suffix (e.g. ``my-title``, ``my-title-1``, ``my-title-2``, …).
+    An ``IntegrityError`` is never raised for duplicate slugs.
     """
 
     title = models.CharField(max_length=255)
@@ -57,7 +77,15 @@ class TitleSlugModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            self.slug = base_slug
+            for x in itertools.count(1):
+                qs = self.__class__.objects.filter(slug=self.slug)
+                if self.pk:
+                    qs = qs.exclude(pk=self.pk)
+                if not qs.exists():
+                    break
+                self.slug = f"{base_slug}-{x}"
         super().save(*args, **kwargs)
 
 
