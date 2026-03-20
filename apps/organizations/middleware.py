@@ -4,8 +4,8 @@ Middleware for handling organization context in requests.
 Organization resolution order
 ------------------------------
 1. If ``active_organization`` is set in the session, load that org and verify
-   the current user has an active membership (or is a super-admin / profile
-   owner-admin).  If the org is inactive or the user is no longer a member the
+   the current user has an active membership (or is a super-admin).
+   If the org is inactive or the user is no longer a member the
    slug is removed from the session and resolution continues.
 
 2. If no session org is present, query the user's **active** memberships
@@ -55,22 +55,6 @@ class OrganizationMiddleware:
             result.setdefault(m.organization_id, m.organization)
         return result
 
-    @staticmethod
-    def _can_bootstrap_admin(user, organization):
-        """
-        Return True when the user's legacy profile marks them as org-owner or
-        org-admin for *organization* but no explicit Membership row exists yet.
-        This prevents locking out legacy admins during the transition period.
-        """
-        from apps.accounts.models import ProfileRole
-
-        profile = getattr(user, "profile", None)
-        return (
-            profile is not None
-            and getattr(profile, "organization_id", None) == organization.id
-            and getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
-        )
-
     # ------------------------------------------------------------------
     # Main entry-point
     # ------------------------------------------------------------------
@@ -106,7 +90,7 @@ class OrganizationMiddleware:
                 is_superuser = getattr(request.user, "is_superuser", False) or getattr(
                     request.user, "is_superadmin", False
                 )
-                if memberships or is_superuser or self._can_bootstrap_admin(request.user, candidate):
+                if memberships or is_superuser:
                     request.organization = candidate
                     request.org_memberships = memberships
                 else:
