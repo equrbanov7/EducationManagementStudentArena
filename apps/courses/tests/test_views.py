@@ -273,8 +273,12 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, f'{reverse("exams:teacher_exam_detail", args=[self.course_exam.slug])}?from_section=my-courses')
-        self.assertContains(response, f'{reverse("exams:teacher_exam_results", args=[self.course_exam.slug])}?from_section=my-courses')
+        self.assertContains(
+            response, f'{reverse("exams:teacher_exam_detail", args=[self.course_exam.slug])}?from_section=my-courses'
+        )
+        self.assertContains(
+            response, f'{reverse("exams:teacher_exam_results", args=[self.course_exam.slug])}?from_section=my-courses'
+        )
         expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
         self.assertContains(response, f"return_to={expected_return_to}")
 
@@ -304,7 +308,9 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.course_a.status = "draft"
         self.course_a.save(update_fields=["status"])
 
-        next_url = f"{reverse('courses:course_dashboard', kwargs={'course_id': self.course_a.id})}?from_section=my-courses"
+        next_url = (
+            f"{reverse('courses:course_dashboard', kwargs={'course_id': self.course_a.id})}?from_section=my-courses"
+        )
         response = self.client.post(
             reverse("courses:update_course_status", kwargs={"course_id": self.course_a.id}),
             {"status": "published", "next": next_url},
@@ -314,6 +320,7 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.url, next_url)
         self.course_a.refresh_from_db()
         self.assertEqual(self.course_a.status, "published")
+
     def test_delete_course_redirects_to_new_profile_page(self):
         self.client.force_login(self.owner)
         session = self.client.session
@@ -420,7 +427,8 @@ class CourseOrganizationRequiredTest(TestCase):
     """
 
     def setUp(self):
-        from django.core.exceptions import ValidationError
+        pass
+
         self.teacher = User.objects.create_user(
             username="org_req_teacher",
             email="org_req_teacher@example.com",
@@ -467,6 +475,7 @@ class CourseOrganizationRequiredTest(TestCase):
     def test_create_course_view_raises_403_without_active_organization(self):
         """CreateCourseView form_valid raises PermissionDenied when request has no organization."""
         from django.core.exceptions import PermissionDenied
+
         from apps.courses.views.crud import CreateCourseView
 
         # Simulate a request with organization=None (no active org)
@@ -486,6 +495,7 @@ class CourseOrganizationRequiredTest(TestCase):
         view.object = None
 
         from apps.courses.forms import CourseForm
+
         form = CourseForm({"title": "No Org Course", "description": "Should not be saved"})
         form.instance.owner = self.teacher
 

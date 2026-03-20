@@ -278,7 +278,7 @@ class SubscriberTest(TestCase):
         """Test that subscriber email must be unique."""
         Subscriber.objects.create(email="unique@example.com")
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception):  # noqa: B017
             Subscriber.objects.create(email="unique@example.com")
 
     def test_subscriber_string_representation(self):

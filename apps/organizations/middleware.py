@@ -85,6 +85,7 @@ class OrganizationMiddleware:
             return self.get_response(request)
 
         from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
+
         from .models import Organization
 
         # ── Step 1: restore org from session ──────────────────────────────

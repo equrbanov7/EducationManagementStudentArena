@@ -550,7 +550,7 @@ class OTPPasswordResetConfirmForm(SetPasswordForm):
         if matched_otp is not None and not matched_otp.is_used:
             matched_otp.is_used = True
             matched_otp.save(update_fields=["is_used"])
-        EmailOTP.objects.filter(user=user, is_used=False).exclude(
-            pk=getattr(matched_otp, "pk", None)
-        ).update(is_used=True)
+        EmailOTP.objects.filter(user=user, is_used=False).exclude(pk=getattr(matched_otp, "pk", None)).update(
+            is_used=True
+        )
         return user

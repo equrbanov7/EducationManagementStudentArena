@@ -92,12 +92,16 @@ def get_question_phase_override(session: LiveSession, *, question_id: int | None
     if not isinstance(override, dict):
         return None
 
-    active_question_id = safe_int(question_id if question_id is not None else getattr(session, "current_question_id", 0), 0)
+    active_question_id = safe_int(
+        question_id if question_id is not None else getattr(session, "current_question_id", 0), 0
+    )
     override_question_id = safe_int(override.get("question_id"), 0)
     if active_question_id <= 0 or override_question_id != active_question_id:
         return None
 
-    answer_starts_at = parse_datetime(str(override.get("answer_starts_at") or "")) if override.get("answer_starts_at") else None
+    answer_starts_at = (
+        parse_datetime(str(override.get("answer_starts_at") or "")) if override.get("answer_starts_at") else None
+    )
     ends_at = parse_datetime(str(override.get("ends_at") or "")) if override.get("ends_at") else None
     ready_ends_at = parse_datetime(str(override.get("ready_ends_at") or "")) if override.get("ready_ends_at") else None
     if answer_starts_at is None or ends_at is None:

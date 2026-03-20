@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from apps.exams.models import StudentGroup
 
-from .models import Course, CourseMembership
+from .models import CourseMembership
 
 User = get_user_model()
 
@@ -255,9 +255,7 @@ def get_available_student_groups(organization, teacher):
     Returns:
         QuerySet: StudentGroup queryset
     """
-    qs = StudentGroup.objects.filter(
-        Q(teacher=teacher) | Q(teachers=teacher)
-    ).distinct()
+    qs = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
 
     if organization is not None:
         qs = qs.filter(organization=organization)

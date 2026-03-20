@@ -12,17 +12,21 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
 
 from apps.live_exam.auth import get_request_player
-from apps.live_exam.domain.session import build_question_phase_times, detect_multi, get_question_by_index, get_total_questions
+from apps.live_exam.domain.session import (
+    build_question_phase_times,
+    detect_multi,
+    get_question_by_index,
+    get_total_questions,
+)
 from apps.live_exam.models import LiveSession
-from apps.live_exam.session_settings import get_session_settings
 from apps.live_exam.serializers import (
     serialize_player_question_result,
     serialize_players,
     serialize_question,
-    serialize_question_results,
     serialize_top,
     serialize_top_before_question,
 )
+from apps.live_exam.session_settings import get_session_settings
 from apps.live_exam.transport import build_reveal_payload
 from core.rate_limit import record_rate_limit_hit
 from core.utils import get_client_ip
@@ -94,7 +98,11 @@ def live_state_json(request, pin):
 
     idx = int(session.current_index or 0)
     eq = get_question_by_index(session, idx)
-    if not eq or session.state not in {LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL} or not session.question_started_at:
+    if (
+        not eq
+        or session.state not in {LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL}
+        or not session.question_started_at
+    ):
         return JsonResponse(data)
 
     started = session.question_started_at

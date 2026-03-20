@@ -153,11 +153,7 @@ def _build_group_student_map(form):
     group_qs = group_field.queryset.prefetch_related("students")
 
     for group in group_qs:
-        member_ids = [
-            student.id
-            for student in group.students.all()
-            if student.id in allowed_user_ids
-        ]
+        member_ids = [student.id for student in group.students.all() if student.id in allowed_user_ids]
         group_student_map[str(group.id)] = [str(member_id) for member_id in member_ids]
 
     return group_student_map
@@ -165,10 +161,7 @@ def _build_group_student_map(form):
 
 def _get_requested_course_for_exam(request):
     raw_course_id = (
-        request.POST.get("course_id")
-        or request.GET.get("course")
-        or request.GET.get("course_id")
-        or ""
+        request.POST.get("course_id") or request.GET.get("course") or request.GET.get("course_id") or ""
     ).strip()
     if not raw_course_id.isdigit():
         return None

@@ -590,7 +590,9 @@ class LabAnswer(models.Model):
     attempt_number = models.PositiveIntegerField(default=1)
 
     answer = models.TextField(blank=True)
-    answer_file = models.FileField(upload_to="labs/answers/%Y/%m/", blank=True, null=True, validators=[FileUploadValidator()])
+    answer_file = models.FileField(
+        upload_to="labs/answers/%Y/%m/", blank=True, null=True, validators=[FileUploadValidator()]
+    )
 
     is_draft = models.BooleanField(default=True)
     is_correct = models.BooleanField(null=True, blank=True)

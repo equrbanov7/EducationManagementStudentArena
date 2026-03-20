@@ -277,7 +277,7 @@ class ProfileViewTest(TestCase):
         from apps.accounts.models import UserProfile
         from apps.exams.models import Exam
 
-        profile = UserProfile.objects.get(user=self.user)
+        UserProfile.objects.get(user=self.user)
         organization = Organization.objects.create(
             name="Teacher Profile Org",
             org_type=OrganizationType.SCHOOL,
@@ -1609,12 +1609,13 @@ class PendingAnswersViewTest(TestCase):
     def setUp(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.accounts.models import ProfileRole
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from apps.exams.models import Exam, ExamAttempt
         from apps.projects.models import Project, ProjectSubmission
-        from django.utils import timezone
 
         self.client = Client()
         self.teacher = User.objects.create_user(
@@ -1962,9 +1963,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_assignment_points_to_pending_detail_with_type_label(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2009,9 +2011,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_reveals_assignment_student_after_pregrade_window_closes(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2055,9 +2058,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_detail_allows_edit_within_window_and_locks_after(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2126,9 +2130,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_detail_preserves_saved_assignment_score_in_ui_and_shows_confirm_modal(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2173,9 +2178,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_detail_deduplicates_assignment_attachments(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2217,9 +2223,10 @@ class PendingReviewViewTest(TestCase):
     def test_pending_review_lab_detail_preserves_manual_total_without_checkbox(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.courses.models import Course, CourseMembership
         from apps.labs.models import Lab, LabAnswer, LabAssignment, LabBlock, LabQuestion, LabSubmission
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2388,11 +2395,12 @@ class ReviewResultsViewTest(TestCase):
     def test_review_results_non_exam_action_urls_point_to_review_detail_page(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
         from apps.labs.models import Lab, LabAssignment, LabSubmission
         from apps.projects.models import Project, ProjectSubmission
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 
@@ -2484,9 +2492,10 @@ class ReviewResultsViewTest(TestCase):
     def test_review_result_detail_assignment_loads_for_teacher(self):
         from datetime import timedelta
 
+        from django.utils import timezone
+
         from apps.assignments.models import Assignment, Submission
         from apps.courses.models import Course
-        from django.utils import timezone
 
         self._set_user_role(self.user, ProfileRole.TEACHER)
 

@@ -36,9 +36,7 @@ class TeacherRequiredMixin(AccessMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="TeacherRequiredMixin")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="TeacherRequiredMixin"))
 
 
 class StudentRequiredMixin(AccessMixin):
@@ -51,9 +49,7 @@ class StudentRequiredMixin(AccessMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        raise ImproperlyConfigured(
-            _REMOVED_MSG.format(name="StudentRequiredMixin")
-        )
+        raise ImproperlyConfigured(_REMOVED_MSG.format(name="StudentRequiredMixin"))
 
 
 class OwnerRequiredMixin(AccessMixin):
@@ -68,6 +64,7 @@ class OwnerRequiredMixin(AccessMixin):
 
     def dispatch(self, request, *args, **kwargs):
         import warnings
+
         warnings.warn(
             "OwnerRequiredMixin is deprecated. "
             "Use apps.organizations.decorators.OrganizationRequiredMixin / "
@@ -77,6 +74,7 @@ class OwnerRequiredMixin(AccessMixin):
         )
         from django.contrib import messages
         from django.shortcuts import redirect
+
         obj = self.get_object()
         if obj.user != request.user:
             messages.error(request, "You don't have permission to access this page.")

@@ -24,7 +24,10 @@ def safe_same_origin_redirect_path(request, candidate_url):
 def current_return_to(request):
     return safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next") or request.POST.get("return_to") or request.POST.get("next"),
+        request.GET.get("return_to")
+        or request.GET.get("next")
+        or request.POST.get("return_to")
+        or request.POST.get("next"),
     )
 
 

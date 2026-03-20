@@ -12,11 +12,7 @@ class SuperadminBypassAdminMixin:
 
     @staticmethod
     def _is_platform_superadmin(user):
-        return bool(
-            user
-            and user.is_authenticated
-            and (user.is_superuser or getattr(user, "is_superadmin", False))
-        )
+        return bool(user and user.is_authenticated and (user.is_superuser or getattr(user, "is_superadmin", False)))
 
     def has_module_permission(self, request):
         if self._is_platform_superadmin(request.user):

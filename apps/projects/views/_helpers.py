@@ -7,14 +7,13 @@ Project-specific helper functions.
 from django.shortcuts import get_object_or_404
 
 from apps.projects.models import Project, ProjectSubmission
+from apps.task_submission_core.navigation import append_return_to as _append_return_to  # noqa: F401 – re-exported
 from apps.task_submission_core.navigation import (
-    append_return_to as _append_return_to,
     build_student_task_back_url,
     build_teacher_review_back_url,
     student_return_to,
 )
 from core.helpers import _tenant_scoped_courses
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # Tenant Scoping Functions

@@ -5,6 +5,7 @@ This module contains service functions that encapsulate business operations.
 
 from django.utils import timezone
 
+from apps.task_submission_core.services import parse_score_value  # noqa: F401 – re-exported
 from apps.task_submission_core.services import (
     apply_grade,
     assign_task_to_group,
@@ -13,12 +14,10 @@ from apps.task_submission_core.services import (
     create_submission,
     get_pending_task_submissions,
     get_task_submissions,
-    parse_score_value,
     update_submission,
 )
 
 from .models import ProjectSubmission
-
 
 # ════════════════════════════════════════════════════════════════════════════
 # Project Submission Services
@@ -230,6 +229,7 @@ def can_student_submit_project(project, student):
     if not project.assigned_students.filter(id=student.id).exists():
         # Check if student is in course
         from apps.courses.models import CourseMembership
+
         if not CourseMembership.objects.filter(
             course=project.course,
             user=student,
