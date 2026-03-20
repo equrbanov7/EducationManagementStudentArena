@@ -48,25 +48,14 @@ if settings.DEBUG:
         path("test-error/", test_error, name="test_error"),
     ]
 
-if settings.DEBUG:
-    # In DEBUG mode, route ALL media paths through protected_media.
-    # The protected_media view internally differentiates between public and
-    # private paths: private paths (exam_uploads/, labs/, projects/submissions/,
-    # etc.) require authentication, while public paths (post_images/, etc.) are
-    # served openly.  This ensures authentication is enforced for sensitive files
-    # even in development.
-    media_prefix = settings.MEDIA_URL.lstrip("/")
-    if media_prefix and not media_prefix.endswith("/"):
-        media_prefix += "/"
-    urlpatterns += [
-        re_path(
-            rf"^{re.escape(media_prefix)}(?P<path>.*)$",
-            protected_media,
-        )
-    ]
-elif getattr(settings, "SERVE_MEDIA", False):
-    # Use authenticated protected_media view instead of bare serve().
-    # This prevents unauthenticated access to private media files.
+if settings.DEBUG or getattr(settings, "SERVE_MEDIA", False):
+    # In DEBUG mode, route ALL media paths through protected_media so that
+    # authentication is enforced for private paths (exam_uploads/, labs/,
+    # projects/submissions/, etc.) even in development.  The protected_media
+    # view differentiates between public and private paths internally.
+    # In non-DEBUG mode this branch is only reached when SERVE_MEDIA=True
+    # (simple/staging deployments); production nginx/caddy should serve media
+    # directly with SERVE_MEDIA=False.
     media_prefix = settings.MEDIA_URL.lstrip("/")
     if media_prefix and not media_prefix.endswith("/"):
         media_prefix += "/"
