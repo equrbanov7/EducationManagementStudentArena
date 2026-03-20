@@ -225,6 +225,7 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         rejected by AllowedHostsOriginValidator before reaching the consumer.
         The connection must not be established.
         """
+
         async def scenario():
             communicator = WebsocketCommunicator(
                 application,
@@ -1130,9 +1131,11 @@ class WebSocketOriginValidationTest(TransactionTestCase):
 
     def test_player_answer_accepted_on_valid_origin(self):
         """Sanity check: player answer is accepted when origin is valid (testserver)."""
-        correct_option_id = ExamQuestionOption.objects.filter(
-            question=self.question, is_correct=True
-        ).values_list("id", flat=True).first()
+        correct_option_id = (
+            ExamQuestionOption.objects.filter(question=self.question, is_correct=True)
+            .values_list("id", flat=True)
+            .first()
+        )
 
         async def scenario():
             communicator = WebsocketCommunicator(
