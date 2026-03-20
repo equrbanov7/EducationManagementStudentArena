@@ -43,51 +43,7 @@
           {% endfor %}
         </section>
 
-        {% if page_obj.has_other_pages %}
-        <div class="pagination-wrapper">
-            <ul class="pagination">
-                
-                {# --- GERİ --- #}
-                {% if page_obj.has_previous %}
-                    <li>
-                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
-                            <i class="fas fa-chevron-left"></i> <span>{% trans "pagination_prev" context "blog.home_page" %}</span>
-                        </a>
-                    </li>
-                {% else %}
-                     <li><span class="page-link disabled prev-next"><i class="fas fa-chevron-left"></i> <span>{% trans "pagination_prev" context "blog.home_page" %}</span></span></li>
-                {% endif %}
-        
-                {# --- RƏQƏMLƏR --- #}
-                {% for num in page_obj.paginator.page_range %}
-                    
-                    {% if page_obj.number == num %}
-                        <li><span class="page-link active">{{ num }}</span></li>
-                    
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <li>
-                            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="page-link">
-                                {{ num }}
-                            </a>
-                        </li>
-                    {% endif %}
-        
-                {% endfor %}
-        
-                {# --- İRƏLİ --- #}
-                {% if page_obj.has_next %}
-                    <li>
-                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="page-link prev-next">
-                            <span>{% trans "pagination_next" context "blog.home_page" %}</span> <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                {% else %}
-                    <li><span class="page-link disabled prev-next"><span>{% trans "pagination_next" context "blog.home_page" %}</span> <i class="fas fa-chevron-right"></i></span></li>
-                {% endif %}
-        
-            </ul>
-        </div>
-        {% endif %}
+        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=extra_query %}
 
 
     </div>

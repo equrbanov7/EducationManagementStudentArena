@@ -22,7 +22,7 @@
       <button class="register-submit-btn" type="submit">{% trans "submit" context "blog.verify_code_page" %}</button>
     </form>
 
-    <form method="post" action="{% url 'resend_code' %}" style="margin-top:12px;">
+    <form method="post" action="{% url 'resend_code' %}" class="register-resend-form">
       {% csrf_token %}
       <button class="register-submit-btn" type="submit">{% trans "resend" context "blog.verify_code_page" %}</button>
     </form>

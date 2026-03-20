@@ -146,7 +146,7 @@
 
 {% endif %}
 
-<style>
+<style nonce="{{ request.csp_nonce }}">
 .asn-chk-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer}
 .asn-chk-row:hover{background:#f5f9ff}
 .asn-chk-row:last-child{border-bottom:none}
