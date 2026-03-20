@@ -78,7 +78,7 @@ class OwnerRequiredMixin(AccessMixin):
         from django.contrib import messages
         from django.shortcuts import redirect
         obj = self.get_object()
-        if obj.user != request.user and not request.user.is_staff:
+        if obj.user != request.user:
             messages.error(request, "You don't have permission to access this page.")
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)

@@ -7,7 +7,7 @@
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'courses/css/course_dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
-<style>
+<style nonce="{{ request.csp_nonce }}">
   .my-courses-wrap { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
   .course-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
   .course-card { 

@@ -84,6 +84,13 @@
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
+.subscribe-form-error {
+    margin-top: 5px;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #991b1b;
+}
+
 /* Göndər Düyməsi */
 .btn-subscribe {
     width: 100%;

@@ -23,6 +23,9 @@
 
         <form method="post" class="auth-form" novalidate>
             {% csrf_token %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
 
             <div class="auth-form-field"> {# auth-field -> auth-form-field #}
                 {{ form.username.label_tag }}

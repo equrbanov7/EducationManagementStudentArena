@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ organization.name }} - {% trans "page_title" context "organizations.roles" %}</title>
-    <style>
+    <style nonce="{{ request.csp_nonce }}">
         * {
             margin: 0;
             padding: 0;
