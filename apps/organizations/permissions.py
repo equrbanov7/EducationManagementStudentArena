@@ -79,6 +79,7 @@ PERMISSION_CATEGORIES = {
         "exam.view",
         "exam.create",
         "exam.edit",
+        "exam.manage",
         "exam.host",
         "exam.delete",
     ],

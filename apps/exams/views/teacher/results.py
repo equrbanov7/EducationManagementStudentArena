@@ -14,7 +14,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAnswer, ExamAttempt
-from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW

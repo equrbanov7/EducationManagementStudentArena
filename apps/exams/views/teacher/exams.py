@@ -13,7 +13,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from apps.courses.models import CourseMembership
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
-from apps.exams.services.attempts import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404, tenant_scoped_exams
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission

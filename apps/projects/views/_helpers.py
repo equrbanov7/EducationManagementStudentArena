@@ -4,6 +4,8 @@ projects/views/_helpers.py
 Project-specific helper functions.
 """
 
+from urllib.parse import urlencode
+
 from django.shortcuts import get_object_or_404
 
 from apps.projects.models import Project, ProjectSubmission
@@ -63,3 +65,10 @@ def _student_return_to(request):
 def _teacher_review_back_url(request, project):
     """Generate the back URL for teacher review page."""
     return build_teacher_review_back_url(request, course_id=project.course.id)
+
+
+def _append_return_to(url, return_to):
+    if not return_to:
+        return url
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}{urlencode({'return_to': return_to})}"

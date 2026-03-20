@@ -27,7 +27,7 @@ from apps.live_exam.serializers import (
     serialize_top_before_question,
 )
 from apps.live_exam.session_settings import get_session_settings
-from apps.live_exam.transport import build_reveal_payload
+from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
 from core.rate_limit import record_rate_limit_hit
 from core.utils import get_client_ip
 
@@ -134,8 +134,14 @@ def live_state_json(request, pin):
 
     data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
     if session.state == LiveSession.STATE_REVEAL:
-        reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends)
-        data["results"] = reveal_payload["results"]
+        if is_host:
+            # Host receives the full reveal payload including per-player result details.
+            reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends)
+            data["results"] = reveal_payload["results"]
+        else:
+            # Players receive the player-appropriate reveal payload: correct answers and
+            # leaderboard data are included, but per-player result details are host-only.
+            reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends)
         data["top"] = reveal_payload["top"]
         data["previous_top"] = reveal_payload["previous_top"]
         data["distribution"] = reveal_payload["distribution"]
