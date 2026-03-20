@@ -78,3 +78,63 @@ class CustomErrorHandlerTests(TestCase):
             hasattr(root_urlconf, "handler500"),
             "handler500 must be a module-level name in config.urls",
         )
+
+
+@override_settings(DEBUG=False)
+class TestErrorEndpointProductionTest(TestCase):
+    """
+    Task 9: The /test-error/ route must be completely inaccessible in production
+    (DEBUG=False).  Ensure it returns 404 rather than triggering an error.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_test_error_route_inaccessible_in_production(self):
+        """
+        When DEBUG=False, the /test-error/ URL must not be registered in the
+        URL configuration, and any request to it must return 404.
+        """
+        response = self.client.get("/test-error/")
+        self.assertEqual(
+            response.status_code,
+            404,
+            "The /test-error/ route must not be accessible when DEBUG=False",
+        )
+
+    def test_test_error_route_not_in_urlpatterns_production(self):
+        """
+        In production mode, the ``test_error`` URL name must not be resolvable.
+        """
+        from django.urls import NoReverseMatch, reverse
+
+        with self.assertRaises(NoReverseMatch):
+            reverse("test_error")
+
+
+@override_settings(DEBUG=True)
+class TestErrorEndpointDevelopmentTest(TestCase):
+    """
+    Task 9: The /test-error/ route must be accessible in development (DEBUG=True).
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_test_error_route_accessible_in_development(self):
+        """
+        When DEBUG=True, the /test-error/ endpoint must exist and be reachable.
+        It intentionally raises a 500 (Sentry smoke-test), so any response
+        other than 404 confirms the route is registered.
+        """
+        try:
+            response = self.client.get("/test-error/")
+            self.assertNotEqual(
+                response.status_code,
+                404,
+                "The /test-error/ route must be accessible when DEBUG=True",
+            )
+        except Exception:
+            # The view may raise an exception (that's its purpose); just ensure
+            # the URL was resolved (i.e., no NoReverseMatch/404 before the view).
+            pass

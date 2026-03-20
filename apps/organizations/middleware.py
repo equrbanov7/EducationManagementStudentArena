@@ -1,5 +1,27 @@
 """
 Middleware for handling organization context in requests.
+
+Organization resolution order
+------------------------------
+1. If ``active_organization`` is set in the session, load that org and verify
+   the current user has an active membership (or is a super-admin / profile
+   owner-admin).  If the org is inactive or the user is no longer a member the
+   slug is removed from the session and resolution continues.
+
+2. If no session org is present, query the user's **active** memberships
+   without first materializing anything.
+   • Exactly 1 active org  → auto-select it and persist the slug to the
+     session as a convenience (single-org users must not be forced to pick
+     every request).
+   • 0 active orgs  → attempt legacy materialization once (back-fill the
+     membership that the old profile-role system implies), then repeat the
+     check.  If that yields exactly 1 org it is auto-selected.
+   • 2+ active orgs  → leave ``request.organization = None``.  The user must
+     visit the org-picker and make an explicit choice.
+
+3. Once an organization is confirmed, apply
+   ``_materialize_legacy_teacher_membership`` *for that specific org only* to
+   ensure teacher/assistant-teacher membership records are up to date.
 """
 
 
@@ -12,97 +34,137 @@ class OrganizationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _fetch_active_memberships(user):
+        """Return all active memberships for *user* across active organizations."""
+        return list(
+            user.memberships.filter(is_active=True, organization__is_active=True)
+            .select_related("organization", "role", "scope_unit")
+            .order_by("-is_primary", "-role__level")
+        )
+
+    @staticmethod
+    def _unique_orgs(memberships):
+        """Return an ``{org_id: Organization}`` mapping from a membership list."""
+        result = {}
+        for m in memberships:
+            result.setdefault(m.organization_id, m.organization)
+        return result
+
+    @staticmethod
+    def _can_bootstrap_admin(user, organization):
+        """
+        Return True when the user's legacy profile marks them as org-owner or
+        org-admin for *organization* but no explicit Membership row exists yet.
+        This prevents locking out legacy admins during the transition period.
+        """
+        from apps.accounts.models import ProfileRole
+
+        profile = getattr(user, "profile", None)
+        return (
+            profile is not None
+            and getattr(profile, "organization_id", None) == organization.id
+            and getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
+        )
+
+    # ------------------------------------------------------------------
+    # Main entry-point
+    # ------------------------------------------------------------------
+
     def __call__(self, request):
         # Initialize organization-related attributes
         request.organization = None
         request.org_memberships = []
         request.org_permissions = []
 
-        # Only process for authenticated users
-        if request.user.is_authenticated:
-            from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
-            from .models import Organization
+        if not request.user.is_authenticated:
+            return self.get_response(request)
 
-            # Get organization from session (set by organization selector)
-            org_slug = request.session.get("active_organization")
+        from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
+        from .models import Organization
 
-            if org_slug:
-                # Try to load the organization
-                try:
-                    request.organization = Organization.objects.get(slug=org_slug, is_active=True)
-                except Organization.DoesNotExist:
-                    # Organization not found or inactive, clear session
-                    request.session.pop("active_organization", None)
+        # ── Step 1: restore org from session ──────────────────────────────
+        org_slug = request.session.get("active_organization")
+        if org_slug:
+            try:
+                candidate = Organization.objects.get(slug=org_slug, is_active=True)
+            except Organization.DoesNotExist:
+                # Org has been deactivated or deleted — purge from session.
+                request.session.pop("active_organization", None)
+                candidate = None
 
-            # If organization is set, load memberships and permissions
-            if request.organization:
-                # Get active memberships for this user in this organization
-                request.org_memberships = list(
-                    request.user.memberships.filter(organization=request.organization, is_active=True)
+            if candidate is not None:
+                memberships = list(
+                    request.user.memberships.filter(organization=candidate, is_active=True)
                     .select_related("role", "scope_unit")
                     .order_by("-is_primary", "-role__level")
                 )
-
-                can_bootstrap_admin_membership = False
-                if not request.org_memberships:
-                    from apps.accounts.models import ProfileRole
-
-                    profile = getattr(request.user, "profile", None)
-                    can_bootstrap_admin_membership = (
-                        getattr(profile, "organization_id", None) == request.organization.id
-                        and getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
-                    )
-
-                if not request.org_memberships and not can_bootstrap_admin_membership and not (
-                    getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-                ):
-                    request.organization = None
+                is_superuser = getattr(request.user, "is_superuser", False) or getattr(
+                    request.user, "is_superadmin", False
+                )
+                if memberships or is_superuser or self._can_bootstrap_admin(request.user, candidate):
+                    request.organization = candidate
+                    request.org_memberships = memberships
+                else:
+                    # User is no longer a member of the session org — clear it.
                     request.session.pop("active_organization", None)
 
-            if request.organization is None:
-                # Backfill legacy teacher membership before querying so that new/legacy
-                # users without explicit membership records are found in the query below.
+        # ── Step 2: auto-select when no session org is available ──────────
+        if request.organization is None:
+            active_memberships = self._fetch_active_memberships(request.user)
+            unique_orgs = self._unique_orgs(active_memberships)
+
+            if len(unique_orgs) == 1:
+                # Single org — auto-select for convenience.
+                request.organization = next(iter(unique_orgs.values()))
+                request.session["active_organization"] = request.organization.slug
+                request.org_memberships = [
+                    m for m in active_memberships if m.organization_id == request.organization.id
+                ]
+
+            elif len(unique_orgs) == 0:
+                # No memberships found — try legacy back-fill *once*.
                 _materialize_legacy_teacher_membership(request.user)
 
-                active_memberships = list(
-                    request.user.memberships.filter(is_active=True, organization__is_active=True)
-                    .select_related("organization", "role", "scope_unit")
-                    .order_by("-is_primary", "-role__level")
-                )
-                unique_organizations = {}
-                for membership in active_memberships:
-                    unique_organizations.setdefault(membership.organization_id, membership.organization)
+                active_memberships = self._fetch_active_memberships(request.user)
+                unique_orgs = self._unique_orgs(active_memberships)
 
-                if len(unique_organizations) == 1:
-                    request.organization = next(iter(unique_organizations.values()))
+                if len(unique_orgs) == 1:
+                    request.organization = next(iter(unique_orgs.values()))
                     request.session["active_organization"] = request.organization.slug
                     request.org_memberships = [
-                        membership
-                        for membership in active_memberships
-                        if membership.organization_id == request.organization.id
+                        m for m in active_memberships if m.organization_id == request.organization.id
                     ]
+                # len == 0  → leave request.organization = None (no org to assign).
+                # Reaching here with 0 orgs after back-fill is a genuine no-org state.
 
-            if request.organization:
-                request.org_memberships = _materialize_legacy_teacher_membership(
-                    request.user,
-                    request.organization,
-                    memberships=request.org_memberships,
-                )
+            # len >= 2  → multi-org user; explicit selection required.
+            # request.organization stays None; the org-picker view handles this.
 
-                # Collect all permissions from memberships
-                permissions_set = set()
-                for membership in request.org_memberships:
-                    if membership.role.permissions:
-                        permissions_set.update(membership.role.permissions)
+        # ── Step 3: finalize permissions for the resolved org ─────────────
+        if request.organization:
+            # Apply legacy teacher membership materialization scoped to this org.
+            request.org_memberships = _materialize_legacy_teacher_membership(
+                request.user,
+                request.organization,
+                memberships=request.org_memberships,
+            )
 
-                request.org_permissions = list(permissions_set)
+            permissions_set = set()
+            for membership in request.org_memberships:
+                if membership.role.permissions:
+                    permissions_set.update(membership.role.permissions)
+            request.org_permissions = list(permissions_set)
 
-            if hasattr(request.user, "set_active_organization_context"):
-                request.user.set_active_organization_context(
-                    request.organization,
-                    memberships=request.org_memberships,
-                    permissions=request.org_permissions,
-                )
+        if hasattr(request.user, "set_active_organization_context"):
+            request.user.set_active_organization_context(
+                request.organization,
+                memberships=request.org_memberships,
+                permissions=request.org_permissions,
+            )
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
