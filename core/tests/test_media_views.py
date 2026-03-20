@@ -627,9 +627,7 @@ class QuestionMediaAccessTest(TestCase):
         self.file_path = f"question_media/exam_{self.exam.pk}/q_{self.question.pk}/img.jpg"
 
         # Create the physical file
-        file_dir = os.path.join(
-            self.media_tmp, "question_media", f"exam_{self.exam.pk}", f"q_{self.question.pk}"
-        )
+        file_dir = os.path.join(self.media_tmp, "question_media", f"exam_{self.exam.pk}", f"q_{self.question.pk}")
         os.makedirs(file_dir, exist_ok=True)
         with open(os.path.join(file_dir, "img.jpg"), "wb") as f:
             f.write(b"\xff\xd8\xff\xe0")

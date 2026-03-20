@@ -1311,9 +1311,7 @@ class SuspendedOrgHostActionTest(TestCase):
             self.org.is_active = False
         self.org.save()
 
-        response = self.client.post(
-            reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin})
-        )
+        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
         # Blocked access may be a redirect-to-login (302) from SuspendedOrganizationMiddleware
         # or a PermissionDenied (403) from the RBAC check in the view.  Both are correct.
         self.assertIn(
@@ -1322,9 +1320,7 @@ class SuspendedOrgHostActionTest(TestCase):
             f"host_start_game must block suspended/inactive org users (got {response.status_code})",
         )
 
-        response = self.client.post(
-            reverse("liveExam:host_toggle_lock", kwargs={"pin": self.session.pin})
-        )
+        response = self.client.post(reverse("liveExam:host_toggle_lock", kwargs={"pin": self.session.pin}))
         self.assertIn(
             response.status_code,
             {302, 403},
@@ -1378,9 +1374,7 @@ class PlayerPayloadHardeningTest(TestCase):
             is_active=True,
         )
         self.question = ExamQuestion.objects.create(exam=self.exam, text="Q1", order=1)
-        self.correct_option = ExamQuestionOption.objects.create(
-            question=self.question, text="Correct", is_correct=True
-        )
+        self.correct_option = ExamQuestionOption.objects.create(question=self.question, text="Correct", is_correct=True)
         ExamQuestionOption.objects.create(question=self.question, text="Wrong", is_correct=False)
 
         self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
