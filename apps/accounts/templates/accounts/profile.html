@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - EMSArena{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
@@ -54,10 +54,10 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'js/profile.js' %}"></script>
-<script src="{% static 'js/role_assignment_search.js' %}"></script>
-<script src="{% static 'js/permission_editor_ui.js' %}"></script>
-<script src="{% static 'js/manage_roles.js' %}"></script>
+<script src="{% static 'accounts/js/profile.js' %}"></script>
+<script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor_ui.js' %}"></script>
+<script src="{% static 'accounts/js/manage_roles.js' %}"></script>
 <script src="{% static 'js/user_profile.js' %}"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}"></script>
 <script src="{% static 'exams/js/profile_group_modal.js' %}?v=20260222-2"></script>

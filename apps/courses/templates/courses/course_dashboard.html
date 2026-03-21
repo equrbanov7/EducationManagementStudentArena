@@ -7,7 +7,7 @@
 
 {% block extraCss %}
     {% if is_student %}
-    <link rel="stylesheet" href="{% static 'css/profile/sections/assigned_exams.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
     {% endif %}
     {% if is_owner or user_role == 'teacher' %}
     <link rel="stylesheet" href="{% static 'exams/css/course_exam_modal.css' %}">

@@ -5,13 +5,16 @@ from django.db import connection
 from django.http import JsonResponse
 from django.shortcuts import render
 
+import redis as redis_client
+
 logger = logging.getLogger(__name__)
 
 
 def health_check(request):
     """
-    Health check endpoint for monitoring
-    Checks: Database connectivity, basic system status
+    Health check endpoint for monitoring.
+    Checks: Database connectivity, Redis connectivity.
+    Returns a structured JSON response with individual component statuses.
     """
     health_status = {"status": "healthy", "checks": {}}
 
@@ -19,14 +22,31 @@ def health_check(request):
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT %s", [1])
-            health_status["checks"]["database"] = "connected"
+        health_status["checks"]["database"] = "connected"
     except Exception:
         logger.exception("Database health check failed")
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = "error"
 
-    # Response
-    status_code = 200 if health_status["status"] == "healthy" else 503
+    # Redis check
+    try:
+        redis_url = getattr(settings, "REDIS_URL", "redis://127.0.0.1:6379/0")
+        client = redis_client.from_url(redis_url, socket_connect_timeout=2, socket_timeout=2)
+        try:
+            client.ping()
+        finally:
+            client.close()
+        health_status["checks"]["redis"] = "connected"
+    except Exception:
+        logger.exception("Redis health check failed")
+        # Redis failure is degraded (not fully unhealthy) unless already unhealthy
+        if health_status["status"] == "healthy":
+            health_status["status"] = "degraded"
+        health_status["checks"]["redis"] = "error"
+
+    # Response: 200 for healthy, 207 for degraded, 503 for unhealthy
+    status_map = {"healthy": 200, "degraded": 207, "unhealthy": 503}
+    status_code = status_map.get(health_status["status"], 503)
     return JsonResponse(health_status, status=status_code)
 
 
