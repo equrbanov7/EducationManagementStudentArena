@@ -28,6 +28,7 @@ from playwright.sync_api import Page, expect
 BASE_URL: str = os.environ.get("BASE_URL", "http://localhost").rstrip("/")
 E2E_USERNAME: str = os.environ.get("E2E_USERNAME", "")
 E2E_PASSWORD: str = os.environ.get("E2E_PASSWORD", "")
+DASHBOARD_URL: str = f"{BASE_URL}/accounts/dashboard/"
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -38,10 +39,19 @@ def login(page: Page) -> None:
     page.goto(f"{BASE_URL}/accounts/login/")
     page.wait_for_load_state("networkidle")
 
+    # Scope actions to the actual auth form because the page also contains
+    # hidden language-switcher submit buttons.
+    login_form = (
+        page.locator("form")
+        .filter(has=page.locator("input[name='username']"))
+        .filter(has=page.locator("input[name='password']"))
+    )
+    expect(login_form).to_have_count(1)
+
     # Fill in the login form (Django's default field names)
-    page.fill("input[name='username']", E2E_USERNAME)
-    page.fill("input[name='password']", E2E_PASSWORD)
-    page.click("button[type='submit']")
+    login_form.locator("input[name='username']").fill(E2E_USERNAME)
+    login_form.locator("input[name='password']").fill(E2E_PASSWORD)
+    login_form.locator("button[type='submit']").click()
     page.wait_for_load_state("networkidle")
 
 
@@ -88,19 +98,16 @@ class TestDashboardLoading:
         """The dashboard page must load without errors after login."""
         login(page)
 
-        # Navigate explicitly to the organisation dashboard root.
-        response = page.goto(f"{BASE_URL}/organizations/")
+        # Navigate to the authenticated dashboard entrypoint and allow Django
+        # to redirect to the appropriate teacher/student variant.
+        response = page.goto(DASHBOARD_URL)
         assert response is not None
-        assert response.status in {200, 302}, f"Dashboard page returned unexpected HTTP {response.status}"
-
-        # Follow any redirect and check the final page.
+        assert response.status == 200, f"Dashboard page returned unexpected HTTP {response.status}"
         page.wait_for_load_state("networkidle")
-        final_response = page.goto(page.url)
-        assert final_response is not None
-        assert final_response.status == 200, f"Dashboard final page returned HTTP {final_response.status}"
 
-        # The page must contain at least one visible element (body is not blank).
-        expect(page.locator("body")).to_be_visible()
+        # The final page should render a dashboard shell, regardless of which
+        # role-specific variant the logged-in user lands on.
+        expect(page.locator("main, .main-content, .student-dashboard").first).to_be_visible()
 
     @pytest.mark.skipif(
         not E2E_USERNAME or not E2E_PASSWORD,
@@ -109,12 +116,11 @@ class TestDashboardLoading:
     def test_navbar_present_on_dashboard(self, page: Page) -> None:
         """The navigation bar must be visible on the dashboard."""
         login(page)
-        page.goto(f"{BASE_URL}/organizations/")
+        page.goto(DASHBOARD_URL)
         page.wait_for_load_state("networkidle")
 
-        # Check that the page has a nav element (generic selector that works
-        # regardless of CSS class names used in the template).
-        expect(page.locator("nav, [role='navigation']").first).to_be_visible()
+        # Teacher and student dashboards expose different navigation shells.
+        expect(page.locator("nav, [role='navigation'], .sidebar-nav, .quick-actions").first).to_be_visible()
 
 
 class TestPrimaryAction:
