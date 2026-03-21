@@ -395,6 +395,7 @@ jobs:
           echo "::group::🧪 Running Tests"
           pytest \
             --ds=config.settings.test \
+            --ignore=tests/e2e \
             --cov=. \
             --cov-report=xml:coverage.xml \
             --cov-report=html:htmlcov \
@@ -618,7 +619,7 @@ jobs:
       # Results are also uploaded as a SARIF artifact to the Security tab.
       # ───────────────────────────────────────────────────────────────────
       - name: 🛡️ Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: emsarena-prod:ci
           format: sarif
@@ -636,7 +637,7 @@ jobs:
 
       - name: 📊 Print Trivy table report (for log readability)
         if: always()
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: emsarena-prod:ci
           format: table
@@ -858,9 +859,11 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: 📥 Install Playwright and pytest-playwright
+      - name: 📥 Install E2E test dependencies
         run: |
-          pip install pytest pytest-playwright playwright
+          python -m pip install --upgrade pip
+          pip install -r requirements/test.txt
+          pip install pytest-playwright playwright
           playwright install chromium --with-deps
 
       # ───────────────────────────────────────────────────────────────────
