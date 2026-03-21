@@ -1288,6 +1288,11 @@ msgctxt "accounts.password_reset_page"
 msgid "submit"
 msgstr "Send link"
 
+#: apps/accounts/templates/accounts/password_reset.html:30
+msgctxt "accounts.password_reset_page"
+msgid "back_to_login"
+msgstr "Back to login"
+
 #: apps/accounts/templates/accounts/password_reset_complete.html:4
 msgctxt "accounts.password_reset_complete_page"
 msgid "title"
@@ -15450,3 +15455,134 @@ msgstr "Previous"
 msgctxt "partials.pagination"
 msgid "action_next"
 msgstr "Next"
+
+
+# Added for signup privacy policy modal
+
+msgctxt "accounts.form.register.label"
+msgid "accept_privacy_policy"
+msgstr "I have read and accept the Privacy Policy."
+
+msgctxt "accounts.form.register.error"
+msgid "privacy_policy_required"
+msgstr "You must accept the Privacy Policy to continue."
+
+msgctxt "accounts.register"
+msgid "privacy_card_title"
+msgstr "Privacy and data processing"
+
+msgctxt "accounts.register"
+msgid "privacy_card_description"
+msgstr ""
+"Before creating your account, review how EMSArena uses personal data during "
+"registration and learning activity."
+
+msgctxt "accounts.register"
+msgid "privacy_open_button"
+msgstr "Open Privacy Policy"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_hint"
+msgstr "Open the full text in the modal window, review it, and then complete your signup."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_eyebrow"
+msgstr "EMSArena registration policy"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_title"
+msgstr "Privacy Policy"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_intro"
+msgstr ""
+"This policy explains how your information is processed when you create an "
+"account, join an organization, and use courses, exams, labs, assignments, and "
+"live session features inside EMSArena."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary_badge"
+msgstr "Short and clear summary"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary"
+msgstr ""
+"Your data is used to create your account, keep sign-in secure, manage "
+"organization membership, and run the platform's teaching features. Your data is "
+"not sold and is only shared when necessary to provide the service."
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_title"
+msgstr "What we collect"
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_body"
+msgstr ""
+"During signup we collect your username, first name, last name, email, country, "
+"selected account type, and organization details. As you use the platform, "
+"operational records related to courses, exams, labs, assignments, results, and "
+"membership activity may also be generated."
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_title"
+msgstr "How we use it"
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_body"
+msgstr ""
+"This data is used to create your account, send email OTP verification, manage "
+"workspace and organization access, run course and exam flows, show results, and "
+"support auditing and security controls."
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_title"
+msgstr "Visibility inside organizations"
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_body"
+msgstr ""
+"If you join a school, university, or course center, authorized admins and "
+"teachers in that organization may see your basic profile details, membership "
+"status, and learning activity relevant to your role."
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_title"
+msgstr "Who data is shared with"
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_body"
+msgstr ""
+"Your information is not sold. It may be shared only with authorized managers in "
+"the organization you select, technical providers that support services such as "
+"email verification or hosting, and relevant parties when required by law."
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_title"
+msgstr "Retention and security"
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_body"
+msgstr ""
+"Information is retained for as long as it is needed to operate the service, "
+"support audits, and investigate disputes. Sensitive flows such as OTP "
+"verification are short-lived, and technical and organizational security measures "
+"are applied across the system."
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_title"
+msgstr "Your rights"
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_body"
+msgstr ""
+"You can update your profile details, change your organization choices, and "
+"request clarification or deletion related to your account data. You can contact "
+"the platform administrator to exercise these rights."
+
+msgctxt "accounts.register"
+msgid "privacy_close"
+msgstr "Close"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_from_modal"
+msgstr "I have read and accept"

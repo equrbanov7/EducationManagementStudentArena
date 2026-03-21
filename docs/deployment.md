@@ -83,9 +83,9 @@ before running any `docker compose` command.  Never commit this file.
 | `DATABASE_URL` | `postgres://emsarena:<pw>@postgres:5432/emsarena` | Full database URL passed to Django |
 | `REDIS_PASSWORD` | `<strong password>` | Redis `--requirepass` value |
 | `REDIS_URL` | `redis://:${REDIS_PASSWORD}@redis:6379/0` | Full Redis URL (channel layer) |
-| `ALLOWED_HOSTS` | `emsarena.az,www.emsarena.az` | Comma-separated list of valid `Host` headers |
-| `CSRF_TRUSTED_ORIGINS` | `https://emsarena.az` | Comma-separated origins for CSRF validation |
-| `SITE_URL` | `https://emsarena.az` | Canonical site URL (used in emails, WebSocket CSP) |
+| `ALLOWED_HOSTS` | `emsarena.com,www.emsarena.com` | Comma-separated list of valid `Host` headers |
+| `CSRF_TRUSTED_ORIGINS` | `https://emsarena.com` | Comma-separated origins for CSRF validation |
+| `SITE_URL` | `https://emsarena.com` | Canonical site URL (used in emails, WebSocket CSP) |
 
 ### Optional / feature variables
 
@@ -94,10 +94,10 @@ before running any `docker compose` command.  Never commit this file.
 | `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
 | `EMAIL_HOST_USER` | _(empty)_ | SMTP username for outbound email |
 | `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
-| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.az` | From address for system emails |
+| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.com` | From address for system emails |
 | `SENTRY_DSN` | _(empty)_ | Sentry error-tracking DSN. Leave blank to disable |
-| `LIVE_EXAM_PUBLIC_HOST` | _(empty)_ | Publicly reachable hostname for live-exam WebSocket connections |
-| `LAN_HOST` | `emsarena.az` | Internal hostname used in certain generated links |
+| `LIVE_EXAM_PUBLIC_HOST` | `emsarena.com` | Publicly reachable hostname for live-exam WebSocket connections |
+| `LAN_HOST` | `emsarena.com` | Internal hostname used in certain generated links |
 | `MEDIA_ACCEL_REDIRECT_URL` | `/internal_media` | Nginx X-Accel-Redirect prefix for private media |
 | `DJANGO_LOG_LEVEL` | `INFO` | Log level for the Django logger (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 | `SECURE_SSL_REDIRECT` | `True` | Set to `False` only in CI or behind a TLS-terminating proxy that already enforces HTTPS |
@@ -155,9 +155,11 @@ POSTGRES_PASSWORD=<strong-password>
 DATABASE_URL=postgres://emsarena:<strong-password>@postgres:5432/emsarena
 REDIS_PASSWORD=<strong-redis-password>
 REDIS_URL=redis://:<strong-redis-password>@redis:6379/0
-ALLOWED_HOSTS=emsarena.az,www.emsarena.az
-CSRF_TRUSTED_ORIGINS=https://emsarena.az,https://www.emsarena.az
-SITE_URL=https://emsarena.az
+ALLOWED_HOSTS=emsarena.com,www.emsarena.com
+CSRF_TRUSTED_ORIGINS=https://emsarena.com,https://www.emsarena.com
+SITE_URL=https://emsarena.com
+LAN_HOST=emsarena.com
+LIVE_EXAM_PUBLIC_HOST=emsarena.com
 ```
 
 ### Step 2 — Build the production image
@@ -302,18 +304,18 @@ curl -sf http://localhost/health/ && echo "✅ Health OK"
 From the internet (via the Load Balancer):
 
 ```bash
-curl -sf https://emsarena.az/ping/ && echo "✅ Public ping OK"
-curl -sf https://emsarena.az/health/ && echo "✅ Public health OK"
+curl -sf https://emsarena.com/ping/ && echo "✅ Public ping OK"
+curl -sf https://emsarena.com/health/ && echo "✅ Public health OK"
 ```
 
 ### Smoke test checklist (manual)
 
 Run these steps in a browser to verify the core user flow:
 
-- [ ] `https://emsarena.az/accounts/login/` — login page loads, form is visible.
+- [ ] `https://emsarena.com/accounts/login/` — login page loads, form is visible.
 - [ ] Log in with a test account — redirected to the dashboard.
-- [ ] `https://emsarena.az/organizations/` — organisation dashboard renders.
-- [ ] `https://emsarena.az/exams/` — exam list page loads.
+- [ ] `https://emsarena.com/organizations/` — organisation dashboard renders.
+- [ ] `https://emsarena.com/exams/` — exam list page loads.
 - [ ] WebSocket test: open a live exam session; the WebSocket connection
       establishes (no browser console errors).
 
@@ -326,7 +328,7 @@ To run them locally against a deployed environment:
 pip install pytest pytest-playwright playwright
 playwright install chromium
 
-BASE_URL=https://emsarena.az \
+BASE_URL=https://emsarena.com \
 E2E_USERNAME=<your-test-user> \
 E2E_PASSWORD=<your-test-password> \
     pytest tests/e2e/ -v
@@ -414,4 +416,3 @@ docker compose -f docker-compose.prod.yml exec -T postgres \
       Actions secrets, not hardcoded in workflow files.
 - [ ] Gitleaks is enabled in CI to catch future accidental secret commits.
 - [ ] Sentry DSN (if used) is treated as a secret and injected at runtime only.
-

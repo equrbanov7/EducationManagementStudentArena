@@ -1295,6 +1295,11 @@ msgctxt "accounts.password_reset_page"
 msgid "submit"
 msgstr "Send link"
 
+#: apps/accounts/templates/accounts/password_reset.html:30
+msgctxt "accounts.password_reset_page"
+msgid "back_to_login"
+msgstr "Вернуться ко входу"
+
 #: apps/accounts/templates/accounts/password_reset_complete.html:4
 msgctxt "accounts.password_reset_complete_page"
 msgid "title"
@@ -15111,3 +15116,137 @@ msgstr "Подтвердить удаление"
 msgctxt "exams.template.teacher_questions_bank"
 msgid "modal_delete_question_body"
 msgstr "Вы уверены, что хотите удалить этот вопрос? {question}"
+
+
+# Added for signup privacy policy modal
+
+msgctxt "accounts.form.register.label"
+msgid "accept_privacy_policy"
+msgstr "Я прочитал(а) и принимаю Политику конфиденциальности."
+
+msgctxt "accounts.form.register.error"
+msgid "privacy_policy_required"
+msgstr "Чтобы продолжить, необходимо принять Политику конфиденциальности."
+
+msgctxt "accounts.register"
+msgid "privacy_card_title"
+msgstr "Конфиденциальность и обработка данных"
+
+msgctxt "accounts.register"
+msgid "privacy_card_description"
+msgstr ""
+"Перед созданием аккаунта ознакомьтесь с тем, как EMSArena использует персональные "
+"данные во время регистрации и учебной активности."
+
+msgctxt "accounts.register"
+msgid "privacy_open_button"
+msgstr "Открыть политику конфиденциальности"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_hint"
+msgstr "Откройте полный текст в модальном окне, ознакомьтесь с ним и затем завершите регистрацию."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_eyebrow"
+msgstr "Политика регистрации EMSArena"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_title"
+msgstr "Политика конфиденциальности"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_intro"
+msgstr ""
+"Эта политика объясняет, как обрабатывается ваша информация при создании "
+"аккаунта, вступлении в организацию и использовании курсов, экзаменов, "
+"лабораторных, заданий и live-сессий внутри EMSArena."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary_badge"
+msgstr "Краткое и понятное резюме"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary"
+msgstr ""
+"Ваши данные используются для создания аккаунта, безопасного входа, управления "
+"членством в организации и работы учебных функций платформы. Ваши данные не "
+"продаются и передаются только тогда, когда это необходимо для оказания сервиса."
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_title"
+msgstr "Какие данные мы собираем"
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_body"
+msgstr ""
+"Во время регистрации мы собираем ваше имя пользователя, имя, фамилию, email, "
+"страну, выбранный тип аккаунта и сведения об организации. При использовании "
+"платформы также могут формироваться рабочие записи, связанные с курсами, "
+"экзаменами, лабораторными, заданиями, результатами и членством."
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_title"
+msgstr "Как мы используем данные"
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_body"
+msgstr ""
+"Эти данные используются для создания аккаунта, отправки email OTP-подтверждения, "
+"управления доступом к workspace и организации, работы учебных сценариев, показа "
+"результатов, а также для аудита и контроля безопасности."
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_title"
+msgstr "Видимость внутри организаций"
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_body"
+msgstr ""
+"Если вы присоединяетесь к школе, университету или учебному центру, "
+"уполномоченные администраторы и преподаватели этой организации могут видеть ваши "
+"основные профильные данные, статус членства и учебную активность, относящуюся к "
+"вашей роли."
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_title"
+msgstr "С кем могут делиться данными"
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_body"
+msgstr ""
+"Ваши данные не продаются. Они могут передаваться только уполномоченным "
+"руководителям выбранной вами организации, техническим провайдерам, обеспечивающим "
+"email-подтверждение или хостинг, а также соответствующим сторонам, если этого "
+"требует закон."
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_title"
+msgstr "Хранение и безопасность"
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_body"
+msgstr ""
+"Информация хранится столько, сколько необходимо для работы сервиса, аудита и "
+"разбора спорных ситуаций. Чувствительные процессы, такие как OTP-подтверждение, "
+"имеют короткий срок жизни, а в системе применяются технические и организационные "
+"меры безопасности."
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_title"
+msgstr "Ваши права"
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_body"
+msgstr ""
+"Вы можете обновлять данные профиля, менять параметры присоединения к "
+"организации, а также запрашивать уточнение или удаление данных, связанных с "
+"вашим аккаунтом. Для реализации этих прав можно обратиться к администратору "
+"платформы."
+
+msgctxt "accounts.register"
+msgid "privacy_close"
+msgstr "Закрыть"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_from_modal"
+msgstr "Прочитал(а), принимаю"
