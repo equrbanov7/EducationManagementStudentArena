@@ -90,9 +90,7 @@ class StudentGroupForm(forms.ModelForm):
             users_qs = users_qs.none()
 
         students_qs = users_qs.filter(profile__role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT]).distinct()
-        teachers_qs = users_qs.filter(
-            profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]
-        ).distinct()
+        teachers_qs = users_qs.filter(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).distinct()
 
         self.fields["students"].queryset = students_qs
         self.fields["primary_teacher"].queryset = teachers_qs
