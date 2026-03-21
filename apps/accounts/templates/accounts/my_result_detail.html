@@ -4,10 +4,10 @@
 {% block title %}{% trans "title" context "accounts.my_result_detail_page" %} - EMSArena{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
 {% if item_type == "labs" %}
 <link rel="stylesheet" href="{% static 'labs/css/my_lab_answers.css' %}">
-<link rel="stylesheet" href="{% static 'css/my_result_detail.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/my_result_detail.css' %}">
 {% endif %}
 {% endblock %}
 

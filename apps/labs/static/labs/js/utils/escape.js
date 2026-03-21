@@ -90,11 +90,14 @@ function sanitizeHtml(html) {
             }
         });
 
-        // Remove javascript: URLs
+        // Remove dangerous URL schemes (javascript:, data:, vbscript:)
         ['href', 'src', 'action', 'formaction'].forEach(attrName => {
             const attrValue = element.getAttribute(attrName);
-            if (attrValue && attrValue.toLowerCase().trim().startsWith('javascript:')) {
-                element.removeAttribute(attrName);
+            if (attrValue) {
+                const normalized = attrValue.toLowerCase().trim();
+                if (normalized.startsWith('javascript:') || normalized.startsWith('data:') || normalized.startsWith('vbscript:')) {
+                    element.removeAttribute(attrName);
+                }
             }
         });
     });
