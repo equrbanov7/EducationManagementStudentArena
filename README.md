@@ -165,18 +165,25 @@ black --check .
 Create a `.env` file in the project root:
 
 ```env
+# Generate strong secrets for real deployments:
+# python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+# python -c "import secrets; print(secrets.token_urlsafe(24))"
+
 # Django Settings
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=replace-with-a-long-random-secret-key
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
 # Database (PostgreSQL)
-DATABASE_URL=postgresql://username:password@localhost:5432/emsarena
+POSTGRES_DB=emsarena_db
+POSTGRES_USER=emsarena_user
+POSTGRES_PASSWORD=replace-with-a-strong-postgres-password
+DATABASE_URL=postgresql://emsarena_user:replace-with-a-strong-postgres-password@localhost:5432/emsarena_db
 
 # Redis (for WebSockets)
 REDIS_URL=redis://127.0.0.1:6379/0
 # Production Docker stack only
-REDIS_PASSWORD=change-me-strong-redis-password
+REDIS_PASSWORD=replace-with-a-strong-redis-password
 
 # Email Configuration (Gmail SMTP example)
 EMAIL_HOST_USER=your-email@gmail.com
@@ -189,6 +196,10 @@ CSRF_TRUSTED_ORIGINS=http://192.168.1.100:8000,http://localhost:8000
 
 # Site URL
 SITE_URL=http://127.0.0.1:8000
+
+# pgAdmin (docker-compose.dev.yml)
+PGADMIN_EMAIL=admin@local.dev
+PGADMIN_PASSWORD=replace-with-a-strong-pgadmin-password
 ```
 
 **⚠️ Security Note:** Never commit `.env` to version control!
@@ -205,8 +216,8 @@ docker-compose up -d
 ```
 
 Default credentials:
-- **PostgreSQL**: `localhost:5432` (user: `admin`, password: `admin`, db: `emsarena`)
-- **pgAdmin**: `http://localhost:5050` (email: `admin@admin.com`, password: `admin`)
+- **PostgreSQL**: `localhost:5432` (user: value from `POSTGRES_USER`, password: value from `POSTGRES_PASSWORD`, db: value from `POSTGRES_DB`)
+- **pgAdmin**: `http://localhost:5050` (email: value from `PGADMIN_EMAIL`, password: value from `PGADMIN_PASSWORD`)
 
 #### **Option B: Manual PostgreSQL Setup**
 
@@ -265,23 +276,10 @@ Follow the prompts to set username, email, and password.
 
 ---
 
-### **10. Create User Groups (Required)**
+### **10. Organization Roles**
 
-```bash
-python manage.py shell
-```
-
-```python
-from django.contrib.auth.models import Group
-
-# Create groups
-Group.objects.create(name='teacher')
-Group.objects.create(name='student')
-Group.objects.create(name='assistant_teacher')
-Group.objects.create(name='moderator')
-
-exit()
-```
+No manual Django auth-group setup is required.
+EMS Arena uses organization-scoped memberships and roles instead.
 
 ---
 
@@ -685,4 +683,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **⭐ If you find this project useful, please consider giving it a star on GitHub!**
-

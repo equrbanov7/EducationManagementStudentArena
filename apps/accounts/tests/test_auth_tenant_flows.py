@@ -47,6 +47,7 @@ class SignupAndLoginFlowTest(TestCase):
             "organization_identifier": "",
             "organization_license_identifier": "",
             "initial_role": ProfileRole.MEMBER,
+            "accept_privacy_policy": "on",
         }
         payload.update(overrides)
         return payload
@@ -102,6 +103,16 @@ class SignupAndLoginFlowTest(TestCase):
         response = self.client.get(self.register_url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'value="student"')
+
+    def test_signup_requires_privacy_policy_acceptance(self):
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(accept_privacy_policy=""),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("accept_privacy_policy", response.context["form"].errors)
+        self.assertFalse(User.objects.filter(username="newuser").exists())
 
     def test_school_signup_creates_organization_from_manual_name(self):
         response = self.client.post(

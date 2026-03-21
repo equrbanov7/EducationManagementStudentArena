@@ -7,10 +7,7 @@ import os
 
 from django.core.management.utils import get_random_secret_key
 
-from .base import *
-
-# STATICFILES_DIRS bəzən tuple olur; append üçün list-ə çeviririk
-STATICFILES_DIRS = list(STATICFILES_DIRS)
+from .base import *  # noqa: F401,F403
 
 # Use environment secret for tests when provided; otherwise generate ephemeral key.
 SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
@@ -55,9 +52,6 @@ SITE_URL = "http://testserver"
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
-
-# Add live_exam static files directory
-STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # Disable migrations for faster tests (optional)
 # class DisableMigrations:

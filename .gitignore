@@ -7,7 +7,7 @@
 .env.local
 .env.production
 .env.development
-# Allow the example file so developers have a reference
+# Allow the shared example file so developers have a reference
 !.env.example
 
 # =========================
