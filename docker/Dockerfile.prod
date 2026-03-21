@@ -1,5 +1,6 @@
 # Production Dockerfile for EMS Arena
-FROM python:3.11-slim
+# Pin to Debian Bookworm (stable) to avoid unfixed CVEs in Debian Trixie/testing.
+FROM python:3.12-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -9,16 +10,23 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    postgresql-client \
+# Apply all available OS security patches.
+# No extra system packages are needed: psycopg2-binary ships its own libpq,
+# and the production entrypoint uses Python (not pg_isready/psql).
+RUN apt-get update \
+    && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements /app/requirements
-RUN pip install --no-cache-dir -r /app/requirements/production.txt
+# Create a dedicated non-root user for runtime security.
+RUN groupadd --system appgroup \
+    && useradd --system --gid appgroup --no-create-home --shell /usr/sbin/nologin appuser
 
-# Copy project
+# Upgrade pip, then install Python dependencies.
+COPY requirements /app/requirements
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements/production.txt
+
+# Copy project and make entrypoints executable.
 COPY . /app/
 RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh
 
@@ -37,6 +45,13 @@ RUN SECRET_KEY="${BUILD_SECRET_KEY}" \
     DATABASE_URL="${BUILD_DATABASE_URL}" \
     ALLOWED_HOSTS="${BUILD_ALLOWED_HOSTS}" \
     python manage.py collectstatic --noinput
+
+# Transfer ownership of the entire app directory (including collected statics)
+# to the app user AFTER collectstatic so all files are accessible at runtime.
+RUN chown -R appuser:appgroup /app
+
+# Drop privileges: run the application as a non-root user.
+USER appuser
 
 # Expose port
 EXPOSE 8000
