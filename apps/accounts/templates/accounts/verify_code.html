@@ -3,7 +3,7 @@
 {% block title %}{% trans "title" context "accounts.verify_code" %}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'css/register.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/register.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -56,6 +56,6 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
+<script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 <script src="{% static 'js/otp_timer.js' %}"></script>
 {% endblock %}

@@ -293,9 +293,7 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
 def _materialize_legacy_teacher_membership(user, organization=None, *, memberships=None):
     """
     Back-fill tenant-scoped ``Membership`` rows from the legacy single-org
-    profile, and (when the caller is the org admin/owner) ensure that any
-    teacher/assistant-teacher group hints are reflected as explicit membership
-    records.
+    profile.
 
     Behaviour summary
     -----------------
@@ -313,10 +311,10 @@ def _materialize_legacy_teacher_membership(user, organization=None, *, membershi
         ``OrganizationMiddleware`` only calls this path when the count is 0).
 
     Called with *organization=<org>* and *memberships=<list>* (org confirmed):
-        Checks whether the user's legacy ``profile.role`` or Django group
-        membership implies a teacher/assistant-teacher role that is not yet
-        represented in the provided membership list.  If so, and if the caller
-        has admin context in the org, it creates the missing role record.
+        Checks whether the user's legacy ``profile.role`` implies a
+        teacher/assistant-teacher role that is not yet represented in the
+        provided membership list. If so, and if the caller has admin context
+        in the org, it creates the missing role record.
 
         Unlike the no-org path this is safe to call on every request because
         it always scopes its work to the already-verified *organization*.
@@ -440,18 +438,9 @@ def _materialize_legacy_teacher_membership(user, organization=None, *, membershi
     if current_profile_roles & {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
         return current_memberships
 
-    legacy_role_hints = set()
-    if legacy_profile_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
-        legacy_role_hints.add(legacy_profile_role)
-
-    legacy_group_names = set(
-        user.groups.filter(name__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).values_list("name", flat=True)
-    )
-    legacy_role_hints.update(legacy_group_names)
-
-    if ProfileRole.TEACHER in legacy_role_hints:
+    if legacy_profile_role == ProfileRole.TEACHER:
         desired_role_name = ProfileRole.TEACHER
-    elif ProfileRole.ASSISTANT_TEACHER in legacy_role_hints:
+    elif legacy_profile_role == ProfileRole.ASSISTANT_TEACHER:
         desired_role_name = ProfileRole.ASSISTANT_TEACHER
     else:
         return current_memberships

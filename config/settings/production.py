@@ -104,18 +104,18 @@ MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_medi
 # Email settings for production
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.az")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.com")
 
 # LAN host
-LAN_HOST = os.getenv("LAN_HOST", "emsarena.az")
-LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "")
+LAN_HOST = os.getenv("LAN_HOST", "emsarena.com")
+LIVE_EXAM_PUBLIC_HOST = os.getenv("LIVE_EXAM_PUBLIC_HOST", "emsarena.com")
 
 # CSRF trusted origins
 raw_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 CSRF_TRUSTED_ORIGINS = [x.strip() for x in raw_csrf.split(",") if x.strip()]
 
 # Site URL
-SITE_URL = os.getenv("SITE_URL", "https://emsarena.az")
+SITE_URL = os.getenv("SITE_URL", "https://emsarena.com")
 
 # Logging configuration
 LOGGING = {

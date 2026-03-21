@@ -5,7 +5,6 @@ Student group forms (teacher/admin-facing).
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
@@ -90,13 +89,9 @@ class StudentGroupForm(forms.ModelForm):
         elif not self.is_superadmin:
             users_qs = users_qs.none()
 
-        students_qs = users_qs.filter(
-            Q(profile__role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
-            | Q(groups__name__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
-        ).distinct()
+        students_qs = users_qs.filter(profile__role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT]).distinct()
         teachers_qs = users_qs.filter(
-            Q(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER])
-            | Q(groups__name__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER])
+            profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]
         ).distinct()
 
         self.fields["students"].queryset = students_qs

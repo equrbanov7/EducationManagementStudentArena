@@ -4,7 +4,7 @@
 {% block title %}{% trans "title" context "accounts.login" %} | EMSArena{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}"> {# register.css -> auth.css #}
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
 {% endblock %}
  
 {% block content %}
@@ -70,5 +70,5 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
+<script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {% endblock %}
