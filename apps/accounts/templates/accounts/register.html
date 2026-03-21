@@ -4,12 +4,12 @@
 {% block title %}{% trans "title" context "accounts.register" %} | EMSArena{% endblock %}
  
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="register-page-wrapper">
-    <div class="register-card">
+    <div class="register-card register-card--signup">
         <h1 class="register-heading">{% trans "heading" context "accounts.register" %}</h1>
         <p class="register-subheading">{% trans "subheading" context "accounts.register" %}</p>
 
@@ -226,6 +226,45 @@
                     {% endif %}
                 </div>
 
+                <div class="register-form-field register-privacy-field">
+                    <div class="register-privacy-card{% if form.accept_privacy_policy.errors %} is-invalid{% endif %}" id="privacyConsentCard">
+                        <div class="register-privacy-card__header">
+                            <div class="register-privacy-card__icon" aria-hidden="true">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="register-privacy-card__copy">
+                                <h4 class="register-privacy-card__title">
+                                    {% trans "privacy_card_title" context "accounts.register" %}
+                                </h4>
+                                <p class="register-privacy-card__description">
+                                    {% trans "privacy_card_description" context "accounts.register" %}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                class="register-privacy-card__button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#privacyPolicyModal"
+                            >
+                                {% trans "privacy_open_button" context "accounts.register" %}
+                            </button>
+                        </div>
+
+                        <label class="register-checkbox{% if form.accept_privacy_policy.errors %} is-invalid{% endif %}" for="{{ form.accept_privacy_policy.id_for_label }}">
+                            {{ form.accept_privacy_policy }}
+                            <span>{{ form.accept_privacy_policy.label }}</span>
+                        </label>
+
+                        <p class="register-help-text register-help-text--privacy" id="privacyConsentHelp">
+                            {% trans "privacy_accept_hint" context "accounts.register" %}
+                        </p>
+                        <div class="register-field-error" id="privacyConsentClientError" hidden aria-live="polite"></div>
+                        {% if form.accept_privacy_policy.errors %}
+                            <div class="register-field-error" id="privacyConsentServerError">{{ form.accept_privacy_policy.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="wizard-nav">
                     <button type="button" class="register-back-btn" data-wizard-back="2">
                         <i class="fas fa-arrow-left"></i> {% trans "back" context "accounts.register" %}
@@ -235,6 +274,134 @@
             </div>
         </form>
 
+        <div class="modal fade register-policy-modal" id="privacyPolicyModal" tabindex="-1" aria-labelledby="privacyPolicyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+                <div class="modal-content register-policy-modal__content">
+                    <div class="modal-header register-policy-modal__header">
+                        <div>
+                            <span class="register-policy-modal__eyebrow">
+                                {% trans "privacy_modal_eyebrow" context "accounts.register" %}
+                            </span>
+                            <h2 class="modal-title register-policy-modal__title" id="privacyPolicyModalLabel">
+                                {% trans "privacy_modal_title" context "accounts.register" %}
+                            </h2>
+                            <p class="register-policy-modal__lead">
+                                {% trans "privacy_modal_intro" context "accounts.register" %}
+                            </p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'privacy_close' context 'accounts.register' %}"></button>
+                    </div>
+
+                    <div class="modal-body register-policy-modal__body">
+                        <div class="register-policy-modal__summary">
+                            <span class="register-policy-modal__summary-badge">
+                                <i class="fas fa-lock" aria-hidden="true"></i>
+                                {% trans "privacy_modal_summary_badge" context "accounts.register" %}
+                            </span>
+                            <p class="register-policy-modal__summary-text">
+                                {% trans "privacy_modal_summary" context "accounts.register" %}
+                            </p>
+                        </div>
+
+                        <div class="register-policy-grid">
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_data_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_data_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_use_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_use_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_access_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_access_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_sharing_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_sharing_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_retention_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_retention_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <section class="register-policy-section">
+                                <div class="register-policy-section__icon" aria-hidden="true">
+                                    <i class="fas fa-hand-paper"></i>
+                                </div>
+                                <div>
+                                    <h3 class="register-policy-section__title">
+                                        {% trans "privacy_section_rights_title" context "accounts.register" %}
+                                    </h3>
+                                    <p class="register-policy-section__body">
+                                        {% trans "privacy_section_rights_body" context "accounts.register" %}
+                                    </p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer register-policy-modal__footer">
+                        <button type="button" class="register-back-btn register-back-btn--modal" data-bs-dismiss="modal">
+                            {% trans "privacy_close" context "accounts.register" %}
+                        </button>
+                        <button type="button" class="register-submit-btn register-submit-btn--modal" data-accept-privacy-policy>
+                            {% trans "privacy_accept_from_modal" context "accounts.register" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <p class="register-footer-text">
             {% trans "already_have_account" context "accounts.register" %} <a href="{% url 'accounts:login' %}">{% trans "login_now" context "accounts.register" %}</a>
         </p>
@@ -243,8 +410,8 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'js/register_wizard.js' %}"></script>
-<script src="{% static 'js/auth_visibility_toggle.js' %}"></script>
+<script src="{% static 'accounts/js/register_wizard.js' %}"></script>
+<script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
 <script nonce="{{ request.csp_nonce }}">
     window.SIGNUP_LOOKUP_DATA = JSON.parse(document.getElementById('signup-lookup-data').textContent);
@@ -278,7 +445,8 @@
         label_identifier_default: "{% trans 'label_identifier_default' context 'accounts.register.js' %}",
         help_identifier_required: "{% trans 'help_identifier_required' context 'accounts.register.js' %}",
         help_identifier_optional: "{% trans 'help_identifier_optional' context 'accounts.register.js' %}",
-        no_results: "{% trans 'no_results' context 'accounts.register.js' %}"
+        no_results: "{% trans 'no_results' context 'accounts.register.js' %}",
+        privacy_policy_required: "{% trans 'privacy_policy_required' context 'accounts.form.register.error' %}"
     };
 </script>
 {% endblock %}

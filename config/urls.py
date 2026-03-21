@@ -48,23 +48,34 @@ if settings.DEBUG:
         path("test-error/", test_error, name="test_error"),
     ]
 
-if settings.DEBUG or getattr(settings, "SERVE_MEDIA", False):
-    # In DEBUG mode, route ALL media paths through protected_media so that
-    # authentication is enforced for private paths (exam_uploads/, labs/,
-    # projects/submissions/, etc.) even in development.  The protected_media
-    # view differentiates between public and private paths internally.
-    # In non-DEBUG mode this branch is only reached when SERVE_MEDIA=True
-    # (simple/staging deployments); production nginx/caddy should serve media
-    # directly with SERVE_MEDIA=False.
-    media_prefix = settings.MEDIA_URL.lstrip("/")
-    if media_prefix and not media_prefix.endswith("/"):
-        media_prefix += "/"
+if settings.DEBUG:
+    # Only expose this endpoint in development.  In production, triggering a
+    # Sentry test error must not be possible by unauthenticated third parties.
     urlpatterns += [
-        re_path(
-            rf"^{re.escape(media_prefix)}(?P<path>.*)$",
-            protected_media,
-        )
+        path("test-error/", test_error, name="test_error"),
     ]
+
+# Always register the protected_media view so that Django can enforce
+# authentication and return X-Accel-Redirect headers for authorised requests.
+#
+# In DEBUG mode or when SERVE_MEDIA=True (simple/staging), Django serves
+# media files directly via FileResponse as a fallback.
+#
+# In production with MEDIA_ACCEL_REDIRECT_URL configured, the protected_media
+# view performs auth checks and delegates actual file delivery to nginx via an
+# X-Accel-Redirect header (the /internal_media/ internal location).  Nginx
+# proxies /media/<private_path> to Django; if auth fails, Django returns
+# 403/404; if auth passes, nginx serves the file at high performance without
+# the response body passing through Python.
+media_prefix = settings.MEDIA_URL.lstrip("/")
+if media_prefix and not media_prefix.endswith("/"):
+    media_prefix += "/"
+urlpatterns += [
+    re_path(
+        rf"^{re.escape(media_prefix)}(?P<path>.*)$",
+        protected_media,
+    )
+]
 
 # Django looks for these module-level names in ROOT_URLCONF when DEBUG=False
 # to dispatch 4xx/5xx responses.  The aliased imports above ensure the names

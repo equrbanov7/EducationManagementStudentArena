@@ -15,7 +15,6 @@ Authorization convention for this app
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
 
@@ -40,9 +39,7 @@ def _get_owner_course_or_404(request, course_id):
 
 def _student_users_queryset(queryset):
     """Filter a user queryset to only include students."""
-    return queryset.filter(
-        Q(profile__role__in=["student", "lead_student"]) | Q(groups__name__in=["student", "lead_student"])
-    ).distinct()
+    return queryset.filter(profile__role__in=["student", "lead_student"]).distinct()
 
 
 def _require_org_permission(request, permission):
