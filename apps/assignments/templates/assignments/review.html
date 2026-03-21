@@ -112,7 +112,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/assignment_modal.js' %}"></script>
+<script src="{% static 'assignment/js/assignment_modal.js' %}"></script>
 {{ all_groups|json_script:"all-groups-data" }}
 <script nonce="{{ request.csp_nonce }}">
     const COURSE_ID = {{ course.id }};

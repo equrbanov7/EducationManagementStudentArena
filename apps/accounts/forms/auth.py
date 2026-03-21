@@ -59,7 +59,12 @@ class RegisterForm(forms.ModelForm):
         label=pgettext_lazy("accounts.form.register.label", "country"),
         required=True,
         choices=[],
-        widget=forms.Select(attrs={"class": "form-control"}),
+        widget=forms.Select(
+            attrs={
+                "class": "form-select register-native-select",
+                "data-register-enhanced-select": "true",
+            }
+        ),
     )
 
     organization_type = forms.ChoiceField(
@@ -94,7 +99,12 @@ class RegisterForm(forms.ModelForm):
                 pgettext_lazy("accounts.form.register.choice", "org_type_course_student"),
             ),
         ],
-        widget=forms.Select(attrs={"class": "form-control"}),
+        widget=forms.Select(
+            attrs={
+                "class": "form-select register-native-select",
+                "data-register-enhanced-select": "true",
+            }
+        ),
         initial=OrganizationType.INDIVIDUAL,
     )
 
@@ -173,6 +183,15 @@ class RegisterForm(forms.ModelForm):
         ],
         widget=forms.Select(attrs={"class": "form-control"}),
         initial=ProfileRole.MEMBER,
+    )
+
+    accept_privacy_policy = forms.BooleanField(
+        label=pgettext_lazy("accounts.form.register.label", "accept_privacy_policy"),
+        required=True,
+        error_messages={
+            "required": pgettext_lazy("accounts.form.register.error", "privacy_policy_required"),
+        },
+        widget=forms.CheckboxInput(attrs={"class": "register-checkbox-input"}),
     )
 
     class Meta:
@@ -346,6 +365,7 @@ class RegisterForm(forms.ModelForm):
         self.fields["last_name"].required = True
         self.fields["first_name"].widget.attrs["required"] = "required"
         self.fields["last_name"].widget.attrs["required"] = "required"
+        self.fields["accept_privacy_policy"].widget.attrs["required"] = "required"
 
     @staticmethod
     def _organization_matches_country(organization, country_code):

@@ -7,6 +7,7 @@ from datetime import timedelta
 from urllib.parse import quote
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
@@ -413,6 +414,35 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(CourseMembership.objects.filter(course=self.course_a, user=self.external_student).exists())
+
+
+class StudentUserQuerysetRoleSourceTests(TestCase):
+    def test_auth_groups_do_not_make_member_users_visible_as_students(self):
+        from apps.courses.views._helpers import _student_users_queryset
+
+        real_student = User.objects.create_user(
+            username="course_helper_student",
+            email="course_helper_student@example.com",
+            password="StrongPass123!",
+        )
+        member_user = User.objects.create_user(
+            username="course_helper_member",
+            email="course_helper_member@example.com",
+            password="StrongPass123!",
+        )
+
+        real_student.profile.role = ProfileRole.STUDENT
+        real_student.profile.save(update_fields=["role", "updated_at"])
+        member_user.profile.role = ProfileRole.MEMBER
+        member_user.profile.save(update_fields=["role", "updated_at"])
+
+        student_group = Group.objects.create(name=ProfileRole.STUDENT)
+        member_user.groups.add(student_group)
+
+        result_ids = set(_student_users_queryset(User.objects.order_by("id")).values_list("id", flat=True))
+
+        self.assertIn(real_student.id, result_ids)
+        self.assertNotIn(member_user.id, result_ids)
 
 
 # ════════════════════════════════════════════════════════════════════════════

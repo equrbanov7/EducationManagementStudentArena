@@ -1293,6 +1293,11 @@ msgctxt "accounts.password_reset_page"
 msgid "submit"
 msgstr "Send link"
 
+#: apps/accounts/templates/accounts/password_reset.html:30
+msgctxt "accounts.password_reset_page"
+msgid "back_to_login"
+msgstr "Daxil ol səhifəsinə qayıt"
+
 #: apps/accounts/templates/accounts/password_reset_complete.html:4
 msgctxt "accounts.password_reset_complete_page"
 msgid "title"
@@ -15030,6 +15035,136 @@ msgstr "Aktiv suallar"
 msgctxt "exams.template.teacher_questions_bank"
 msgid "label_inactive_questions"
 msgstr "Deaktiv suallar"
+
+
+# Added for signup privacy policy modal
+
+msgctxt "accounts.form.register.label"
+msgid "accept_privacy_policy"
+msgstr "Məxfilik siyasətini oxudum və qəbul edirəm."
+
+msgctxt "accounts.form.register.error"
+msgid "privacy_policy_required"
+msgstr "Davam etmək üçün məxfilik siyasətini qəbul etməlisiniz."
+
+msgctxt "accounts.register"
+msgid "privacy_card_title"
+msgstr "Məxfilik və məlumatların işlənməsi"
+
+msgctxt "accounts.register"
+msgid "privacy_card_description"
+msgstr ""
+"Hesab yaratmazdan əvvəl EMSArena-da şəxsi məlumatların necə istifadə olunduğunu "
+"qısa formada oxuyun."
+
+msgctxt "accounts.register"
+msgid "privacy_open_button"
+msgstr "Məxfilik siyasətini aç"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_hint"
+msgstr "Tam mətni modal pəncərədə açıb oxuduqdan sonra qeydiyyatı tamamlayın."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_eyebrow"
+msgstr "EMSArena qeydiyyat siyasəti"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_title"
+msgstr "Məxfilik siyasəti"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_intro"
+msgstr ""
+"Bu siyasət hesab yaradarkən, təşkilata qoşularkən və EMSArena daxilində kurs, "
+"imtahan, laboratoriya, tapşırıq və canlı sessiya funksiyalarından istifadə "
+"edərkən məlumatlarınızın necə emal olunduğunu izah edir."
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary_badge"
+msgstr "Qısa və aydın xülasə"
+
+msgctxt "accounts.register"
+msgid "privacy_modal_summary"
+msgstr ""
+"Məlumatlarınız hesabın yaradılması, təhlükəsiz giriş, təşkilat üzvlüyünün idarə "
+"olunması və tədris funksiyalarının işləməsi üçün istifadə olunur. Məlumatlarınız "
+"satılmır və yalnız xidmətin işləməsi üçün zəruri hallarda paylaşılır."
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_title"
+msgstr "Hansı məlumatları toplayırıq"
+
+msgctxt "accounts.register"
+msgid "privacy_section_data_body"
+msgstr ""
+"Qeydiyyat zamanı istifadəçi adı, ad, soyad, email, ölkə, seçdiyiniz hesab növü "
+"və təşkilat məlumatlarını toplayırıq. Platformadan istifadə etdikcə kurs, "
+"imtahan, laboratoriya, tapşırıq, nəticə və üzvlük prosesləri ilə bağlı əməliyyat "
+"məlumatları da formalaşa bilər."
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_title"
+msgstr "Məlumatlardan necə istifadə edirik"
+
+msgctxt "accounts.register"
+msgid "privacy_section_use_body"
+msgstr ""
+"Bu məlumatlar hesab yaratmaq, email OTP təsdiqi göndərmək, workspace və "
+"təşkilat girişini idarə etmək, kurs və imtahan axınlarını işlətmək, nəticələri "
+"göstərmək, audit və təhlükəsizlik nəzarətini aparmaq üçün istifadə olunur."
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_title"
+msgstr "Təşkilat daxilində görünürlük"
+
+msgctxt "accounts.register"
+msgid "privacy_section_access_body"
+msgstr ""
+"Məktəbə, universitetə və ya kurs mərkəzinə qoşulduqda həmin qurumun səlahiyyətli "
+"admin və müəllimləri sizin əsas profil məlumatlarınızı, üzvlük statusunuzu və "
+"rolunuza aid tədris fəaliyyətlərini görə bilər."
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_title"
+msgstr "Məlumatlar kimlə paylaşılır"
+
+msgctxt "accounts.register"
+msgid "privacy_section_sharing_body"
+msgstr ""
+"Məlumatlarınız satılmır. Onlar yalnız seçdiyiniz təşkilatın səlahiyyətli "
+"idarəçiləri, email/doğrulama və hosting kimi texniki xidmət təminatçıları və "
+"qanuni öhdəlik yarandıqda aidiyyəti tərəflərlə paylaşılır."
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_title"
+msgstr "Saxlama və təhlükəsizlik"
+
+msgctxt "accounts.register"
+msgid "privacy_section_retention_body"
+msgstr ""
+"Məlumatlar xidmətin işləməsi, audit və mübahisələrin araşdırılması üçün lazım "
+"olan müddətdə saxlanılır. OTP və doğrulama kimi həssas axınlar qısaömürlüdür və "
+"sistemdə texniki və təşkilati təhlükəsizlik tədbirləri tətbiq olunur."
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_title"
+msgstr "Sizin hüquqlarınız"
+
+msgctxt "accounts.register"
+msgid "privacy_section_rights_body"
+msgstr ""
+"Profil məlumatlarınızı yeniləmək, təşkilata qoşulma seçimlərinizi dəyişmək və "
+"hesabınızla bağlı silinmə və ya dəqiqləşdirmə sorğusu vermək hüququnuz var. Belə "
+"sorğular üçün platforma administratoru ilə əlaqə saxlaya bilərsiniz."
+
+msgctxt "accounts.register"
+msgid "privacy_close"
+msgstr "Bağla"
+
+msgctxt "accounts.register"
+msgid "privacy_accept_from_modal"
+msgstr "Oxudum, qəbul edirəm"
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "placeholder_search_questions"

@@ -222,6 +222,13 @@ class PasswordResetViewTest(TestCase):
         self.password_reset_url = reverse("accounts:password_reset")
         self.password_reset_done_url = reverse("accounts:password_reset_done")
         self.password_reset_complete_url = reverse("accounts:password_reset_complete")
+        self.login_url = reverse("accounts:login")
+
+    def test_password_reset_page_contains_back_to_login_link(self):
+        response = self.client.get(self.password_reset_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.login_url)
 
     def test_password_reset_flow_sends_email_and_completes(self):
         response = self.client.post(self.password_reset_url, {"email": self.user.email})
@@ -281,10 +288,19 @@ class RegisterViewTest(TestCase):
             {
                 "username": "newuser",
                 "email": "newuser@example.com",
-                "password1": "StrongPass123!",
+                "password": "StrongPass123!",
                 "password2": "StrongPass123!",
                 "first_name": "New",
                 "last_name": "User",
+                "country": "AZ",
+                "organization_type": OrganizationType.INDIVIDUAL,
+                "join_organization": "",
+                "institution": "",
+                "institution_not_listed_name": "",
+                "organization_identifier": "",
+                "organization_license_identifier": "",
+                "initial_role": ProfileRole.MEMBER,
+                "accept_privacy_policy": "on",
             },
         )
         # Registration might redirect or show success
@@ -312,11 +328,19 @@ class RegisterViewTest(TestCase):
             {
                 "username": "orgstudent",
                 "email": "orgstudent@example.com",
-                "password1": "StrongPass123!",
+                "password": "StrongPass123!",
                 "password2": "StrongPass123!",
                 "first_name": "Org",
                 "last_name": "Student",
-                "organization": org.id,
+                "country": "AZ",
+                "organization_type": "school_student",
+                "join_organization": org.id,
+                "institution": "",
+                "institution_not_listed_name": "",
+                "organization_identifier": "",
+                "organization_license_identifier": "",
+                "initial_role": ProfileRole.MEMBER,
+                "accept_privacy_policy": "on",
             },
         )
         # Registration should work
@@ -340,6 +364,7 @@ class RegisterViewTest(TestCase):
                 "organization_identifier": "",
                 "organization_license_identifier": "",
                 "initial_role": ProfileRole.MEMBER,
+                "accept_privacy_policy": "on",
             },
         )
 

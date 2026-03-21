@@ -815,9 +815,7 @@ class ProfileViewTest(TestCase):
             ).exists()
         )
 
-    def test_org_owner_legacy_teacher_group_is_backfilled_to_active_org_membership(self):
-        from django.contrib.auth.models import Group
-
+    def test_org_owner_legacy_teacher_profile_role_is_backfilled_to_active_org_membership(self):
         organization = Organization.objects.create(
             name="Legacy Teacher Owner Org",
             org_type=OrganizationType.UNIVERSITY,
@@ -828,7 +826,7 @@ class ProfileViewTest(TestCase):
         profile = self.user.profile
         profile.organization = organization
         profile.organization_type = organization.org_type
-        profile.role = ProfileRole.ORG_OWNER
+        profile.role = ProfileRole.TEACHER
         profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
         Membership.objects.update_or_create(
@@ -840,9 +838,6 @@ class ProfileViewTest(TestCase):
                 "is_active": True,
             },
         )
-
-        teacher_group, _ = Group.objects.get_or_create(name=ProfileRole.TEACHER)
-        self.user.groups.add(teacher_group)
 
         _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
