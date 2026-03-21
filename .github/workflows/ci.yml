@@ -552,6 +552,7 @@ jobs:
     needs: [lint]
     permissions:
       contents: read
+      pull-requests: read
 
     steps:
       - name: 📥 Checkout code (full history for diff-aware scan)
