@@ -585,6 +585,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker-prod-build]
     permissions:
+      actions: read
       contents: read
       security-events: write   # SARIF upload to Security tab
 
