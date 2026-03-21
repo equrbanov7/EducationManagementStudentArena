@@ -788,6 +788,10 @@ jobs:
     needs: [docker-prod-build]
     permissions:
       contents: read
+    env:
+      BASE_URL: "http://localhost"
+      E2E_USERNAME: "ci_university_e2e"
+      E2E_PASSWORD: "CiE2EUniversity2026!"
 
     steps:
       - name: 📥 Checkout code
@@ -857,6 +861,21 @@ jobs:
           done
 
       # ───────────────────────────────────────────────────────────────────
+      # Seed a deterministic university user inside the running app
+      # container so the authenticated smoke tests always run in CI.
+      # The user is intentionally NOT a Django superuser; access comes from
+      # the university RBAC memberships that the seed command attaches.
+      # ───────────────────────────────────────────────────────────────────
+      - name: 👤 Seed CI university E2E user
+        env:
+          E2E_USERNAME: ${{ env.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
+        run: |
+          docker exec emsarena-app python manage.py seed_ci_e2e_user \
+            --username "$E2E_USERNAME" \
+            --password "$E2E_PASSWORD"
+
+      # ───────────────────────────────────────────────────────────────────
       # Install Python + Playwright for the E2E test runner.
       # Only the Chromium browser is installed to keep install time short.
       # ───────────────────────────────────────────────────────────────────
@@ -873,17 +892,14 @@ jobs:
           playwright install chromium --with-deps
 
       # ───────────────────────────────────────────────────────────────────
-      # Run the E2E smoke suite.
-      # E2E_USERNAME / E2E_PASSWORD are intentionally NOT set in CI so that
-      # the authenticated test cases are auto-skipped (the unauthenticated
-      # smoke checks still run and validate basic reachability).
-      # To run the full authenticated suite, set these secrets in the repo.
+      # Run the E2E smoke suite using the seeded university user so both
+      # unauthenticated and authenticated Playwright flows are exercised.
       # ───────────────────────────────────────────────────────────────────
       - name: 🎭 Run E2E smoke tests
         env:
-          BASE_URL: "http://localhost"
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+          BASE_URL: ${{ env.BASE_URL }}
+          E2E_USERNAME: ${{ env.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
         run: |
           echo "::group::🎭 Playwright E2E Smoke Tests"
           pytest tests/e2e/ \
