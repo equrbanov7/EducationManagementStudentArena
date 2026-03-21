@@ -69,13 +69,12 @@ class TestLoginFlow:
         login(page)
 
         # After login the URL must no longer be the login page.
-        assert "/accounts/login/" not in page.url, (
-            f"Still on login page after submit — current URL: {page.url}"
-        )
+        assert "/accounts/login/" not in page.url, f"Still on login page after submit — current URL: {page.url}"
         # The landing page must return HTTP 200.
-        assert page.evaluate("() => document.readyState") in {"complete", "interactive"}, (
-            "Post-login page did not finish loading"
-        )
+        assert page.evaluate("() => document.readyState") in {
+            "complete",
+            "interactive",
+        }, "Post-login page did not finish loading"
 
 
 class TestDashboardLoading:
@@ -92,17 +91,13 @@ class TestDashboardLoading:
         # Navigate explicitly to the organisation dashboard root.
         response = page.goto(f"{BASE_URL}/organizations/")
         assert response is not None
-        assert response.status in {200, 302}, (
-            f"Dashboard page returned unexpected HTTP {response.status}"
-        )
+        assert response.status in {200, 302}, f"Dashboard page returned unexpected HTTP {response.status}"
 
         # Follow any redirect and check the final page.
         page.wait_for_load_state("networkidle")
         final_response = page.goto(page.url)
         assert final_response is not None
-        assert final_response.status == 200, (
-            f"Dashboard final page returned HTTP {final_response.status}"
-        )
+        assert final_response.status == 200, f"Dashboard final page returned HTTP {final_response.status}"
 
         # The page must contain at least one visible element (body is not blank).
         expect(page.locator("body")).to_be_visible()
@@ -131,9 +126,7 @@ class TestPrimaryAction:
         # Either a redirect (3xx — which Playwright follows) landing on login,
         # or the exam list is public (200). Either is acceptable; 5xx is not.
         assert response is not None
-        assert response.status < 500, (
-            f"/exams/ returned server error HTTP {response.status}"
-        )
+        assert response.status < 500, f"/exams/ returned server error HTTP {response.status}"
 
     @pytest.mark.skipif(
         not E2E_USERNAME or not E2E_PASSWORD,
@@ -145,9 +138,7 @@ class TestPrimaryAction:
 
         response = page.goto(f"{BASE_URL}/exams/")
         assert response is not None
-        assert response.status == 200, (
-            f"/exams/ returned HTTP {response.status} after login"
-        )
+        assert response.status == 200, f"/exams/ returned HTTP {response.status} after login"
         page.wait_for_load_state("networkidle")
 
         # The page must not be blank.
