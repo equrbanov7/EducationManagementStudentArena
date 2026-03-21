@@ -143,3 +143,18 @@ class TestPrimaryAction:
 
         # The page must not be blank.
         expect(page.locator("body")).to_be_visible()
+
+    @pytest.mark.skipif(
+        not E2E_USERNAME or not E2E_PASSWORD,
+        reason="E2E_USERNAME / E2E_PASSWORD not set — skipping authenticated tests",
+    )
+    def test_student_exam_list_loads_for_multi_role_user(self, page: Page) -> None:
+        """A seeded multi-role university user must also reach student exam pages."""
+        login(page)
+
+        response = page.goto(f"{BASE_URL}/exams/available/")
+        assert response is not None
+        assert response.status == 200, f"/exams/available/ returned HTTP {response.status} after login"
+        page.wait_for_load_state("networkidle")
+
+        expect(page.locator("body")).to_be_visible()
