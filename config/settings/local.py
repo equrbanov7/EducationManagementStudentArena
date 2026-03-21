@@ -18,9 +18,6 @@ def _split_csv_env(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
 
-# Ensure mutable copy (base-də tuple ola bilər)
-STATICFILES_DIRS = list(STATICFILES_DIRS)
-
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
@@ -85,9 +82,6 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 SERVE_MEDIA = True
-
-# Add live_exam static files directory for development
-STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # LAN host for development
 LAN_HOST = os.getenv("LAN_HOST", "172.20.10.11:8000")

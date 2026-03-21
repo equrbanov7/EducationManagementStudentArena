@@ -49,9 +49,6 @@ def _csp_connect_sources(*values: str) -> tuple[str, ...]:
     return tuple(sorted(sources))
 
 
-# STATICFILES_DIRS base-də tuple ola bilər, append üçün list edirik
-STATICFILES_DIRS = list(STATICFILES_DIRS)
-
 # Load environment variables
 load_dotenv(BASE_DIR / ".env")
 
@@ -103,9 +100,6 @@ SERVE_MEDIA = False
 # Nginx internal redirect prefix for X-Accel-Redirect (Task 6: private media).
 # Nginx must define a matching `location /internal_media/ { internal; ... }` block.
 MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_media")
-
-# Add live_exam static files directory
-STATICFILES_DIRS.append(BASE_DIR / "apps" / "live_exam" / "static")
 
 # Email settings for production
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
