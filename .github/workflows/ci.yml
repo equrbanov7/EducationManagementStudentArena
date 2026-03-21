@@ -619,7 +619,7 @@ jobs:
       # Results are also uploaded as a SARIF artifact to the Security tab.
       # ───────────────────────────────────────────────────────────────────
       - name: 🛡️ Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: emsarena-prod:ci
           format: sarif
@@ -637,7 +637,7 @@ jobs:
 
       - name: 📊 Print Trivy table report (for log readability)
         if: always()
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: emsarena-prod:ci
           format: table
