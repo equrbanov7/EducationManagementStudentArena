@@ -22,12 +22,36 @@ User = get_user_model()
 
 
 def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
-    membership_role_name = membership_role_name or {
-        ProfileRole.TEACHER: "teacher",
-        ProfileRole.STUDENT: "student",
-        ProfileRole.ORG_ADMIN: "member",
-        ProfileRole.MEMBER: "member",
-    }.get(profile_role, "member")
+    if membership_role_name is None:
+        if profile_role == ProfileRole.TEACHER:
+            membership_role_name = "teacher"
+        elif profile_role == ProfileRole.STUDENT:
+            membership_role_name = "student"
+        elif profile_role == ProfileRole.ORG_ADMIN:
+            admin_role_candidates = (
+                "vice_rector",
+                "dean",
+                "director",
+                "deputy_director",
+                "section_head",
+                "chair_head",
+                "manager",
+                "senior_instructor",
+            )
+            membership_role_name = next(
+                (
+                    role_name
+                    for role_name in admin_role_candidates
+                    if organization.roles.filter(name=role_name, is_active=True).exists()
+                ),
+                "member",
+            )
+        elif profile_role == ProfileRole.ORG_OWNER:
+            membership_role_name = organization.roles.filter(is_active=True).order_by("-level").values_list(
+                "name", flat=True
+            ).first() or "member"
+        else:
+            membership_role_name = "member"
 
     profile = user.profile
     profile.organization = organization

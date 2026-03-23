@@ -37,15 +37,20 @@ def _create_org_role_and_membership(user, org, permissions=None):
     Create a Role with the given permissions (defaults to ['exam.manage']) and
     a Membership linking *user* to *org* with that role.  Returns the Membership.
     """
-    role = Role.objects.create(
+    permission_list = list(permissions) if permissions is not None else ["exam.manage"]
+    role_name = "instructor" if sorted(permission_list) == ["exam.manage"] else "professor"
+    display_name = "Instructor" if role_name == "instructor" else "Professor"
+    role, _created = Role.objects.update_or_create(
         organization=org,
-        name=f"teacher-{user.pk}",
-        display_name="Teacher",
-        level=50,
-        scope_type=RoleScopeType.ORGANIZATION,
-        permissions=permissions if permissions is not None else ["exam.manage"],
-        is_system=False,
-        is_active=True,
+        name=role_name,
+        defaults={
+            "display_name": display_name,
+            "level": 50,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": permission_list,
+            "is_system": False,
+            "is_active": True,
+        },
     )
     return Membership.objects.create(
         user=user,

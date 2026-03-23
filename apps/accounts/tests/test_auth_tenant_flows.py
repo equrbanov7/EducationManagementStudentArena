@@ -1723,7 +1723,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_org_owner_without_membership_gets_permission_editor_access(self):
+    def test_org_owner_without_membership_is_denied_permission_editor_access(self):
         owner_without_membership = User.objects.create_user(
             username="owner_no_membership",
             email="owner_no_membership@example.com",
@@ -1736,15 +1736,11 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         owner_profile.save()
 
         self._activate_org_session(owner_without_membership, self.org_a)
-        response = self.client.get(reverse("accounts:permission_editor"), follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur.")
-        self.assertTrue(
-            Membership.objects.filter(
-                user=owner_without_membership,
-                organization=self.org_a,
-                is_active=True,
-            ).exists()
+        response = self.client.get(reverse("accounts:permission_editor"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile"))
+        self.assertFalse(
+            Membership.objects.filter(user=owner_without_membership, organization=self.org_a, is_active=True).exists()
         )
 
     def test_permission_editor_bulk_add_and_remove(self):

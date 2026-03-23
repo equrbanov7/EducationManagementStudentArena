@@ -1,15 +1,12 @@
 import os
 import sys
 
-
-def _require_settings_module() -> None:
-    if not os.environ.get("DJANGO_SETTINGS_MODULE"):
-        raise RuntimeError("DJANGO_SETTINGS_MODULE must be set before running manage.py.")
+DEFAULT_SETTINGS_MODULE = "config.settings.local"
 
 
 def main():
     """Run administrative tasks."""
-    _require_settings_module()
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", DEFAULT_SETTINGS_MODULE)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
