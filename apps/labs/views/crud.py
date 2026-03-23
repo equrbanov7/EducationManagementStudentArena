@@ -3,6 +3,8 @@ Labs Views - Lab CRUD Operations
 Lab yaratma, redaktə, silmə və yayımlama
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -12,6 +14,8 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from ..models import Lab
+
+logger = logging.getLogger(__name__)
 from ._helpers import (
     _get_tenant_course_or_404,
     _get_tenant_lab_or_404,
@@ -78,11 +82,9 @@ def create_lab(request, course_id):
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in create_lab")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -172,11 +174,9 @@ def edit_lab(request, pk):
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in edit_lab")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
