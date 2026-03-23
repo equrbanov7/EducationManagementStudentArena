@@ -203,3 +203,120 @@ class ExamParsingServicesTest(TestCase):
                 parsing.extract_text_from_upload(uploaded)
 
         self.assertIn("pypdf", str(exc.exception))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Exams grading service coverage
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class ExamGradingServiceTest(TestCase):
+    """Tests for apps/exams/services/grading.py and domain/grading.py."""
+
+    def setUp(self):
+        self.teacher = User.objects.create_user(
+            username="grd_teacher", email="grd_t@example.com", password="pass"
+        )
+        self.student = User.objects.create_user(
+            username="grd_student", email="grd_s@example.com", password="pass"
+        )
+        org = Organization.objects.create(
+            name="Grading Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.exam = Exam.objects.create(
+            title="Grading Exam",
+            slug="grading-exam",
+            author=self.teacher,
+            organization=org,
+            exam_type="test",
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Q?",
+            points=10,
+            order=1,
+        )
+        self.attempt = ExamAttempt.objects.create(exam=self.exam, user=self.student)
+        self.answer = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=self.question,
+        )
+
+    def test_grade_exam_answer_sets_score(self):
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, "8")
+        self.assertEqual(result.teacher_score, 8)
+
+    def test_grade_exam_answer_with_feedback(self):
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, "7", feedback="Good answer")
+        self.assertEqual(result.teacher_feedback, "Good answer")
+
+    def test_grade_exam_answer_decimal_input(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, Decimal("9"))
+        self.assertEqual(result.teacher_score, 9)
+
+    def test_bulk_grade_answers(self):
+        from apps.exams.services.grading import bulk_grade_answers
+
+        answer2 = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=ExamQuestion.objects.create(exam=self.exam, text="Q2?", points=5, order=2),
+        )
+        count = bulk_grade_answers([self.answer.id, answer2.id], [5, 7])
+        self.assertEqual(count, 2)
+
+    def test_calculate_attempt_score_test_type_correct(self):
+        from decimal import Decimal
+
+        from apps.exams.models import ExamQuestionOption
+        from apps.exams.services.grading import calculate_attempt_score
+
+        option = ExamQuestionOption.objects.create(
+            question=self.question, text="Yes", is_correct=True
+        )
+        self.answer.selected_options.add(option)
+        self.answer.is_correct = True
+        self.answer.save()
+        score = calculate_attempt_score(self.attempt)
+        self.assertEqual(score, Decimal("10"))
+
+    def test_calculate_attempt_score_uses_teacher_score_if_set(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import calculate_attempt_score
+
+        self.answer.teacher_score = 6
+        self.answer.save()
+        score = calculate_attempt_score(self.attempt)
+        self.assertEqual(score, Decimal("6"))
+
+    def test_parse_score_value_valid(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertEqual(parse_score_value("9.5"), Decimal("9.5"))
+
+    def test_parse_score_value_invalid_returns_default(self):
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertIsNone(parse_score_value("bad"))
+        self.assertEqual(parse_score_value("bad", default=0), 0)
+
+    def test_parse_score_value_none_returns_default(self):
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertIsNone(parse_score_value(None))
+        self.assertIsNone(parse_score_value(""))

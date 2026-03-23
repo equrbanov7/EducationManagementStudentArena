@@ -125,11 +125,20 @@ LOGGING = {
         "mask_sensitive": {
             "()": "core.logging_filters.SensitiveDataFilter",
         },
+        "request_id": {
+            "()": "core.logging_filters.RequestIdFilter",
+        },
+    },
+    "formatters": {
+        "json": {
+            "()": "core.logging_filters.JsonFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "filters": ["mask_sensitive"],
+            "formatter": "json",
+            "filters": ["mask_sensitive", "request_id"],
         },
     },
     "root": {

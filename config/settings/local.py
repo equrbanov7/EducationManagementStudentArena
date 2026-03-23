@@ -142,11 +142,21 @@ LOGGING = {
         "mask_sensitive": {
             "()": "core.logging_filters.SensitiveDataFilter",
         },
+        "request_id": {
+            "()": "core.logging_filters.RequestIdFilter",
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "[%(asctime)s] %(levelname)s [%(request_id)s] %(name)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "filters": ["mask_sensitive"],
+            "formatter": "verbose",
+            "filters": ["mask_sensitive", "request_id"],
         },
     },
     "root": {
