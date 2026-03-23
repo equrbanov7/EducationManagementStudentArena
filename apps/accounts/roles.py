@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
 from apps.accounts.models import ProfileRole
+from apps.organizations.services import get_active_memberships
 from core.constants import ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR, ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN, ROLE_LEVELS
 
 User = get_user_model()
@@ -48,49 +49,22 @@ def _resolve_active_organization_context(self):
 
     if cached_memberships is not None:
         memberships = [membership for membership in cached_memberships if getattr(membership, "is_active", False)]
-        if active_organization is not None:
-            memberships = [
-                membership
-                for membership in memberships
-                if getattr(membership, "organization_id", None) == active_organization.id
-            ]
-        elif memberships:
-            active_organization = memberships[0].organization
+        if active_organization is None:
+            return None, []
+        memberships = [
+            membership
+            for membership in memberships
+            if getattr(membership, "organization_id", None) == active_organization.id
+        ]
         return active_organization, memberships
-
-    if active_organization is not None:
-        memberships = list(
-            self.memberships.filter(organization=active_organization, is_active=True)
-            .select_related("organization", "role", "scope_unit")
-            .order_by("-is_primary", "-role__level")
-        )
-        self._active_org_memberships = memberships
-        return active_organization, memberships
-
-    memberships = list(
-        self.memberships.filter(is_active=True, organization__is_active=True)
-        .select_related("organization", "role", "scope_unit")
-        .order_by("-is_primary", "-role__level")
-    )
-    unique_org_ids = {membership.organization_id for membership in memberships}
-    if len(unique_org_ids) == 1 and memberships:
-        active_organization = memberships[0].organization
-        self._active_organization = active_organization
-        self._active_org_memberships = memberships
-        return active_organization, memberships
-
-    return None, []
-
-
-def _should_use_legacy_profile_fallback(self):
-    if not _is_authenticated_user(self):
-        return False
 
     active_organization = getattr(self, "_active_organization", None)
-    if active_organization is not None:
-        return False
+    if active_organization is None:
+        return None, []
 
-    return not self.memberships.filter(is_active=True, organization__is_active=True).exists()
+    memberships = list(get_active_memberships(self, active_organization))
+    self._active_org_memberships = memberships
+    return active_organization, memberships
 
 
 def _get_active_organization(self):
@@ -125,10 +99,8 @@ def _get_all_roles(self):
         return []
 
     active_organization, memberships = _resolve_active_organization_context(self)
-    if not memberships and _should_use_legacy_profile_fallback(self):
-        profile = _get_profile_safe(self)
-        legacy_role = getattr(profile, "role", None)
-        return [legacy_role] if legacy_role in ProfileRole.LEVELS else []
+    if not active_organization or not memberships:
+        return []
 
     role_names = []
     for membership in memberships:
@@ -154,9 +126,8 @@ def _highest_role_level(self):
         return 999
 
     active_organization, memberships = _resolve_active_organization_context(self)
-    if not memberships and _should_use_legacy_profile_fallback(self):
-        profile = _get_profile_safe(self)
-        return ProfileRole.LEVELS.get(getattr(profile, "role", None), 0)
+    if not active_organization or not memberships:
+        return 0
 
     levels = [_membership_effective_level(self, membership, active_organization) for membership in memberships]
     return max(levels, default=0)
@@ -172,10 +143,7 @@ def _has_role(self, role_name: str) -> bool:
         return bool(self.is_superuser or getattr(profile, "role", None) == ProfileRole.SUPERADMIN)
 
     active_organization, memberships = _resolve_active_organization_context(self)
-    if not memberships:
-        if _should_use_legacy_profile_fallback(self):
-            profile = _get_profile_safe(self)
-            return getattr(profile, "role", None) == normalized_role_name
+    if not active_organization or not memberships:
         return False
 
     for membership in memberships:

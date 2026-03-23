@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -35,6 +35,13 @@ class StudentGroupTest(TestCase):
 
         self.teacher.profile.organization = self.org
         self.teacher.profile.save(update_fields=["organization"])
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
 
     def test_student_group_creation(self):
         """Test that StudentGroup can be created."""

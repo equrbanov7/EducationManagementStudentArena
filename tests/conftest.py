@@ -2,12 +2,15 @@
 Pytest configuration and fixtures for EMS Arena project.
 """
 
-from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 
 import pytest
 
-User = get_user_model()
+
+def _get_user_model():
+    from django.contrib.auth import get_user_model
+
+    return get_user_model()
 
 
 @pytest.fixture
@@ -17,7 +20,7 @@ def create_user():
     """
 
     def _create_user(username="testuser", email="test@example.com", password="testpass123", **kwargs):
-        return User.objects.create_user(username=username, email=email, password=password, **kwargs)
+        return _get_user_model().objects.create_user(username=username, email=email, password=password, **kwargs)
 
     return _create_user
 
@@ -103,7 +106,7 @@ def organization(db):
     from apps.organizations.signals import create_default_roles
     from core.constants import OrganizationType
 
-    owner = User.objects.create_user(
+    owner = _get_user_model().objects.create_user(
         username="org_owner",
         email="org_owner@example.com",
         password="testpass123",
@@ -172,7 +175,7 @@ def multi_org_user(db):
     from apps.organizations.signals import create_default_roles
     from core.constants import OrganizationType, RoleScopeType
 
-    user = User.objects.create_user(
+    user = _get_user_model().objects.create_user(
         username="multi_org_user",
         email="multi_org@example.com",
         password="testpass123",

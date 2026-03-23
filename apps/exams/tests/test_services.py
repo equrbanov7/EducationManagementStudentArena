@@ -14,7 +14,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 from apps.exams.services import parsing
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -98,7 +98,12 @@ class ExamGradingServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
+        self.exam = Exam.objects.create(
+            title="Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
         self.attempt = ExamAttempt.objects.create(
             user=self.student, exam=self.exam, attempt_number=1, status="submitted"
         )
@@ -133,9 +138,6 @@ class ExamAccessControlServicesTest(TestCase):
 
     def setUp(self):
         self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -143,17 +145,32 @@ class ExamAccessControlServicesTest(TestCase):
             status="active",
             is_active=True,
         )
-        self.teacher.profile.organization = self.org
-        self.teacher.profile.organization_type = self.org.org_type
-        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
+        self.teacher.set_active_organization_context(self.org)
 
         self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
-        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
+        self.exam = Exam.objects.create(
+            title="Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
 
     def test_is_teacher_user(self):
         """Test checking if user is teacher."""
         self.assertTrue(services.is_teacher_user(self.teacher))
         self.assertFalse(services.is_teacher_user(self.student))
+
+    def test_is_teacher_user_denies_without_bound_tenant_context(self):
+        self.teacher.clear_active_organization_context()
+
+        self.assertFalse(services.is_teacher_user(self.teacher))
 
     def test_can_user_access_exam_as_author(self):
         """Test exam access for author."""

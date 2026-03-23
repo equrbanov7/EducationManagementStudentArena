@@ -20,6 +20,7 @@ from django.db.models.signals import post_save
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 
+from apps.accounts.models import ProfileRole
 from apps.organizations.middleware import OrganizationMiddleware
 from apps.organizations.models import Membership, Organization, Role
 from apps.organizations.signals import create_default_roles
@@ -277,4 +278,74 @@ class MultiOrgExplicitSelectionTest(TestCase):
             request.org_permissions,
             [],
             "org_permissions must be empty when no org context is active",
+        )
+
+
+class MembershipSourceOfTruthTest(TestCase):
+    """Regression guards for membership-only organization context resolution."""
+
+    def setUp(self):
+        self.middleware = OrganizationMiddleware(_dummy_view)
+
+    def test_profile_fields_do_not_backfill_org_context_without_membership(self):
+        user = User.objects.create_user(
+            username="legacy_profile_only_user",
+            email="legacy_profile_only@example.com",
+            password="testpass123",
+        )
+        organization = _make_org("Legacy Profile Org", "legacy-profile-org", user)
+
+        profile = user.profile
+        profile.organization = organization
+        profile.organization_type = organization.org_type
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        request = _make_request(user)
+        self.middleware(request)
+
+        self.assertIsNone(request.organization)
+        self.assertEqual(request.org_memberships, [])
+        self.assertEqual(request.org_permissions, [])
+        self.assertNotIn("active_organization", request.session)
+        self.assertFalse(
+            Membership.objects.filter(user=user, organization=organization, is_active=True).exists(),
+            "Runtime middleware must not materialize memberships from legacy profile fields",
+        )
+
+    def test_selected_org_context_overrides_stale_profile_role_and_org(self):
+        user = User.objects.create_user(
+            username="multi_org_membership_source_of_truth",
+            email="multi_org_membership_source_of_truth@example.com",
+            password="testpass123",
+        )
+        org_a = _make_org("Source Truth Org A", "source-truth-org-a", user)
+        org_b = _make_org("Source Truth Org B", "source-truth-org-b", user, OrganizationType.SCHOOL)
+
+        role_a = _make_role(org_a, name="teacher", level=60, permissions=["course.create"])
+        role_b = _make_role(org_b, name="member", level=20, permissions=[])
+
+        _assign(user, org_a, role_a, is_primary=True)
+        _assign(user, org_b, role_b, is_primary=False)
+
+        profile = user.profile
+        profile.organization = org_a
+        profile.organization_type = org_a.org_type
+        profile.role = ProfileRole.TEACHER
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        request = _make_request(user)
+        request.session["active_organization"] = org_b.slug
+        self.middleware(request)
+
+        self.assertEqual(request.organization, org_b)
+        self.assertEqual({membership.organization_id for membership in request.org_memberships}, {org_b.id})
+        self.assertFalse(request.user.has_role(ProfileRole.TEACHER))
+        self.assertTrue(request.user.has_role(ProfileRole.MEMBER))
+        self.assertTrue(request.user.has_role(ProfileRole.ORG_OWNER))
+        self.assertEqual(request.user._highest_role_level(), ProfileRole.LEVELS.get(ProfileRole.ORG_OWNER, 90))
+        self.assertEqual(
+            request.organization.slug,
+            org_b.slug,
+            "The resolved org must match the one the user selected",
         )

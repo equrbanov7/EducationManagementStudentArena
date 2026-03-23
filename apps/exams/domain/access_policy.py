@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
+from apps.organizations.services import organization_user_queryset, user_has_org_role
 
 User = get_user_model()
 
@@ -64,24 +65,21 @@ class StudentGroup(models.Model):
             errors["organization"] = pgettext("exams.model.error", "group_organization_required")
 
         if self.teacher_id:
-            try:
-                profile = self.teacher.profile
-            except Exception:
-                profile = None
-            teacher_org = getattr(profile, "organization", None)
             teacher_is_allowed = self.teacher.is_superuser or getattr(self.teacher, "is_superadmin", False)
-            if not teacher_is_allowed and hasattr(self.teacher, "has_role"):
-                teacher_is_allowed = self.teacher.has_role(ProfileRole.TEACHER) or self.teacher.has_role(
-                    ProfileRole.ASSISTANT_TEACHER
+            if not teacher_is_allowed and self.organization_id:
+                teacher_is_allowed = user_has_org_role(
+                    self.teacher,
+                    self.organization,
+                    {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
                 )
-            if not teacher_is_allowed:
-                teacher_role = getattr(profile, "role", None)
-                teacher_is_allowed = teacher_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
 
             if not teacher_is_allowed:
                 errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_role_required")
 
-            if self.organization_id and teacher_org != self.organization:
+            if self.organization_id and not organization_user_queryset(
+                self.organization,
+                queryset=User.objects.filter(id=self.teacher_id),
+            ).exists():
                 errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_tenant_mismatch")
 
         if errors:

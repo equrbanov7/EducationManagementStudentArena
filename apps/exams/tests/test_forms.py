@@ -5,7 +5,7 @@ from django.test import TestCase
 from apps.accounts.models import ProfileRole
 from apps.exams.forms import ExamForm, StudentGroupForm
 from apps.exams.models import Exam
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -71,6 +71,16 @@ class StudentGroupFormRoleSourceTests(TestCase):
             email="group_form_member_student_group@example.com",
             password="StrongPass123!",
         )
+        self.legacy_profile_teacher = User.objects.create_user(
+            username="group_form_legacy_profile_teacher",
+            email="group_form_legacy_profile_teacher@example.com",
+            password="StrongPass123!",
+        )
+        self.legacy_profile_student = User.objects.create_user(
+            username="group_form_legacy_profile_student",
+            email="group_form_legacy_profile_student@example.com",
+            password="StrongPass123!",
+        )
 
         self.org = Organization.objects.create(
             name="Student Group Form Org",
@@ -80,21 +90,32 @@ class StudentGroupFormRoleSourceTests(TestCase):
             is_active=True,
         )
 
-        for user, role in (
-            (self.teacher, ProfileRole.TEACHER),
-            (self.student, ProfileRole.STUDENT),
-            (self.member_with_teacher_group, ProfileRole.MEMBER),
-            (self.member_with_student_group, ProfileRole.MEMBER),
+        for user, membership_role in (
+            (self.teacher, "teacher"),
+            (self.student, "student"),
+            (self.member_with_teacher_group, "member"),
+            (self.member_with_student_group, "member"),
         ):
-            user.profile.organization = self.org
-            user.profile.organization_type = self.org.org_type
-            user.profile.role = role
-            user.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+            Membership.objects.create(
+                user=user,
+                organization=self.org,
+                role=self.org.roles.get(name=membership_role),
+                is_primary=True,
+                is_active=True,
+            )
 
         teacher_group = Group.objects.create(name=ProfileRole.TEACHER)
         student_group = Group.objects.create(name=ProfileRole.STUDENT)
         self.member_with_teacher_group.groups.add(teacher_group)
         self.member_with_student_group.groups.add(student_group)
+        self.legacy_profile_teacher.profile.organization = self.org
+        self.legacy_profile_teacher.profile.organization_type = self.org.org_type
+        self.legacy_profile_teacher.profile.role = ProfileRole.TEACHER
+        self.legacy_profile_teacher.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        self.legacy_profile_student.profile.organization = self.org
+        self.legacy_profile_student.profile.organization_type = self.org.org_type
+        self.legacy_profile_student.profile.role = ProfileRole.STUDENT
+        self.legacy_profile_student.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
     def test_auth_groups_do_not_expand_teacher_or_student_queryset(self):
         form = StudentGroupForm(actor=self.teacher, organization=self.org)
@@ -106,3 +127,5 @@ class StudentGroupFormRoleSourceTests(TestCase):
         self.assertIn(self.student.id, student_ids)
         self.assertNotIn(self.member_with_teacher_group.id, teacher_ids)
         self.assertNotIn(self.member_with_student_group.id, student_ids)
+        self.assertNotIn(self.legacy_profile_teacher.id, teacher_ids)
+        self.assertNotIn(self.legacy_profile_student.id, student_ids)
