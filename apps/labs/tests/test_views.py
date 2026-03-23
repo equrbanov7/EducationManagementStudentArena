@@ -898,7 +898,6 @@ class LabUploadSecurityTest(TestCase):
                     content_type="application/x-httpd-php",
                 ),
             },
-            content_type="multipart/form-data",
         )
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["success"])
