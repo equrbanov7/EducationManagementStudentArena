@@ -209,30 +209,33 @@ class ProtectedMediaViewTest(TestCase):
             self.assertEqual(response["Cache-Control"], "private, no-store")
 
     def test_serve_media_false_does_not_expose_media_in_production(self):
-        """SERVE_MEDIA=False in production means no Django-based media serving."""
-        import sys
+        """SERVE_MEDIA=False in production means files are never served directly.
 
-        from django.urls import clear_url_caches
+        The protected_media view is always registered (so Django can enforce
+        authentication and emit X-Accel-Redirect headers for nginx).  For
+        unauthenticated requests to private paths, the view redirects to the
+        login page regardless of SERVE_MEDIA — files are never exposed.
+        """
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
 
-        # Force URL module re-import so the test is not affected by previous
-        # tests that temporarily set SERVE_MEDIA=True (which causes the URL to
-        # be registered in sys.modules["config.urls"].urlpatterns).
-        sys.modules.pop("config.urls", None)
-        clear_url_caches()
+        from core.media_views import protected_media
 
-        # When SERVE_MEDIA is False (the production default), the /media/ URL
-        # pattern is not registered at all, so requests return 404.
+        factory = RequestFactory()
+        request = factory.get("/media/projects/submissions/sample.txt")
+        request.user = AnonymousUser()
+
         with override_settings(
             MEDIA_ROOT=self.media_tmp,
+            MEDIA_URL="/media/",
             SERVE_MEDIA=False,
             DEBUG=False,
+            MEDIA_ACCEL_REDIRECT_URL="",
         ):
-            response = self.client.get("/media/projects/submissions/sample.txt")
-            self.assertEqual(response.status_code, 404)
-
-        # Restore URL module for subsequent tests
-        sys.modules.pop("config.urls", None)
-        clear_url_caches()
+            response = protected_media(request, path="projects/submissions/sample.txt")
+            # Unauthenticated users must be redirected to login, not served the file.
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("login", response["Location"].lower())
 
     def test_dev_private_media_requires_auth(self):
         """

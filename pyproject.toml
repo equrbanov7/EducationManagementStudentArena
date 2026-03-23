@@ -86,7 +86,7 @@ DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["tests.py", "test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-testpaths = ["tests", "apps"]
+testpaths = ["tests", "apps", "core"]
 addopts = "-v --tb=short"
 filterwarnings = [
     "ignore::DeprecationWarning",
