@@ -14,8 +14,6 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from ..models import Lab
-
-logger = logging.getLogger(__name__)
 from ._helpers import (
     _get_tenant_course_or_404,
     _get_tenant_lab_or_404,
@@ -23,6 +21,8 @@ from ._helpers import (
     _parse_max_size_mb,
     _validate_and_prepare_lab_upload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required

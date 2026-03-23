@@ -13,14 +13,14 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from ..models import LabQuestion
-
-logger = logging.getLogger(__name__)
 from ._helpers import (
     _get_tenant_block_or_404,
     _get_tenant_question_or_404,
     _normalize_extensions,
     _validate_and_prepare_lab_upload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
