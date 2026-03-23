@@ -9,6 +9,8 @@ Contains:
 - delete_project
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -21,6 +23,8 @@ from apps.courses.models import CourseMembership
 from ._helpers import _get_tenant_course_or_404, _get_tenant_project_or_404
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -89,8 +93,9 @@ def create_project(request, course_id):
         messages.success(request, pgettext("projects.views.message", "project_created"))
         return JsonResponse({"success": True, "project_id": project.id})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in create_project")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -191,8 +196,9 @@ def edit_project(request, pk):
         messages.success(request, pgettext("projects.views.message", "project_updated"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_updated")})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in edit_project")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -221,5 +227,6 @@ def delete_project(request, pk):
         project.delete()
         messages.success(request, pgettext("projects.views.message", "project_deleted"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_deleted")})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in delete_project")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
