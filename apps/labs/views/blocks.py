@@ -13,9 +13,9 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
 from ..models import LabBlock
+from ._helpers import _get_tenant_block_or_404, _get_tenant_lab_or_404
 
 logger = logging.getLogger(__name__)
-from ._helpers import _get_tenant_block_or_404, _get_tenant_lab_or_404
 
 
 @login_required
