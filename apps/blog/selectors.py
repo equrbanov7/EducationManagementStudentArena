@@ -3,13 +3,28 @@ Database query layer for blog app.
 This module contains selector functions that handle database queries.
 """
 
+import logging
 from collections import defaultdict
 
+from django.core.cache import cache
 from django.db.models import Case, Count, IntegerField, Value, When
 
 from .models import Category, Post
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_TECHNOLOGY_CATEGORY_SLUG = "technology"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cache TTLs (seconds)
+# ─────────────────────────────────────────────────────────────────────────────
+_NAVBAR_CATEGORIES_TTL = 300       # 5 min — low mutation rate
+_SIDEBAR_CATEGORIES_TTL = 120      # 2 min — invalidated on post publish
+_POPULAR_TOPICS_TTL = 300          # 5 min — low mutation rate
+
+_CACHE_KEY_NAVBAR = "emsarena:blog:navbar_categories"
+_CACHE_KEY_SIDEBAR = "emsarena:blog:sidebar_categories"
+_CACHE_KEY_POPULAR_TOPICS = "emsarena:blog:popular_topics"
 
 
 def _static_category_sort_key(category):
@@ -137,6 +152,15 @@ def get_flat_category_tree(
 
 def get_sidebar_categories(*, posts_queryset=None, active_category=None, include_empty=False):
     root_category = active_category.get_root() if active_category else None
+
+    # Use cached result only for the common global call (no active category filter)
+    use_cache = active_category is None and posts_queryset is None
+    if use_cache:
+        cache_key = f"{_CACHE_KEY_SIDEBAR}:{include_empty}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     categories = get_flat_category_tree(
         posts_queryset=posts_queryset,
         include_empty=include_empty,
@@ -145,16 +169,23 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
     )
 
     if active_category is None:
-        return categories
+        result = categories
+    else:
+        nested_categories = [category for category in categories if category.tree_depth > 0]
+        if not nested_categories:
+            result = categories
+        else:
+            for category in nested_categories:
+                category.tree_depth = max(category.tree_depth - 1, 0)
+            result = nested_categories
 
-    nested_categories = [category for category in categories if category.tree_depth > 0]
-    if not nested_categories:
-        return categories
+    if use_cache:
+        try:
+            cache.set(cache_key, result, timeout=_SIDEBAR_CATEGORIES_TTL)
+        except Exception:
+            logger.warning("Redis unavailable; sidebar categories cache not populated")
 
-    for category in nested_categories:
-        category.tree_depth = max(category.tree_depth - 1, 0)
-
-    return nested_categories
+    return result
 
 
 def get_category_assignment_choices():
@@ -177,12 +208,28 @@ def get_category_assignment_queryset_and_labels():
 
 
 def get_navbar_categories():
+    cached = cache.get(_CACHE_KEY_NAVBAR)
+    if cached is not None:
+        return cached
     navbar_categories = get_flat_category_tree(include_empty=True)
-    return [category for category in navbar_categories if category.tree_depth == 0 and category.show_in_navbar]
+    result = [category for category in navbar_categories if category.tree_depth == 0 and category.show_in_navbar]
+    try:
+        cache.set(_CACHE_KEY_NAVBAR, result, timeout=_NAVBAR_CATEGORIES_TTL)
+    except Exception:
+        logger.warning("Redis unavailable; navbar categories cache not populated")
+    return result
 
 
 def get_popular_topics(*, active_category=None, limit=5):
     root_category = active_category.get_root() if active_category else None
+
+    # Use cached result only for the common global call (no category filter)
+    if active_category is None:
+        cache_key = f"{_CACHE_KEY_POPULAR_TOPICS}:{limit}"
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
+
     categories = get_flat_category_tree(
         include_empty=True,
         root_category=root_category,
@@ -190,13 +237,18 @@ def get_popular_topics(*, active_category=None, limit=5):
     )
 
     if not categories:
-        return []
-
-    if root_category is not None:
+        result = []
+    elif root_category is not None:
         child_topics = [category for category in categories if category.tree_depth == 1]
-        if child_topics:
-            return child_topics[:limit]
-        return []
+        result = child_topics[:limit] if child_topics else []
+    else:
+        root_topics = [category for category in categories if category.tree_depth == 0]
+        result = root_topics[:limit]
 
-    root_topics = [category for category in categories if category.tree_depth == 0]
-    return root_topics[:limit]
+    if active_category is None:
+        try:
+            cache.set(cache_key, result, timeout=_POPULAR_TOPICS_TTL)
+        except Exception:
+            logger.warning("Redis unavailable; popular topics cache not populated")
+
+    return result

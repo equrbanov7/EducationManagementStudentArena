@@ -11,10 +11,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Apply all available OS security patches.
-# No extra system packages are needed: psycopg2-binary ships its own libpq,
-# and the production entrypoint uses Python (not pg_isready/psql).
+# libpq-dev, gcc and python3-dev are required to compile psycopg2 from source
+# (production uses psycopg2, not psycopg2-binary).
 RUN apt-get update \
     && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        libpq-dev \
+        gcc \
+        python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a dedicated non-root user for runtime security.
