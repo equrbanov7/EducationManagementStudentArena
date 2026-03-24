@@ -3403,6 +3403,10 @@ msgctxt "accounts.auth.message"
 msgid "logout_success"
 msgstr "Вы успешно выступили."
 
+msgctxt "accounts.auth.message"
+msgid "otp_email_send_failed"
+msgstr "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
+
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
 msgid "basic_information"
@@ -6109,6 +6113,10 @@ msgstr "Email не найден."
 msgctxt "blog.verify.message"
 msgid "new_code_sent"
 msgstr "Новый код отправлен."
+
+msgctxt "blog.verify.message"
+msgid "otp_email_send_failed"
+msgstr "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"
