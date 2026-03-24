@@ -9,6 +9,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import StudentGroup
+from apps.organizations.services import organization_role_user_queryset, organization_user_queryset, user_has_org_role
 
 User = get_user_model()
 
@@ -71,26 +72,26 @@ class StudentGroupForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.actor = actor or teacher
-        if self.actor:
-            try:
-                actor_profile = self.actor.profile
-            except Exception:
-                actor_profile = None
-        else:
-            actor_profile = None
-        self.actor_role = getattr(actor_profile, "role", None)
         self.organization = organization
         self.is_superadmin = bool(is_superadmin)
         self.can_multi_assign_teachers = bool(can_multi_assign_teachers)
 
         users_qs = User.objects.filter(is_active=True).select_related("profile").order_by("username")
         if self.organization is not None:
-            users_qs = users_qs.filter(profile__organization=self.organization)
+            users_qs = organization_user_queryset(self.organization, queryset=users_qs)
         elif not self.is_superadmin:
             users_qs = users_qs.none()
 
-        students_qs = users_qs.filter(profile__role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT]).distinct()
-        teachers_qs = users_qs.filter(profile__role__in=[ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER]).distinct()
+        students_qs = organization_role_user_queryset(
+            self.organization,
+            {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
+            queryset=users_qs,
+        )
+        teachers_qs = organization_role_user_queryset(
+            self.organization,
+            {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
+            queryset=users_qs,
+        )
 
         self.fields["students"].queryset = students_qs
         self.fields["primary_teacher"].queryset = teachers_qs
@@ -103,12 +104,10 @@ class StudentGroupForm(forms.ModelForm):
                 initial_assigned.append(self.instance.teacher_id)
             self.fields["assigned_teachers"].initial = initial_assigned
 
-        actor_is_teacher = self.actor is not None and (
-            (
-                hasattr(self.actor, "has_role")
-                and (self.actor.has_role(ProfileRole.TEACHER) or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER))
-            )
-            or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = self.actor is not None and user_has_org_role(
+            self.actor,
+            self.organization,
+            {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
         )
         if self.actor is not None and actor_is_teacher and not self.can_multi_assign_teachers:
             self.fields["primary_teacher"].queryset = teachers_qs.filter(id=self.actor.id)
@@ -138,13 +137,11 @@ class StudentGroupForm(forms.ModelForm):
     def _is_teacher_profile(self, user):
         if user is None:
             return False
-        if hasattr(user, "has_role"):
-            return user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
-        try:
-            profile = user.profile
-        except Exception:
-            profile = None
-        return getattr(profile, "role", None) in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        return user_has_org_role(
+            user,
+            self.organization,
+            {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -156,7 +153,8 @@ class StudentGroupForm(forms.ModelForm):
             raise ValidationError(pgettext_lazy("exams.form.group.error", "org_required"))
 
         if students is not None:
-            invalid_students = students.exclude(profile__organization=self.organization)
+            allowed_student_ids = set(self.fields["students"].queryset.values_list("id", flat=True))
+            invalid_students = students.exclude(id__in=allowed_student_ids)
             if invalid_students.exists():
                 raise ValidationError(pgettext_lazy("exams.form.group.error", "tenant_students_only"))
 
@@ -166,26 +164,15 @@ class StudentGroupForm(forms.ModelForm):
         if not self._is_teacher_profile(primary_teacher):
             raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_role_required"))
 
-        try:
-            primary_teacher_profile = primary_teacher.profile
-        except Exception:
-            primary_teacher_profile = None
-
-        primary_teacher_org = getattr(primary_teacher_profile, "organization", None)
-        if primary_teacher_org != self.organization:
+        if primary_teacher.id not in self.fields["primary_teacher"].queryset.values_list("id", flat=True):
             raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_tenant_mismatch"))
 
         assigned_list = list(assigned_teachers) if assigned_teachers is not None else []
 
         invalid_assigned = []
+        allowed_teacher_ids = set(self.fields["assigned_teachers"].queryset.values_list("id", flat=True))
         for teacher in assigned_list:
-            try:
-                teacher_profile = teacher.profile
-            except Exception:
-                teacher_profile = None
-            teacher_org = getattr(teacher_profile, "organization", None)
-
-            if not self._is_teacher_profile(teacher) or teacher_org != self.organization:
+            if teacher.id not in allowed_teacher_ids or not self._is_teacher_profile(teacher):
                 invalid_assigned.append(teacher)
         if invalid_assigned:
             raise ValidationError(pgettext_lazy("exams.form.group.error", "assigned_teachers_invalid"))
@@ -193,12 +180,10 @@ class StudentGroupForm(forms.ModelForm):
         assigned_ids = {teacher.id for teacher in assigned_list}
         assigned_ids.add(primary_teacher.id)
 
-        actor_is_teacher = self.actor is not None and (
-            (
-                hasattr(self.actor, "has_role")
-                and (self.actor.has_role(ProfileRole.TEACHER) or self.actor.has_role(ProfileRole.ASSISTANT_TEACHER))
-            )
-            or self.actor_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+        actor_is_teacher = self.actor is not None and user_has_org_role(
+            self.actor,
+            self.organization,
+            {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
         )
 
         if self.can_multi_assign_teachers:

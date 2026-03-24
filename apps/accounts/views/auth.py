@@ -2,11 +2,14 @@
 Authentication views: registration, verification, login, logout.
 """
 
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 from django.core.signing import BadSignature, SignatureExpired
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import pgettext_lazy
@@ -24,12 +27,14 @@ from ..services import (
     activate_user_account,
     create_user_with_organization,
     get_otp_timer_context,
+    purge_stale_pending_registration,
     send_verification_otp,
     verify_otp_code,
 )
 from ._helpers import signer
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 AUTH_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 LOGIN_LIMIT_SCOPE_IP = "accounts.login.ip"
@@ -157,33 +162,63 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 def register_view(request):
     """User registration with organization bootstrap and email verification."""
     if request.method == "POST":
+        # Remove any prior unverified registration with the same credentials so
+        # that the form's unique-constraint check does not block a legitimate retry.
+        purge_stale_pending_registration(
+            username=request.POST.get("username", "").strip(),
+            email=request.POST.get("email", "").strip(),
+        )
+
         form = RegisterForm(request.POST)
         if form.is_valid():
             country_code = form.cleaned_data.get("country", "")
             country_obj = Country.objects.filter(code=country_code).first()
             country_name = country_obj.name if country_obj else country_code
-            user, organization, _, profile = create_user_with_organization(
-                username=form.cleaned_data["username"],
-                email=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                signup_mode=form.cleaned_data.get("signup_mode", "individual"),
-                organization_type=form.cleaned_data["organization_type"],
-                country_code=country_code,
-                country_name=country_name,
-                join_organization=form.cleaned_data.get("join_organization"),
-                institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
-                organization_identifier=form.cleaned_data.get("organization_identifier", ""),
-                organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
-                initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
-            )
-            requested_organization_name = profile.requested_organization_name
+
+            try:
+                with transaction.atomic():
+                    user, organization, _, profile = create_user_with_organization(
+                        username=form.cleaned_data["username"],
+                        email=form.cleaned_data["email"],
+                        password=form.cleaned_data["password"],
+                        first_name=form.cleaned_data["first_name"],
+                        last_name=form.cleaned_data["last_name"],
+                        signup_mode=form.cleaned_data.get("signup_mode", "individual"),
+                        organization_type=form.cleaned_data["organization_type"],
+                        country_code=country_code,
+                        country_name=country_name,
+                        join_organization=form.cleaned_data.get("join_organization"),
+                        institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
+                        organization_identifier=form.cleaned_data.get("organization_identifier", ""),
+                        organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
+                        initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
+                    )
+                    requested_organization_name = profile.requested_organization_name
+
+                    # Send OTP inside the transaction so that a delivery failure
+                    # rolls back user/org creation and leaves no stale records.
+                    send_verification_otp(user, request=request)
+            except Exception:
+                logger.exception(
+                    "Registration failed for username=%s — user creation or OTP delivery error",
+                    form.cleaned_data.get("username"),
+                )
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.auth.message", "otp_email_send_failed"),
+                )
+                return render(
+                    request,
+                    "accounts/register.html",
+                    {
+                        "form": form,
+                        "lookup_payload": get_signup_lookup_payload(),
+                    },
+                )
 
             if organization is not None:
                 request.session["active_organization"] = organization.slug
 
-            send_verification_otp(user, request=request)
             request.session["pending_verify_email"] = user.email
 
             if organization is None and requested_organization_name:

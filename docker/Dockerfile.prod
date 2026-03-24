@@ -1,6 +1,9 @@
 # Production Dockerfile for EMS Arena
-# Pin to Debian Bookworm (stable) to avoid unfixed CVEs in Debian Trixie/testing.
-FROM python:3.12-slim-bookworm
+# Pin by digest for supply-chain security.  To update, pull the new tag and
+# replace the sha256 digest below:
+#   docker pull python:3.12-slim-bookworm
+#   docker inspect python:3.12-slim-bookworm --format '{{index .RepoDigests 0}}'
+FROM python:3.12-slim-bookworm@sha256:31c0807da611e2e377a2e9b566ad4eb038ac5a5838cbbbe6f2262259b5dc77a0
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -11,10 +14,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Apply all available OS security patches.
-# No extra system packages are needed: psycopg2-binary ships its own libpq,
-# and the production entrypoint uses Python (not pg_isready/psql).
+# libpq-dev, gcc and python3-dev are required to compile psycopg2 from source
+# (production uses psycopg2, not psycopg2-binary).
 RUN apt-get update \
     && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        libpq-dev \
+        gcc \
+        python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create a dedicated non-root user for runtime security.

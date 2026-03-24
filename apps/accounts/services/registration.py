@@ -2,8 +2,11 @@
 Registration and bootstrap services for accounts.
 """
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
 
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from core.constants import OrganizationType
@@ -11,7 +14,50 @@ from core.constants import OrganizationType
 from ..models import ProfileRole, UserProfile
 from ..policies import map_signup_role_to_profile_role, resolve_membership_role
 
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
+
+
+def purge_stale_pending_registration(username: str, email: str) -> None:
+    """Delete any unverified (is_active=False) users with the given username or email.
+
+    This is called before a new registration attempt so that a user who started
+    registration but never completed OTP verification does not permanently block
+    the same credentials from being reused.
+
+    Only users who have at least one EmailOTP record are removed — this
+    distinguishes mid-registration pending accounts from users that were
+    intentionally deactivated by an admin.
+
+    Owned organizations are deleted first to satisfy the ``PROTECT`` constraint
+    on ``Organization.owner``.
+    """
+    from apps.accounts.models import EmailOTP
+    from apps.organizations.models import Organization
+
+    if not username and not email:
+        return
+
+    stale_users = (
+        User.objects.filter(
+            Q(username=username) | Q(email=email),
+            is_active=False,
+        )
+        .filter(email_otps__isnull=False)
+        .distinct()
+    )
+
+    for stale in stale_users:
+        logger.info(
+            "Purging stale pending registration for user pk=%s username=%s email=%s",
+            stale.pk,
+            stale.username,
+            stale.email,
+        )
+        # Remove owned organizations before deleting the user to satisfy PROTECT.
+        Organization.objects.filter(owner=stale).delete()
+        stale.delete()
 
 
 @transaction.atomic
@@ -152,4 +198,4 @@ def create_user_with_organization(
     return user, organization, requested_organization, profile
 
 
-__all__ = ["create_user_with_organization"]
+__all__ = ["create_user_with_organization", "purge_stale_pending_registration"]

@@ -16,6 +16,7 @@ Contains:
 """
 
 import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -37,6 +38,8 @@ from core.tenancy import get_request_organization, scoped_by_organization
 from ._helpers import _get_owner_course_or_404, _owner_courses_queryset, _student_users_queryset
 
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -265,8 +268,9 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
                 {"success": False, "error": pgettext("courses.view.message", "studentgroup_model_not_found")},
                 status=500,
             )
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+        except Exception:
+            logger.exception("Unexpected error in AddMembersBulkView")
+            return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -381,10 +385,20 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        user = self.request.user
+        courses_page = context["courses"]
+
+        # Batch-fetch memberships for all courses on this page in one query
+        # instead of one per course (N+1 avoidance).
+        course_ids = [c.id for c in courses_page]
+        membership_by_course = {
+            m.course_id: m for m in CourseMembership.objects.filter(course_id__in=course_ids, user=user, role="student")
+        }
+
         # Hər kurs üçün əlavə məlumat
         courses_with_info = []
-        for course in context["courses"]:
-            membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
+        for course in courses_page:
+            membership = membership_by_course.get(course.id)
 
             courses_with_info.append(
                 {
@@ -422,8 +436,9 @@ def link_exam_to_course(request, pk):
         exam.save()
 
         return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+    except Exception:
+        logger.exception("Unexpected error in link_exam_to_course")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -447,5 +462,6 @@ def unlink_exam_from_course(request, pk):
         exam.save()
 
         return JsonResponse({"success": True})
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)})
+    except Exception:
+        logger.exception("Unexpected error in unlink_exam_from_course")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)

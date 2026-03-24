@@ -11,11 +11,100 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-from .base import *
+from .base import (
+    ASGI_APPLICATION,
+    AUTH_OTP_EXPIRY_SECONDS,
+    AUTH_PASSWORD_VALIDATORS,
+    AUTHENTICATION_BACKENDS,
+    BASE_DIR,
+    CACHES,
+    CELERY_ACCEPT_CONTENT,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    CELERY_RESULT_SERIALIZER,
+    CELERY_TASK_SERIALIZER,
+    CELERY_TASK_SOFT_TIME_LIMIT,
+    CELERY_TASK_TIME_LIMIT,
+    CELERY_TASK_TRACK_STARTED,
+    CELERY_TIMEZONE,
+    CHANNEL_LAYERS,
+    CONTENT_SECURITY_POLICY,
+    CSRF_COOKIE_HTTPONLY,
+    CSRF_COOKIE_SAMESITE,
+    DEFAULT_AUTO_FIELD,
+    EMAIL_BACKEND,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_USE_SSL,
+    EMAIL_USE_TLS,
+    FILE_UPLOAD_SECURITY_MAX_SIZE_MB,
+    INSTALLED_APPS,
+    LANGUAGE_CODE,
+    LANGUAGE_COOKIE_HTTPONLY,
+    LANGUAGE_COOKIE_SAMESITE,
+    LANGUAGES,
+    LIVE_EXAM_JOIN_RATE_LIMIT,
+    LIVE_REACTION_RATE_LIMIT,
+    LIVE_STATE_RATE_LIMIT,
+    LOCALE_PATHS,
+    LOGIN_RATE_LIMIT,
+    LOGIN_REDIRECT_URL,
+    LOGIN_URL,
+    LOGOUT_REDIRECT_URL,
+    MEDIA_ROOT,
+    MEDIA_URL,
+    MESSAGE_TAGS,
+    MIDDLEWARE,
+    OTP_RESEND_RATE_LIMIT,
+    OTP_VERIFY_RATE_LIMIT,
+    PASSWORD_RESET_TIMEOUT,
+    RATELIMIT_ENABLE,
+    RATELIMIT_USE_CACHE,
+    REDIS_CACHE_URL,
+    REDIS_URL,
+    ROOT_URLCONF,
+    SECURE_CONTENT_TYPE_NOSNIFF,
+    SERVE_MEDIA,
+    SESSION_COOKIE_AGE,
+    SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE,
+    SESSION_EXPIRE_AT_BROWSER_CLOSE,
+    SESSION_INACTIVITY_TIMEOUT,
+    SITE_URL,
+    STATIC_ROOT,
+    STATIC_URL,
+    STATICFILES_DIRS,
+    SUBSCRIBE_RATE_LIMIT,
+    TEMPLATES,
+    TIME_ZONE,
+    USE_I18N,
+    USE_TZ,
+    WHITENOISE_ALLOW_ALL_ORIGINS,
+    WSGI_APPLICATION,
+    X_FRAME_OPTIONS,
+)
+
+# Make mutable copies of lists inherited from base so that local-only
+# additions (debug_toolbar, django_extensions) do not pollute the base module.
+INSTALLED_APPS = list(INSTALLED_APPS)
+MIDDLEWARE = list(MIDDLEWARE)
 
 
 def _split_csv_env(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    """Parse an environment variable as a boolean.
+
+    Accepts: 1, true, yes, on  → True
+             0, false, no, off → False
+    Falls back to *default* when the variable is unset or empty.
+    """
+    value = os.getenv(name, "").strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
 
 
 # Load environment variables from .env file
@@ -38,7 +127,7 @@ if not SECRET_KEY:
     )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = _env_bool("DEBUG", True)
 
 # ALLOWED_HOSTS - read from .env or use default
 ALLOWED_HOSTS = _split_csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
@@ -142,11 +231,21 @@ LOGGING = {
         "mask_sensitive": {
             "()": "core.logging_filters.SensitiveDataFilter",
         },
+        "request_id": {
+            "()": "core.logging_filters.RequestIdFilter",
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "[%(asctime)s] %(levelname)s [%(request_id)s] %(name)s: %(message)s",
+            "datefmt": "%Y-%m-%dT%H:%M:%S",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "filters": ["mask_sensitive"],
+            "formatter": "verbose",
+            "filters": ["mask_sensitive", "request_id"],
         },
     },
     "root": {

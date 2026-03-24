@@ -3,7 +3,10 @@ Labs Views - Lab CRUD Operations
 Lab yaratma, redaktə, silmə və yayımlama
 """
 
+import logging
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
@@ -19,6 +22,9 @@ from ._helpers import (
     _parse_max_size_mb,
     _validate_and_prepare_lab_upload,
 )
+
+logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 @login_required
@@ -66,9 +72,12 @@ def create_lab(request, course_id):
             allowed_extensions=",".join(ext.lstrip(".") for ext in sorted(allowed_extensions)),
             teacher_instructions=request.POST.get("teacher_instructions", ""),
             allowed_groups=",".join(group_names) if group_names else "",
-            allowed_students=",".join(student_ids) if student_ids else "",
             created_by=request.user,
         )
+
+        if student_ids:
+            valid_ids = [int(sid) for sid in student_ids if str(sid).isdigit()]
+            lab.allowed_students.set(User.objects.filter(pk__in=valid_ids))
 
         if teacher_file is not None:
             lab.teacher_files = teacher_file
@@ -78,11 +87,9 @@ def create_lab(request, course_id):
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in create_lab")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -103,9 +110,7 @@ def edit_lab(request, pk):
             group_names = [g.strip() for g in lab.allowed_groups.split(",") if g.strip()]
 
         # Mövcud tələbə ID-lərini al
-        student_ids = []
-        if lab.allowed_students:
-            student_ids = [int(x) for x in lab.allowed_students.split(",") if x.strip().isdigit()]
+        student_ids = list(lab.allowed_students.values_list("id", flat=True))
 
         data = {
             "id": lab.id,
@@ -155,7 +160,6 @@ def edit_lab(request, pk):
         lab.allowed_extensions = request.POST.get("allowed_extensions", "")
         lab.teacher_instructions = request.POST.get("teacher_instructions", "")
         lab.allowed_groups = ",".join(group_names) if group_names else ""
-        lab.allowed_students = ",".join(student_ids) if student_ids else ""
 
         teacher_file = request.FILES.get("teacher_files")
         if teacher_file is not None:
@@ -168,15 +172,18 @@ def edit_lab(request, pk):
             lab.teacher_files = teacher_file
 
         lab.save()
+
+        # Update allowed_students M2M relation
+        valid_ids = [int(sid) for sid in student_ids if str(sid).isdigit()]
+        lab.allowed_students.set(User.objects.filter(pk__in=valid_ids))
+
         return JsonResponse({"success": True})
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in edit_lab")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required

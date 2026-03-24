@@ -8,6 +8,7 @@ from collections import defaultdict
 from django.db.models import Q
 
 from apps.accounts.models import ProfileRole
+from apps.accounts.policies import get_user_role_level, is_superadmin_user, user_has_any_role
 from apps.exams.models import StudentGroup
 from core.constants import ROLE_LEVEL_TEACHER
 
@@ -19,40 +20,6 @@ APPROVAL_STATUS_FILTERS = {
     Post.ApprovalStatus.NEEDS_CHANGES,
     Post.ApprovalStatus.APPROVED,
 }
-
-
-def is_superadmin_user(user):
-    return bool(
-        user
-        and getattr(user, "is_authenticated", False)
-        and (user.is_superuser or getattr(user, "is_superadmin", False))
-    )
-
-
-def get_user_role_level(user):
-    if not user or not getattr(user, "is_authenticated", False):
-        return 0
-    if is_superadmin_user(user):
-        return 999
-    if hasattr(user, "_highest_role_level"):
-        return int(user._highest_role_level())
-
-    profile = getattr(user, "profile", None)
-    profile_role = getattr(profile, "role", "")
-    return int(ProfileRole.LEVELS.get(profile_role, 0))
-
-
-def user_has_any_role(user, role_names):
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    normalized = set(role_names or [])
-    if not normalized:
-        return False
-    if hasattr(user, "has_role"):
-        return any(user.has_role(role_name) for role_name in normalized)
-
-    profile = getattr(user, "profile", None)
-    return getattr(profile, "role", None) in normalized
 
 
 def author_requires_post_approval(author):

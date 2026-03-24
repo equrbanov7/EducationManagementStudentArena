@@ -9,6 +9,8 @@ Contains:
 - my_submissions
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -23,6 +25,8 @@ from apps.task_submission_core.uploads import prepare_submission_upload
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 from ._helpers import _append_return_to, _assignment_back_url, _get_tenant_assignment_or_404, _student_return_to
+
+logger = logging.getLogger(__name__)
 
 REVIEW_WINDOW_MINUTES = int(REVIEW_EDIT_LOCK_WINDOW.total_seconds() // 60)
 
@@ -148,8 +152,9 @@ def submit_assignment(request, pk):
             }
         )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in submit_assignment")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 # ════════════════════════════════════════════════════════════════════════════

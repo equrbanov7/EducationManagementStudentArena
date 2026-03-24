@@ -63,16 +63,18 @@ class LabAssignmentReassignmentTest(TestCase):
     def test_get_or_create_blocks_student_without_course_access(self):
         outsider = User.objects.create_user("outsider_student", "outsider@example.com", "StrongPass123!")
         self.lab.allowed_groups = "B1"
-        self.lab.allowed_students = ""
-        self.lab.save(update_fields=["allowed_groups", "allowed_students"])
+        self.lab.save(update_fields=["allowed_groups"])
+        self.lab.allowed_students.clear()
 
         with self.assertRaises(PermissionDenied):
             LabAssignment.get_or_create_for_student(self.lab, outsider)
 
     def test_get_or_create_blocks_student_outside_allowed_filters(self):
         self.lab.allowed_groups = "B1"
-        self.lab.allowed_students = "999999"
-        self.lab.save(update_fields=["allowed_groups", "allowed_students"])
+        self.lab.save(update_fields=["allowed_groups"])
+        # Add a non-existent user ID by using a user not in the course
+        other_user = User.objects.create_user("other999", "other999@example.com", "StrongPass123!")
+        self.lab.allowed_students.set([other_user])
 
         with self.assertRaises(PermissionDenied):
             LabAssignment.get_or_create_for_student(self.lab, self.student)
