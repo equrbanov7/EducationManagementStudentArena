@@ -19,8 +19,7 @@ class SessionTimeoutMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
-        # Default to 3 days (in seconds)
-        self.timeout_seconds = getattr(settings, "SESSION_INACTIVITY_TIMEOUT", 3 * 24 * 60 * 60)
+        self.timeout_seconds = settings.SESSION_INACTIVITY_TIMEOUT
 
     def __call__(self, request):
         if request.user.is_authenticated:
