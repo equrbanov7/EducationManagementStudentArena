@@ -1,5 +1,7 @@
 # blog/views/auth.py
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
@@ -7,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
 
 from apps.accounts.models import EmailOTP
-from apps.accounts.services import issue_email_otp
+from apps.accounts.services import issue_email_otp, purge_stale_pending_registration
 from core.utils import get_auth_otp_expiry_seconds
 
 from ..forms import RegisterForm
@@ -15,10 +17,18 @@ from ..utils import send_verify_email
 
 User = get_user_model()
 signer = TimestampSigner()
+logger = logging.getLogger(__name__)
 
 
 def register_view(request):
     if request.method == "POST":
+        # Remove any prior unverified registration so the form's unique-constraint
+        # check does not block a legitimate retry after a failed OTP delivery.
+        purge_stale_pending_registration(
+            username=request.POST.get("username", "").strip(),
+            email=request.POST.get("email", "").strip(),
+        )
+
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -32,7 +42,16 @@ def register_view(request):
             user.save()
 
             code, expires_at = issue_email_otp(user)
-            send_verify_email(user, code, request=request, expires_at=expires_at)
+            try:
+                send_verify_email(user, code, request=request, expires_at=expires_at)
+            except Exception:
+                logger.exception(
+                    "Failed to send OTP email during blog registration for user pk=%s", user.pk
+                )
+                # Roll back: delete the user so the credentials are free to retry.
+                user.delete()
+                messages.error(request, pgettext("blog.verify.message", "otp_email_send_failed"))
+                return render(request, "blog/register.html", {"form": form})
 
             request.session["pending_verify_email"] = user.email
             messages.success(request, pgettext("blog.verify.message", "code_sent"))
