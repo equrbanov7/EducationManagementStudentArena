@@ -48,6 +48,11 @@ class SignupAndLoginFlowTest(TestCase):
             "organization_license_identifier": "",
             "initial_role": ProfileRole.MEMBER,
             "accept_privacy_policy": "on",
+            "phone": "",
+            "specialization": "",
+            "group_number": "",
+            "department": "",
+            "staff_position": "",
         }
         payload.update(overrides)
         return payload
@@ -133,6 +138,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "Baku School 500")
         self.assertEqual(profile.organization.organization_identifier, "")
+        # New organizations start as pending (require superadmin approval)
+        self.assertEqual(profile.organization.status, "pending")
+        self.assertTrue(profile.organization.is_active)
         self.assertEqual(profile.requested_organization, profile.organization)
         self.assertEqual(profile.requested_organization_name, profile.organization.name)
         self.assertEqual(profile.organization_type, OrganizationType.SCHOOL)
@@ -160,6 +168,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "My New Center")
         self.assertEqual(profile.organization.license_identifier, "TAX-991")
+        # New organizations start as pending (require superadmin approval)
+        self.assertEqual(profile.organization.status, "pending")
+        self.assertTrue(profile.organization.is_active)
         self.assertEqual(profile.requested_organization_name, "My New Center")
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
 
@@ -195,6 +206,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization="",
+                specialization="Computer Science",
+                group_number="CS-101",
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
@@ -203,6 +216,8 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNone(user.profile.organization)
         self.assertIsNone(user.profile.requested_organization)
         self.assertEqual(user.profile.requested_organization_name, "")
+        self.assertEqual(user.profile.student_specialization, "Computer Science")
+        self.assertEqual(user.profile.student_group_number, "CS-101")
 
     def test_student_join_rejects_suspended_organization(self):
         owner = User.objects.create_user(
@@ -224,6 +239,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization=str(suspended_org.id),
+                specialization="History",
+                group_number="HIS-1",
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -249,6 +266,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization=str(university_org.id),
+                specialization="Physics",
+                group_number="PHY-2B",
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -276,6 +295,8 @@ class SignupAndLoginFlowTest(TestCase):
                 email="school_student_user@example.com",
                 organization_type="school_student",
                 join_organization=str(school_org.id),
+                specialization="Biology",
+                group_number="BIO-2A",
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
@@ -300,6 +321,153 @@ class SignupAndLoginFlowTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
+
+    def test_student_registration_requires_specialization_and_group(self):
+        """Student join requires specialization and group number."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type="school_student",
+                join_organization="",
+                specialization="",
+                group_number="",
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("specialization", form.errors)
+        self.assertIn("group_number", form.errors)
+
+    def test_teacher_join_without_organization_is_allowed(self):
+        """University teacher can register without selecting an organization."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="teacher_user",
+                email="teacher_user@example.com",
+                organization_type="university_teacher",
+                join_organization="",
+                department="Faculty of Engineering",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="teacher_user")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.TEACHER)
+        self.assertIsNone(profile.organization)
+        self.assertEqual(profile.department, "Faculty of Engineering")
+
+    def test_teacher_join_with_organization(self):
+        """University teacher can join an active university organization."""
+        owner = User.objects.create_user(
+            username="uni_owner2",
+            email="uni_owner2@example.com",
+            password="StrongPass123!",
+        )
+        uni_org = Organization.objects.create(
+            name="Active University",
+            org_type=OrganizationType.UNIVERSITY,
+            country="Azerbaijan",
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="teacher_joined",
+                email="teacher_joined@example.com",
+                organization_type="university_teacher",
+                join_organization=str(uni_org.id),
+                department="Computer Science",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="teacher_joined")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.TEACHER)
+        self.assertEqual(profile.requested_organization, uni_org)
+        self.assertEqual(profile.department, "Computer Science")
+
+    def test_staff_join_without_organization_is_allowed(self):
+        """School staff can register without selecting an organization."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="staff_user",
+                email="staff_user@example.com",
+                organization_type="school_staff",
+                join_organization="",
+                department="Administration",
+                staff_position="Secretary",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="staff_user")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.MEMBER)
+        self.assertIsNone(profile.organization)
+        self.assertEqual(profile.department, "Administration")
+        self.assertEqual(profile.staff_position, "Secretary")
+
+    def test_org_create_sets_pending_status(self):
+        """Organizations created via signup must start with pending status."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="pending_org_owner",
+                email="pending_org_owner@example.com",
+                organization_type=OrganizationType.UNIVERSITY,
+                institution_not_listed_name="New University",
+                organization_identifier="UNIV-001",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="pending_org_owner")
+        org = user.profile.organization
+        self.assertIsNotNone(org)
+        self.assertEqual(org.status, "pending")
+        self.assertTrue(org.is_active)
+
+    def test_individual_workspace_is_active_immediately(self):
+        """Personal workspaces (individual) must be active immediately after signup."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="newuser")
+        org = user.profile.organization
+        self.assertIsNotNone(org)
+        self.assertEqual(org.status, "active")
+        self.assertTrue(org.is_active)
+
+    def test_teacher_join_rejects_type_mismatch(self):
+        """Teacher cannot join an organization of a different type."""
+        owner = User.objects.create_user(
+            username="school_owner2",
+            email="school_owner2@example.com",
+            password="StrongPass123!",
+        )
+        school_org = Organization.objects.create(
+            name="School Mismatch",
+            org_type=OrganizationType.SCHOOL,
+            country="Azerbaijan",
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type="university_teacher",
+                join_organization=str(school_org.id),
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        # Should report type mismatch error
+        form = response.context["form"]
+        self.assertIn("join_organization", form.errors)
 
 
 class ProfileAndSuspensionFlowTest(TestCase):

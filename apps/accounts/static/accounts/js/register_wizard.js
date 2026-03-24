@@ -2,8 +2,9 @@
  * Registration wizard - multi-step form navigation.
  * Steps:
  * 1) Country
- * 2) Registration type + organization details / join organization
- * 3) Account details
+ * 2a) Organization type card selection
+ * 2b) Role/persona card selection + org-specific fields
+ * 3) Account details (with persona-specific fields)
  */
 document.addEventListener("DOMContentLoaded", function () {
     var i18n = window.REGISTER_I18N || {};
@@ -20,10 +21,35 @@ document.addEventListener("DOMContentLoaded", function () {
         school_student: { mode: "student_join", orgType: "school" },
         university_student: { mode: "student_join", orgType: "university" },
         course_student: { mode: "student_join", orgType: "course_center" },
+        school_teacher: { mode: "teacher_join", orgType: "school" },
+        university_teacher: { mode: "teacher_join", orgType: "university" },
+        course_teacher: { mode: "teacher_join", orgType: "course_center" },
+        school_staff: { mode: "staff_join", orgType: "school" },
+        university_staff: { mode: "staff_join", orgType: "university" },
+        course_staff: { mode: "staff_join", orgType: "course_center" },
+    };
+
+    // Org type → combined registration type value for each role
+    var orgRoleCombinedMap = {
+        individual: { owner: "individual" },
+        school: { owner: "school", teacher: "school_teacher", staff: "school_staff", student: "school_student" },
+        university: { owner: "university", teacher: "university_teacher", staff: "university_staff", student: "university_student" },
+        course_center: { owner: "course_center", teacher: "course_teacher", staff: "course_staff", student: "course_student" },
     };
 
     var countrySelect = document.getElementById("id_country");
     var registrationTypeSelect = document.getElementById("id_organization_type");
+
+    var step2a = document.getElementById("step2a");
+    var step2b = document.getElementById("step2b");
+    var step2bTitle = document.getElementById("step2bTitle");
+    var orgTypeCards = document.getElementById("orgTypeCards");
+    var roleCards = document.getElementById("roleCards");
+    var roleCardOwner = document.getElementById("roleCardOwner");
+    var roleCardTeacher = document.getElementById("roleCardTeacher");
+    var roleCardStaff = document.getElementById("roleCardStaff");
+    var roleCardStudent = document.getElementById("roleCardStudent");
+    var step2bBackBtn = document.getElementById("step2bBackBtn");
 
     var individualAccountInfo = document.getElementById("individualAccountInfo");
     var orgCreateFields = document.getElementById("orgCreateFields");
@@ -63,9 +89,20 @@ document.addEventListener("DOMContentLoaded", function () {
     var signupRestoreDraftQueryKey = "signup_restore";
     var signupDraftStorageKey = "accounts.register.draft";
 
+    // Step 3 persona-specific elements
+    var phoneField = document.getElementById("phoneField");
+    var studentSpecificFields = document.getElementById("studentSpecificFields");
+    var teacherSpecificFields = document.getElementById("teacherSpecificFields");
+    var staffSpecificFields = document.getElementById("staffSpecificFields");
+    var specializationInput = document.getElementById("id_specialization");
+    var groupNumberInput = document.getElementById("id_group_number");
+
     var lookupData = window.SIGNUP_LOOKUP_DATA || {};
     var organizations = lookupData.organizations || [];
     var enhancedSelects = [];
+
+    // Track which org type the user picked in step 2a
+    var _selectedOrgType = null;
 
     function syncEnhancedSelect(select) {
         if (select && typeof select._syncEnhancedSelect === "function") {
@@ -175,6 +212,105 @@ document.addEventListener("DOMContentLoaded", function () {
     function currentSelection() {
         var selected = registrationTypeSelect ? registrationTypeSelect.value : "individual";
         return registrationTypeMap[selected] || registrationTypeMap.individual;
+    }
+
+    function isJoinMode(mode) {
+        return mode === "student_join" || mode === "teacher_join" || mode === "staff_join";
+    }
+
+    // Set the combined registration type value from org type + role
+    function setRegistrationValue(orgType, role) {
+        var roles = orgRoleCombinedMap[orgType] || {};
+        var combinedValue = roles[role] || "individual";
+        if (registrationTypeSelect) {
+            registrationTypeSelect.value = combinedValue;
+            registrationTypeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    }
+
+    // Show step 2b for the chosen org type
+    function showPersonaStep(orgType) {
+        _selectedOrgType = orgType;
+
+        if (step2a) step2a.hidden = true;
+        if (step2b) step2b.hidden = false;
+
+        // For individual, immediately pick owner and skip role selection
+        if (orgType === "individual") {
+            setRegistrationValue("individual", "owner");
+            if (step2b) step2b.hidden = false;
+            // Show only the individual info, hide role cards
+            if (roleCards) roleCards.hidden = true;
+            if (individualAccountInfo) individualAccountInfo.hidden = false;
+            if (orgCreateFields) orgCreateFields.hidden = true;
+            if (studentJoinFields) studentJoinFields.hidden = true;
+            if (step2bTitle) step2bTitle.hidden = true;
+            return;
+        }
+
+        // Show role cards for org types
+        if (roleCards) roleCards.hidden = false;
+        if (step2bTitle) step2bTitle.hidden = false;
+
+        // Update title
+        if (step2bTitle) {
+            var orgTypeLabels = {
+                school: tr("org_type_school", "School"),
+                university: tr("org_type_university", "University"),
+                course_center: tr("org_type_course_center", "Course Center"),
+            };
+            step2bTitle.textContent = (orgTypeLabels[orgType] || orgType) + " – " + tr("choose_role", "Choose your role");
+        }
+
+        // Reset combined select so no stale value
+        if (registrationTypeSelect) registrationTypeSelect.value = "";
+
+        // Hide fields until role is picked
+        if (individualAccountInfo) individualAccountInfo.hidden = true;
+        if (orgCreateFields) orgCreateFields.hidden = true;
+        if (studentJoinFields) studentJoinFields.hidden = true;
+    }
+
+    // Org type card click handlers
+    if (orgTypeCards) {
+        orgTypeCards.querySelectorAll(".register-persona-card[data-org-type]").forEach(function (card) {
+            card.addEventListener("click", function () {
+                var orgType = card.dataset.orgType;
+                // Mark card as selected
+                orgTypeCards.querySelectorAll(".register-persona-card").forEach(function (c) {
+                    c.classList.remove("is-selected");
+                });
+                card.classList.add("is-selected");
+                showPersonaStep(orgType);
+            });
+        });
+    }
+
+    // Role card click handlers
+    if (roleCards) {
+        roleCards.querySelectorAll(".register-persona-role-card[data-role]").forEach(function (card) {
+            card.addEventListener("click", function () {
+                var role = card.dataset.role;
+                var orgType = _selectedOrgType || "individual";
+                // Mark card as selected
+                roleCards.querySelectorAll(".register-persona-role-card").forEach(function (c) {
+                    c.classList.remove("is-selected");
+                });
+                card.classList.add("is-selected");
+                setRegistrationValue(orgType, role);
+                updateStep2State();
+            });
+        });
+    }
+
+    // Step 2b back button → back to step 2a (org type selection)
+    if (step2bBackBtn) {
+        step2bBackBtn.addEventListener("click", function () {
+            if (step2a) step2a.hidden = false;
+            if (step2b) step2b.hidden = true;
+            _selectedOrgType = null;
+            if (registrationTypeSelect) registrationTypeSelect.value = "";
+        });
     }
 
     function hideOrganizationSearchList() {
@@ -548,17 +684,27 @@ document.addEventListener("DOMContentLoaded", function () {
         var isIndividual = selection.mode === "individual";
         var isCreatorMode = selection.mode === "organization_create";
         var isStudentJoinMode = selection.mode === "student_join";
+        var isTeacherJoinMode = selection.mode === "teacher_join";
+        var isStaffJoinMode = selection.mode === "staff_join";
+        var isJoinAny = isStudentJoinMode || isTeacherJoinMode || isStaffJoinMode;
 
         if (individualAccountInfo) individualAccountInfo.hidden = !isIndividual;
         if (orgCreateFields) orgCreateFields.hidden = !isCreatorMode;
-        if (studentJoinFields) studentJoinFields.hidden = !isStudentJoinMode;
+        if (studentJoinFields) studentJoinFields.hidden = !isJoinAny;
         if (orgIdentifierField) orgIdentifierField.hidden = !isCreatorMode;
         if (initialRoleField) initialRoleField.hidden = true;
         if (autoRoleInfoField) autoRoleInfoField.hidden = false;
 
         if (initialRoleSelect) {
-            // Keep posted value valid for ChoiceField; backend maps student-join to student role.
-            initialRoleSelect.value = isStudentJoinMode ? "member" : "org_admin";
+            if (isStudentJoinMode) {
+                initialRoleSelect.value = "member";
+            } else if (isTeacherJoinMode) {
+                initialRoleSelect.value = "teacher";
+            } else if (isStaffJoinMode) {
+                initialRoleSelect.value = "member";
+            } else {
+                initialRoleSelect.value = "org_admin";
+            }
         }
 
         if (autoRoleInfoText) {
@@ -569,7 +715,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
             } else if (isStudentJoinMode) {
                 autoRoleInfoText.textContent =
-                    "Email təsdiqindən sonra təşkilata qoşulma müraciətiniz təsdiq gözləyəcək.";
+                    tr("auto_role_info_student_join", "Email təsdiqindən sonra təşkilata tələbə kimi qoşulacaqsınız.");
+            } else if (isTeacherJoinMode) {
+                autoRoleInfoText.textContent =
+                    tr("auto_role_info_teacher_join", "Email təsdiqindən sonra təşkilata müəllim kimi qoşulacaqsınız (təsdiq gözlənilir).");
+            } else if (isStaffJoinMode) {
+                autoRoleInfoText.textContent =
+                    tr("auto_role_info_staff_join", "Email təsdiqindən sonra təşkilata işçi kimi qoşulacaqsınız (təsdiq gözlənilir).");
             } else {
                 autoRoleInfoText.textContent = tr(
                     "auto_role_info_org",
@@ -598,14 +750,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (organizationSelect) {
             organizationSelect.required = false;
-            if (!isStudentJoinMode) organizationSelect.value = "";
+            if (!isJoinAny) organizationSelect.value = "";
         }
 
         if (isCreatorMode) {
             updateCreateFieldsCopy(selection.orgType);
         }
 
-        if (isStudentJoinMode) {
+        if (isJoinAny) {
             updateStudentJoinCopy(selection.orgType);
             populateJoinOrganizationOptions(organizationSearchInput ? organizationSearchInput.value : "");
             syncSearchInputWithSelectedOrganization();
@@ -620,6 +772,26 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             hideOrganizationSearchList();
         }
+
+        // Also update step 3 persona fields
+        updateStep3State();
+    }
+
+    function updateStep3State() {
+        var selection = currentSelection();
+        var isStudent = selection.mode === "student_join";
+        var isTeacher = selection.mode === "teacher_join";
+        var isStaff = selection.mode === "staff_join";
+        var isJoinAny = isStudent || isTeacher || isStaff;
+
+        if (studentSpecificFields) studentSpecificFields.hidden = !isStudent;
+        if (teacherSpecificFields) teacherSpecificFields.hidden = !isTeacher;
+        if (staffSpecificFields) staffSpecificFields.hidden = !isStaff;
+        if (phoneField) phoneField.hidden = !isJoinAny;
+
+        // Make specialization/group required for students
+        if (specializationInput) specializationInput.required = isStudent;
+        if (groupNumberInput) groupNumberInput.required = isStudent;
     }
 
     if (countrySelect) {
@@ -636,7 +808,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (organizationSearchInput) {
         organizationSearchInput.addEventListener("input", function () {
-            if (currentSelection().mode !== "student_join") return;
+            if (!isJoinMode(currentSelection().mode)) return;
 
             var selectedValue = organizationSearchInput.dataset.selectedValue || "";
             if (selectedValue && organizationSelect) {
@@ -657,7 +829,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         organizationSearchInput.addEventListener("focus", function () {
-            if (currentSelection().mode !== "student_join") return;
+            if (!isJoinMode(currentSelection().mode)) return;
             if (organizationSearchDebounceTimer) {
                 clearTimeout(organizationSearchDebounceTimer);
                 organizationSearchDebounceTimer = null;
@@ -675,7 +847,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("click", function (event) {
         if (!organizationSearchInput || !organizationSearchList) return;
-        if (currentSelection().mode !== "student_join") return;
+        if (!isJoinMode(currentSelection().mode)) return;
 
         var clickInsideInput = organizationSearchInput.contains(event.target);
         var clickInsideList = organizationSearchList.contains(event.target);
@@ -753,6 +925,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     updateStep2State();
+    updateStep3State();
 
     if (shouldRestoreSignupDraft()) {
         restoreSignupDraft();
@@ -762,7 +935,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var hasErrors = document.querySelector(".register-global-errors, .register-field-error:not([hidden])");
     if (hasErrors) {
         var step2Error = document.querySelector("#step2 .register-field-error");
-        wizardNext(step2Error ? 2 : 3);
+        if (step2Error) {
+            // Show step 2 with step 2b visible (errors are in org-specific fields)
+            wizardNext(2);
+            if (step2a) step2a.hidden = true;
+            if (step2b) step2b.hidden = false;
+        } else {
+            wizardNext(3);
+        }
         return;
     }
 

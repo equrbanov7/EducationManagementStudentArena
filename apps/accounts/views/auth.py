@@ -177,6 +177,11 @@ def register_view(request):
                 organization_identifier=form.cleaned_data.get("organization_identifier", ""),
                 organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
                 initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
+                phone=form.cleaned_data.get("phone", ""),
+                specialization=form.cleaned_data.get("specialization", ""),
+                group_number=form.cleaned_data.get("group_number", ""),
+                department=form.cleaned_data.get("department", ""),
+                staff_position=form.cleaned_data.get("staff_position", ""),
             )
             requested_organization_name = profile.requested_organization_name
 
