@@ -162,6 +162,25 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 # ---------------------------------------------------------------------------
+# Session timeout settings
+# ---------------------------------------------------------------------------
+# Absolute lifetime of the session cookie (seconds).  After this period the
+# browser discards the cookie and the user must log in again regardless of
+# activity.  Default: 7 days.
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(7 * 24 * 60 * 60)))
+
+# Expire the session cookie when the browser is closed (no persistent cookie).
+# Set to True for higher-security deployments; False keeps the cookie across
+# browser restarts up to SESSION_COOKIE_AGE.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Inactivity timeout enforced by SessionTimeoutMiddleware (seconds).
+# Users who have not made any request within this window are automatically
+# logged out on their next request, even if SESSION_COOKIE_AGE has not yet
+# elapsed.  Default: 3 days.
+SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(3 * 24 * 60 * 60)))
+
+# ---------------------------------------------------------------------------
 # Cookie security settings
 # ---------------------------------------------------------------------------
 # Session cookie: HttpOnly prevents JS access; Lax blocks cross-site POST.

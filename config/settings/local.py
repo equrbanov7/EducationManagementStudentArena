@@ -18,6 +18,19 @@ def _split_csv_env(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    """Parse an environment variable as a boolean.
+
+    Accepts: 1, true, yes, on  → True
+             0, false, no, off → False
+    Falls back to *default* when the variable is unset or empty.
+    """
+    value = os.getenv(name, "").strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
+
+
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / ".env")
 
@@ -38,7 +51,7 @@ if not SECRET_KEY:
     )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = _env_bool("DEBUG", True)
 
 # ALLOWED_HOSTS - read from .env or use default
 ALLOWED_HOSTS = _split_csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")

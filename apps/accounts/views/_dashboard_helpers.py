@@ -242,7 +242,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     )
     assigned_labs = []
     for lab in labs_qs:
-        allowed_student_ids = set(lab.allowed_students.values_list("id", flat=True))
+        # Use .all() to hit the prefetch_related cache (values_list bypasses it).
+        allowed_student_ids = {s.id for s in lab.allowed_students.all()}
         allowed_group_names = _csv_to_lower_token_set(lab.allowed_groups)
         if not allowed_student_ids and not allowed_group_names:
             continue

@@ -84,6 +84,12 @@ SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
 
+# Session timeout — tighter values in production for security.
+# Absolute cookie lifetime: 1 day (overrides base.py default of 7 days).
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(1 * 24 * 60 * 60)))
+# Inactivity timeout enforced by SessionTimeoutMiddleware: 8 hours.
+SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(8 * 60 * 60)))
+
 # HSTS settings
 SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if SECURE_SSL_REDIRECT else "0"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", SECURE_HSTS_SECONDS > 0)

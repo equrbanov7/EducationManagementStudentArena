@@ -385,10 +385,21 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        user = self.request.user
+        courses_page = context["courses"]
+
+        # Batch-fetch memberships for all courses on this page in one query
+        # instead of one per course (N+1 avoidance).
+        course_ids = [c.id for c in courses_page]
+        membership_by_course = {
+            m.course_id: m
+            for m in CourseMembership.objects.filter(course_id__in=course_ids, user=user, role="student")
+        }
+
         # Hər kurs üçün əlavə məlumat
         courses_with_info = []
-        for course in context["courses"]:
-            membership = CourseMembership.objects.filter(course=course, user=self.request.user).first()
+        for course in courses_page:
+            membership = membership_by_course.get(course.id)
 
             courses_with_info.append(
                 {
