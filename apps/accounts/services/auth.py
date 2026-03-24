@@ -2,41 +2,30 @@
 Authentication-related services for accounts.
 """
 
+import logging
 from datetime import timedelta
 
 from django.utils import timezone
 
 from apps.accounts.models import EmailOTP
-from apps.blog.utils import generate_otp
-from core.utils import build_absolute_url, get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds
+from apps.blog.utils import generate_otp, send_verify_email
+from core.utils import get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds
 
 from ..queries import get_latest_pending_otp
 from .organization_requests import activate_verified_student_membership
 
+logger = logging.getLogger(__name__)
+
 
 def send_verification_otp(user, *, request=None):
-    """Generate and send an OTP code to the user's email asynchronously."""
-    from django.urls import reverse
+    """Generate and send an OTP code to the user's email synchronously.
 
-    from core.email_tasks import send_verification_otp_email
-
+    Raises an exception if the email cannot be delivered so that the caller
+    can react (e.g. roll back the registration transaction and show an error).
+    """
     code, expires_at = issue_email_otp(user)
-
-    # Build the verification link (needs request context for full URL)
-    verification_url = build_absolute_url(reverse("accounts:verify_email_link"), request=request)
-    from django.core.signing import TimestampSigner
-
-    signer = TimestampSigner()
-    token = signer.sign(str(user.pk))
-    verification_link = f"{verification_url}?token={token}"
-
-    send_verification_otp_email.delay(
-        user_pk=user.pk,
-        code=code,
-        expires_at=expires_at.isoformat() if expires_at else None,
-        verification_link=verification_link,
-        otp_expiry_minutes=get_auth_otp_expiry_minutes(),
-    )
+    send_verify_email(user, code, request=request, expires_at=expires_at)
+    logger.info("Verification OTP email sent to user %s", user.pk)
     return code
 
 
