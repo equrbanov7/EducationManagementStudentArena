@@ -280,25 +280,11 @@
                 <!-- Teacher-specific fields -->
                 <div id="teacherSpecificFields" hidden>
                     <p class="register-step-subtitle">{% trans "teacher_fields_title" context "accounts.register" %}</p>
-                    <div class="register-form-field">
-                        {{ form.department.label_tag }}
-                        {{ form.department }}
-                        {% if form.department.errors %}
-                            <div class="register-field-error">{{ form.department.errors.0 }}</div>
-                        {% endif %}
-                    </div>
                 </div>
 
                 <!-- Staff-specific fields -->
                 <div id="staffSpecificFields" hidden>
                     <p class="register-step-subtitle">{% trans "staff_fields_title" context "accounts.register" %}</p>
-                    <div class="register-form-field">
-                        {{ form.department.label_tag }}
-                        {{ form.department }}
-                        {% if form.department.errors %}
-                            <div class="register-field-error">{{ form.department.errors.0 }}</div>
-                        {% endif %}
-                    </div>
                     <div class="register-form-field">
                         {{ form.staff_position.label_tag }}
                         {{ form.staff_position }}
@@ -306,6 +292,15 @@
                             <div class="register-field-error">{{ form.staff_position.errors.0 }}</div>
                         {% endif %}
                     </div>
+                </div>
+
+                <!-- Department field: shared between teacher and staff (shown for both) -->
+                <div class="register-form-field" id="departmentField" hidden>
+                    {{ form.department.label_tag }}
+                    {{ form.department }}
+                    {% if form.department.errors %}
+                        <div class="register-field-error">{{ form.department.errors.0 }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="register-form-field" id="initialRoleField" hidden>
