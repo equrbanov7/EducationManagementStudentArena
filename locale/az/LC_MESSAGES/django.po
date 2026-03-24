@@ -3395,6 +3395,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "Yeni təsdiq kodu göndərildi."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Qeydiyyat uğursuz oldu: doğrulama emaili göndərilə bilmədi. Zəhmət olmasa "
+"email ünvanınızı yoxlayın və yenidən cəhd edin."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"

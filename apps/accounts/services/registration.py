@@ -7,7 +7,11 @@ import logging
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
 from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
@@ -135,11 +139,19 @@ def create_user_with_organization(
     if (
         organization is None
         and requested_organization is not None
-        and profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
+        and signup_mode in {"student_join", "teacher_join", "staff_join"}
     ):
+        if signup_mode == "teacher_join":
+            req_role_type = MembershipRequestRoleType.TEACHER
+        elif signup_mode == "staff_join":
+            req_role_type = MembershipRequestRoleType.STAFF
+        else:
+            req_role_type = MembershipRequestRoleType.STUDENT
+
         StudentOrganizationRequest.objects.update_or_create(
             user=user,
             organization=requested_organization,
+            role_type=req_role_type,
             status=StudentOrganizationRequestStatus.PENDING,
             defaults={
                 "message": "",

@@ -3385,6 +3385,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "A new verification code has been sent."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Registration failed: we could not send the verification email. Please check"
+" your email address and try again."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"
