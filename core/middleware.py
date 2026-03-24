@@ -1,6 +1,8 @@
 """
-Request ID middleware.
+Core HTTP middleware for EMS Arena.
 
+RequestIdMiddleware
+-------------------
 Attaches a unique correlation ID to every incoming HTTP request so that all
 log records emitted during that request can be grouped by the same ID.
 
@@ -16,10 +18,20 @@ The resolved ID is:
 - Stored in the thread-local via ``core.request_context.set_request_id`` so
   that ``RequestIdFilter`` can inject it into every log record.
 - Echoed back to the client in the ``X-Request-ID`` response header.
+
+MetricsMiddleware
+-----------------
+Records per-request Prometheus metrics (request count and latency).  It must
+be placed **after** ``RequestIdMiddleware`` in ``MIDDLEWARE`` so that the
+request ID is already attached when timing begins.
+
+See ``core.metrics`` for metric definitions and ``core.views.metrics_view``
+for the Prometheus scrape endpoint.
 """
 
 from __future__ import annotations
 
+import time
 import uuid
 
 from core.request_context import clear_request_id, set_request_id
@@ -78,3 +90,54 @@ class RequestIdMiddleware:
                 if sanitized:
                     return sanitized
         return uuid.uuid4().hex
+
+
+class MetricsMiddleware:
+    """Middleware that records Prometheus metrics for every HTTP request.
+
+    Tracks:
+    - ``http_requests_total`` – labelled by method, normalised path, and
+      response status code.
+    - ``http_request_duration_seconds`` – latency histogram labelled by
+      method and normalised path.
+
+    Place this middleware **after** ``RequestIdMiddleware`` in
+    ``settings.MIDDLEWARE``::
+
+        MIDDLEWARE = [
+            "core.middleware.RequestIdMiddleware",
+            "core.middleware.MetricsMiddleware",  # ← second
+            ...
+        ]
+
+    The ``/metrics/`` path itself is excluded from tracking to avoid
+    pollution of the latency histogram with scrape requests.
+    """
+
+    _EXCLUDED_PATHS = frozenset({"/metrics/", "/ping/", "/health/"})
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Import lazily so that tests that do not install prometheus-client
+        # can still import this module without errors.
+        from core.metrics import _normalise_path, http_request_duration_seconds, http_requests_total
+
+        self._requests_total = http_requests_total
+        self._duration = http_request_duration_seconds
+        self._normalise = _normalise_path
+
+    def __call__(self, request):
+        path = request.path_info
+        if path in self._EXCLUDED_PATHS:
+            return self.get_response(request)
+
+        method = request.method or "UNKNOWN"
+        norm_path = self._normalise(path)
+        start = time.perf_counter()
+        response = self.get_response(request)
+        elapsed = time.perf_counter() - start
+
+        status = str(response.status_code)
+        self._requests_total.labels(method=method, path=norm_path, status_code=status).inc()
+        self._duration.labels(method=method, path=norm_path).observe(elapsed)
+        return response
