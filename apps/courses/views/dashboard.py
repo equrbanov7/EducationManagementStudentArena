@@ -298,16 +298,11 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Published olan lab-ları yoxla
             for lab in course.labs.filter(status="published").order_by("-created_at"):
 
-                # Bu lab tələbəyə təyin olunubmu?
+                # This lab assigned to the student?
                 is_assigned = False
 
-                # Allowed students - vergüllə ayrılmış ID-lər
-                allowed_student_ids = []
-                if lab.allowed_students and lab.allowed_students.strip():
-                    for x in lab.allowed_students.split(","):
-                        x = x.strip()
-                        if x.isdigit():
-                            allowed_student_ids.append(int(x))
+                # Allowed students - check M2M relation
+                allowed_student_ids = list(lab.allowed_students.values_list("id", flat=True))
 
                 # Allowed groups - vergüllə ayrılmış qrup adları
                 allowed_group_names = []
