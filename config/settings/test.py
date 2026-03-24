@@ -5,6 +5,7 @@ Fast, isolated configuration for running tests.
 
 import os
 
+import dj_database_url
 from django.core.management.utils import get_random_secret_key
 
 from .base import *  # noqa: F401,F403
@@ -17,12 +18,16 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
-# Use in-memory SQLite for fast tests
+# Use PostgreSQL for tests to match the production environment.
+# The DATABASE_URL environment variable is set by the CI pipeline.
+# For local development, fall back to a dedicated test database.
+_DEFAULT_TEST_DB_URL = "postgres://localhost/test_emsarena"
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-    }
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", _DEFAULT_TEST_DB_URL),
+        conn_max_age=0,
+        conn_health_checks=False,
+    )
 }
 
 # Use in-memory channel layer for tests

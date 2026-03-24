@@ -1078,9 +1078,9 @@ class ProfileViewTest(TestCase):
             start_datetime=timezone.now() - timedelta(hours=2),
             end_datetime=timezone.now() + timedelta(days=1),
             status="published",
-            allowed_students=str(self.user.id),
             created_by=teacher,
         )
+        lab.allowed_students.add(self.user)
 
         project = Project.objects.create(
             course=course,
