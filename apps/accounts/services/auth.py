@@ -2,6 +2,7 @@
 Authentication-related services for accounts.
 """
 
+import logging
 from datetime import timedelta
 
 from django.utils import timezone
@@ -13,11 +14,18 @@ from core.utils import get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds
 from ..queries import get_latest_pending_otp
 from .organization_requests import activate_verified_student_membership
 
+logger = logging.getLogger(__name__)
+
 
 def send_verification_otp(user, *, request=None):
-    """Generate and send an OTP code to the user's email."""
+    """Generate and send an OTP code to the user's email synchronously.
+
+    Raises an exception if the email cannot be delivered so that the caller
+    can react (e.g. roll back the registration transaction and show an error).
+    """
     code, expires_at = issue_email_otp(user)
     send_verify_email(user, code, request=request, expires_at=expires_at)
+    logger.info("Verification OTP email sent to user %s", user.pk)
     return code
 
 

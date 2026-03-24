@@ -10,11 +10,10 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 from apps.exams.services import parsing
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -98,7 +97,12 @@ class ExamGradingServicesTest(TestCase):
         self.teacher.profile.organization = self.org
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
-        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
+        self.exam = Exam.objects.create(
+            title="Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
         self.attempt = ExamAttempt.objects.create(
             user=self.student, exam=self.exam, attempt_number=1, status="submitted"
         )
@@ -133,9 +137,6 @@ class ExamAccessControlServicesTest(TestCase):
 
     def setUp(self):
         self.teacher = User.objects.create_user(username="teacher", email="teacher@example.com", password="pass123")
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["role", "updated_at"])
-
         self.org = Organization.objects.create(
             name="Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -143,17 +144,32 @@ class ExamAccessControlServicesTest(TestCase):
             status="active",
             is_active=True,
         )
-        self.teacher.profile.organization = self.org
-        self.teacher.profile.organization_type = self.org.org_type
-        self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
+        self.teacher.set_active_organization_context(self.org)
 
         self.student = User.objects.create_user(username="student", email="student@example.com", password="pass123")
-        self.exam = Exam.objects.create(title="Test Exam", author=self.teacher, is_active=True)
+        self.exam = Exam.objects.create(
+            title="Test Exam",
+            author=self.teacher,
+            organization=self.org,
+            is_active=True,
+        )
 
     def test_is_teacher_user(self):
         """Test checking if user is teacher."""
         self.assertTrue(services.is_teacher_user(self.teacher))
         self.assertFalse(services.is_teacher_user(self.student))
+
+    def test_is_teacher_user_denies_without_bound_tenant_context(self):
+        self.teacher.clear_active_organization_context()
+
+        self.assertFalse(services.is_teacher_user(self.teacher))
 
     def test_can_user_access_exam_as_author(self):
         """Test exam access for author."""
@@ -186,3 +202,114 @@ class ExamParsingServicesTest(TestCase):
                 parsing.extract_text_from_upload(uploaded)
 
         self.assertIn("pypdf", str(exc.exception))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Exams grading service coverage
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class ExamGradingServiceTest(TestCase):
+    """Tests for apps/exams/services/grading.py and domain/grading.py."""
+
+    def setUp(self):
+        self.teacher = User.objects.create_user(username="grd_teacher", email="grd_t@example.com", password="pass")
+        self.student = User.objects.create_user(username="grd_student", email="grd_s@example.com", password="pass")
+        org = Organization.objects.create(
+            name="Grading Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.exam = Exam.objects.create(
+            title="Grading Exam",
+            slug="grading-exam",
+            author=self.teacher,
+            organization=org,
+            exam_type="test",
+            is_active=True,
+        )
+        self.question = ExamQuestion.objects.create(
+            exam=self.exam,
+            text="Q?",
+            points=10,
+            order=1,
+        )
+        self.attempt = ExamAttempt.objects.create(exam=self.exam, user=self.student)
+        self.answer = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=self.question,
+        )
+
+    def test_grade_exam_answer_sets_score(self):
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, "8")
+        self.assertEqual(result.teacher_score, 8)
+
+    def test_grade_exam_answer_with_feedback(self):
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, "7", feedback="Good answer")
+        self.assertEqual(result.teacher_feedback, "Good answer")
+
+    def test_grade_exam_answer_decimal_input(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import grade_exam_answer
+
+        result = grade_exam_answer(self.answer, Decimal("9"))
+        self.assertEqual(result.teacher_score, 9)
+
+    def test_bulk_grade_answers(self):
+        from apps.exams.services.grading import bulk_grade_answers
+
+        answer2 = ExamAnswer.objects.create(
+            attempt=self.attempt,
+            question=ExamQuestion.objects.create(exam=self.exam, text="Q2?", points=5, order=2),
+        )
+        count = bulk_grade_answers([self.answer.id, answer2.id], [5, 7])
+        self.assertEqual(count, 2)
+
+    def test_calculate_attempt_score_test_type_correct(self):
+        from decimal import Decimal
+
+        from apps.exams.models import ExamQuestionOption
+        from apps.exams.services.grading import calculate_attempt_score
+
+        option = ExamQuestionOption.objects.create(question=self.question, text="Yes", is_correct=True)
+        self.answer.selected_options.add(option)
+        self.answer.is_correct = True
+        self.answer.save()
+        score = calculate_attempt_score(self.attempt)
+        self.assertEqual(score, Decimal("10"))
+
+    def test_calculate_attempt_score_uses_teacher_score_if_set(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import calculate_attempt_score
+
+        self.answer.teacher_score = 6
+        self.answer.save()
+        score = calculate_attempt_score(self.attempt)
+        self.assertEqual(score, Decimal("6"))
+
+    def test_parse_score_value_valid(self):
+        from decimal import Decimal
+
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertEqual(parse_score_value("9.5"), Decimal("9.5"))
+
+    def test_parse_score_value_invalid_returns_default(self):
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertIsNone(parse_score_value("bad"))
+        self.assertEqual(parse_score_value("bad", default=0), 0)
+
+    def test_parse_score_value_none_returns_default(self):
+        from apps.exams.services.grading import parse_score_value
+
+        self.assertIsNone(parse_score_value(None))
+        self.assertIsNone(parse_score_value(""))

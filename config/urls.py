@@ -10,7 +10,7 @@ from core.views import handler400 as handler400  # noqa: F401
 from core.views import handler403 as handler403  # noqa: F401
 from core.views import handler404 as handler404  # noqa: F401
 from core.views import handler500 as handler500  # noqa: F401
-from core.views import health_check, ping, test_error
+from core.views import health_check, metrics_view, ping, test_error
 
 admin.site.site_url = reverse_lazy("home")
 
@@ -35,18 +35,17 @@ urlpatterns = [
     ),
     # audit
     path("audit/", include(("apps.audit.urls", "audit"), namespace="audit")),
+    # notifications
+    path(
+        "notifications/",
+        include(("apps.notifications.urls", "notifications"), namespace="notifications"),
+    ),
     # API versioned endpoints
     path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),
     path("ping/", ping, name="ping"),
+    path("metrics/", metrics_view, name="metrics"),
 ]
-
-if settings.DEBUG:
-    # Only expose this endpoint in development.  In production, triggering a
-    # Sentry test error must not be possible by unauthenticated third parties.
-    urlpatterns += [
-        path("test-error/", test_error, name="test_error"),
-    ]
 
 if settings.DEBUG:
     # Only expose this endpoint in development.  In production, triggering a

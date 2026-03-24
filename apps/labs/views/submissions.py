@@ -4,8 +4,8 @@ Submission idarəetməsi və qiymətləndirmə
 """
 
 import json
+import logging
 import os
-import traceback
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -44,6 +44,8 @@ from ._helpers import (
     _tenant_scoped_questions,
     _validate_and_prepare_lab_upload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_filter_date(raw_value):
@@ -344,8 +346,9 @@ def grade_submission_page(request, pk):
 
             messages.success(request, pgettext("labs.view.message", "grade_saved_successfully"))
             return redirect("labs:lab_submissions", pk=lab.id)
-        except Exception as e:
-            messages.error(request, pgettext("labs.view.error", "error_with_details").format(error=str(e)))
+        except Exception:
+            logger.exception("Unexpected error while saving grades")
+            messages.error(request, "An unexpected error occurred. Please try again.")
 
     has_answer_scores = any(answer.score is not None for answer in answers)
     auto_total_decimal = sum(
@@ -458,10 +461,9 @@ def auto_save_answer(request, pk):
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)})
+    except Exception:
+        logger.exception("Unexpected error in save_answer")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -500,10 +502,9 @@ def submit_lab(request, pk):
             }
         )
 
-    except Exception as e:
-
-        traceback.print_exc()
-        return JsonResponse({"success": False, "error": str(e)})
+    except Exception:
+        logger.exception("Unexpected error in submit_lab")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required

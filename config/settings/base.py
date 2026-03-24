@@ -39,6 +39,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "core.middleware.RequestIdMiddleware",
+    "core.middleware.MetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
@@ -95,6 +97,7 @@ def _redis_url_with_db(redis_url: str, db: int) -> str:
 # Channel Layers for WebSocket support
 REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0").strip()
 REDIS_CACHE_URL = _redis_url_with_db(REDIS_URL, 1)
+CELERY_BROKER_URL = _redis_url_with_db(REDIS_URL, 2)
 
 CHANNEL_LAYERS = {
     "default": {
@@ -112,6 +115,19 @@ CACHES = {
         "LOCATION": REDIS_CACHE_URL,
     }
 }
+
+# ─────────────────────────────────────────────────────────────────────────
+# Celery — background task processing
+# Broker: Redis DB 2  |  Results: Redis DB 2  |  Worker: see docker-compose
+# ─────────────────────────────────────────────────────────────────────────
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Baku"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
+CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
 # Rate limiting configuration
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed
@@ -145,6 +161,25 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+# ---------------------------------------------------------------------------
+# Session timeout settings
+# ---------------------------------------------------------------------------
+# Absolute lifetime of the session cookie (seconds).  After this period the
+# browser discards the cookie and the user must log in again regardless of
+# activity.  Default: 7 days.
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(7 * 24 * 60 * 60)))
+
+# Expire the session cookie when the browser is closed (no persistent cookie).
+# Set to True for higher-security deployments; False keeps the cookie across
+# browser restarts up to SESSION_COOKIE_AGE.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Inactivity timeout enforced by SessionTimeoutMiddleware (seconds).
+# Users who have not made any request within this window are automatically
+# logged out on their next request, even if SESSION_COOKIE_AGE has not yet
+# elapsed.  Default: 3 days.
+SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(3 * 24 * 60 * 60)))
 
 # ---------------------------------------------------------------------------
 # Cookie security settings

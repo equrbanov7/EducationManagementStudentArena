@@ -5,13 +5,176 @@ Tests for the audit app.
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, models
-from django.test import TransactionTestCase
+from django.test import RequestFactory, TestCase, TransactionTestCase
+from django.test.client import Client
 
 from core.constants import AuditAction
 
 from .models import AuditLog
+from .utils import log_action
 
 User = get_user_model()
+
+
+# ---------------------------------------------------------------------------
+# AuditLog model unit tests
+# ---------------------------------------------------------------------------
+
+
+class AuditLogModelTest(TestCase):
+    """Basic creation, __str__, and get_resource_display coverage."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="audit_model_user",
+            email="audit_model@example.com",
+            password="StrongPass123!",
+        )
+        self.content_type = ContentType.objects.get_for_model(self.user)
+
+    def test_str_includes_username_and_action(self):
+        log = AuditLog.objects.create(
+            user=self.user,
+            action=AuditAction.LOGIN,
+        )
+        result = str(log)
+        self.assertIn(self.user.username, result)
+        self.assertIn(AuditAction.LOGIN, result)
+
+    def test_str_with_anonymous_user(self):
+        log = AuditLog.objects.create(user=None, action=AuditAction.VIEW)
+        self.assertIn("Anonymous", str(log))
+
+    def test_get_resource_display_with_content_object(self):
+        log = AuditLog.objects.create(
+            user=self.user,
+            action=AuditAction.VIEW,
+            content_type=self.content_type,
+            object_id=str(self.user.pk),
+        )
+        display = log.get_resource_display()
+        self.assertIn(self.user.username, display)
+
+    def test_get_resource_display_falls_back_to_resource_repr(self):
+        log = AuditLog.objects.create(
+            user=self.user,
+            action=AuditAction.VIEW,
+            resource_repr="My Resource",
+        )
+        self.assertEqual(log.get_resource_display(), "My Resource")
+
+    def test_get_resource_display_falls_back_to_resource_type_and_id(self):
+        log = AuditLog.objects.create(
+            user=self.user,
+            action=AuditAction.VIEW,
+            resource_type="course",
+            resource_id="42",
+        )
+        display = log.get_resource_display()
+        self.assertIn("course", display)
+        self.assertIn("42", display)
+
+    def test_get_resource_display_unknown_when_nothing_set(self):
+        log = AuditLog.objects.create(user=self.user, action=AuditAction.VIEW)
+        self.assertEqual(log.get_resource_display(), "Unknown Resource")
+
+    def test_default_ordering_most_recent_first(self):
+        log1 = AuditLog.objects.create(user=self.user, action=AuditAction.CREATE)
+        log2 = AuditLog.objects.create(user=self.user, action=AuditAction.UPDATE)
+        qs = AuditLog.objects.filter(user=self.user)
+        self.assertEqual(qs.first(), log2)
+        self.assertEqual(qs.last(), log1)
+
+
+# ---------------------------------------------------------------------------
+# log_action utility tests
+# ---------------------------------------------------------------------------
+
+
+class LogActionUtilityTest(TestCase):
+    """Test the log_action() helper."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="log_action_user",
+            email="log_action@example.com",
+            password="StrongPass123!",
+        )
+        self.factory = RequestFactory()
+
+    def test_log_action_creates_entry(self):
+        initial_count = AuditLog.objects.count()
+        log = log_action(action=AuditAction.VIEW, user=self.user)
+        self.assertEqual(AuditLog.objects.count(), initial_count + 1)
+        self.assertEqual(log.user, self.user)
+        self.assertEqual(log.action, AuditAction.VIEW)
+
+    def test_log_action_with_object(self):
+        log = log_action(action=AuditAction.UPDATE, user=self.user, obj=self.user)
+        ct = ContentType.objects.get_for_model(self.user)
+        self.assertEqual(log.content_type, ct)
+        self.assertEqual(log.object_id, str(self.user.pk))
+
+    def test_log_action_captures_request_ip_and_user_agent(self):
+        request = self.factory.get("/", HTTP_USER_AGENT="TestAgent/1.0", REMOTE_ADDR="192.168.1.100")
+        log = log_action(action=AuditAction.VIEW, user=self.user, request=request)
+        self.assertEqual(log.user_agent, "TestAgent/1.0")
+        self.assertIsNotNone(log.ip_address)
+
+    def test_log_action_with_old_and_new_values(self):
+        log = log_action(
+            action=AuditAction.UPDATE,
+            user=self.user,
+            old_values={"title": "Old"},
+            new_values={"title": "New"},
+            changes={"title": {"old": "Old", "new": "New"}},
+        )
+        self.assertEqual(log.old_values["title"], "Old")
+        self.assertEqual(log.new_values["title"], "New")
+        self.assertIn("title", log.changes)
+
+    def test_log_action_with_reason(self):
+        log = log_action(action=AuditAction.DELETE, user=self.user, reason="Test deletion")
+        self.assertIn("Test deletion", log.reason)
+
+    def test_log_action_without_user_is_allowed(self):
+        log = log_action(action=AuditAction.VIEW, user=None)
+        self.assertIsNone(log.user)
+        self.assertEqual(log.action, AuditAction.VIEW)
+
+
+# ---------------------------------------------------------------------------
+# Login / Logout signal handler tests
+# ---------------------------------------------------------------------------
+
+
+class AuditSignalTest(TestCase):
+    """Test that login and logout events create AuditLog entries."""
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="signal_user",
+            email="signal_user@example.com",
+            password="StrongPass123!",
+        )
+
+    def test_login_creates_audit_log(self):
+        initial_count = AuditLog.objects.filter(action=AuditAction.LOGIN, user=self.user).count()
+        self.client.login(username="signal_user", password="StrongPass123!")
+        self.assertEqual(
+            AuditLog.objects.filter(action=AuditAction.LOGIN, user=self.user).count(),
+            initial_count + 1,
+        )
+
+    def test_logout_creates_audit_log(self):
+        self.client.force_login(self.user)
+        initial_count = AuditLog.objects.filter(action=AuditAction.LOGOUT, user=self.user).count()
+        self.client.logout()
+        self.assertEqual(
+            AuditLog.objects.filter(action=AuditAction.LOGOUT, user=self.user).count(),
+            initial_count + 1,
+        )
 
 
 class AuditLogSchemaCompatibilityTest(TransactionTestCase):
