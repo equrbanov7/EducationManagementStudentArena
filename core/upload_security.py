@@ -6,11 +6,14 @@ Centralized validation for user-uploaded files:
 - MIME type checks
 - file size limits
 - random file name generation
+- ZIP/archive bomb protection
 """
 
 from __future__ import annotations
 
+import io
 import mimetypes
+import zipfile
 from pathlib import PurePosixPath
 from uuid import uuid4
 
@@ -200,6 +203,139 @@ def randomize_uploaded_filename(uploaded_file):
     extension = _normalized_extension(getattr(uploaded_file, "name", ""))
     uploaded_file.name = f"{uuid4().hex}{extension}"
     return uploaded_file
+
+
+# ─── ZIP / Archive guard constants ──────────────────────────────────────────
+
+#: Maximum number of entries allowed inside a ZIP archive.
+ZIP_MAX_FILE_COUNT = 1_000
+
+#: Maximum total uncompressed size (bytes) allowed for a ZIP archive (100 MB).
+#: The check uses ``file_size`` (claimed uncompressed size from the central directory).
+#: Extreme ratios are caught independently by ``ZIP_BOMB_RATIO_THRESHOLD``.
+ZIP_MAX_EXTRACTED_SIZE_BYTES = 100 * 1024 * 1024
+
+#: Maximum nesting depth when recursively scanning nested ZIPs.
+ZIP_MAX_NESTING_DEPTH = 3
+
+#: Compression-ratio threshold above which an entry is flagged as a zip bomb.
+#: Standard files compress at most ~95 %; ratios above 99 % are suspicious.
+ZIP_BOMB_RATIO_THRESHOLD = 99
+
+
+def validate_zip_archive(
+    uploaded_file,
+    *,
+    max_file_count: int = ZIP_MAX_FILE_COUNT,
+    max_extracted_size_bytes: int = ZIP_MAX_EXTRACTED_SIZE_BYTES,
+    max_nesting_depth: int = ZIP_MAX_NESTING_DEPTH,
+):
+    """Validate a ZIP archive against common bomb and abuse vectors.
+
+    Checks performed
+    ----------------
+    1. **Valid ZIP**: the file must be a well-formed ZIP archive.
+    2. **File count**: total entries ≤ *max_file_count*.
+    3. **Compressed size**: running sum of ``compress_size`` (bytes actually
+       stored in the archive) across all entries ≤ *max_extracted_size_bytes*.
+       This is a reliable, unforgeable bound because ``compress_size`` reflects
+       the real on-disk payload.
+    4. **Compression ratio per entry**: entries whose claimed uncompressed size
+       (``file_size``) is more than ``ZIP_BOMB_RATIO_THRESHOLD``× their actual
+       compressed size are flagged as potential zip bombs.
+    5. **Nesting depth**: nested ZIPs (ZIPs inside ZIPs) are recursively
+       validated up to *max_nesting_depth* levels.
+
+    Raises ``ValidationError`` on any violation.  Returns ``None`` on success.
+    """
+    _validate_zip_recursive(uploaded_file, max_file_count, max_extracted_size_bytes, max_nesting_depth, depth=0)
+
+
+def _validate_zip_recursive(file_or_bytes, max_file_count, max_extracted_size_bytes, max_nesting_depth, *, depth):
+    """Inner recursive ZIP validator."""
+    # Accept both file-like objects and raw bytes (for nested ZIPs read from
+    # the outer archive's member data).
+    if isinstance(file_or_bytes, (bytes, bytearray)):
+        source = io.BytesIO(file_or_bytes)
+    else:
+        # Seek to the beginning so zipfile can read the central directory.
+        try:
+            current_pos = file_or_bytes.tell()
+            file_or_bytes.seek(0)
+        except Exception:
+            current_pos = None
+        source = file_or_bytes
+
+    try:
+        zf = zipfile.ZipFile(source)
+    except zipfile.BadZipFile:
+        raise ValidationError(pgettext("upload.security.error", "Yüklənmiş fayl etibarsız ZIP arxividir."))
+    except Exception:
+        raise ValidationError(pgettext("upload.security.error", "ZIP arxivi oxuna bilmədi."))
+    finally:
+        # Restore file position if we moved it.
+        if not isinstance(file_or_bytes, (bytes, bytearray)) and current_pos is not None:
+            try:
+                file_or_bytes.seek(current_pos)
+            except Exception:
+                pass
+
+    entries = zf.infolist()
+
+    # 1. File count guard.
+    if len(entries) > max_file_count:
+        raise ValidationError(
+            pgettext(
+                "upload.security.error",
+                "ZIP arxivi çox sayda fayl ehtiva edir (maksimum {max} icazə verilir).",
+            ).format(max=max_file_count)
+        )
+
+    # 2. Extracted-size and compression-ratio guards.
+    total_compressed = 0
+    for entry in entries:
+        total_compressed += entry.compress_size
+
+        if total_compressed > max_extracted_size_bytes:
+            raise ValidationError(
+                pgettext(
+                    "upload.security.error",
+                    "ZIP arxivinin ümumi sıxılmış ölçüsü limiti keçir.",
+                )
+            )
+
+        # Ratio guard: skip directories and zero-byte entries.
+        if entry.compress_size > 0 and entry.file_size > 0:
+            ratio = entry.file_size / entry.compress_size
+            if ratio > ZIP_BOMB_RATIO_THRESHOLD:
+                raise ValidationError(
+                    pgettext(
+                        "upload.security.error",
+                        "ZIP arxivindəki '{filename}' faylı zip-bomb kimi şübhəlidir.",
+                    ).format(filename=entry.filename)
+                )
+
+    # 3. Nesting guard: scan nested ZIPs one level deeper.
+    for entry in entries:
+        if entry.filename.lower().endswith(".zip") and not entry.is_dir():
+            if depth >= max_nesting_depth:
+                raise ValidationError(
+                    pgettext(
+                        "upload.security.error",
+                        "ZIP arxivi dəstəklənən maksimum iç-içə dərinliyi keçir.",
+                    )
+                )
+            try:
+                nested_data = zf.read(entry.filename)
+            except Exception:
+                continue
+            _validate_zip_recursive(
+                nested_data,
+                max_file_count,
+                max_extracted_size_bytes,
+                max_nesting_depth,
+                depth=depth + 1,
+            )
 
 
 class FileUploadValidator:

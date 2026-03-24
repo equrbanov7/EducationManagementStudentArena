@@ -7,20 +7,24 @@ Contains:
 - CourseDashboardView (large view with role-based context building)
 """
 
+from collections import defaultdict
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.generic import DetailView
 
+from apps.assignments.models import Submission
 from apps.courses.forms import CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabAssignment, LabSubmission
+from apps.projects.models import ProjectSubmission
 from core.helpers import (
     ASSIGNED_TASK_FILTER_CHOICES,
     REVIEW_EDIT_LOCK_WINDOW,
@@ -145,10 +149,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 course.assignments.filter(assigned_students=user).exclude(status="inactive").order_by("-created_at")
             )
 
+            # Batch-fetch submission counts for this user across all assignments
+            # to avoid N+1 queries (one query instead of one per assignment).
+            assignment_ids = list(assignments_qs.values_list("id", flat=True))
+            submission_counts_qs = (
+                Submission.objects.filter(assignment_id__in=assignment_ids, user=user)
+                .values("assignment_id")
+                .annotate(count=Count("id"))
+            )
+            submission_count_by_assignment = {row["assignment_id"]: row["count"] for row in submission_counts_qs}
+
             # Hər assignment üçün user-specific məlumat hazırla
             assignments_with_user_data = []
             for a in assignments_qs:
-                user_attempts = a.submissions.filter(user=user).count()
+                user_attempts = submission_count_by_assignment.get(a.id, 0)
                 is_deadline_passed = a.is_deadline_passed if hasattr(a, "is_deadline_passed") else False
                 is_active = a.status in {"active", "published"}
                 can_submit = user_attempts < a.max_attempts and not is_deadline_passed and is_active
@@ -188,10 +202,20 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     course.projects.filter(assigned_students=user).exclude(status="archived").order_by("-created_at")
                 )
 
+                # Batch-fetch submission counts for this user across all projects
+                # to avoid N+1 queries (one query instead of one per project).
+                project_ids = list(projects_qs.values_list("id", flat=True))
+                project_submission_counts_qs = (
+                    ProjectSubmission.objects.filter(project_id__in=project_ids, student=user)
+                    .values("project_id")
+                    .annotate(count=Count("id"))
+                )
+                project_submission_count = {row["project_id"]: row["count"] for row in project_submission_counts_qs}
+
                 # Hər project üçün user-specific məlumat hazırla
                 projects_with_user_data = []
                 for p in projects_qs:
-                    user_attempts = p.submissions.filter(student=user).count()
+                    user_attempts = project_submission_count.get(p.id, 0)
                     is_deadline_passed = p.is_deadline_passed
                     is_active = p.status == "active"
                     can_submit = user_attempts < p.max_attempts and not is_deadline_passed and is_active
@@ -235,22 +259,35 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
         elif context["is_student"]:
             # TƏLƏBƏ - yalnız aktiv və ona icazəli imtahanları görür
-            all_course_exams = scoped_by_organization(
-                Exam.objects.filter(course=course, is_active=True),
-                self.request,
+            all_course_exams = list(
+                scoped_by_organization(
+                    Exam.objects.filter(course=course, is_active=True),
+                    self.request,
+                )
             )
+
+            # Batch-fetch all this user's non-draft attempts for all exams in one query,
+            # grouped by exam_id to avoid N+1 (one query instead of two per exam).
+            exam_ids = [exam.id for exam in all_course_exams]
+            all_user_attempts = (
+                ExamAttempt.objects.filter(exam_id__in=exam_ids, user=user)
+                .exclude(status="draft")
+                .order_by("-started_at")
+            )
+            attempts_by_exam: dict[int, list] = defaultdict(list)
+            for attempt in all_user_attempts:
+                attempts_by_exam[attempt.exam_id].append(attempt)
 
             exams_with_data = []
             for exam in all_course_exams:
                 if exam.can_user_see(user):
-                    # Bu tələbənin attempt-ları
-                    attempts = (
-                        ExamAttempt.objects.filter(exam=exam, user=user).exclude(status="draft").order_by("-started_at")
+                    # Use pre-fetched attempts instead of per-exam queries.
+                    exam_attempts = attempts_by_exam.get(exam.id, [])
+                    last_attempt = exam_attempts[0] if exam_attempts else None
+                    attempt_count = len(exam_attempts)
+                    attempts_left = (
+                        max(exam.max_attempts_per_user - attempt_count, 0) if exam.max_attempts_per_user else None
                     )
-
-                    last_attempt = attempts.first()
-                    attempt_count = attempts.count()
-                    attempts_left = exam.attempts_left_for(user)
                     can_start_without_code, _ = exam.can_user_start(user, code=None)
                     is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
                     has_attempts_left = attempts_left is None or attempts_left > 0
@@ -295,19 +332,32 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
             labs_with_user_data = []
 
-            # Published olan lab-ları yoxla
-            for lab in course.labs.filter(status="published").order_by("-created_at"):
+            # Fetch all published labs with their M2M allowed_students pre-loaded
+            # in a single query to avoid per-lab allowed_student lookups (N+1).
+            published_labs = list(
+                course.labs.filter(status="published").prefetch_related("allowed_students").order_by("-created_at")
+            )
 
-                # Bu lab tələbəyə təyin olunubmu?
+            # Batch-fetch LabAssignments for this student across all labs.
+            lab_ids = [lab.id for lab in published_labs]
+            lab_assignments_by_lab = {
+                la.lab_id: la for la in LabAssignment.objects.filter(lab_id__in=lab_ids, student=user)
+            }
+
+            # Batch-fetch LabSubmissions for all LabAssignments belonging to this student.
+            student_assignment_ids = [la.id for la in lab_assignments_by_lab.values()]
+            submissions_by_assignment: dict[int, list] = defaultdict(list)
+            for sub in LabSubmission.objects.filter(assignment_id__in=student_assignment_ids).order_by("-submitted_at"):
+                submissions_by_assignment[sub.assignment_id].append(sub)
+
+            # Published olan lab-ları yoxla
+            for lab in published_labs:
+
+                # This lab assigned to the student?
                 is_assigned = False
 
-                # Allowed students - vergüllə ayrılmış ID-lər
-                allowed_student_ids = []
-                if lab.allowed_students and lab.allowed_students.strip():
-                    for x in lab.allowed_students.split(","):
-                        x = x.strip()
-                        if x.isdigit():
-                            allowed_student_ids.append(int(x))
+                # Allowed students - use pre-fetched M2M (no extra query per lab)
+                allowed_student_ids = {s.id for s in lab.allowed_students.all()}
 
                 # Allowed groups - vergüllə ayrılmış qrup adları
                 allowed_group_names = []
@@ -340,19 +390,19 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 if not is_assigned:
                     continue
 
-                # Assignment və submission məlumatlarını al
-                assignment = LabAssignment.objects.filter(lab=lab, student=user).first()
+                # Use pre-fetched LabAssignment and LabSubmissions.
+                assignment = lab_assignments_by_lab.get(lab.id)
 
-                submissions_qs = LabSubmission.objects.none()
+                submissions_list: list = []
                 attempt_count = 0
                 has_submitted = False
                 latest_submission = None
 
                 if assignment:
-                    submissions_qs = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
-                    attempt_count = submissions_qs.count()
+                    submissions_list = submissions_by_assignment.get(assignment.id, [])
+                    attempt_count = len(submissions_list)
                     has_submitted = attempt_count > 0
-                    latest_submission = submissions_qs.first() if has_submitted else None
+                    latest_submission = submissions_list[0] if has_submitted else None
 
                 max_attempts = lab.max_attempts or 1
                 can_submit = (attempt_count < max_attempts) and lab.is_open
@@ -368,7 +418,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         "lab": lab,
                         "has_submitted": has_submitted,
                         "submission": latest_submission,
-                        "submissions": submissions_qs,
+                        "submissions": submissions_list,
                         "attempt_count": attempt_count,
                         "max_attempts": max_attempts,
                         "attempts_left": max_attempts - attempt_count,

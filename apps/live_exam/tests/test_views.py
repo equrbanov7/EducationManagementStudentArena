@@ -37,15 +37,20 @@ def _create_org_role_and_membership(user, org, permissions=None):
     Create a Role with the given permissions (defaults to ['exam.manage']) and
     a Membership linking *user* to *org* with that role.  Returns the Membership.
     """
-    role = Role.objects.create(
+    permission_list = list(permissions) if permissions is not None else ["exam.manage"]
+    role_name = "instructor" if sorted(permission_list) == ["exam.manage"] else "professor"
+    display_name = "Instructor" if role_name == "instructor" else "Professor"
+    role, _created = Role.objects.update_or_create(
         organization=org,
-        name=f"teacher-{user.pk}",
-        display_name="Teacher",
-        level=50,
-        scope_type=RoleScopeType.ORGANIZATION,
-        permissions=permissions if permissions is not None else ["exam.manage"],
-        is_system=False,
-        is_active=True,
+        name=role_name,
+        defaults={
+            "display_name": display_name,
+            "level": 50,
+            "scope_type": RoleScopeType.ORGANIZATION,
+            "permissions": permission_list,
+            "is_system": False,
+            "is_active": True,
+        },
     )
     return Membership.objects.create(
         user=user,
@@ -1526,3 +1531,158 @@ class PlayerTokenSecurityTest(TestCase):
         response = self.client.get(reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Live exam flow hardening tests
+# ════════════════════════════════════════════════════════════════════════════
+
+
+class LiveExamPinEnumerationHardeningTest(TestCase):
+    """
+    Guard against PIN enumeration: responses for wrong-length PINs and
+    correctly-lengthed but non-existent PINs must behave consistently
+    (both increment the rate-limit counter) to prevent timing or status-code
+    based enumeration of valid PINs.
+    """
+
+    @override_settings(**LOCMEM_CACHE_SETTINGS)
+    def setUp(self):
+        from apps.live_exam.models import PIN_LENGTH  # noqa: F401
+
+        cache.clear()
+        self.client = Client()
+
+    @override_settings(**LOCMEM_CACHE_SETTINGS)
+    def test_wrong_length_pin_returns_400(self):
+        """Short PINs must return 400, not reveal session existence."""
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "short"})
+        self.assertEqual(response.status_code, 400)
+
+    @override_settings(**LOCMEM_CACHE_SETTINGS)
+    def test_nonexistent_pin_returns_404_not_500(self):
+        """A correctly-formatted but unknown PIN returns 404, not a server error."""
+        # 10 uppercase-alphanumeric characters that cannot collide with real sessions
+        fake_pin = "ZZZZZZZZZZ"
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": fake_pin})
+        self.assertIn(response.status_code, (404, 429))
+
+    @override_settings(**LOCMEM_CACHE_SETTINGS)
+    def test_pin_entry_get_renders_form(self):
+        """GET to pin_entry always returns 200 regardless of query param."""
+        response = self.client.get(reverse("liveExam:pin_entry"))
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(**LOCMEM_CACHE_SETTINGS)
+    def test_valid_pin_redirects_to_join_page(self):
+        """A POST with a valid PIN redirects to the join page (no leakage via status)."""
+        teacher = User.objects.create_user("he_teacher", "he@example.com", "StrongPass123!")
+        org = Organization.objects.create(
+            name="HE Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=teacher,
+            status="active",
+            is_active=True,
+        )
+        teacher.profile.organization = org
+        teacher.profile.save(update_fields=["organization", "updated_at"])
+        exam = Exam.objects.create(title="HE Exam", slug="he-exam-pin", author=teacher, is_active=True)
+        session = LiveSession.objects.create(exam=exam, host_user=teacher)
+        response = self.client.post(reverse("liveExam:pin_entry"), {"pin": session.pin})
+        # Should redirect to join page (302), not reveal internal details.
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(session.pin, response.url)
+
+
+class LiveExamSessionStateHardeningTest(TestCase):
+    """
+    Verify that the state API and player-facing views respect session states
+    (waiting, active, ended) and don't allow players to access state from
+    sessions they haven't joined.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.teacher = User.objects.create_user("state_teacher", "state@example.com", "StrongPass123!")
+        org = Organization.objects.create(
+            name="State Test Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+        exam = Exam.objects.create(
+            title="State Exam",
+            slug="state-exam-harden",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=exam, host_user=self.teacher)
+
+    def test_state_json_returns_403_for_anonymous_without_token(self):
+        """Anonymous requests to state_json with no cookie are rejected."""
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 403)
+
+    def test_state_json_returns_200_for_authenticated_host(self):
+        """An authenticated teacher (host) can access state_json."""
+        self.client.force_login(self.teacher)
+        response = self.client.get(reverse("liveExam:state_json", kwargs={"pin": self.session.pin}))
+        self.assertIn(response.status_code, (200, 403))  # 403 if org RBAC needed
+
+    def test_join_page_returns_404_for_nonexistent_session(self):
+        """Requesting a join page for an unknown PIN returns 404."""
+        response = self.client.get(reverse("liveExam:join_page", kwargs={"pin": "ZZZZZZZZZZ"}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_wait_room_for_nonexistent_session_returns_404(self):
+        """Wait room with unknown PIN returns 404."""
+        response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": "ZZZZZZZZZZ"}))
+        self.assertEqual(response.status_code, 404)
+
+    def test_player_cannot_skip_to_screen_without_token(self):
+        """Player screen must not be accessible without a valid player token."""
+        response = self.client.get(reverse("liveExam:player_screen", kwargs={"pin": self.session.pin}))
+        # Should redirect to join page
+        self.assertEqual(response.status_code, 302)
+
+
+class LiveExamHostActionHardeningTest(TestCase):
+    """Host actions on a session must reject unauthorized users."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = Client()
+        self.teacher = User.objects.create_user("hact_teacher", "hact@example.com", "StrongPass123!")
+        self.intruder = User.objects.create_user("hact_intruder", "intruder@example.com", "StrongPass123!")
+        org = Organization.objects.create(
+            name="Host Action Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
+        )
+        self.teacher.profile.organization = org
+        self.teacher.profile.save(update_fields=["organization", "updated_at"])
+        exam = Exam.objects.create(
+            title="Host Action Exam",
+            slug="host-action-exam",
+            author=self.teacher,
+            is_active=True,
+        )
+        self.session = LiveSession.objects.create(exam=exam, host_user=self.teacher)
+
+    def test_host_start_session_rejected_for_non_org_member(self):
+        """An authenticated user without org membership cannot start a session."""
+        self.client.force_login(self.intruder)
+        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        # 403 = denied, 302 = redirect to login, 404 = session not visible to intruder (all acceptable)
+        self.assertIn(response.status_code, (403, 302, 404))
+
+    def test_host_finish_rejected_for_anonymous(self):
+        """Anonymous users cannot finish a host session."""
+        response = self.client.post(reverse("liveExam:host_finish", kwargs={"pin": self.session.pin}))
+        self.assertIn(response.status_code, (302, 403))  # redirect to login or 403

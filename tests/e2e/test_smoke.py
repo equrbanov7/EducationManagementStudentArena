@@ -20,6 +20,8 @@ Run locally:
 from __future__ import annotations
 
 import os
+import socket
+from urllib.parse import urlsplit
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -39,6 +41,9 @@ def login(page: Page) -> None:
     page.goto(f"{BASE_URL}/accounts/login/")
     page.wait_for_load_state("networkidle")
 
+    if not E2E_USERNAME or not E2E_PASSWORD:
+        return
+
     # Scope actions to the actual auth form because the page also contains
     # hidden language-switcher submit buttons.
     login_form = (
@@ -53,6 +58,24 @@ def login(page: Page) -> None:
     login_form.locator("input[name='password']").fill(E2E_PASSWORD)
     login_form.locator("button[type='submit']").click()
     page.wait_for_load_state("networkidle")
+
+
+def _base_url_is_reachable() -> bool:
+    parsed = urlsplit(BASE_URL)
+    host = parsed.hostname or "localhost"
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+
+    try:
+        with socket.create_connection((host, port), timeout=1):
+            return True
+    except OSError:
+        return False
+
+
+@pytest.fixture(autouse=True)
+def require_reachable_base_url():
+    if not _base_url_is_reachable():
+        pytest.skip(f"BASE_URL is not reachable for smoke tests: {BASE_URL}")
 
 
 # ── Tests ─────────────────────────────────────────────────────────────────────

@@ -3400,6 +3400,10 @@ msgctxt "accounts.auth.message"
 msgid "logout_success"
 msgstr "Uğurla çıxış etdiniz."
 
+msgctxt "accounts.auth.message"
+msgid "otp_email_send_failed"
+msgstr "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
+
 #: apps/assignments/admin.py:23
 msgctxt "assignment.admin.fieldset"
 msgid "basic_information"
@@ -6112,6 +6116,10 @@ msgstr "Email tapılmadı."
 msgctxt "blog.verify.message"
 msgid "new_code_sent"
 msgstr "Yeni kod göndərildi."
+
+msgctxt "blog.verify.message"
+msgid "otp_email_send_failed"
+msgstr "Təsdiq kodunun göndərilməsi uğursuz oldu. Xahiş edirik, yenidən cəhd edin."
 
 #: apps/blog/views.py:633
 msgctxt "blog.permission"

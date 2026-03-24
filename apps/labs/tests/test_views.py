@@ -324,8 +324,7 @@ class LabAccessControlTest(TestCase):
         self.assertFalse(LabAssignment.objects.filter(lab=self.lab, student=self.unenrolled_student).exists())
 
     def test_lab_detail_blocks_student_outside_allowed_groups_and_students(self):
-        self.lab.allowed_students = str(self.owner.id)
-        self.lab.save(update_fields=["allowed_students"])
+        self.lab.allowed_students.add(self.owner)
         self._login_as(self.blocked_student)
 
         response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))
@@ -898,7 +897,6 @@ class LabUploadSecurityTest(TestCase):
                     content_type="application/x-httpd-php",
                 ),
             },
-            content_type="multipart/form-data",
         )
         self.assertEqual(response.status_code, 400)
         self.assertFalse(response.json()["success"])

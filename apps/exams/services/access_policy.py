@@ -9,11 +9,9 @@ def is_teacher_user(user):
         return True
 
     if hasattr(user, "has_role"):
-        if user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER):
-            return True
+        return user.has_role(ProfileRole.TEACHER) or user.has_role(ProfileRole.ASSISTANT_TEACHER)
 
-    profile = getattr(user, "profile", None)
-    return getattr(profile, "role", None) in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}
+    return False
 
 
 def can_user_access_exam(exam, user):

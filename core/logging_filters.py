@@ -61,3 +61,66 @@ class SensitiveDataFilter(logging.Filter):
         text = self._EMAIL_RE.sub(self.REDACTED, text)
         text = self._PHONE_RE.sub(self.REDACTED, text)
         return text
+
+
+class RequestIdFilter(logging.Filter):
+    """Inject the current request's ``request_id`` into every log record.
+
+    Install this filter on any handler where per-request correlation is
+    needed.  The filter reads ``request_id`` from Django's thread-local
+    request store (set by ``RequestIdMiddleware``) and attaches it to each
+    ``LogRecord`` as the string attribute ``request_id``.  When no request is
+    active the field is set to ``"-"``.
+
+    Usage in ``LOGGING``::
+
+        "filters": {
+            "request_id": {"()": "core.logging_filters.RequestIdFilter"},
+        },
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        from core.request_context import get_request_id
+
+        record.request_id = get_request_id() or "-"
+        return True
+
+
+class JsonFormatter(logging.Formatter):
+    """Emit each log record as a single-line JSON object.
+
+    Fields emitted
+    --------------
+    ``timestamp``  ISO-8601 UTC timestamp
+    ``level``      Log level name (INFO, WARNING, …)
+    ``logger``     Logger name (``record.name``)
+    ``message``    Rendered log message
+    ``request_id`` Per-request correlation ID (set by ``RequestIdFilter``)
+    ``exc_info``   Formatted exception traceback string, if present
+
+    Usage in ``LOGGING``::
+
+        "formatters": {
+            "json": {"()": "core.logging_filters.JsonFormatter"},
+        },
+    """
+
+    def format(self, record: logging.LogRecord) -> str:
+        import json
+        import traceback
+        from datetime import datetime, timezone
+
+        timestamp = datetime.fromtimestamp(record.created, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        payload: dict = {
+            "timestamp": timestamp,
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "request_id": getattr(record, "request_id", "-"),
+        }
+
+        if record.exc_info:
+            payload["exc_info"] = "".join(traceback.format_exception(*record.exc_info))
+
+        return json.dumps(payload, ensure_ascii=False, default=str)

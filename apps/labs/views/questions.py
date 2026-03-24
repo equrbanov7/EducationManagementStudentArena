@@ -3,6 +3,7 @@ Labs Views - Question Management
 Sual CRUD və import
 """
 
+import logging
 import re
 
 from django.contrib.auth.decorators import login_required
@@ -18,6 +19,8 @@ from ._helpers import (
     _normalize_extensions,
     _validate_and_prepare_lab_upload,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -56,8 +59,9 @@ def create_question(request, block_id):
 
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in create_question")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -86,8 +90,9 @@ def edit_question(request, pk):
         question.save()
         return JsonResponse({"success": True})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in edit_question")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -192,5 +197,6 @@ def import_questions(request, block_id):
             }
         )
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in import_questions")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)

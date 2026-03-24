@@ -8,7 +8,7 @@ from django.test import TestCase
 from apps.courses import services
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import StudentGroup
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
 User = get_user_model()
@@ -71,6 +71,13 @@ class RosterManagementServicesTest(TestCase):
             status="published",
             organization=self.org,
         )
+        Membership.objects.create(
+            user=self.teacher,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            is_primary=True,
+            is_active=True,
+        )
         self.students = [
             User.objects.create_user(username=f"student{i}", email=f"student{i}@example.com", password="pass123")
             for i in range(3)
@@ -100,12 +107,6 @@ class RosterManagementServicesTest(TestCase):
 
     def test_add_students_from_group_to_course(self):
         """Students in a StudentGroup are enrolled in a single batch."""
-        from apps.accounts.models import ProfileRole
-
-        self.teacher.profile.organization = self.org
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["organization", "role", "updated_at"])
-
         group = StudentGroup.objects.create(
             name="Group A",
             teacher=self.teacher,
@@ -122,12 +123,6 @@ class RosterManagementServicesTest(TestCase):
 
     def test_add_students_from_group_updates_existing_group_name(self):
         """Existing student members get their group name updated when re-added."""
-        from apps.accounts.models import ProfileRole
-
-        self.teacher.profile.organization = self.org
-        self.teacher.profile.role = ProfileRole.TEACHER
-        self.teacher.profile.save(update_fields=["organization", "role", "updated_at"])
-
         group = StudentGroup.objects.create(
             name="Old Group",
             teacher=self.teacher,

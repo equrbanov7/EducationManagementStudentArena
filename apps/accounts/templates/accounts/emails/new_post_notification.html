@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="az">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMSArena | Yeni post</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 18px 40px rgba(15,23,42,0.10);">
+            <tr>
+              <td style="background:linear-gradient(135deg,#1e293b,#0ea5e9);padding:28px 32px;color:#ffffff;">
+                <div style="font-size:13px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.82;">EMSArena</div>
+                <h1 style="margin:10px 0 0;font-size:28px;line-height:1.25;">Yeni post yayımlandı</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px;">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">Salam,</p>
+                <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">EMSArena blogunda yeni bir post yayımlandı:</p>
+
+                <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #bae6fd;border-radius:16px;background:#f0f9ff;">
+                  <h2 style="margin:0 0 8px;font-size:20px;color:#0f172a;">{{ post.title }}</h2>
+                  {% if post.excerpt %}
+                  <p style="margin:0;font-size:14px;line-height:1.7;color:#475569;">{{ post.excerpt }}</p>
+                  {% endif %}
+                </div>
+
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
+                  <tr>
+                    <td align="center" style="border-radius:12px;background:#0f766e;">
+                      <a href="{{ post.get_absolute_url }}" style="display:inline-block;padding:14px 24px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;">Postu oxu</a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0;font-size:13px;color:#64748b;line-height:1.7;">
+                  Bu emaili aldınızsa, EMSArena bloguna abunə olmusunuz. Abunəliyi ləğv etmək üçün sayta daxil olun.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

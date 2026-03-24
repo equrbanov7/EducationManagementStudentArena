@@ -1,13 +1,17 @@
 import logging
+import time
 
 from django.conf import settings
 from django.db import connection
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
 import redis as redis_client
 
 logger = logging.getLogger(__name__)
+
+# Application start time – used to report uptime in the health endpoint.
+_APP_START_TIME: float = time.monotonic()
 
 
 def health_check(request):
@@ -16,7 +20,14 @@ def health_check(request):
     Checks: Database connectivity, Redis connectivity.
     Returns a structured JSON response with individual component statuses.
     """
-    health_status = {"status": "healthy", "checks": {}}
+    import os
+
+    health_status: dict = {
+        "status": "healthy",
+        "checks": {},
+        "version": os.getenv("APP_VERSION", "unknown"),
+        "uptime_seconds": round(time.monotonic() - _APP_START_TIME),
+    }
 
     # Database check
     try:
@@ -53,6 +64,22 @@ def health_check(request):
 def ping(request):
     """Simple ping endpoint"""
     return JsonResponse({"status": "ok"})
+
+
+def metrics_view(request):
+    """Expose application metrics in Prometheus text format.
+
+    This endpoint is intended to be scraped by a Prometheus server.
+    In production, access should be restricted at the reverse-proxy level
+    (e.g. allow only from the Prometheus server IP) so that internal counters
+    are not publicly accessible.
+    """
+    from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+    from core.metrics import REGISTRY
+
+    data = generate_latest(REGISTRY)
+    return HttpResponse(data, content_type=CONTENT_TYPE_LATEST)
 
 
 def test_error(request):

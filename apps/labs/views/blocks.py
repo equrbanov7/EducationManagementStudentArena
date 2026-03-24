@@ -3,6 +3,8 @@ Labs Views - Block Management
 Blok CRUD və idarəetmə
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -12,6 +14,8 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from ..models import LabBlock
 from ._helpers import _get_tenant_block_or_404, _get_tenant_lab_or_404
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -59,8 +63,9 @@ def create_block(request, pk):
         messages.success(request, pgettext("labs.view.message", "block_created"))
         return JsonResponse({"success": True, "block_id": block.id})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in create_block")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required
@@ -95,8 +100,9 @@ def edit_block(request, pk):
         block.save()
         return JsonResponse({"success": True})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in edit_block")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 @login_required

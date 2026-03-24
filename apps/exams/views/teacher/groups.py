@@ -11,11 +11,7 @@ from apps.accounts.models import ProfileRole
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
-
-
-def _user_role(user):
-    profile = getattr(user, "profile", None)
-    return getattr(profile, "role", None)
+from core.tenancy import request_has_active_organization_context
 
 
 def _is_superadmin(user):
@@ -25,27 +21,16 @@ def _is_superadmin(user):
 def _ensure_group_manager(user):
     if _is_superadmin(user):
         return
-    has_student_role = False
-    has_teacher_like_role = False
-    if hasattr(user, "has_role"):
-        has_student_role = user.has_role(ProfileRole.STUDENT) or user.has_role(ProfileRole.LEAD_STUDENT)
-        has_teacher_like_role = (
-            user.has_role(ProfileRole.TEACHER)
-            or user.has_role(ProfileRole.ASSISTANT_TEACHER)
-            or user.has_role(ProfileRole.ORG_ADMIN)
-            or user.has_role(ProfileRole.ORG_OWNER)
-            or user.has_role(ProfileRole.HR)
-        )
-    else:
-        role = _user_role(user)
-        has_student_role = role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
-        has_teacher_like_role = role in {
-            ProfileRole.TEACHER,
-            ProfileRole.ASSISTANT_TEACHER,
-            ProfileRole.ORG_ADMIN,
-            ProfileRole.ORG_OWNER,
-            ProfileRole.HR,
-        }
+    has_student_role = hasattr(user, "has_role") and (
+        user.has_role(ProfileRole.STUDENT) or user.has_role(ProfileRole.LEAD_STUDENT)
+    )
+    has_teacher_like_role = hasattr(user, "has_role") and (
+        user.has_role(ProfileRole.TEACHER)
+        or user.has_role(ProfileRole.ASSISTANT_TEACHER)
+        or user.has_role(ProfileRole.ORG_ADMIN)
+        or user.has_role(ProfileRole.ORG_OWNER)
+        or user.has_role(ProfileRole.HR)
+    )
 
     if has_student_role and not has_teacher_like_role:
         raise PermissionDenied(pgettext("exams.view.groups.message", "no_page_permission"))
@@ -55,11 +40,7 @@ def _can_multi_assign_teachers(user):
     if _is_superadmin(user):
         return True
 
-    role_level = (
-        user._highest_role_level()
-        if hasattr(user, "_highest_role_level")
-        else ProfileRole.LEVELS.get(_user_role(user), 0)
-    )
+    role_level = user._highest_role_level() if hasattr(user, "_highest_role_level") else 0
     return role_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
 
@@ -82,10 +63,8 @@ def _get_required_organization(request):
         messages.error(request, pgettext_lazy("exams.view.groups.message", "active_org_not_found"))
         return None
 
-    if not _is_superadmin(request.user):
-        user_org = getattr(getattr(request.user, "profile", None), "organization", None)
-        if user_org != organization:
-            raise PermissionDenied(pgettext("exams.view.groups.message", "active_tenant_mismatch"))
+    if not _is_superadmin(request.user) and not request_has_active_organization_context(request):
+        raise PermissionDenied(pgettext("exams.view.groups.message", "active_tenant_mismatch"))
 
     return organization
 

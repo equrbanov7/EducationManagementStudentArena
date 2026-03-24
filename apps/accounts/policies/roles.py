@@ -23,9 +23,7 @@ def get_user_role_level(user):
     if hasattr(user, "_highest_role_level"):
         return int(user._highest_role_level())
 
-    profile = getattr(user, "profile", None)
-    profile_role = getattr(profile, "role", "")
-    return int(ProfileRole.LEVELS.get(profile_role, 0))
+    return 0
 
 
 def user_has_any_role(user, role_names):
@@ -39,8 +37,7 @@ def user_has_any_role(user, role_names):
     if hasattr(user, "has_role"):
         return any(user.has_role(role_name) for role_name in normalized)
 
-    profile = getattr(user, "profile", None)
-    return getattr(profile, "role", None) in normalized
+    return False
 
 
 def get_profile_role_label(role):

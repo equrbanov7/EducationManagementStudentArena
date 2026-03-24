@@ -43,10 +43,11 @@ class Lab(models.Model):
         ("archived", "Arxivləndi"),
     ]
 
-    allowed_students = models.TextField(
+    allowed_students = models.ManyToManyField(
+        User,
         blank=True,
-        verbose_name="İcazəli tələbələr (ID)",
-        help_text="Vergüllə ayrılmış tələbə ID-ləri. Boş = qrup filtri istifadə olunur",
+        related_name="allowed_labs",
+        verbose_name="İcazəli tələbələr",
     )
 
     course = models.ForeignKey(
@@ -189,9 +190,7 @@ class Lab(models.Model):
 
     def get_allowed_student_ids_list(self):
         """İcazəli tələbə ID-lərini list kimi qaytar"""
-        if not self.allowed_students:
-            return []
-        return [int(student_id) for student_id in self.allowed_students.split(",") if student_id.strip().isdigit()]
+        return list(self.allowed_students.values_list("id", flat=True))
 
     def get_allowed_extensions_list(self):
         """İcazəli extension-ları list kimi qaytar"""
@@ -221,13 +220,13 @@ class Lab(models.Model):
         if membership is None:
             return False
 
-        allowed_student_ids = set(self.get_allowed_student_ids_list())
+        has_allowed_students = self.allowed_students.exists()
         allowed_groups = {group.casefold() for group in self.get_allowed_groups_list()}
 
-        if not allowed_student_ids and not allowed_groups:
+        if not has_allowed_students and not allowed_groups:
             return True
 
-        if user.id in allowed_student_ids:
+        if has_allowed_students and self.allowed_students.filter(pk=user.pk).exists():
             return True
 
         membership_group = (membership.group_name or "").strip().casefold()

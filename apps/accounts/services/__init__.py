@@ -39,13 +39,14 @@ from .organization_requests import (
 )
 from .parsing import parse_decimal_score
 from .profile import update_user_profile, update_user_role
-from .registration import create_user_with_organization
+from .registration import create_user_with_organization, purge_stale_pending_registration
 
 __all__ = [
     "activate_user_account",
     "activate_verified_student_membership",
     "close_other_pending_student_requests",
     "create_user_with_organization",
+    "purge_stale_pending_registration",
     "get_assigned_courses_for_user",
     "get_assigned_exams_for_user",
     "get_course_membership_groups",
