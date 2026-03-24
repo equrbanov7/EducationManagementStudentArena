@@ -13,7 +13,22 @@ class StudentOrganizationRequestStatus(models.TextChoices):
     AUTO_CLOSED = "auto_closed", "Auto Closed"
 
 
+class MembershipRequestRoleType(models.TextChoices):
+    """Discriminates student / teacher / staff join requests."""
+
+    STUDENT = "student", "Student"
+    TEACHER = "teacher", "Teacher"
+    STAFF = "staff", "Staff"
+
+
 class StudentOrganizationRequest(models.Model):
+    """Unified membership-join request for students, teachers, and staff.
+
+    The ``role_type`` field discriminates between the three kinds of join
+    requests.  Pre-existing rows (created before the field was added) default
+    to ``STUDENT`` so the existing student approval flow is unaffected.
+    """
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -23,6 +38,12 @@ class StudentOrganizationRequest(models.Model):
         "organizations.Organization",
         on_delete=models.CASCADE,
         related_name="student_organization_requests",
+    )
+    role_type = models.CharField(
+        max_length=10,
+        choices=MembershipRequestRoleType.choices,
+        default=MembershipRequestRoleType.STUDENT,
+        db_index=True,
     )
     message = models.CharField(max_length=280, blank=True, default="")
     status = models.CharField(
@@ -48,10 +69,11 @@ class StudentOrganizationRequest(models.Model):
         indexes = [
             models.Index(fields=["user", "status"]),
             models.Index(fields=["organization", "status"]),
+            models.Index(fields=["organization", "role_type", "status"]),
         ]
 
     def __str__(self):
-        return f"{self.user} -> {self.organization} ({self.status})"
+        return f"{self.user} -> {self.organization} [{self.role_type}] ({self.status})"
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -66,6 +88,7 @@ class NotificationType(models.TextChoices):
     SYSTEM = "system", "System / Admin"
     COURSE = "course", "Course"
     LIVE_EXAM = "live_exam", "Live Exam / Session"
+    APPROVAL = "approval", "Membership / Approval Request"
 
 
 class InAppNotification(models.Model):

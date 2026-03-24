@@ -626,6 +626,91 @@ def student_organization_management(request):
         messages.error(request, "Naməlum əməliyyat.")
         return redirect(next_url)
 
+    # Teacher / staff join requests: approve or reject
+    if request.method == "POST":
+        action = (request.POST.get("action") or "").strip().lower()
+        next_url = _resolve_next_url(request, reverse("accounts:student_organization_management"))
+
+        if action in {"approve_teacher_staff_request", "reject_teacher_staff_request"}:
+            from apps.notifications.models import MembershipRequestRoleType as MRR
+
+            request_id = (request.POST.get("request_id") or "").strip()
+            if not request_id.isdigit():
+                messages.error(request, "Keçərsiz müraciət ID-si.")
+                return redirect(next_url)
+
+            ts_request = StudentOrganizationRequest.objects.filter(
+                id=int(request_id),
+                organization=org,
+                status=StudentOrganizationRequestStatus.PENDING,
+                role_type__in=[MRR.TEACHER, MRR.STAFF],
+            ).first()
+            if ts_request is None:
+                messages.error(request, "Müraciət tapılmadı və ya artıq cavablandırılıb.")
+                return redirect(next_url)
+
+            if action == "approve_teacher_staff_request":
+                with transaction.atomic():
+                    target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
+                    _set_student_org_request_status(
+                        request_obj=ts_request,
+                        status=StudentOrganizationRequestStatus.APPROVED,
+                        note="Qəbul edildi.",
+                        responded_by=request.user,
+                    )
+                    # Assign teacher/staff membership role
+                    from apps.organizations.models import Membership, Role
+
+                    role_name = "teacher" if ts_request.role_type == MRR.TEACHER else "member"
+                    role_obj = org.roles.filter(name=role_name, is_active=True).first()
+                    if role_obj is None:
+                        role_obj = org.roles.filter(is_active=True).order_by("level").first()
+                    if role_obj:
+                        Membership.objects.update_or_create(
+                            user=ts_request.user,
+                            organization=org,
+                            defaults={
+                                "role": role_obj,
+                                "is_active": True,
+                                "is_primary": not Membership.objects.filter(
+                                    user=ts_request.user, is_active=True, is_primary=True
+                                )
+                                .exclude(organization=org)
+                                .exists(),
+                            },
+                        )
+                        target_profile.organization = org
+                        target_profile.organization_type = org.org_type
+                        target_profile.role = ProfileRole.TEACHER if ts_request.role_type == MRR.TEACHER else ProfileRole.MEMBER
+                        target_profile.requested_organization = None
+                        target_profile.requested_organization_name = ""
+                        target_profile.save(
+                            update_fields=[
+                                "organization",
+                                "organization_type",
+                                "role",
+                                "requested_organization",
+                                "requested_organization_name",
+                                "updated_at",
+                            ]
+                        )
+                messages.success(
+                    request,
+                    f"{ts_request.user.get_full_name() or ts_request.user.username} qəbul edildi.",
+                )
+            else:
+                _set_student_org_request_status(
+                    request_obj=ts_request,
+                    status=StudentOrganizationRequestStatus.REJECTED,
+                    note="Müraciət rədd edildi.",
+                    responded_by=request.user,
+                )
+                messages.success(
+                    request,
+                    f"{ts_request.user.get_full_name() or ts_request.user.username} müraciəti rədd edildi.",
+                )
+            return redirect(next_url)
+
     context = _build_student_org_management_section(
         request=request,
         organization=org,

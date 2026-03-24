@@ -2,11 +2,14 @@
 Authentication views: registration, verification, login, logout.
 """
 
+import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 from django.core.signing import BadSignature, SignatureExpired
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.translation import pgettext_lazy
@@ -18,6 +21,8 @@ from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_id
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
+
+logger = logging.getLogger(__name__)
 from ..models import ProfileRole
 from ..queries import get_signup_lookup_payload
 from ..services import (
@@ -155,40 +160,67 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 
 
 def register_view(request):
-    """User registration with organization bootstrap and email verification."""
+    """User registration with organization bootstrap and email verification.
+
+    The user record and the OTP email are created inside a single database
+    savepoint.  If email delivery fails the savepoint is rolled back so no
+    half-created user record is left behind.
+    """
     if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             country_code = form.cleaned_data.get("country", "")
             country_obj = Country.objects.filter(code=country_code).first()
             country_name = country_obj.name if country_obj else country_code
-            user, organization, _, profile = create_user_with_organization(
-                username=form.cleaned_data["username"],
-                email=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                signup_mode=form.cleaned_data.get("signup_mode", "individual"),
-                organization_type=form.cleaned_data["organization_type"],
-                country_code=country_code,
-                country_name=country_name,
-                join_organization=form.cleaned_data.get("join_organization"),
-                institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
-                organization_identifier=form.cleaned_data.get("organization_identifier", ""),
-                organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
-                initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
-                phone=form.cleaned_data.get("phone", ""),
-                specialization=form.cleaned_data.get("specialization", ""),
-                group_number=form.cleaned_data.get("group_number", ""),
-                department=form.cleaned_data.get("department", ""),
-                staff_position=form.cleaned_data.get("staff_position", ""),
-            )
+
+            # Wrap user creation + OTP issue inside a savepoint so we can
+            # roll back cleanly when email delivery fails.
+            try:
+                with transaction.atomic():
+                    user, organization, _, profile = create_user_with_organization(
+                        username=form.cleaned_data["username"],
+                        email=form.cleaned_data["email"],
+                        password=form.cleaned_data["password"],
+                        first_name=form.cleaned_data["first_name"],
+                        last_name=form.cleaned_data["last_name"],
+                        signup_mode=form.cleaned_data.get("signup_mode", "individual"),
+                        organization_type=form.cleaned_data["organization_type"],
+                        country_code=country_code,
+                        country_name=country_name,
+                        join_organization=form.cleaned_data.get("join_organization"),
+                        institution_not_listed_name=form.cleaned_data.get("institution_not_listed_name", ""),
+                        organization_identifier=form.cleaned_data.get("organization_identifier", ""),
+                        organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
+                        initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
+                        phone=form.cleaned_data.get("phone", ""),
+                        specialization=form.cleaned_data.get("specialization", ""),
+                        group_number=form.cleaned_data.get("group_number", ""),
+                        department=form.cleaned_data.get("department", ""),
+                        staff_position=form.cleaned_data.get("staff_position", ""),
+                    )
+                    # OTP generation + email send; raises on failure so the
+                    # atomic block is rolled back and no orphaned user remains.
+                    send_verification_otp(user, request=request)
+            except Exception:
+                logger.exception("Registration failed during user creation or OTP delivery")
+                messages.error(
+                    request,
+                    pgettext_lazy("accounts.auth.message", "registration_email_send_failed"),
+                )
+                return render(
+                    request,
+                    "accounts/register.html",
+                    {
+                        "form": form,
+                        "lookup_payload": get_signup_lookup_payload(),
+                    },
+                )
+
             requested_organization_name = profile.requested_organization_name
 
             if organization is not None:
                 request.session["active_organization"] = organization.slug
 
-            send_verification_otp(user, request=request)
             request.session["pending_verify_email"] = user.email
 
             if organization is None and requested_organization_name:
