@@ -8,8 +8,6 @@ backend in tests, so no real messages are sent.
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
-
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 

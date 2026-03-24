@@ -18,9 +18,9 @@ DEFAULT_TECHNOLOGY_CATEGORY_SLUG = "technology"
 # ─────────────────────────────────────────────────────────────────────────────
 # Cache TTLs (seconds)
 # ─────────────────────────────────────────────────────────────────────────────
-_NAVBAR_CATEGORIES_TTL = 300       # 5 min — low mutation rate
-_SIDEBAR_CATEGORIES_TTL = 120      # 2 min — invalidated on post publish
-_POPULAR_TOPICS_TTL = 300          # 5 min — low mutation rate
+_NAVBAR_CATEGORIES_TTL = 300  # 5 min — low mutation rate
+_SIDEBAR_CATEGORIES_TTL = 120  # 2 min — invalidated on post publish
+_POPULAR_TOPICS_TTL = 300  # 5 min — low mutation rate
 
 _CACHE_KEY_NAVBAR = "emsarena:blog:navbar_categories"
 _CACHE_KEY_SIDEBAR = "emsarena:blog:sidebar_categories"

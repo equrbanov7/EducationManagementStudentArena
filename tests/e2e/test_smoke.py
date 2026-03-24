@@ -55,7 +55,7 @@ def _base_url_is_reachable() -> bool:
 
 
 @pytest.fixture(scope="module", autouse=True)
-def require_reachable_base_url():
+def require_reachable_base_url(page):
     if not _base_url_is_reachable():
         pytest.skip(f"BASE_URL is not reachable for smoke tests: {BASE_URL}")
 

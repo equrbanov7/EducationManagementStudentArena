@@ -18,9 +18,7 @@ def send_new_post_notification(sender, instance, created, **kwargs):
     if created and instance.is_published:
 
         # 1. Bütün aktiv abunəçiləri çək
-        active_subscribers = list(
-            Subscriber.objects.filter(is_active=True).values_list("email", flat=True)
-        )
+        active_subscribers = list(Subscriber.objects.filter(is_active=True).values_list("email", flat=True))
 
         if not active_subscribers:
             return  # Abunəçi yoxdursa dayandır

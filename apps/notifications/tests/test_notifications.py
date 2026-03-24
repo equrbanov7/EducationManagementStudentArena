@@ -317,7 +317,7 @@ class NotificationViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_list_shows_own_notifications(self):
-        n = self._make_notification(title="My notif")
+        self._make_notification(title="My notif")
         create_notification(recipient=self.other, title="Others")
         response = self.client.get(reverse("notifications:notification_list"))
         self.assertContains(response, "My notif")

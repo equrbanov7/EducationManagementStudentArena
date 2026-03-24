@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Prefetch
+from django.db.models import Count
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -286,9 +286,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                     last_attempt = exam_attempts[0] if exam_attempts else None
                     attempt_count = len(exam_attempts)
                     attempts_left = (
-                        max(exam.max_attempts_per_user - attempt_count, 0)
-                        if exam.max_attempts_per_user
-                        else None
+                        max(exam.max_attempts_per_user - attempt_count, 0) if exam.max_attempts_per_user else None
                     )
                     can_start_without_code, _ = exam.can_user_start(user, code=None)
                     is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
@@ -337,24 +335,19 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Fetch all published labs with their M2M allowed_students pre-loaded
             # in a single query to avoid per-lab allowed_student lookups (N+1).
             published_labs = list(
-                course.labs.filter(status="published")
-                .prefetch_related("allowed_students")
-                .order_by("-created_at")
+                course.labs.filter(status="published").prefetch_related("allowed_students").order_by("-created_at")
             )
 
             # Batch-fetch LabAssignments for this student across all labs.
             lab_ids = [lab.id for lab in published_labs]
             lab_assignments_by_lab = {
-                la.lab_id: la
-                for la in LabAssignment.objects.filter(lab_id__in=lab_ids, student=user)
+                la.lab_id: la for la in LabAssignment.objects.filter(lab_id__in=lab_ids, student=user)
             }
 
             # Batch-fetch LabSubmissions for all LabAssignments belonging to this student.
             student_assignment_ids = [la.id for la in lab_assignments_by_lab.values()]
             submissions_by_assignment: dict[int, list] = defaultdict(list)
-            for sub in LabSubmission.objects.filter(assignment_id__in=student_assignment_ids).order_by(
-                "-submitted_at"
-            ):
+            for sub in LabSubmission.objects.filter(assignment_id__in=student_assignment_ids).order_by("-submitted_at"):
                 submissions_by_assignment[sub.assignment_id].append(sub)
 
             # Published olan lab-ları yoxla

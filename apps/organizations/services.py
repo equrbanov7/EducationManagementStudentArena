@@ -90,9 +90,7 @@ def user_has_org_role(user, organization, role_names):
         return False
 
     normalized = {
-        ProfileRole.normalize_membership_role_name(role_name)
-        for role_name in (role_names or [])
-        if role_name
+        ProfileRole.normalize_membership_role_name(role_name) for role_name in (role_names or []) if role_name
     }
     if not normalized:
         return False
@@ -105,9 +103,7 @@ def user_has_org_role(user, organization, role_names):
 
 def _candidate_membership_role_names(role_names):
     normalized = {
-        ProfileRole.normalize_membership_role_name(role_name)
-        for role_name in (role_names or [])
-        if role_name
+        ProfileRole.normalize_membership_role_name(role_name) for role_name in (role_names or []) if role_name
     }
     if not normalized:
         return set()

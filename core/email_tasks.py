@@ -24,11 +24,12 @@ from __future__ import annotations
 
 import logging
 
-from celery import shared_task
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, mail_admins
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 

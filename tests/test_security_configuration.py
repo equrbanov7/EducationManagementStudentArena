@@ -177,6 +177,7 @@ class DebugEnvParsingTest(TestCase):
         DEBUG=0, and DEBUG=no — instead of consistently returning False for
         all falsy values and True only for truthy ones.
         """
+
         # Old fragile pattern: 'False' != 'True' → returns False (correct by luck)
         # But also: 'false' != 'True' → False (correct)
         # And: '0' != 'True' → False (correct)

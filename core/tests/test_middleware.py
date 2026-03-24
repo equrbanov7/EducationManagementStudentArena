@@ -114,8 +114,8 @@ class RequestIdMiddlewareTest(TestCase):
 
     def test_clears_thread_local_on_view_exception(self):
         """Thread-local must be cleared even if the view raises an exception."""
-        from core.request_context import get_request_id
         from core.middleware import RequestIdMiddleware
+        from core.request_context import get_request_id
 
         def boom(request):
             raise RuntimeError("view exploded")

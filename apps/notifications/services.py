@@ -8,7 +8,6 @@ without coupling UI logic to accounts views.
 
 import logging
 
-from django.db import models
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
@@ -141,13 +140,11 @@ def mark_all_notifications_read(*, user) -> int:
     Returns the number of notifications updated.
     """
     now = timezone.now()
-    updated = (
-        InAppNotification.objects.filter(
-            recipient=user,
-            deleted_at__isnull=True,
-            is_read=False,
-        ).update(is_read=True, read_at=now)
-    )
+    updated = InAppNotification.objects.filter(
+        recipient=user,
+        deleted_at__isnull=True,
+        is_read=False,
+    ).update(is_read=True, read_at=now)
     return updated
 
 
