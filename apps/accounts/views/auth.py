@@ -21,8 +21,6 @@ from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_id
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
 from ..forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetConfirmForm, RegisterForm
-
-logger = logging.getLogger(__name__)
 from ..models import ProfileRole
 from ..queries import get_signup_lookup_payload
 from ..services import (
@@ -34,6 +32,7 @@ from ..services import (
 )
 from ._helpers import signer
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 AUTH_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
