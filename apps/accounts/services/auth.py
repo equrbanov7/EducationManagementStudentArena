@@ -25,8 +25,11 @@ def send_verification_otp(user, *, request=None):
     send fails, we fall back to a best-effort async Celery send so that
     transient SMTP hiccups don't silently drop the message.
 
-    Raises ``Exception`` when both paths fail, letting the caller roll back
-    any in-progress transaction (e.g. user creation).
+    Raises the underlying exception from the email backend (e.g.
+    ``smtplib.SMTPException``, ``ConnectionError``, or any
+    ``django.core.mail`` transport error) when **both** the synchronous
+    and async paths fail, letting the caller roll back any in-progress
+    transaction (e.g. user creation).
     """
     code, expires_at = issue_email_otp(user)
 
