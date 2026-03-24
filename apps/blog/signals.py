@@ -1,12 +1,30 @@
 # your_app/signals.py
-from django.conf import settings
-from django.core.mail import send_mail
-from django.db.models.signals import post_save
+import logging
+
+from django.core.cache import cache
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.template.loader import render_to_string
 
 from .models import Post  # Post və Subscriber modellərini import et
 from .models import Subscriber
+from .selectors import _CACHE_KEY_NAVBAR, _CACHE_KEY_POPULAR_TOPICS, _CACHE_KEY_SIDEBAR
+
+logger = logging.getLogger(__name__)
+
+
+def _invalidate_blog_listing_cache():
+    """Remove cached blog listing data that changes when posts are added/removed."""
+    try:
+        cache.delete_many(
+            [
+                _CACHE_KEY_NAVBAR,
+                _CACHE_KEY_SIDEBAR,
+                # Popular topics uses a keyed pattern; delete the common key
+                f"{_CACHE_KEY_POPULAR_TOPICS}:5",
+            ]
+        )
+    except Exception:
+        logger.warning("Redis unavailable; could not invalidate blog listing cache")
 
 
 # Yeni post üçün email göndərmək
@@ -16,24 +34,32 @@ def send_new_post_notification(sender, instance, created, **kwargs):
     if created and instance.is_published:
 
         # 1. Bütün aktiv abunəçiləri çək
-        active_subscribers = Subscriber.objects.filter(is_active=True).values_list("email", flat=True)
+        active_subscribers = list(
+            Subscriber.objects.filter(is_active=True).values_list("email", flat=True)
+        )
 
         if not active_subscribers:
             return  # Abunəçi yoxdursa dayandır
 
-        # 2. Şablonu hazırla
-        html_message = render_to_string("email_templates/new_post_notification.html", {"post": instance})
+        # 2. Bildirişi Celery vasitəsilə arxa planda göndər
+        from core.email_tasks import send_new_post_notification_email
 
-        # 3. Toplu mail göndər
-        send_mail(
-            f"YENİ MƏQALƏ: {instance.title}",
-            f"Yeni məqalə yayımlandı: {instance.title}. Ətraflı: [Link]",  # Text versiyası
-            settings.DEFAULT_FROM_EMAIL,
-            active_subscribers,  # Bütün abunəçilərə göndər
-            html_message=html_message,
-            fail_silently=True,  # Əgər xəta olsa proqram dayanmasın
+        send_new_post_notification_email.delay(
+            post_pk=instance.pk,
+            subscriber_emails=active_subscribers,
         )
-        # Qeyd: Yüzlərlə abunəçi varsa, bu, Asynchronous Tasks (Celery) vasitəsilə edilməlidir.
+
+
+@receiver(post_save, sender=Post)
+def invalidate_blog_cache_on_post_save(sender, instance, **kwargs):
+    """Invalidate cached blog listing data whenever a post is saved."""
+    _invalidate_blog_listing_cache()
+
+
+@receiver(post_delete, sender=Post)
+def invalidate_blog_cache_on_post_delete(sender, instance, **kwargs):
+    """Invalidate cached blog listing data whenever a post is deleted."""
+    _invalidate_blog_listing_cache()
 
 
 # signals.py faylını app konfiqurasiyasında aktivləşdir:

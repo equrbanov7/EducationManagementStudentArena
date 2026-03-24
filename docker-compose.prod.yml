@@ -126,6 +126,40 @@ services:
       - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
+  # Celery worker — background task processing
+  # Processes email delivery and other async tasks via Redis broker.
+  # ─────────────────────────────────────────────────────────────────────────
+  celery_worker:
+    image: ${APP_IMAGE:-emsarena-prod:latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    container_name: emsarena-celery-worker
+    command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=2"]
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      SITE_URL: ${SITE_URL}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-noreply@emsarena.az}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - emsarena-network
+
+  # ─────────────────────────────────────────────────────────────────────────
   # Nginx — reverse proxy and static/media file server
   # The only service with external port bindings (80 and 443).
   # ─────────────────────────────────────────────────────────────────────────

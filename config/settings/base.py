@@ -96,6 +96,7 @@ def _redis_url_with_db(redis_url: str, db: int) -> str:
 # Channel Layers for WebSocket support
 REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0").strip()
 REDIS_CACHE_URL = _redis_url_with_db(REDIS_URL, 1)
+CELERY_BROKER_URL = _redis_url_with_db(REDIS_URL, 2)
 
 CHANNEL_LAYERS = {
     "default": {
@@ -113,6 +114,19 @@ CACHES = {
         "LOCATION": REDIS_CACHE_URL,
     }
 }
+
+# ─────────────────────────────────────────────────────────────────────────
+# Celery — background task processing
+# Broker: Redis DB 2  |  Results: Redis DB 2  |  Worker: see docker-compose
+# ─────────────────────────────────────────────────────────────────────────
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Baku"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 300  # 5 minutes hard limit per task
+CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes soft limit (raises SoftTimeLimitExceeded)
 
 # Rate limiting configuration
 RATELIMIT_ENABLE = True  # Can be set to False in development if needed

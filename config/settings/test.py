@@ -48,6 +48,13 @@ CACHES = {
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = "http://testserver"
 
+# Celery — run tasks synchronously (eagerly) in tests so that no broker
+# connection is required.  Email tasks will use the console backend above.
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_BROKER_URL = "memory://"
+CELERY_RESULT_BACKEND = "cache+memory://"
+
 # Static files - simple storage for tests
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 WHITENOISE_USE_FINDERS = True

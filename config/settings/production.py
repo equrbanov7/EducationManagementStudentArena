@@ -102,9 +102,19 @@ SERVE_MEDIA = False
 MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_media")
 
 # Email settings for production
+# EMAIL_BACKEND can be overridden to use alternative providers:
+#   django.core.mail.backends.smtp.EmailBackend   (default)
+#   anymail.backends.sendgrid.EmailBackend         (SendGrid via django-anymail)
+#   anymail.backends.amazon_ses.EmailBackend       (AWS SES via django-anymail)
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", str(EMAIL_PORT)))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() in {"1", "true", "yes"}
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() in {"1", "true", "yes"}
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.com")
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))  # seconds; avoids hanging workers
 
 # LAN host
 LAN_HOST = os.getenv("LAN_HOST", "emsarena.com")
@@ -149,6 +159,16 @@ LOGGING = {
         "django": {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "core.email_tasks": {
+            "handlers": ["console"],
+            "level": "WARNING",
             "propagate": False,
         },
     },
