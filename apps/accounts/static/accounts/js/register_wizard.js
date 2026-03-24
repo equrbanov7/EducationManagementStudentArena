@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var studentSpecificFields = document.getElementById("studentSpecificFields");
     var teacherSpecificFields = document.getElementById("teacherSpecificFields");
     var staffSpecificFields = document.getElementById("staffSpecificFields");
+    var departmentField = document.getElementById("departmentField");
     var specializationInput = document.getElementById("id_specialization");
     var groupNumberInput = document.getElementById("id_group_number");
 
@@ -787,6 +788,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (studentSpecificFields) studentSpecificFields.hidden = !isStudent;
         if (teacherSpecificFields) teacherSpecificFields.hidden = !isTeacher;
         if (staffSpecificFields) staffSpecificFields.hidden = !isStaff;
+        // Department field is shared: visible for both teacher and staff
+        if (departmentField) departmentField.hidden = !(isTeacher || isStaff);
         if (phoneField) phoneField.hidden = !isJoinAny;
 
         // Make specialization/group required for students
