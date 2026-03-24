@@ -21,7 +21,6 @@ from ._helpers import (
     _append_query_params,
     _assigned_courses_queryset,
     _assigned_exams_queryset,
-    _csv_to_int_set,
     _csv_to_lower_token_set,
     _is_result_visible_to_student,
     _is_review_window_open,
@@ -238,11 +237,13 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     labs_qs = (
         Lab.objects.filter(course_id__in=course_ids, status="published")
         .select_related("course")
+        .prefetch_related("allowed_students")
         .order_by("-created_at")
     )
     assigned_labs = []
     for lab in labs_qs:
-        allowed_student_ids = _csv_to_int_set(lab.allowed_students)
+        # Use .all() to hit the prefetch_related cache (values_list bypasses it).
+        allowed_student_ids = {s.id for s in lab.allowed_students.all()}
         allowed_group_names = _csv_to_lower_token_set(lab.allowed_groups)
         if not allowed_student_ids and not allowed_group_names:
             continue

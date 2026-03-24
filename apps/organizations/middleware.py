@@ -13,15 +13,9 @@ Organization resolution order
    • Exactly 1 active org  → auto-select it and persist the slug to the
      session as a convenience (single-org users must not be forced to pick
      every request).
-   • 0 active orgs  → attempt legacy materialization once (back-fill the
-     membership that the old profile-role system implies), then repeat the
-     check.  If that yields exactly 1 org it is auto-selected.
+   • 0 active orgs  → leave ``request.organization = None``.
    • 2+ active orgs  → leave ``request.organization = None``.  The user must
      visit the org-picker and make an explicit choice.
-
-3. Once an organization is confirmed, apply
-   ``_materialize_legacy_teacher_membership`` *for that specific org only* to
-   ensure teacher/assistant-teacher membership records are up to date.
 """
 
 
@@ -70,8 +64,6 @@ class OrganizationMiddleware:
 
         if not request.user.is_authenticated:
             return self.get_response(request)
-
-        from apps.accounts.views._helpers import _materialize_legacy_teacher_membership
 
         from .models import Organization
 
@@ -122,20 +114,9 @@ class OrganizationMiddleware:
                 ]
 
             elif len(unique_orgs) == 0:
-                # No memberships found — try legacy back-fill *once*.
-                _materialize_legacy_teacher_membership(request.user)
-
-                active_memberships = self._fetch_active_memberships(request.user)
-                unique_orgs = self._unique_orgs(active_memberships)
-
-                if len(unique_orgs) == 1:
-                    request.organization = next(iter(unique_orgs.values()))
-                    request.session["active_organization"] = request.organization.slug
-                    request.org_memberships = [
-                        m for m in active_memberships if m.organization_id == request.organization.id
-                    ]
-                # len == 0  → leave request.organization = None (no org to assign).
-                # Reaching here with 0 orgs after back-fill is a genuine no-org state.
+                # No active memberships: deny by default until an organization
+                # context can be established via real membership data.
+                pass
 
             # len >= 2  → multi-org user; explicit selection required.
             # request.organization stays None; the org-picker view handles this.
@@ -153,13 +134,6 @@ class OrganizationMiddleware:
 
         # ── Step 3: finalize permissions for the resolved org ─────────────
         if request.organization:
-            # Apply legacy teacher membership materialization scoped to this org.
-            request.org_memberships = _materialize_legacy_teacher_membership(
-                request.user,
-                request.organization,
-                memberships=request.org_memberships,
-            )
-
             permissions_set = set()
             for membership in request.org_memberships:
                 if membership.role.permissions:

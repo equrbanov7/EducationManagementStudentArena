@@ -815,7 +815,7 @@ class ProfileViewTest(TestCase):
             ).exists()
         )
 
-    def test_org_owner_legacy_teacher_profile_role_is_backfilled_to_active_org_membership(self):
+    def test_profile_page_does_not_backfill_teacher_membership_from_legacy_profile_role(self):
         organization = Organization.objects.create(
             name="Legacy Teacher Owner Org",
             org_type=OrganizationType.UNIVERSITY,
@@ -843,8 +843,16 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, reverse("accounts:pending_review"))
+        self.assertNotContains(response, reverse("accounts:pending_review"))
         self.assertTrue(
+            Membership.objects.filter(
+                user=self.user,
+                organization=organization,
+                role__name="rector",
+                is_active=True,
+            ).exists()
+        )
+        self.assertFalse(
             Membership.objects.filter(
                 user=self.user,
                 organization=organization,
@@ -1070,9 +1078,9 @@ class ProfileViewTest(TestCase):
             start_datetime=timezone.now() - timedelta(hours=2),
             end_datetime=timezone.now() + timedelta(days=1),
             status="published",
-            allowed_students=str(self.user.id),
             created_by=teacher,
         )
+        lab.allowed_students.add(self.user)
 
         project = Project.objects.create(
             course=course,

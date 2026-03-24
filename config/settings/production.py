@@ -15,7 +15,77 @@ import dj_database_url
 import sentry_sdk
 from dotenv import load_dotenv
 
-from .base import *
+from .base import (
+    ASGI_APPLICATION,
+    AUTH_OTP_EXPIRY_SECONDS,
+    AUTH_PASSWORD_VALIDATORS,
+    AUTHENTICATION_BACKENDS,
+    BASE_DIR,
+    CACHES,
+    CELERY_ACCEPT_CONTENT,
+    CELERY_BROKER_URL,
+    CELERY_RESULT_BACKEND,
+    CELERY_RESULT_SERIALIZER,
+    CELERY_TASK_SERIALIZER,
+    CELERY_TASK_SOFT_TIME_LIMIT,
+    CELERY_TASK_TIME_LIMIT,
+    CELERY_TASK_TRACK_STARTED,
+    CELERY_TIMEZONE,
+    CHANNEL_LAYERS,
+    CONTENT_SECURITY_POLICY,
+    CSRF_COOKIE_HTTPONLY,
+    CSRF_COOKIE_SAMESITE,
+    DEFAULT_AUTO_FIELD,
+    EMAIL_BACKEND,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_USE_SSL,
+    EMAIL_USE_TLS,
+    FILE_UPLOAD_SECURITY_MAX_SIZE_MB,
+    INSTALLED_APPS,
+    LANGUAGE_CODE,
+    LANGUAGE_COOKIE_HTTPONLY,
+    LANGUAGE_COOKIE_SAMESITE,
+    LANGUAGES,
+    LIVE_EXAM_JOIN_RATE_LIMIT,
+    LIVE_REACTION_RATE_LIMIT,
+    LIVE_STATE_RATE_LIMIT,
+    LOCALE_PATHS,
+    LOGIN_RATE_LIMIT,
+    LOGIN_REDIRECT_URL,
+    LOGIN_URL,
+    LOGOUT_REDIRECT_URL,
+    MEDIA_ROOT,
+    MEDIA_URL,
+    MESSAGE_TAGS,
+    MIDDLEWARE,
+    OTP_RESEND_RATE_LIMIT,
+    OTP_VERIFY_RATE_LIMIT,
+    PASSWORD_RESET_TIMEOUT,
+    RATELIMIT_ENABLE,
+    RATELIMIT_USE_CACHE,
+    REDIS_CACHE_URL,
+    REDIS_URL,
+    ROOT_URLCONF,
+    SECURE_CONTENT_TYPE_NOSNIFF,
+    SERVE_MEDIA,
+    SESSION_COOKIE_AGE,
+    SESSION_COOKIE_HTTPONLY,
+    SESSION_COOKIE_SAMESITE,
+    SESSION_EXPIRE_AT_BROWSER_CLOSE,
+    SESSION_INACTIVITY_TIMEOUT,
+    STATIC_ROOT,
+    STATIC_URL,
+    STATICFILES_DIRS,
+    SUBSCRIBE_RATE_LIMIT,
+    TEMPLATES,
+    TIME_ZONE,
+    USE_I18N,
+    USE_TZ,
+    WHITENOISE_ALLOW_ALL_ORIGINS,
+    WSGI_APPLICATION,
+    X_FRAME_OPTIONS,
+)
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -84,6 +154,12 @@ SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
 
+# Session timeout — tighter values in production for security.
+# Absolute cookie lifetime: 1 day (overrides base.py default of 7 days).
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(1 * 24 * 60 * 60)))
+# Inactivity timeout enforced by SessionTimeoutMiddleware: 8 hours.
+SESSION_INACTIVITY_TIMEOUT = int(os.getenv("SESSION_INACTIVITY_TIMEOUT", str(8 * 60 * 60)))
+
 # HSTS settings
 SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if SECURE_SSL_REDIRECT else "0"))
 SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", SECURE_HSTS_SECONDS > 0)
@@ -102,9 +178,19 @@ SERVE_MEDIA = False
 MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_media")
 
 # Email settings for production
+# EMAIL_BACKEND can be overridden to use alternative providers:
+#   django.core.mail.backends.smtp.EmailBackend   (default)
+#   anymail.backends.sendgrid.EmailBackend         (SendGrid via django-anymail)
+#   anymail.backends.amazon_ses.EmailBackend       (AWS SES via django-anymail)
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() in {"1", "true", "yes"}
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() in {"1", "true", "yes"}
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@emsarena.com")
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))  # seconds; avoids hanging workers
 
 # LAN host
 LAN_HOST = os.getenv("LAN_HOST", "emsarena.com")
@@ -125,11 +211,20 @@ LOGGING = {
         "mask_sensitive": {
             "()": "core.logging_filters.SensitiveDataFilter",
         },
+        "request_id": {
+            "()": "core.logging_filters.RequestIdFilter",
+        },
+    },
+    "formatters": {
+        "json": {
+            "()": "core.logging_filters.JsonFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "filters": ["mask_sensitive"],
+            "formatter": "json",
+            "filters": ["mask_sensitive", "request_id"],
         },
     },
     "root": {
@@ -140,6 +235,16 @@ LOGGING = {
         "django": {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "core.email_tasks": {
+            "handlers": ["console"],
+            "level": "WARNING",
             "propagate": False,
         },
     },

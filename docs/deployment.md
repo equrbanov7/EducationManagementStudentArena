@@ -92,6 +92,12 @@ before running any `docker compose` command.  Never commit this file.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
+| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Email backend class. Override with `anymail` backend for SendGrid/SES |
+| `EMAIL_HOST` | `smtp.gmail.com` | SMTP server hostname |
+| `EMAIL_PORT` | `465` | SMTP server port |
+| `EMAIL_USE_SSL` | `True` | Use implicit SSL (port 465). Set `False` and `EMAIL_USE_TLS=True` for port 587 |
+| `EMAIL_USE_TLS` | `False` | Use explicit STARTTLS (port 587) |
+| `EMAIL_TIMEOUT` | `10` | SMTP connection timeout in seconds |
 | `EMAIL_HOST_USER` | _(empty)_ | SMTP username for outbound email |
 | `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
 | `DEFAULT_FROM_EMAIL` | `noreply@emsarena.com` | From address for system emails |
@@ -416,3 +422,77 @@ docker compose -f docker-compose.prod.yml exec -T postgres \
       Actions secrets, not hardcoded in workflow files.
 - [ ] Gitleaks is enabled in CI to catch future accidental secret commits.
 - [ ] Sentry DSN (if used) is treated as a secret and injected at runtime only.
+
+---
+
+## 10. Celery Background Tasks
+
+EMS Arena uses **Celery with Redis** (DB 2) as the broker to offload heavy
+operations (email delivery, audit logging, notifications) from the HTTP
+request-response cycle.
+
+### Services
+
+The production Compose stack includes a `celery_worker` service alongside
+the main `app` service.  Both share the same Docker image so no extra build
+step is needed.
+
+### Starting the worker
+
+```bash
+# The worker starts automatically via docker-compose.prod.yml.
+# To start manually:
+docker compose -f docker-compose.prod.yml up -d celery_worker
+
+# Watch worker logs:
+docker compose -f docker-compose.prod.yml logs -f celery_worker
+```
+
+### Local development
+
+```bash
+# Start the Celery worker in the background (requires Redis running):
+celery -A config worker -l INFO
+
+# Or run with the beat scheduler for periodic tasks:
+celery -A config worker --beat -l INFO -S django
+```
+
+### Email delivery
+
+All verification OTP emails and blog post subscriber notifications are
+dispatched via Celery tasks defined in `core/email_tasks.py`.  Each task
+retries up to 3 times with exponential back-off on transient SMTP errors.
+
+### Email backend environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Override for SendGrid/SES via django-anymail |
+| `EMAIL_HOST` | `smtp.gmail.com` | SMTP hostname |
+| `EMAIL_PORT` | `465` | SMTP port |
+| `EMAIL_USE_SSL` | `True` | Implicit TLS (port 465) |
+| `EMAIL_USE_TLS` | `False` | Explicit STARTTLS (port 587) |
+| `EMAIL_TIMEOUT` | `10` | Connection timeout in seconds |
+| `EMAIL_HOST_USER` | _(empty)_ | SMTP username |
+| `EMAIL_HOST_PASSWORD` | _(empty)_ | SMTP password |
+| `DEFAULT_FROM_EMAIL` | `noreply@emsarena.com` | Sender address |
+
+---
+
+## 11. Redis Caching Strategy
+
+Redis DB 1 is used as the application cache backend.  The following data is
+cached automatically:
+
+| Cache key | TTL | Description |
+|-----------|-----|-------------|
+| `emsarena:blog:navbar_categories` | 300 s | Blog navbar categories (invalidated on post save/delete) |
+| `emsarena:blog:sidebar_categories:<flag>` | 120 s | Blog sidebar categories (invalidated on post save/delete) |
+| `emsarena:blog:popular_topics:<limit>` | 300 s | Blog popular topics (invalidated on post save/delete) |
+| `emsarena:live_session:settings:<pk>` | 120 s | Live exam session settings |
+| `emsarena:exam:questions:<pk>` | 300 s | Exam question ID list |
+| `emsarena:exam:meta:<pk>` | 600 s | Exam metadata |
+
+Cache entries are invalidated automatically by signals when the underlying
+data changes (e.g. `post_save` / `post_delete` on the `Post` model).

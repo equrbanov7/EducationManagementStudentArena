@@ -262,3 +262,124 @@ class UploadSecurityRequiredNamedTests(TestCase):
         f = SimpleUploadedFile("photo.jpg", b"<?php system($_GET['cmd']);", content_type="image/jpeg")
         with self.assertRaises(ValidationError):
             validate_uploaded_file(f)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ZIP bomb / archive guard tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _make_zip(entries: dict[str, bytes]) -> bytes:
+    """Build an in-memory ZIP with the given filename→content mapping."""
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for name, data in entries.items():
+            zf.writestr(name, data)
+    return buf.getvalue()
+
+
+def _make_zip_file(entries: dict[str, bytes], name: str = "upload.zip"):
+    """Return a SimpleUploadedFile ZIP archive."""
+    data = _make_zip(entries)
+    return SimpleUploadedFile(name, data, content_type="application/zip")
+
+
+class ZipArchiveValidationTest(TestCase):
+    """Tests for validate_zip_archive – bomb and abuse protection."""
+
+    def setUp(self):
+        from core.upload_security import validate_zip_archive
+
+        self.validate = validate_zip_archive
+
+    # ── happy-path ────────────────────────────────────────────────────────
+
+    def test_valid_zip_accepted(self):
+        """A normal ZIP with a few small files must pass without error."""
+        f = _make_zip_file({"a.txt": b"hello", "b.txt": b"world"})
+        self.assertIsNone(self.validate(f))  # no exception
+
+    def test_empty_zip_accepted(self):
+        """An empty ZIP archive is valid."""
+        f = _make_zip_file({})
+        self.assertIsNone(self.validate(f))
+
+    # ── invalid ZIP ───────────────────────────────────────────────────────
+
+    def test_bad_zip_raises(self):
+        """Non-ZIP bytes must raise ValidationError."""
+        f = SimpleUploadedFile("bad.zip", b"not a zip", content_type="application/zip")
+        with self.assertRaises(ValidationError):
+            self.validate(f)
+
+    # ── file count limit ─────────────────────────────────────────────────
+
+    def test_too_many_files_raises(self):
+        """ZIPs exceeding the file-count limit must be rejected."""
+        entries = {f"file{i}.txt": b"x" for i in range(5)}
+        f = _make_zip_file(entries)
+        with self.assertRaises(ValidationError):
+            self.validate(f, max_file_count=3)
+
+    def test_exactly_at_limit_accepted(self):
+        """ZIPs at the exact file-count limit must be accepted."""
+        entries = {f"file{i}.txt": b"x" for i in range(3)}
+        f = _make_zip_file(entries)
+        self.assertIsNone(self.validate(f, max_file_count=3))
+
+    # ── extracted size limit ─────────────────────────────────────────────
+
+    def test_oversized_compressed_total_raises(self):
+        """ZIPs whose total compressed size exceeds the limit must be rejected."""
+        # Deflate compresses b"a"*100 to ~6 bytes; 3 such entries = ~18 bytes.
+        # Use a limit of 10 bytes to reliably trigger the size guard.
+        entries = {f"file{i}.txt": b"a" * 100 for i in range(3)}
+        f = _make_zip_file(entries)
+        with self.assertRaises(ValidationError):
+            self.validate(f, max_extracted_size_bytes=10)
+
+    # ── compression-ratio (zip bomb) guard ───────────────────────────────
+
+    def test_zip_bomb_ratio_raises(self):
+        """An entry with extreme compression ratio must be flagged as a zip bomb."""
+        import io
+        import zipfile
+
+        # 1 MB of zero bytes compresses to ~1 KB via DEFLATE.
+        # ratio ≈ 1015 >> ZIP_BOMB_RATIO_THRESHOLD (99).
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("bomb.txt", b"\x00" * (1024 * 1024))
+        bomb_data = buf.getvalue()
+
+        f = SimpleUploadedFile("bomb.zip", bomb_data, content_type="application/zip")
+        with self.assertRaises(ValidationError):
+            self.validate(f)
+
+    # ── nesting depth ─────────────────────────────────────────────────────
+
+    def test_nested_zip_exceeding_depth_raises(self):
+        """Nested ZIPs beyond the allowed depth must be rejected.
+
+        max_nesting_depth=0 means the top-level ZIP may not contain any nested
+        ZIPs at all; any nested ZIP triggers a ValidationError.
+        """
+        # outer.zip → inner.zip → file.txt  (2 levels)
+        inner_data = _make_zip({"file.txt": b"deep"})
+        outer_data = _make_zip({"inner.zip": inner_data})
+
+        f = SimpleUploadedFile("outer.zip", outer_data, content_type="application/zip")
+        with self.assertRaises(ValidationError):
+            # Depth 0 means nested ZIPs are not permitted at all.
+            self.validate(f, max_nesting_depth=0)
+
+    def test_nested_zip_within_depth_accepted(self):
+        """Nested ZIPs within the allowed depth must pass."""
+        inner_data = _make_zip({"file.txt": b"ok"})
+        outer_data = _make_zip({"inner.zip": inner_data})
+        f = SimpleUploadedFile("outer.zip", outer_data, content_type="application/zip")
+        # max_nesting_depth=1 allows outer→inner.zip to be inspected.
+        self.assertIsNone(self.validate(f, max_nesting_depth=1))

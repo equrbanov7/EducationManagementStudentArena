@@ -74,6 +74,13 @@ class RoleManagementServicesTest(TestCase):
         self.assertTrue(services.user_has_any_role(self.teacher, [ProfileRole.TEACHER]))
         self.assertFalse(services.user_has_any_role(self.student, [ProfileRole.TEACHER]))
 
+    def test_role_checks_deny_without_active_tenant_context(self):
+        """Memberships alone must not authorize when no active org context is bound."""
+        self.teacher.clear_active_organization_context()
+
+        self.assertEqual(services.get_user_role_level(self.teacher), 0)
+        self.assertFalse(services.user_has_any_role(self.teacher, [ProfileRole.TEACHER]))
+
 
 class OTPServicesTest(TestCase):
     """Test OTP and email verification services."""

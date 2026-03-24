@@ -8,6 +8,8 @@ Contains:
 - grade_submission
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -27,6 +29,8 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_pat
 from core.permissions import request_has_permission
 
 from ._helpers import _get_tenant_project_or_404, _get_tenant_submission_or_404, _teacher_review_back_url
+
+logger = logging.getLogger(__name__)
 
 
 def _can_delete_submissions(request):
@@ -194,5 +198,6 @@ def grade_submission(request, pk):
         messages.success(request, pgettext("projects.views.message", "grade_given"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "grade_given")})
 
-    except Exception as e:
-        return JsonResponse({"success": False, "error": str(e)}, status=400)
+    except Exception:
+        logger.exception("Unexpected error in grade_submission (projects)")
+        return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)

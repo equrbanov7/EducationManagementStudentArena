@@ -6,6 +6,8 @@ import zipfile
 from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext
 
+from core.upload_security import validate_zip_archive
+
 # İcazə verilən fayl tipləri
 ALLOWED_EXTENSIONS = [".pdf", ".png", ".jpg", ".jpeg", ".zip"]
 
@@ -64,3 +66,6 @@ def validate_zip_contents(file):
             raise ValidationError(
                 pgettext("exams.validator.error", "blocked_extension_in_zip").format(filename=info.filename)
             )
+
+    # Apply centralized ZIP bomb / archive-abuse protection.
+    validate_zip_archive(file)

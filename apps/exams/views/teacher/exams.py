@@ -186,10 +186,10 @@ def teacher_exam_list(request):
     """
     Müəllimin yaratdığı bütün imtahanların siyahısı.
     """
-    _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
     exams = tenant_scoped_exams(request, Exam.objects.filter(author=request.user)).order_by("-created_at")
     return render(
         request,
@@ -210,10 +210,10 @@ def createAndEditExamView(request, slug=None):
     slug=None -> Yeni imtahan
     slug=<value> -> Mövcud imtahanı redaktə
     """
-    _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
 
     required_permission = "exam.edit" if slug else "exam.create"
     _ensure_exam_permission(request, required_permission)
@@ -338,10 +338,10 @@ def teacher_exam_detail(request, slug):
     - 'Sual əlavə et' düyməsi
     (sonra bura statistikalar, attempts və s. də əlavə ediləcək).
     """
-    _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
     questions = exam.questions.all().order_by("order")
     profile_return_url, _, nav_query = _resolve_profile_navigation(request, default_section="my-exams")
@@ -365,10 +365,10 @@ def toggle_exam_active(request, slug):
     """
     Müəllim imtahanı istənilən vaxt aktiv/deaktiv edə bilsin.
     """
-    _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
     _ensure_exam_permission(request, "exam.edit")
     exam = get_teacher_exam_or_404(request, slug=slug)
 
@@ -384,10 +384,10 @@ def delete_exam(request, slug):
     İmtahanı silmək – amma əvvəlcə təsdiq istəyəciyik.
     Əgər imtahan üzrə cəhd (attempt) varsa, silməyə icazə vermirik.
     """
-    _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return _organization_selection_redirect(request)
+    _ensure_teacher(request.user)
     _ensure_exam_permission(request, "exam.delete")
     exam = _get_editable_exam_or_404(request, slug)
 

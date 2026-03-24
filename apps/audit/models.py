@@ -159,8 +159,7 @@ class AuditLog(models.Model):
 
     def __str__(self):
         user_str = self.user.username if self.user else "Anonymous"
-        action_str = self.get_action_display()
-        return f"{user_str} - {action_str} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+        return f"{user_str} - {self.action} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
     def get_resource_display(self):
         """Get a display string for the resource."""
