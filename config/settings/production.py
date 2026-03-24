@@ -107,8 +107,8 @@ MEDIA_ACCEL_REDIRECT_URL = os.getenv("MEDIA_ACCEL_REDIRECT_URL", "/internal_medi
 #   anymail.backends.sendgrid.EmailBackend         (SendGrid via django-anymail)
 #   anymail.backends.amazon_ses.EmailBackend       (AWS SES via django-anymail)
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
-EMAIL_HOST = os.getenv("EMAIL_HOST", EMAIL_HOST)
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", str(EMAIL_PORT)))
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False").lower() in {"1", "true", "yes"}
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() in {"1", "true", "yes"}
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")

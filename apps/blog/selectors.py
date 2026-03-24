@@ -220,6 +220,24 @@ def get_navbar_categories():
     return result
 
 
+def invalidate_blog_listing_cache() -> None:
+    """Remove all cached blog listing data (categories, popular topics).
+
+    Call this whenever posts or categories are added, modified, or deleted.
+    """
+    try:
+        keys_to_delete = [
+            _CACHE_KEY_NAVBAR,
+            f"{_CACHE_KEY_SIDEBAR}:True",
+            f"{_CACHE_KEY_SIDEBAR}:False",
+            f"{_CACHE_KEY_POPULAR_TOPICS}:5",
+            f"{_CACHE_KEY_POPULAR_TOPICS}:10",
+        ]
+        cache.delete_many(keys_to_delete)
+    except Exception:
+        logger.warning("Redis unavailable; could not invalidate blog listing cache")
+
+
 def get_popular_topics(*, active_category=None, limit=5):
     root_category = active_category.get_root() if active_category else None
 
