@@ -2,6 +2,8 @@
 Registration and bootstrap services for accounts.
 """
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
@@ -10,6 +12,8 @@ from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
 from ..policies import map_signup_role_to_profile_role, resolve_membership_role
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -30,6 +34,11 @@ def create_user_with_organization(
     organization_identifier="",
     organization_license_identifier="",
     initial_role=ProfileRole.MEMBER,
+    phone="",
+    specialization="",
+    group_number="",
+    department="",
+    staff_position="",
 ):
     """Create a user, profile, request, and optional organization membership."""
     del country_code
@@ -68,12 +77,13 @@ def create_user_with_organization(
         organization_name = institution_not_listed_name
         requested_organization_name = organization_name
         resolved_identifier = organization_identifier
+        # New organizations require superadmin approval before becoming active.
         organization = Organization.objects.create(
             name=organization_name,
             org_type=organization_type,
             country=country_name,
             owner=user,
-            status="active",
+            status="pending",
             is_active=True,
             organization_identifier=resolved_identifier,
             license_identifier=organization_license_identifier,
@@ -81,6 +91,7 @@ def create_user_with_organization(
         requested_organization = organization
         requested_organization_name = organization.name
     else:
+        # student_join / teacher_join / staff_join
         requested_organization = join_organization
         requested_organization_name = join_organization.name if join_organization else ""
         resolved_identifier = (
@@ -97,7 +108,7 @@ def create_user_with_organization(
     profile.role = map_signup_role_to_profile_role(initial_role)
     profile.student_university_name = (
         requested_organization_name
-        if signup_mode == "student_join"
+        if signup_mode in {"student_join", "teacher_join", "staff_join"}
         or organization_type
         in {
             OrganizationType.UNIVERSITY,
@@ -107,6 +118,18 @@ def create_user_with_organization(
         else ""
     )
     profile.student_school_identifier = resolved_identifier if organization_type == OrganizationType.SCHOOL else ""
+
+    # Persona-specific profile data
+    if phone:
+        profile.phone = phone
+    if signup_mode == "student_join":
+        profile.student_specialization = specialization
+        profile.student_group_number = group_number
+    if signup_mode in {"teacher_join", "staff_join"}:
+        profile.department = department
+    if signup_mode == "staff_join":
+        profile.staff_position = staff_position
+
     profile.save()
 
     if (
