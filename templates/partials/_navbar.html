@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n notification_tags %}
 {% url 'home' as home_url %}
 {% url 'about' as about_url %}
 {% url 'subscribe' as subscribe_url %}
@@ -80,6 +80,13 @@
                         <div class="blog-header__user-menu">
                             <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
                                 {% trans "my_profile" context "nav" %}
+                            </a>
+                            <a href="{% url 'notifications:notification_list' %}" class="blog-header__user-menu-item">
+                                {% user_unread_notification_count request.user as notif_count %}
+                                {% trans "notifications" context "nav" %}
+                                {% if notif_count %}
+                                    <span class="badge bg-danger ms-1" style="font-size:0.7rem">{{ notif_count }}</span>
+                                {% endif %}
                             </a>
                             <a href="{% url 'accounts:logout' %}" class="blog-header__user-menu-item">
                                 {% trans "logout" context "nav" %}

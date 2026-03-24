@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Notifications" %} — EMSArena{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'notifications/css/notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="notifications-page container py-4">
+
+    <div class="notifications-header d-flex justify-content-between align-items-center mb-4">
+        <h1 class="notifications-title mb-0">
+            <i class="fas fa-bell me-2 text-primary"></i>
+            {% trans "Notifications" %}
+            {% if unread_count %}
+                <span class="badge bg-danger ms-2">{{ unread_count }}</span>
+            {% endif %}
+        </h1>
+        {% if page_obj.object_list %}
+        <div class="notifications-actions d-flex gap-2">
+            <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-check-double me-1"></i>{% trans "Mark all as read" %}
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Filter tabs ── #}
+    <nav class="notifications-filters nav nav-tabs mb-3">
+        <a class="nav-link {% if filter_by == 'all' %}active{% endif %}"
+           href="?filter=all{% if type_filter %}&type={{ type_filter }}{% endif %}">
+            {% trans "All" %}
+        </a>
+        <a class="nav-link {% if filter_by == 'unread' %}active{% endif %}"
+           href="?filter=unread{% if type_filter %}&type={{ type_filter }}{% endif %}">
+            {% trans "Unread" %}
+        </a>
+        <a class="nav-link {% if filter_by == 'read' %}active{% endif %}"
+           href="?filter=read{% if type_filter %}&type={{ type_filter }}{% endif %}">
+            {% trans "Read" %}
+        </a>
+
+        {# Type filter dropdown #}
+        <div class="nav-item dropdown ms-auto">
+            <a class="nav-link dropdown-toggle {% if type_filter %}text-primary fw-bold{% endif %}"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown">
+                <i class="fas fa-filter me-1"></i>{% trans "Type" %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item {% if not type_filter %}active{% endif %}"
+                       href="?filter={{ filter_by }}">{% trans "All types" %}</a>
+                </li>
+                {% for value, label in notification_types %}
+                <li>
+                    <a class="dropdown-item {% if type_filter == value %}active{% endif %}"
+                       href="?filter={{ filter_by }}&type={{ value }}">{{ label }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+
+    {# ── Notification list ── #}
+    {% if page_obj.object_list %}
+        {# Bulk-delete form wraps the list #}
+        <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="bulk-delete-form">
+            {% csrf_token %}
+            <div class="notifications-bulk-actions mb-2 d-flex align-items-center gap-2" id="bulk-actions-bar" style="display:none !important">
+                <input type="checkbox" id="select-all-notifications" title="{% trans 'Select all' %}">
+                <label for="select-all-notifications" class="mb-0 me-2">{% trans "Select all" %}</label>
+                <button type="submit" class="btn btn-sm btn-outline-danger" id="bulk-delete-btn" disabled>
+                    <i class="fas fa-trash me-1"></i>{% trans "Delete selected" %}
+                </button>
+            </div>
+
+            <ul class="notifications-list list-unstyled">
+                {% for notification in page_obj %}
+                <li class="notification-item {% if not notification.is_read %}notification-item--unread{% endif %}" data-id="{{ notification.pk }}">
+                    <div class="notification-item__checkbox">
+                        <input type="checkbox" name="ids[]" value="{{ notification.pk }}"
+                               class="notification-checkbox">
+                    </div>
+
+                    <div class="notification-item__icon">
+                        <span class="notification-type-icon notification-type-icon--{{ notification.notification_type }}">
+                            {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt"></i>
+                            {% elif notification.notification_type == 'exam' %}<i class="fas fa-clipboard-list"></i>
+                            {% elif notification.notification_type == 'grade' %}<i class="fas fa-star"></i>
+                            {% elif notification.notification_type == 'course' %}<i class="fas fa-book"></i>
+                            {% elif notification.notification_type == 'live_exam' %}<i class="fas fa-broadcast-tower"></i>
+                            {% else %}<i class="fas fa-bell"></i>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="notification-item__body">
+                        <a href="{% url 'notifications:notification_detail' notification.pk %}"
+                           class="notification-item__title">
+                            {% if not notification.is_read %}
+                                <strong>{{ notification.title }}</strong>
+                            {% else %}
+                                {{ notification.title }}
+                            {% endif %}
+                        </a>
+                        {% if notification.message %}
+                        <p class="notification-item__message text-truncate mb-0">{{ notification.message }}</p>
+                        {% endif %}
+                        <span class="notification-item__time text-muted small">
+                            <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} {% trans "ago" %}
+                        </span>
+                    </div>
+
+                    <div class="notification-item__actions">
+                        {% if notification.is_read %}
+                            <form method="post" action="{% url 'notifications:notification_mark_unread' notification.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="{% trans 'Mark as unread' %}">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'Mark as read' %}">
+                                    <i class="fas fa-envelope-open"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}"
+                                    onclick="return confirm('{% trans "Delete this notification?" %}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </form>
+
+        {# ── Pagination ── #}
+        {% include "partials/_pagination.html" with page_obj=page_obj %}
+
+    {% else %}
+        <div class="notifications-empty text-center py-5">
+            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+            <p class="text-muted">
+                {% if filter_by == 'unread' %}
+                    {% trans "No unread notifications." %}
+                {% elif filter_by == 'read' %}
+                    {% trans "No read notifications." %}
+                {% else %}
+                    {% trans "You have no notifications yet." %}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script nonce="{{ request.csp_nonce }}">
+(function () {
+    'use strict';
+
+    var selectAll = document.getElementById('select-all-notifications');
+    var bulkBar = document.getElementById('bulk-actions-bar');
+    var bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    var checkboxes = document.querySelectorAll('.notification-checkbox');
+
+    if (selectAll && bulkBar) {
+        // Show the bulk bar when there are items
+        bulkBar.style.removeProperty('display');
+
+        function updateBulkBar() {
+            var checkedCount = document.querySelectorAll('.notification-checkbox:checked').length;
+            bulkDeleteBtn.disabled = checkedCount === 0;
+        }
+
+        selectAll.addEventListener('change', function () {
+            checkboxes.forEach(function (cb) { cb.checked = selectAll.checked; });
+            updateBulkBar();
+        });
+
+        checkboxes.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                selectAll.checked = document.querySelectorAll('.notification-checkbox:checked').length === checkboxes.length;
+                updateBulkBar();
+            });
+        });
+    }
+})();
+</script>
+{% endblock %}

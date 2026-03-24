@@ -1,0 +1,158 @@
+/* notifications/css/notifications.css */
+
+/* ── Page ── */
+.notifications-page {
+    max-width: 860px;
+}
+
+.notifications-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* ── List ── */
+.notifications-list {
+    margin: 0;
+    padding: 0;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: box-shadow 0.15s ease;
+}
+
+.notification-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.notification-item--unread {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary-color, #2563eb);
+}
+
+.notification-item__checkbox {
+    display: flex;
+    align-items: center;
+    padding-top: 2px;
+}
+
+/* ── Type icon ── */
+.notification-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.notification-type-icon--assignment { background: #dbeafe; color: #2563eb; }
+.notification-type-icon--exam       { background: #fef3c7; color: #d97706; }
+.notification-type-icon--grade      { background: #dcfce7; color: #16a34a; }
+.notification-type-icon--course     { background: #ede9fe; color: #7c3aed; }
+.notification-type-icon--live_exam  { background: #fee2e2; color: #dc2626; }
+.notification-type-icon--system     { background: #f1f5f9; color: #475569; }
+
+/* ── Body ── */
+.notification-item__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-item__title {
+    display: block;
+    color: var(--text-dark, #1f2937);
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+    text-decoration: none;
+}
+
+.notification-item__title:hover {
+    color: var(--primary-color, #2563eb);
+}
+
+.notification-item__message {
+    color: var(--text-light, #6b7280);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notification-item__time {
+    font-size: 0.78rem;
+}
+
+/* ── Actions ── */
+.notification-item__actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* ── Bulk actions bar ── */
+.notifications-bulk-actions {
+    padding: 0.5rem 0;
+}
+
+/* ── Empty state ── */
+.notifications-empty {
+    background: var(--card-bg, #fff);
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+}
+
+/* ── Detail card ── */
+.notification-detail-card .card-header {
+    background: #f8fafc;
+}
+
+.notification-detail-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-dark, #1f2937);
+}
+
+.notification-detail-message {
+    font-size: 1rem;
+    color: var(--text-dark, #1f2937);
+    line-height: 1.7;
+}
+
+/* ── Navbar badge ── */
+.notifications-nav-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.notifications-nav-badge .badge-count {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
