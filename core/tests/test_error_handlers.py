@@ -137,3 +137,56 @@ class TestErrorEndpointDevelopmentTest(TestCase):
             # The view may raise an exception (that's its purpose); just ensure
             # the URL was resolved (i.e., no NoReverseMatch/404 before the view).
             pass
+
+
+class HealthCheckViewTest(TestCase):
+    """Tests for the enhanced health check endpoint."""
+
+    def test_health_check_returns_200_or_degraded(self):
+        resp = self.client.get("/health/")
+        # DB connects; Redis may be unavailable in test env (degraded=207)
+        self.assertIn(resp.status_code, (200, 207, 503))
+
+    def test_health_check_json_contains_status(self):
+        resp = self.client.get("/health/")
+        data = resp.json()
+        self.assertIn("status", data)
+        self.assertIn(data["status"], ("healthy", "degraded", "unhealthy"))
+
+    def test_health_check_json_contains_checks(self):
+        resp = self.client.get("/health/")
+        data = resp.json()
+        self.assertIn("checks", data)
+        self.assertIn("database", data["checks"])
+
+    def test_health_check_json_contains_version(self):
+        resp = self.client.get("/health/")
+        data = resp.json()
+        self.assertIn("version", data)
+
+    def test_health_check_json_contains_uptime(self):
+        resp = self.client.get("/health/")
+        data = resp.json()
+        self.assertIn("uptime_seconds", data)
+        self.assertGreaterEqual(data["uptime_seconds"], 0)
+
+    def test_ping_returns_ok(self):
+        resp = self.client.get("/ping/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"status": "ok"})
+
+
+class MetricsViewTest(TestCase):
+    """Tests for the Prometheus metrics endpoint."""
+
+    def test_metrics_endpoint_returns_200(self):
+        resp = self.client.get("/metrics/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_metrics_content_type_is_prometheus(self):
+        resp = self.client.get("/metrics/")
+        self.assertIn("text/plain", resp["Content-Type"])
+
+    def test_metrics_contain_http_requests_total(self):
+        resp = self.client.get("/metrics/")
+        self.assertIn(b"http_requests_total", resp.content)

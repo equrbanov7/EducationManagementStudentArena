@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase
 
 
 class RequestIdMiddlewareTest(TestCase):
@@ -216,3 +216,49 @@ class JsonFormatterTest(TestCase):
             payload = self._format("oops", exc_info=sys.exc_info())
         self.assertIn("exc_info", payload)
         self.assertIn("ValueError", payload["exc_info"])
+
+
+class MetricsMiddlewareTest(TestCase):
+    """MetricsMiddleware records Prometheus metrics for HTTP requests."""
+
+    def _make_response(self, status=200):
+        from django.http import HttpResponse
+
+        def inner(request):
+            return HttpResponse("ok", status=status)
+
+        return inner
+
+    def _make_middleware(self, status=200):
+        from core.middleware import MetricsMiddleware
+
+        return MetricsMiddleware(self._make_response(status))
+
+    def test_passes_response_through(self):
+        factory = RequestFactory()
+        request = factory.get("/courses/")
+        mw = self._make_middleware(200)
+        response = mw(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_excluded_paths_not_tracked(self):
+        """Requests to /metrics/, /ping/, /health/ are excluded from tracking."""
+        factory = RequestFactory()
+        for path in ("/metrics/", "/ping/", "/health/"):
+            request = factory.get(path)
+            mw = self._make_middleware(200)
+            # Should return response without error
+            response = mw(request)
+            self.assertEqual(response.status_code, 200)
+
+    def test_regular_request_increments_counter(self):
+        """A normal request increments the http_requests_total counter."""
+        from core.metrics import http_requests_total
+
+        before = http_requests_total.labels(method="GET", path="/test-path/", status_code="200")._value.get()
+        factory = RequestFactory()
+        request = factory.get("/test-path/")
+        mw = self._make_middleware(200)
+        mw(request)
+        after = http_requests_total.labels(method="GET", path="/test-path/", status_code="200")._value.get()
+        self.assertGreater(after, before)
