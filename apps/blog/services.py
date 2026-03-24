@@ -21,6 +21,7 @@ APPROVAL_STATUS_FILTERS = {
     Post.ApprovalStatus.APPROVED,
 }
 
+
 def author_requires_post_approval(author):
     if not author or not getattr(author, "is_authenticated", False):
         return False

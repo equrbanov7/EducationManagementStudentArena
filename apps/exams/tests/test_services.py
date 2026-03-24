@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 from apps.exams.services import parsing
@@ -214,12 +213,8 @@ class ExamGradingServiceTest(TestCase):
     """Tests for apps/exams/services/grading.py and domain/grading.py."""
 
     def setUp(self):
-        self.teacher = User.objects.create_user(
-            username="grd_teacher", email="grd_t@example.com", password="pass"
-        )
-        self.student = User.objects.create_user(
-            username="grd_student", email="grd_s@example.com", password="pass"
-        )
+        self.teacher = User.objects.create_user(username="grd_teacher", email="grd_t@example.com", password="pass")
+        self.student = User.objects.create_user(username="grd_student", email="grd_s@example.com", password="pass")
         org = Organization.objects.create(
             name="Grading Test Org",
             org_type=OrganizationType.SCHOOL,
@@ -283,9 +278,7 @@ class ExamGradingServiceTest(TestCase):
         from apps.exams.models import ExamQuestionOption
         from apps.exams.services.grading import calculate_attempt_score
 
-        option = ExamQuestionOption.objects.create(
-            question=self.question, text="Yes", is_correct=True
-        )
+        option = ExamQuestionOption.objects.create(question=self.question, text="Yes", is_correct=True)
         self.answer.selected_options.add(option)
         self.answer.is_correct = True
         self.answer.save()

@@ -76,10 +76,13 @@ class StudentGroup(models.Model):
             if not teacher_is_allowed:
                 errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_role_required")
 
-            if self.organization_id and not organization_user_queryset(
-                self.organization,
-                queryset=User.objects.filter(id=self.teacher_id),
-            ).exists():
+            if (
+                self.organization_id
+                and not organization_user_queryset(
+                    self.organization,
+                    queryset=User.objects.filter(id=self.teacher_id),
+                ).exists()
+            ):
                 errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_tenant_mismatch")
 
         if errors:

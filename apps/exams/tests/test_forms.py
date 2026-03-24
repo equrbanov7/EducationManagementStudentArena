@@ -111,11 +111,15 @@ class StudentGroupFormRoleSourceTests(TestCase):
         self.legacy_profile_teacher.profile.organization = self.org
         self.legacy_profile_teacher.profile.organization_type = self.org.org_type
         self.legacy_profile_teacher.profile.role = ProfileRole.TEACHER
-        self.legacy_profile_teacher.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        self.legacy_profile_teacher.profile.save(
+            update_fields=["organization", "organization_type", "role", "updated_at"]
+        )
         self.legacy_profile_student.profile.organization = self.org
         self.legacy_profile_student.profile.organization_type = self.org.org_type
         self.legacy_profile_student.profile.role = ProfileRole.STUDENT
-        self.legacy_profile_student.profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+        self.legacy_profile_student.profile.save(
+            update_fields=["organization", "organization_type", "role", "updated_at"]
+        )
 
     def test_auth_groups_do_not_expand_teacher_or_student_queryset(self):
         form = StudentGroupForm(actor=self.teacher, organization=self.org)

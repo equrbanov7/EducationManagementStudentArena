@@ -392,8 +392,7 @@ class StudentCoursesView(LoginRequiredMixin, ListView):
         # instead of one per course (N+1 avoidance).
         course_ids = [c.id for c in courses_page]
         membership_by_course = {
-            m.course_id: m
-            for m in CourseMembership.objects.filter(course_id__in=course_ids, user=user, role="student")
+            m.course_id: m for m in CourseMembership.objects.filter(course_id__in=course_ids, user=user, role="student")
         }
 
         # Hər kurs üçün əlavə məlumat

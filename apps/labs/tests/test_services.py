@@ -260,16 +260,16 @@ class LabSubmissionServiceExtendedTest(TestCase):
     # ── lab_grading_service ───────────────────────────────────────────────
 
     def test_parse_decimal_input_valid(self):
-        from apps.labs.lab_grading_service import parse_decimal_input
-
         from decimal import Decimal
+
+        from apps.labs.lab_grading_service import parse_decimal_input
 
         self.assertEqual(parse_decimal_input("9.5"), Decimal("9.5"))
 
     def test_parse_decimal_input_comma_separator(self):
-        from apps.labs.lab_grading_service import parse_decimal_input
-
         from decimal import Decimal
+
+        from apps.labs.lab_grading_service import parse_decimal_input
 
         self.assertEqual(parse_decimal_input("9,5"), Decimal("9.5"))
 
@@ -300,9 +300,9 @@ class LabSubmissionServiceExtendedTest(TestCase):
         self.assertEqual(format_decimal_input(None), "")
 
     def test_grade_lab_answer(self):
-        from apps.labs.lab_grading_service import grade_lab_answer
-
         from decimal import Decimal
+
+        from apps.labs.lab_grading_service import grade_lab_answer
 
         block = LabBlock.objects.create(lab=self.lab, title="BG")
         question = LabQuestion.objects.create(block=block, question_text="Q2?", points=10)

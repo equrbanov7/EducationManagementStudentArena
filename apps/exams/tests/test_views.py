@@ -47,9 +47,10 @@ def _assign_user_to_org(user, organization, profile_role, *, membership_role_nam
                 "member",
             )
         elif profile_role == ProfileRole.ORG_OWNER:
-            membership_role_name = organization.roles.filter(is_active=True).order_by("-level").values_list(
-                "name", flat=True
-            ).first() or "member"
+            membership_role_name = (
+                organization.roles.filter(is_active=True).order_by("-level").values_list("name", flat=True).first()
+                or "member"
+            )
         else:
             membership_role_name = "member"
 
