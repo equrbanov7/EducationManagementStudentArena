@@ -94,6 +94,17 @@ def create_user_with_organization(
         )
         requested_organization = organization
         requested_organization_name = organization.name
+
+        # Notify all superadmins that a new organization is awaiting approval.
+        # Import deferred to avoid circular imports at module load time.
+        try:
+            from apps.accounts.views.superadmin import _notify_superadmins_of_pending_org
+
+            _notify_superadmins_of_pending_org(organization)
+        except Exception:
+            logger.exception(
+                "Failed to notify superadmins about new pending org %s", organization.pk
+            )
     else:
         # student_join / teacher_join / staff_join
         requested_organization = join_organization
