@@ -15442,3 +15442,33 @@ msgstr "Подходящая цель для отправки уведомлен
 msgctxt "profile.publish_notification"
 msgid "no_targets_teacher_hint"
 msgstr "Для отправки уведомлений необходимо создать хотя бы одну группу."
+
+msgid "target_all_users"
+msgstr "Все пользователи (система)"
+
+msgid "target_org_prefix"
+msgstr "Организация"
+
+msgid "target_org_all_members"
+msgstr "все участники"
+
+msgid "target_group_prefix"
+msgstr "Группа"
+
+msgid "notif_title_required"
+msgstr "Заголовок уведомления не может быть пустым."
+
+msgid "notif_link_invalid"
+msgstr "Введённая ссылка некорректна. Она должна начинаться с http:// или https://."
+
+msgid "notif_image_too_large"
+msgstr "Изображение не должно превышать 5 МБ."
+
+msgid "notif_image_invalid"
+msgstr "Файл изображения некорректен."
+
+msgid "notif_sent_success"
+msgstr "Уведомление успешно отправлено."
+
+msgid "notif_no_recipients"
+msgstr "У вас нет прав на эти цели или получатели не найдены."
