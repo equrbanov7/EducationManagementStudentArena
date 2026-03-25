@@ -299,6 +299,9 @@
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-organizations' %}active{% endif %}">
                 <i class="fas fa-building sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "superadmin_control" context "profile.sidebar" %}</span>
+                {% if superadmin_pending_org_count > 0 %}
+                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ superadmin_pending_org_count }}</span>
+                {% endif %}
             </a>
         </li>
         {% endif %}
