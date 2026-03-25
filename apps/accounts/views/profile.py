@@ -178,10 +178,11 @@ def _get_publish_notification_targets(user, capabilities):
     is_teacher = capabilities["is_teacher"]
 
     if is_superadmin:
-        targets.append({"value": "all", "label": "Bütün istifadəçilər (sistem)"})
+        # "All users" is exclusive — if selected, ignore specific org selections
+        targets.append({"value": "all", "label": "Bütün istifadəçilər (sistem)", "is_exclusive": True})
         from apps.organizations.models import Organization
         for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
-            targets.append({"value": f"org_{org.pk}", "label": f"Təşkilat: {org.name}"})
+            targets.append({"value": f"org_{org.pk}", "label": f"Təşkilat: {org.name}", "is_exclusive": False})
     elif is_org_admin:
         # Get user's active org memberships
         org_memberships = Membership.objects.filter(
@@ -191,11 +192,12 @@ def _get_publish_notification_targets(user, capabilities):
             targets.append({
                 "value": f"org_{membership.organization_id}",
                 "label": f"Təşkilat: {membership.organization.name} (bütün üzvlər)",
+                "is_exclusive": False,
             })
     elif is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
         for group in teacher_groups:
-            targets.append({"value": f"group_{group.pk}", "label": f"Qrup: {group.name}"})
+            targets.append({"value": f"group_{group.pk}", "label": f"Qrup: {group.name}", "is_exclusive": False})
     return targets
 
 
@@ -351,8 +353,16 @@ def user_profile(request):
                 return redirect(f"{reverse('accounts:profile')}?section=profile-info")
             notif_title = (request.POST.get("notif_title") or "").strip()
             notif_message = (request.POST.get("notif_message") or "").strip()
-            notif_target = (request.POST.get("notif_target") or "all").strip()
-            notif_group_id = request.POST.get("notif_group_id", "").strip()
+            # Accept multiple targets submitted as a checkbox list
+            notif_targets_raw = request.POST.getlist("notif_targets")
+            notif_targets = [t.strip() for t in notif_targets_raw if t.strip()]
+            # Fall back to the old single-value field for backward-compat
+            if not notif_targets:
+                single = (request.POST.get("notif_target") or "").strip()
+                if single:
+                    notif_targets = [single]
+            if not notif_targets:
+                notif_targets = ["all"]
             notif_link = (request.POST.get("notif_link") or "").strip()
             notif_image_file = request.FILES.get("notif_image")
 
@@ -397,26 +407,38 @@ def user_profile(request):
                 )
                 notif_image_url = default_storage.url(saved_path)
 
-            recipients = _get_notification_recipients(
-                request.user, capabilities, notif_target, notif_group_id
-            )
-            if recipients is None:
-                messages.error(request, "Bu hədəf üçün icazəniz yoxdur.")
-                return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
-
             metadata = {}
             if notif_image_url:
                 metadata["image_url"] = notif_image_url
 
-            create_notification_for_users(
-                recipients=recipients,
-                title=notif_title,
-                message=notif_message,
-                link=notif_link,
-                notification_type=NotificationType.SYSTEM,
-                metadata=metadata or None,
-            )
-            messages.success(request, "Bildiriş uğurla göndərildi.")
+            # Resolve each selected target and collect unique recipients
+            UserModel = get_user_model()
+            sent_to_user_ids: set = set()
+            for notif_target in notif_targets:
+                recipients = _get_notification_recipients(
+                    request.user, capabilities, notif_target, ""
+                )
+                if recipients is None:
+                    continue
+                # Avoid duplicate notifications to the same user
+                qs_ids = list(recipients.values_list("pk", flat=True).exclude(pk__in=sent_to_user_ids))
+                if not qs_ids:
+                    continue
+                target_recipients = UserModel.objects.filter(pk__in=qs_ids)
+                create_notification_for_users(
+                    recipients=target_recipients,
+                    title=notif_title,
+                    message=notif_message,
+                    link=notif_link,
+                    notification_type=NotificationType.SYSTEM,
+                    metadata=metadata or None,
+                )
+                sent_to_user_ids.update(qs_ids)
+
+            if sent_to_user_ids:
+                messages.success(request, "Bildiriş uğurla göndərildi.")
+            else:
+                messages.error(request, "Bu hədəflər üçün icazəniz yoxdur və ya alıcı tapılmadı.")
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section

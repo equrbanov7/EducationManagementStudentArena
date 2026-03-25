@@ -15239,3 +15239,183 @@ msgstr "Kapat"
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
 msgstr "Okudum, kabul ediyorum"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Bildirimler"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "Tümü"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Okunmamış"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Okunmuş"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Tümünü okundu işaretle"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Tümünü seç"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Seçilenleri sil"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "önce"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "Yeni"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Okundu işaretle"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "Okunmamış bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "Okunmuş bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "Henüz bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "Yeni bildirimler burada görünecek."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Bildirim"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Kapat"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Bağlantıya git"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "için başvurunuz onay bekliyor."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Mesaj"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "İptal"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "sizi öğrenci olarak davet etti."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Kabul et"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Reddet"
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Bildirim gönder"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Seçtiğiniz hedef gruba bildirim göndermek için aşağıdaki formu doldurun. Alıcılar bunu profillerinin bildirimler bölümünde görecek."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Hedef grup"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Bildirimin gönderileceği kullanıcı gruplarını seçin."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Ara..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Bildirim başlığı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Bildirim başlığını girin..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Bildirim metni"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Bildirim metnini girin (isteğe bağlı)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Bağlantı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Alıcılar bildirim detaylarından bu bağlantıya gidebilecek."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Görsel"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "Desteklenen formatlar: JPG, PNG, WebP, GIF."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "isteğe bağlı"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "maks. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Önizleme"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Görseli kaldır"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Gönder"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Sıfırla"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "Bildirim göndermek için uygun hedef bulunamadı."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "Bildirim göndermek için en az bir grup oluşturmanız gerekiyor."

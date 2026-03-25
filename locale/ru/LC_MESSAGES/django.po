@@ -15262,3 +15262,183 @@ msgstr "Закрыть"
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
 msgstr "Прочитал(а), принимаю"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Уведомления"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "Все"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Непрочитанные"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Прочитанные"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Отметить все как прочитанные"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Выбрать все"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Удалить выбранные"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "назад"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "Новое"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Отметить как прочитанное"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Удалить"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "Нет непрочитанных уведомлений."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "Нет прочитанных уведомлений."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "Уведомлений пока нет."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "Новые уведомления будут отображаться здесь."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Уведомление"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Закрыть"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Перейти по ссылке"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "ваша заявка ожидает подтверждения."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Сообщение"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "Отмена"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "пригласила вас в качестве студента."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Принять"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Отклонить"
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Отправить уведомление"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Заполните форму ниже, чтобы отправить уведомление выбранной целевой группе. Получатели увидят его в разделе уведомлений своего профиля."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Целевая группа"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Выберите группы пользователей для отправки уведомления."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Поиск..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Заголовок уведомления"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Введите заголовок уведомления..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Текст уведомления"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Введите текст уведомления (необязательно)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Ссылка"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Получатели смогут перейти по этой ссылке из деталей уведомления."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Изображение"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "Поддерживаемые форматы: JPG, PNG, WebP, GIF."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "необязательно"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "макс. 5 МБ"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Предпросмотр"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Удалить изображение"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Отправить"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Сбросить"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "Подходящая цель для отправки уведомления не найдена."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "Для отправки уведомлений необходимо создать хотя бы одну группу."
