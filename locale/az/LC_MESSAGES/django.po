@@ -15507,3 +15507,183 @@ msgstr "Silməni təsdiqlə"
 msgctxt "exams.template.teacher_questions_bank"
 msgid "modal_delete_question_body"
 msgstr "Bu sualı silmək istədiyinizə əminsiniz? {question}"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Bildirişlər"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "Hamısı"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Oxunmamış"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Oxunmuş"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Hamısını oxunmuş işarələ"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Hamısını seç"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "əvvəl"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "Yeni"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Oxunmuş işarələ"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "Oxunmamış bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "Oxunmuş bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "Hazırda bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "Yeni bildirişlər burada görünəcək."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Bildiriş"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Bağla"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Keçidə get"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "üçün müraciətiniz təsdiq gözləyir."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Mesaj"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "sizi tələbə kimi dəvət edib."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Qəbul et"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Rədd et"
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Bildiriş göndər"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin. Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Hədəf qrup"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Bildiriş göndəriləcək istifadəçi qruplarını seçin."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Axtar..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Bildiriş başlığı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Bildiriş başlığını daxil edin..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Bildiriş mətni"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Bildiriş mətnini daxil edin (isteğe bağlı)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Keçid (link)"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Alıcılar bildiriş detallarından bu keçidə gedə biləcəklər."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Şəkil"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "JPG, PNG, WebP, GIF formatları dəstəklənir."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "isteğe bağlı"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "maks. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Önizləmə"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Şəkli sil"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Göndər"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Sıfırla"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "Bildiriş göndərmək üçün uyğun hədəf tapılmadı."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız."

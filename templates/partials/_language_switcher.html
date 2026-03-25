@@ -76,3 +76,20 @@
     </div>
 </div>
 {% endwith %}
+<script>
+(function () {
+    'use strict';
+    var s = document.currentScript;
+    if (!s) { return; }
+    var dd = s.previousElementSibling;
+    if (!dd || !dd.classList.contains('language-switcher')) { return; }
+    // Whenever the dropdown opens, sync the "next" URL to whatever the browser
+    // currently shows (handles SPA section navigation via History.pushState).
+    dd.addEventListener('show.bs.dropdown', function () {
+        var href = window.location.href;
+        dd.querySelectorAll('.language-switcher__form input[name="next"]').forEach(function (inp) {
+            inp.value = href;
+        });
+    });
+})();
+</script>

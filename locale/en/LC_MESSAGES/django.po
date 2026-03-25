@@ -15744,3 +15744,183 @@ msgstr "Close"
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
 msgstr "I have read and accept"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Notifications"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "All"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Unread"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Read"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Mark all as read"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Select all"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Delete selected"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "ago"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "New"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Mark as read"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Delete"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "No unread notifications."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "No read notifications."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "No notifications yet."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "New notifications will appear here."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Notification"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Close"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Go to link"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "your request is pending approval."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Message"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "has invited you as a student."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Accept"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Reject"
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Send Notification"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Fill out the form below to send a notification to your selected target group. Recipients will see it in the notifications section of their profile."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Target group"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Select the user groups to send the notification to."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Search..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Notification title"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Enter notification title..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Notification body"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Enter notification body (optional)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Link"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Recipients can follow this link from the notification details."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Image"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "Supported formats: JPG, PNG, WebP, GIF."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "optional"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "max. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Preview"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Remove image"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Send"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Reset"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "No suitable target found to send a notification."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "You must create at least one group to send notifications."

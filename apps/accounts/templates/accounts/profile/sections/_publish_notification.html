@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if 'publish-notification' in allowed_sections %}
 <section class="profile-section-panel profile-section--publish-notification {% if active_section == 'publish-notification' %}is-active{% endif %}"
          data-profile-section-panel="publish-notification"
@@ -5,13 +6,10 @@
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-paper-plane"></i>
-            <span>Bildiriş göndər</span>
+            <span>{% trans "title" context "profile.publish_notification" %}</span>
         </div>
 
-        <p class="text-muted mb-4">
-            Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin.
-            Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək.
-        </p>
+        <p class="text-muted mb-4">{% trans "description" context "profile.publish_notification" %}</p>
 
         {% if publish_notification_targets %}
         <form method="post" action="{{ profile_base_url }}"
@@ -22,129 +20,100 @@
             <input type="hidden" name="profile_form" value="publish-notification">
             <input type="hidden" name="section" value="publish-notification">
 
-            {# Hidden select that holds the actual submitted value #}
-            <input type="hidden" name="notif_target" id="notifTargetValue" value="{{ publish_notification_targets.0.value }}">
-
-            {# Target group — Bootstrap searchable dropdown #}
+            {# Target group — multi-select checkboxes #}
             <div class="mb-4">
-                <label class="form-label fw-semibold mb-1">
-                    <i class="fas fa-users me-1 text-primary"></i>Hədəf qrup <span class="text-danger">*</span>
+                <label class="form-label fw-semibold mb-2">
+                    <i class="fas fa-users me-1 text-primary"></i>{% trans "target_group_label" context "profile.publish_notification" %} <span class="text-danger">*</span>
                 </label>
-                <div class="pn-select-wrap dropdown" id="notifTargetDropdown">
-                    <button type="button"
-                            class="pn-select-toggle btn btn-outline-secondary w-100 d-flex align-items-center justify-content-between"
-                            data-bs-toggle="dropdown"
-                            data-bs-auto-close="outside"
-                            aria-expanded="false"
-                            aria-haspopup="listbox">
-                        <span class="pn-select-display">
-                            <span class="pn-select-icon me-2">
-                                {% if publish_notification_targets.0.value == 'all' %}
-                                    <i class="fas fa-globe-americas text-primary"></i>
-                                {% else %}
-                                    <i class="fas fa-building text-success"></i>
-                                {% endif %}
-                            </span>
-                            <span class="pn-select-label">{{ publish_notification_targets.0.label }}</span>
-                        </span>
-                        <i class="fas fa-chevron-down pn-select-caret ms-2 text-muted small"></i>
-                    </button>
-                    <div class="dropdown-menu w-100 pn-select-menu p-2" style="max-height:320px;overflow-y:auto;">
-                        <div class="pn-select-search mb-2">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-transparent border-end-0">
-                                    <i class="fas fa-search text-muted small"></i>
-                                </span>
-                                <input type="text"
-                                       class="form-control border-start-0 ps-1"
-                                       id="notifTargetSearch"
-                                       placeholder="Axtar..."
-                                       autocomplete="off">
-                            </div>
-                        </div>
-                        <ul class="list-unstyled mb-0 pn-select-list" role="listbox" id="notifTargetList">
-                            {% for target in publish_notification_targets %}
-                            <li class="pn-select-option {% if forloop.first %}selected{% endif %}"
-                                role="option"
-                                data-value="{{ target.value }}"
-                                data-label="{{ target.label }}"
-                                data-icon="{% if target.value == 'all' %}globe-americas text-primary{% elif target.value|slice:':6' == 'group_' %}users text-info{% else %}building text-success{% endif %}">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="pn-opt-check">
-                                        <i class="fas fa-check-circle text-primary"></i>
-                                    </span>
-                                    <span class="pn-opt-icon">
-                                        {% if target.value == 'all' %}
-                                            <i class="fas fa-globe-americas text-primary"></i>
-                                        {% elif target.value|slice:":6" == 'group_' %}
-                                            <i class="fas fa-users text-info"></i>
-                                        {% else %}
-                                            <i class="fas fa-building text-success"></i>
-                                        {% endif %}
-                                    </span>
-                                    <span class="pn-opt-label">{{ target.label }}</span>
-                                </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
+
+                <div class="pn-target-list" id="pnTargetList">
+                    {# Search bar shown only when there are many targets #}
+                    {% if publish_notification_targets|length > 5 %}
+                    <div class="pn-target-search-wrap">
+                        <input type="text" class="form-control form-control-sm"
+                               id="pnTargetSearch"
+                               placeholder="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
+                               autocomplete="off">
                     </div>
+                    {% endif %}
+
+                    {% for target in publish_notification_targets %}
+                    <label class="pn-target-item {% if target.is_exclusive %}is-exclusive{% endif %}"
+                           data-label="{{ target.label|lower }}">
+                        <input type="checkbox"
+                               name="notif_targets"
+                               value="{{ target.value }}"
+                               class="pn-target-cb {% if target.is_exclusive %}pn-target-cb--exclusive{% endif %}"
+                               {% if forloop.first %}checked{% endif %}>
+                        <span class="pn-target-icon">
+                            {% if target.value == 'all' %}
+                                <i class="fas fa-globe-americas text-primary"></i>
+                            {% elif target.value|slice:":6" == 'group_' %}
+                                <i class="fas fa-users text-info"></i>
+                            {% else %}
+                                <i class="fas fa-building text-success"></i>
+                            {% endif %}
+                        </span>
+                        <span class="pn-target-label">{{ target.label }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
-                <div class="form-text mt-1">Bildiriş göndəriləcək istifadəçi qrupunu seçin.</div>
+                <div class="form-text mt-1">{% trans "target_group_hint" context "profile.publish_notification" %}</div>
             </div>
 
             {# Title #}
             <div class="mb-3">
                 <label for="notifTitle" class="form-label fw-semibold">
-                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı <span class="text-danger">*</span>
+                    <i class="fas fa-heading me-1 text-primary"></i>{% trans "notif_title_label" context "profile.publish_notification" %} <span class="text-danger">*</span>
                 </label>
                 <input type="text" class="form-control form-control-lg" id="notifTitle"
                        name="notif_title" maxlength="255" required
-                       placeholder="Bildiriş başlığını daxil edin...">
+                       placeholder="{% trans 'notif_title_placeholder' context 'profile.publish_notification' %}">
             </div>
 
             {# Message #}
             <div class="mb-3">
                 <label for="notifMessage" class="form-label fw-semibold">
-                    <i class="fas fa-align-left me-1 text-primary"></i>Bildiriş mətni
+                    <i class="fas fa-align-left me-1 text-primary"></i>{% trans "notif_message_label" context "profile.publish_notification" %}
                 </label>
                 <textarea class="form-control" id="notifMessage" name="notif_message"
-                          rows="4" placeholder="Bildiriş mətnini daxil edin (isteğe bağlı)..."></textarea>
+                          rows="4" placeholder="{% trans 'notif_message_placeholder' context 'profile.publish_notification' %}"></textarea>
             </div>
 
             {# Optional link #}
             <div class="mb-3">
                 <label for="notifLink" class="form-label fw-semibold">
-                    <i class="fas fa-link me-1 text-primary"></i>Keçid (link)
-                    <span class="text-muted fw-normal small">(isteğe bağlı)</span>
+                    <i class="fas fa-link me-1 text-primary"></i>{% trans "notif_link_label" context "profile.publish_notification" %}
+                    <span class="text-muted fw-normal small">({% trans "optional" context "profile.publish_notification" %})</span>
                 </label>
                 <input type="url" class="form-control" id="notifLink" name="notif_link"
                        maxlength="500" placeholder="https://example.com">
-                <div class="form-text">Alıcılar bildiriş detallarından bu keçidə gedə biləcəklər.</div>
+                <div class="form-text">{% trans "notif_link_hint" context "profile.publish_notification" %}</div>
             </div>
 
             {# Optional image upload #}
             <div class="mb-4">
                 <label for="notifImage" class="form-label fw-semibold">
-                    <i class="fas fa-image me-1 text-primary"></i>Şəkil
-                    <span class="text-muted fw-normal small">(isteğe bağlı, maks. 5 MB)</span>
+                    <i class="fas fa-image me-1 text-primary"></i>{% trans "notif_image_label" context "profile.publish_notification" %}
+                    <span class="text-muted fw-normal small">({% trans "optional" context "profile.publish_notification" %}, {% trans "max_5mb" context "profile.publish_notification" %})</span>
                 </label>
                 <input type="file" class="form-control" id="notifImage" name="notif_image" accept="image/*">
-                <div class="form-text">JPG, PNG, WebP, GIF formatları dəstəklənir.</div>
+                <div class="form-text">{% trans "notif_image_hint" context "profile.publish_notification" %}</div>
                 <div id="notifImagePreviewWrap" class="mt-2" style="display:none;">
-                    <img id="notifImagePreview" src="" alt="Önizləmə"
-                         class="img-thumbnail" style="max-height:180px;object-fit:contain;">
-                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="notifImageClear">
-                        <i class="fas fa-times"></i> Şəkli sil
+                    <img id="notifImagePreview" src="" alt="{% trans 'preview' context 'profile.publish_notification' %}"
+                         class="img-thumbnail" style="max-width:100%;max-height:180px;object-fit:contain;display:block;">
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="notifImageClear">
+                        <i class="fas fa-times"></i> {% trans "remove_image" context "profile.publish_notification" %}
                     </button>
                 </div>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
                 <button type="submit" class="btn btn-send-notif">
-                    <i class="fas fa-paper-plane me-1"></i>Göndər
+                    <i class="fas fa-paper-plane me-1"></i>{% trans "send_btn" context "profile.publish_notification" %}
                 </button>
                 <button type="reset" class="btn btn-outline-secondary" id="notifResetBtn">
-                    <i class="fas fa-undo me-1"></i>Sıfırla
+                    <i class="fas fa-undo me-1"></i>{% trans "reset_btn" context "profile.publish_notification" %}
                 </button>
             </div>
         </form>
@@ -152,9 +121,9 @@
         {% else %}
         <div class="empty-state py-5 text-center">
             <i class="fas fa-exclamation-circle fa-2x text-muted mb-2"></i>
-            <p class="text-muted fw-semibold mb-1">Bildiriş göndərmək üçün uyğun hədəf tapılmadı.</p>
+            <p class="text-muted fw-semibold mb-1">{% trans "no_targets" context "profile.publish_notification" %}</p>
             {% if is_teacher %}
-            <p class="text-muted small">Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız.</p>
+            <p class="text-muted small">{% trans "no_targets_teacher_hint" context "profile.publish_notification" %}</p>
             {% endif %}
         </div>
         {% endif %}
@@ -164,58 +133,42 @@
     (function () {
         'use strict';
 
-        // ── Searchable single-select dropdown ──
-        var toggle       = document.querySelector('#notifTargetDropdown .pn-select-toggle');
-        var hiddenInput  = document.getElementById('notifTargetValue');
-        var searchInput  = document.getElementById('notifTargetSearch');
-        var optionList   = document.getElementById('notifTargetList');
-        var displayLabel = document.querySelector('#notifTargetDropdown .pn-select-label');
-        var displayIcon  = document.querySelector('#notifTargetDropdown .pn-select-icon');
+        var targetList = document.getElementById('pnTargetList');
+        if (!targetList) { return; }
 
-        if (!toggle || !optionList) return;
+        var allCbs    = targetList.querySelectorAll('.pn-target-cb');
+        var exclusiveCbs = targetList.querySelectorAll('.pn-target-cb--exclusive');
 
-        function selectOption(li) {
-            // Deselect all
-            optionList.querySelectorAll('.pn-select-option').forEach(function (opt) {
-                opt.classList.remove('selected');
+        // ── Exclusive checkbox handling (e.g., "All users") ──
+        // When an exclusive box is checked, uncheck everything else.
+        // When any normal box is checked, uncheck the exclusive ones.
+        allCbs.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                if (!cb.checked) { return; }
+
+                if (cb.classList.contains('pn-target-cb--exclusive')) {
+                    // Uncheck all non-exclusive boxes
+                    allCbs.forEach(function (other) {
+                        if (!other.classList.contains('pn-target-cb--exclusive')) {
+                            other.checked = false;
+                        }
+                    });
+                } else {
+                    // Uncheck all exclusive boxes
+                    exclusiveCbs.forEach(function (excl) { excl.checked = false; });
+                }
             });
-            li.classList.add('selected');
-
-            // Update hidden input
-            hiddenInput.value = li.getAttribute('data-value');
-
-            // Update display
-            displayLabel.textContent = li.getAttribute('data-label');
-            var iconEl = li.querySelector('.pn-opt-icon i');
-            if (iconEl && displayIcon) {
-                displayIcon.innerHTML = '';
-                displayIcon.appendChild(iconEl.cloneNode(true));
-            }
-
-            // Close dropdown
-            var ddToggle = bootstrap.Dropdown.getOrCreateInstance(toggle);
-            ddToggle.hide();
-        }
-
-        optionList.querySelectorAll('.pn-select-option').forEach(function (li) {
-            li.addEventListener('click', function () { selectOption(li); });
         });
 
-        // Search filter
+        // ── Search filter (only present when many targets) ──
+        var searchInput = document.getElementById('pnTargetSearch');
         if (searchInput) {
             searchInput.addEventListener('input', function () {
                 var q = searchInput.value.toLowerCase().trim();
-                optionList.querySelectorAll('.pn-select-option').forEach(function (li) {
-                    var label = (li.getAttribute('data-label') || '').toLowerCase();
-                    li.style.display = (q === '' || label.indexOf(q) !== -1) ? '' : 'none';
+                targetList.querySelectorAll('.pn-target-item').forEach(function (item) {
+                    var label = (item.getAttribute('data-label') || '').toLowerCase();
+                    item.style.display = (q === '' || label.indexOf(q) !== -1) ? '' : 'none';
                 });
-            });
-
-            // Focus search on dropdown open
-            document.getElementById('notifTargetDropdown').addEventListener('shown.bs.dropdown', function () {
-                searchInput.value = '';
-                optionList.querySelectorAll('.pn-select-option').forEach(function (li) { li.style.display = ''; });
-                searchInput.focus();
             });
         }
 
@@ -256,7 +209,7 @@
             resetBtn.addEventListener('click', function () {
                 setTimeout(function () {
                     imgPreviewWrap.style.display = 'none';
-                    if (imgPreview) imgPreview.src = '';
+                    if (imgPreview) { imgPreview.src = ''; }
                 }, 10);
             });
         }

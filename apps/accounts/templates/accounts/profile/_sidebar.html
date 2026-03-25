@@ -28,11 +28,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=notifications"
                data-section="notifications"
-               data-title="Bildirişlər"
+               data-title="{% trans 'notifications' context 'profile.section' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'notifications' %}active{% endif %}">
                 <i class="fas fa-bell sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Bildirişlər</span>
+                <span class="sidebar-menu-text">{% trans "notifications" context "profile.section" %}</span>
                 {% if notifications_unread_count > 0 %}
                 <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse">{{ notifications_unread_count }}</span>
                 {% endif %}
@@ -44,11 +44,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=publish-notification"
                data-section="publish-notification"
-               data-title="Bildiriş göndər"
+               data-title="{% trans 'title' context 'profile.publish_notification' %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'publish-notification' %}active{% endif %}">
                 <i class="fas fa-paper-plane sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Bildiriş göndər</span>
+                <span class="sidebar-menu-text">{% trans "title" context "profile.publish_notification" %}</span>
             </a>
         </li>
         {% endif %}

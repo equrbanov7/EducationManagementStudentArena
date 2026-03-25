@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if 'notifications' in allowed_sections %}
 <section class="profile-section-panel profile-section--notifications {% if active_section == 'notifications' %}is-active{% endif %}"
          data-profile-section-panel="notifications"
@@ -5,7 +6,7 @@
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-bell"></i>
-            <span>Bildirişlər</span>
+            <span>{% trans "notifications" context "profile.section" %}</span>
             {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-2">{{ in_app_unread_count }}</span>{% endif %}
         </div>
 
@@ -14,15 +15,15 @@
             <div class="alert alert-warning mb-3">
                 <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
                     <div>
-                        <div><strong>{{ pending_request.organization.name }}</strong> üçün müraciətiniz təsdiq gözləyir.</div>
-                        {% if pending_request.message %}<div class="mt-2"><small><strong>Mesaj:</strong> {{ pending_request.message }}</small></div>{% endif %}
+                        <div><strong>{{ pending_request.organization.name }}</strong> {% trans "pending_approval" context "profile.notifications" %}</div>
+                        {% if pending_request.message %}<div class="mt-2"><small><strong>{% trans "message" context "profile.notifications" %}:</strong> {{ pending_request.message }}</small></div>{% endif %}
                     </div>
                     <form method="post" action="{% url 'accounts:student_organization_request' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
                         <input type="hidden" name="action" value="clear_request">
                         <input type="hidden" name="request_id" value="{{ pending_request.id }}">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">Ləğv et</button>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">{% trans "cancel" context "profile.notifications" %}</button>
                     </form>
                 </div>
             </div>
@@ -33,21 +34,21 @@
         <div class="mb-3">
             {% for invite in pending_student_invites %}
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
-                <div><strong>{{ invite.organization.name }}</strong> sizi tələbə kimi dəvət edib.</div>
+                <div><strong>{{ invite.organization.name }}</strong> {% trans "invite_as_student" context "profile.notifications" %}</div>
                 <div class="d-flex gap-2">
                     <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
                         <input type="hidden" name="invite_id" value="{{ invite.id }}">
                         <input type="hidden" name="action" value="accept">
-                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Qəbul et</button>
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> {% trans "accept" context "profile.notifications" %}</button>
                     </form>
                     <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
                         <input type="hidden" name="invite_id" value="{{ invite.id }}">
                         <input type="hidden" name="action" value="reject">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">Rədd et</button>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">{% trans "reject" context "profile.notifications" %}</button>
                     </form>
                 </div>
             </div>
@@ -61,16 +62,16 @@
             <nav class="nav nav-pills notif-filter-tabs">
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'all' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=all">
-                    <i class="fas fa-list me-1"></i>Hamısı
+                    <i class="fas fa-list me-1"></i>{% trans "filter_all" context "profile.notifications" %}
                 </a>
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'unread' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=unread">
-                    <i class="fas fa-envelope me-1"></i>Oxunmamış
+                    <i class="fas fa-envelope me-1"></i>{% trans "filter_unread" context "profile.notifications" %}
                     {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-1">{{ in_app_unread_count }}</span>{% endif %}
                 </a>
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'read' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=read">
-                    <i class="fas fa-envelope-open me-1"></i>Oxunmuş
+                    <i class="fas fa-envelope-open me-1"></i>{% trans "filter_read" context "profile.notifications" %}
                 </a>
             </nav>
             {% if in_app_notifications_page.object_list %}
@@ -78,7 +79,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
                 <button type="submit" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-check-double me-1"></i>Hamısını oxunmuş işarələ
+                    <i class="fas fa-check-double me-1"></i>{% trans "mark_all_read" context "profile.notifications" %}
                 </button>
             </form>
             {% endif %}
@@ -88,14 +89,14 @@
         <div class="d-flex align-items-center gap-2 mb-2 notif-bulk-bar" id="profileNotifBulkBar" style="display:none !important">
             <div class="form-check mb-0">
                 <input class="form-check-input" type="checkbox" id="profileNotifSelectAll">
-                <label class="form-check-label small fw-semibold" for="profileNotifSelectAll">Hamısını seç</label>
+                <label class="form-check-label small fw-semibold" for="profileNotifSelectAll">{% trans "select_all" context "profile.notifications" %}</label>
             </div>
             <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="profileNotifBulkDeleteForm" class="ms-2">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
                 <div id="profileNotifBulkIds"></div>
                 <button type="submit" class="btn btn-sm btn-outline-danger" id="profileNotifBulkDeleteBtn" disabled>
-                    <i class="fas fa-trash me-1"></i>Seçilənləri sil
+                    <i class="fas fa-trash me-1"></i>{% trans "delete_selected" context "profile.notifications" %}
                 </button>
             </form>
         </div>
@@ -119,12 +120,12 @@
                 <div class="profile-notif-body js-notif-open"
                      style="cursor:pointer;"
                      data-notif-id="{{ notification.pk }}"
-                     data-notif-title="{{ notification.title }}"
-                     data-notif-message="{{ notification.message }}"
+                     data-notif-title="{{ notification.title|escapejs }}"
+                     data-notif-message="{{ notification.message|escapejs }}"
                      data-notif-time="{{ notification.created_at|date:'d M Y, H:i' }}"
                      data-notif-type="{{ notification.get_notification_type_display }}"
-                     data-notif-link="{{ notification.link }}"
-                     data-notif-image="{{ notification.metadata.image_url|default:'' }}"
+                     data-notif-link="{{ notification.link|default:''|escapejs }}"
+                     data-notif-image="{{ notification.metadata.image_url|default:''|escapejs }}"
                      data-notif-is-read="{% if notification.is_read %}1{% else %}0{% endif %}"
                      data-mark-read-url="{% url 'notifications:notification_mark_read' notification.pk %}">
                     <div class="profile-notif-title">
@@ -135,12 +136,14 @@
                     <div class="profile-notif-preview text-muted small">{{ notification.message|truncatechars:80 }}</div>
                     {% endif %}
                     {% if notification.metadata.image_url %}
-                    <div class="mt-1"><img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img"></div>
+                    <div class="mt-1">
+                        <img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img">
+                    </div>
                     {% endif %}
                     <div class="profile-notif-meta text-muted small mt-1">
-                        <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} əvvəl
+                        <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} {% trans "ago" context "profile.notifications" %}
                         {% if not notification.is_read %}
-                        <span class="badge bg-primary notif-new-badge ms-2" style="font-size:.65rem;">Yeni</span>
+                        <span class="badge bg-primary notif-new-badge ms-2" style="font-size:.65rem;">{% trans "new_badge" context "profile.notifications" %}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -149,7 +152,7 @@
                     <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.number }}">
-                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Oxunmuş işarələ">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'mark_read' context 'profile.notifications' %}">
                             <i class="fas fa-envelope-open"></i>
                         </button>
                     </form>
@@ -157,7 +160,7 @@
                     <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.number }}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'delete' context 'profile.notifications' %}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
@@ -197,11 +200,11 @@
         <div class="notif-empty-state py-5 text-center">
             <div class="notif-empty-icon mb-3"><i class="fas fa-bell-slash"></i></div>
             <p class="text-muted fw-semibold mb-1">
-                {% if notif_filter == 'unread' %}Oxunmamış bildiriş yoxdur.
-                {% elif notif_filter == 'read' %}Oxunmuş bildiriş yoxdur.
-                {% else %}Hazırda bildiriş yoxdur.{% endif %}
+                {% if notif_filter == 'unread' %}{% trans "empty_unread" context "profile.notifications" %}
+                {% elif notif_filter == 'read' %}{% trans "empty_read" context "profile.notifications" %}
+                {% else %}{% trans "empty_all" context "profile.notifications" %}{% endif %}
             </p>
-            <p class="text-muted small">Yeni bildirişlər burada görünəcək.</p>
+            <p class="text-muted small">{% trans "empty_hint" context "profile.notifications" %}</p>
         </div>
         {% endif %}
         {% endif %}
@@ -215,22 +218,21 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="profileNotifModalLabel">
                         <i class="fas fa-bell me-2 text-primary" id="profileNotifModalIcon"></i>
-                        <span id="profileNotifModalTitle">Bildiriş</span>
+                        <span id="profileNotifModalTitle">{% trans "notification" context "profile.notifications" %}</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.notifications' %}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-muted small mb-3" id="profileNotifModalMeta"></div>
                     <div id="profileNotifModalImage" class="mb-3" style="display:none">
-                        <img id="profileNotifModalImageEl" src="" alt=""
-                             class="img-fluid rounded" style="max-height:260px;object-fit:contain;">
+                        <img id="profileNotifModalImageEl" src="" alt="">
                     </div>
-                    <div id="profileNotifModalMessage" class="mb-3" style="white-space:pre-line;"></div>
+                    <div id="profileNotifModalMessage" class="mb-3"></div>
                     <div id="profileNotifModalLink"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Bağla
+                        <i class="fas fa-times me-1"></i>{% trans "close" context "profile.notifications" %}
                     </button>
                 </div>
             </div>
@@ -243,6 +245,8 @@
 
         var modalEl = document.getElementById('profileNotifModal');
         if (!modalEl) return;
+
+        var goToLinkText = '{{ _("go_to_link") | default:"" }}';
 
         // ── Bulk action bar ──
         var bulkBar = document.getElementById('profileNotifBulkBar');
@@ -282,8 +286,6 @@
         }
 
         // ── Modal: open notification detail via manual Bootstrap trigger ──
-        // Using bootstrap.Modal directly (not data-bs-toggle) to guarantee content
-        // is populated before the modal becomes visible.
         document.querySelectorAll('.profile-notif-body.js-notif-open').forEach(function (body) {
             body.addEventListener('click', function () {
                 var title   = body.getAttribute('data-notif-title')   || '';
@@ -294,7 +296,6 @@
                 var image   = body.getAttribute('data-notif-image')   || '';
                 var isRead  = body.getAttribute('data-notif-is-read') === '1';
                 var markUrl = body.getAttribute('data-mark-read-url') || '';
-                var notifId = body.getAttribute('data-notif-id')      || '';
 
                 // Populate modal content safely (textContent prevents XSS)
                 document.getElementById('profileNotifModalTitle').textContent = title;
@@ -325,7 +326,7 @@
                     var icon = document.createElement('i');
                     icon.className = 'fas fa-external-link-alt me-1';
                     a.appendChild(icon);
-                    a.appendChild(document.createTextNode('Keçidə get'));
+                    a.appendChild(document.createTextNode('{% trans "go_to_link" context "profile.notifications" %}'));
                     linkEl.appendChild(a);
                 }
 
