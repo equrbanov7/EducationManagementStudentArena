@@ -20,7 +20,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import http_date
-from django.utils.translation import gettext as _, pgettext_lazy
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
@@ -179,37 +180,46 @@ def _get_publish_notification_targets(user, capabilities):
 
     if is_superadmin:
         # "All users" is exclusive — if selected, ignore specific org selections
-        targets.append({
-            "value": "all",
-            "label": _("target_all_users"),
-            "is_exclusive": True,
-        })
+        targets.append(
+            {
+                "value": "all",
+                "label": _("target_all_users"),
+                "is_exclusive": True,
+            }
+        )
         from apps.organizations.models import Organization
+
         for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
-            targets.append({
-                "value": f"org_{org.pk}",
-                "label": f'{_("target_org_prefix")}: {org.name}',
-                "is_exclusive": False,
-            })
+            targets.append(
+                {
+                    "value": f"org_{org.pk}",
+                    "label": f'{_("target_org_prefix")}: {org.name}',
+                    "is_exclusive": False,
+                }
+            )
     elif is_org_admin:
         # Get user's active org memberships
         org_memberships = Membership.objects.filter(
             user=user, is_active=True, organization__is_active=True
         ).select_related("organization")
         for membership in org_memberships:
-            targets.append({
-                "value": f"org_{membership.organization_id}",
-                "label": f'{_("target_org_prefix")}: {membership.organization.name} ({_("target_org_all_members")})',
-                "is_exclusive": False,
-            })
+            targets.append(
+                {
+                    "value": f"org_{membership.organization_id}",
+                    "label": f'{_("target_org_prefix")}: {membership.organization.name} ({_("target_org_all_members")})',
+                    "is_exclusive": False,
+                }
+            )
     elif is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
         for group in teacher_groups:
-            targets.append({
-                "value": f"group_{group.pk}",
-                "label": f'{_("target_group_prefix")}: {group.name}',
-                "is_exclusive": False,
-            })
+            targets.append(
+                {
+                    "value": f"group_{group.pk}",
+                    "label": f'{_("target_group_prefix")}: {group.name}',
+                    "is_exclusive": False,
+                }
+            )
     return targets
 
 
@@ -245,9 +255,7 @@ def _get_notification_recipients(user, capabilities, target: str):
         if not is_superadmin:
             if not Membership.objects.filter(user=user, organization=org, is_active=True).exists():
                 return None
-        member_user_ids = Membership.objects.filter(
-            organization=org, is_active=True
-        ).values_list("user_id", flat=True)
+        member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
         return User.objects.filter(pk__in=member_user_ids, is_active=True)
 
     if target.startswith("group_"):
@@ -427,9 +435,7 @@ def user_profile(request):
             UserModel = get_user_model()
             sent_to_user_ids: set = set()
             for notif_target in notif_targets:
-                recipients = _get_notification_recipients(
-                    request.user, capabilities, notif_target, ""
-                )
+                recipients = _get_notification_recipients(request.user, capabilities, notif_target, "")
                 if recipients is None:
                     continue
                 # Avoid duplicate notifications to the same user

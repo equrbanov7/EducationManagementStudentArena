@@ -502,7 +502,9 @@ def _role_capabilities(user, profile):
             )
 
         if is_teacher:
-            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"})
+            allowed_sections.update(
+                {"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"}
+            )
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses", "student-organization-request"})

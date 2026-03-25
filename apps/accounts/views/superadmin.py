@@ -34,9 +34,7 @@ def _notify_org_owner_of_approval(org, approved_by, *, approved: bool, reason: s
             )
         else:
             title = f"Təşkilat müraciəti rədd edildi: {org.name}"
-            message = (
-                f'"{org.name}" təşkilatı superadmin tərəfindən rədd edildi.'
-            )
+            message = f'"{org.name}" təşkilatı superadmin tərəfindən rədd edildi.'
             if reason:
                 message += f" Səbəb: {reason}"
 
@@ -64,10 +62,7 @@ def _notify_superadmins_of_pending_org(org):
 
         link = f"{reverse('accounts:superadmin_organizations')}?status=pending"
         title = f"Yeni təşkilat müraciəti: {org.name}"
-        message = (
-            f'"{org.name}" adlı yeni təşkilat superadmin təsdiqi gözləyir. '
-            f"Növ: {org.get_org_type_display()}."
-        )
+        message = f'"{org.name}" adlı yeni təşkilat superadmin təsdiqi gözləyir. ' f"Növ: {org.get_org_type_display()}."
 
         for superadmin in superadmins:
             create_notification(
@@ -128,9 +123,7 @@ def superadmin_organizations(request):
                         "updated_at",
                     ]
                 )
-                _notify_org_owner_of_approval(
-                    organization, request.user, approved=False, reason=reason
-                )
+                _notify_org_owner_of_approval(organization, request.user, approved=False, reason=reason)
                 messages.success(
                     request,
                     f'"{organization.name}" təşkilatı rədd edildi.',

@@ -306,7 +306,11 @@ class TeacherStaffRequestFlowTest(TestCase):
 
     def test_teacher_signup_creates_pending_request(self):
         """Teacher join signup must create a PENDING teacher request."""
-        from apps.notifications.models import MembershipRequestRoleType, StudentOrganizationRequest, StudentOrganizationRequestStatus
+        from apps.notifications.models import (
+            MembershipRequestRoleType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
 
         user, _, _, profile = self._register_teacher()
 
@@ -324,7 +328,11 @@ class TeacherStaffRequestFlowTest(TestCase):
 
     def test_staff_signup_creates_pending_request(self):
         """Staff join signup must create a PENDING staff request."""
-        from apps.notifications.models import MembershipRequestRoleType, StudentOrganizationRequest, StudentOrganizationRequestStatus
+        from apps.notifications.models import (
+            MembershipRequestRoleType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
 
         user, _, _, profile = self._register_staff()
 
@@ -342,7 +350,11 @@ class TeacherStaffRequestFlowTest(TestCase):
     def test_email_verification_updates_existing_teacher_request(self):
         """After email verification activate_verified_membership does not duplicate requests."""
         from apps.accounts.services import activate_verified_membership
-        from apps.notifications.models import MembershipRequestRoleType, StudentOrganizationRequest, StudentOrganizationRequestStatus
+        from apps.notifications.models import (
+            MembershipRequestRoleType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
 
         user, _, _, _ = self._register_teacher()
         user.is_active = False

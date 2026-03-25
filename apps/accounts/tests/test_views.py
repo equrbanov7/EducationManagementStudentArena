@@ -405,10 +405,9 @@ class RegisterViewTest(TestCase):
         """If both sync and async email sending fail, no user must remain in DB."""
         import unittest.mock as mock
 
-        with mock.patch(
-            "apps.accounts.services.auth.send_verify_email", side_effect=Exception("SMTP error")
-        ), mock.patch(
-            "core.email_tasks.send_verification_otp_email.delay", side_effect=Exception("Celery error")
+        with (
+            mock.patch("apps.accounts.services.auth.send_verify_email", side_effect=Exception("SMTP error")),
+            mock.patch("core.email_tasks.send_verification_otp_email.delay", side_effect=Exception("Celery error")),
         ):
             response = self.client.post(self.register_url, self._base_payload())
 
