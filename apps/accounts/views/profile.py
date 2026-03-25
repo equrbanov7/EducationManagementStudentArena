@@ -360,14 +360,14 @@ def user_profile(request):
                 messages.error(request, "Bildiriş başlığı boş ola bilməz.")
                 return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
 
-            # Validate optional link
+            # Validate optional link — require explicit http/https scheme
             if notif_link:
                 try:
                     parsed_link = _parse_url(notif_link)
-                    if parsed_link.scheme not in ("http", "https", ""):
+                    if parsed_link.scheme not in ("http", "https"):
                         raise ValueError("invalid scheme")
                 except Exception:
-                    messages.error(request, "Daxil edilmiş link düzgün deyil.")
+                    messages.error(request, "Daxil edilmiş link düzgün deyil. http:// və ya https:// ilə başlamalıdır.")
                     return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
 
             # Validate + save optional image

@@ -12776,6 +12776,10 @@ msgctxt "nav"
 msgid "my_profile"
 msgstr "My profile"
 
+msgctxt "nav"
+msgid "notifications"
+msgstr "Notifications"
+
 #: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
 msgctxt "nav"
 msgid "logout"

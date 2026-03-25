@@ -12883,6 +12883,10 @@ msgctxt "nav"
 msgid "my_profile"
 msgstr "Mənim profilim"
 
+msgctxt "nav"
+msgid "notifications"
+msgstr "Bildirişlər"
+
 #: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
 msgctxt "nav"
 msgid "logout"
