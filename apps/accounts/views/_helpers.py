@@ -17,7 +17,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from apps.courses.models import Course
 from apps.exams.models import Exam
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
 from core.constants import OrganizationType
 from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, REVIEW_EDIT_LOCK_WINDOW
 from core.tenancy import get_request_organization, scoped_by_organization
@@ -775,16 +779,19 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     pending_search = request.GET.get("student_org_pending_search", "")
     unassigned_search = request.GET.get("student_org_unassigned_search", "")
     sent_invite_search = request.GET.get("student_org_sent_invite_search", "")
+    teacher_staff_search = request.GET.get("student_org_ts_search", "")
     section = {
         "organization": organization,
         "students": [],
         "pending_requested_students": [],
         "unassigned_students": [],
         "sent_student_invites": [],
+        "pending_teacher_staff_requests": [],
         "student_search_query": student_search,
         "pending_search_query": pending_search,
         "unassigned_search_query": unassigned_search,
         "sent_invite_search_query": sent_invite_search,
+        "teacher_staff_search_query": teacher_staff_search,
         "post_next_url": "",
         "access_denied_message": "",
         "can_manage_students": False,
@@ -796,6 +803,8 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         "unassigned_pagination_query": "",
         "sent_invites_page_param": "student_org_sent_invites_page",
         "sent_invites_pagination_query": "",
+        "teacher_staff_page_param": "student_org_ts_page",
+        "teacher_staff_pagination_query": "",
     }
 
     if organization is None:
@@ -953,10 +962,31 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     pending_page = request.GET.get(section["pending_page_param"])
     unassigned_page = request.GET.get(section["unassigned_page_param"])
     sent_invites_page = request.GET.get(section["sent_invites_page_param"])
+    teacher_staff_page = request.GET.get(section["teacher_staff_page_param"])
     section["students"] = Paginator(students, 12).get_page(students_page)
     section["pending_requested_students"] = Paginator(pending_requested_students, 12).get_page(pending_page)
     section["unassigned_students"] = Paginator(unassigned_students, 12).get_page(unassigned_page)
     section["sent_student_invites"] = Paginator(sent_student_invites, 12).get_page(sent_invites_page)
+
+    # Teacher / staff pending requests
+    teacher_staff_pending_qs = (
+        StudentOrganizationRequest.objects.filter(
+            organization=organization,
+            status=StudentOrganizationRequestStatus.PENDING,
+            role_type__in=[MembershipRequestRoleType.TEACHER, MembershipRequestRoleType.STAFF],
+            user__is_active=True,
+        )
+        .select_related("user", "user__profile")
+        .order_by("-created_at", "user__username")
+    )
+    if teacher_staff_search:
+        teacher_staff_pending_qs = teacher_staff_pending_qs.filter(
+            Q(user__username__icontains=teacher_staff_search)
+            | Q(user__email__icontains=teacher_staff_search)
+            | Q(user__first_name__icontains=teacher_staff_search)
+            | Q(user__last_name__icontains=teacher_staff_search)
+        )
+    section["pending_teacher_staff_requests"] = Paginator(teacher_staff_pending_qs, 12).get_page(teacher_staff_page)
 
     for pending_request in section["pending_requested_students"].object_list:
         pending_request.request_display_status = (
@@ -1030,6 +1060,15 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         student_org_pending_search=pending_search,
         student_org_unassigned_search=unassigned_search,
         student_org_sent_invite_search=sent_invite_search,
+        student_org_ts_search=teacher_staff_search,
+    )
+    section["teacher_staff_pagination_query"] = _query_string(
+        section="student-organization-management",
+        student_org_search=student_search,
+        student_org_pending_search=pending_search,
+        student_org_unassigned_search=unassigned_search,
+        student_org_sent_invite_search=sent_invite_search,
+        student_org_ts_search=teacher_staff_search,
     )
     section["post_next_url"] = _append_query_params(
         reverse("accounts:student_organization_management"),
@@ -1037,6 +1076,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         student_org_pending_search=pending_search,
         student_org_unassigned_search=unassigned_search,
         student_org_sent_invite_search=sent_invite_search,
+        student_org_ts_search=teacher_staff_search,
     )
     section["can_manage_students"] = True
     return section

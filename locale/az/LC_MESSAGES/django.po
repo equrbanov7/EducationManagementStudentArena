@@ -3395,6 +3395,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "Yeni təsdiq kodu göndərildi."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Qeydiyyat uğursuz oldu: doğrulama emaili göndərilə bilmədi. Zəhmət olmasa "
+"email ünvanınızı yoxlayın və yenidən cəhd edin."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"
@@ -15012,9 +15018,149 @@ msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Seçilən təşkilat seçilən ölkəyə uyğun deyil."
 
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_teacher"
+msgstr "Məktəb müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_teacher"
+msgstr "Universitet müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_teacher"
+msgstr "Kurs mərkəzi müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_staff"
+msgstr "Məktəb işçisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_staff"
+msgstr "Universitet işçisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_staff"
+msgstr "Kurs mərkəzi işçisi"
+
+msgctxt "accounts.form.register.label"
+msgid "phone"
+msgstr "Telefon nömrəsi"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "phone"
+msgstr "məs. +994501234567"
+
+msgctxt "accounts.form.register.label"
+msgid "specialization"
+msgstr "İxtisas / Fakültə"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "specialization"
+msgstr "məs. Kompüter Mühəndisliyi"
+
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Qrup / Sinif"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "məs. CS-101 və ya Qrup 3A"
+
+msgctxt "accounts.form.register.label"
+msgid "department"
+msgstr "Departament / Kafedra"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "department"
+msgstr "məs. Mühəndislik Fakültəsi"
+
+msgctxt "accounts.form.register.label"
+msgid "staff_position"
+msgstr "Vəzifə"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "staff_position"
+msgstr "məs. Ofis Meneceri"
+
+msgctxt "accounts.form.register.error"
+msgid "specialization_required"
+msgstr "Tələbələr üçün ixtisas / fakültə mütləqdir."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Tələbələr üçün qrup / sinif mütləqdir."
+
+msgctxt "accounts.register"
+msgid "step_role"
+msgstr "Rol"
+
+msgctxt "accounts.register"
+msgid "choose_role"
+msgstr "Rolunuzu seçin"
+
+msgctxt "accounts.register"
+msgid "role_owner_title"
+msgstr "Sahibi / Qurucu"
+
+msgctxt "accounts.register"
+msgid "role_owner_description"
+msgstr "Qurumunuzu qeydiyyata alın və sahibi kimi idarə edin."
+
+msgctxt "accounts.register"
+msgid "role_teacher_title"
+msgstr "Müəllim"
+
+msgctxt "accounts.register"
+msgid "role_teacher_description"
+msgstr "Müəllim kimi qoşulun, kursları və tələbələri idarə edin."
+
+msgctxt "accounts.register"
+msgid "role_staff_title"
+msgstr "İşçi"
+
+msgctxt "accounts.register"
+msgid "role_staff_description"
+msgstr "İnzibati və ya dəstək rolunda işçi kimi qoşulun."
+
+msgctxt "accounts.register"
+msgid "role_student_title"
+msgstr "Tələbə"
+
+msgctxt "accounts.register"
+msgid "role_student_description"
+msgstr "Tələbə kimi qoşulun və kurslara daxil olun."
+
+msgctxt "accounts.register"
+msgid "org_pending_approval_notice"
+msgstr "Qurumun qeydiyyatı superadmin təsdiqi gözləyir. Nəzərdən keçirildikdən sonra sizə bildiriş göndəriləcəkdir."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_teacher_join"
+msgstr "Email təsdiqindən sonra seçdiyiniz quruma müəllim kimi qoşulacaqsınız (təsdiq gözlənilir)."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_staff_join"
+msgstr "Email təsdiqindən sonra seçdiyiniz quruma işçi kimi qoşulacaqsınız (təsdiq gözlənilir)."
+
+msgctxt "accounts.register"
+msgid "student_fields_title"
+msgstr "Tələbə məlumatları"
+
+msgctxt "accounts.register"
+msgid "teacher_fields_title"
+msgstr "Müəllim məlumatları"
+
+msgctxt "accounts.register"
+msgid "staff_fields_title"
+msgstr "İşçi məlumatları"
+
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqsınız."
+
+msgctxt "accounts.register"
+msgid "join_org_optional_hint"
+msgstr "Təşkilat seçimi boş qala bilər. Sonradan profil bölməsindən təşkilata müraciət edə bilərsiniz."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "title_questions_bank"
