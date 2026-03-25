@@ -27,14 +27,13 @@ from ..services import (
     activate_user_account,
     create_user_with_organization,
     get_otp_timer_context,
-    purge_stale_pending_registration,
     send_verification_otp,
     verify_otp_code,
 )
 from ._helpers import signer
 
-User = get_user_model()
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 AUTH_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 LOGIN_LIMIT_SCOPE_IP = "accounts.login.ip"
@@ -160,21 +159,21 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
 
 
 def register_view(request):
-    """User registration with organization bootstrap and email verification."""
-    if request.method == "POST":
-        # Remove any prior unverified registration with the same credentials so
-        # that the form's unique-constraint check does not block a legitimate retry.
-        purge_stale_pending_registration(
-            username=request.POST.get("username", "").strip(),
-            email=request.POST.get("email", "").strip(),
-        )
+    """User registration with organization bootstrap and email verification.
 
+    The user record and the OTP email are created inside a single database
+    savepoint.  If email delivery fails the savepoint is rolled back so no
+    half-created user record is left behind.
+    """
+    if request.method == "POST":
         form = RegisterForm(request.POST)
         if form.is_valid():
             country_code = form.cleaned_data.get("country", "")
             country_obj = Country.objects.filter(code=country_code).first()
             country_name = country_obj.name if country_obj else country_code
 
+            # Wrap user creation + OTP issue inside a savepoint so we can
+            # roll back cleanly when email delivery fails.
             try:
                 with transaction.atomic():
                     user, organization, _, profile = create_user_with_organization(
@@ -192,20 +191,20 @@ def register_view(request):
                         organization_identifier=form.cleaned_data.get("organization_identifier", ""),
                         organization_license_identifier=form.cleaned_data.get("organization_license_identifier", ""),
                         initial_role=form.cleaned_data.get("initial_role", ProfileRole.MEMBER),
+                        phone=form.cleaned_data.get("phone", ""),
+                        specialization=form.cleaned_data.get("specialization", ""),
+                        group_number=form.cleaned_data.get("group_number", ""),
+                        department=form.cleaned_data.get("department", ""),
+                        staff_position=form.cleaned_data.get("staff_position", ""),
                     )
-                    requested_organization_name = profile.requested_organization_name
-
-                    # Send OTP inside the transaction so that a delivery failure
-                    # rolls back user/org creation and leaves no stale records.
+                    # OTP generation + email send; raises on failure so the
+                    # atomic block is rolled back and no orphaned user remains.
                     send_verification_otp(user, request=request)
             except Exception:
-                logger.exception(
-                    "Registration failed for username=%s — user creation or OTP delivery error",
-                    form.cleaned_data.get("username"),
-                )
+                logger.exception("Registration failed during user creation or OTP delivery")
                 messages.error(
                     request,
-                    pgettext_lazy("accounts.auth.message", "otp_email_send_failed"),
+                    pgettext_lazy("accounts.auth.message", "registration_email_send_failed"),
                 )
                 return render(
                     request,
@@ -215,6 +214,8 @@ def register_view(request):
                         "lookup_payload": get_signup_lookup_payload(),
                     },
                 )
+
+            requested_organization_name = profile.requested_organization_name
 
             if organization is not None:
                 request.session["active_organization"] = organization.slug

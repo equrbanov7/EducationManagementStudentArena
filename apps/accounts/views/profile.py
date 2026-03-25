@@ -993,6 +993,7 @@ def user_profile(request):
         superadmin_organizations_section["organizations_pagination_query"] = _query_string(
             section="superadmin-organizations"
         )
+        superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
@@ -1129,6 +1130,7 @@ def user_profile(request):
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
         "superadmin_organizations_section": superadmin_organizations_section,
+        "superadmin_pending_org_count": superadmin_organizations_section.get("pending_count", 0),
         "is_teacher": capabilities["is_teacher"],
         "is_admin": capabilities["can_manage_org"],
         "is_superadmin": capabilities["is_superadmin"],

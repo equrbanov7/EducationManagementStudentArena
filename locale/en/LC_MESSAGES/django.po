@@ -3385,6 +3385,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "A new verification code has been sent."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Registration failed: we could not send the verification email. Please check"
+" your email address and try again."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"
@@ -14909,11 +14915,151 @@ msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Selected organization does not match the selected country."
 
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_teacher"
+msgstr "School teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_teacher"
+msgstr "University teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_teacher"
+msgstr "Course teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_staff"
+msgstr "School staff"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_staff"
+msgstr "University staff"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_staff"
+msgstr "Course staff"
+
+msgctxt "accounts.form.register.label"
+msgid "phone"
+msgstr "Phone number"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "phone"
+msgstr "e.g. +994501234567"
+
+msgctxt "accounts.form.register.label"
+msgid "specialization"
+msgstr "Specialization / Major"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "specialization"
+msgstr "e.g. Computer Science"
+
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Group / Class"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "e.g. CS-101 or Group 3A"
+
+msgctxt "accounts.form.register.label"
+msgid "department"
+msgstr "Department / Faculty"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "department"
+msgstr "e.g. Faculty of Engineering"
+
+msgctxt "accounts.form.register.label"
+msgid "staff_position"
+msgstr "Position / Role Title"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "staff_position"
+msgstr "e.g. Office Manager"
+
+msgctxt "accounts.form.register.error"
+msgid "specialization_required"
+msgstr "Specialization / major is required for students."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Group / class is required for students."
+
+msgctxt "accounts.register"
+msgid "step_role"
+msgstr "Role"
+
+msgctxt "accounts.register"
+msgid "choose_role"
+msgstr "Choose your role"
+
+msgctxt "accounts.register"
+msgid "role_owner_title"
+msgstr "Owner / Founder"
+
+msgctxt "accounts.register"
+msgid "role_owner_description"
+msgstr "Register your organization and manage it as the owner."
+
+msgctxt "accounts.register"
+msgid "role_teacher_title"
+msgstr "Teacher"
+
+msgctxt "accounts.register"
+msgid "role_teacher_description"
+msgstr "Join as a teacher and manage courses and students."
+
+msgctxt "accounts.register"
+msgid "role_staff_title"
+msgstr "Staff"
+
+msgctxt "accounts.register"
+msgid "role_staff_description"
+msgstr "Join as a staff member in an administrative or support role."
+
+msgctxt "accounts.register"
+msgid "role_student_title"
+msgstr "Student"
+
+msgctxt "accounts.register"
+msgid "role_student_description"
+msgstr "Join as a student and access your courses."
+
+msgctxt "accounts.register"
+msgid "org_pending_approval_notice"
+msgstr "Your organization registration is pending superadmin approval. You will be notified once it is reviewed."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_teacher_join"
+msgstr "After email verification, you will join the selected organization as a teacher (pending approval)."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_staff_join"
+msgstr "After email verification, you will join the selected organization as a staff member (pending approval)."
+
+msgctxt "accounts.register"
+msgid "student_fields_title"
+msgstr "Student information"
+
+msgctxt "accounts.register"
+msgid "teacher_fields_title"
+msgstr "Teacher information"
+
+msgctxt "accounts.register"
+msgid "staff_fields_title"
+msgstr "Staff information"
+
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr ""
 "After email verification, you will join the selected organization as a "
 "student."
+
+msgctxt "accounts.register"
+msgid "join_org_optional_hint"
+msgstr "Organization selection is optional. You can apply to join an organization later from your profile."
 
 msgctxt "assignment.review_submissions"
 msgid "filter_search_placeholder"
