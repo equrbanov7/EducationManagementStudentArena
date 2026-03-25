@@ -25,8 +25,13 @@ from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabSubmission
-from apps.notifications.models import StudentOrganizationRequestStatus
-from apps.notifications.services import build_profile_notification_state
+from apps.notifications.models import NotificationType, StudentOrganizationRequestStatus
+from apps.notifications.services import (
+    build_profile_notification_state,
+    create_notification_for_users,
+    get_unread_count,
+    get_user_notifications,
+)
 from apps.projects.models import ProjectSubmission
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
@@ -159,6 +164,92 @@ def profile_avatar(request, user_id):
     return response
 
 
+def _get_publish_notification_targets(user, capabilities):
+    """Return list of target options for notification publishing based on role."""
+    from apps.exams.models import StudentGroup
+    from apps.organizations.models import Membership
+
+    targets = []
+    is_superadmin = capabilities["is_superadmin"]
+    is_org_admin = capabilities["is_org_admin"]
+    is_teacher = capabilities["is_teacher"]
+
+    if is_superadmin:
+        targets.append({"value": "all", "label": "Bütün istifadəçilər (sistem)"})
+        from apps.organizations.models import Organization
+        for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
+            targets.append({"value": f"org_{org.pk}", "label": f"Təşkilat: {org.name}"})
+    elif is_org_admin:
+        # Get user's active org memberships
+        org_memberships = Membership.objects.filter(
+            user=user, is_active=True, organization__is_active=True
+        ).select_related("organization")
+        for membership in org_memberships:
+            targets.append({
+                "value": f"org_{membership.organization_id}",
+                "label": f"Təşkilat: {membership.organization.name} (bütün üzvlər)",
+            })
+    elif is_teacher:
+        teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
+        for group in teacher_groups:
+            targets.append({"value": f"group_{group.pk}", "label": f"Qrup: {group.name}"})
+    return targets
+
+
+def _get_notification_recipients(user, capabilities, target: str, group_id_str: str):
+    """Resolve notification target to a queryset of recipient users.
+
+    Returns a queryset/list of users, or None if target is invalid/unauthorized.
+    """
+    from apps.exams.models import StudentGroup
+    from apps.organizations.models import Membership, Organization
+
+    is_superadmin = capabilities["is_superadmin"]
+    is_org_admin = capabilities["is_org_admin"]
+    is_teacher = capabilities["is_teacher"]
+
+    User = get_user_model()
+
+    if target == "all":
+        if not is_superadmin:
+            return None
+        return User.objects.filter(is_active=True)
+
+    if target.startswith("org_"):
+        try:
+            org_id = int(target[4:])
+        except (ValueError, IndexError):
+            return None
+        try:
+            org = Organization.objects.get(pk=org_id, is_active=True)
+        except Organization.DoesNotExist:
+            return None
+        # Superadmin can target any org; org admin only their own
+        if not is_superadmin:
+            if not Membership.objects.filter(user=user, organization=org, is_active=True).exists():
+                return None
+        member_user_ids = Membership.objects.filter(
+            organization=org, is_active=True
+        ).values_list("user_id", flat=True)
+        return User.objects.filter(pk__in=member_user_ids, is_active=True)
+
+    if target.startswith("group_"):
+        try:
+            grp_id = int(target[6:])
+        except (ValueError, IndexError):
+            return None
+        try:
+            group = StudentGroup.objects.get(pk=grp_id)
+        except StudentGroup.DoesNotExist:
+            return None
+        # Only the teacher who owns the group (or superadmin) may target it
+        if not is_superadmin and group.teacher_id != user.pk:
+            return None
+        return group.students.filter(is_active=True)
+
+    return None
+
+
 @login_required
 def user_profile(request):
     """
@@ -184,7 +275,9 @@ def user_profile(request):
     pending_student_join_org_name = notification_state["pending_student_join_org_name"]
     pending_student_join_message = notification_state["pending_student_join_message"]
     student_can_leave_org = notification_state["student_can_leave_org"]
-    notifications_unread_count = notification_state["unread_count"]
+    org_notification_count = notification_state["unread_count"]
+    in_app_unread_count = get_unread_count(user=request.user)
+    notifications_unread_count = org_notification_count + in_app_unread_count
 
     def _validate_avatar_upload(uploaded_avatar):
         if uploaded_avatar is None:
@@ -249,6 +342,31 @@ def user_profile(request):
 
             messages.error(request, "Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin.")
             active_section = "change-password"
+        elif submitted_form == "publish-notification":
+            if "publish-notification" not in allowed_sections:
+                messages.error(request, "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur.")
+                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
+            notif_title = (request.POST.get("notif_title") or "").strip()
+            notif_message = (request.POST.get("notif_message") or "").strip()
+            notif_target = (request.POST.get("notif_target") or "all").strip()
+            notif_group_id = request.POST.get("notif_group_id", "").strip()
+            if not notif_title:
+                messages.error(request, "Bildiriş başlığı boş ola bilməz.")
+                return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+            recipients = _get_notification_recipients(
+                request.user, capabilities, notif_target, notif_group_id
+            )
+            if recipients is None:
+                messages.error(request, "Bu hədəf üçün icazəniz yoxdur.")
+                return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+            create_notification_for_users(
+                recipients=recipients,
+                title=notif_title,
+                message=notif_message,
+                notification_type=NotificationType.SYSTEM,
+            )
+            messages.success(request, f"Bildiriş uğurla göndərildi.")
+            return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section
             if target_section not in allowed_sections:
@@ -995,9 +1113,23 @@ def user_profile(request):
         )
         superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 
+    # InAppNotification data for profile notifications section
+    notif_filter = request.GET.get("notif_filter", "all")
+    if notif_filter not in ("all", "unread", "read"):
+        notif_filter = "all"
+    in_app_notifications_qs = get_user_notifications(user=request.user, filter_by=notif_filter)
+    in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
+    in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+
+    # Publish-notification data (teacher groups, org info)
+    publish_notification_targets = []
+    if "publish-notification" in allowed_sections:
+        publish_notification_targets = _get_publish_notification_targets(request.user, capabilities)
+
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
         "notifications": "Bildirişlər",
+        "publish-notification": "Bildiriş göndər",
         "posts": pgettext_lazy("profile.section", "posts"),
         "create-post": pgettext_lazy("profile.section", "create_post"),
         "courses": pgettext_lazy("profile.section", "my_courses"),
@@ -1013,7 +1145,7 @@ def user_profile(request):
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
         "student-organization-request": "Təşkilata qoşul",
-        "student-organization-management": "Tələbə idarəetməsi",
+        "student-organization-management": "Staff İdarəetməsi",
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
@@ -1121,9 +1253,13 @@ def user_profile(request):
         "pending_student_invites": pending_student_invites,
         "pending_student_join_requests": pending_student_join_requests,
         "notifications_unread_count": notifications_unread_count,
+        "in_app_unread_count": in_app_unread_count,
+        "in_app_notifications_page": in_app_notifications_page,
+        "notif_filter": notif_filter,
         "pending_student_join_org_name": pending_student_join_org_name,
         "pending_student_join_message": pending_student_join_message,
         "student_can_leave_org": student_can_leave_org,
+        "publish_notification_targets": publish_notification_targets,
         "role_assignment_section": role_assignment_section,
         "student_org_request_section": student_org_request_section,
         "student_org_management_section": student_org_management_section,

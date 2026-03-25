@@ -47,6 +47,19 @@ def _get_own_notification_or_404(pk, user):
     return get_object_or_404(InAppNotification, pk=pk, recipient=user, deleted_at__isnull=True)
 
 
+def _safe_next_url(request):
+    """Return a safe `next` URL from POST, defaulting to notification list."""
+    from urllib.parse import urlparse
+
+    next_url = request.POST.get("next", "").strip()
+    if next_url:
+        parsed = urlparse(next_url)
+        # Only allow relative URLs (no scheme/netloc) for safety
+        if not parsed.scheme and not parsed.netloc:
+            return next_url
+    return None
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Notification List (Inbox)
 # ────────────────────────────────────────────────────────────────────────────
@@ -130,7 +143,7 @@ def notification_mark_read(request, pk):
     mark_notification_read(notification=notification, user=request.user)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "is_read": True})
-    return redirect("notifications:notification_list")
+    return redirect(_safe_next_url(request) or "notifications:notification_list")
 
 
 @login_required
@@ -141,7 +154,7 @@ def notification_mark_unread(request, pk):
     mark_notification_unread(notification=notification, user=request.user)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "is_read": False})
-    return redirect("notifications:notification_list")
+    return redirect(_safe_next_url(request) or "notifications:notification_list")
 
 
 @login_required
@@ -151,7 +164,7 @@ def notification_mark_all_read(request):
     count = mark_all_notifications_read(user=request.user)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "updated": count})
-    return redirect("notifications:notification_list")
+    return redirect(_safe_next_url(request) or "notifications:notification_list")
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -167,7 +180,7 @@ def notification_delete(request, pk):
     delete_notification(notification=notification, user=request.user)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True})
-    return redirect("notifications:notification_list")
+    return redirect(_safe_next_url(request) or "notifications:notification_list")
 
 
 @login_required
@@ -183,7 +196,7 @@ def notification_bulk_delete(request):
     deleted = bulk_delete_notifications(notification_ids=notification_ids, user=request.user)
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "deleted": deleted})
-    return redirect("notifications:notification_list")
+    return redirect(_safe_next_url(request) or "notifications:notification_list")
 
 
 # ────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,71 @@
+{% if 'publish-notification' in allowed_sections %}
+<section class="profile-section-panel profile-section--publish-notification {% if active_section == 'publish-notification' %}is-active{% endif %}"
+         data-profile-section-panel="publish-notification"
+         data-source-url="{{ profile_base_url }}">
+    <div class="section-card">
+        <div class="section-title">
+            <i class="fas fa-paper-plane"></i>
+            <span>Bildiriş göndər</span>
+        </div>
+
+        <p class="text-muted mb-4">
+            Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin.
+            Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək.
+        </p>
+
+        {% if publish_notification_targets %}
+        <form method="post" action="{{ profile_base_url }}" class="publish-notif-form">
+            {% csrf_token %}
+            <input type="hidden" name="profile_form" value="publish-notification">
+            <input type="hidden" name="section" value="publish-notification">
+
+            <div class="mb-3">
+                <label for="notifTarget" class="form-label fw-semibold">
+                    <i class="fas fa-users me-1 text-primary"></i>Hədəf qrup
+                </label>
+                <select class="form-select" id="notifTarget" name="notif_target" required>
+                    {% for target in publish_notification_targets %}
+                    <option value="{{ target.value }}">{{ target.label }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Bildiriş göndəriləcək istifadəçi qrupunu seçin.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="notifTitle" class="form-label fw-semibold">
+                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="notifTitle" name="notif_title"
+                       maxlength="255" required placeholder="Bildiriş başlığını daxil edin...">
+            </div>
+
+            <div class="mb-3">
+                <label for="notifMessage" class="form-label fw-semibold">
+                    <i class="fas fa-align-left me-1 text-primary"></i>Bildiriş mətni
+                </label>
+                <textarea class="form-control" id="notifMessage" name="notif_message"
+                          rows="4" placeholder="Bildiriş mətnini daxil edin (isteğe bağlı)..."></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i>Göndər
+                </button>
+                <button type="reset" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo me-1"></i>Sıfırla
+                </button>
+            </div>
+        </form>
+
+        {% else %}
+        <div class="empty-state py-4 text-center">
+            <i class="fas fa-exclamation-circle fa-2x text-muted mb-2"></i>
+            <p class="text-muted mb-0">
+                Bildiriş göndərmək üçün uyğun hədəf tapılmadı.<br>
+                {% if is_teacher %}Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız.{% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}

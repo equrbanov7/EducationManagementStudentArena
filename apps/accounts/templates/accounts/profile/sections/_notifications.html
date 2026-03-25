@@ -6,8 +6,12 @@
         <div class="section-title">
             <i class="fas fa-bell"></i>
             <span>Bildirişlər</span>
+            {% if in_app_unread_count > 0 %}
+            <span class="badge bg-danger ms-2">{{ in_app_unread_count }}</span>
+            {% endif %}
         </div>
 
+        {# ── Organisation invite / request alerts ── #}
         {% if pending_student_join_requests %}
             {% for pending_request in pending_student_join_requests %}
             <div class="alert alert-warning mb-3">
@@ -35,6 +39,7 @@
         {% endif %}
 
         {% if pending_student_invites %}
+            <div class="mb-3">
             {% for invite in pending_student_invites %}
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
                 <div>
@@ -62,14 +67,289 @@
                 </div>
             </div>
             {% endfor %}
-        {% elif not pending_student_join_requests %}
-        <div class="empty-state py-3">
-            <i class="fas fa-bell-slash"></i>
-            <p>Hazırda yeni bildiriş yoxdur.</p>
+            </div>
+        {% endif %}
+
+        {# ── In-App Notification Inbox ── #}
+        <hr class="my-3">
+
+        {# Filter tabs #}
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <nav class="nav nav-pills notif-filter-tabs">
+                <a class="nav-link py-1 px-2 {% if notif_filter == 'all' %}active{% endif %}"
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=all">Hamısı</a>
+                <a class="nav-link py-1 px-2 {% if notif_filter == 'unread' %}active{% endif %}"
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=unread">
+                    Oxunmamış
+                    {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-1">{{ in_app_unread_count }}</span>{% endif %}
+                </a>
+                <a class="nav-link py-1 px-2 {% if notif_filter == 'read' %}active{% endif %}"
+                   href="{{ profile_base_url }}?section=notifications&notif_filter=read">Oxunmuş</a>
+            </nav>
+            {% if in_app_notifications_page.object_list %}
+            <div class="d-flex gap-2">
+                <form method="post" action="{% url 'notifications:notification_mark_all_read' %}" id="profile-notif-mark-all-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-check-double me-1"></i>Hamısını oxunmuş işarələ
+                    </button>
+                </form>
+            </div>
+            {% endif %}
         </div>
+
+        {% if in_app_notifications_page.object_list %}
+        {# Bulk action bar #}
+        <div class="d-flex align-items-center gap-2 mb-2 notif-bulk-bar" id="profileNotifBulkBar" style="display:none !important">
+            <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="profileNotifSelectAll">
+                <label class="form-check-label" for="profileNotifSelectAll">Hamısını seç</label>
+            </div>
+            <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="profileNotifBulkDeleteForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
+                <div id="profileNotifBulkIds"></div>
+                <button type="submit" class="btn btn-sm btn-outline-danger" id="profileNotifBulkDeleteBtn" disabled>
+                    <i class="fas fa-trash me-1"></i>Seçilənləri sil
+                </button>
+            </form>
+        </div>
+
+        <ul class="list-unstyled profile-notif-list" id="profileNotifList">
+            {% for notification in in_app_notifications_page %}
+            <li class="profile-notif-item {% if not notification.is_read %}profile-notif-item--unread{% endif %}"
+                data-id="{{ notification.pk }}">
+                <div class="form-check profile-notif-checkbox-wrap mb-0">
+                    <input class="form-check-input profile-notif-checkbox" type="checkbox"
+                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}">
+                </div>
+
+                <div class="profile-notif-icon">
+                    {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt text-warning"></i>
+                    {% elif notification.notification_type == 'exam' %}<i class="fas fa-clipboard-list text-primary"></i>
+                    {% elif notification.notification_type == 'grade' %}<i class="fas fa-star text-success"></i>
+                    {% elif notification.notification_type == 'course' %}<i class="fas fa-book text-info"></i>
+                    {% elif notification.notification_type == 'live_exam' %}<i class="fas fa-broadcast-tower text-danger"></i>
+                    {% else %}<i class="fas fa-bell text-secondary"></i>
+                    {% endif %}
+                </div>
+
+                <div class="profile-notif-body" style="cursor:pointer;"
+                     data-bs-toggle="modal" data-bs-target="#profileNotifModal"
+                     data-notif-id="{{ notification.pk }}"
+                     data-notif-title="{{ notification.title|escapejs }}"
+                     data-notif-message="{{ notification.message|escapejs }}"
+                     data-notif-time="{{ notification.created_at|date:'d M Y, H:i' }}"
+                     data-notif-type="{{ notification.get_notification_type_display }}"
+                     data-notif-link="{{ notification.link }}"
+                     data-notif-is-read="{% if notification.is_read %}1{% else %}0{% endif %}"
+                     data-mark-read-url="{% url 'notifications:notification_mark_read' notification.pk %}">
+                    <div class="profile-notif-title">
+                        {% if not notification.is_read %}<strong>{{ notification.title }}</strong>
+                        {% else %}{{ notification.title }}{% endif %}
+                    </div>
+                    {% if notification.message %}
+                    <div class="profile-notif-preview text-muted small text-truncate">{{ notification.message }}</div>
+                    {% endif %}
+                    <div class="profile-notif-meta text-muted small">
+                        <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} əvvəl
+                        {% if not notification.is_read %}
+                        <span class="badge bg-primary ms-2" style="font-size:.65rem;">Yeni</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="profile-notif-actions">
+                    {% if not notification.is_read %}
+                    <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.number }}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Oxunmuş işarələ">
+                            <i class="fas fa-envelope-open"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.number }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        {# Pagination #}
+        {% if in_app_notifications_page.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination pagination-sm justify-content-center">
+                {% if in_app_notifications_page.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.previous_page_number }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
+                {% endif %}
+                {% for i in in_app_notifications_page.paginator.page_range %}
+                <li class="page-item {% if i == in_app_notifications_page.number %}active{% endif %}">
+                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ i }}">{{ i }}</a>
+                </li>
+                {% endfor %}
+                {% if in_app_notifications_page.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.next_page_number }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        {# Empty state #}
+        {% if not pending_student_invites and not pending_student_join_requests %}
+        <div class="empty-state py-4 text-center">
+            <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+            <p class="text-muted mb-0">
+                {% if notif_filter == 'unread' %}Oxunmamış bildiriş yoxdur.
+                {% elif notif_filter == 'read' %}Oxunmuş bildiriş yoxdur.
+                {% else %}Hazırda bildiriş yoxdur.{% endif %}
+            </p>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 
- 
+    {# ── Notification Detail Modal ── #}
+    <div class="modal fade" id="profileNotifModal" tabindex="-1"
+         aria-labelledby="profileNotifModalLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileNotifModalLabel">
+                        <i class="fas fa-bell me-2 text-primary"></i>
+                        <span id="profileNotifModalTitle">Bildiriş</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-muted small mb-3" id="profileNotifModalMeta"></div>
+                    <div id="profileNotifModalMessage" class="mb-3"></div>
+                    <div id="profileNotifModalLink"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Bağla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script nonce="{{ request.csp_nonce }}">
+    (function () {
+        'use strict';
+
+        var modal = document.getElementById('profileNotifModal');
+        if (!modal) return;
+
+        // Show bulk bar
+        var bulkBar = document.getElementById('profileNotifBulkBar');
+        var bulkDeleteBtn = document.getElementById('profileNotifBulkDeleteBtn');
+        var selectAllCb = document.getElementById('profileNotifSelectAll');
+        var checkboxes = document.querySelectorAll('.profile-notif-checkbox');
+        var bulkIdsContainer = document.getElementById('profileNotifBulkIds');
+
+        if (bulkBar) {
+            bulkBar.style.removeProperty('display');
+
+            function updateBulkState() {
+                var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
+                bulkDeleteBtn.disabled = checked.length === 0;
+                // Rebuild hidden inputs
+                if (bulkIdsContainer) {
+                    bulkIdsContainer.innerHTML = '';
+                    checked.forEach(function (cb) {
+                        var inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = 'ids[]';
+                        inp.value = cb.value;
+                        bulkIdsContainer.appendChild(inp);
+                    });
+                }
+                if (selectAllCb) {
+                    selectAllCb.checked = checked.length === checkboxes.length && checkboxes.length > 0;
+                    selectAllCb.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+                }
+            }
+
+            if (selectAllCb) {
+                selectAllCb.addEventListener('change', function () {
+                    checkboxes.forEach(function (cb) { cb.checked = selectAllCb.checked; });
+                    updateBulkState();
+                });
+            }
+            checkboxes.forEach(function (cb) {
+                cb.addEventListener('change', updateBulkState);
+            });
+        }
+
+        // Modal: open notification detail and mark as read
+        var notifBodies = document.querySelectorAll('.profile-notif-body[data-bs-toggle="modal"]');
+        notifBodies.forEach(function (body) {
+            body.addEventListener('click', function () {
+                var title = body.getAttribute('data-notif-title') || '';
+                var message = body.getAttribute('data-notif-message') || '';
+                var time = body.getAttribute('data-notif-time') || '';
+                var type = body.getAttribute('data-notif-type') || '';
+                var link = body.getAttribute('data-notif-link') || '';
+                var isRead = body.getAttribute('data-notif-is-read') === '1';
+                var markReadUrl = body.getAttribute('data-mark-read-url') || '';
+                var notifId = body.getAttribute('data-notif-id');
+
+                document.getElementById('profileNotifModalTitle').textContent = title;
+                document.getElementById('profileNotifModalMeta').textContent =
+                    (type ? type + ' — ' : '') + time;
+                document.getElementById('profileNotifModalMessage').textContent = message || '(Mətn yoxdur)';
+
+                var linkEl = document.getElementById('profileNotifModalLink');
+                if (link) {
+                    linkEl.innerHTML = '<a href="' + link + '" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-external-link-alt me-1"></i>Keçidə get</a>';
+                } else {
+                    linkEl.innerHTML = '';
+                }
+
+                // Auto mark as read via AJAX
+                if (!isRead && markReadUrl) {
+                    var csrfToken = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+                    fetch(markReadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    }).then(function (resp) {
+                        if (resp.ok) {
+                            // Update UI: remove unread styling
+                            var item = document.querySelector('.profile-notif-item[data-id="' + notifId + '"]');
+                            if (item) {
+                                item.classList.remove('profile-notif-item--unread');
+                            }
+                            body.setAttribute('data-notif-is-read', '1');
+                        }
+                    }).catch(function () {});
+                }
+            });
+        });
+    })();
+    </script>
 </section>
 {% endif %}
