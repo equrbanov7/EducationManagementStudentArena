@@ -472,6 +472,7 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
             "change-password",
+            "publish-notification",
         }
     else:
         allowed_sections = {
@@ -496,11 +497,12 @@ def _role_capabilities(user, profile):
                     "student-organization-management",
                     "permission-editor",
                     "manage-roles",
+                    "publish-notification",
                 }
             )
 
         if is_teacher:
-            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review", "review-results"})
+            allowed_sections.update({"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"})
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses", "student-organization-request"})

@@ -39,6 +39,19 @@
             </a>
         </li>
         {% endif %}
+
+        {% if 'publish-notification' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=publish-notification"
+               data-section="publish-notification"
+               data-title="Bildiriş göndər"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'publish-notification' %}active{% endif %}">
+                <i class="fas fa-paper-plane sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Bildiriş göndər</span>
+            </a>
+        </li>
+        {% endif %}
  
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_education" context "profile.sidebar" %}</span></li>
         {% if 'posts' in allowed_sections %}
@@ -255,11 +268,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=student-organization-management"
                data-section="student-organization-management"
-               data-title="Tələbə idarəetməsi"
+               data-title="Staff İdarəetməsi"
                data-source-url="{% url 'accounts:student_organization_management' %}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
-                <i class="fas fa-user-graduate sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Tələbə idarəetməsi</span>
+                <i class="fas fa-users-cog sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Staff İdarəetməsi</span>
             </a>
         </li>
         {% endif %}
