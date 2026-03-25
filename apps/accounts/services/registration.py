@@ -144,9 +144,7 @@ def create_user_with_organization(
 
             _notify_superadmins_of_pending_org(organization)
         except Exception:
-            logger.exception(
-                "Failed to notify superadmins about new pending org %s", organization.pk
-            )
+            logger.exception("Failed to notify superadmins about new pending org %s", organization.pk)
     else:
         # student_join / teacher_join / staff_join
         requested_organization = join_organization

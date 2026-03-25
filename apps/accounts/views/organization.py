@@ -681,7 +681,9 @@ def student_organization_management(request):
                         )
                         target_profile.organization = org
                         target_profile.organization_type = org.org_type
-                        target_profile.role = ProfileRole.TEACHER if ts_request.role_type == MRR.TEACHER else ProfileRole.MEMBER
+                        target_profile.role = (
+                            ProfileRole.TEACHER if ts_request.role_type == MRR.TEACHER else ProfileRole.MEMBER
+                        )
                         target_profile.requested_organization = None
                         target_profile.requested_organization_name = ""
                         target_profile.save(

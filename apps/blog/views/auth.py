@@ -45,9 +45,7 @@ def register_view(request):
             try:
                 send_verify_email(user, code, request=request, expires_at=expires_at)
             except Exception:
-                logger.exception(
-                    "Failed to send OTP email during blog registration for user pk=%s", user.pk
-                )
+                logger.exception("Failed to send OTP email during blog registration for user pk=%s", user.pk)
                 # Roll back: delete the user so the credentials are free to retry.
                 user.delete()
                 messages.error(request, pgettext("blog.verify.message", "otp_email_send_failed"))
