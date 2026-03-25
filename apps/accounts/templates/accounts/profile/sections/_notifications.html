@@ -59,19 +59,22 @@
         <hr class="my-3">
 
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <nav class="nav nav-pills notif-filter-tabs">
-                <a class="nav-link py-1 px-2 {% if notif_filter == 'all' %}active{% endif %}"
+            <nav class="nav notif-filter-tabs" role="tablist">
+                <a class="notif-filter-tab {% if notif_filter == 'all' %}is-active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=all">
-                    <i class="fas fa-list me-1"></i>{% trans "filter_all" context "profile.notifications" %}
+                    <i class="fas fa-list"></i>
+                    <span>{% trans "filter_all" context "profile.notifications" %}</span>
                 </a>
-                <a class="nav-link py-1 px-2 {% if notif_filter == 'unread' %}active{% endif %}"
+                <a class="notif-filter-tab {% if notif_filter == 'unread' %}is-active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=unread">
-                    <i class="fas fa-envelope me-1"></i>{% trans "filter_unread" context "profile.notifications" %}
-                    {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-1">{{ in_app_unread_count }}</span>{% endif %}
+                    <i class="fas fa-envelope"></i>
+                    <span>{% trans "filter_unread" context "profile.notifications" %}</span>
+                    {% if in_app_unread_count > 0 %}<span class="notif-filter-badge">{{ in_app_unread_count }}</span>{% endif %}
                 </a>
-                <a class="nav-link py-1 px-2 {% if notif_filter == 'read' %}active{% endif %}"
+                <a class="notif-filter-tab {% if notif_filter == 'read' %}is-active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=read">
-                    <i class="fas fa-envelope-open me-1"></i>{% trans "filter_read" context "profile.notifications" %}
+                    <i class="fas fa-envelope-open"></i>
+                    <span>{% trans "filter_read" context "profile.notifications" %}</span>
                 </a>
             </nav>
             {% if in_app_notifications_page.object_list %}

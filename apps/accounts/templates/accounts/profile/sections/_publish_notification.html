@@ -27,16 +27,15 @@
                 </label>
 
                 <div class="pn-target-list" id="pnTargetList">
-                    {# Search bar shown only when there are many targets #}
-                    {% if publish_notification_targets|length > 5 %}
+                    {# Search bar — always visible so users can quickly filter targets #}
                     <div class="pn-target-search-wrap">
                         <input type="text" class="form-control form-control-sm"
                                id="pnTargetSearch"
                                placeholder="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
                                autocomplete="off">
                     </div>
-                    {% endif %}
 
+                    <div class="pn-target-scroll">
                     {% for target in publish_notification_targets %}
                     <label class="pn-target-item {% if target.is_exclusive %}is-exclusive{% endif %}"
                            data-label="{{ target.label|lower }}">
@@ -57,6 +56,10 @@
                         <span class="pn-target-label">{{ target.label }}</span>
                     </label>
                     {% endfor %}
+                    <div class="pn-target-no-results" id="pnTargetNoResults" style="display:none;">
+                        <p class="text-muted small px-3 py-2 mb-0">{% trans "search_no_results" context "profile.publish_notification" %}</p>
+                    </div>
+                    </div>{# /pn-target-scroll #}
                 </div>
                 <div class="form-text mt-1">{% trans "target_group_hint" context "profile.publish_notification" %}</div>
             </div>
@@ -160,15 +163,22 @@
             });
         });
 
-        // ── Search filter (only present when many targets) ──
-        var searchInput = document.getElementById('pnTargetSearch');
+        // ── Search filter — always present ──
+        var searchInput   = document.getElementById('pnTargetSearch');
+        var noResults     = document.getElementById('pnTargetNoResults');
         if (searchInput) {
             searchInput.addEventListener('input', function () {
                 var q = searchInput.value.toLowerCase().trim();
+                var visibleCount = 0;
                 targetList.querySelectorAll('.pn-target-item').forEach(function (item) {
                     var label = (item.getAttribute('data-label') || '').toLowerCase();
-                    item.style.display = (q === '' || label.indexOf(q) !== -1) ? '' : 'none';
+                    var visible = (q === '' || label.indexOf(q) !== -1);
+                    item.style.display = visible ? '' : 'none';
+                    if (visible) { visibleCount++; }
                 });
+                if (noResults) {
+                    noResults.style.display = (q !== '' && visibleCount === 0) ? '' : 'none';
+                }
             });
         }
 

@@ -15717,3 +15717,7 @@ msgstr "Bildiriş uğurla göndərildi."
 
 msgid "notif_no_recipients"
 msgstr "Bu hədəflər üçün icazəniz yoxdur və ya alıcı tapılmadı."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "Axtarış nəticəsi tapılmadı."

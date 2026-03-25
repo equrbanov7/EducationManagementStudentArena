@@ -213,7 +213,7 @@ def _get_publish_notification_targets(user, capabilities):
     return targets
 
 
-def _get_notification_recipients(user, capabilities, target: str, group_id_str: str):
+def _get_notification_recipients(user, capabilities, target: str):
     """Resolve notification target to a queryset of recipient users.
 
     Returns a queryset/list of users, or None if target is invalid/unauthorized.

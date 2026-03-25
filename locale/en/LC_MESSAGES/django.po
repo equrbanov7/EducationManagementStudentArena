@@ -15954,3 +15954,7 @@ msgstr "Notification sent successfully."
 
 msgid "notif_no_recipients"
 msgstr "You do not have permission for these targets or no recipients found."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "No results found."

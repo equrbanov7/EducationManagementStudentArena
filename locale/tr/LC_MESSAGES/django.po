@@ -15449,3 +15449,7 @@ msgstr "Bildirim başarıyla gönderildi."
 
 msgid "notif_no_recipients"
 msgstr "Bu hedefler için izniniz yok veya alıcı bulunamadı."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "Sonuç bulunamadı."
