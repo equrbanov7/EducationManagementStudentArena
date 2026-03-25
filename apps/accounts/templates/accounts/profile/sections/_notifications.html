@@ -3,28 +3,19 @@
          data-profile-section-panel="notifications"
          data-source-url="{{ profile_base_url }}">
     <div class="section-card">
-        <div class="section-title d-flex align-items-center gap-2">
+        <div class="section-title">
             <i class="fas fa-bell"></i>
             <span>Bildirişlər</span>
-            {% if in_app_unread_count > 0 %}
-            <span class="badge bg-danger">{{ in_app_unread_count }}</span>
-            {% endif %}
+            {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-2">{{ in_app_unread_count }}</span>{% endif %}
         </div>
 
-        {# Organisation invite / request alerts #}
         {% if pending_student_join_requests %}
             {% for pending_request in pending_student_join_requests %}
             <div class="alert alert-warning mb-3">
                 <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
                     <div>
-                        <div>
-                            <strong>{{ pending_request.organization.name }}</strong> üçün müraciətiniz təsdiq gözləyir.
-                        </div>
-                        {% if pending_request.message %}
-                        <div class="mt-2">
-                            <small><strong>Mesaj:</strong> {{ pending_request.message }}</small>
-                        </div>
-                        {% endif %}
+                        <div><strong>{{ pending_request.organization.name }}</strong> üçün müraciətiniz təsdiq gözləyir.</div>
+                        {% if pending_request.message %}<div class="mt-2"><small><strong>Mesaj:</strong> {{ pending_request.message }}</small></div>{% endif %}
                     </div>
                     <form method="post" action="{% url 'accounts:student_organization_request' %}">
                         {% csrf_token %}
@@ -39,46 +30,38 @@
         {% endif %}
 
         {% if pending_student_invites %}
-            <div class="mb-3">
+        <div class="mb-3">
             {% for invite in pending_student_invites %}
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
-                <div>
-                    <strong>{{ invite.organization.name }}</strong> sizi tələbə kimi dəvət edib.
-                </div>
+                <div><strong>{{ invite.organization.name }}</strong> sizi tələbə kimi dəvət edib.</div>
                 <div class="d-flex gap-2">
                     <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
                         <input type="hidden" name="invite_id" value="{{ invite.id }}">
                         <input type="hidden" name="action" value="accept">
-                        <button type="submit" class="btn btn-success btn-sm">
-                            <i class="fas fa-check"></i> Qəbul et
-                        </button>
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Qəbul et</button>
                     </form>
                     <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
                         <input type="hidden" name="invite_id" value="{{ invite.id }}">
                         <input type="hidden" name="action" value="reject">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">
-                            Rədd et
-                        </button>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Rədd et</button>
                     </form>
                 </div>
             </div>
             {% endfor %}
-            </div>
+        </div>
         {% endif %}
 
-        {# In-App Notification Inbox #}
         <hr class="my-3">
 
-        {# Filter tabs + bulk mark-all-read #}
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
             <nav class="nav nav-pills notif-filter-tabs">
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'all' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=all">
-                   <i class="fas fa-list me-1"></i>Hamısı
+                    <i class="fas fa-list me-1"></i>Hamısı
                 </a>
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'unread' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=unread">
@@ -87,24 +70,21 @@
                 </a>
                 <a class="nav-link py-1 px-2 {% if notif_filter == 'read' %}active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=read">
-                   <i class="fas fa-envelope-open me-1"></i>Oxunmuş
+                    <i class="fas fa-envelope-open me-1"></i>Oxunmuş
                 </a>
             </nav>
             {% if in_app_notifications_page.object_list %}
-            <div class="d-flex gap-2">
-                <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-check-double me-1"></i>Hamısını oxunmuş işarələ
-                    </button>
-                </form>
-            </div>
+            <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-check-double me-1"></i>Hamısını oxunmuş işarələ
+                </button>
+            </form>
             {% endif %}
         </div>
 
         {% if in_app_notifications_page.object_list %}
-        {# Bulk action bar #}
         <div class="d-flex align-items-center gap-2 mb-2 notif-bulk-bar" id="profileNotifBulkBar" style="display:none !important">
             <div class="form-check mb-0">
                 <input class="form-check-input" type="checkbox" id="profileNotifSelectAll">
@@ -128,26 +108,16 @@
                     <input class="form-check-input profile-notif-checkbox" type="checkbox"
                            value="{{ notification.pk }}" id="pn-{{ notification.pk }}">
                 </div>
-
                 <div class="profile-notif-icon">
                     {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt text-warning"></i>
                     {% elif notification.notification_type == 'exam' %}<i class="fas fa-clipboard-list text-primary"></i>
                     {% elif notification.notification_type == 'grade' %}<i class="fas fa-star text-success"></i>
                     {% elif notification.notification_type == 'course' %}<i class="fas fa-book text-info"></i>
                     {% elif notification.notification_type == 'live_exam' %}<i class="fas fa-broadcast-tower text-danger"></i>
-                    {% else %}<i class="fas fa-bell text-secondary"></i>
-                    {% endif %}
+                    {% else %}<i class="fas fa-bell text-secondary"></i>{% endif %}
                 </div>
-
-                {#
-                  NOTE: Data attributes use Django's default auto-HTML-escaping (no |escapejs).
-                  This is correct: getAttribute() decodes HTML entities automatically.
-                  Using |escapejs here would cause \u sequences to appear literally.
-                #}
-                <div class="profile-notif-body"
+                <div class="profile-notif-body js-notif-open"
                      style="cursor:pointer;"
-                     data-bs-toggle="modal"
-                     data-bs-target="#profileNotifModal"
                      data-notif-id="{{ notification.pk }}"
                      data-notif-title="{{ notification.title }}"
                      data-notif-message="{{ notification.message }}"
@@ -165,9 +135,7 @@
                     <div class="profile-notif-preview text-muted small">{{ notification.message|truncatechars:80 }}</div>
                     {% endif %}
                     {% if notification.metadata.image_url %}
-                    <div class="mt-1">
-                        <img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img">
-                    </div>
+                    <div class="mt-1"><img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img"></div>
                     {% endif %}
                     <div class="profile-notif-meta text-muted small mt-1">
                         <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} əvvəl
@@ -176,7 +144,6 @@
                         {% endif %}
                     </div>
                 </div>
-
                 <div class="profile-notif-actions">
                     {% if not notification.is_read %}
                     <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
@@ -199,15 +166,12 @@
             {% endfor %}
         </ul>
 
-        {# Pagination #}
         {% if in_app_notifications_page.has_other_pages %}
         <nav class="mt-3">
             <ul class="pagination pagination-sm justify-content-center">
                 {% if in_app_notifications_page.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.previous_page_number }}">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
+                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
                 </li>
                 {% else %}
                 <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i></span></li>
@@ -219,9 +183,7 @@
                 {% endfor %}
                 {% if in_app_notifications_page.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.next_page_number }}">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
+                    <a class="page-link" href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_page={{ in_app_notifications_page.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
                 </li>
                 {% else %}
                 <li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-right"></i></span></li>
@@ -231,12 +193,9 @@
         {% endif %}
 
         {% else %}
-        {# Empty state #}
         {% if not pending_student_invites and not pending_student_join_requests %}
         <div class="notif-empty-state py-5 text-center">
-            <div class="notif-empty-icon mb-3">
-                <i class="fas fa-bell-slash"></i>
-            </div>
+            <div class="notif-empty-icon mb-3"><i class="fas fa-bell-slash"></i></div>
             <p class="text-muted fw-semibold mb-1">
                 {% if notif_filter == 'unread' %}Oxunmamış bildiriş yoxdur.
                 {% elif notif_filter == 'read' %}Oxunmuş bildiriş yoxdur.
@@ -248,14 +207,14 @@
         {% endif %}
     </div>
 
-    {# Notification Detail Modal #}
+    {# Notification detail modal #}
     <div class="modal fade" id="profileNotifModal" tabindex="-1"
          aria-labelledby="profileNotifModalLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title d-flex align-items-center gap-2" id="profileNotifModalLabel">
-                        <span id="profileNotifModalIcon"><i class="fas fa-bell text-primary"></i></span>
+                    <h5 class="modal-title" id="profileNotifModalLabel">
+                        <i class="fas fa-bell me-2 text-primary" id="profileNotifModalIcon"></i>
                         <span id="profileNotifModalTitle">Bildiriş</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
@@ -270,7 +229,7 @@
                     <div id="profileNotifModalLink"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i>Bağla
                     </button>
                 </div>
@@ -282,38 +241,37 @@
     (function () {
         'use strict';
 
-        var modal = document.getElementById('profileNotifModal');
-        if (!modal) return;
+        var modalEl = document.getElementById('profileNotifModal');
+        if (!modalEl) return;
 
-        // Bulk action bar
+        // ── Bulk action bar ──
         var bulkBar = document.getElementById('profileNotifBulkBar');
         var bulkDeleteBtn = document.getElementById('profileNotifBulkDeleteBtn');
         var selectAllCb = document.getElementById('profileNotifSelectAll');
         var checkboxes = document.querySelectorAll('.profile-notif-checkbox');
         var bulkIdsContainer = document.getElementById('profileNotifBulkIds');
 
+        function updateBulkState() {
+            var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
+            if (bulkDeleteBtn) bulkDeleteBtn.disabled = checked.length === 0;
+            if (bulkIdsContainer) {
+                bulkIdsContainer.innerHTML = '';
+                checked.forEach(function (cb) {
+                    var inp = document.createElement('input');
+                    inp.type = 'hidden';
+                    inp.name = 'ids[]';
+                    inp.value = cb.value;
+                    bulkIdsContainer.appendChild(inp);
+                });
+            }
+            if (selectAllCb) {
+                selectAllCb.checked = checked.length === checkboxes.length && checkboxes.length > 0;
+                selectAllCb.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
+            }
+        }
+
         if (bulkBar) {
             bulkBar.style.removeProperty('display');
-
-            function updateBulkState() {
-                var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
-                if (bulkDeleteBtn) bulkDeleteBtn.disabled = checked.length === 0;
-                if (bulkIdsContainer) {
-                    bulkIdsContainer.innerHTML = '';
-                    checked.forEach(function (cb) {
-                        var inp = document.createElement('input');
-                        inp.type = 'hidden';
-                        inp.name = 'ids[]';
-                        inp.value = cb.value;
-                        bulkIdsContainer.appendChild(inp);
-                    });
-                }
-                if (selectAllCb) {
-                    selectAllCb.checked = checked.length === checkboxes.length && checkboxes.length > 0;
-                    selectAllCb.indeterminate = checked.length > 0 && checked.length < checkboxes.length;
-                }
-            }
-
             if (selectAllCb) {
                 selectAllCb.addEventListener('change', function () {
                     checkboxes.forEach(function (cb) { cb.checked = selectAllCb.checked; });
@@ -323,10 +281,10 @@
             checkboxes.forEach(function (cb) { cb.addEventListener('change', updateBulkState); });
         }
 
-        // Modal: open notification detail
-        // NOTE: getAttribute() automatically decodes HTML entities, so plain Django
-        // auto-escaping (no |escapejs) in data-* attributes is safe and correct here.
-        document.querySelectorAll('.profile-notif-body[data-bs-toggle="modal"]').forEach(function (body) {
+        // ── Modal: open notification detail via manual Bootstrap trigger ──
+        // Using bootstrap.Modal directly (not data-bs-toggle) to guarantee content
+        // is populated before the modal becomes visible.
+        document.querySelectorAll('.profile-notif-body.js-notif-open').forEach(function (body) {
             body.addEventListener('click', function () {
                 var title   = body.getAttribute('data-notif-title')   || '';
                 var message = body.getAttribute('data-notif-message') || '';
@@ -338,23 +296,11 @@
                 var markUrl = body.getAttribute('data-mark-read-url') || '';
                 var notifId = body.getAttribute('data-notif-id')      || '';
 
-                // textContent safely renders the decoded text (no XSS risk)
+                // Populate modal content safely (textContent prevents XSS)
                 document.getElementById('profileNotifModalTitle').textContent = title;
                 document.getElementById('profileNotifModalMeta').textContent =
                     (type ? type + ' — ' : '') + time;
                 document.getElementById('profileNotifModalMessage').textContent = message || '';
-
-                // Copy type icon from list item
-                var item = body.closest('.profile-notif-item');
-                var listIcon = item ? item.querySelector('.profile-notif-icon i') : null;
-                var modalIcon = document.getElementById('profileNotifModalIcon');
-                if (modalIcon) {
-                    modalIcon.innerHTML = '';
-                    if (listIcon) {
-                        var clonedIcon = listIcon.cloneNode(true);
-                        modalIcon.appendChild(clonedIcon);
-                    }
-                }
 
                 // Image
                 var imgWrap = document.getElementById('profileNotifModalImage');
@@ -367,8 +313,9 @@
                     imgEl.src = '';
                 }
 
-                // Link
+                // Link (built with createElement for XSS safety)
                 var linkEl = document.getElementById('profileNotifModalLink');
+                while (linkEl.firstChild) { linkEl.removeChild(linkEl.firstChild); }
                 if (link) {
                     var a = document.createElement('a');
                     a.href = link;
@@ -379,13 +326,14 @@
                     icon.className = 'fas fa-external-link-alt me-1';
                     a.appendChild(icon);
                     a.appendChild(document.createTextNode('Keçidə get'));
-                    linkEl.textContent = '';
                     linkEl.appendChild(a);
-                } else {
-                    linkEl.textContent = '';
                 }
 
-                // Auto mark as read via AJAX
+                // Show modal via Bootstrap API
+                var bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                bsModal.show();
+
+                // Auto mark as read via AJAX after modal opens
                 if (!isRead && markUrl) {
                     var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
                     fetch(markUrl, {
@@ -394,6 +342,7 @@
                     }).then(function (resp) {
                         if (resp.ok) {
                             body.setAttribute('data-notif-is-read', '1');
+                            var item = body.closest('.profile-notif-item');
                             if (item) {
                                 item.classList.remove('profile-notif-item--unread');
                                 var badge = item.querySelector('.notif-new-badge');
@@ -404,9 +353,8 @@
                                     sp.textContent = strong.textContent;
                                     strong.replaceWith(sp);
                                 }
-                                // Remove mark-read button
                                 var mrForm = item.querySelector('form[action*="mark-read"]');
-                                if (mrForm) mrForm.style.display = 'none';
+                                if (mrForm) mrForm.remove();
                             }
                         }
                     }).catch(function () {});

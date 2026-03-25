@@ -22,33 +22,72 @@
             <input type="hidden" name="profile_form" value="publish-notification">
             <input type="hidden" name="section" value="publish-notification">
 
-            {# Target group — styled card-select #}
+            {# Hidden select that holds the actual submitted value #}
+            <input type="hidden" name="notif_target" id="notifTargetValue" value="{{ publish_notification_targets.0.value }}">
+
+            {# Target group — Bootstrap searchable dropdown #}
             <div class="mb-4">
-                <label class="form-label fw-semibold mb-2">
-                    <i class="fas fa-users me-1 text-primary"></i>Hədəf qrup
-                    <span class="text-danger">*</span>
+                <label class="form-label fw-semibold mb-1">
+                    <i class="fas fa-users me-1 text-primary"></i>Hədəf qrup <span class="text-danger">*</span>
                 </label>
-                <div class="publish-notif-targets" id="publishTargetList" role="radiogroup">
-                    {% for target in publish_notification_targets %}
-                    <label class="publish-notif-target-card {% if forloop.first %}selected{% endif %}">
-                        <input type="radio" name="notif_target" value="{{ target.value }}"
-                               {% if forloop.first %}checked{% endif %}
-                               class="publish-notif-target-radio visually-hidden">
-                        <span class="publish-notif-target-icon">
-                            {% if target.value == 'all' %}
-                                <i class="fas fa-globe-americas text-primary"></i>
-                            {% elif target.value|slice:":6" == 'group_' %}
-                                <i class="fas fa-users text-info"></i>
-                            {% else %}
-                                <i class="fas fa-building text-success"></i>
-                            {% endif %}
+                <div class="pn-select-wrap dropdown" id="notifTargetDropdown">
+                    <button type="button"
+                            class="pn-select-toggle btn btn-outline-secondary w-100 d-flex align-items-center justify-content-between"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            aria-haspopup="listbox">
+                        <span class="pn-select-display">
+                            <span class="pn-select-icon me-2">
+                                {% if publish_notification_targets.0.value == 'all' %}
+                                    <i class="fas fa-globe-americas text-primary"></i>
+                                {% else %}
+                                    <i class="fas fa-building text-success"></i>
+                                {% endif %}
+                            </span>
+                            <span class="pn-select-label">{{ publish_notification_targets.0.label }}</span>
                         </span>
-                        <span class="publish-notif-target-label">{{ target.label }}</span>
-                        <span class="publish-notif-target-check">
-                            <i class="fas fa-check-circle"></i>
-                        </span>
-                    </label>
-                    {% endfor %}
+                        <i class="fas fa-chevron-down pn-select-caret ms-2 text-muted small"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 pn-select-menu p-2" style="max-height:320px;overflow-y:auto;">
+                        <div class="pn-select-search mb-2">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-search text-muted small"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control border-start-0 ps-1"
+                                       id="notifTargetSearch"
+                                       placeholder="Axtar..."
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                        <ul class="list-unstyled mb-0 pn-select-list" role="listbox" id="notifTargetList">
+                            {% for target in publish_notification_targets %}
+                            <li class="pn-select-option {% if forloop.first %}selected{% endif %}"
+                                role="option"
+                                data-value="{{ target.value }}"
+                                data-label="{{ target.label }}"
+                                data-icon="{% if target.value == 'all' %}globe-americas text-primary{% elif target.value|slice:':6' == 'group_' %}users text-info{% else %}building text-success{% endif %}">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="pn-opt-check">
+                                        <i class="fas fa-check-circle text-primary"></i>
+                                    </span>
+                                    <span class="pn-opt-icon">
+                                        {% if target.value == 'all' %}
+                                            <i class="fas fa-globe-americas text-primary"></i>
+                                        {% elif target.value|slice:":6" == 'group_' %}
+                                            <i class="fas fa-users text-info"></i>
+                                        {% else %}
+                                            <i class="fas fa-building text-success"></i>
+                                        {% endif %}
+                                    </span>
+                                    <span class="pn-opt-label">{{ target.label }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
                 <div class="form-text mt-1">Bildiriş göndəriləcək istifadəçi qrupunu seçin.</div>
             </div>
@@ -56,8 +95,7 @@
             {# Title #}
             <div class="mb-3">
                 <label for="notifTitle" class="form-label fw-semibold">
-                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı
-                    <span class="text-danger">*</span>
+                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı <span class="text-danger">*</span>
                 </label>
                 <input type="text" class="form-control form-control-lg" id="notifTitle"
                        name="notif_title" maxlength="255" required
@@ -80,9 +118,8 @@
                     <span class="text-muted fw-normal small">(isteğe bağlı)</span>
                 </label>
                 <input type="url" class="form-control" id="notifLink" name="notif_link"
-                       maxlength="500"
-                       placeholder="https://example.com">
-                <div class="form-text">Alıcılar bu keçidə bildiriş detallarından keçə biləcəklər.</div>
+                       maxlength="500" placeholder="https://example.com">
+                <div class="form-text">Alıcılar bildiriş detallarından bu keçidə gedə biləcəklər.</div>
             </div>
 
             {# Optional image upload #}
@@ -91,10 +128,8 @@
                     <i class="fas fa-image me-1 text-primary"></i>Şəkil
                     <span class="text-muted fw-normal small">(isteğe bağlı, maks. 5 MB)</span>
                 </label>
-                <input type="file" class="form-control" id="notifImage" name="notif_image"
-                       accept="image/*">
+                <input type="file" class="form-control" id="notifImage" name="notif_image" accept="image/*">
                 <div class="form-text">JPG, PNG, WebP, GIF formatları dəstəklənir.</div>
-                {# Image preview #}
                 <div id="notifImagePreviewWrap" class="mt-2" style="display:none;">
                     <img id="notifImagePreview" src="" alt="Önizləmə"
                          class="img-thumbnail" style="max-height:180px;object-fit:contain;">
@@ -105,7 +140,7 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-                <button type="submit" class="btn btn-success btn-send-notif">
+                <button type="submit" class="btn btn-send-notif">
                     <i class="fas fa-paper-plane me-1"></i>Göndər
                 </button>
                 <button type="reset" class="btn btn-outline-secondary" id="notifResetBtn">
@@ -129,23 +164,66 @@
     (function () {
         'use strict';
 
-        // Card-style radio selector
-        var targetCards = document.querySelectorAll('.publish-notif-target-card');
-        targetCards.forEach(function (card) {
-            var radio = card.querySelector('.publish-notif-target-radio');
-            if (!radio) return;
-            card.addEventListener('click', function () {
-                targetCards.forEach(function (c) { c.classList.remove('selected'); });
-                card.classList.add('selected');
-                radio.checked = true;
+        // ── Searchable single-select dropdown ──
+        var toggle       = document.querySelector('#notifTargetDropdown .pn-select-toggle');
+        var hiddenInput  = document.getElementById('notifTargetValue');
+        var searchInput  = document.getElementById('notifTargetSearch');
+        var optionList   = document.getElementById('notifTargetList');
+        var displayLabel = document.querySelector('#notifTargetDropdown .pn-select-label');
+        var displayIcon  = document.querySelector('#notifTargetDropdown .pn-select-icon');
+
+        if (!toggle || !optionList) return;
+
+        function selectOption(li) {
+            // Deselect all
+            optionList.querySelectorAll('.pn-select-option').forEach(function (opt) {
+                opt.classList.remove('selected');
             });
+            li.classList.add('selected');
+
+            // Update hidden input
+            hiddenInput.value = li.getAttribute('data-value');
+
+            // Update display
+            displayLabel.textContent = li.getAttribute('data-label');
+            var iconEl = li.querySelector('.pn-opt-icon i');
+            if (iconEl && displayIcon) {
+                displayIcon.innerHTML = '';
+                displayIcon.appendChild(iconEl.cloneNode(true));
+            }
+
+            // Close dropdown
+            var ddToggle = bootstrap.Dropdown.getOrCreateInstance(toggle);
+            ddToggle.hide();
+        }
+
+        optionList.querySelectorAll('.pn-select-option').forEach(function (li) {
+            li.addEventListener('click', function () { selectOption(li); });
         });
 
-        // Image preview
-        var imgInput = document.getElementById('notifImage');
-        var imgPreview = document.getElementById('notifImagePreview');
+        // Search filter
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                var q = searchInput.value.toLowerCase().trim();
+                optionList.querySelectorAll('.pn-select-option').forEach(function (li) {
+                    var label = (li.getAttribute('data-label') || '').toLowerCase();
+                    li.style.display = (q === '' || label.indexOf(q) !== -1) ? '' : 'none';
+                });
+            });
+
+            // Focus search on dropdown open
+            document.getElementById('notifTargetDropdown').addEventListener('shown.bs.dropdown', function () {
+                searchInput.value = '';
+                optionList.querySelectorAll('.pn-select-option').forEach(function (li) { li.style.display = ''; });
+                searchInput.focus();
+            });
+        }
+
+        // ── Image preview ──
+        var imgInput       = document.getElementById('notifImage');
+        var imgPreview     = document.getElementById('notifImagePreview');
         var imgPreviewWrap = document.getElementById('notifImagePreviewWrap');
-        var imgClear = document.getElementById('notifImageClear');
+        var imgClear       = document.getElementById('notifImageClear');
 
         if (imgInput && imgPreview && imgPreviewWrap) {
             imgInput.addEventListener('change', function () {
@@ -172,18 +250,13 @@
             }
         }
 
-        // Reset clears image preview
+        // ── Reset button clears image preview ──
         var resetBtn = document.getElementById('notifResetBtn');
         if (resetBtn && imgPreviewWrap) {
             resetBtn.addEventListener('click', function () {
                 setTimeout(function () {
                     imgPreviewWrap.style.display = 'none';
                     if (imgPreview) imgPreview.src = '';
-                    targetCards.forEach(function (c, i) {
-                        c.classList.toggle('selected', i === 0);
-                    });
-                    var firstRadio = document.querySelector('.publish-notif-target-radio');
-                    if (firstRadio) firstRadio.checked = true;
                 }, 10);
             });
         }
