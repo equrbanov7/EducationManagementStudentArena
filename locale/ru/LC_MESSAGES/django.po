@@ -15472,3 +15472,7 @@ msgstr "Уведомление успешно отправлено."
 
 msgid "notif_no_recipients"
 msgstr "У вас нет прав на эти цели или получатели не найдены."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "Результаты не найдены."

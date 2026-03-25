@@ -3,22 +3,57 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Filter tabs ── */
-.notif-filter-tabs .nav-link {
+.notif-filter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.notif-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 0.82rem;
     color: #6c757d;
     border-radius: 20px;
     transition: background 0.18s, color 0.18s;
-    padding: 0.3rem 0.7rem;
+    padding: 0.32rem 0.75rem;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    white-space: nowrap;
 }
 
-.notif-filter-tabs .nav-link:hover {
+.notif-filter-tab:hover {
     background-color: #e9f0fb;
     color: #0d6efd;
+    border-color: #d0e3ff;
 }
 
-.notif-filter-tabs .nav-link.active {
+.notif-filter-tab.is-active {
     background-color: #0d6efd;
     color: #fff;
+    border-color: #0d6efd;
+}
+
+.notif-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 10px;
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.notif-filter-tab.is-active .notif-filter-badge {
+    background-color: #fff;
+    color: #dc3545;
 }
 
 /* ── Notification list items ── */
@@ -160,12 +195,13 @@
     border: 1.5px solid #dee2e6;
     border-radius: 0.5rem;
     overflow: hidden;
-    max-height: 320px;
-    overflow-y: auto;
+    /* The scroll area is inside .pn-target-scroll, not on the list itself */
 }
 
-.pn-target-list:empty {
-    display: none;
+.pn-target-scroll {
+    max-height: 224px; /* ~4 items @ ~56px each */
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .pn-target-item {
@@ -259,6 +295,12 @@
     filter: brightness(0.97);
 }
 
+.pn-target-no-results {
+    padding: 0.5rem 0.85rem;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
 /* Responsive */
 @media (max-width: 576px) {
     .profile-notif-actions {
@@ -269,7 +311,7 @@
         flex-wrap: nowrap;
     }
 
-    .pn-target-list {
-        max-height: 240px;
+    .pn-target-scroll {
+        max-height: 180px; /* ~3 items on mobile */
     }
 }
