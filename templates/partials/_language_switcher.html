@@ -83,14 +83,24 @@
     if (!s) { return; }
     var dd = s.previousElementSibling;
     if (!dd || !dd.classList.contains('language-switcher')) { return; }
-    // Whenever the dropdown opens, sync the "next" URL to whatever the browser
-    // currently shows (handles SPA section navigation via History.pushState).
-    // Use pathname+search (relative URL) so Django's is_safe_url check accepts it.
-    dd.addEventListener('show.bs.dropdown', function () {
-        var href = window.location.pathname + window.location.search;
+
+    function currentRelativeUrl() {
+        return window.location.pathname + window.location.search + window.location.hash;
+    }
+
+    function syncNextInputs() {
+        var href = currentRelativeUrl();
         dd.querySelectorAll('.language-switcher__form input[name="next"]').forEach(function (inp) {
             inp.value = href;
         });
+    }
+
+    syncNextInputs();
+    dd.addEventListener('show.bs.dropdown', syncNextInputs);
+    window.addEventListener('hashchange', syncNextInputs);
+    window.addEventListener('popstate', syncNextInputs);
+    dd.querySelectorAll('.language-switcher__form').forEach(function (form) {
+        form.addEventListener('submit', syncNextInputs);
     });
 })();
 </script>

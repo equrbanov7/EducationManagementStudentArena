@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import os
 import socket
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 from playwright.sync_api import Page, expect
@@ -31,6 +31,7 @@ BASE_URL: str = os.environ.get("BASE_URL", "http://localhost").rstrip("/")
 E2E_USERNAME: str = os.environ.get("E2E_USERNAME", "")
 E2E_PASSWORD: str = os.environ.get("E2E_PASSWORD", "")
 DASHBOARD_URL: str = f"{BASE_URL}/accounts/dashboard/"
+PROFILE_URL: str = f"{BASE_URL}/accounts/profile/"
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -172,6 +173,67 @@ class TestPrimaryAction:
 
         # The page must not be blank.
         expect(page.locator("body")).to_be_visible()
+
+
+class TestProfileExperience:
+    """Smoke tests for profile section UX regressions."""
+
+    @pytest.mark.skipif(
+        not E2E_USERNAME or not E2E_PASSWORD,
+        reason="E2E_USERNAME / E2E_PASSWORD not set — skipping authenticated tests",
+    )
+    @pytest.mark.parametrize("section", ["notifications", "publish-notification"])
+    def test_language_switcher_keeps_current_profile_section(self, page: Page, section: str) -> None:
+        """Changing language must keep the active profile section stable."""
+        login(page)
+
+        response = page.goto(f"{PROFILE_URL}?section={section}")
+        assert response is not None
+        assert response.status == 200, f"Profile section returned HTTP {response.status}"
+        page.wait_for_load_state("networkidle")
+
+        active_panel = page.locator(f'[data-profile-section-panel="{section}"].is-active')
+        expect(active_panel).to_be_visible()
+
+        switcher = page.locator(".language-switcher").first
+        trigger = switcher.locator(".language-switcher__trigger")
+        expect(trigger).to_be_visible()
+        trigger.click()
+
+        english_option = (
+            switcher.locator("form")
+            .filter(has=page.locator('input[name="language"][value="en"]'))
+            .locator('button[type="submit"]')
+        )
+        english_option.click()
+        page.wait_for_load_state("networkidle")
+
+        query = parse_qs(urlsplit(page.url).query)
+        assert query.get("section") == [section], f"Language switch redirected away from {section}: {page.url}"
+        expect(page.locator(f'[data-profile-section-panel="{section}"].is-active')).to_be_visible()
+
+    @pytest.mark.skipif(
+        not E2E_USERNAME or not E2E_PASSWORD,
+        reason="E2E_USERNAME / E2E_PASSWORD not set — skipping authenticated tests",
+    )
+    def test_publish_notification_targets_keep_search_and_scroll_container(self, page: Page) -> None:
+        """The publish-notification target picker must keep its search and scroll UI."""
+        login(page)
+
+        response = page.goto(f"{PROFILE_URL}?section=publish-notification")
+        assert response is not None
+        assert response.status == 200, f"Publish notification section returned HTTP {response.status}"
+        page.wait_for_load_state("networkidle")
+
+        search_input = page.locator("#pnTargetSearch")
+        scroll_container = page.locator(".pn-target-scroll")
+        expect(search_input).to_be_visible()
+        expect(scroll_container).to_be_visible()
+
+        overflow_y = scroll_container.evaluate("element => getComputedStyle(element).overflowY")
+        max_height = scroll_container.evaluate("element => getComputedStyle(element).maxHeight")
+        assert overflow_y in {"auto", "scroll"}, f"Unexpected target list overflow-y: {overflow_y}"
+        assert max_height != "none", "Target list lost its bounded scroll height"
 
     @pytest.mark.skipif(
         not E2E_USERNAME or not E2E_PASSWORD,

@@ -67,7 +67,7 @@ def send_verification_otp(user, *, request=None):
         )
         logger.info("Verification OTP email queued (async) for user %s", user.pk)
         return code
-    except Exception as exc:
+    except Exception:
         logger.exception("Both synchronous and async OTP email delivery failed for user %s", user.pk)
         raise
 

@@ -232,9 +232,6 @@ def _get_notification_recipients(user, capabilities, target: str):
     from apps.organizations.models import Membership, Organization
 
     is_superadmin = capabilities["is_superadmin"]
-    is_org_admin = capabilities["is_org_admin"]
-    is_teacher = capabilities["is_teacher"]
-
     User = get_user_model()
 
     if target == "all":
@@ -243,13 +240,12 @@ def _get_notification_recipients(user, capabilities, target: str):
         return User.objects.filter(is_active=True)
 
     if target.startswith("org_"):
-        try:
-            org_id = int(target[4:])
-        except (ValueError, IndexError):
+        org_id = (target[4:] or "").strip()
+        if not org_id:
             return None
         try:
-            org = Organization.objects.get(pk=org_id, is_active=True)
-        except Organization.DoesNotExist:
+            org = Organization.objects.get(pk=org_id, is_active=True, status="active")
+        except (ValidationError, Organization.DoesNotExist):
             return None
         # Superadmin can target any org; org admin only their own
         if not is_superadmin:
@@ -292,7 +288,7 @@ def user_profile(request):
     )
 
     # Ensure profile exists (get_or_create for safety)
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile, _created = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
     notification_state = build_profile_notification_state(user=request.user, profile=profile)
     pending_student_invites = notification_state["pending_student_invites"]
@@ -435,7 +431,7 @@ def user_profile(request):
             UserModel = get_user_model()
             sent_to_user_ids: set = set()
             for notif_target in notif_targets:
-                recipients = _get_notification_recipients(request.user, capabilities, notif_target, "")
+                recipients = _get_notification_recipients(request.user, capabilities, notif_target)
                 if recipients is None:
                     continue
                 # Avoid duplicate notifications to the same user
@@ -1388,7 +1384,7 @@ def public_user_profile(request, username):
     if request.user.is_authenticated and request.user == profile_user:
         return redirect("accounts:profile")
 
-    profile, _ = UserProfile.objects.get_or_create(user=profile_user)
+    profile, _created = UserProfile.objects.get_or_create(user=profile_user)
 
     published_posts = (
         Post.objects.filter(author=profile_user, is_published=True).select_related("category").order_by("-created_at")

@@ -659,7 +659,7 @@ def student_organization_management(request):
                         responded_by=request.user,
                     )
                     # Assign teacher/staff membership role
-                    from apps.organizations.models import Membership, Role
+                    from apps.organizations.models import Membership
 
                     role_name = "teacher" if ts_request.role_type == MRR.TEACHER else "member"
                     role_obj = org.roles.filter(name=role_name, is_active=True).first()

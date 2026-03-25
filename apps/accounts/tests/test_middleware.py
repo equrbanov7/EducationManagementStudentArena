@@ -456,7 +456,7 @@ class SuperadminOrgApprovalTest(TestCase):
     def test_superadmin_can_filter_pending_orgs(self):
         """Superadmin can filter organizations by status=pending."""
         # Create an active org to ensure it is excluded
-        active_org = Organization.objects.create(
+        Organization.objects.create(
             name="Active Uni",
             org_type=OrganizationType.UNIVERSITY,
             owner=self.org_owner,

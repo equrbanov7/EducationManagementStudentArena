@@ -37,7 +37,6 @@ def purge_stale_pending_registration(username: str, email: str) -> None:
     Owned organizations are deleted first to satisfy the ``PROTECT`` constraint
     on ``Organization.owner``.
     """
-    from apps.accounts.models import EmailOTP
     from apps.organizations.models import Organization
 
     if not username and not email:
