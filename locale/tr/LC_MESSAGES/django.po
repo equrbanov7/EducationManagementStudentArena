@@ -15419,3 +15419,33 @@ msgstr "Bildirim göndermek için uygun hedef bulunamadı."
 msgctxt "profile.publish_notification"
 msgid "no_targets_teacher_hint"
 msgstr "Bildirim göndermek için en az bir grup oluşturmanız gerekiyor."
+
+msgid "target_all_users"
+msgstr "Tüm kullanıcılar (sistem)"
+
+msgid "target_org_prefix"
+msgstr "Kuruluş"
+
+msgid "target_org_all_members"
+msgstr "tüm üyeler"
+
+msgid "target_group_prefix"
+msgstr "Grup"
+
+msgid "notif_title_required"
+msgstr "Bildirim başlığı boş olamaz."
+
+msgid "notif_link_invalid"
+msgstr "Girilen bağlantı geçersiz. http:// veya https:// ile başlamalıdır."
+
+msgid "notif_image_too_large"
+msgstr "Görsel en fazla 5 MB olabilir."
+
+msgid "notif_image_invalid"
+msgstr "Görsel dosyası geçersiz."
+
+msgid "notif_sent_success"
+msgstr "Bildirim başarıyla gönderildi."
+
+msgid "notif_no_recipients"
+msgstr "Bu hedefler için izniniz yok veya alıcı bulunamadı."

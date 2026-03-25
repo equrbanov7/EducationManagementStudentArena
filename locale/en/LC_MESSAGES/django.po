@@ -15924,3 +15924,33 @@ msgstr "No suitable target found to send a notification."
 msgctxt "profile.publish_notification"
 msgid "no_targets_teacher_hint"
 msgstr "You must create at least one group to send notifications."
+
+msgid "target_all_users"
+msgstr "All users (system)"
+
+msgid "target_org_prefix"
+msgstr "Organization"
+
+msgid "target_org_all_members"
+msgstr "all members"
+
+msgid "target_group_prefix"
+msgstr "Group"
+
+msgid "notif_title_required"
+msgstr "Notification title cannot be empty."
+
+msgid "notif_link_invalid"
+msgstr "The link entered is invalid. It must start with http:// or https://."
+
+msgid "notif_image_too_large"
+msgstr "The image must be at most 5 MB."
+
+msgid "notif_image_invalid"
+msgstr "The image file is invalid."
+
+msgid "notif_sent_success"
+msgstr "Notification sent successfully."
+
+msgid "notif_no_recipients"
+msgstr "You do not have permission for these targets or no recipients found."

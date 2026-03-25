@@ -20,7 +20,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import http_date
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext as _, pgettext_lazy
 from django.views.decorators.http import require_safe
 
 from apps.assignments.models import Submission
@@ -179,10 +179,18 @@ def _get_publish_notification_targets(user, capabilities):
 
     if is_superadmin:
         # "All users" is exclusive — if selected, ignore specific org selections
-        targets.append({"value": "all", "label": "Bütün istifadəçilər (sistem)", "is_exclusive": True})
+        targets.append({
+            "value": "all",
+            "label": _("target_all_users"),
+            "is_exclusive": True,
+        })
         from apps.organizations.models import Organization
         for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
-            targets.append({"value": f"org_{org.pk}", "label": f"Təşkilat: {org.name}", "is_exclusive": False})
+            targets.append({
+                "value": f"org_{org.pk}",
+                "label": f'{_("target_org_prefix")}: {org.name}',
+                "is_exclusive": False,
+            })
     elif is_org_admin:
         # Get user's active org memberships
         org_memberships = Membership.objects.filter(
@@ -191,13 +199,17 @@ def _get_publish_notification_targets(user, capabilities):
         for membership in org_memberships:
             targets.append({
                 "value": f"org_{membership.organization_id}",
-                "label": f"Təşkilat: {membership.organization.name} (bütün üzvlər)",
+                "label": f'{_("target_org_prefix")}: {membership.organization.name} ({_("target_org_all_members")})',
                 "is_exclusive": False,
             })
     elif is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
         for group in teacher_groups:
-            targets.append({"value": f"group_{group.pk}", "label": f"Qrup: {group.name}", "is_exclusive": False})
+            targets.append({
+                "value": f"group_{group.pk}",
+                "label": f'{_("target_group_prefix")}: {group.name}',
+                "is_exclusive": False,
+            })
     return targets
 
 
@@ -367,7 +379,7 @@ def user_profile(request):
             notif_image_file = request.FILES.get("notif_image")
 
             if not notif_title:
-                messages.error(request, "Bildiriş başlığı boş ola bilməz.")
+                messages.error(request, _("notif_title_required"))
                 return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
 
             # Validate optional link — require explicit http/https scheme
@@ -377,7 +389,7 @@ def user_profile(request):
                     if parsed_link.scheme not in ("http", "https"):
                         raise ValueError("invalid scheme")
                 except Exception:
-                    messages.error(request, "Daxil edilmiş link düzgün deyil. http:// və ya https:// ilə başlamalıdır.")
+                    messages.error(request, _("notif_link_invalid"))
                     return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
 
             # Validate + save optional image
@@ -386,7 +398,7 @@ def user_profile(request):
                 _img_max_mb = 5
                 _img_max_bytes = _img_max_mb * 1024 * 1024
                 if getattr(notif_image_file, "size", 0) > _img_max_bytes:
-                    messages.error(request, f"Şəkil maksimum {_img_max_mb} MB ola bilər.")
+                    messages.error(request, _("notif_image_too_large"))
                     return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
                 try:
                     validate_uploaded_file(
@@ -397,7 +409,7 @@ def user_profile(request):
                         allowed_mime_prefixes=("image/",),
                     )
                 except ValidationError as exc:
-                    messages.error(request, exc.messages[0] if exc.messages else "Şəkil faylı düzgün deyil.")
+                    messages.error(request, exc.messages[0] if exc.messages else _("notif_image_invalid"))
                     return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
                 # Save image to media/notifications/images/
                 randomize_uploaded_filename(notif_image_file)
@@ -436,9 +448,9 @@ def user_profile(request):
                 sent_to_user_ids.update(qs_ids)
 
             if sent_to_user_ids:
-                messages.success(request, "Bildiriş uğurla göndərildi.")
+                messages.success(request, _("notif_sent_success"))
             else:
-                messages.error(request, "Bu hədəflər üçün icazəniz yoxdur və ya alıcı tapılmadı.")
+                messages.error(request, _("notif_no_recipients"))
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section
@@ -1201,8 +1213,8 @@ def user_profile(request):
 
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
-        "notifications": "Bildirişlər",
-        "publish-notification": "Bildiriş göndər",
+        "notifications": pgettext_lazy("profile.section", "notifications"),
+        "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
         "posts": pgettext_lazy("profile.section", "posts"),
         "create-post": pgettext_lazy("profile.section", "create_post"),
         "courses": pgettext_lazy("profile.section", "my_courses"),
