@@ -3,13 +3,16 @@ Profile views: user profile management and avatar serving.
 """
 
 import mimetypes
+import os
 import re
+from urllib.parse import urlparse as _parse_url
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
@@ -33,7 +36,7 @@ from apps.notifications.services import (
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
-from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
@@ -350,22 +353,70 @@ def user_profile(request):
             notif_message = (request.POST.get("notif_message") or "").strip()
             notif_target = (request.POST.get("notif_target") or "all").strip()
             notif_group_id = request.POST.get("notif_group_id", "").strip()
+            notif_link = (request.POST.get("notif_link") or "").strip()
+            notif_image_file = request.FILES.get("notif_image")
+
             if not notif_title:
                 messages.error(request, "Bildiriş başlığı boş ola bilməz.")
                 return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+
+            # Validate optional link
+            if notif_link:
+                try:
+                    parsed_link = _parse_url(notif_link)
+                    if parsed_link.scheme not in ("http", "https", ""):
+                        raise ValueError("invalid scheme")
+                except Exception:
+                    messages.error(request, "Daxil edilmiş link düzgün deyil.")
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+
+            # Validate + save optional image
+            notif_image_url = ""
+            if notif_image_file:
+                _img_max_mb = 5
+                _img_max_bytes = _img_max_mb * 1024 * 1024
+                if getattr(notif_image_file, "size", 0) > _img_max_bytes:
+                    messages.error(request, f"Şəkil maksimum {_img_max_mb} MB ola bilər.")
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+                try:
+                    validate_uploaded_file(
+                        notif_image_file,
+                        allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+                        max_size_mb=_img_max_mb,
+                        allowed_mime_types=set(),
+                        allowed_mime_prefixes=("image/",),
+                    )
+                except ValidationError as exc:
+                    messages.error(request, exc.messages[0] if exc.messages else "Şəkil faylı düzgün deyil.")
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+                # Save image to media/notifications/images/
+                randomize_uploaded_filename(notif_image_file)
+                saved_path = default_storage.save(
+                    os.path.join("notifications", "images", notif_image_file.name),
+                    notif_image_file,
+                )
+                notif_image_url = default_storage.url(saved_path)
+
             recipients = _get_notification_recipients(
                 request.user, capabilities, notif_target, notif_group_id
             )
             if recipients is None:
                 messages.error(request, "Bu hədəf üçün icazəniz yoxdur.")
                 return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+
+            metadata = {}
+            if notif_image_url:
+                metadata["image_url"] = notif_image_url
+
             create_notification_for_users(
                 recipients=recipients,
                 title=notif_title,
                 message=notif_message,
+                link=notif_link,
                 notification_type=NotificationType.SYSTEM,
+                metadata=metadata or None,
             )
-            messages.success(request, f"Bildiriş uğurla göndərildi.")
+            messages.success(request, "Bildiriş uğurla göndərildi.")
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section

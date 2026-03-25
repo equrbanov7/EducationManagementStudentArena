@@ -14,31 +14,57 @@
         </p>
 
         {% if publish_notification_targets %}
-        <form method="post" action="{{ profile_base_url }}" class="publish-notif-form">
+        <form method="post" action="{{ profile_base_url }}"
+              class="publish-notif-form"
+              enctype="multipart/form-data"
+              novalidate>
             {% csrf_token %}
             <input type="hidden" name="profile_form" value="publish-notification">
             <input type="hidden" name="section" value="publish-notification">
 
-            <div class="mb-3">
-                <label for="notifTarget" class="form-label fw-semibold">
+            {# Target group — styled card-select #}
+            <div class="mb-4">
+                <label class="form-label fw-semibold mb-2">
                     <i class="fas fa-users me-1 text-primary"></i>Hədəf qrup
+                    <span class="text-danger">*</span>
                 </label>
-                <select class="form-select" id="notifTarget" name="notif_target" required>
+                <div class="publish-notif-targets" id="publishTargetList" role="radiogroup">
                     {% for target in publish_notification_targets %}
-                    <option value="{{ target.value }}">{{ target.label }}</option>
+                    <label class="publish-notif-target-card {% if forloop.first %}selected{% endif %}">
+                        <input type="radio" name="notif_target" value="{{ target.value }}"
+                               {% if forloop.first %}checked{% endif %}
+                               class="publish-notif-target-radio visually-hidden">
+                        <span class="publish-notif-target-icon">
+                            {% if target.value == 'all' %}
+                                <i class="fas fa-globe-americas text-primary"></i>
+                            {% elif target.value|slice:":6" == 'group_' %}
+                                <i class="fas fa-users text-info"></i>
+                            {% else %}
+                                <i class="fas fa-building text-success"></i>
+                            {% endif %}
+                        </span>
+                        <span class="publish-notif-target-label">{{ target.label }}</span>
+                        <span class="publish-notif-target-check">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    </label>
                     {% endfor %}
-                </select>
-                <div class="form-text">Bildiriş göndəriləcək istifadəçi qrupunu seçin.</div>
+                </div>
+                <div class="form-text mt-1">Bildiriş göndəriləcək istifadəçi qrupunu seçin.</div>
             </div>
 
+            {# Title #}
             <div class="mb-3">
                 <label for="notifTitle" class="form-label fw-semibold">
-                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı <span class="text-danger">*</span>
+                    <i class="fas fa-heading me-1 text-primary"></i>Bildiriş başlığı
+                    <span class="text-danger">*</span>
                 </label>
-                <input type="text" class="form-control" id="notifTitle" name="notif_title"
-                       maxlength="255" required placeholder="Bildiriş başlığını daxil edin...">
+                <input type="text" class="form-control form-control-lg" id="notifTitle"
+                       name="notif_title" maxlength="255" required
+                       placeholder="Bildiriş başlığını daxil edin...">
             </div>
 
+            {# Message #}
             <div class="mb-3">
                 <label for="notifMessage" class="form-label fw-semibold">
                     <i class="fas fa-align-left me-1 text-primary"></i>Bildiriş mətni
@@ -47,25 +73,121 @@
                           rows="4" placeholder="Bildiriş mətnini daxil edin (isteğe bağlı)..."></textarea>
             </div>
 
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
+            {# Optional link #}
+            <div class="mb-3">
+                <label for="notifLink" class="form-label fw-semibold">
+                    <i class="fas fa-link me-1 text-primary"></i>Keçid (link)
+                    <span class="text-muted fw-normal small">(isteğe bağlı)</span>
+                </label>
+                <input type="url" class="form-control" id="notifLink" name="notif_link"
+                       maxlength="500"
+                       placeholder="https://example.com">
+                <div class="form-text">Alıcılar bu keçidə bildiriş detallarından keçə biləcəklər.</div>
+            </div>
+
+            {# Optional image upload #}
+            <div class="mb-4">
+                <label for="notifImage" class="form-label fw-semibold">
+                    <i class="fas fa-image me-1 text-primary"></i>Şəkil
+                    <span class="text-muted fw-normal small">(isteğe bağlı, maks. 5 MB)</span>
+                </label>
+                <input type="file" class="form-control" id="notifImage" name="notif_image"
+                       accept="image/*">
+                <div class="form-text">JPG, PNG, WebP, GIF formatları dəstəklənir.</div>
+                {# Image preview #}
+                <div id="notifImagePreviewWrap" class="mt-2" style="display:none;">
+                    <img id="notifImagePreview" src="" alt="Önizləmə"
+                         class="img-thumbnail" style="max-height:180px;object-fit:contain;">
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="notifImageClear">
+                        <i class="fas fa-times"></i> Şəkli sil
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-success btn-send-notif">
                     <i class="fas fa-paper-plane me-1"></i>Göndər
                 </button>
-                <button type="reset" class="btn btn-outline-secondary">
+                <button type="reset" class="btn btn-outline-secondary" id="notifResetBtn">
                     <i class="fas fa-undo me-1"></i>Sıfırla
                 </button>
             </div>
         </form>
 
         {% else %}
-        <div class="empty-state py-4 text-center">
+        <div class="empty-state py-5 text-center">
             <i class="fas fa-exclamation-circle fa-2x text-muted mb-2"></i>
-            <p class="text-muted mb-0">
-                Bildiriş göndərmək üçün uyğun hədəf tapılmadı.<br>
-                {% if is_teacher %}Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız.{% endif %}
-            </p>
+            <p class="text-muted fw-semibold mb-1">Bildiriş göndərmək üçün uyğun hədəf tapılmadı.</p>
+            {% if is_teacher %}
+            <p class="text-muted small">Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız.</p>
+            {% endif %}
         </div>
         {% endif %}
     </div>
+
+    <script nonce="{{ request.csp_nonce }}">
+    (function () {
+        'use strict';
+
+        // Card-style radio selector
+        var targetCards = document.querySelectorAll('.publish-notif-target-card');
+        targetCards.forEach(function (card) {
+            var radio = card.querySelector('.publish-notif-target-radio');
+            if (!radio) return;
+            card.addEventListener('click', function () {
+                targetCards.forEach(function (c) { c.classList.remove('selected'); });
+                card.classList.add('selected');
+                radio.checked = true;
+            });
+        });
+
+        // Image preview
+        var imgInput = document.getElementById('notifImage');
+        var imgPreview = document.getElementById('notifImagePreview');
+        var imgPreviewWrap = document.getElementById('notifImagePreviewWrap');
+        var imgClear = document.getElementById('notifImageClear');
+
+        if (imgInput && imgPreview && imgPreviewWrap) {
+            imgInput.addEventListener('change', function () {
+                var file = imgInput.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        imgPreview.src = e.target.result;
+                        imgPreviewWrap.style.display = '';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imgPreviewWrap.style.display = 'none';
+                    imgPreview.src = '';
+                }
+            });
+
+            if (imgClear) {
+                imgClear.addEventListener('click', function () {
+                    imgInput.value = '';
+                    imgPreview.src = '';
+                    imgPreviewWrap.style.display = 'none';
+                });
+            }
+        }
+
+        // Reset clears image preview
+        var resetBtn = document.getElementById('notifResetBtn');
+        if (resetBtn && imgPreviewWrap) {
+            resetBtn.addEventListener('click', function () {
+                setTimeout(function () {
+                    imgPreviewWrap.style.display = 'none';
+                    if (imgPreview) imgPreview.src = '';
+                    targetCards.forEach(function (c, i) {
+                        c.classList.toggle('selected', i === 0);
+                    });
+                    var firstRadio = document.querySelector('.publish-notif-target-radio');
+                    if (firstRadio) firstRadio.checked = true;
+                }, 10);
+            });
+        }
+    })();
+    </script>
 </section>
 {% endif %}
