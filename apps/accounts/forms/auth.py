@@ -16,7 +16,7 @@ from core.constants import OrganizationType
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from ..models import ProfileRole
-from ..services import issue_email_otp
+from ..services import issue_email_otp, purge_stale_pending_registration
 
 User = get_user_model()
 
@@ -483,12 +483,16 @@ class RegisterForm(forms.ModelForm):
 
     def clean_username(self):
         username = (self.cleaned_data.get("username") or "").strip()
+        if username:
+            purge_stale_pending_registration(username=username, email="")
         if username and User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "username_taken"))
         return username
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
+        if email:
+            purge_stale_pending_registration(username="", email=email)
         if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "email_taken"))
         return email

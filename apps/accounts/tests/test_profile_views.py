@@ -299,6 +299,123 @@ class ProfileViewTest(TestCase):
         expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
         self.assertContains(response, f"return_to={expected_return_to}")
 
+    def test_publish_notification_section_renders_search_and_scrollable_targets(self):
+        from apps.exams.models import StudentGroup
+
+        organization = Organization.objects.create(
+            name="Notification Search Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+        StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Alpha Search Group",
+        )
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=publish-notification")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="pnTargetSearch"', html=False)
+        self.assertContains(response, 'class="pn-target-scroll"', html=False)
+        self.assertContains(response, "Alpha Search Group")
+
+    def test_publish_notification_post_sends_group_notification_and_redirects_back(self):
+        from apps.exams.models import StudentGroup
+        from apps.notifications.models import InAppNotification
+
+        organization = Organization.objects.create(
+            name="Notification Delivery Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="notif_student",
+            email="notif_student@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+
+        group = StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Broadcast Group",
+        )
+        group.students.add(student)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=publish-notification",
+            data={
+                "profile_form": "publish-notification",
+                "section": "publish-notification",
+                "notif_title": "Group update",
+                "notif_message": "Important schedule change",
+                "notif_targets": [f"group_{group.pk}"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=publish-notification")
+
+        notifications = InAppNotification.objects.filter(recipient=student)
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications.first().title, "Group update")
+
+    def test_superadmin_publish_notification_can_target_organization_uuid(self):
+        from apps.notifications.models import InAppNotification
+
+        superadmin = User.objects.create_superuser(
+            username="notif_superadmin",
+            email="notif_superadmin@example.com",
+            password="adminpass123",
+        )
+        organization_owner = User.objects.create_user(
+            username="notif_org_owner",
+            email="notif_org_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Notification UUID Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=organization_owner,
+            status="active",
+            is_active=True,
+        )
+        recipient = User.objects.create_user(
+            username="notif_org_member",
+            email="notif_org_member@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(recipient, organization, ProfileRole.STUDENT)
+
+        self.client.force_login(superadmin)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=publish-notification",
+            data={
+                "profile_form": "publish-notification",
+                "section": "publish-notification",
+                "notif_title": "Org update",
+                "notif_message": "Organization-wide announcement",
+                "notif_targets": [f"org_{organization.pk}"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=publish-notification")
+
+        notifications = InAppNotification.objects.filter(recipient=recipient)
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications.first().title, "Org update")
+
     def test_profile_role_field(self):
         """Test that profile has role field with default member role."""
         from apps.accounts.models import ProfileRole, UserProfile
