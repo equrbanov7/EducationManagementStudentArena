@@ -421,6 +421,35 @@ class ProfileViewTest(TestCase):
         self.assertEqual(notifications.count(), 1)
         self.assertEqual(notifications.first().title, "Group update")
 
+    def test_publish_notification_org_targets_are_unique_per_organization(self):
+        organization = Organization.objects.create(
+            name="Notification Unique Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+        Membership.objects.create(
+            user=self.user,
+            organization=organization,
+            role=organization.roles.get(name="rector"),
+            is_primary=False,
+            is_active=True,
+        )
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=publish-notification")
+
+        self.assertEqual(response.status_code, 200)
+        targets = response.context["publish_notification_targets"]
+        org_targets = [target for target in targets if target["value"] == f"org_{organization.pk}"]
+        self.assertEqual(len(org_targets), 1)
+        self.assertEqual(
+            [target["label"] for target in org_targets],
+            ["Təşkilat: Notification Unique Org (bütün üzvlər)"],
+        )
+
     def test_superadmin_publish_notification_can_target_organization_uuid(self):
         from apps.notifications.models import InAppNotification
 

@@ -264,10 +264,16 @@ def _get_publish_notification_targets(user, capabilities):
             )
     elif is_org_admin:
         # Get user's active org memberships
-        org_memberships = Membership.objects.filter(
-            user=user, is_active=True, organization__is_active=True
-        ).select_related("organization")
+        org_memberships = (
+            Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
+            .select_related("organization")
+            .order_by("organization__name", "organization_id", "-role__level", "id")
+        )
+        seen_org_ids = set()
         for membership in org_memberships:
+            if membership.organization_id in seen_org_ids:
+                continue
+            seen_org_ids.add(membership.organization_id)
             targets.append(
                 {
                     "value": f"org_{membership.organization_id}",
