@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
     var closeModalButton = document.getElementById("closeCreateCourseModal");
     var submitInFlight = false;
     var activeTrigger = null;
+    var resetContentTimeoutId = null;
+    var cachedModalUrl = "";
+    var cachedModalMarkup = "";
+    var pendingModalMarkupRequest = null;
 
     if (!modal || !modalBody) {
         return;
@@ -57,11 +61,66 @@ document.addEventListener("DOMContentLoaded", function () {
         return window.location.href;
     }
 
+    function cacheModalMarkup(modalUrl, markup) {
+        cachedModalUrl = modalUrl || "";
+        cachedModalMarkup = markup || "";
+    }
+
+    async function fetchModalMarkup(modalUrl) {
+        var response = await fetch(modalUrl, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("create course modal load failed");
+        }
+
+        var markup = await response.text();
+        cacheModalMarkup(modalUrl, markup);
+        return markup;
+    }
+
+    function primeModalMarkup(createCourseUrl) {
+        if (!createCourseUrl) {
+            return;
+        }
+
+        var modalUrl = buildModalUrl(createCourseUrl);
+        if (cachedModalUrl === modalUrl && cachedModalMarkup) {
+            return;
+        }
+        if (pendingModalMarkupRequest && cachedModalUrl === modalUrl) {
+            return;
+        }
+
+        cacheModalMarkup(modalUrl, "");
+        pendingModalMarkupRequest = fetchModalMarkup(modalUrl)
+            .catch(function () {
+                return "";
+            })
+            .finally(function () {
+                pendingModalMarkupRequest = null;
+            });
+    }
+
     function closeModal(resetContent) {
         modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
         if (resetContent) {
-            modalBody.innerHTML = modalLoadingMarkup();
+            if (resetContentTimeoutId) {
+                window.clearTimeout(resetContentTimeoutId);
+            }
+            resetContentTimeoutId = window.setTimeout(function () {
+                if (!modal.classList.contains("active")) {
+                    modalBody.innerHTML = cachedModalMarkup || modalLoadingMarkup();
+                    if (cachedModalMarkup) {
+                        bindModalForm();
+                    }
+                }
+            }, 280);
         }
     }
 
@@ -146,6 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (contentType.indexOf("application/json") !== -1) {
                     var errorData = await response.json();
                     if (errorData.html) {
+                        cacheModalMarkup(buildModalUrl(form.getAttribute("action")), errorData.html);
                         modalBody.innerHTML = errorData.html;
                         bindModalForm();
                         return;
@@ -170,26 +230,38 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        if (resetContentTimeoutId) {
+            window.clearTimeout(resetContentTimeoutId);
+            resetContentTimeoutId = null;
+        }
         activeTrigger = trigger || null;
         ensureModalRoot();
+        modal.setAttribute("aria-hidden", "false");
         modal.classList.add("active");
         document.body.style.overflow = "hidden";
-        modalBody.innerHTML = modalLoadingMarkup();
 
         var modalUrl = buildModalUrl(createCourseUrl);
 
         try {
-            var response = await fetch(modalUrl, {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("create course modal load failed");
+            if (cachedModalUrl === modalUrl && cachedModalMarkup) {
+                modalBody.innerHTML = cachedModalMarkup;
+                bindModalForm();
+                return;
             }
 
-            modalBody.innerHTML = await response.text();
+            modalBody.innerHTML = modalLoadingMarkup();
+
+            if (pendingModalMarkupRequest && cachedModalUrl === modalUrl) {
+                await pendingModalMarkupRequest;
+            }
+
+            if (cachedModalUrl === modalUrl && cachedModalMarkup) {
+                modalBody.innerHTML = cachedModalMarkup;
+                bindModalForm();
+                return;
+            }
+
+            modalBody.innerHTML = await fetchModalMarkup(modalUrl);
             bindModalForm();
         } catch (error) {
             modalBody.innerHTML = modalErrorMarkup();
@@ -221,6 +293,31 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
         openModal(trigger.getAttribute("data-create-course-url"), trigger);
     });
+
+    document.addEventListener("pointerenter", function (event) {
+        var trigger = event.target.closest(".js-open-create-course");
+        if (!trigger) {
+            return;
+        }
+
+        primeModalMarkup(trigger.getAttribute("data-create-course-url"));
+    }, true);
+
+    document.addEventListener("focusin", function (event) {
+        var trigger = event.target.closest(".js-open-create-course");
+        if (!trigger) {
+            return;
+        }
+
+        primeModalMarkup(trigger.getAttribute("data-create-course-url"));
+    });
+
+    window.setTimeout(function () {
+        var initialTrigger = document.querySelector(".js-open-create-course");
+        if (initialTrigger) {
+            primeModalMarkup(initialTrigger.getAttribute("data-create-course-url"));
+        }
+    }, 150);
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape" && modal.classList.contains("active")) {

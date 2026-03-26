@@ -7,9 +7,9 @@ from django.utils.translation import pgettext_lazy
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Category, Comment, Post, Question
-from .taxonomy import SUPPORTED_CATEGORY_LANGUAGES
 from .selectors import build_post_category_picker_options, get_post_category_tree
 from .services import resolve_post_category_selection
+from .taxonomy import SUPPORTED_CATEGORY_LANGUAGES
 
 
 class SubscriptionForm(forms.Form):
@@ -151,10 +151,14 @@ class PostForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         category_tree = get_post_category_tree()
         root_categories = list(category_tree)
-        subcategories = [child for root_category in root_categories for child in getattr(root_category, "child_categories", [])]
+        subcategories = [
+            child for root_category in root_categories for child in getattr(root_category, "child_categories", [])
+        ]
 
         self.category_tree = category_tree
-        self.root_category_picker_options, self.subcategory_picker_options = build_post_category_picker_options(category_tree)
+        self.root_category_picker_options, self.subcategory_picker_options = build_post_category_picker_options(
+            category_tree
+        )
         self.fields["category"] = self.LocalizedCategoryChoiceField(
             queryset=self._queryset_from_categories(root_categories),
             label=self.fields["category"].label,
@@ -178,7 +182,11 @@ class PostForm(forms.ModelForm):
         category_ids = [category.id for category in categories]
         if not category_ids:
             return Category.objects.none()
-        return Category.objects.filter(id__in=category_ids).select_related("parent").order_by("sort_order", "name_en", "name_az", "id")
+        return (
+            Category.objects.filter(id__in=category_ids)
+            .select_related("parent")
+            .order_by("sort_order", "name_en", "name_az", "id")
+        )
 
     def _resolve_selected_category_ids(self):
         selected_category_id = self.data.get("category") if self.is_bound else None

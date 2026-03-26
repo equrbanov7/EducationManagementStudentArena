@@ -7,6 +7,8 @@ from .models import Category, Post, Subscriber
 from .selectors import invalidate_blog_listing_cache
 
 logger = logging.getLogger(__name__)
+
+
 @receiver(post_save, sender=Post)
 def send_new_post_notification(sender, instance, created, **kwargs):
     if created and instance.is_published:

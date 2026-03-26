@@ -1,16 +1,24 @@
 .course-modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.7);
-    display: none;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1100;
     padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.28s ease, visibility 0s linear 0.28s;
 }
 
 .course-modal-overlay.active {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.28s ease;
 }
 
 .course-modal-content {
@@ -22,6 +30,12 @@
     box-shadow: 0 24px 56px rgba(2, 6, 23, 0.3);
     display: flex;
     flex-direction: column;
+    transform: translateY(18px) scale(0.985);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.course-modal-overlay.active .course-modal-content {
+    transform: translateY(0) scale(1);
 }
 
 .course-modal-header {
@@ -62,11 +76,12 @@
 .create-course-modal-body {
     padding: 1rem 1.25rem 1.25rem;
     overflow: auto;
+    min-height: 420px;
 }
 
 .create-course-modal-loading,
 .create-course-modal-error {
-    min-height: 140px;
+    min-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -183,6 +198,10 @@
 @media (max-width: 768px) {
     .create-course-form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .create-course-modal-body {
+        min-height: 360px;
     }
 
     .course-modal-actions {

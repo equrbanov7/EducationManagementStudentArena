@@ -534,6 +534,95 @@ class CourseOrganizationRequiredTest(TestCase):
 
         self.assertFalse(Course.objects.filter(title="No Org Course").exists())
 
+    def test_superadmin_can_create_course_from_profile_org_when_session_org_missing(self):
+        superadmin = User.objects.create_user(
+            username="course_superadmin_restore",
+            email="course_superadmin_restore@example.com",
+            password="StrongPass123!",
+        )
+        profile = superadmin.profile
+        profile.organization = self.org
+        profile.organization_type = self.org.org_type
+        profile.role = ProfileRole.SUPERADMIN
+        profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self.client.force_login(superadmin)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        response = self.client.post(
+            reverse("courses:create_course") + "?modal=1",
+            {
+                "title": "Superadmin Restored Course",
+                "description": "Created after restoring org context from profile.",
+                "status": "published",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        created_course = Course.objects.get(title="Superadmin Restored Course")
+        self.assertJSONEqual(
+            response.content,
+            {
+                "success": True,
+                "course_id": created_course.id,
+                "dashboard_url": reverse("courses:course_dashboard", args=[created_course.id]),
+            },
+        )
+        self.assertEqual(created_course.organization, self.org)
+        self.assertEqual(created_course.owner, superadmin)
+        self.assertEqual(self.client.session.get("active_organization"), self.org.slug)
+
+    def test_superadmin_without_profile_org_can_choose_organization_in_create_course_modal(self):
+        superadmin = User.objects.create_superuser(
+            username="course_superadmin_modal",
+            email="course_superadmin_modal@example.com",
+            password="StrongPass123!",
+        )
+
+        self.client.force_login(superadmin)
+        session = self.client.session
+        session.pop("active_organization", None)
+        session.save()
+
+        modal_response = self.client.get(
+            reverse("courses:create_course") + "?modal=1",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(modal_response.status_code, 200)
+        self.assertContains(modal_response, 'name="organization"', html=False)
+        self.assertContains(modal_response, self.org.name)
+
+        response = self.client.post(
+            reverse("courses:create_course") + "?modal=1",
+            {
+                "organization": str(self.org.pk),
+                "title": "Superadmin Selected Org Course",
+                "description": "Created by explicit organization selection.",
+                "status": "published",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        created_course = Course.objects.get(title="Superadmin Selected Org Course")
+        self.assertJSONEqual(
+            response.content,
+            {
+                "success": True,
+                "course_id": created_course.id,
+                "dashboard_url": reverse("courses:course_dashboard", args=[created_course.id]),
+            },
+        )
+        self.assertEqual(created_course.organization, self.org)
+        self.assertEqual(created_course.owner, superadmin)
+        self.assertEqual(self.client.session.get("active_organization"), self.org.slug)
+
     def test_course_with_explicit_organization_is_created_successfully(self):
         """Course explicitly bound to an organization is created without errors."""
         course = Course.objects.create(
