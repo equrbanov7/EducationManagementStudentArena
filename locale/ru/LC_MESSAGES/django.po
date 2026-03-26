@@ -15596,3 +15596,619 @@ msgstr "У вас нет прав на эти цели или получател
 msgctxt "profile.publish_notification"
 msgid "search_no_results"
 msgstr "Результаты не найдены."
+
+msgctxt "profile.section"
+msgid "staff_management"
+msgstr "Управление персоналом"
+
+msgctxt "profile.sidebar"
+msgid "staff_management"
+msgstr "Управление персоналом"
+
+msgctxt "profile.notifications"
+msgid "Search notifications..."
+msgstr "Поиск уведомлений..."
+
+msgctxt "profile.notifications"
+msgid "Clear notification search"
+msgstr "Очистить поиск уведомлений"
+
+msgctxt "profile.notifications"
+msgid "Search"
+msgstr "Поиск"
+
+msgctxt "profile.notifications"
+msgid "No notifications matched your search."
+msgstr "По вашему запросу уведомления не найдены."
+
+msgctxt "profile.notifications"
+msgid "Try a different search term or clear the search filter."
+msgstr "Попробуйте другой поисковый запрос или очистите фильтр поиска."
+
+msgctxt "staff.management"
+msgid "Staff Management"
+msgstr "Управление персоналом"
+
+msgctxt "staff.management"
+msgid "Back to profile"
+msgstr "Вернуться в профиль"
+
+msgctxt "staff.management"
+msgid "Choose which group you want to view inside %(organization_name)s."
+msgstr "Выберите, какую группу вы хотите просмотреть в организации %(organization_name)s."
+
+msgctxt "staff.management"
+msgid "Choose which group you want to view in superadmin mode."
+msgstr "Выберите, какую группу вы хотите просмотреть в режиме суперадмина."
+
+msgctxt "staff.management"
+msgid "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
+msgstr "Если ничего не выбрано, все разделы останутся открытыми, а панели будут показаны согласно выбранным фильтрам."
+
+msgctxt "staff.management"
+msgid "Superadmin view"
+msgstr "Режим суперадмина"
+
+msgctxt "staff.management"
+msgid "All"
+msgstr "Все"
+
+msgctxt "staff.management"
+msgid "Students"
+msgstr "Студенты"
+
+msgctxt "staff.management"
+msgid "Student requests"
+msgstr "Заявки студентов"
+
+msgctxt "staff.management"
+msgid "Unassigned"
+msgstr "Не приглашённые"
+
+msgctxt "staff.management"
+msgid "Invites"
+msgstr "Приглашения"
+
+msgctxt "staff.management"
+msgid "Teachers"
+msgstr "Преподаватели"
+
+msgctxt "staff.management"
+msgid "Teacher requests"
+msgstr "Заявки преподавателей"
+
+msgctxt "staff.management"
+msgid "Unassigned teachers"
+msgstr "Не приглашённые преподаватели"
+
+msgctxt "staff.management"
+msgid "Teacher invites"
+msgstr "Приглашения преподавателей"
+
+msgctxt "staff.management"
+msgid "Staff"
+msgstr "Сотрудники"
+
+msgctxt "staff.management"
+msgid "Staff requests"
+msgstr "Заявки сотрудников"
+
+msgctxt "staff.management"
+msgid "Unassigned staff"
+msgstr "Не приглашённые сотрудники"
+
+msgctxt "staff.management"
+msgid "Staff invites"
+msgstr "Приглашения сотрудников"
+
+msgctxt "staff.management"
+msgid "Organizations"
+msgstr "Организации"
+
+msgctxt "staff.management"
+msgid "Organization students"
+msgstr "Студенты организации"
+
+msgctxt "staff.management"
+msgid "Manage active students from here."
+msgstr "Здесь вы можете управлять активными студентами."
+
+msgctxt "staff.management"
+msgid "Search students..."
+msgstr "Поиск студентов..."
+
+msgctxt "staff.management"
+msgid "Search pending students..."
+msgstr "Поиск ожидающих студентов..."
+
+msgctxt "staff.management"
+msgid "Clear search"
+msgstr "Очистить поиск"
+
+msgctxt "staff.management"
+msgid "Search"
+msgstr "Поиск"
+
+msgctxt "staff.management"
+msgid "User"
+msgstr "Пользователь"
+
+msgctxt "staff.management"
+msgid "Username"
+msgstr "Имя пользователя"
+
+msgctxt "staff.management"
+msgid "Email"
+msgstr "Эл. почта"
+
+msgctxt "staff.management"
+msgid "Action"
+msgstr "Действие"
+
+msgctxt "staff.management"
+msgid "Remove from organization"
+msgstr "Удалить из организации"
+
+msgctxt "staff.management"
+msgid "No student found."
+msgstr "Студенты не найдены."
+
+msgctxt "staff.management"
+msgid "Pending students"
+msgstr "Ожидающие студенты"
+
+msgctxt "staff.management"
+msgid "Approve or delete pending requests from here."
+msgstr "Здесь можно одобрить или удалить ожидающие заявки."
+
+msgctxt "staff.management"
+msgid "Select all"
+msgstr "Выбрать все"
+
+msgctxt "staff.management"
+msgid "Add selected users to the organization"
+msgstr "Добавить выбранных пользователей в организацию"
+
+msgctxt "staff.management"
+msgid "Add selected users to the organization ({count} selected)"
+msgstr "Добавить выбранных пользователей в организацию (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "Select at least 1 student"
+msgstr "Выберите хотя бы 1 студента"
+
+msgctxt "staff.management"
+msgid "Delete selected users"
+msgstr "Удалить выбранных пользователей"
+
+msgctxt "staff.management"
+msgid "Delete selected users ({count} selected)"
+msgstr "Удалить выбранных пользователей (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "Select at least 1 user"
+msgstr "Выберите хотя бы 1 пользователя"
+
+msgctxt "staff.management"
+msgid "Message"
+msgstr "Сообщение"
+
+msgctxt "staff.management"
+msgid "Status / note"
+msgstr "Статус / примечание"
+
+msgctxt "staff.management"
+msgid "Add to organization"
+msgstr "Добавить в организацию"
+
+msgctxt "staff.management"
+msgid "Delete"
+msgstr "Удалить"
+
+msgctxt "staff.management"
+msgid "There are no pending students."
+msgstr "Нет ожидающих студентов."
+
+msgctxt "staff.management"
+msgid "Students without organization"
+msgstr "Студенты без организации"
+
+msgctxt "staff.management"
+msgid "Students who can be invited appear here."
+msgstr "Здесь отображаются студенты, которым можно отправить приглашение."
+
+msgctxt "staff.management"
+msgid "Invite selected users"
+msgstr "Пригласить выбранных пользователей"
+
+msgctxt "staff.management"
+msgid "Invite selected users ({count} selected)"
+msgstr "Пригласить выбранных пользователей (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "Invite"
+msgstr "Пригласить"
+
+msgctxt "staff.management"
+msgid "No student available for invitation."
+msgstr "Нет студентов, доступных для приглашения."
+
+msgctxt "staff.management"
+msgid "Sent invites"
+msgstr "Отправленные приглашения"
+
+msgctxt "staff.management"
+msgid "Withdraw pending invites from here."
+msgstr "Отсюда можно отозвать непринятые приглашения."
+
+msgctxt "staff.management"
+msgid "Search invites..."
+msgstr "Поиск приглашений..."
+
+msgctxt "staff.management"
+msgid "Organization staff"
+msgstr "Сотрудники организации"
+
+msgctxt "staff.management"
+msgid "Non-teaching staff members are listed here."
+msgstr "Здесь отображаются сотрудники, не являющиеся преподавателями."
+
+msgctxt "staff.management"
+msgid "Search staff..."
+msgstr "Поиск сотрудников..."
+
+msgctxt "staff.management"
+msgid "Position"
+msgstr "Должность"
+
+msgctxt "staff.management"
+msgid "Role"
+msgstr "Роль"
+
+msgctxt "staff.management"
+msgid "No staff member found."
+msgstr "Сотрудники не найдены."
+
+msgctxt "staff.management"
+msgid "Review pending staff requests here."
+msgstr "Здесь можно рассмотреть ожидающие заявки сотрудников."
+
+msgctxt "staff.management"
+msgid "Search staff requests..."
+msgstr "Поиск заявок сотрудников..."
+
+msgctxt "staff.management"
+msgid "Request date"
+msgstr "Дата заявки"
+
+msgctxt "staff.management"
+msgid "Approve"
+msgstr "Одобрить"
+
+msgctxt "staff.management"
+msgid "Reject"
+msgstr "Отклонить"
+
+msgctxt "staff.management"
+msgid "There are no pending staff requests."
+msgstr "Нет ожидающих заявок сотрудников."
+
+msgctxt "staff.management"
+msgid "Staff without organization"
+msgstr "Сотрудники без организации"
+
+msgctxt "staff.management"
+msgid "Staff users who can be invited appear here."
+msgstr "Здесь отображаются сотрудники, которым можно отправить приглашение."
+
+msgctxt "staff.management"
+msgid "Invite selected staff users"
+msgstr "Пригласить выбранных сотрудников"
+
+msgctxt "staff.management"
+msgid "Invite selected staff users ({count} selected)"
+msgstr "Пригласить выбранных сотрудников (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "Department"
+msgstr "Кафедра"
+
+msgctxt "staff.management"
+msgid "No staff member available for invitation."
+msgstr "Нет сотрудников, доступных для приглашения."
+
+msgctxt "staff.management"
+msgid "Sent staff invites"
+msgstr "Отправленные приглашения для сотрудников"
+
+msgctxt "staff.management"
+msgid "Withdraw pending staff invites from here."
+msgstr "Отсюда можно отозвать непринятые приглашения сотрудников."
+
+msgctxt "staff.management"
+msgid "Search staff invites..."
+msgstr "Поиск приглашений сотрудников..."
+
+msgctxt "staff.management"
+msgid "Withdraw selected invites"
+msgstr "Отозвать выбранные приглашения"
+
+msgctxt "staff.management"
+msgid "Withdraw selected invites ({count} selected)"
+msgstr "Отозвать выбранные приглашения (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "Sender"
+msgstr "Отправитель"
+
+msgctxt "staff.management"
+msgid "Withdraw"
+msgstr "Отозвать"
+
+msgctxt "staff.management"
+msgid "There are no active staff invites to withdraw."
+msgstr "Нет активных приглашений сотрудников для отзыва."
+
+msgctxt "staff.management"
+msgid "Withdraw invite"
+msgstr "Отозвать приглашение"
+
+msgctxt "staff.management"
+msgid "Close"
+msgstr "Закрыть"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to withdraw the selected invites."
+msgstr "Подтвердите, что хотите отозвать выбранные приглашения."
+
+msgctxt "staff.management"
+msgid "Cancel"
+msgstr "Отмена"
+
+msgctxt "staff.management"
+msgid "Confirm"
+msgstr "Подтвердить"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to remove the following user from the organization."
+msgstr "Подтвердите, что хотите удалить следующего пользователя из организации."
+
+msgctxt "staff.management"
+msgid "Name"
+msgstr "Имя"
+
+msgctxt "staff.management"
+msgid "Organization"
+msgstr "Организация"
+
+msgctxt "staff.management"
+msgid "Target role"
+msgstr "Назначаемая роль"
+
+msgctxt "staff.management"
+msgid "Short note (optional)"
+msgstr "Короткая заметка (необязательно)"
+
+msgctxt "staff.management"
+msgid "Reason for removal..."
+msgstr "Причина удаления..."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to add the selected user(s) to the organization."
+msgstr "Подтвердите, что хотите добавить выбранных пользователей в организацию."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to invite the selected user(s)."
+msgstr "Подтвердите, что хотите пригласить выбранных пользователей."
+
+msgctxt "staff.management"
+msgid "Invite user"
+msgstr "Пригласить пользователя"
+
+msgctxt "staff.management"
+msgid "This user"
+msgstr "Этот пользователь"
+
+msgctxt "staff.management"
+msgid "Selected invites:"
+msgstr "Выбрано приглашений:"
+
+msgctxt "staff.management"
+msgid "Please select at least one invite first."
+msgstr "Сначала выберите хотя бы одно приглашение."
+
+msgctxt "staff.management"
+msgid "The confirm button is disabled in this state."
+msgstr "В этом состоянии кнопка подтверждения отключена."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to add this user to the organization."
+msgstr "Подтвердите, что хотите добавить этого пользователя в организацию."
+
+msgctxt "staff.management"
+msgid "Selected users:"
+msgstr "Выбрано пользователей:"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to invite this user."
+msgstr "Подтвердите, что хотите пригласить этого пользователя."
+
+msgctxt "staff.management"
+msgid "There are no active invites to withdraw."
+msgstr "Нет активных приглашений для отзыва."
+
+msgctxt "staff.management"
+msgid "Teachers in organization"
+msgstr "Преподаватели организации"
+
+msgctxt "staff.management"
+msgid "Active teacher accounts are shown here."
+msgstr "Здесь отображаются активные аккаунты преподавателей."
+
+msgctxt "staff.management"
+msgid "Search teachers..."
+msgstr "Поиск преподавателей..."
+
+msgctxt "staff.management"
+msgid "Not available"
+msgstr "Недоступно"
+
+msgctxt "staff.management"
+msgid "No teacher found."
+msgstr "Преподаватели не найдены."
+
+msgctxt "staff.management"
+msgid "Respond to pending teacher requests here."
+msgstr "Здесь можно обработать ожидающие заявки преподавателей."
+
+msgctxt "staff.management"
+msgid "Search teacher requests..."
+msgstr "Поиск заявок преподавателей..."
+
+msgctxt "staff.management"
+msgid "There are no pending teacher requests."
+msgstr "Нет ожидающих заявок преподавателей."
+
+msgctxt "staff.management"
+msgid "Teachers without organization"
+msgstr "Преподаватели без организации"
+
+msgctxt "staff.management"
+msgid "Teachers who can be invited appear here."
+msgstr "Здесь отображаются преподаватели, которым можно отправить приглашение."
+
+msgctxt "staff.management"
+msgid "Invite selected teachers"
+msgstr "Пригласить выбранных преподавателей"
+
+msgctxt "staff.management"
+msgid "Invite selected teachers ({count} selected)"
+msgstr "Пригласить выбранных преподавателей (выбрано: {count})"
+
+msgctxt "staff.management"
+msgid "No teacher available for invitation."
+msgstr "Нет преподавателей, доступных для приглашения."
+
+msgctxt "staff.management"
+msgid "Sent teacher invites"
+msgstr "Отправленные приглашения для преподавателей"
+
+msgctxt "staff.management"
+msgid "Withdraw pending teacher invites from here."
+msgstr "Отсюда можно отозвать непринятые приглашения преподавателей."
+
+msgctxt "staff.management"
+msgid "Search teacher invites..."
+msgstr "Поиск приглашений преподавателей..."
+
+msgctxt "staff.management"
+msgid "There are no active teacher invites to withdraw."
+msgstr "Нет активных приглашений преподавателей для отзыва."
+
+msgctxt "staff.management"
+msgid "Superadmin organization overview and status actions."
+msgstr "Обзор организаций и действия со статусами для суперадмина."
+
+msgctxt "staff.management"
+msgid "Search organizations..."
+msgstr "Поиск организаций..."
+
+msgctxt "staff.management"
+msgid "All statuses"
+msgstr "Все статусы"
+
+msgctxt "staff.management"
+msgid "Active"
+msgstr "Активен"
+
+msgctxt "staff.management"
+msgid "Pending"
+msgstr "Ожидает"
+
+msgctxt "staff.management"
+msgid "Suspended"
+msgstr "Приостановлен"
+
+msgctxt "staff.management"
+msgid "Inactive"
+msgstr "Неактивен"
+
+msgctxt "staff.management"
+msgid "All types"
+msgstr "Все типы"
+
+msgctxt "staff.management"
+msgid "School"
+msgstr "Школа"
+
+msgctxt "staff.management"
+msgid "University"
+msgstr "Университет"
+
+msgctxt "staff.management"
+msgid "Course center"
+msgstr "Учебный центр"
+
+msgctxt "staff.management"
+msgid "Individual"
+msgstr "Индивидуальный"
+
+msgctxt "staff.management"
+msgid "Apply filters"
+msgstr "Применить фильтры"
+
+msgctxt "staff.management"
+msgid "Type"
+msgstr "Тип"
+
+msgctxt "staff.management"
+msgid "Owner"
+msgstr "Владелец"
+
+msgctxt "staff.management"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "staff.management"
+msgid "Active members"
+msgstr "Активные участники"
+
+msgctxt "staff.management"
+msgid "Details"
+msgstr "Детали"
+
+msgctxt "staff.management"
+msgid "Manage"
+msgstr "Управление"
+
+msgctxt "staff.management"
+msgid "Code"
+msgstr "Код"
+
+msgctxt "staff.management"
+msgid "License"
+msgstr "Лицензия"
+
+msgctxt "staff.management"
+msgid "Reason"
+msgstr "Причина"
+
+msgctxt "staff.management"
+msgid "Reject reason (optional)"
+msgstr "Причина отклонения (необязательно)"
+
+msgctxt "staff.management"
+msgid "Unsuspend"
+msgstr "Снять приостановку"
+
+msgctxt "staff.management"
+msgid "Suspension reason"
+msgstr "Причина приостановки"
+
+msgctxt "staff.management"
+msgid "Suspend"
+msgstr "Приостановить"
+
+msgctxt "staff.management"
+msgid "No organization found."
+msgstr "Организации не найдены."

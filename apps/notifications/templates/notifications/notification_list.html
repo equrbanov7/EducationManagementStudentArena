@@ -22,6 +22,7 @@
         <div class="notifications-actions d-flex gap-2">
             <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                 <button type="submit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-check-double me-1"></i>{% trans "Mark all as read" %}
                 </button>
@@ -33,15 +34,15 @@
     {# ── Filter tabs ── #}
     <nav class="notifications-filters nav nav-tabs mb-3">
         <a class="nav-link {% if filter_by == 'all' %}active{% endif %}"
-           href="?filter=all{% if type_filter %}&type={{ type_filter }}{% endif %}">
+           href="?filter=all{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">
             {% trans "All" %}
         </a>
         <a class="nav-link {% if filter_by == 'unread' %}active{% endif %}"
-           href="?filter=unread{% if type_filter %}&type={{ type_filter }}{% endif %}">
+           href="?filter=unread{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">
             {% trans "Unread" %}
         </a>
         <a class="nav-link {% if filter_by == 'read' %}active{% endif %}"
-           href="?filter=read{% if type_filter %}&type={{ type_filter }}{% endif %}">
+           href="?filter=read{% if type_filter %}&type={{ type_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">
             {% trans "Read" %}
         </a>
 
@@ -56,23 +57,37 @@
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
                     <a class="dropdown-item {% if not type_filter %}active{% endif %}"
-                       href="?filter={{ filter_by }}">{% trans "All types" %}</a>
+                       href="?filter={{ filter_by }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">{% trans "All types" %}</a>
                 </li>
                 {% for value, label in notification_types %}
                 <li>
                     <a class="dropdown-item {% if type_filter == value %}active{% endif %}"
-                       href="?filter={{ filter_by }}&type={{ value }}">{{ label }}</a>
+                       href="?filter={{ filter_by }}&type={{ value }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">{{ label }}</a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
     </nav>
 
+    <form method="get" class="search-form mb-3">
+        <input type="hidden" name="filter" value="{{ filter_by }}">
+        {% if type_filter %}<input type="hidden" name="type" value="{{ type_filter }}">{% endif %}
+        <input type="search"
+               class="form-control"
+               name="q"
+               value="{{ search_query }}"
+               placeholder="{% trans 'Search notifications...' context 'profile.notifications' %}">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i>{% trans "Search" context "profile.notifications" %}
+        </button>
+    </form>
+
     {# ── Notification list ── #}
     {% if page_obj.object_list %}
         {# Bulk-delete form wraps the list #}
         <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="bulk-delete-form">
             {% csrf_token %}
+            <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
             <div class="notifications-bulk-actions mb-2 d-flex align-items-center gap-2" id="bulk-actions-bar" style="display:none !important">
                 <input type="checkbox" id="select-all-notifications" title="{% trans 'Select all' %}">
                 <label for="select-all-notifications" class="mb-0 me-2">{% trans "Select all" %}</label>
@@ -122,6 +137,7 @@
                         {% if notification.is_read %}
                             <form method="post" action="{% url 'notifications:notification_mark_unread' notification.pk %}" class="d-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                                 <button type="submit" class="btn btn-sm btn-outline-secondary" title="{% trans 'Mark as unread' %}">
                                     <i class="fas fa-envelope"></i>
                                 </button>
@@ -129,6 +145,7 @@
                         {% else %}
                             <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                                 <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'Mark as read' %}">
                                     <i class="fas fa-envelope-open"></i>
                                 </button>
@@ -136,6 +153,7 @@
                         {% endif %}
                         <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}"
                                     onclick="return confirm('{% trans "Delete this notification?" %}')">
                                 <i class="fas fa-trash"></i>
@@ -148,13 +166,15 @@
         </form>
 
         {# ── Pagination ── #}
-        {% include "partials/_pagination.html" with page_obj=page_obj %}
+        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query page_param="page" %}
 
     {% else %}
         <div class="notifications-empty text-center py-5">
             <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
             <p class="text-muted">
-                {% if filter_by == 'unread' %}
+                {% if search_query %}
+                    {% trans "No notifications matched your search." context "profile.notifications" %}
+                {% elif filter_by == 'unread' %}
                     {% trans "No unread notifications." %}
                 {% elif filter_by == 'read' %}
                     {% trans "No read notifications." %}

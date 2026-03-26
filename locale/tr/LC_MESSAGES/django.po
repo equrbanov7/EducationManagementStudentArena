@@ -15573,3 +15573,619 @@ msgstr "Bu hedefler için izniniz yok veya alıcı bulunamadı."
 msgctxt "profile.publish_notification"
 msgid "search_no_results"
 msgstr "Sonuç bulunamadı."
+
+msgctxt "profile.section"
+msgid "staff_management"
+msgstr "Personel Yönetimi"
+
+msgctxt "profile.sidebar"
+msgid "staff_management"
+msgstr "Personel Yönetimi"
+
+msgctxt "profile.notifications"
+msgid "Search notifications..."
+msgstr "Bildirim ara..."
+
+msgctxt "profile.notifications"
+msgid "Clear notification search"
+msgstr "Bildirim aramasını temizle"
+
+msgctxt "profile.notifications"
+msgid "Search"
+msgstr "Ara"
+
+msgctxt "profile.notifications"
+msgid "No notifications matched your search."
+msgstr "Aramanızla eşleşen bildirim bulunamadı."
+
+msgctxt "profile.notifications"
+msgid "Try a different search term or clear the search filter."
+msgstr "Farklı bir arama terimi deneyin veya arama filtresini temizleyin."
+
+msgctxt "staff.management"
+msgid "Staff Management"
+msgstr "Personel Yönetimi"
+
+msgctxt "staff.management"
+msgid "Back to profile"
+msgstr "Profile dön"
+
+msgctxt "staff.management"
+msgid "Choose which group you want to view inside %(organization_name)s."
+msgstr "%(organization_name)s içinde görüntülemek istediğiniz grubu seçin."
+
+msgctxt "staff.management"
+msgid "Choose which group you want to view in superadmin mode."
+msgstr "Süperadmin modunda görüntülemek istediğiniz grubu seçin."
+
+msgctxt "staff.management"
+msgid "If nothing is selected, all sections stay open and panels are shown according to the filters you choose."
+msgstr "Hiçbir şey seçilmezse tüm bölümler açık kalır ve paneller seçtiğiniz filtrelere göre gösterilir."
+
+msgctxt "staff.management"
+msgid "Superadmin view"
+msgstr "Süperadmin görünümü"
+
+msgctxt "staff.management"
+msgid "All"
+msgstr "Tümü"
+
+msgctxt "staff.management"
+msgid "Students"
+msgstr "Öğrenciler"
+
+msgctxt "staff.management"
+msgid "Student requests"
+msgstr "Öğrenci başvuruları"
+
+msgctxt "staff.management"
+msgid "Unassigned"
+msgstr "Bağlı olmayanlar"
+
+msgctxt "staff.management"
+msgid "Invites"
+msgstr "Davetler"
+
+msgctxt "staff.management"
+msgid "Teachers"
+msgstr "Öğretmenler"
+
+msgctxt "staff.management"
+msgid "Teacher requests"
+msgstr "Öğretmen başvuruları"
+
+msgctxt "staff.management"
+msgid "Unassigned teachers"
+msgstr "Bağlı olmayan öğretmenler"
+
+msgctxt "staff.management"
+msgid "Teacher invites"
+msgstr "Öğretmen davetleri"
+
+msgctxt "staff.management"
+msgid "Staff"
+msgstr "Personel"
+
+msgctxt "staff.management"
+msgid "Staff requests"
+msgstr "Personel başvuruları"
+
+msgctxt "staff.management"
+msgid "Unassigned staff"
+msgstr "Bağlı olmayan personel"
+
+msgctxt "staff.management"
+msgid "Staff invites"
+msgstr "Personel davetleri"
+
+msgctxt "staff.management"
+msgid "Organizations"
+msgstr "Kuruluşlar"
+
+msgctxt "staff.management"
+msgid "Organization students"
+msgstr "Kuruluş öğrencileri"
+
+msgctxt "staff.management"
+msgid "Manage active students from here."
+msgstr "Aktif öğrencileri buradan yönetin."
+
+msgctxt "staff.management"
+msgid "Search students..."
+msgstr "Öğrenci ara..."
+
+msgctxt "staff.management"
+msgid "Search pending students..."
+msgstr "Bekleyen öğrenci ara..."
+
+msgctxt "staff.management"
+msgid "Clear search"
+msgstr "Aramayı temizle"
+
+msgctxt "staff.management"
+msgid "Search"
+msgstr "Ara"
+
+msgctxt "staff.management"
+msgid "User"
+msgstr "Kullanıcı"
+
+msgctxt "staff.management"
+msgid "Username"
+msgstr "Kullanıcı adı"
+
+msgctxt "staff.management"
+msgid "Email"
+msgstr "E-posta"
+
+msgctxt "staff.management"
+msgid "Action"
+msgstr "İşlem"
+
+msgctxt "staff.management"
+msgid "Remove from organization"
+msgstr "Kuruluştan çıkar"
+
+msgctxt "staff.management"
+msgid "No student found."
+msgstr "Öğrenci bulunamadı."
+
+msgctxt "staff.management"
+msgid "Pending students"
+msgstr "Bekleyen öğrenciler"
+
+msgctxt "staff.management"
+msgid "Approve or delete pending requests from here."
+msgstr "Bekleyen başvuruları buradan onaylayabilir veya silebilirsiniz."
+
+msgctxt "staff.management"
+msgid "Select all"
+msgstr "Tümünü seç"
+
+msgctxt "staff.management"
+msgid "Add selected users to the organization"
+msgstr "Seçilen kullanıcıları kuruluşa ekle"
+
+msgctxt "staff.management"
+msgid "Add selected users to the organization ({count} selected)"
+msgstr "Seçilen kullanıcıları kuruluşa ekle ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "Select at least 1 student"
+msgstr "En az 1 öğrenci seçin"
+
+msgctxt "staff.management"
+msgid "Delete selected users"
+msgstr "Seçilen kullanıcıları sil"
+
+msgctxt "staff.management"
+msgid "Delete selected users ({count} selected)"
+msgstr "Seçilen kullanıcıları sil ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "Select at least 1 user"
+msgstr "En az 1 kullanıcı seçin"
+
+msgctxt "staff.management"
+msgid "Message"
+msgstr "Mesaj"
+
+msgctxt "staff.management"
+msgid "Status / note"
+msgstr "Durum / not"
+
+msgctxt "staff.management"
+msgid "Add to organization"
+msgstr "Kuruluşa ekle"
+
+msgctxt "staff.management"
+msgid "Delete"
+msgstr "Sil"
+
+msgctxt "staff.management"
+msgid "There are no pending students."
+msgstr "Bekleyen öğrenci yok."
+
+msgctxt "staff.management"
+msgid "Students without organization"
+msgstr "Kuruluşa bağlı olmayan öğrenciler"
+
+msgctxt "staff.management"
+msgid "Students who can be invited appear here."
+msgstr "Davet edilebilecek öğrenciler burada görünür."
+
+msgctxt "staff.management"
+msgid "Invite selected users"
+msgstr "Seçilen kullanıcıları davet et"
+
+msgctxt "staff.management"
+msgid "Invite selected users ({count} selected)"
+msgstr "Seçilen kullanıcıları davet et ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "Invite"
+msgstr "Davet et"
+
+msgctxt "staff.management"
+msgid "No student available for invitation."
+msgstr "Davet edilebilecek öğrenci bulunamadı."
+
+msgctxt "staff.management"
+msgid "Sent invites"
+msgstr "Gönderilen davetler"
+
+msgctxt "staff.management"
+msgid "Withdraw pending invites from here."
+msgstr "Kabul edilmemiş davetleri buradan geri çekin."
+
+msgctxt "staff.management"
+msgid "Search invites..."
+msgstr "Davet ara..."
+
+msgctxt "staff.management"
+msgid "Organization staff"
+msgstr "Kuruluş personeli"
+
+msgctxt "staff.management"
+msgid "Non-teaching staff members are listed here."
+msgstr "Öğretmen olmayan personel üyeleri burada listelenir."
+
+msgctxt "staff.management"
+msgid "Search staff..."
+msgstr "Personel ara..."
+
+msgctxt "staff.management"
+msgid "Position"
+msgstr "Pozisyon"
+
+msgctxt "staff.management"
+msgid "Role"
+msgstr "Rol"
+
+msgctxt "staff.management"
+msgid "No staff member found."
+msgstr "Personel bulunamadı."
+
+msgctxt "staff.management"
+msgid "Review pending staff requests here."
+msgstr "Bekleyen personel başvurularını buradan değerlendirin."
+
+msgctxt "staff.management"
+msgid "Search staff requests..."
+msgstr "Personel başvurusu ara..."
+
+msgctxt "staff.management"
+msgid "Request date"
+msgstr "Başvuru tarihi"
+
+msgctxt "staff.management"
+msgid "Approve"
+msgstr "Onayla"
+
+msgctxt "staff.management"
+msgid "Reject"
+msgstr "Reddet"
+
+msgctxt "staff.management"
+msgid "There are no pending staff requests."
+msgstr "Bekleyen personel başvurusu yok."
+
+msgctxt "staff.management"
+msgid "Staff without organization"
+msgstr "Kuruluşa bağlı olmayan personel"
+
+msgctxt "staff.management"
+msgid "Staff users who can be invited appear here."
+msgstr "Davet edilebilecek personel kullanıcıları burada görünür."
+
+msgctxt "staff.management"
+msgid "Invite selected staff users"
+msgstr "Seçilen personel kullanıcılarını davet et"
+
+msgctxt "staff.management"
+msgid "Invite selected staff users ({count} selected)"
+msgstr "Seçilen personel kullanıcılarını davet et ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "Department"
+msgstr "Kürsü"
+
+msgctxt "staff.management"
+msgid "No staff member available for invitation."
+msgstr "Davet edilebilecek personel bulunamadı."
+
+msgctxt "staff.management"
+msgid "Sent staff invites"
+msgstr "Gönderilen personel davetleri"
+
+msgctxt "staff.management"
+msgid "Withdraw pending staff invites from here."
+msgstr "Kabul edilmemiş personel davetlerini buradan geri çekin."
+
+msgctxt "staff.management"
+msgid "Search staff invites..."
+msgstr "Personel daveti ara..."
+
+msgctxt "staff.management"
+msgid "Withdraw selected invites"
+msgstr "Seçilen davetleri geri çek"
+
+msgctxt "staff.management"
+msgid "Withdraw selected invites ({count} selected)"
+msgstr "Seçilen davetleri geri çek ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "Sender"
+msgstr "Gönderen"
+
+msgctxt "staff.management"
+msgid "Withdraw"
+msgstr "Geri çek"
+
+msgctxt "staff.management"
+msgid "There are no active staff invites to withdraw."
+msgstr "Geri çekilecek aktif personel daveti yok."
+
+msgctxt "staff.management"
+msgid "Withdraw invite"
+msgstr "Daveti geri çek"
+
+msgctxt "staff.management"
+msgid "Close"
+msgstr "Kapat"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to withdraw the selected invites."
+msgstr "Seçilen davetleri geri çekmek istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "Cancel"
+msgstr "İptal et"
+
+msgctxt "staff.management"
+msgid "Confirm"
+msgstr "Onayla"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to remove the following user from the organization."
+msgstr "Aşağıdaki kullanıcıyı kuruluştan çıkarmak istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "Name"
+msgstr "Ad"
+
+msgctxt "staff.management"
+msgid "Organization"
+msgstr "Kuruluş"
+
+msgctxt "staff.management"
+msgid "Target role"
+msgstr "Değişecek rol"
+
+msgctxt "staff.management"
+msgid "Short note (optional)"
+msgstr "Kısa not (isteğe bağlı)"
+
+msgctxt "staff.management"
+msgid "Reason for removal..."
+msgstr "Çıkarma nedeni..."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to add the selected user(s) to the organization."
+msgstr "Seçilen kullanıcı(lar)ı kuruluşa eklemek istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to invite the selected user(s)."
+msgstr "Seçilen kullanıcı(lar)ı davet etmek istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "Invite user"
+msgstr "Kullanıcıyı davet et"
+
+msgctxt "staff.management"
+msgid "This user"
+msgstr "Bu kullanıcı"
+
+msgctxt "staff.management"
+msgid "Selected invites:"
+msgstr "Seçilen davet sayısı:"
+
+msgctxt "staff.management"
+msgid "Please select at least one invite first."
+msgstr "Önce en az bir davet seçin."
+
+msgctxt "staff.management"
+msgid "The confirm button is disabled in this state."
+msgstr "Bu durumda onay düğmesi devre dışıdır."
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to add this user to the organization."
+msgstr "Bu kullanıcıyı kuruluşa eklemek istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "Selected users:"
+msgstr "Seçilen kullanıcı sayısı:"
+
+msgctxt "staff.management"
+msgid "Please confirm that you want to invite this user."
+msgstr "Bu kullanıcıyı davet etmek istediğinizi onaylayın."
+
+msgctxt "staff.management"
+msgid "There are no active invites to withdraw."
+msgstr "Geri çekilecek aktif davet yok."
+
+msgctxt "staff.management"
+msgid "Teachers in organization"
+msgstr "Kuruluştaki öğretmenler"
+
+msgctxt "staff.management"
+msgid "Active teacher accounts are shown here."
+msgstr "Aktif öğretmen hesapları burada gösterilir."
+
+msgctxt "staff.management"
+msgid "Search teachers..."
+msgstr "Öğretmen ara..."
+
+msgctxt "staff.management"
+msgid "Not available"
+msgstr "Mevcut değil"
+
+msgctxt "staff.management"
+msgid "No teacher found."
+msgstr "Öğretmen bulunamadı."
+
+msgctxt "staff.management"
+msgid "Respond to pending teacher requests here."
+msgstr "Bekleyen öğretmen başvurularını buradan yanıtlayın."
+
+msgctxt "staff.management"
+msgid "Search teacher requests..."
+msgstr "Öğretmen başvurusu ara..."
+
+msgctxt "staff.management"
+msgid "There are no pending teacher requests."
+msgstr "Bekleyen öğretmen başvurusu yok."
+
+msgctxt "staff.management"
+msgid "Teachers without organization"
+msgstr "Kuruluşa bağlı olmayan öğretmenler"
+
+msgctxt "staff.management"
+msgid "Teachers who can be invited appear here."
+msgstr "Davet gönderilebilecek öğretmenler burada görünür."
+
+msgctxt "staff.management"
+msgid "Invite selected teachers"
+msgstr "Seçilen öğretmenleri davet et"
+
+msgctxt "staff.management"
+msgid "Invite selected teachers ({count} selected)"
+msgstr "Seçilen öğretmenleri davet et ({count} seçildi)"
+
+msgctxt "staff.management"
+msgid "No teacher available for invitation."
+msgstr "Davet edilebilecek öğretmen bulunamadı."
+
+msgctxt "staff.management"
+msgid "Sent teacher invites"
+msgstr "Gönderilen öğretmen davetleri"
+
+msgctxt "staff.management"
+msgid "Withdraw pending teacher invites from here."
+msgstr "Kabul edilmemiş öğretmen davetlerini buradan geri çekin."
+
+msgctxt "staff.management"
+msgid "Search teacher invites..."
+msgstr "Öğretmen daveti ara..."
+
+msgctxt "staff.management"
+msgid "There are no active teacher invites to withdraw."
+msgstr "Geri çekilecek aktif öğretmen daveti yok."
+
+msgctxt "staff.management"
+msgid "Superadmin organization overview and status actions."
+msgstr "Süperadmin için kuruluş görünümü ve durum işlemleri."
+
+msgctxt "staff.management"
+msgid "Search organizations..."
+msgstr "Kuruluş ara..."
+
+msgctxt "staff.management"
+msgid "All statuses"
+msgstr "Tüm durumlar"
+
+msgctxt "staff.management"
+msgid "Active"
+msgstr "Aktif"
+
+msgctxt "staff.management"
+msgid "Pending"
+msgstr "Beklemede"
+
+msgctxt "staff.management"
+msgid "Suspended"
+msgstr "Askıya alındı"
+
+msgctxt "staff.management"
+msgid "Inactive"
+msgstr "Aktif değil"
+
+msgctxt "staff.management"
+msgid "All types"
+msgstr "Tüm türler"
+
+msgctxt "staff.management"
+msgid "School"
+msgstr "Okul"
+
+msgctxt "staff.management"
+msgid "University"
+msgstr "Üniversite"
+
+msgctxt "staff.management"
+msgid "Course center"
+msgstr "Eğitim merkezi"
+
+msgctxt "staff.management"
+msgid "Individual"
+msgstr "Bireysel"
+
+msgctxt "staff.management"
+msgid "Apply filters"
+msgstr "Uygula"
+
+msgctxt "staff.management"
+msgid "Type"
+msgstr "Tür"
+
+msgctxt "staff.management"
+msgid "Owner"
+msgstr "Sahip"
+
+msgctxt "staff.management"
+msgid "Status"
+msgstr "Durum"
+
+msgctxt "staff.management"
+msgid "Active members"
+msgstr "Aktif üye"
+
+msgctxt "staff.management"
+msgid "Details"
+msgstr "Detaylar"
+
+msgctxt "staff.management"
+msgid "Manage"
+msgstr "Yönet"
+
+msgctxt "staff.management"
+msgid "Code"
+msgstr "Kod"
+
+msgctxt "staff.management"
+msgid "License"
+msgstr "Lisans"
+
+msgctxt "staff.management"
+msgid "Reason"
+msgstr "Sebep"
+
+msgctxt "staff.management"
+msgid "Reject reason (optional)"
+msgstr "Ret sebebi (isteğe bağlı)"
+
+msgctxt "staff.management"
+msgid "Unsuspend"
+msgstr "Askıyı kaldır"
+
+msgctxt "staff.management"
+msgid "Suspension reason"
+msgstr "Askıya alma sebebi"
+
+msgctxt "staff.management"
+msgid "Suspend"
+msgstr "Askıya al"
+
+msgctxt "staff.management"
+msgid "No organization found."
+msgstr "Kuruluş bulunamadı."

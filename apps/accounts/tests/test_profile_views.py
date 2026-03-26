@@ -142,6 +142,34 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Join organization")
         self.assertContains(response, "Search current organizations, choose one")
 
+    def test_staff_management_sidebar_and_section_are_translated_in_english(self):
+        owner = User.objects.create_user(
+            username="staff_org_owner",
+            email="staff_org_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Staff Translation Org",
+            slug="staff-translation-org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="hr")
+
+        _login_with_org(self.client, self.user, organization)
+        self.client.cookies["django_language"] = "en"
+        response = self.client.get(
+            reverse("accounts:profile") + "?section=student-organization-management",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Staff Management")
+        self.assertContains(response, "Organization students")
+        self.assertContains(response, "Student requests")
+
     def test_profile_notification_modal_keeps_real_newlines_and_internal_link_query(self):
         self.client.login(username="testuser", password="testpass123")
         create_notification(
@@ -161,6 +189,32 @@ class ProfileViewTest(TestCase):
         )
         self.assertNotContains(response, "\\u000A", html=False)
         self.assertNotContains(response, "\\u003F", html=False)
+
+    def test_profile_notifications_search_filters_results(self):
+        self.client.login(username="testuser", password="testpass123")
+        create_notification(recipient=self.user, title="Budget update", message="Quarterly report")
+        create_notification(recipient=self.user, title="Exam reminder", message="Starts tomorrow")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications&notif_search=budget")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Budget update")
+        self.assertNotContains(response, "Exam reminder")
+        self.assertEqual(response.context["in_app_notifications_page"].paginator.count, 1)
+        self.assertEqual(
+            response.context["notif_pagination_query"],
+            "section=notifications&notif_filter=all&notif_search=budget",
+        )
+
+    def test_profile_notifications_pagination_uses_requested_page(self):
+        self.client.login(username="testuser", password="testpass123")
+        for index in range(11):
+            create_notification(recipient=self.user, title=f"Notification {index}")
+
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications&notif_page=2")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["in_app_notifications_page"].number, 2)
 
     def test_profile_change_password_updates_password_and_keeps_session(self):
         self.client.login(username="testuser", password="testpass123")

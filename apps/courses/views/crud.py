@@ -59,7 +59,10 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
 
     def _can_superadmin_select_organization(self, request=None):
         current_request = request or self.request
-        return is_superadmin_user(getattr(current_request, "user", None)) and get_request_organization(current_request) is None
+        return (
+            is_superadmin_user(getattr(current_request, "user", None))
+            and get_request_organization(current_request) is None
+        )
 
     def _organization_selection_queryset(self):
         return Organization.objects.filter(is_active=True, status="active").order_by("name")
