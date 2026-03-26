@@ -45,6 +45,7 @@ def create_project(request, course_id):
     │ Təyin etmə: group_names[] və ya students[]                              │
     └─────────────────────────────────────────────────────────────────────────┘
     """
+    from apps.notifications.services import notify_task_assignment
     from apps.projects.models import Project
 
     course = _get_tenant_course_or_404(request, course_id)
@@ -89,6 +90,13 @@ def create_project(request, course_id):
                 course_memberships__role="student",
             ).distinct()
             project.assigned_students.set(group_students)
+
+        if project.status == "active":
+            notify_task_assignment(
+                task=project,
+                user_ids=project.assigned_students.values_list("id", flat=True),
+                task_kind="project",
+            )
 
         messages.success(request, pgettext("projects.views.message", "project_created"))
         return JsonResponse({"success": True, "project_id": project.id})
@@ -162,6 +170,8 @@ def edit_project(request, pk):
     # POST - Yenilə
     # ─────────────────────────────────────────────────────────────────────────
     try:
+        previous_status = project.status
+        previous_recipient_ids = set(project.assigned_students.values_list("id", flat=True))
         project.title = request.POST.get("title")
         project.description = request.POST.get("description", "")
         project.start_date = request.POST.get("start_date")
@@ -192,6 +202,18 @@ def edit_project(request, pk):
             project.assigned_students.set(group_students)
         else:
             project.assigned_students.clear()
+
+        current_recipient_ids = set(project.assigned_students.values_list("id", flat=True))
+        should_notify_all = previous_status != "active" and project.status == "active"
+        new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        if new_recipient_ids and project.status == "active":
+            from apps.notifications.services import notify_task_assignment
+
+            notify_task_assignment(
+                task=project,
+                user_ids=new_recipient_ids,
+                task_kind="project",
+            )
 
         messages.success(request, pgettext("projects.views.message", "project_updated"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_updated")})

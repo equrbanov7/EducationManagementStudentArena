@@ -46,6 +46,7 @@ def create_assignment(request, course_id):
     └─────────────────────────────────────────────────────────────────────────┘
     """
     from apps.assignments.models import Assignment
+    from apps.notifications.services import notify_task_assignment
 
     course = _get_tenant_course_or_404(request, course_id)
 
@@ -89,6 +90,13 @@ def create_assignment(request, course_id):
                 course_memberships__role="student",
             ).distinct()
             assignment.assigned_students.set(group_students)
+
+        if assignment.status in {"active", "published"}:
+            notify_task_assignment(
+                task=assignment,
+                user_ids=assignment.assigned_students.values_list("id", flat=True),
+                task_kind="assignment",
+            )
 
         messages.success(request, pgettext("assignments.views.message", "assignment_created"))
         return JsonResponse({"success": True, "assignment_id": assignment.id})
@@ -162,6 +170,8 @@ def edit_assignment(request, pk):
     # POST - Yenilə
     # ─────────────────────────────────────────────────────────────────────────
     try:
+        previous_status = assignment.status
+        previous_recipient_ids = set(assignment.assigned_students.values_list("id", flat=True))
         assignment.title = request.POST.get("title")
         assignment.description = request.POST.get("description", "")
         assignment.start_date = request.POST.get("start_date")
@@ -192,6 +202,18 @@ def edit_assignment(request, pk):
             assignment.assigned_students.set(group_students)
         else:
             assignment.assigned_students.clear()
+
+        current_recipient_ids = set(assignment.assigned_students.values_list("id", flat=True))
+        should_notify_all = previous_status not in {"active", "published"} and assignment.status in {"active", "published"}
+        new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        if new_recipient_ids and assignment.status in {"active", "published"}:
+            from apps.notifications.services import notify_task_assignment
+
+            notify_task_assignment(
+                task=assignment,
+                user_ids=new_recipient_ids,
+                task_kind="assignment",
+            )
 
         messages.success(request, pgettext("assignments.views.message", "assignment_updated"))
         return JsonResponse({"success": True, "message": pgettext("assignments.views.message", "assignment_updated")})

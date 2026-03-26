@@ -11,6 +11,10 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
+from apps.notifications.services import (
+    notify_membership_request_resolution,
+    notify_org_admins_of_new_request,
+)
 from core.constants import OrganizationType
 
 from ..models import ProfileRole
@@ -21,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 def set_student_org_request_status(*, request_obj, status, note="", responded_by=None, when=None):
     """Persist a status update for a student organization request."""
+    previous_status = request_obj.status
     responded_at = when or timezone.now()
     request_obj.status = status
     request_obj.resolution_note = (note or "").strip()
@@ -35,6 +40,15 @@ def set_student_org_request_status(*, request_obj, status, note="", responded_by
             "updated_at",
         ]
     )
+    if previous_status != status:
+        try:
+            notify_membership_request_resolution(request_obj=request_obj)
+        except Exception:
+            logger.exception(
+                "Failed to notify applicant about request %s status change to %s",
+                request_obj.pk,
+                status,
+            )
 
 
 def sync_profile_pending_request_snapshot(profile):
@@ -100,58 +114,6 @@ def close_other_pending_student_requests(*, user, accepted_organization, respond
     )
 
 
-def _notify_org_admins_of_new_request(user, organization, role_type):
-    """Send in-app notifications to org admins/owners about a new join request."""
-    try:
-        from apps.notifications.models import InAppNotification, NotificationType
-        from apps.organizations.models import Membership
-
-        role_label = {
-            MembershipRequestRoleType.STUDENT: "tələbə",
-            MembershipRequestRoleType.TEACHER: "müəllim",
-            MembershipRequestRoleType.STAFF: "işçi",
-        }.get(role_type, "üzv")
-
-        admin_user_ids = list(
-            Membership.objects.filter(
-                organization=organization,
-                is_active=True,
-                role__in=["org_owner", "org_admin", "hr"],
-            ).values_list("user_id", flat=True)
-        )
-        # Also include org.owner
-        if organization.owner_id and organization.owner_id not in admin_user_ids:
-            admin_user_ids.append(organization.owner_id)
-
-        title = f"Yeni {role_label} müraciəti: {user.get_full_name() or user.username}"
-        message = (
-            f"{user.get_full_name() or user.username} ({user.email}) "
-            f"{organization.name} təşkilatına {role_label} kimi qoşulmaq üçün müraciət etdi."
-        )
-        from django.urls import reverse
-
-        link = reverse("accounts:student_organization_management")
-
-        notifications = [
-            InAppNotification(
-                recipient_id=admin_id,
-                title=title,
-                message=message,
-                link=link,
-                notification_type=NotificationType.APPROVAL,
-            )
-            for admin_id in admin_user_ids
-        ]
-        if notifications:
-            InAppNotification.objects.bulk_create(notifications, ignore_conflicts=True)
-    except Exception:
-        logger.exception(
-            "Failed to send join-request notifications for user %s to org %s",
-            user.pk,
-            organization.pk,
-        )
-
-
 def activate_verified_student_membership(user):
     """Back-compat alias for activate_verified_membership (students only)."""
     return activate_verified_membership(user)
@@ -207,15 +169,20 @@ def activate_verified_membership(user):
             existing_pending.message = request_message
             existing_pending.save(update_fields=["message", "updated_at"])
     else:
-        StudentOrganizationRequest.objects.create(
+        request_obj = StudentOrganizationRequest.objects.create(
             user=user,
             organization=requested_organization,
             role_type=role_type,
             message=request_message,
             status=StudentOrganizationRequestStatus.PENDING,
         )
-        # Notify org admins of the new request.
-        _notify_org_admins_of_new_request(user, requested_organization, role_type)
+        try:
+            notify_org_admins_of_new_request(request_obj=request_obj)
+        except Exception:
+            logger.exception(
+                "Failed to notify org admins about verified membership request %s",
+                request_obj.pk,
+            )
 
     profile.requested_organization_name = requested_organization.name
     profile.student_university_name = requested_organization.name

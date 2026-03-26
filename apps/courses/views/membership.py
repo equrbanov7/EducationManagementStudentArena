@@ -158,6 +158,8 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                 status=403,
             )
 
+        from apps.notifications.services import notify_course_membership_assigned
+
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
@@ -184,10 +186,16 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                     user=user,
                     defaults={"role": "student", "group_name": group_name},
                 )
+                previous_group_name = membership.group_name or ""
                 if not created:
                     membership.group_name = group_name
-                    membership.save()
+                    membership.save(update_fields=["group_name"])
                 added_count += 1
+                notify_course_membership_assigned(
+                    membership=membership,
+                    created=created,
+                    previous_group_name=previous_group_name,
+                )
             except User.DoesNotExist:
                 continue
 
@@ -220,6 +228,8 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
                 {"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403
             )
 
+        from apps.notifications.services import notify_course_membership_assigned
+
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
@@ -248,12 +258,23 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
                         user=student,
                         defaults={"role": "student", "group_name": group.name},
                     )
+                    previous_group_name = membership.group_name or ""
                     if created:
                         added_count += 1
+                        notify_course_membership_assigned(
+                            membership=membership,
+                            created=True,
+                            previous_group_name=previous_group_name,
+                        )
                     else:
                         if not (membership.group_name or "").strip():
                             membership.group_name = group.name
                             membership.save(update_fields=["group_name"])
+                            notify_course_membership_assigned(
+                                membership=membership,
+                                created=False,
+                                previous_group_name=previous_group_name,
+                            )
 
             return JsonResponse(
                 {
@@ -424,6 +445,8 @@ def link_exam_to_course(request, pk):
     course = _get_owner_course_or_404(request, pk)
 
     try:
+        from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+
         data = json.loads(request.body)
         exam_id = data.get("exam_id")
 
@@ -434,6 +457,13 @@ def link_exam_to_course(request, pk):
         exam = get_object_or_404(exam_qs, id=exam_id)
         exam.course = course
         exam.save()
+
+        if exam.is_active:
+            notify_task_assignment(
+                task=exam,
+                user_ids=get_exam_assigned_user_ids(exam),
+                task_kind="exam",
+            )
 
         return JsonResponse({"success": True})
     except Exception:

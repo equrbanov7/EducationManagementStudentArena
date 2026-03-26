@@ -15267,6 +15267,42 @@ msgctxt "profile.section"
 msgid "notifications"
 msgstr "Уведомления"
 
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Присоединиться к организации"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Присоединиться к организации"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Студент"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Преподаватель"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Сотрудник"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Участник"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "Университет"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "Школа"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Курс-центр"
+
 msgctxt "profile.notifications"
 msgid "filter_all"
 msgstr "Все"
@@ -15358,6 +15394,90 @@ msgstr "Принять"
 msgctxt "profile.notifications"
 msgid "reject"
 msgstr "Отклонить"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "Ваша заявка в организацию %(organization_name)s как %(role_label)s отправлена и сейчас ожидает ответа."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "Организация %(organization_name)s пригласила вас как %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "Присоединиться к организации как %(role_label)s"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Найдите доступные организации, выберите одну и отправьте короткое сообщение, чтобы присоединиться как %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "Сейчас вы связаны с организацией <strong>%(organization_name)s</strong>. После выхода вы сможете отправить новую заявку из этого раздела или принять ожидающие приглашения."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "Сейчас у вас <strong>%(count)s</strong> заявок в организации, ожидающих подтверждения."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "У вас есть <strong>%(count)s</strong> приглашений в организации. Вы можете присоединиться по ним как %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "Отменить"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Поиск организации..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "Все типы организаций"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "Отправить заявку как %(role_label)s"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "Сообщение к заявке как %(role_label)s"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "Вы можете написать короткую заметку для организации..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Подтвердить заявку"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Выбрать"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Организация"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Тип"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Страна"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Статус"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "Заявка как %(role_label)s отправлена"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "Подходящих организаций не найдено."
 
 msgctxt "profile.publish_notification"
 msgid "title"

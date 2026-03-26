@@ -72,6 +72,18 @@
         </button>
         <button type="button"
                 class="org-management-chip is-active"
+                data-management-chip="teacher-unassigned">
+            <span>Müəllim dəvətsizlər</span>
+            <span class="org-management-chip__count">{{ unassigned_teachers.paginator.count }}</span>
+        </button>
+        <button type="button"
+                class="org-management-chip is-active"
+                data-management-chip="teacher-invites">
+            <span>Müəllim dəvətləri</span>
+            <span class="org-management-chip__count">{{ sent_teacher_invites.paginator.count }}</span>
+        </button>
+        <button type="button"
+                class="org-management-chip is-active"
                 data-management-chip="staff-members">
             <span>Staff</span>
             <span class="org-management-chip__count">{{ staff_members.paginator.count }}</span>
@@ -81,6 +93,18 @@
                 data-management-chip="staff-requests">
             <span>Staff müraciətləri</span>
             <span class="org-management-chip__count">{{ pending_staff_requests.paginator.count }}</span>
+        </button>
+        <button type="button"
+                class="org-management-chip is-active"
+                data-management-chip="staff-unassigned">
+            <span>Staff dəvətsizlər</span>
+            <span class="org-management-chip__count">{{ unassigned_staff.paginator.count }}</span>
+        </button>
+        <button type="button"
+                class="org-management-chip is-active"
+                data-management-chip="staff-invites">
+            <span>Staff dəvətləri</span>
+            <span class="org-management-chip__count">{{ sent_staff_invites.paginator.count }}</span>
         </button>
         {% endif %}
         {% if is_superadmin %}
@@ -224,7 +248,9 @@
         </button>
     </form>
 
-    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ post_next_url }}">
         <input type="hidden" name="action" value="bulk_approve_requested_students">
@@ -383,12 +409,15 @@
             <label class="form-check d-flex align-items-center gap-2 mb-0">
                 <input type="checkbox"
                        id="selectAllUnassignedStudents"
+                       data-select-all-unassigned
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not unassigned_students.paginator.count %}disabled{% endif %}>
                 <span class="form-check-label">Hamısını seç</span>
             </label>
             <button type="button"
                     class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    data-invite-action="bulk_invite_students"
+                    data-invite-role-type="student"
                     data-default-label="Seçilənlərə dəvət et"
                     data-selected-label="Seçilənlərə dəvət et ({count} seçildi)"
                     data-disabled-tooltip="Ən az 1 seçin"
@@ -430,6 +459,8 @@
                         <td>
                             <button type="button"
                                     class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-invite-action="bulk_invite_students"
+                                    data-invite-role-type="student"
                                     data-single-invite-user-id="{{ profile.user.id }}"
                                     data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
                                     data-user-username="@{{ profile.user.username }}"
@@ -492,7 +523,9 @@
         </button>
     </form>
 
-    <form method="post" action="{% url 'accounts:student_organization_management' %}">
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-sent-invites-form>
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ post_next_url }}">
         <input type="hidden" name="action" value="revoke_sent_invites">
@@ -500,6 +533,7 @@
             <label class="form-check d-flex align-items-center gap-2 mb-0">
                 <input type="checkbox"
                        id="selectAllSentInvites"
+                       data-select-all-sent-invites
                        class="form-check-input mt-0"
                        {% if not can_manage_students or not sent_student_invites.paginator.count %}disabled{% endif %}>
                 <span class="form-check-label">Hamısını seç</span>
@@ -509,6 +543,8 @@
                     data-bs-toggle="modal"
                     data-bs-target="#revokeSentInvitesConfirmModal"
                     data-revoke-mode="bulk"
+                    data-revoke-action="revoke_sent_invites"
+                    data-revoke-role-type="student"
                     data-default-label="Seçilənləri geri çək"
                     data-selected-label="Seçilənləri geri çək ({count} seçildi)"
                     data-disabled-tooltip="Ən az 1 seçin"
@@ -551,6 +587,8 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#revokeSentInvitesConfirmModal"
                                     data-revoke-mode="single"
+                                    data-revoke-action="revoke_sent_invites"
+                                    data-revoke-role-type="student"
                                     data-single-revoke-user-id="{{ invite.user.id }}"
                                     data-single-revoke-username="@{{ invite.user.username }}"
                                     {% if not can_manage_students %}disabled{% endif %}>
@@ -617,6 +655,7 @@
                     <th>Username</th>
                     <th>Email</th>
                     <th>Rol</th>
+                    <th>Əməliyyat</th>
                 </tr>
             </thead>
             <tbody>
@@ -626,10 +665,30 @@
                     <td>@{{ membership.user.username }}</td>
                     <td>{{ membership.user.email }}</td>
                     <td><span class="role-badge">{{ membership.management_role_label }}</span></td>
+                    <td>
+                        {% if membership.management_can_remove %}
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeStudentConfirmModal"
+                            data-student-user-id="{{ membership.user.id }}"
+                            data-student-full-name="{{ membership.user.get_full_name|default:membership.user.username }}"
+                            data-student-username="@{{ membership.user.username }}"
+                            data-student-email="{{ membership.user.email }}"
+                            data-student-org="{{ organization.name }}"
+                            data-student-role="{{ membership.management_role_label }}"
+                            {% if not can_manage_students %}disabled{% endif %}>
+                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                        </button>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">Müəllim tapılmadı.</td>
+                    <td colspan="5" class="text-center">Müəllim tapılmadı.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -732,7 +791,262 @@
             </tbody>
         </table>
     </div>
-    {% include "partials/_pagination.html" with page_obj=pending_teacher_requests extra_query=teacher_requests_pagination_query page_param=teacher_requests_page_param %}
+{% include "partials/_pagination.html" with page_obj=pending_teacher_requests extra_query=teacher_requests_pagination_query page_param=teacher_requests_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="teacher-unassigned">
+    <div class="section-title">
+        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan müəllimlər
+    </div>
+    <p class="text-muted mb-3">Dəvət göndərilə bilən müəllimlər burada görünür.</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="teachers">
+        <input type="hidden" name="teacher_tab" value="unassigned">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="Müəllim axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_invite_teacher_staff">
+        <input type="hidden" name="invite_role_type" value="teacher">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllUnassignedTeachers"
+                       data-select-all-unassigned
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not unassigned_teachers.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="button"
+                    class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    data-invite-action="bulk_invite_teacher_staff"
+                    data-invite-role-type="teacher"
+                    data-default-label="Seçilən müəllimlərə dəvət et"
+                    data-selected-label="Seçilən müəllimlərə dəvət et ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not unassigned_teachers.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> Seçilən müəllimlərə dəvət et
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Kafedra</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_teachers %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="unassigned-student-checkbox form-check-input"
+                                   name="selected_unassigned_teacher_user_ids"
+                                   value="{{ profile.user.id }}"
+                                   data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                   data-user-username="@{{ profile.user.username }}"
+                                   data-user-email="{{ profile.user.email }}"
+                                   data-target-role="Müəllim"
+                                   {% if not can_manage_students %}disabled{% endif %}>
+                        </td>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>@{{ profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>{{ profile.department|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-invite-action="bulk_invite_teacher_staff"
+                                    data-invite-role-type="teacher"
+                                    data-single-invite-user-id="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="Müəllim"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane"></i> Dəvət et
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">Dəvət göndəriləcək müəllim tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=unassigned_teachers extra_query=teacher_unassigned_pagination_query page_param=teacher_unassigned_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="teacher-invites">
+    <div class="section-title">
+        <i class="fas fa-paper-plane"></i> Göndərilmiş müəllim dəvətləri
+    </div>
+    <p class="text-muted mb-3">Qəbul edilməmiş müəllim dəvətlərini buradan geri çəkin.</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="teachers">
+        <input type="hidden" name="teacher_tab" value="invites">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_sent_invite_search"
+                   value="{{ sent_invite_search_query }}"
+                   placeholder="Müəllim dəvəti axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-sent-invites-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="revoke_teacher_staff_invites">
+        <input type="hidden" name="revoke_role_type" value="teacher">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllTeacherInvites"
+                       data-select-all-sent-invites
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not sent_teacher_invites.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
+                    data-bs-toggle="modal"
+                    data-bs-target="#revokeSentInvitesConfirmModal"
+                    data-revoke-mode="bulk"
+                    data-revoke-action="revoke_teacher_staff_invites"
+                    data-revoke-role-type="teacher"
+                    data-default-label="Seçilənləri geri çək"
+                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not sent_teacher_invites.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-trash"></i> Seçilənləri geri çək
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Kafedra</th>
+                        <th>Göndərən</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invite in sent_teacher_invites %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="sent-invite-checkbox form-check-input"
+                                   name="selected_sent_teacher_invite_user_ids"
+                                   value="{{ invite.user.id }}"
+                                   {% if not can_manage_students %}disabled{% endif %}>
+                        </td>
+                        <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
+                        <td>@{{ invite.user.username }}</td>
+                        <td>{{ invite.user.email }}</td>
+                        <td>{{ invite.user.profile.department|default:"-" }}</td>
+                        <td>@{{ invite.assigned_by.username|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeSentInvitesConfirmModal"
+                                    data-revoke-mode="single"
+                                    data-revoke-action="revoke_teacher_staff_invites"
+                                    data-revoke-role-type="teacher"
+                                    data-single-revoke-user-id="{{ invite.user.id }}"
+                                    data-single-revoke-username="@{{ invite.user.username }}"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-trash"></i> Geri çək
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Geri çəkiləcək müəllim dəvəti yoxdur.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=sent_teacher_invites extra_query=teacher_invites_pagination_query page_param=teacher_invites_page_param %}
 </div>
 {% endif %}
 
@@ -783,6 +1097,7 @@
                     <th>Email</th>
                     <th>Vəzifə</th>
                     <th>Rol</th>
+                    <th>Əməliyyat</th>
                 </tr>
             </thead>
             <tbody>
@@ -793,10 +1108,30 @@
                     <td>{{ membership.user.email }}</td>
                     <td>{{ membership.management_position|default:"-" }}</td>
                     <td><span class="role-badge role-warning">{{ membership.management_role_label }}</span></td>
+                    <td>
+                        {% if membership.management_can_remove %}
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#removeStudentConfirmModal"
+                            data-student-user-id="{{ membership.user.id }}"
+                            data-student-full-name="{{ membership.user.get_full_name|default:membership.user.username }}"
+                            data-student-username="@{{ membership.user.username }}"
+                            data-student-email="{{ membership.user.email }}"
+                            data-student-org="{{ organization.name }}"
+                            data-student-role="{{ membership.management_role_label }}"
+                            {% if not can_manage_students %}disabled{% endif %}>
+                            <i class="fas fa-user-minus"></i> Təşkilatdan uzaqlaşdır
+                        </button>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">Staff tapılmadı.</td>
+                    <td colspan="6" class="text-center">Staff tapılmadı.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -899,7 +1234,264 @@
             </tbody>
         </table>
     </div>
-    {% include "partials/_pagination.html" with page_obj=pending_staff_requests extra_query=staff_requests_pagination_query page_param=staff_requests_page_param %}
+{% include "partials/_pagination.html" with page_obj=pending_staff_requests extra_query=staff_requests_pagination_query page_param=staff_requests_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-unassigned">
+    <div class="section-title">
+        <i class="fas fa-user-plus"></i> Təşkilata bağlı olmayan staff
+    </div>
+    <p class="text-muted mb-3">Dəvət göndərilə bilən staff istifadəçilər burada görünür.</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="unassigned">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="Staff axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-unassigned-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="bulk_invite_teacher_staff">
+        <input type="hidden" name="invite_role_type" value="staff">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllUnassignedStaff"
+                       data-select-all-unassigned
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not unassigned_staff.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="button"
+                    class="btn btn-success btn-sm js-invite-confirm-bulk"
+                    data-invite-action="bulk_invite_teacher_staff"
+                    data-invite-role-type="staff"
+                    data-default-label="Seçilən staff istifadəçilərə dəvət et"
+                    data-selected-label="Seçilən staff istifadəçilərə dəvət et ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not unassigned_staff.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> Seçilənlərə dəvət et
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Kafedra</th>
+                        <th>Vəzifə</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in unassigned_staff %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="unassigned-student-checkbox form-check-input"
+                                   name="selected_unassigned_staff_user_ids"
+                                   value="{{ profile.user.id }}"
+                                   data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                   data-user-username="@{{ profile.user.username }}"
+                                   data-user-email="{{ profile.user.email }}"
+                                   data-target-role="Staff"
+                                   {% if not can_manage_students %}disabled{% endif %}>
+                        </td>
+                        <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+                        <td>@{{ profile.user.username }}</td>
+                        <td>{{ profile.user.email }}</td>
+                        <td>{{ profile.department|default:"-" }}</td>
+                        <td>{{ profile.staff_position|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-success btn-sm js-invite-confirm-single"
+                                    data-invite-action="bulk_invite_teacher_staff"
+                                    data-invite-role-type="staff"
+                                    data-single-invite-user-id="{{ profile.user.id }}"
+                                    data-user-full-name="{{ profile.user.get_full_name|default:profile.user.username }}"
+                                    data-user-username="@{{ profile.user.username }}"
+                                    data-user-email="{{ profile.user.email }}"
+                                    data-target-role="Staff"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-paper-plane"></i> Dəvət et
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Dəvət göndəriləcək staff tapılmadı.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+{% include "partials/_pagination.html" with page_obj=unassigned_staff extra_query=staff_unassigned_pagination_query page_param=staff_unassigned_page_param %}
+</div>
+{% endif %}
+
+{% if organization %}
+<div class="section-card org-management-panel" data-management-panel="staff-invites">
+    <div class="section-title">
+        <i class="fas fa-paper-plane"></i> Göndərilmiş staff dəvətləri
+    </div>
+    <p class="text-muted mb-3">Qəbul edilməmiş staff dəvətlərini buradan geri çəkin.</p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="management_view" value="staff">
+        <input type="hidden" name="staff_tab" value="invites">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_sent_invite_search"
+                   value="{{ sent_invite_search_query }}"
+                   placeholder="Staff dəvəti axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </form>
+
+    <form method="post"
+          action="{% url 'accounts:student_organization_management' %}"
+          data-sent-invites-form>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ post_next_url }}">
+        <input type="hidden" name="action" value="revoke_teacher_staff_invites">
+        <input type="hidden" name="revoke_role_type" value="staff">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-check d-flex align-items-center gap-2 mb-0">
+                <input type="checkbox"
+                       id="selectAllStaffInvites"
+                       data-select-all-sent-invites
+                       class="form-check-input mt-0"
+                       {% if not can_manage_students or not sent_staff_invites.paginator.count %}disabled{% endif %}>
+                <span class="form-check-label">Hamısını seç</span>
+            </label>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm js-sent-invite-revoke-bulk"
+                    data-bs-toggle="modal"
+                    data-bs-target="#revokeSentInvitesConfirmModal"
+                    data-revoke-mode="bulk"
+                    data-revoke-action="revoke_teacher_staff_invites"
+                    data-revoke-role-type="staff"
+                    data-default-label="Seçilənləri geri çək"
+                    data-selected-label="Seçilənləri geri çək ({count} seçildi)"
+                    data-disabled-tooltip="Ən az 1 seçin"
+                    data-permission-disabled="{% if not can_manage_students %}1{% else %}0{% endif %}"
+                    title="Ən az 1 seçin"
+                    {% if not can_manage_students or not sent_staff_invites.paginator.count %}disabled{% endif %}>
+                <i class="fas fa-trash"></i> Seçilənləri geri çək
+            </button>
+        </div>
+
+        <div class="table-responsive profile-section-table-scroll">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 44px;"></th>
+                        <th>İstifadəçi</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Vəzifə</th>
+                        <th>Göndərən</th>
+                        <th>Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invite in sent_staff_invites %}
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   class="sent-invite-checkbox form-check-input"
+                                   name="selected_sent_staff_invite_user_ids"
+                                   value="{{ invite.user.id }}"
+                                   {% if not can_manage_students %}disabled{% endif %}>
+                        </td>
+                        <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>
+                        <td>@{{ invite.user.username }}</td>
+                        <td>{{ invite.user.email }}</td>
+                        <td>{{ invite.user.profile.staff_position|default:"-" }}</td>
+                        <td>@{{ invite.assigned_by.username|default:"-" }}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#revokeSentInvitesConfirmModal"
+                                    data-revoke-mode="single"
+                                    data-revoke-action="revoke_teacher_staff_invites"
+                                    data-revoke-role-type="staff"
+                                    data-single-revoke-user-id="{{ invite.user.id }}"
+                                    data-single-revoke-username="@{{ invite.user.username }}"
+                                    {% if not can_manage_students %}disabled{% endif %}>
+                                <i class="fas fa-trash"></i> Geri çək
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Geri çəkiləcək staff dəvəti yoxdur.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    {% include "partials/_pagination.html" with page_obj=sent_staff_invites extra_query=staff_invites_pagination_query page_param=staff_invites_page_param %}
 </div>
 {% endif %}
 
@@ -1037,7 +1629,8 @@
             <form method="post" action="{% url 'accounts:student_organization_management' %}">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ post_next_url }}">
-                <input type="hidden" name="action" value="revoke_sent_invites">
+                <input type="hidden" name="action" value="revoke_sent_invites" id="revokeSentInvitesAction">
+                <input type="hidden" name="revoke_role_type" value="student" id="revokeSentInvitesRoleType">
                 <input type="hidden" name="single_revoke_user_id" id="revokeSentInvitesSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="revokeSentInvitesSelectedUserIds">
                 <div class="modal-header">
@@ -1142,7 +1735,8 @@
             <form method="post" action="{% url 'accounts:student_organization_management' %}" id="inviteConfirmForm">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ post_next_url }}">
-                <input type="hidden" name="action" value="bulk_invite_students">
+                <input type="hidden" name="action" value="bulk_invite_students" id="inviteConfirmAction">
+                <input type="hidden" name="invite_role_type" value="student" id="inviteConfirmRoleType">
                 <input type="hidden" name="single_invite_user_id" id="inviteConfirmSingleUserId">
                 <input type="hidden" name="selected_user_ids" id="inviteConfirmSelectedUserIds">
                 <div class="modal-header">
@@ -1227,7 +1821,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var showAllPanels = activeKeys.length === managementFilterButtons.length;
         if (managementAllButton) {
             managementAllButton.classList.toggle("is-active", showAllPanels);
+            managementAllButton.setAttribute("aria-pressed", showAllPanels ? "true" : "false");
         }
+
+        managementFilterButtons.forEach(function (button) {
+            button.setAttribute(
+                "aria-pressed",
+                button.classList.contains("is-active") ? "true" : "false"
+            );
+        });
 
         managementPanels.forEach(function (panel) {
             var panelKey = panel.getAttribute("data-management-panel") || "";
@@ -1293,31 +1895,33 @@ document.addEventListener("DOMContentLoaded", function () {
         ? (pendingRemoveBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
         : "Ən az 1 seçin";
 
-    var selectAllUnassigned = document.getElementById("selectAllUnassignedStudents");
-    var unassignedCheckboxes = Array.from(document.querySelectorAll(".unassigned-student-checkbox"));
-    var unassignedSelectableCheckboxes = unassignedCheckboxes.filter(function (checkbox) {
-        return !checkbox.disabled;
+    var unassignedFormConfigs = Array.from(document.querySelectorAll("[data-unassigned-form]")).map(function (form) {
+        var bulkButton = form.querySelector(".js-invite-confirm-bulk");
+        return {
+            form: form,
+            selectAll: form.querySelector("[data-select-all-unassigned]"),
+            checkboxes: Array.from(form.querySelectorAll(".unassigned-student-checkbox")),
+            bulkButton: bulkButton,
+            permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
+            disabledTooltip: bulkButton
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
+                : "Ən az 1 seçin",
+        };
     });
-    var inviteBulkBtn = document.querySelector(".js-invite-confirm-bulk");
-    var unassignedPermissionDisabled = inviteBulkBtn
-        ? inviteBulkBtn.getAttribute("data-permission-disabled") === "1"
-        : false;
-    var unassignedDisabledTooltip = inviteBulkBtn
-        ? (inviteBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
 
-    var selectAllSentInvites = document.getElementById("selectAllSentInvites");
-    var sentInviteCheckboxes = Array.from(document.querySelectorAll(".sent-invite-checkbox"));
-    var sentInviteSelectableCheckboxes = sentInviteCheckboxes.filter(function (checkbox) {
-        return !checkbox.disabled;
+    var sentInviteFormConfigs = Array.from(document.querySelectorAll("[data-sent-invites-form]")).map(function (form) {
+        var bulkButton = form.querySelector(".js-sent-invite-revoke-bulk");
+        return {
+            form: form,
+            selectAll: form.querySelector("[data-select-all-sent-invites]"),
+            checkboxes: Array.from(form.querySelectorAll(".sent-invite-checkbox")),
+            bulkButton: bulkButton,
+            permissionDisabled: bulkButton ? bulkButton.getAttribute("data-permission-disabled") === "1" : false,
+            disabledTooltip: bulkButton
+                ? (bulkButton.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
+                : "Ən az 1 seçin",
+        };
     });
-    var sentInviteRevokeBulkBtn = document.querySelector(".js-sent-invite-revoke-bulk");
-    var sentInvitePermissionDisabled = sentInviteRevokeBulkBtn
-        ? sentInviteRevokeBulkBtn.getAttribute("data-permission-disabled") === "1"
-        : false;
-    var sentInviteDisabledTooltip = sentInviteRevokeBulkBtn
-        ? (sentInviteRevokeBulkBtn.getAttribute("data-disabled-tooltip") || "Ən az 1 seçin")
-        : "Ən az 1 seçin";
 
     function syncBulkButtonState(button, selectedCount, hasRows, isPermissionDisabled, tooltipText) {
         if (!button) {
@@ -1381,75 +1985,44 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function syncUnassignedBulkSelectionUi() {
-        var selectedCount = unassignedSelectableCheckboxes.filter(function (checkbox) {
+    function syncScopedBulkSelectionUi(config) {
+        var selectableCheckboxes = config.checkboxes.filter(function (checkbox) {
+            return !checkbox.disabled;
+        });
+        var selectedCount = selectableCheckboxes.filter(function (checkbox) {
             return checkbox.checked;
         }).length;
-        var hasRows = unassignedSelectableCheckboxes.length > 0;
+        var hasRows = selectableCheckboxes.length > 0;
 
         syncBulkButtonState(
-            inviteBulkBtn,
+            config.bulkButton,
             selectedCount,
             hasRows,
-            unassignedPermissionDisabled,
-            unassignedDisabledTooltip
+            config.permissionDisabled,
+            config.disabledTooltip
         );
 
-        if (selectAllUnassigned) {
-            var canToggleAll = hasRows && !unassignedPermissionDisabled;
-            selectAllUnassigned.disabled = !canToggleAll;
-            if (!canToggleAll) {
-                selectAllUnassigned.checked = false;
-                selectAllUnassigned.indeterminate = false;
-                return;
-            }
-
-            if (selectedCount === 0) {
-                selectAllUnassigned.checked = false;
-                selectAllUnassigned.indeterminate = false;
-            } else if (selectedCount === unassignedSelectableCheckboxes.length) {
-                selectAllUnassigned.checked = true;
-                selectAllUnassigned.indeterminate = false;
-            } else {
-                selectAllUnassigned.checked = false;
-                selectAllUnassigned.indeterminate = true;
-            }
+        if (!config.selectAll) {
+            return;
         }
-    }
 
-    function syncSentInvitesBulkSelectionUi() {
-        var selectedCount = sentInviteSelectableCheckboxes.filter(function (checkbox) {
-            return checkbox.checked;
-        }).length;
-        var hasRows = sentInviteSelectableCheckboxes.length > 0;
+        var canToggleAll = hasRows && !config.permissionDisabled;
+        config.selectAll.disabled = !canToggleAll;
+        if (!canToggleAll) {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = false;
+            return;
+        }
 
-        syncBulkButtonState(
-            sentInviteRevokeBulkBtn,
-            selectedCount,
-            hasRows,
-            sentInvitePermissionDisabled,
-            sentInviteDisabledTooltip
-        );
-
-        if (selectAllSentInvites) {
-            var canToggleAll = hasRows && !sentInvitePermissionDisabled;
-            selectAllSentInvites.disabled = !canToggleAll;
-            if (!canToggleAll) {
-                selectAllSentInvites.checked = false;
-                selectAllSentInvites.indeterminate = false;
-                return;
-            }
-
-            if (selectedCount === 0) {
-                selectAllSentInvites.checked = false;
-                selectAllSentInvites.indeterminate = false;
-            } else if (selectedCount === sentInviteSelectableCheckboxes.length) {
-                selectAllSentInvites.checked = true;
-                selectAllSentInvites.indeterminate = false;
-            } else {
-                selectAllSentInvites.checked = false;
-                selectAllSentInvites.indeterminate = true;
-            }
+        if (selectedCount === 0) {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = false;
+        } else if (selectedCount === selectableCheckboxes.length) {
+            config.selectAll.checked = true;
+            config.selectAll.indeterminate = false;
+        } else {
+            config.selectAll.checked = false;
+            config.selectAll.indeterminate = true;
         }
     }
 
@@ -1466,31 +2039,47 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     syncPendingBulkSelectionUi();
 
-    if (selectAllUnassigned) {
-        selectAllUnassigned.addEventListener("change", function () {
-            unassignedSelectableCheckboxes.forEach(function (checkbox) {
-                checkbox.checked = selectAllUnassigned.checked;
+    unassignedFormConfigs.forEach(function (config) {
+        if (config.selectAll) {
+            config.selectAll.addEventListener("change", function () {
+                config.checkboxes.forEach(function (checkbox) {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = config.selectAll.checked;
+                    }
+                });
+                syncScopedBulkSelectionUi(config);
             });
-            syncUnassignedBulkSelectionUi();
+        }
+        config.checkboxes.forEach(function (checkbox) {
+            if (!checkbox.disabled) {
+                checkbox.addEventListener("change", function () {
+                    syncScopedBulkSelectionUi(config);
+                });
+            }
         });
-    }
-    unassignedSelectableCheckboxes.forEach(function (checkbox) {
-        checkbox.addEventListener("change", syncUnassignedBulkSelectionUi);
+        syncScopedBulkSelectionUi(config);
     });
-    syncUnassignedBulkSelectionUi();
 
-    if (selectAllSentInvites) {
-        selectAllSentInvites.addEventListener("change", function () {
-            sentInviteSelectableCheckboxes.forEach(function (checkbox) {
-                checkbox.checked = selectAllSentInvites.checked;
+    sentInviteFormConfigs.forEach(function (config) {
+        if (config.selectAll) {
+            config.selectAll.addEventListener("change", function () {
+                config.checkboxes.forEach(function (checkbox) {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = config.selectAll.checked;
+                    }
+                });
+                syncScopedBulkSelectionUi(config);
             });
-            syncSentInvitesBulkSelectionUi();
+        }
+        config.checkboxes.forEach(function (checkbox) {
+            if (!checkbox.disabled) {
+                checkbox.addEventListener("change", function () {
+                    syncScopedBulkSelectionUi(config);
+                });
+            }
         });
-    }
-    sentInviteSelectableCheckboxes.forEach(function (checkbox) {
-        checkbox.addEventListener("change", syncSentInvitesBulkSelectionUi);
+        syncScopedBulkSelectionUi(config);
     });
-    syncSentInvitesBulkSelectionUi();
 
     function getSelectedUsers(selector) {
         return Array.from(document.querySelectorAll(selector + ":checked"))
@@ -1511,8 +2100,27 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function getSelectedSentInviteUserIds() {
-        return Array.from(document.querySelectorAll(".sent-invite-checkbox:checked"))
+    function getSelectedUsersWithin(container, selector) {
+        return Array.from((container || document).querySelectorAll(selector + ":checked"))
+            .filter(function (checkbox) {
+                return !checkbox.disabled;
+            })
+            .map(function (checkbox) {
+                return {
+                    id: checkbox.value || "",
+                    fullName: checkbox.getAttribute("data-user-full-name") || "-",
+                    username: checkbox.getAttribute("data-user-username") || "-",
+                    email: checkbox.getAttribute("data-user-email") || "-",
+                    role: checkbox.getAttribute("data-target-role") || "Tələbə",
+                };
+            })
+            .filter(function (entry) {
+                return entry.id !== "";
+            });
+    }
+
+    function getSelectedSentInviteUserIds(container) {
+        return Array.from((container || document).querySelectorAll(".sent-invite-checkbox:checked"))
             .filter(function (checkbox) {
                 return !checkbox.disabled;
             })
@@ -1528,6 +2136,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (revokeModal) {
         var revokeTextNode = document.getElementById("revokeSentInvitesModalText");
         var revokeHintNode = document.getElementById("revokeSentInvitesModalHint");
+        var revokeActionInput = document.getElementById("revokeSentInvitesAction");
+        var revokeRoleTypeInput = document.getElementById("revokeSentInvitesRoleType");
         var revokeSingleInput = document.getElementById("revokeSentInvitesSingleUserId");
         var revokeSelectedInput = document.getElementById("revokeSentInvitesSelectedUserIds");
         var revokeConfirmBtn = document.getElementById("revokeSentInvitesConfirmBtn");
@@ -1535,12 +2145,23 @@ document.addEventListener("DOMContentLoaded", function () {
         revokeModal.addEventListener("show.bs.modal", function (event) {
             var trigger = event.relatedTarget;
             var mode = trigger ? (trigger.getAttribute("data-revoke-mode") || "bulk") : "bulk";
+            var sourceForm = trigger ? trigger.closest("form") : null;
 
             if (revokeSingleInput) {
                 revokeSingleInput.value = "";
             }
             if (revokeSelectedInput) {
                 revokeSelectedInput.value = "";
+            }
+            if (revokeActionInput) {
+                revokeActionInput.value = trigger
+                    ? (trigger.getAttribute("data-revoke-action") || "revoke_sent_invites")
+                    : "revoke_sent_invites";
+            }
+            if (revokeRoleTypeInput) {
+                revokeRoleTypeInput.value = trigger
+                    ? (trigger.getAttribute("data-revoke-role-type") || "student")
+                    : "student";
             }
             if (revokeHintNode) {
                 revokeHintNode.textContent = "";
@@ -1561,7 +2182,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            var selectedUserIds = getSelectedSentInviteUserIds();
+            var selectedUserIds = getSelectedSentInviteUserIds(sourceForm);
             if (revokeSelectedInput) {
                 revokeSelectedInput.value = selectedUserIds.join(",");
             }
@@ -1699,6 +2320,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var inviteModal = document.getElementById("inviteConfirmModal");
     if (inviteModal && window.bootstrap) {
         var inviteModalInstance = new window.bootstrap.Modal(inviteModal);
+        var inviteActionInput = document.getElementById("inviteConfirmAction");
+        var inviteRoleTypeInput = document.getElementById("inviteConfirmRoleType");
         var inviteSingleInput = document.getElementById("inviteConfirmSingleUserId");
         var inviteSelectedInput = document.getElementById("inviteConfirmSelectedUserIds");
         var inviteLeadText = document.getElementById("inviteConfirmLeadText");
@@ -1709,8 +2332,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var inviteHint = document.getElementById("inviteConfirmHint");
         var inviteConfirmBtn = document.getElementById("inviteConfirmBtn");
 
-        function fillInviteModal(users, mode) {
+        function fillInviteModal(users, mode, inviteConfig) {
             var firstUser = users.length ? users[0] : null;
+            inviteConfig = inviteConfig || {};
+            if (inviteActionInput) {
+                inviteActionInput.value = inviteConfig.action || "bulk_invite_students";
+            }
+            if (inviteRoleTypeInput) {
+                inviteRoleTypeInput.value = inviteConfig.roleType || "student";
+            }
             if (inviteSingleInput) {
                 inviteSingleInput.value = mode === "single" && firstUser ? firstUser.id : "";
             }
@@ -1746,27 +2376,39 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        document.querySelectorAll(".js-invite-confirm-single").forEach(function (button) {
-            button.addEventListener("click", function () {
-                fillInviteModal([
-                    {
-                        id: button.getAttribute("data-single-invite-user-id") || "",
-                        fullName: button.getAttribute("data-user-full-name") || "-",
-                        username: button.getAttribute("data-user-username") || "-",
-                        email: button.getAttribute("data-user-email") || "-",
-                        role: button.getAttribute("data-target-role") || "Tələbə",
-                    }
-                ], "single");
-                inviteModalInstance.show();
+        unassignedFormConfigs.forEach(function (config) {
+            config.form.querySelectorAll(".js-invite-confirm-single").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    fillInviteModal([
+                        {
+                            id: button.getAttribute("data-single-invite-user-id") || "",
+                            fullName: button.getAttribute("data-user-full-name") || "-",
+                            username: button.getAttribute("data-user-username") || "-",
+                            email: button.getAttribute("data-user-email") || "-",
+                            role: button.getAttribute("data-target-role") || "Tələbə",
+                        }
+                    ], "single", {
+                        action: button.getAttribute("data-invite-action") || "bulk_invite_students",
+                        roleType: button.getAttribute("data-invite-role-type") || "student",
+                    });
+                    inviteModalInstance.show();
+                });
             });
-        });
 
-        if (inviteBulkBtn) {
-            inviteBulkBtn.addEventListener("click", function () {
-                fillInviteModal(getSelectedUsers(".unassigned-student-checkbox"), "bulk");
-                inviteModalInstance.show();
-            });
-        }
+            if (config.bulkButton) {
+                config.bulkButton.addEventListener("click", function () {
+                    fillInviteModal(
+                        getSelectedUsersWithin(config.form, ".unassigned-student-checkbox"),
+                        "bulk",
+                        {
+                            action: config.bulkButton.getAttribute("data-invite-action") || "bulk_invite_students",
+                            roleType: config.bulkButton.getAttribute("data-invite-role-type") || "student",
+                        }
+                    );
+                    inviteModalInstance.show();
+                });
+            }
+        });
     }
 });
 </script>

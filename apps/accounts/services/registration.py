@@ -13,6 +13,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
+from apps.notifications.services import notify_org_admins_of_new_request
 from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
@@ -198,7 +199,7 @@ def create_user_with_organization(
         else:
             req_role_type = MembershipRequestRoleType.STUDENT
 
-        StudentOrganizationRequest.objects.update_or_create(
+        request_obj, created = StudentOrganizationRequest.objects.update_or_create(
             user=user,
             organization=requested_organization,
             role_type=req_role_type,
@@ -210,6 +211,14 @@ def create_user_with_organization(
                 "responded_at": None,
             },
         )
+        if created:
+            try:
+                notify_org_admins_of_new_request(request_obj=request_obj)
+            except Exception:
+                logger.exception(
+                    "Failed to notify org admins about join request %s during registration",
+                    request_obj.pk,
+                )
 
     if organization is not None:
         membership_role = resolve_membership_role(organization, initial_role)

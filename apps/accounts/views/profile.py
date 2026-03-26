@@ -83,6 +83,19 @@ PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION = frozenset({" ", "-", "_", ".", ",", "
 PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-zA-Z]")
 PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
 PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
+PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
+    "groups",
+    "my-courses",
+    "my-exams",
+    "pending-post-approvals",
+    "pending-review",
+    "review-results",
+    "role-assignment",
+    "student-organization-management",
+    "permission-editor",
+    "manage-roles",
+    "publish-notification",
+}
 
 
 def _normalize_public_profile_query_value(raw_value, *, max_length):
@@ -118,6 +131,56 @@ def _validate_public_profile_category(raw_value, *, allowed_slugs):
         return "", True
 
     return normalized, False
+
+
+def _restore_profile_org_context(request, profile, active_section):
+    """
+    Re-hydrate the active organization for org-bound profile sections when the
+    session lost its tenant selection but the profile still points at a valid org.
+    """
+    if active_section not in PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT:
+        return
+    if getattr(request, "organization", None) is not None:
+        return
+
+    fallback_org = getattr(profile, "organization", None)
+    if fallback_org is None or not getattr(fallback_org, "is_active", False):
+        return
+
+    from apps.organizations.models import Membership
+
+    memberships = list(
+        Membership.objects.filter(
+            user=request.user,
+            organization=fallback_org,
+            organization__is_active=True,
+            is_active=True,
+        )
+        .select_related("organization", "role", "scope_unit")
+        .order_by("-is_primary", "-role__level")
+    )
+    is_owner = getattr(fallback_org, "owner_id", None) == getattr(request.user, "id", None)
+    is_superadmin = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False))
+    if not memberships and not is_owner and not is_superadmin:
+        return
+
+    permissions_set = set()
+    for membership in memberships:
+        if membership.role.permissions:
+            permissions_set.update(membership.role.permissions)
+        if getattr(membership.role, "name", "") == "teacher":
+            permissions_set.add("course.create")
+
+    request.organization = fallback_org
+    request.org_memberships = memberships
+    request.org_permissions = list(permissions_set)
+    request.session["active_organization"] = fallback_org.slug
+    if hasattr(request.user, "set_active_organization_context"):
+        request.user.set_active_organization_context(
+            fallback_org,
+            memberships=memberships,
+            permissions=request.org_permissions,
+        )
 
 
 def _parse_public_profile_page_number(raw_value):
@@ -289,6 +352,9 @@ def user_profile(request):
 
     # Ensure profile exists (get_or_create for safety)
     profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    requested_section = request.GET.get("section", "profile-info")
+    _restore_profile_org_context(request, profile, requested_section)
+
     capabilities = _role_capabilities(request.user, profile)
     notification_state = build_profile_notification_state(user=request.user, profile=profile)
     pending_student_invites = notification_state["pending_student_invites"]
@@ -333,7 +399,6 @@ def user_profile(request):
         return ""
 
     # Get active section from URL parameter (default: profile-info)
-    requested_section = request.GET.get("section", "profile-info")
     allowed_sections = capabilities["allowed_sections"]
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
     password_change_form = CustomPasswordChangeForm(request.user)
@@ -1245,7 +1310,7 @@ def user_profile(request):
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
-        "student-organization-request": "Təşkilata qoşul",
+        "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
         "student-organization-management": "Staff İdarəetməsi",
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),

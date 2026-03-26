@@ -2,12 +2,15 @@
 {% if 'notifications' in allowed_sections %}
 <section class="profile-section-panel profile-section--notifications {% if active_section == 'notifications' %}is-active{% endif %}"
          data-profile-section-panel="notifications"
-         data-source-url="{{ profile_base_url }}">
+         data-source-url="{{ profile_base_url }}"
+         data-current-filter="{{ notif_filter }}"
+         data-in-app-unread-count="{{ in_app_unread_count }}"
+         data-total-unread-count="{{ notifications_unread_count }}">
     <div class="section-card">
         <div class="section-title">
             <i class="fas fa-bell"></i>
             <span>{% trans "notifications" context "profile.section" %}</span>
-            {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-2">{{ in_app_unread_count }}</span>{% endif %}
+            {% if in_app_unread_count > 0 %}<span class="badge bg-danger ms-2" data-profile-notif-unread-badge>{{ in_app_unread_count }}</span>{% endif %}
         </div>
 
         {% if pending_student_join_requests %}
@@ -15,7 +18,11 @@
             <div class="alert alert-warning mb-3">
                 <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
                     <div>
-                        <div><strong>{{ pending_request.organization.name }}</strong> {% trans "pending_approval" context "profile.notifications" %}</div>
+                        <div>
+                            {% blocktrans trimmed with organization_name=pending_request.organization.name role_label=pending_request.role_label_lower context "profile.notifications" %}
+                            Your {{ role_label }} request has been sent to {{ organization_name }} and is currently awaiting a response.
+                            {% endblocktrans %}
+                        </div>
                         {% if pending_request.message %}<div class="mt-2"><small><strong>{% trans "message" context "profile.notifications" %}:</strong> {{ pending_request.message }}</small></div>{% endif %}
                     </div>
                     <form method="post" action="{% url 'accounts:student_organization_request' %}">
@@ -34,7 +41,11 @@
         <div class="mb-3">
             {% for invite in pending_student_invites %}
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
-                <div><strong>{{ invite.organization.name }}</strong> {% trans "invite_as_student" context "profile.notifications" %}</div>
+                <div>
+                    {% blocktrans trimmed with organization_name=invite.organization.name role_label=invite.role_label_lower context "profile.notifications" %}
+                    {{ organization_name }} has invited you as {{ role_label }}.
+                    {% endblocktrans %}
+                </div>
                 <div class="d-flex gap-2">
                     <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
                         {% csrf_token %}
@@ -69,7 +80,7 @@
                    href="{{ profile_base_url }}?section=notifications&notif_filter=unread">
                     <i class="fas fa-envelope"></i>
                     <span>{% trans "filter_unread" context "profile.notifications" %}</span>
-                    {% if in_app_unread_count > 0 %}<span class="notif-filter-badge">{{ in_app_unread_count }}</span>{% endif %}
+                    {% if in_app_unread_count > 0 %}<span class="notif-filter-badge" data-profile-notif-filter-badge>{{ in_app_unread_count }}</span>{% endif %}
                 </a>
                 <a class="notif-filter-tab {% if notif_filter == 'read' %}is-active{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=read">
@@ -118,17 +129,19 @@
                     {% elif notification.notification_type == 'grade' %}<i class="fas fa-star text-success"></i>
                     {% elif notification.notification_type == 'course' %}<i class="fas fa-book text-info"></i>
                     {% elif notification.notification_type == 'live_exam' %}<i class="fas fa-broadcast-tower text-danger"></i>
+                    {% elif notification.notification_type == 'approval' %}<i class="fas fa-user-check text-primary"></i>
                     {% else %}<i class="fas fa-bell text-secondary"></i>{% endif %}
                 </div>
                 <div class="profile-notif-body js-notif-open"
                      style="cursor:pointer;"
                      data-notif-id="{{ notification.pk }}"
-                     data-notif-title="{{ notification.title|escapejs }}"
-                     data-notif-message="{{ notification.message|escapejs }}"
+                     data-notif-title="{{ notification.title|default:''|escape }}"
+                     data-notif-message="{{ notification.message|default:''|escape }}"
                      data-notif-time="{{ notification.created_at|date:'d M Y, H:i' }}"
                      data-notif-type="{{ notification.get_notification_type_display }}"
-                     data-notif-link="{{ notification.link|default:''|escapejs }}"
-                     data-notif-image="{{ notification.metadata.image_url|default:''|escapejs }}"
+                     data-notif-link="{{ notification.link|default:''|escape }}"
+                     data-notif-link-label="{{ notification.metadata.link_label|default:''|escape }}"
+                     data-notif-image="{{ notification.metadata.image_url|default:''|escape }}"
                      data-notif-is-read="{% if notification.is_read %}1{% else %}0{% endif %}"
                      data-mark-read-url="{% url 'notifications:notification_mark_read' notification.pk %}">
                     <div class="profile-notif-title">
@@ -230,7 +243,7 @@
                     <div id="profileNotifModalImage" class="mb-3" style="display:none">
                         <img id="profileNotifModalImageEl" src="" alt="">
                     </div>
-                    <div id="profileNotifModalMessage" class="mb-3"></div>
+                    <div id="profileNotifModalMessage" class="mb-3" style="white-space: pre-line;"></div>
                     <div id="profileNotifModalLink"></div>
                 </div>
                 <div class="modal-footer">
@@ -246,6 +259,7 @@
     (function () {
         'use strict';
 
+        var panelEl = document.querySelector('[data-profile-section-panel="notifications"]');
         var modalEl = document.getElementById('profileNotifModal');
         if (!modalEl) return;
 
@@ -253,10 +267,81 @@
         var bulkBar = document.getElementById('profileNotifBulkBar');
         var bulkDeleteBtn = document.getElementById('profileNotifBulkDeleteBtn');
         var selectAllCb = document.getElementById('profileNotifSelectAll');
-        var checkboxes = document.querySelectorAll('.profile-notif-checkbox');
         var bulkIdsContainer = document.getElementById('profileNotifBulkIds');
+        var currentFilter = panelEl ? (panelEl.getAttribute('data-current-filter') || 'all') : 'all';
+
+        function getNotificationCheckboxes() {
+            return document.querySelectorAll('.profile-notif-checkbox');
+        }
+
+        function syncUnreadBadges(inAppUnreadCount, totalUnreadCount) {
+            if (panelEl) {
+                panelEl.setAttribute('data-in-app-unread-count', String(inAppUnreadCount));
+                panelEl.setAttribute('data-total-unread-count', String(totalUnreadCount));
+            }
+
+            var panelBadge = document.querySelector('[data-profile-notif-unread-badge]');
+            if (panelBadge) {
+                if (inAppUnreadCount > 0) {
+                    panelBadge.textContent = String(inAppUnreadCount);
+                } else {
+                    panelBadge.remove();
+                }
+            }
+
+            var filterBadge = document.querySelector('[data-profile-notif-filter-badge]');
+            if (filterBadge) {
+                if (inAppUnreadCount > 0) {
+                    filterBadge.textContent = String(inAppUnreadCount);
+                } else {
+                    filterBadge.remove();
+                }
+            }
+
+            var sidebarBadge = document.querySelector('.sidebar-menu-link[data-section="notifications"] .sidebar-menu-badge');
+            if (sidebarBadge) {
+                if (totalUnreadCount > 0) {
+                    sidebarBadge.textContent = String(totalUnreadCount);
+                } else {
+                    sidebarBadge.remove();
+                }
+            }
+        }
+
+        function markNotificationItemRead(body, item) {
+            body.setAttribute('data-notif-is-read', '1');
+            if (item) {
+                item.classList.remove('profile-notif-item--unread');
+                var badge = item.querySelector('.notif-new-badge');
+                if (badge) badge.remove();
+                var strong = item.querySelector('.profile-notif-title strong');
+                if (strong) {
+                    var sp = document.createElement('span');
+                    sp.textContent = strong.textContent;
+                    strong.replaceWith(sp);
+                }
+                var mrForm = item.querySelector('form[action*="mark-read"]');
+                if (mrForm) mrForm.remove();
+            }
+
+            var currentInAppUnread = panelEl ? parseInt(panelEl.getAttribute('data-in-app-unread-count') || '0', 10) : 0;
+            var currentTotalUnread = panelEl ? parseInt(panelEl.getAttribute('data-total-unread-count') || '0', 10) : 0;
+            syncUnreadBadges(
+                Math.max(0, currentInAppUnread - 1),
+                Math.max(0, currentTotalUnread - 1)
+            );
+
+            if (currentFilter === 'unread' && item) {
+                item.remove();
+                updateBulkState();
+                if (!document.querySelector('.profile-notif-item')) {
+                    window.location.reload();
+                }
+            }
+        }
 
         function updateBulkState() {
+            var checkboxes = getNotificationCheckboxes();
             var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
             if (bulkDeleteBtn) bulkDeleteBtn.disabled = checked.length === 0;
             if (bulkIdsContainer) {
@@ -279,22 +364,38 @@
             bulkBar.style.removeProperty('display');
             if (selectAllCb) {
                 selectAllCb.addEventListener('change', function () {
+                    var checkboxes = getNotificationCheckboxes();
                     checkboxes.forEach(function (cb) { cb.checked = selectAllCb.checked; });
                     updateBulkState();
                 });
             }
-            checkboxes.forEach(function (cb) { cb.addEventListener('change', updateBulkState); });
+            getNotificationCheckboxes().forEach(function (cb) { cb.addEventListener('change', updateBulkState); });
         }
 
         // ── Modal: open notification detail via manual Bootstrap trigger ──
         document.querySelectorAll('.profile-notif-body.js-notif-open').forEach(function (body) {
             body.addEventListener('click', function () {
-                var title   = body.getAttribute('data-notif-title')   || '';
-                var message = body.getAttribute('data-notif-message') || '';
-                var time    = body.getAttribute('data-notif-time')    || '';
-                var type    = body.getAttribute('data-notif-type')    || '';
-                var link    = body.getAttribute('data-notif-link')    || '';
-                var image   = body.getAttribute('data-notif-image')   || '';
+                function decodeEscapedAttribute(value) {
+                    if (!value) {
+                        return '';
+                    }
+
+                    return value
+                        .replace(/\\u([0-9a-fA-F]{4})/g, function (_match, code) {
+                            return String.fromCharCode(parseInt(code, 16));
+                        })
+                        .replace(/\\n/g, '\n')
+                        .replace(/\\r/g, '\r')
+                        .replace(/\\t/g, '\t');
+                }
+
+                var title   = decodeEscapedAttribute(body.getAttribute('data-notif-title') || '');
+                var message = decodeEscapedAttribute(body.getAttribute('data-notif-message') || '');
+                var time    = decodeEscapedAttribute(body.getAttribute('data-notif-time') || '');
+                var type    = decodeEscapedAttribute(body.getAttribute('data-notif-type') || '');
+                var link    = decodeEscapedAttribute(body.getAttribute('data-notif-link') || '');
+                var linkLabel = decodeEscapedAttribute(body.getAttribute('data-notif-link-label') || '');
+                var image   = decodeEscapedAttribute(body.getAttribute('data-notif-image') || '');
                 var isRead  = body.getAttribute('data-notif-is-read') === '1';
                 var markUrl = body.getAttribute('data-mark-read-url') || '';
 
@@ -322,12 +423,14 @@
                     var a = document.createElement('a');
                     a.href = link;
                     a.className = 'btn btn-sm btn-outline-primary';
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
+                    if (link.charAt(0) !== '/') {
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                    }
                     var icon = document.createElement('i');
                     icon.className = 'fas fa-external-link-alt me-1';
                     a.appendChild(icon);
-                    a.appendChild(document.createTextNode('{% trans "go_to_link" context "profile.notifications" %}'));
+                    a.appendChild(document.createTextNode(linkLabel || '{% trans "go_to_link" context "profile.notifications" %}'));
                     linkEl.appendChild(a);
                 }
 
@@ -337,27 +440,14 @@
 
                 // Auto mark as read via AJAX after modal opens
                 if (!isRead && markUrl) {
-                    var csrf = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+                    var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+                    var csrf = (csrfInput && csrfInput.value) || (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
                     fetch(markUrl, {
                         method: 'POST',
                         headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'XMLHttpRequest' },
                     }).then(function (resp) {
                         if (resp.ok) {
-                            body.setAttribute('data-notif-is-read', '1');
-                            var item = body.closest('.profile-notif-item');
-                            if (item) {
-                                item.classList.remove('profile-notif-item--unread');
-                                var badge = item.querySelector('.notif-new-badge');
-                                if (badge) badge.remove();
-                                var strong = item.querySelector('.profile-notif-title strong');
-                                if (strong) {
-                                    var sp = document.createElement('span');
-                                    sp.textContent = strong.textContent;
-                                    strong.replaceWith(sp);
-                                }
-                                var mrForm = item.querySelector('form[action*="mark-read"]');
-                                if (mrForm) mrForm.remove();
-                            }
+                            markNotificationItemRead(body, body.closest('.profile-notif-item'));
                         }
                     }).catch(function () {});
                 }

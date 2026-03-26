@@ -229,6 +229,13 @@ def createAndEditExamView(request, slug=None):
     is_modal_request = request.GET.get("modal") == "1" or request.POST.get("modal") == "1"
 
     if request.method == "POST":
+        previous_is_active = exam.is_active if is_editing else False
+        previous_recipient_ids = set()
+        if is_editing and exam is not None:
+            from apps.notifications.services import get_exam_assigned_user_ids
+
+            previous_recipient_ids = get_exam_assigned_user_ids(exam)
+
         if is_editing:
             # Edit mode
             form = ExamForm(request.POST, instance=exam, user=request.user, organization=organization)
@@ -248,6 +255,18 @@ def createAndEditExamView(request, slug=None):
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
+
+            from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+
+            current_recipient_ids = get_exam_assigned_user_ids(exam_instance)
+            should_notify_all = not previous_is_active and exam_instance.is_active
+            new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+            if new_recipient_ids and exam_instance.is_active:
+                notify_task_assignment(
+                    task=exam_instance,
+                    user_ids=new_recipient_ids,
+                    task_kind="exam",
+                )
 
             from apps.audit.utils import log_action
             from core.constants import AuditAction
@@ -375,6 +394,14 @@ def toggle_exam_active(request, slug):
     if request.method == "POST":
         exam.is_active = not exam.is_active
         exam.save()
+        if exam.is_active:
+            from apps.notifications.services import get_exam_assigned_user_ids, notify_task_assignment
+
+            notify_task_assignment(
+                task=exam,
+                user_ids=get_exam_assigned_user_ids(exam),
+                task_kind="exam",
+            )
     return redirect("exams:teacher_exam_detail", slug=exam.slug)
 
 
