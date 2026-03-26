@@ -15,8 +15,7 @@ from apps.notifications.models import (
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
 )
-from apps.notifications.services import notify_org_admins_of_new_request
-from apps.notifications.services import notify_member_removed_from_organization
+from apps.notifications.services import notify_member_removed_from_organization, notify_org_admins_of_new_request
 from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
@@ -31,9 +30,9 @@ from ._helpers import (
     _ensure_profile_admin_membership,
     _get_active_organization,
     _is_superadmin_user,
+    _map_org_role_to_profile_role,
     _membership_request_role_label,
     _membership_request_role_type_for_profile_role,
-    _map_org_role_to_profile_role,
     _normalized_org_name,
     _pending_student_request_queryset,
     _profile_role_for_membership_request_type,
@@ -569,7 +568,9 @@ def student_organization_management(request):
             return redirect(next_url)
 
         if action in {"invite_student", "bulk_invite_students", "invite_teacher_staff", "bulk_invite_teacher_staff"}:
-            invite_role_type = (request.POST.get("invite_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            invite_role_type = (
+                (request.POST.get("invite_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            )
             if invite_role_type not in {
                 MembershipRequestRoleType.STUDENT,
                 MembershipRequestRoleType.TEACHER,
@@ -631,7 +632,9 @@ def student_organization_management(request):
             return redirect(next_url)
 
         if action in {"revoke_sent_invites", "revoke_teacher_staff_invites"}:
-            revoke_role_type = (request.POST.get("revoke_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            revoke_role_type = (
+                (request.POST.get("revoke_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            )
             if revoke_role_type not in {
                 MembershipRequestRoleType.STUDENT,
                 MembershipRequestRoleType.TEACHER,
@@ -716,7 +719,7 @@ def student_organization_management(request):
                         responded_by=request.user,
                     )
                     # Assign teacher/staff membership role
-                    from apps.organizations.models import Membership
+                    from apps.organizations.models import Membership  # noqa: F811
 
                     role_name = "teacher" if ts_request.role_type == MRR.TEACHER else "member"
                     role_obj = org.roles.filter(name=role_name, is_active=True).first()
@@ -922,11 +925,15 @@ def student_organization_request(request):
                     pass
 
             # Keep one pending row per user+organization for cleaner history and UI.
-            duplicate_pending = _pending_student_request_queryset(
-                user=request.user,
-                organization=target_org,
-                statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).filter(role_type=request_role_type).exclude(id=target_request.id)
+            duplicate_pending = (
+                _pending_student_request_queryset(
+                    user=request.user,
+                    organization=target_org,
+                    statuses=[StudentOrganizationRequestStatus.PENDING],
+                )
+                .filter(role_type=request_role_type)
+                .exclude(id=target_request.id)
+            )
             if duplicate_pending.exists():
                 now = timezone.now()
                 duplicate_pending.update(

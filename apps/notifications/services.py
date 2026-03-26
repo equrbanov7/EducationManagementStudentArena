@@ -19,8 +19,8 @@ from django.utils.translation import pgettext
 from apps.accounts.models import ProfileRole
 from apps.accounts.policies.roles import map_org_role_to_profile_role
 from apps.notifications.models import (
-    MembershipRequestRoleType,
     InAppNotification,
+    MembershipRequestRoleType,
     NotificationType,
     StudentOrganizationRequest,
     StudentOrganizationRequestStatus,
@@ -45,41 +45,41 @@ TASK_NOTIFICATION_META = {
     "assignment": {
         "label": "sərbəst iş",
         "assigned_title": "Yeni sərbəst iş təyin olundu: {title}",
-        "assigned_message": "{course} kursunda \"{title}\" işi sizə təyin olundu.",
+        "assigned_message": '{course} kursunda "{title}" işi sizə təyin olundu.',
         "submission_title": "Yeni sərbəst iş cavabı: {student}",
-        "submission_message": "\"{title}\" işi üçün {student} cavab göndərdi.",
+        "submission_message": '"{title}" işi üçün {student} cavab göndərdi.',
         "graded_title": "Sərbəst iş nəticəniz hazırdır: {title}",
-        "graded_message": "\"{title}\" işi üçün müəllim rəy və ya bal əlavə etdi.",
+        "graded_message": '"{title}" işi üçün müəllim rəy və ya bal əlavə etdi.',
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "project": {
         "label": "layihə",
         "assigned_title": "Yeni layihə təyin olundu: {title}",
-        "assigned_message": "{course} kursunda \"{title}\" layihəsi sizə təyin olundu.",
+        "assigned_message": '{course} kursunda "{title}" layihəsi sizə təyin olundu.',
         "submission_title": "Yeni layihə cavabı: {student}",
-        "submission_message": "\"{title}\" layihəsi üçün {student} cavab göndərdi.",
+        "submission_message": '"{title}" layihəsi üçün {student} cavab göndərdi.',
         "graded_title": "Layihə nəticəniz hazırdır: {title}",
-        "graded_message": "\"{title}\" layihəsi üçün müəllim rəy və ya bal əlavə etdi.",
+        "graded_message": '"{title}" layihəsi üçün müəllim rəy və ya bal əlavə etdi.',
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "lab": {
         "label": "lab",
         "assigned_title": "Yeni lab təyin olundu: {title}",
-        "assigned_message": "{course} kursunda \"{title}\" lab işi sizin üçün aktivdir.",
+        "assigned_message": '{course} kursunda "{title}" lab işi sizin üçün aktivdir.',
         "submission_title": "Yeni lab göndərişi: {student}",
-        "submission_message": "\"{title}\" labı üçün {student} cavab göndərdi.",
+        "submission_message": '"{title}" labı üçün {student} cavab göndərdi.',
         "graded_title": "Lab nəticəniz hazırdır: {title}",
-        "graded_message": "\"{title}\" labı üçün müəllim rəy və ya bal əlavə etdi.",
+        "graded_message": '"{title}" labı üçün müəllim rəy və ya bal əlavə etdi.',
         "notification_type": NotificationType.ASSIGNMENT,
     },
     "exam": {
         "label": "imtahan",
         "assigned_title": "Yeni imtahan təyin olundu: {title}",
-        "assigned_message": "\"{title}\" imtahanı sizin üçün aktivdir.",
+        "assigned_message": '"{title}" imtahanı sizin üçün aktivdir.',
         "submission_title": "Yeni imtahan cəhdi: {student}",
-        "submission_message": "\"{title}\" imtahanı üçün {student} cavabını göndərdi.",
+        "submission_message": '"{title}" imtahanı üçün {student} cavabını göndərdi.',
         "graded_title": "İmtahan nəticəniz yeniləndi: {title}",
-        "graded_message": "\"{title}\" imtahanı üçün müəllim rəy və ya bal əlavə etdi.",
+        "graded_message": '"{title}" imtahanı üçün müəllim rəy və ya bal əlavə etdi.',
         "notification_type": NotificationType.EXAM,
     },
 }
@@ -306,8 +306,9 @@ def notify_org_admins_of_new_request(*, request_obj: StudentOrganizationRequest)
 
     if request_obj.role_type in {MembershipRequestRoleType.TEACHER, MembershipRequestRoleType.STAFF}:
         admin_user_ids.extend(
-            UserModel.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN))
-            .values_list("id", flat=True)
+            UserModel.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN)).values_list(
+                "id", flat=True
+            )
         )
 
     admin_user_ids = sorted({user_id for user_id in admin_user_ids if user_id and user_id != request_obj.user_id})
@@ -342,7 +343,10 @@ def notify_membership_request_resolution(*, request_obj: StudentOrganizationRequ
     if request_obj.status not in MEMBERSHIP_REQUEST_STATUS_TITLES:
         return None
 
-    if request_obj.status == StudentOrganizationRequestStatus.CANCELLED and request_obj.responded_by_id == request_obj.user_id:
+    if (
+        request_obj.status == StudentOrganizationRequestStatus.CANCELLED
+        and request_obj.responded_by_id == request_obj.user_id
+    ):
         return None
 
     role_label = get_membership_request_role_label(request_obj.role_type).lower()
@@ -373,14 +377,16 @@ def notify_membership_request_resolution(*, request_obj: StudentOrganizationRequ
     )
 
 
-def notify_member_removed_from_organization(*, removed_user, organization, removed_by=None, reason: str = "") -> InAppNotification:
+def notify_member_removed_from_organization(
+    *, removed_user, organization, removed_by=None, reason: str = ""
+) -> InAppNotification:
     """
     Notify a user that they were removed from an organization by an admin.
     """
     actor_name = _display_name(removed_by) if removed_by is not None else ""
     message = (
         f"Siz {organization.name} təşkilatından uzaqlaşdırıldınız. "
-        "İstəsəniz profilinizdəki \"Təşkilata qoşul\" bölməsindən yenidən müraciət göndərə bilərsiniz."
+        'İstəsəniz profilinizdəki "Təşkilata qoşul" bölməsindən yenidən müraciət göndərə bilərsiniz.'
     )
     if actor_name:
         message = f"{message} Əməliyyatı icra edən: {actor_name}."
@@ -403,7 +409,9 @@ def notify_member_removed_from_organization(*, removed_user, organization, remov
     )
 
 
-def notify_course_membership_assigned(*, membership, created: bool, previous_group_name: str = "") -> InAppNotification | None:
+def notify_course_membership_assigned(
+    *, membership, created: bool, previous_group_name: str = ""
+) -> InAppNotification | None:
     """
     Notify a student when they are added to a course or moved to a group.
     """
@@ -532,7 +540,9 @@ def get_lab_assigned_user_ids(lab) -> set[int]:
             ).values_list("user_id", flat=True)
         )
     elif not assigned_user_ids:
-        assigned_user_ids.update(CourseMembership.objects.filter(course=lab.course, role="student").values_list("user_id", flat=True))
+        assigned_user_ids.update(
+            CourseMembership.objects.filter(course=lab.course, role="student").values_list("user_id", flat=True)
+        )
     return assigned_user_ids
 
 
@@ -624,7 +634,14 @@ def build_profile_notification_state(*, user, profile):
     )
     for pending_invite in pending_student_invites:
         invite_role_name = getattr(getattr(pending_invite, "role", None), "name", "")
-        if invite_role_name in {"teacher", "instructor", "professor", "associate_professor", "assistant_teacher", "assistant"}:
+        if invite_role_name in {
+            "teacher",
+            "instructor",
+            "professor",
+            "associate_professor",
+            "assistant_teacher",
+            "assistant",
+        }:
             pending_invite.role_label = get_membership_request_role_label(MembershipRequestRoleType.TEACHER)
         elif invite_role_name == "student":
             pending_invite.role_label = get_membership_request_role_label(MembershipRequestRoleType.STUDENT)

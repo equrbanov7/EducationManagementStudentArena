@@ -923,7 +923,7 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
         notifications_link = content.index(f'{reverse("accounts:profile")}?section=notifications')
-        join_link = content.index('?section=student-organization-request')
+        join_link = content.index("?section=student-organization-request")
         posts_link = content.index(f'{reverse("accounts:profile")}?section=posts')
         self.assertLess(notifications_link, join_link)
         self.assertLess(join_link, posts_link)
