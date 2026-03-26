@@ -6,9 +6,10 @@ from django.utils.translation import pgettext_lazy
 
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
-from .models import Comment, Post, Question
-from .selectors import get_category_assignment_queryset_and_labels
-from .services import can_user_create_post_category
+from .models import Category, Comment, Post, Question
+from .taxonomy import SUPPORTED_CATEGORY_LANGUAGES
+from .selectors import build_post_category_picker_options, get_post_category_tree
+from .services import resolve_post_category_selection
 
 
 class SubscriptionForm(forms.Form):
@@ -81,21 +82,16 @@ class RegisterForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    class CategoryChoiceField(forms.ModelChoiceField):
-        def __init__(self, *args, label_map=None, **kwargs):
-            self.label_map = label_map or {}
-            super().__init__(*args, **kwargs)
-
+    class LocalizedCategoryChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, obj):
-            return self.label_map.get(obj.pk, obj.name)
+            return obj.localized_name
 
-    new_category = forms.CharField(
-        label=pgettext_lazy("blog.form.post", "new_category_label"),
+    subcategory = LocalizedCategoryChoiceField(
+        queryset=None,
         required=False,
-        widget=forms.TextInput(
+        widget=forms.Select(
             attrs={
-                "class": "form-control",
-                "placeholder": pgettext_lazy("blog.form.post", "new_category_placeholder"),
+                "class": "form-select form-select-lg post-category-select",
             }
         ),
     )
@@ -119,7 +115,7 @@ class PostForm(forms.ModelForm):
             ),
             "category": forms.Select(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select form-select-lg post-category-select",
                 }
             ),
             "excerpt": forms.Textarea(
@@ -151,29 +147,81 @@ class PostForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        author = kwargs.pop("author", None)
+        kwargs.pop("author", None)
         super().__init__(*args, **kwargs)
-        category_queryset, category_labels = get_category_assignment_queryset_and_labels()
-        self.fields["category"] = self.CategoryChoiceField(
-            queryset=category_queryset,
+        category_tree = get_post_category_tree()
+        root_categories = list(category_tree)
+        subcategories = [child for root_category in root_categories for child in getattr(root_category, "child_categories", [])]
+
+        self.category_tree = category_tree
+        self.root_category_picker_options, self.subcategory_picker_options = build_post_category_picker_options(category_tree)
+        self.fields["category"] = self.LocalizedCategoryChoiceField(
+            queryset=self._queryset_from_categories(root_categories),
             label=self.fields["category"].label,
-            required=False,
+            required=True,
             widget=self.fields["category"].widget,
-            label_map=category_labels,
         )
-        self.allow_new_category = can_user_create_post_category(author)
-        self.fields["category"].required = False
-        self.fields["category"].empty_label = pgettext_lazy("blog.form.post", "category_empty_label")
+        self.fields["subcategory"] = self.LocalizedCategoryChoiceField(
+            queryset=self._queryset_from_categories(subcategories),
+            label="Subcategory",
+            required=False,
+            widget=self.fields["subcategory"].widget,
+        )
+        self.fields["category"].empty_label = "Select a category"
+        self.fields["subcategory"].empty_label = "Select a subcategory"
         self.fields["image"].required = False
         self.fields["image_url"].required = False
-        if not self.allow_new_category:
-            self.fields["new_category"].widget = forms.HiddenInput()
+        self.selected_root_category_id, self.selected_subcategory_id = self._resolve_selected_category_ids()
 
-    def clean_new_category(self):
-        new_category = (self.cleaned_data.get("new_category") or "").strip()
-        if new_category and not self.allow_new_category:
-            raise forms.ValidationError("Yeni kateqoriya yaratmaq üçün müəllim və ya daha yüksək rol tələb olunur.")
-        return new_category
+    @staticmethod
+    def _queryset_from_categories(categories):
+        category_ids = [category.id for category in categories]
+        if not category_ids:
+            return Category.objects.none()
+        return Category.objects.filter(id__in=category_ids).select_related("parent").order_by("sort_order", "name_en", "name_az", "id")
+
+    def _resolve_selected_category_ids(self):
+        selected_category_id = self.data.get("category") if self.is_bound else None
+        selected_subcategory_id = self.data.get("subcategory") if self.is_bound else None
+
+        if not self.is_bound and getattr(self.instance, "category_id", None):
+            if self.instance.category.parent_id:
+                selected_category_id = self.instance.category.parent_id
+                selected_subcategory_id = self.instance.category_id
+            else:
+                selected_category_id = self.instance.category_id
+
+        return self._normalize_optional_int(selected_category_id), self._normalize_optional_int(selected_subcategory_id)
+
+    @staticmethod
+    def _normalize_optional_int(raw_value):
+        try:
+            return int(raw_value)
+        except (TypeError, ValueError):
+            return None
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if (self.data.get("new_category") or "").strip():
+            raise forms.ValidationError({"category": "Categories are managed by SuperAdmin only."})
+
+        selected_category = cleaned_data.get("category")
+        selected_subcategory = cleaned_data.get("subcategory")
+        cleaned_data["resolved_category"] = resolve_post_category_selection(
+            category=selected_category,
+            subcategory=selected_subcategory,
+        )
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.category = self.cleaned_data.get("resolved_category")
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
 
     def clean_image(self):
         image = self.cleaned_data.get("image")
@@ -189,6 +237,104 @@ class PostForm(forms.ModelForm):
         )
         randomize_uploaded_filename(image)
         return image
+
+
+class CategoryManagementForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = [
+            "parent",
+            "name_az",
+            "name_en",
+            "name_ru",
+            "name_tr",
+            "sort_order",
+        ]
+        widgets = {
+            "sort_order": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 0,
+                    "step": 1,
+                }
+            ),
+        }
+
+    duplicate_messages = {
+        "az": "Bu Azərbaycan adı ilə eyni səviyyədə başqa kateqoriya artıq mövcuddur.",
+        "en": "Bu ingilis adı ilə eyni səviyyədə başqa kateqoriya artıq mövcuddur.",
+        "ru": "Bu rus adı ilə eyni səviyyədə başqa kateqoriya artıq mövcuddur.",
+        "tr": "Bu türk adı ilə eyni səviyyədə başqa kateqoriya artıq mövcuddur.",
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["parent"].queryset = Category.objects.filter(parent__isnull=True).order_by(
+            "sort_order",
+            "name_en",
+            "name_az",
+            "id",
+        )
+        self.fields["parent"].required = False
+        self.fields["parent"].label = "Ana kateqoriya"
+        self.fields["parent"].empty_label = "Ana kateqoriya seçin (boş saxlasanız əsas kateqoriya olacaq)"
+        self.fields["sort_order"].required = False
+        self.fields["sort_order"].label = "Sıralama"
+        self.fields["sort_order"].help_text = "Kiçik rəqəm yuxarıda görünür."
+
+        if self.instance.pk:
+            invalid_parent_ids = {self.instance.pk, *self.instance.get_descendant_ids(include_self=False)}
+            self.fields["parent"].queryset = self.fields["parent"].queryset.exclude(pk__in=invalid_parent_ids)
+
+        for field_name, label in (
+            ("name_az", "Ad (AZ)"),
+            ("name_en", "Name (EN)"),
+            ("name_ru", "Название (RU)"),
+            ("name_tr", "Ad (TR)"),
+        ):
+            self.fields[field_name].required = True
+            self.fields[field_name].label = label
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-control",
+                    "maxlength": 100,
+                }
+            )
+
+        if self.instance.pk and self.instance.children.exists():
+            self.fields["parent"].help_text = (
+                "Bu kateqoriyanın alt kateqoriyaları var. Ona görə başqa kateqoriyanın altına keçirilə bilməz."
+            )
+
+    def clean_sort_order(self):
+        return self.cleaned_data.get("sort_order") or 0
+
+    def clean(self):
+        cleaned_data = super().clean()
+        parent = cleaned_data.get("parent")
+        scope_filters = {"parent__isnull": True} if parent is None else {"parent": parent}
+        duplicate_scope = Category.objects.filter(**scope_filters)
+
+        if self.instance.pk:
+            duplicate_scope = duplicate_scope.exclude(pk=self.instance.pk)
+
+        for language_code in SUPPORTED_CATEGORY_LANGUAGES:
+            field_name = f"name_{language_code}"
+            field_value = (cleaned_data.get(field_name) or "").strip()
+            if not field_value:
+                continue
+
+            if duplicate_scope.filter(**{f"{field_name}__iexact": field_value}).exists():
+                self.add_error(field_name, self.duplicate_messages[language_code])
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.show_in_navbar = bool(instance.show_in_navbar and not instance.parent_id)
+        if commit:
+            instance.save()
+        return instance
 
 
 class CommentForm(forms.ModelForm):

@@ -32,7 +32,8 @@
                                             data-edit-url="{% url 'post_edit_ajax' post.pk %}"
                                             data-title="{{ post.title|escape }}"
                                             data-content="{{ post.content|escape }}"
-                                            data-category="{{ post.category.id|default_if_none:'' }}"
+                                            data-category-root="{{ post.root_category.id|default_if_none:'' }}"
+                                            data-subcategory="{{ post.selected_subcategory.id|default_if_none:'' }}"
                                             data-excerpt="{{ post.excerpt|default_if_none:''|escape }}"
                                             data-image-url="{{ post.image_url|default_if_none:''|escape }}"
                                             data-file-image="{% if post.image %}{{ post.image.url|escape }}{% endif %}"
@@ -115,111 +116,16 @@
                     {% trans "empty_message" context "profile.posts" %}
                 </div>
                 <div class="profile-edit-link">
-                    <button type="button" class="btn btn-primary js-open-create-post">
+                    <a href="{{ profile_base_url }}?section=create-post"
+                       data-section="create-post"
+                       data-title="{% trans 'create_post' context 'profile.section' %}"
+                       data-source-url="{% url 'create_post' %}"
+                       class="btn profile-action-btn profile-action-btn--ocean js-profile-section-link">
                         <i class="fas fa-plus"></i> {% trans "create_first_post" context "profile.posts" %}
-                    </button>
+                    </a>
                 </div>
             {% endif %}
         </section>
-
-        <div id="createModal" class="modal-overlay">
-            <div class="modal-content modal-large">
-                <div class="modal-header">
-                    <h3>{% trans "modal_create_title" context "profile.posts" %}</h3>
-                    <button class="modal-close-btn" id="closeCreateModal" type="button">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <div id="createFormError" class="create-form-error" hidden></div>
-
-                <form id="createForm" enctype="multipart/form-data" data-requires-approval="{{ post_creation_requires_approval|yesno:'true,false' }}">
-                    {% csrf_token %}
-                    {% if post_creation_requires_approval %}
-                        <div class="approval-notice">
-                            Bu post əvvəlcə müəllim təsdiqinə gedəcək və təsdiqlənənə qədər paylaşılmayacaq.
-                        </div>
-                    {% endif %}
-
-                    <div class="form-group">
-                        <label for="createTitle">{% trans "label_title" context "profile.posts" %}</label>
-                        <input type="text" id="createTitle" name="title" class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="createCategory">{% trans "label_category" context "profile.posts" %}</label>
-                        <select id="createCategory" name="category" class="form-control">
-                            <option value="">--- {% trans "option_select_category" context "profile.posts" %} ---</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.display_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    {% if can_create_post_categories %}
-                        <div class="form-group">
-                            <label for="createNewCategory">{% trans "label_new_category" context "profile.posts" %}</label>
-                            <input type="text" id="createNewCategory" name="new_category" class="form-control"
-                                   placeholder="{% trans 'placeholder_new_category' context 'profile.posts' %}">
-                        </div>
-                    {% else %}
-                        <div class="form-group">
-                            <div class="approval-lock-row">
-                                <i class="fas fa-tag"></i>
-                                <span>Mövcud kateqoriyalardan birini seçə bilərsiniz.</span>
-                            </div>
-                            <small class="approval-help-text">Yeni kateqoriya yaratmaq yalnız müəllim və daha yüksək rollar üçündür.</small>
-                        </div>
-                    {% endif %}
-
-                    <div class="form-group">
-                        <label for="createExcerpt">{% trans "label_excerpt" context "profile.posts" %}</label>
-                        <textarea id="createExcerpt" name="excerpt" class="form-control" rows="2"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="createContent">{% trans "label_content" context "profile.posts" %}</label>
-                        <textarea id="createContent" name="content" class="form-control" rows="10" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="createImageUrl">{% trans "label_image_url" context "profile.posts" %}</label>
-                        <input type="url" id="createImageUrl" name="image_url" class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="createImage">{% trans "label_upload_image" context "profile.posts" %}</label>
-                        <input type="file" id="createImage" name="image" class="form-control" accept=".jpg,.jpeg,.jfif,.png,.gif,.webp">
-                        <small class="image-format-help">Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB).</small>
-                    </div>
-
-                    {% if post_creation_requires_approval %}
-                        <div class="form-group">
-                            <div class="approval-lock-row">
-                                <i class="fas fa-lock"></i>
-                                <span>Bu post avtomatik olaraq müəllim təsdiqinə göndəriləcək.</span>
-                            </div>
-                            <small class="approval-help-text">“Publish article” tələbələr üçün aktiv deyil; post təsdiqdən sonra paylaşılır.</small>
-                        </div>
-                    {% else %}
-                        <div class="form-group form-check publish-toggle">
-                            <label class="checkbox-label checkbox-label--prominent">
-                                <input type="checkbox"
-                                       id="createIsPublished"
-                                       name="is_published"
-                                       checked>
-                                <span class="checkbox-label-text">{% trans "publish_article" context "profile.posts" %}</span>
-                            </label>
-                        </div>
-                    {% endif %}
-
-                    <div class="modal-buttons">
-                        <button type="button" id="cancelCreate" class="modal-cancel-btn">{% trans "cancel" context "profile.posts" %}</button>
-                        <button type="submit" id="saveCreate" class="modal-confirm-btn">{% trans "create" context "profile.posts" %}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
         <div id="editModal" class="modal-overlay">
             <div class="modal-content modal-large">
@@ -249,12 +155,17 @@
 
                     <div class="form-group">
                         <label for="editCategory">{% trans "label_category" context "profile.posts" %}</label>
-                        <select id="editCategory" name="category" class="form-control" required>
-                            <option value="" disabled>{% trans "option_select_category" context "profile.posts" %}</option>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.display_name }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="profile-post-category-picker js-post-category-picker">
+                            <div class="profile-post-category-grid">
+                                {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Category" field_label_class="profile-post-category-grid__label" field_id="editCategory" field_name="category" field_placeholder="Select a category" field_options=post_category_root_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-root required" %}
+
+                                {% include "partials/_bootstrap_select_field.html" with field_wrapper_class="profile-post-category-grid__item" field_label="Subcategory" field_optional_label="Optional" field_label_class="profile-post-category-grid__label" field_id="editSubcategory" field_name="subcategory" field_placeholder="Select a subcategory" field_options=post_category_subcategory_options field_value="" field_select_class="form-select-lg form-control" field_extra_attrs="data-post-category-sub" field_hint="Optional: choose a more specific subcategory if it matches your post." field_hint_class="profile-post-category-grid__hint" field_hint_attrs="data-post-category-sub-hint" %}
+                            </div>
+
+                            <small class="profile-post-category-picker__footer">
+                                Categories are managed by SuperAdmin. New categories cannot be created here.
+                            </small>
+                        </div>
                     </div>
 
                     <div class="form-group">

@@ -6,9 +6,15 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from ..models import Category, Post
-from ..selectors import DEFAULT_TECHNOLOGY_CATEGORY_SLUG, get_popular_topics, get_sidebar_categories
+from ..selectors import (
+    DEFAULT_TECHNOLOGY_CATEGORY_SLUG,
+    filter_posts_by_category_scope,
+    get_popular_topics,
+    get_sidebar_categories,
+)
 from .categories import render_category_page
 
 HOME_SEARCH_MAX_LENGTH = 200
@@ -17,6 +23,10 @@ _PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
 
 def _normalize_home_search_query(raw_value, *, max_length=HOME_SEARCH_MAX_LENGTH):
     return " ".join(str(raw_value or "").split())[:max_length]
+
+
+def _normalize_home_category_slug(raw_value, *, max_length=120):
+    return str(raw_value or "").strip()[:max_length]
 
 
 def _parse_home_page_number(raw_value):
@@ -30,7 +40,15 @@ def _parse_home_page_number(raw_value):
 
 def home(request):
     query = _normalize_home_search_query(request.GET.get("q"))
-    post_list = Post.objects.filter(is_published=True).select_related("category", "author").order_by("-created_at")
+    category_slug = _normalize_home_category_slug(request.GET.get("category"))
+    selected_category = None
+
+    published_posts = Post.objects.filter(is_published=True).select_related("category", "author")
+    post_list = published_posts.order_by("-created_at")
+
+    if category_slug:
+        selected_category = get_object_or_404(Category.objects.select_related("parent", "parent__parent"), slug=category_slug)
+        post_list = filter_posts_by_category_scope(post_list, selected_category)
 
     if query:
         post_list = post_list.filter(
@@ -44,19 +62,36 @@ def home(request):
 
     paginator = Paginator(post_list, 6)
     page_obj = paginator.get_page(page_number)
-    extra_query = urlencode({"q": query}) if query else ""
+    extra_query_params = {}
+    if query:
+        extra_query_params["q"] = query
+    if selected_category is not None:
+        extra_query_params["category"] = selected_category.slug
+    extra_query = urlencode(extra_query_params)
 
     categories = get_sidebar_categories(
-        posts_queryset=Post.objects.filter(is_published=True),
+        posts_queryset=published_posts,
         include_empty=True,
     )
     popular_topics = get_popular_topics(limit=5)
+
+    clear_filter_query = urlencode({"q": query}) if query else ""
+    clear_category_filter_url = reverse("home")
+    if clear_filter_query:
+        clear_category_filter_url = f"{clear_category_filter_url}?{clear_filter_query}"
 
     context = {
         "page_obj": page_obj,
         "categories": categories,
         "popular_topics": popular_topics,
-        "active_category_slug": "",
+        "active_category_slug": selected_category.slug if selected_category else "",
+        "selected_category": selected_category,
+        "selected_category_display_name": (
+            selected_category.localized_full_name if selected_category and selected_category.parent_id else (
+                selected_category.localized_name if selected_category else ""
+            )
+        ),
+        "clear_category_filter_url": clear_category_filter_url,
         "search_query": query,
         "query": query,  # Also pass as 'query' for template compatibility
         "extra_query": extra_query,

@@ -94,6 +94,32 @@
         </li>
         {% endif %}
 
+        {% if 'create-category' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=create-category"
+               data-section="create-category"
+               data-title="Create category"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-category' %}active{% endif %}">
+                <i class="fas fa-folder-plus sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Create category</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% if 'category-management' in allowed_sections %}
+        <li class="sidebar-menu-item">
+            <a href="{{ profile_base_url }}?section=category-management"
+               data-section="category-management"
+               data-title="Categories"
+               data-source-url="{{ profile_base_url }}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'category-management' %}active{% endif %}">
+                <i class="fas fa-sitemap sidebar-menu-icon"></i>
+                <span class="sidebar-menu-text">Categories</span>
+            </a>
+        </li>
+        {% endif %}
+
         {% if 'my-exams' in allowed_sections %}
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-exams"
