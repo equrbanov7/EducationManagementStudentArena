@@ -3385,6 +3385,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "A new verification code has been sent."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Registration failed: we could not send the verification email. Please check"
+" your email address and try again."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"
@@ -12770,6 +12776,10 @@ msgctxt "nav"
 msgid "my_profile"
 msgstr "My profile"
 
+msgctxt "nav"
+msgid "notifications"
+msgstr "Notifications"
+
 #: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
 msgctxt "nav"
 msgid "logout"
@@ -14909,11 +14919,151 @@ msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Selected organization does not match the selected country."
 
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_teacher"
+msgstr "School teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_teacher"
+msgstr "University teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_teacher"
+msgstr "Course teacher"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_staff"
+msgstr "School staff"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_staff"
+msgstr "University staff"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_staff"
+msgstr "Course staff"
+
+msgctxt "accounts.form.register.label"
+msgid "phone"
+msgstr "Phone number"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "phone"
+msgstr "e.g. +994501234567"
+
+msgctxt "accounts.form.register.label"
+msgid "specialization"
+msgstr "Specialization / Major"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "specialization"
+msgstr "e.g. Computer Science"
+
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Group / Class"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "e.g. CS-101 or Group 3A"
+
+msgctxt "accounts.form.register.label"
+msgid "department"
+msgstr "Department / Faculty"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "department"
+msgstr "e.g. Faculty of Engineering"
+
+msgctxt "accounts.form.register.label"
+msgid "staff_position"
+msgstr "Position / Role Title"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "staff_position"
+msgstr "e.g. Office Manager"
+
+msgctxt "accounts.form.register.error"
+msgid "specialization_required"
+msgstr "Specialization / major is required for students."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Group / class is required for students."
+
+msgctxt "accounts.register"
+msgid "step_role"
+msgstr "Role"
+
+msgctxt "accounts.register"
+msgid "choose_role"
+msgstr "Choose your role"
+
+msgctxt "accounts.register"
+msgid "role_owner_title"
+msgstr "Owner / Founder"
+
+msgctxt "accounts.register"
+msgid "role_owner_description"
+msgstr "Register your organization and manage it as the owner."
+
+msgctxt "accounts.register"
+msgid "role_teacher_title"
+msgstr "Teacher"
+
+msgctxt "accounts.register"
+msgid "role_teacher_description"
+msgstr "Join as a teacher and manage courses and students."
+
+msgctxt "accounts.register"
+msgid "role_staff_title"
+msgstr "Staff"
+
+msgctxt "accounts.register"
+msgid "role_staff_description"
+msgstr "Join as a staff member in an administrative or support role."
+
+msgctxt "accounts.register"
+msgid "role_student_title"
+msgstr "Student"
+
+msgctxt "accounts.register"
+msgid "role_student_description"
+msgstr "Join as a student and access your courses."
+
+msgctxt "accounts.register"
+msgid "org_pending_approval_notice"
+msgstr "Your organization registration is pending superadmin approval. You will be notified once it is reviewed."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_teacher_join"
+msgstr "After email verification, you will join the selected organization as a teacher (pending approval)."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_staff_join"
+msgstr "After email verification, you will join the selected organization as a staff member (pending approval)."
+
+msgctxt "accounts.register"
+msgid "student_fields_title"
+msgstr "Student information"
+
+msgctxt "accounts.register"
+msgid "teacher_fields_title"
+msgstr "Teacher information"
+
+msgctxt "accounts.register"
+msgid "staff_fields_title"
+msgstr "Staff information"
+
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr ""
 "After email verification, you will join the selected organization as a "
 "student."
+
+msgctxt "accounts.register"
+msgid "join_org_optional_hint"
+msgstr "Organization selection is optional. You can apply to join an organization later from your profile."
 
 msgctxt "assignment.review_submissions"
 msgid "filter_search_placeholder"
@@ -15594,3 +15744,337 @@ msgstr "Close"
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
 msgstr "I have read and accept"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Notifications"
+
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Join organization"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Join organization"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Student"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Teacher"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Staff"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Member"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "University"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "School"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Course center"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "All"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Unread"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Read"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Mark all as read"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Select all"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Delete selected"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "ago"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "New"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Mark as read"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Delete"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "No unread notifications."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "No read notifications."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "No notifications yet."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "New notifications will appear here."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Notification"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Close"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Go to link"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "your request is pending approval."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Message"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "has invited you as a student."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Accept"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Reject"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "%(organization_name)s has invited you as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "Join organization as %(role_label)s"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Search organization..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "All organization types"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "Send %(role_label)s request"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "%(role_label)s request message"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "You can write a short note to the organization..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Confirm request"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Select"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Organization"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Type"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Country"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Status"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "%(role_label)s request sent"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "No matching organizations were found."
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Send Notification"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Fill out the form below to send a notification to your selected target group. Recipients will see it in the notifications section of their profile."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Target group"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Select the user groups to send the notification to."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Search..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Notification title"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Enter notification title..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Notification body"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Enter notification body (optional)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Link"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Recipients can follow this link from the notification details."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Image"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "Supported formats: JPG, PNG, WebP, GIF."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "optional"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "max. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Preview"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Remove image"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Send"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Reset"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "No suitable target found to send a notification."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "You must create at least one group to send notifications."
+
+msgid "target_all_users"
+msgstr "All users (system)"
+
+msgid "target_org_prefix"
+msgstr "Organization"
+
+msgid "target_org_all_members"
+msgstr "all members"
+
+msgid "target_group_prefix"
+msgstr "Group"
+
+msgid "notif_title_required"
+msgstr "Notification title cannot be empty."
+
+msgid "notif_link_invalid"
+msgstr "The link entered is invalid. It must start with http:// or https://."
+
+msgid "notif_image_too_large"
+msgstr "The image must be at most 5 MB."
+
+msgid "notif_image_invalid"
+msgstr "The image file is invalid."
+
+msgid "notif_sent_success"
+msgstr "Notification sent successfully."
+
+msgid "notif_no_recipients"
+msgstr "You do not have permission for these targets or no recipients found."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "No results found."

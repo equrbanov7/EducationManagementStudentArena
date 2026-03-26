@@ -12,7 +12,13 @@ from django.urls import reverse
 
 from apps.accounts.models import EmailOTP, ProfileRole
 from apps.audit.models import AuditLog
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    InAppNotification,
+    MembershipRequestRoleType,
+    NotificationType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
 from apps.organizations.models import Country, Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
 
@@ -48,6 +54,11 @@ class SignupAndLoginFlowTest(TestCase):
             "organization_license_identifier": "",
             "initial_role": ProfileRole.MEMBER,
             "accept_privacy_policy": "on",
+            "phone": "",
+            "specialization": "",
+            "group_number": "",
+            "department": "",
+            "staff_position": "",
         }
         payload.update(overrides)
         return payload
@@ -133,6 +144,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "Baku School 500")
         self.assertEqual(profile.organization.organization_identifier, "")
+        # New organizations start as pending (require superadmin approval)
+        self.assertEqual(profile.organization.status, "pending")
+        self.assertTrue(profile.organization.is_active)
         self.assertEqual(profile.requested_organization, profile.organization)
         self.assertEqual(profile.requested_organization_name, profile.organization.name)
         self.assertEqual(profile.organization_type, OrganizationType.SCHOOL)
@@ -160,6 +174,9 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNotNone(profile.organization)
         self.assertEqual(profile.organization.name, "My New Center")
         self.assertEqual(profile.organization.license_identifier, "TAX-991")
+        # New organizations start as pending (require superadmin approval)
+        self.assertEqual(profile.organization.status, "pending")
+        self.assertTrue(profile.organization.is_active)
         self.assertEqual(profile.requested_organization_name, "My New Center")
         self.assertEqual(profile.role, ProfileRole.ORG_ADMIN)
 
@@ -195,6 +212,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization="",
+                specialization="Computer Science",
+                group_number="CS-101",
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
@@ -203,6 +222,8 @@ class SignupAndLoginFlowTest(TestCase):
         self.assertIsNone(user.profile.organization)
         self.assertIsNone(user.profile.requested_organization)
         self.assertEqual(user.profile.requested_organization_name, "")
+        self.assertEqual(user.profile.student_specialization, "Computer Science")
+        self.assertEqual(user.profile.student_group_number, "CS-101")
 
     def test_student_join_rejects_suspended_organization(self):
         owner = User.objects.create_user(
@@ -224,6 +245,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization=str(suspended_org.id),
+                specialization="History",
+                group_number="HIS-1",
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -249,6 +272,8 @@ class SignupAndLoginFlowTest(TestCase):
             self._register_payload(
                 organization_type="school_student",
                 join_organization=str(university_org.id),
+                specialization="Physics",
+                group_number="PHY-2B",
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -276,6 +301,8 @@ class SignupAndLoginFlowTest(TestCase):
                 email="school_student_user@example.com",
                 organization_type="school_student",
                 join_organization=str(school_org.id),
+                specialization="Biology",
+                group_number="BIO-2A",
             ),
         )
         self.assertRedirects(response, self.verify_code_url)
@@ -300,6 +327,153 @@ class SignupAndLoginFlowTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
+
+    def test_student_registration_requires_specialization_and_group(self):
+        """Student join requires specialization and group number."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type="school_student",
+                join_organization="",
+                specialization="",
+                group_number="",
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("specialization", form.errors)
+        self.assertIn("group_number", form.errors)
+
+    def test_teacher_join_without_organization_is_allowed(self):
+        """University teacher can register without selecting an organization."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="teacher_user",
+                email="teacher_user@example.com",
+                organization_type="university_teacher",
+                join_organization="",
+                department="Faculty of Engineering",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="teacher_user")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.TEACHER)
+        self.assertIsNone(profile.organization)
+        self.assertEqual(profile.department, "Faculty of Engineering")
+
+    def test_teacher_join_with_organization(self):
+        """University teacher can join an active university organization."""
+        owner = User.objects.create_user(
+            username="uni_owner2",
+            email="uni_owner2@example.com",
+            password="StrongPass123!",
+        )
+        uni_org = Organization.objects.create(
+            name="Active University",
+            org_type=OrganizationType.UNIVERSITY,
+            country="Azerbaijan",
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="teacher_joined",
+                email="teacher_joined@example.com",
+                organization_type="university_teacher",
+                join_organization=str(uni_org.id),
+                department="Computer Science",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="teacher_joined")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.TEACHER)
+        self.assertEqual(profile.requested_organization, uni_org)
+        self.assertEqual(profile.department, "Computer Science")
+
+    def test_staff_join_without_organization_is_allowed(self):
+        """School staff can register without selecting an organization."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="staff_user",
+                email="staff_user@example.com",
+                organization_type="school_staff",
+                join_organization="",
+                department="Administration",
+                staff_position="Secretary",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="staff_user")
+        profile = user.profile
+        self.assertEqual(profile.role, ProfileRole.MEMBER)
+        self.assertIsNone(profile.organization)
+        self.assertEqual(profile.department, "Administration")
+        self.assertEqual(profile.staff_position, "Secretary")
+
+    def test_org_create_sets_pending_status(self):
+        """Organizations created via signup must start with pending status."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                username="pending_org_owner",
+                email="pending_org_owner@example.com",
+                organization_type=OrganizationType.UNIVERSITY,
+                institution_not_listed_name="New University",
+                organization_identifier="UNIV-001",
+            ),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="pending_org_owner")
+        org = user.profile.organization
+        self.assertIsNotNone(org)
+        self.assertEqual(org.status, "pending")
+        self.assertTrue(org.is_active)
+
+    def test_individual_workspace_is_active_immediately(self):
+        """Personal workspaces (individual) must be active immediately after signup."""
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(),
+        )
+        self.assertRedirects(response, self.verify_code_url)
+        user = User.objects.get(username="newuser")
+        org = user.profile.organization
+        self.assertIsNotNone(org)
+        self.assertEqual(org.status, "active")
+        self.assertTrue(org.is_active)
+
+    def test_teacher_join_rejects_type_mismatch(self):
+        """Teacher cannot join an organization of a different type."""
+        owner = User.objects.create_user(
+            username="school_owner2",
+            email="school_owner2@example.com",
+            password="StrongPass123!",
+        )
+        school_org = Organization.objects.create(
+            name="School Mismatch",
+            org_type=OrganizationType.SCHOOL,
+            country="Azerbaijan",
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        response = self.client.post(
+            self.register_url,
+            self._register_payload(
+                organization_type="university_teacher",
+                join_organization=str(school_org.id),
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+        # Should report type mismatch error
+        form = response.context["form"]
+        self.assertIn("join_organization", form.errors)
 
 
 class ProfileAndSuspensionFlowTest(TestCase):
@@ -424,6 +598,43 @@ class ProfileAndSuspensionFlowTest(TestCase):
         organization.refresh_from_db()
         self.assertEqual(organization.status, "active")
         self.assertTrue(organization.is_active)
+
+    def test_superadmin_actions_honor_profile_next_url(self):
+        superadmin = User.objects.create_superuser(
+            username="superadmin_redirect",
+            email="superadmin_redirect@example.com",
+            password="StrongPass123!",
+        )
+        org_owner = User.objects.create_user(
+            username="owner_redirect",
+            email="owner_redirect@example.com",
+            password="StrongPass123!",
+        )
+        organization = Organization.objects.create(
+            name="Managed Redirect Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=org_owner,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superadmin)
+        next_url = f"{reverse('accounts:profile')}?section=superadmin-organizations"
+
+        response = self.client.post(
+            reverse("accounts:superadmin_organizations"),
+            {
+                "organization_id": str(organization.id),
+                "action": "suspend",
+                "reason": "Profile redirect check",
+                "next": next_url,
+            },
+        )
+
+        self.assertRedirects(response, next_url)
+        organization.refresh_from_db()
+        self.assertEqual(organization.status, "suspended")
+        self.assertFalse(organization.is_active)
 
 
 class RoleAndPermissionTenantIsolationTest(TestCase):
@@ -842,12 +1053,13 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         free_profile.requested_organization_name = self.org_a.name
         free_profile.save()
 
-        response = self.client.get(reverse("accounts:student_organization_management"))
+        pending_url = (
+            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
+        )
+        response = self.client.get(pending_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.unassigned_user.username)
-        self.assertContains(response, "Təşkilatdan uzaqlaşdır")
         self.assertContains(response, "Təşkilata əlavə et")
-        self.assertContains(response, "Dəvət et")
         self.assertContains(response, "removeStudentConfirmModal")
         self.assertContains(response, "pendingAddConfirmModal")
         self.assertContains(response, "inviteConfirmModal")
@@ -859,11 +1071,11 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             {
                 "action": "bulk_approve_requested_students",
                 "selected_pending_user_ids": [str(self.unassigned_user.id)],
-                "next": reverse("accounts:student_organization_management"),
+                "next": pending_url,
             },
             follow=True,
         )
-        self.assertRedirects(response, reverse("accounts:student_organization_management"))
+        self.assertRedirects(response, pending_url)
         self.assertContains(response, "Uğurla əlavə edildi: 1 tələbə əlavə edildi.")
         pending_user_ids = {item.user_id for item in response.context["pending_requested_students"].object_list}
         self.assertNotIn(self.unassigned_user.id, pending_user_ids)
@@ -893,7 +1105,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             organization=self.org_a,
         ).delete()
 
-        response = self.client.get(reverse("accounts:student_organization_management"))
+        response = self.client.get(
+            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
         self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
@@ -901,6 +1115,328 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertContains(response, 'data-selected-label="Seçilənləri təşkilata əlavə et ({count} seçildi)"')
         self.assertContains(response, 'data-disabled-tooltip="Ən az 1 tələbə seçin"')
         self.assertContains(response, 'id="selectAllPendingStudents"')
+
+    def test_student_org_management_defaults_to_all_filters_and_hides_superadmins(self):
+        hidden_unassigned_super = User.objects.create_superuser(
+            username="hidden_unassigned_super",
+            email="hidden_unassigned_super@example.com",
+            password="StrongPass123!",
+        )
+        hidden_invited_super = User.objects.create_superuser(
+            username="hidden_invited_super",
+            email="hidden_invited_super@example.com",
+            password="StrongPass123!",
+        )
+        hidden_staff_super = User.objects.create_superuser(
+            username="hidden_staff_super",
+            email="hidden_staff_super@example.com",
+            password="StrongPass123!",
+        )
+        hidden_teacher_request_super = User.objects.create_superuser(
+            username="hidden_teacher_request_super",
+            email="hidden_teacher_request_super@example.com",
+            password="StrongPass123!",
+        )
+
+        hidden_unassigned_profile = hidden_unassigned_super.profile
+        hidden_unassigned_profile.organization = None
+        hidden_unassigned_profile.organization_type = OrganizationType.INDIVIDUAL
+        hidden_unassigned_profile.role = ProfileRole.MEMBER
+        hidden_unassigned_profile.requested_organization = None
+        hidden_unassigned_profile.requested_organization_name = ""
+        hidden_unassigned_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+
+        hidden_invited_profile = hidden_invited_super.profile
+        hidden_invited_profile.organization = None
+        hidden_invited_profile.organization_type = OrganizationType.INDIVIDUAL
+        hidden_invited_profile.role = ProfileRole.MEMBER
+        hidden_invited_profile.requested_organization = self.org_a
+        hidden_invited_profile.requested_organization_name = self.org_a.name
+        hidden_invited_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+        Membership.objects.create(
+            user=hidden_invited_super,
+            organization=self.org_a,
+            role=self.org_a_student_role,
+            assigned_by=self.admin_user,
+            is_primary=False,
+            is_active=False,
+            title="__student_pending_invite__",
+        )
+
+        hidden_staff_profile = hidden_staff_super.profile
+        hidden_staff_profile.organization = self.org_a
+        hidden_staff_profile.organization_type = self.org_a.org_type
+        hidden_staff_profile.role = ProfileRole.MEMBER
+        hidden_staff_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "updated_at",
+            ]
+        )
+        Membership.objects.create(
+            user=hidden_staff_super,
+            organization=self.org_a,
+            role=self.org_a_member_role,
+            is_primary=True,
+            is_active=True,
+        )
+
+        hidden_teacher_request_profile = hidden_teacher_request_super.profile
+        hidden_teacher_request_profile.organization = None
+        hidden_teacher_request_profile.organization_type = OrganizationType.INDIVIDUAL
+        hidden_teacher_request_profile.role = ProfileRole.MEMBER
+        hidden_teacher_request_profile.requested_organization = self.org_a
+        hidden_teacher_request_profile.requested_organization_name = self.org_a.name
+        hidden_teacher_request_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+        StudentOrganizationRequest.objects.create(
+            user=hidden_teacher_request_super,
+            organization=self.org_a,
+            status=StudentOrganizationRequestStatus.PENDING,
+            role_type=MembershipRequestRoleType.TEACHER,
+            message="Superadmin request should stay hidden.",
+        )
+
+        response = self.client.get(reverse("accounts:student_organization_management"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Hamısı")
+        self.assertContains(response, "data-management-all", html=False)
+        self.assertContains(response, 'data-management-chip="student-members"', html=False)
+        self.assertContains(response, 'data-management-panel="student-members"', html=False)
+        self.assertContains(response, 'data-management-panel="teacher-members"', html=False)
+        self.assertContains(response, 'data-management-panel="staff-members"', html=False)
+        self.assertContains(response, "Təşkilat tələbələri")
+        self.assertContains(response, "Təşkilat müəllimləri")
+        self.assertContains(response, "Təşkilat staff siyahısı")
+
+        unassigned_ids = {item.user_id for item in response.context["unassigned_students"].object_list}
+        sent_invite_ids = {item.user_id for item in response.context["sent_student_invites"].object_list}
+        staff_member_ids = {item.user_id for item in response.context["staff_members"].object_list}
+        pending_teacher_ids = {item.user_id for item in response.context["pending_teacher_requests"].object_list}
+
+        self.assertNotIn(hidden_unassigned_super.id, unassigned_ids)
+        self.assertNotIn(hidden_invited_super.id, sent_invite_ids)
+        self.assertNotIn(hidden_staff_super.id, staff_member_ids)
+        self.assertNotIn(hidden_teacher_request_super.id, pending_teacher_ids)
+        self.assertNotContains(response, hidden_unassigned_super.username)
+        self.assertNotContains(response, hidden_invited_super.username)
+        self.assertNotContains(response, hidden_staff_super.username)
+        self.assertNotContains(response, hidden_teacher_request_super.username)
+
+    def test_org_admin_can_approve_teacher_request_from_requests_tab(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_request_user",
+            email="teacher_request_user@example.com",
+            password="StrongPass123!",
+        )
+        teacher_user.profile.role = ProfileRole.TEACHER
+        teacher_user.profile.organization = None
+        teacher_user.profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_user.profile.requested_organization = self.org_a
+        teacher_user.profile.requested_organization_name = self.org_a.name
+        teacher_user.profile.save(
+            update_fields=[
+                "role",
+                "organization",
+                "organization_type",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+        teacher_request = StudentOrganizationRequest.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            status=StudentOrganizationRequestStatus.PENDING,
+            role_type=MembershipRequestRoleType.TEACHER,
+            message="Müəllim kimi qoşulmaq istəyirəm.",
+        )
+
+        next_url = (
+            f"{reverse('accounts:student_organization_management')}?management_view=teachers&teacher_tab=requests"
+        )
+        response = self.client.get(next_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, teacher_user.username)
+        self.assertContains(response, "Müəllim müraciəti axtar...")
+
+        response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "approve_teacher_staff_request",
+                "ts_request_id": str(teacher_request.id),
+                "next": next_url,
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(response, next_url)
+        self.assertContains(response, f"{teacher_user.username} qəbul edildi.")
+        teacher_request.refresh_from_db()
+        teacher_user.profile.refresh_from_db()
+        self.assertEqual(teacher_request.status, StudentOrganizationRequestStatus.APPROVED)
+        self.assertEqual(teacher_user.profile.organization, self.org_a)
+        self.assertEqual(teacher_user.profile.role, ProfileRole.TEACHER)
+        self.assertTrue(
+            Membership.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                role=self.org_a_teacher_role,
+                is_active=True,
+            ).exists()
+        )
+
+    def test_org_admin_can_reject_teacher_request_and_teacher_can_resubmit(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_request_reject_user",
+            email="teacher_request_reject_user@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.requested_organization = self.org_a
+        teacher_profile.requested_organization_name = self.org_a.name
+        teacher_profile.requested_organization_message = "İlk reject testi"
+        teacher_profile.save(
+            update_fields=[
+                "role",
+                "organization",
+                "organization_type",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+        teacher_request = StudentOrganizationRequest.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            status=StudentOrganizationRequestStatus.PENDING,
+            role_type=MembershipRequestRoleType.TEACHER,
+            message="İlk reject testi",
+        )
+
+        reject_next_url = (
+            f"{reverse('accounts:student_organization_management')}?management_view=teachers&teacher_tab=requests"
+        )
+        reject_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "reject_teacher_staff_request",
+                "request_id": str(teacher_request.id),
+                "next": reject_next_url,
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(reject_response, reject_next_url)
+        self.assertContains(reject_response, f"{teacher_user.username} müraciəti rədd edildi.")
+        teacher_request.refresh_from_db()
+        teacher_profile.refresh_from_db()
+        self.assertEqual(teacher_request.status, StudentOrganizationRequestStatus.REJECTED)
+        self.assertIsNone(teacher_profile.requested_organization)
+        self.assertEqual(teacher_profile.requested_organization_name, "")
+        self.assertEqual(teacher_profile.requested_organization_message, "")
+        pending_teacher_ids = {item.user_id for item in reject_response.context["pending_teacher_requests"].object_list}
+        self.assertNotIn(teacher_user.id, pending_teacher_ids)
+
+        self.client.force_login(teacher_user)
+        resubmit_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "submit_request",
+                "organization_id": str(self.org_a.id),
+                "request_message": "Yenidən müraciət edirəm",
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+        )
+        self.assertRedirects(resubmit_response, reverse("accounts:profile") + "?section=student-organization-request")
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                role_type=MembershipRequestRoleType.TEACHER,
+                status=StudentOrganizationRequestStatus.PENDING,
+                message="Yenidən müraciət edirəm",
+            ).exists()
+        )
+
+    def test_org_owner_without_membership_still_sees_teacher_requests(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_request_for_owner",
+            email="teacher_request_for_owner@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.requested_organization = self.org_a
+        teacher_profile.requested_organization_name = self.org_a.name
+        teacher_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "updated_at",
+            ]
+        )
+        StudentOrganizationRequest.objects.create(
+            user=teacher_user,
+            organization=self.org_a,
+            status=StudentOrganizationRequestStatus.PENDING,
+            role_type=MembershipRequestRoleType.TEACHER,
+            message="Owner görməlidir.",
+        )
+
+        Membership.objects.filter(user=self.admin_user, organization=self.org_a).delete()
+        admin_profile = self.admin_user.profile
+        admin_profile.organization = self.org_a
+        admin_profile.organization_type = self.org_a.org_type
+        admin_profile.role = ProfileRole.MEMBER
+        admin_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
+
+        self._activate_org_session(self.admin_user, self.org_a)
+        response = self.client.get(
+            f"{reverse('accounts:student_organization_management')}?management_view=teachers&teacher_tab=requests"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, teacher_user.username)
+        self.assertContains(response, "Owner görməlidir.")
 
     def test_org_admin_can_reject_pending_student_request(self):
         free_profile = self.unassigned_user.profile
@@ -1166,6 +1702,453 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
+    def test_teacher_can_cancel_request_and_resubmit(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_resubmit",
+            email="teacher_resubmit@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.requested_organization = None
+        teacher_profile.requested_organization_name = ""
+        teacher_profile.requested_organization_message = ""
+        teacher_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        self.client.force_login(teacher_user)
+        first_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "submit_request",
+                "organization_id": str(self.org_a.id),
+                "request_message": "İlk müəllim müraciəti",
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+        )
+        self.assertRedirects(first_response, reverse("accounts:profile") + "?section=student-organization-request")
+
+        teacher_request = StudentOrganizationRequest.objects.get(
+            user=teacher_user,
+            organization=self.org_a,
+            role_type=MembershipRequestRoleType.TEACHER,
+        )
+
+        cancel_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "clear_request",
+                "request_id": str(teacher_request.id),
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+            follow=True,
+        )
+        self.assertEqual(cancel_response.status_code, 200)
+        self.assertContains(cancel_response, "Təşkilata qoşul")
+        self.assertContains(cancel_response, "Müəllim müraciəti göndər")
+
+        teacher_profile.refresh_from_db()
+        teacher_request.refresh_from_db()
+        self.assertIsNone(teacher_profile.requested_organization)
+        self.assertEqual(teacher_request.status, StudentOrganizationRequestStatus.CANCELLED)
+
+        second_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "submit_request",
+                "organization_id": str(self.org_a.id),
+                "request_message": "Yenidən müəllim müraciəti",
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+        )
+        self.assertRedirects(second_response, reverse("accounts:profile") + "?section=student-organization-request")
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                role_type=MembershipRequestRoleType.TEACHER,
+                status=StudentOrganizationRequestStatus.PENDING,
+                message="Yenidən müəllim müraciəti",
+            ).exists()
+        )
+
+    def test_teacher_can_leave_organization_with_reason(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_leave_user",
+            email="teacher_leave_user@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        Membership.objects.update_or_create(
+            user=teacher_user,
+            organization=self.org_a,
+            defaults={
+                "role": self.org_a_teacher_role,
+                "assigned_by": self.admin_user,
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        self.client.force_login(teacher_user)
+        response = self.client.post(
+            reverse("accounts:student_leave_organization"),
+            {
+                "leave_reason": "Müvəqqəti ayrılıram",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+        teacher_profile.refresh_from_db()
+        self.assertIsNone(teacher_profile.organization)
+        self.assertEqual(teacher_profile.organization_type, OrganizationType.INDIVIDUAL)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )
+
+    def test_org_admin_can_remove_teacher_and_teacher_can_resubmit(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_remove_user",
+            email="teacher_remove_user@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.organization = self.org_a
+        teacher_profile.organization_type = self.org_a.org_type
+        teacher_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        Membership.objects.update_or_create(
+            user=teacher_user,
+            organization=self.org_a,
+            defaults={
+                "role": self.org_a_teacher_role,
+                "assigned_by": self.admin_user,
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "remove_student",
+                "user_id": str(teacher_user.id),
+                "remove_reason": "Müəllim ayrılır",
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:student_organization_management"))
+        teacher_profile.refresh_from_db()
+        self.assertIsNone(teacher_profile.organization)
+        self.assertEqual(teacher_profile.organization_type, OrganizationType.INDIVIDUAL)
+        self.assertEqual(teacher_profile.role, ProfileRole.TEACHER)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )
+        teacher_notification = InAppNotification.objects.get(
+            recipient=teacher_user,
+            notification_type=NotificationType.SYSTEM,
+            title="Təşkilatdan uzaqlaşdırıldınız",
+        )
+        self.assertIn(self.org_a.name, teacher_notification.message)
+        self.assertIn("yenidən müraciət", teacher_notification.message)
+        self.assertIn("?section=student-organization-request", teacher_notification.link)
+
+        self.client.force_login(teacher_user)
+        resubmit_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "submit_request",
+                "organization_id": str(self.org_a.id),
+                "request_message": "Yenidən müəllim kimi qoşulmaq istəyirəm",
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+        )
+        self.assertRedirects(resubmit_response, reverse("accounts:profile") + "?section=student-organization-request")
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                role_type=MembershipRequestRoleType.TEACHER,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
+
+    def test_staff_member_can_leave_organization_with_reason(self):
+        staff_user = User.objects.create_user(
+            username="staff_leave_user",
+            email="staff_leave_user@example.com",
+            password="StrongPass123!",
+        )
+        staff_profile = staff_user.profile
+        staff_profile.role = ProfileRole.MEMBER
+        staff_profile.organization = self.org_a
+        staff_profile.organization_type = self.org_a.org_type
+        staff_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        Membership.objects.update_or_create(
+            user=staff_user,
+            organization=self.org_a,
+            defaults={
+                "role": self.org_a_member_role,
+                "assigned_by": self.admin_user,
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        self.client.force_login(staff_user)
+        response = self.client.post(
+            reverse("accounts:student_leave_organization"),
+            {
+                "leave_reason": "Staff ayrılışı",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+        staff_profile.refresh_from_db()
+        self.assertIsNone(staff_profile.organization)
+        self.assertEqual(staff_profile.organization_type, OrganizationType.INDIVIDUAL)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=staff_user,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )
+
+    def test_org_admin_can_remove_staff_and_staff_can_resubmit(self):
+        staff_user = User.objects.create_user(
+            username="staff_remove_user",
+            email="staff_remove_user@example.com",
+            password="StrongPass123!",
+        )
+        staff_profile = staff_user.profile
+        staff_profile.role = ProfileRole.MEMBER
+        staff_profile.organization = self.org_a
+        staff_profile.organization_type = self.org_a.org_type
+        staff_profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        Membership.objects.update_or_create(
+            user=staff_user,
+            organization=self.org_a,
+            defaults={
+                "role": self.org_a_member_role,
+                "assigned_by": self.admin_user,
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "remove_student",
+                "user_id": str(staff_user.id),
+                "remove_reason": "Staff ayrılır",
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+
+        self.assertRedirects(response, reverse("accounts:student_organization_management"))
+        staff_profile.refresh_from_db()
+        self.assertIsNone(staff_profile.organization)
+        self.assertEqual(staff_profile.organization_type, OrganizationType.INDIVIDUAL)
+        self.assertEqual(staff_profile.role, ProfileRole.MEMBER)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=staff_user,
+                organization=self.org_a,
+                is_active=True,
+            ).exists()
+        )
+        staff_notification = InAppNotification.objects.get(
+            recipient=staff_user,
+            notification_type=NotificationType.SYSTEM,
+            title="Təşkilatdan uzaqlaşdırıldınız",
+        )
+        self.assertIn(self.org_a.name, staff_notification.message)
+        self.assertIn("?section=student-organization-request", staff_notification.link)
+
+        self.client.force_login(staff_user)
+        resubmit_response = self.client.post(
+            reverse("accounts:student_organization_request"),
+            {
+                "action": "submit_request",
+                "organization_id": str(self.org_a.id),
+                "request_message": "Yenidən staff kimi qoşulmaq istəyirəm",
+                "next": reverse("accounts:profile") + "?section=student-organization-request",
+            },
+        )
+        self.assertRedirects(resubmit_response, reverse("accounts:profile") + "?section=student-organization-request")
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=staff_user,
+                organization=self.org_a,
+                role_type=MembershipRequestRoleType.STAFF,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
+
+    def test_org_admin_can_invite_teacher_and_revoke_to_restore_unassigned_list(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_invite_candidate",
+            email="teacher_invite_candidate@example.com",
+            password="StrongPass123!",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.requested_organization = None
+        teacher_profile.requested_organization_name = ""
+        teacher_profile.requested_organization_message = ""
+        teacher_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        invite_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "invite_teacher_staff",
+                "invite_role_type": MembershipRequestRoleType.TEACHER,
+                "user_id": str(teacher_user.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+        self.assertRedirects(invite_response, reverse("accounts:student_organization_management"))
+        invite_membership = Membership.objects.filter(
+            user=teacher_user,
+            organization=self.org_a,
+            is_active=False,
+            title="__student_pending_invite__",
+            role=self.org_a_teacher_role,
+        ).first()
+        self.assertIsNotNone(invite_membership)
+
+        revoke_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "revoke_teacher_staff_invites",
+                "revoke_role_type": MembershipRequestRoleType.TEACHER,
+                "selected_sent_teacher_invite_user_ids": [str(teacher_user.id)],
+                "next": reverse("accounts:student_organization_management"),
+            },
+            follow=True,
+        )
+        self.assertEqual(revoke_response.status_code, 200)
+        self.assertFalse(
+            Membership.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                is_active=False,
+                title="__student_pending_invite__",
+            ).exists()
+        )
+        self.assertContains(revoke_response, "Təşkilata bağlı olmayan müəllimlər")
+        unassigned_teacher_ids = {item.user_id for item in revoke_response.context["unassigned_teachers"].object_list}
+        self.assertIn(teacher_user.id, unassigned_teacher_ids)
+
+    def test_org_admin_can_invite_staff_and_staff_can_accept(self):
+        staff_user = User.objects.create_user(
+            username="staff_invite_candidate",
+            email="staff_invite_candidate@example.com",
+            password="StrongPass123!",
+        )
+        staff_profile = staff_user.profile
+        staff_profile.organization = None
+        staff_profile.organization_type = OrganizationType.INDIVIDUAL
+        staff_profile.role = ProfileRole.MEMBER
+        staff_profile.requested_organization = None
+        staff_profile.requested_organization_name = ""
+        staff_profile.requested_organization_message = ""
+        staff_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        invite_response = self.client.post(
+            reverse("accounts:student_organization_management"),
+            {
+                "action": "invite_teacher_staff",
+                "invite_role_type": MembershipRequestRoleType.STAFF,
+                "user_id": str(staff_user.id),
+                "next": reverse("accounts:student_organization_management"),
+            },
+        )
+        self.assertRedirects(invite_response, reverse("accounts:student_organization_management"))
+
+        invite_membership = Membership.objects.filter(
+            user=staff_user,
+            organization=self.org_a,
+            is_active=False,
+            title="__student_pending_invite__",
+            role=self.org_a_member_role,
+        ).first()
+        self.assertIsNotNone(invite_membership)
+
+        self.client.force_login(staff_user)
+        accept_response = self.client.post(
+            reverse("accounts:student_org_invitation_action"),
+            {
+                "invite_id": str(invite_membership.id),
+                "action": "accept",
+                "next": reverse("accounts:profile") + "?section=profile-info",
+            },
+        )
+        self.assertRedirects(accept_response, reverse("accounts:profile") + "?section=profile-info")
+
+        staff_profile.refresh_from_db()
+        self.assertEqual(staff_profile.organization, self.org_a)
+        self.assertEqual(staff_profile.role, ProfileRole.MEMBER)
+        self.assertTrue(
+            Membership.objects.filter(
+                user=staff_user,
+                organization=self.org_a,
+                role=self.org_a_member_role,
+                is_active=True,
+            ).exists()
+        )
+
     def test_student_can_send_join_request_with_message_and_org_admin_sees_it(self):
         student_user = User.objects.create_user(
             username="request_student",
@@ -1198,7 +2181,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(student_profile.requested_organization_message, "Mən bu təşkilata qoşulmaq istəyirəm.")
 
         self._activate_org_session(self.admin_user, self.org_a)
-        response = self.client.get(reverse("accounts:student_organization_management"))
+        response = self.client.get(
+            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mən bu təşkilata qoşulmaq istəyirəm.")
 
@@ -1364,7 +2349,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         org_b_admin_profile.save()
 
         self._activate_org_session(org_b_admin, self.org_b)
-        management_response = self.client.get(reverse("accounts:student_organization_management"))
+        management_response = self.client.get(
+            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
+        )
         self.assertEqual(management_response.status_code, 200)
         self.assertContains(management_response, f"İstifadəçi artıq {self.org_a.name} təşkilatının üzvüdür.")
 

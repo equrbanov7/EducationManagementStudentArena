@@ -63,7 +63,8 @@
                 {% for pending_request in pending_student_join_requests %}
                 <div class="{% if not forloop.last %}pb-2 border-bottom{% endif %}">
                     <p class="mb-0">
-                        <strong>{{ pending_request.organization.name }}</strong> üçün müraciətiniz göndərilib və hazırda təsdiq gözləyir.
+                        <strong>{{ pending_request.organization.name }}</strong> üçün
+                        {{ pending_request.role_label_lower|default:"üzv" }} müraciətiniz göndərilib və hazırda təsdiq gözləyir.
                     </p>
                     {% if pending_request.message %}
                     <p class="mt-2 mb-0">

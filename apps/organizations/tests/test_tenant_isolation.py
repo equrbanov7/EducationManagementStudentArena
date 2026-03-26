@@ -15,7 +15,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
 from core.constants import OrganizationType, RoleScopeType
 from core.permissions import request_has_permission
-from core.tenancy import request_has_active_organization_context, scoped_by_organization
+from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR, request_has_active_organization_context, scoped_by_organization
 
 from ..models import Membership, Organization, Role
 from ..services import (
@@ -335,6 +335,15 @@ class RequestTenantContextTest(TestCase):
         # Sanity check: with a real membership the queryset is non-empty.
         request_valid = self._request(organization=self.org_a, memberships=[self.membership_a])
         self.assertTrue(scoped_by_organization(Role.objects.all(), request_valid).exists())
+
+    def test_trusted_owner_context_scopes_but_does_not_grant_permissions(self):
+        request = self._request(organization=self.org_a, memberships=[], permissions=["course.create"])
+        setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
+
+        self.assertTrue(request_has_active_organization_context(request))
+        self.assertTrue(scoped_by_organization(Role.objects.all(), request).filter(id=self.role_a.id).exists())
+        self.assertFalse(scoped_by_organization(Role.objects.all(), request).filter(id=self.role_b.id).exists())
+        self.assertFalse(request_has_permission(request, "course.create"))
 
     # Required named alias for acceptance criteria
     test_scoped_by_organization_returns_none_without_org = test_scoped_by_organization_returns_none_without_context

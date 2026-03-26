@@ -835,3 +835,75 @@
         width: 100%;
     }
 }
+
+/* =========================================================
+   Persona / Role Card Grid
+   ========================================================= */
+
+.register-persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.register-persona-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    border: 2px solid var(--border-color, #dee2e6);
+    border-radius: 0.75rem;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: inherit;
+}
+
+.register-persona-card:hover {
+    border-color: var(--primary-color, #3d6bff);
+    box-shadow: 0 0 0 3px rgba(61, 107, 255, 0.1);
+    background: #f8f9ff;
+}
+
+.register-persona-card.is-selected {
+    border-color: var(--primary-color, #3d6bff);
+    background: #f0f4ff;
+    box-shadow: 0 0 0 3px rgba(61, 107, 255, 0.15);
+}
+
+.register-persona-card__icon {
+    font-size: 1.75rem;
+    color: var(--primary-color, #3d6bff);
+    line-height: 1;
+}
+
+.register-persona-card__title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.register-persona-card__desc {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.register-step-subtitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0.75rem 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 480px) {
+    .register-persona-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

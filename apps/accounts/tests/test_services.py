@@ -167,3 +167,257 @@ class RegistrationServicesTest(TestCase):
                 is_active=True,
             ).exists()
         )
+
+
+class OTPDeliveryServiceTest(TestCase):
+    """Tests for OTP generation and email delivery."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="otpdeliveryuser",
+            email="otpdelivery@example.com",
+            password="StrongPass123!",
+            is_active=False,
+        )
+
+    def test_issue_email_otp_creates_otp_record(self):
+        """issue_email_otp must create an EmailOTP record that matches the returned code."""
+        from apps.accounts.services import issue_email_otp
+
+        code, expires_at = issue_email_otp(self.user)
+
+        self.assertIsNotNone(code)
+        self.assertEqual(len(code), 6)
+        self.assertTrue(code.isdigit())
+        # The OTP is stored hashed; verify with matches_code
+        otp_record = EmailOTP.objects.filter(user=self.user, is_used=False).order_by("-id").first()
+        self.assertIsNotNone(otp_record)
+        self.assertTrue(otp_record.matches_code(code))
+
+    def test_issue_email_otp_invalidates_previous_codes(self):
+        """A fresh OTP must mark older pending OTPs as used."""
+        from apps.accounts.services import issue_email_otp
+
+        # Create two stale OTPs
+        EmailOTP.objects.create(user=self.user, code="111111")
+        EmailOTP.objects.create(user=self.user, code="222222")
+
+        issue_email_otp(self.user)
+
+        # Existing records are now is_used=True – the raw code values are no longer
+        # stored verbatim (they are hashed), so we check via is_used flag.
+        self.assertEqual(
+            EmailOTP.objects.filter(user=self.user, is_used=False).count(),
+            1,
+            "Only the freshly issued OTP should remain active",
+        )
+
+    def test_verify_otp_code_valid(self):
+        """verify_otp_code returns True and the OTP object for a valid code."""
+        from apps.accounts.services import issue_email_otp, verify_otp_code
+
+        code, _ = issue_email_otp(self.user)
+        is_valid, otp = verify_otp_code(self.user, code)
+
+        self.assertTrue(is_valid)
+        self.assertIsNotNone(otp)
+        # The returned OTP object must match the plaintext code
+        self.assertTrue(otp.matches_code(code))
+
+    def test_verify_otp_code_invalid(self):
+        """verify_otp_code returns (False, None) for a wrong code."""
+        from apps.accounts.services import issue_email_otp, verify_otp_code
+
+        issue_email_otp(self.user)
+        is_valid, otp = verify_otp_code(self.user, "000000")
+
+        self.assertFalse(is_valid)
+        self.assertIsNone(otp)
+
+    def test_activate_user_account_sets_is_active(self):
+        """activate_user_account sets user.is_active to True."""
+        from apps.accounts.services import activate_user_account
+
+        self.assertFalse(self.user.is_active)
+        activate_user_account(self.user)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.is_active)
+
+
+class TeacherStaffRequestFlowTest(TestCase):
+    """Tests for teacher/staff join request creation and approval."""
+
+    def setUp(self):
+        from apps.organizations.models import Organization
+
+        self.owner = User.objects.create_user(
+            username="ts_org_owner",
+            email="ts_org_owner@example.com",
+            password="StrongPass123!",
+            is_active=True,
+        )
+        self.org = Organization.objects.create(
+            name="TS Test University",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+
+    def _register_teacher(self, username="teacher_req", email=None):
+        """Create a teacher user who has requested to join self.org."""
+        email = email or f"{username}@example.com"
+        return services.create_user_with_organization(
+            username=username,
+            email=email,
+            password="StrongPass123!",
+            first_name="Test",
+            last_name="Teacher",
+            signup_mode="teacher_join",
+            organization_type=OrganizationType.UNIVERSITY,
+            country_code="AZ",
+            country_name="Azerbaijan",
+            join_organization=self.org,
+            institution_not_listed_name="",
+            organization_identifier="",
+            organization_license_identifier="",
+            initial_role=ProfileRole.TEACHER,
+        )
+
+    def _register_staff(self, username="staff_req", email=None):
+        """Create a staff user who has requested to join self.org."""
+        email = email or f"{username}@example.com"
+        return services.create_user_with_organization(
+            username=username,
+            email=email,
+            password="StrongPass123!",
+            first_name="Test",
+            last_name="Staff",
+            signup_mode="staff_join",
+            organization_type=OrganizationType.UNIVERSITY,
+            country_code="AZ",
+            country_name="Azerbaijan",
+            join_organization=self.org,
+            institution_not_listed_name="",
+            organization_identifier="",
+            organization_license_identifier="",
+            initial_role=ProfileRole.MEMBER,
+        )
+
+    def test_teacher_signup_creates_pending_request(self):
+        """Teacher join signup must create a PENDING teacher request."""
+        from apps.notifications.models import (
+            MembershipRequestRoleType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
+
+        user, _, _, profile = self._register_teacher()
+
+        self.assertEqual(profile.role, ProfileRole.TEACHER)
+        self.assertIsNone(profile.organization)
+        self.assertEqual(profile.requested_organization, self.org)
+
+        req = StudentOrganizationRequest.objects.filter(
+            user=user,
+            organization=self.org,
+            role_type=MembershipRequestRoleType.TEACHER,
+            status=StudentOrganizationRequestStatus.PENDING,
+        ).first()
+        self.assertIsNotNone(req, "No TEACHER pending request was created at registration")
+
+    def test_staff_signup_creates_pending_request(self):
+        """Staff join signup must create a PENDING staff request."""
+        from apps.notifications.models import (
+            MembershipRequestRoleType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
+
+        user, _, _, profile = self._register_staff()
+
+        self.assertEqual(profile.role, ProfileRole.MEMBER)
+        self.assertIsNone(profile.organization)
+
+        req = StudentOrganizationRequest.objects.filter(
+            user=user,
+            organization=self.org,
+            role_type=MembershipRequestRoleType.STAFF,
+            status=StudentOrganizationRequestStatus.PENDING,
+        ).first()
+        self.assertIsNotNone(req, "No STAFF pending request was created at registration")
+
+    def test_email_verification_updates_existing_teacher_request(self):
+        """After email verification activate_verified_membership does not duplicate requests."""
+        from apps.accounts.services import activate_verified_membership
+        from apps.notifications.models import (
+            InAppNotification,
+            MembershipRequestRoleType,
+            NotificationType,
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
+
+        user, _, _, _ = self._register_teacher()
+        user.is_active = False
+        user.save()
+
+        # Should not create a second request
+        activate_verified_membership(user)
+
+        req_count = StudentOrganizationRequest.objects.filter(
+            user=user,
+            organization=self.org,
+            role_type=MembershipRequestRoleType.TEACHER,
+            status=StudentOrganizationRequestStatus.PENDING,
+        ).count()
+        self.assertEqual(req_count, 1, "Duplicate teacher request was created on verification")
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.owner,
+                notification_type=NotificationType.APPROVAL,
+                title__icontains="Yeni müəllim müraciəti",
+            ).exists()
+        )
+
+    def test_teacher_signup_notifies_org_owner(self):
+        """Teacher join signup should notify the target organization owner."""
+        from apps.notifications.models import InAppNotification, NotificationType
+
+        user, _, _, _ = self._register_teacher(username="teacher_notify_owner")
+
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.owner,
+                notification_type=NotificationType.APPROVAL,
+                title__icontains="Yeni müəllim müraciəti",
+                metadata__user_id=user.id,
+            ).exists()
+        )
+
+    def test_pending_teacher_appears_in_management_section(self):
+        """pending_teacher_staff_requests in the management section must include teacher requests."""
+        from django.test import RequestFactory
+
+        from apps.accounts.views._helpers import _build_student_org_management_section
+
+        user, _, _, _ = self._register_teacher()
+        user.is_active = True
+        user.save()
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.GET = {}
+        request.user = self.owner
+
+        context = _build_student_org_management_section(
+            request=request,
+            organization=self.org,
+            is_superadmin=False,
+            user_level=999,
+        )
+        ts_requests = list(context["pending_teacher_staff_requests"].object_list)
+        self.assertTrue(
+            any(r.user_id == user.pk for r in ts_requests),
+            "Teacher's pending request not found in management section",
+        )

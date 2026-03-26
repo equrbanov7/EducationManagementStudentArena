@@ -3,9 +3,9 @@ Tests for the OTP registration flow: email delivery checking, stale-user
 cleanup, and retry behaviour.
 
 These tests cover the fixes introduced to:
- - make OTP email sending synchronous (failures propagate rather than being
-   silently swallowed by an async Celery task)
- - roll back user creation when OTP delivery fails (no stale records)
+ - keep synchronous OTP sending as the primary path while preserving the
+   async fallback when SMTP delivery is temporarily unavailable
+ - roll back user creation when both sync and async OTP delivery fail
  - purge unverified users before a new registration so the same credentials
    can be reused after a failed or abandoned attempt
 """
@@ -116,7 +116,7 @@ class PurgeStaleRegistrationServiceTest(TestCase):
 
     def test_purge_does_not_touch_inactive_users_without_otp(self):
         """Inactive users without any OTP record are left alone (e.g. admin-deactivated)."""
-        user = User.objects.create_user(
+        User.objects.create_user(
             username="admindeactivated", email="deact@example.com", password="pass", is_active=False
         )
         # No EmailOTP created intentionally.
@@ -166,10 +166,16 @@ class AccountsRegisterOTPFlowTest(TestCase):
         self.assertEqual(session.get("pending_verify_email"), "session@example.com")
 
     def test_otp_email_failure_shows_error_and_returns_form(self):
-        """When email delivery fails the form is re-rendered with an error message."""
-        with patch(
-            "apps.accounts.services.auth.send_verify_email",
-            side_effect=Exception("SMTP connection refused"),
+        """When both sync and async delivery fail the form is re-rendered with an error."""
+        with (
+            patch(
+                "apps.accounts.services.auth.send_verify_email",
+                side_effect=Exception("SMTP connection refused"),
+            ),
+            patch(
+                "core.email_tasks.send_verification_otp_email.delay",
+                side_effect=Exception("Celery queue unavailable"),
+            ),
         ):
             response = self.client.post(
                 self.register_url,
@@ -181,10 +187,16 @@ class AccountsRegisterOTPFlowTest(TestCase):
         self.assertTemplateUsed(response, "accounts/register.html")
 
     def test_otp_email_failure_leaves_no_user_in_database(self):
-        """When OTP delivery fails the transaction is rolled back — no user remains."""
-        with patch(
-            "apps.accounts.services.auth.send_verify_email",
-            side_effect=Exception("SMTP timeout"),
+        """When both delivery paths fail the transaction is rolled back."""
+        with (
+            patch(
+                "apps.accounts.services.auth.send_verify_email",
+                side_effect=Exception("SMTP timeout"),
+            ),
+            patch(
+                "core.email_tasks.send_verification_otp_email.delay",
+                side_effect=Exception("Celery queue unavailable"),
+            ),
         ):
             self.client.post(
                 self.register_url,
@@ -194,10 +206,16 @@ class AccountsRegisterOTPFlowTest(TestCase):
         self.assertFalse(User.objects.filter(username="ghostuser").exists())
 
     def test_otp_email_failure_leaves_no_pending_email_in_session(self):
-        """Failed registration must not set pending_verify_email in the session."""
-        with patch(
-            "apps.accounts.services.auth.send_verify_email",
-            side_effect=Exception("SMTP error"),
+        """A fully failed registration must not set pending_verify_email."""
+        with (
+            patch(
+                "apps.accounts.services.auth.send_verify_email",
+                side_effect=Exception("SMTP error"),
+            ),
+            patch(
+                "core.email_tasks.send_verification_otp_email.delay",
+                side_effect=Exception("Celery queue unavailable"),
+            ),
         ):
             self.client.post(
                 self.register_url,
@@ -210,9 +228,15 @@ class AccountsRegisterOTPFlowTest(TestCase):
     def test_retry_after_failed_otp_succeeds(self):
         """A user can successfully re-register after a prior failed OTP delivery."""
         # First attempt: email fails, user should not exist
-        with patch(
-            "apps.accounts.services.auth.send_verify_email",
-            side_effect=Exception("SMTP error"),
+        with (
+            patch(
+                "apps.accounts.services.auth.send_verify_email",
+                side_effect=Exception("SMTP error"),
+            ),
+            patch(
+                "core.email_tasks.send_verification_otp_email.delay",
+                side_effect=Exception("Celery queue unavailable"),
+            ),
         ):
             self.client.post(
                 self.register_url,
@@ -284,7 +308,7 @@ class AccountsRegisterOTPFlowTest(TestCase):
 
 
 class SendVerificationOTPServiceTest(TestCase):
-    """Tests that send_verification_otp propagates email errors."""
+    """Tests that send_verification_otp propagates only unrecoverable email errors."""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -304,12 +328,18 @@ class SendVerificationOTPServiceTest(TestCase):
         self.assertIn(self.user.email, mail.outbox[0].to)
 
     def test_send_verification_otp_raises_on_email_failure(self):
-        """When the email backend raises, send_verification_otp propagates the error."""
+        """When both sync and async delivery fail, send_verification_otp raises."""
         from apps.accounts.services import send_verification_otp
 
-        with patch(
-            "apps.accounts.services.auth.send_verify_email",
-            side_effect=Exception("backend unavailable"),
+        with (
+            patch(
+                "apps.accounts.services.auth.send_verify_email",
+                side_effect=RuntimeError("backend unavailable"),
+            ),
+            patch(
+                "core.email_tasks.send_verification_otp_email.delay",
+                side_effect=RuntimeError("queue unavailable"),
+            ),
         ):
-            with self.assertRaises(Exception):
+            with self.assertRaises(RuntimeError):
                 send_verification_otp(self.user)
