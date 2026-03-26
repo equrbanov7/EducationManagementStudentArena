@@ -9,16 +9,31 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import get_language, pgettext_lazy
 
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from ..models import ProfileRole
-from ..services import issue_email_otp
+from ..services import issue_email_otp, purge_stale_pending_registration
 
 User = get_user_model()
+
+
+_AZERBAIJAN_DISPLAY_NAMES = {
+    "az": "Azərbaycan",
+    "tr": "Azerbaycan",
+    "ru": "Азербайджан",
+}
+
+
+def _country_display_name(country):
+    if country.code != "AZ":
+        return country.name
+
+    language_code = (get_language() or "").split("-", 1)[0]
+    return _AZERBAIJAN_DISPLAY_NAMES.get(language_code, country.name)
 
 
 STUDENT_JOIN_ORG_TYPE_MAP = {
@@ -26,10 +41,26 @@ STUDENT_JOIN_ORG_TYPE_MAP = {
     "university_student": OrganizationType.UNIVERSITY,
     "course_student": OrganizationType.COURSE_CENTER,
 }
+TEACHER_JOIN_ORG_TYPE_MAP = {
+    "school_teacher": OrganizationType.SCHOOL,
+    "university_teacher": OrganizationType.UNIVERSITY,
+    "course_teacher": OrganizationType.COURSE_CENTER,
+}
+STAFF_JOIN_ORG_TYPE_MAP = {
+    "school_staff": OrganizationType.SCHOOL,
+    "university_staff": OrganizationType.UNIVERSITY,
+    "course_staff": OrganizationType.COURSE_CENTER,
+}
 ORGANIZATION_CREATOR_TYPES = {
     OrganizationType.SCHOOL,
     OrganizationType.UNIVERSITY,
     OrganizationType.COURSE_CENTER,
+}
+# All "join" registration types (student / teacher / staff)
+JOIN_ORG_TYPE_MAP = {
+    **STUDENT_JOIN_ORG_TYPE_MAP,
+    **TEACHER_JOIN_ORG_TYPE_MAP,
+    **STAFF_JOIN_ORG_TYPE_MAP,
 }
 
 
@@ -98,6 +129,30 @@ class RegisterForm(forms.ModelForm):
                 "course_student",
                 pgettext_lazy("accounts.form.register.choice", "org_type_course_student"),
             ),
+            (
+                "school_teacher",
+                pgettext_lazy("accounts.form.register.choice", "org_type_school_teacher"),
+            ),
+            (
+                "university_teacher",
+                pgettext_lazy("accounts.form.register.choice", "org_type_university_teacher"),
+            ),
+            (
+                "course_teacher",
+                pgettext_lazy("accounts.form.register.choice", "org_type_course_teacher"),
+            ),
+            (
+                "school_staff",
+                pgettext_lazy("accounts.form.register.choice", "org_type_school_staff"),
+            ),
+            (
+                "university_staff",
+                pgettext_lazy("accounts.form.register.choice", "org_type_university_staff"),
+            ),
+            (
+                "course_staff",
+                pgettext_lazy("accounts.form.register.choice", "org_type_course_staff"),
+            ),
         ],
         widget=forms.Select(
             attrs={
@@ -155,6 +210,63 @@ class RegisterForm(forms.ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": pgettext_lazy("accounts.form.register.placeholder", "license_identifier_optional"),
+                "class": "form-control",
+            }
+        ),
+    )
+
+    # --- Persona-specific fields ---
+
+    phone = forms.CharField(
+        label=pgettext_lazy("accounts.form.register.label", "phone"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "phone"),
+                "class": "form-control",
+            }
+        ),
+    )
+
+    specialization = forms.CharField(
+        label=pgettext_lazy("accounts.form.register.label", "specialization"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "specialization"),
+                "class": "form-control",
+            }
+        ),
+    )
+
+    group_number = forms.CharField(
+        label=pgettext_lazy("accounts.form.register.label", "group_number"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "group_number"),
+                "class": "form-control",
+            }
+        ),
+    )
+
+    department = forms.CharField(
+        label=pgettext_lazy("accounts.form.register.label", "department"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "department"),
+                "class": "form-control",
+            }
+        ),
+    )
+
+    staff_position = forms.CharField(
+        label=pgettext_lazy("accounts.form.register.label", "staff_position"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": pgettext_lazy("accounts.form.register.placeholder", "staff_position"),
                 "class": "form-control",
             }
         ),
@@ -250,6 +362,12 @@ class RegisterForm(forms.ModelForm):
         if selected_registration_type in STUDENT_JOIN_ORG_TYPE_MAP:
             signup_mode = "student_join"
             organization_type = STUDENT_JOIN_ORG_TYPE_MAP[selected_registration_type]
+        elif selected_registration_type in TEACHER_JOIN_ORG_TYPE_MAP:
+            signup_mode = "teacher_join"
+            organization_type = TEACHER_JOIN_ORG_TYPE_MAP[selected_registration_type]
+        elif selected_registration_type in STAFF_JOIN_ORG_TYPE_MAP:
+            signup_mode = "staff_join"
+            organization_type = STAFF_JOIN_ORG_TYPE_MAP[selected_registration_type]
         elif selected_registration_type in ORGANIZATION_CREATOR_TYPES:
             signup_mode = "organization_create"
             organization_type = selected_registration_type
@@ -291,11 +409,71 @@ class RegisterForm(forms.ModelForm):
                         pgettext_lazy("accounts.form.register.error", "join_organization_country_mismatch"),
                     )
 
+            # Validate student-specific required fields
+            specialization = (cleaned_data.get("specialization") or "").strip()
+            group_number = (cleaned_data.get("group_number") or "").strip()
+            if not specialization:
+                self.add_error(
+                    "specialization",
+                    pgettext_lazy("accounts.form.register.error", "specialization_required"),
+                )
+            if not group_number:
+                self.add_error(
+                    "group_number",
+                    pgettext_lazy("accounts.form.register.error", "group_number_required"),
+                )
+
             cleaned_data["institution"] = None
             cleaned_data["institution_not_listed_name"] = ""
             cleaned_data["organization_identifier"] = ""
             cleaned_data["organization_license_identifier"] = ""
             cleaned_data["initial_role"] = ProfileRole.STUDENT
+        elif signup_mode == "teacher_join":
+            if join_organization:
+                if not join_organization.is_active or join_organization.status != "active":
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_inactive"),
+                    )
+                if join_organization.org_type != organization_type:
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_type_mismatch"),
+                    )
+                if not self._organization_matches_country(join_organization, country_code):
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_country_mismatch"),
+                    )
+
+            cleaned_data["institution"] = None
+            cleaned_data["institution_not_listed_name"] = ""
+            cleaned_data["organization_identifier"] = ""
+            cleaned_data["organization_license_identifier"] = ""
+            cleaned_data["initial_role"] = ProfileRole.TEACHER
+        elif signup_mode == "staff_join":
+            if join_organization:
+                if not join_organization.is_active or join_organization.status != "active":
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_inactive"),
+                    )
+                if join_organization.org_type != organization_type:
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_type_mismatch"),
+                    )
+                if not self._organization_matches_country(join_organization, country_code):
+                    self.add_error(
+                        "join_organization",
+                        pgettext_lazy("accounts.form.register.error", "join_organization_country_mismatch"),
+                    )
+
+            cleaned_data["institution"] = None
+            cleaned_data["institution_not_listed_name"] = ""
+            cleaned_data["organization_identifier"] = ""
+            cleaned_data["organization_license_identifier"] = ""
+            cleaned_data["initial_role"] = ProfileRole.MEMBER
         else:
             cleaned_data["institution"] = None
             cleaned_data["institution_not_listed_name"] = ""
@@ -320,12 +498,16 @@ class RegisterForm(forms.ModelForm):
 
     def clean_username(self):
         username = (self.cleaned_data.get("username") or "").strip()
+        if username:
+            purge_stale_pending_registration(username=username, email="")
         if username and User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "username_taken"))
         return username
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
+        if email:
+            purge_stale_pending_registration(username="", email=email)
         if email and User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError(pgettext_lazy("accounts.form.register.error", "email_taken"))
         return email
@@ -335,12 +517,13 @@ class RegisterForm(forms.ModelForm):
 
         countries = Country.objects.filter(is_active=True).order_by("name")
         self.fields["country"].choices = [("", pgettext_lazy("accounts.form.register.choice", "country_select"))] + [
-            (country.code, country.name) for country in countries
+            (country.code, _country_display_name(country)) for country in countries
         ]
 
         selected_country = (self.data.get("country") or self.initial.get("country") or "").upper()
         selected_registration_type = self.data.get("organization_type") or self.initial.get("organization_type")
-        selected_org_type = STUDENT_JOIN_ORG_TYPE_MAP.get(selected_registration_type, selected_registration_type)
+        # Resolve org type from any join map or use as-is
+        selected_org_type = JOIN_ORG_TYPE_MAP.get(selected_registration_type, selected_registration_type)
 
         institutions = Institution.objects.filter(is_active=True)
         if selected_country:
@@ -409,6 +592,7 @@ class CustomLoginForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         """
         Extend default active-user check with organization suspension guard.
+        Pending organizations allow login so users can see their approval status.
         """
         if not user.is_active:
             raise forms.ValidationError(

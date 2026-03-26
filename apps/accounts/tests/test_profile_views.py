@@ -11,6 +11,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
+from apps.notifications.services import create_notification
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -110,6 +111,56 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'name="old_password"', html=False)
         self.assertContains(response, 'name="new_password1"', html=False)
         self.assertContains(response, 'name="new_password2"', html=False)
+
+    def test_profile_language_switcher_keeps_current_section_query(self):
+        self.client.login(username="testuser", password="testpass123")
+        url = reverse("accounts:profile") + "?section=notifications&notif_filter=unread"
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'name="next" value="/accounts/profile/?section=notifications&amp;notif_filter=unread"',
+            html=False,
+        )
+
+    def test_join_organization_sidebar_and_section_are_translated_in_english(self):
+        profile = self.user.profile
+        profile.role = ProfileRole.TEACHER
+        profile.organization = None
+        profile.organization_type = OrganizationType.INDIVIDUAL
+        profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
+        self.client.login(username="testuser", password="testpass123")
+        self.client.cookies["django_language"] = "en"
+        response = self.client.get(
+            reverse("accounts:profile") + "?section=student-organization-request",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Join organization")
+        self.assertContains(response, "Search current organizations, choose one")
+
+    def test_profile_notification_modal_keeps_real_newlines_and_internal_link_query(self):
+        self.client.login(username="testuser", password="testpass123")
+        create_notification(
+            recipient=self.user,
+            title="Permission reminder",
+            message="Line 1\nLine 2",
+            link=reverse("accounts:profile") + "?section=permission-editor&role=7",
+        )
+
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'data-notif-link="/accounts/profile/?section=permission-editor&amp;role=7"',
+            html=False,
+        )
+        self.assertNotContains(response, "\\u000A", html=False)
+        self.assertNotContains(response, "\\u003F", html=False)
 
     def test_profile_change_password_updates_password_and_keeps_session(self):
         self.client.login(username="testuser", password="testpass123")
@@ -298,6 +349,123 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, f'{reverse("exams:teacher_exam_detail", args=[exam.slug])}?from_section=my-exams')
         expected_return_to = quote(response.wsgi_request.get_full_path(), safe="/")
         self.assertContains(response, f"return_to={expected_return_to}")
+
+    def test_publish_notification_section_renders_search_and_scrollable_targets(self):
+        from apps.exams.models import StudentGroup
+
+        organization = Organization.objects.create(
+            name="Notification Search Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+        StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Alpha Search Group",
+        )
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile") + "?section=publish-notification")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="pnTargetSearch"', html=False)
+        self.assertContains(response, 'class="pn-target-scroll"', html=False)
+        self.assertContains(response, "Alpha Search Group")
+
+    def test_publish_notification_post_sends_group_notification_and_redirects_back(self):
+        from apps.exams.models import StudentGroup
+        from apps.notifications.models import InAppNotification
+
+        organization = Organization.objects.create(
+            name="Notification Delivery Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+
+        student = User.objects.create_user(
+            username="notif_student",
+            email="notif_student@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(student, organization, ProfileRole.STUDENT)
+
+        group = StudentGroup.objects.create(
+            teacher=self.user,
+            organization=organization,
+            name="Broadcast Group",
+        )
+        group.students.add(student)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=publish-notification",
+            data={
+                "profile_form": "publish-notification",
+                "section": "publish-notification",
+                "notif_title": "Group update",
+                "notif_message": "Important schedule change",
+                "notif_targets": [f"group_{group.pk}"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=publish-notification")
+
+        notifications = InAppNotification.objects.filter(recipient=student)
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications.first().title, "Group update")
+
+    def test_superadmin_publish_notification_can_target_organization_uuid(self):
+        from apps.notifications.models import InAppNotification
+
+        superadmin = User.objects.create_superuser(
+            username="notif_superadmin",
+            email="notif_superadmin@example.com",
+            password="adminpass123",
+        )
+        organization_owner = User.objects.create_user(
+            username="notif_org_owner",
+            email="notif_org_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="Notification UUID Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=organization_owner,
+            status="active",
+            is_active=True,
+        )
+        recipient = User.objects.create_user(
+            username="notif_org_member",
+            email="notif_org_member@example.com",
+            password="testpass123",
+        )
+        _assign_user_to_org(recipient, organization, ProfileRole.STUDENT)
+
+        self.client.force_login(superadmin)
+        response = self.client.post(
+            reverse("accounts:profile") + "?section=publish-notification",
+            data={
+                "profile_form": "publish-notification",
+                "section": "publish-notification",
+                "notif_title": "Org update",
+                "notif_message": "Organization-wide announcement",
+                "notif_targets": [f"org_{organization.pk}"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("accounts:profile") + "?section=publish-notification")
+
+        notifications = InAppNotification.objects.filter(recipient=recipient)
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications.first().title, "Org update")
 
     def test_profile_role_field(self):
         """Test that profile has role field with default member role."""
@@ -653,7 +821,112 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:pending_review"))
         self.assertNotContains(response, reverse("accounts:superadmin_organizations"))
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
-        self.assertNotContains(response, reverse("accounts:student_organization_request"))
+        self.assertContains(response, reverse("accounts:student_organization_request"))
+        self.assertContains(response, reverse("accounts:student_leave_organization"))
+
+    def test_profile_restores_org_context_for_teacher_course_modal(self):
+        personal_org = Organization.objects.create(
+            name="Teacher Personal Workspace",
+            org_type=OrganizationType.INDIVIDUAL,
+            owner=self.user,
+            status="active",
+            is_active=True,
+        )
+        Membership.objects.update_or_create(
+            user=self.user,
+            organization=personal_org,
+            defaults={
+                "role": personal_org.roles.get(name="member"),
+                "is_primary": True,
+                "is_active": True,
+            },
+        )
+
+        school_owner = User.objects.create_user(
+            username="teacher_school_owner",
+            email="teacher_school_owner@example.com",
+            password="testpass123",
+        )
+        school_org = Organization.objects.create(
+            name="Teacher Course Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=school_owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, school_org, ProfileRole.TEACHER)
+
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(reverse("accounts:profile") + "?section=my-courses")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session.get("active_organization"), school_org.slug)
+
+        modal_response = self.client.get(
+            reverse("courses:create_course") + "?modal=1",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(modal_response.status_code, 200)
+        self.assertContains(modal_response, 'id="createCourseModalForm"', html=False)
+
+    def test_teacher_without_org_sees_join_request_navigation(self):
+        teacher_user = User.objects.create_user(
+            username="teacher_join_nav",
+            email="teacher_join_nav@example.com",
+            password="testpass123",
+        )
+        teacher_profile = teacher_user.profile
+        teacher_profile.organization = None
+        teacher_profile.organization_type = OrganizationType.INDIVIDUAL
+        teacher_profile.role = ProfileRole.TEACHER
+        teacher_profile.requested_organization = None
+        teacher_profile.requested_organization_name = ""
+        teacher_profile.requested_organization_message = ""
+        teacher_profile.save(
+            update_fields=[
+                "organization",
+                "organization_type",
+                "role",
+                "requested_organization",
+                "requested_organization_name",
+                "requested_organization_message",
+                "updated_at",
+            ]
+        )
+
+        self.client.force_login(teacher_user)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"{reverse('accounts:profile')}?section=student-organization-request")
+        self.assertContains(response, "Təşkilata qoşul")
+
+    def test_join_request_navigation_stays_under_general_sidebar_group(self):
+        owner = User.objects.create_user(
+            username="general_nav_owner",
+            email="general_nav_owner@example.com",
+            password="testpass123",
+        )
+        organization = Organization.objects.create(
+            name="General Navigation Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner,
+            status="active",
+            is_active=True,
+        )
+        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
+
+        _login_with_org(self.client, self.user, organization)
+        response = self.client.get(reverse("accounts:profile"))
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode("utf-8")
+        notifications_link = content.index(f'{reverse("accounts:profile")}?section=notifications')
+        join_link = content.index("?section=student-organization-request")
+        posts_link = content.index(f'{reverse("accounts:profile")}?section=posts')
+        self.assertLess(notifications_link, join_link)
+        self.assertLess(join_link, posts_link)
 
     def test_member_profile_shows_group_navigation(self):
         owner = User.objects.create_user(
@@ -675,6 +948,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("exams:teacher_group_list"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
+        self.assertContains(response, reverse("accounts:student_organization_request"))
+        self.assertContains(response, reverse("accounts:student_leave_organization"))
 
     def test_org_admin_profile_shows_groups_and_management_navigation(self):
         organization = Organization.objects.create(
@@ -905,6 +1180,56 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, member_org.name)
         self.assertContains(response, reverse("organizations:dashboard", kwargs={"slug": member_org.slug}))
         self.assertContains(response, reverse("organizations:switch", kwargs={"slug": owned_org.slug}))
+
+    def test_superadmin_profile_renders_superadmin_control_inside_profile_without_active_org(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_org_management",
+            email="profile_superadmin_org_management@example.com",
+            password="adminpass123",
+        )
+        owner_pending = User.objects.create_user(
+            username="pending_org_owner",
+            email="pending_org_owner@example.com",
+            password="testpass123",
+        )
+        owner_active = User.objects.create_user(
+            username="active_org_owner",
+            email="active_org_owner@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Pending Profile Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_pending,
+            status="pending",
+            is_active=True,
+        )
+        active_org = Organization.objects.create(
+            name="Active Profile Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner_active,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "superadmin-organizations",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "?section=superadmin-organizations")
+        self.assertContains(response, pending_org.name)
+        self.assertContains(response, active_org.name)
+        self.assertContains(response, reverse("accounts:superadmin_organizations"))
+        self.assertContains(
+            response,
+            'name="next" value="/accounts/profile/?section=superadmin-organizations"',
+            html=False,
+        )
 
     def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
         from apps.accounts.models import ProfileRole

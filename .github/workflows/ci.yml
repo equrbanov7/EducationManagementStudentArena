@@ -564,15 +564,30 @@ jobs:
       # Gitleaks — scans the current commit diff (pull_request) or the
       # full history (push / workflow_dispatch).  The .gitleaks.toml
       # allowlist prevents known CI placeholder values from failing the job.
+      # We install the gitleaks binary directly to avoid the license
+      # requirement of gitleaks-action@v2.
       # ───────────────────────────────────────────────────────────────────
+      - name: 🔑 Install Gitleaks
+        run: |
+          GITLEAKS_VERSION="8.24.3"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
       - name: 🔑 Run Gitleaks secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Point to our project-level baseline config
-          GITLEAKS_CONFIG: .gitleaks.toml
-          # Exit with a non-zero code when secrets are found (blocks merge)
-          GITLEAKS_ENABLE_COMMENTS: "false"
+        run: |
+          echo "::group::🔑 Gitleaks Secret Scan"
+          gitleaks detect \
+            --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --log-level info || {
+            echo "::error::❌ Gitleaks found secrets in the repository! Remove them before merging."
+            exit 1
+          }
+          echo "✅ No secrets detected."
+          echo "::endgroup::"
 
   # ─────────────────────────────────────────────────────────────────────────
   # JOB 5c: CONTAINER IMAGE VULNERABILITY SCAN (Trivy)

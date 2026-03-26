@@ -92,6 +92,8 @@
                     <td>
                         {% if organization.status == "suspended" %}
                             <span class="role-badge role-danger">{% trans "status_suspended" context "profile.superadmin_orgs" %}</span>
+                        {% elif organization.status == "pending" %}
+                            <span class="role-badge role-warning">Gözləyir</span>
                         {% elif organization.is_active %}
                             <span class="role-badge role-success">{% trans "status_active" context "profile.superadmin_orgs" %}</span>
                         {% else %}
@@ -109,14 +111,27 @@
                     <td>
                         <form method="post" action="{% url 'accounts:superadmin_organizations' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ post_next_url }}">
                             <input type="hidden" name="organization_id" value="{{ organization.id }}">
-                            {% if organization.status == "suspended" or not organization.is_active %}
-                                <input type="hidden" name="action" value="unsuspend">
-                                <button type="submit" class="btn btn-success btn-sm">{% trans "unsuspend" context "profile.superadmin_orgs" %}</button>
+                            {% if organization.status == "pending" %}
+                                <div class="d-flex flex-column gap-2">
+                                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Təsdiqlə
+                                    </button>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" name="reason" placeholder="Rədd etmə səbəbi (opsional)">
+                                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times"></i> Rədd et
+                                        </button>
+                                    </div>
+                                </div>
+                            {% elif organization.status == "suspended" or not organization.is_active %}
+                                <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">{% trans "unsuspend" context "profile.superadmin_orgs" %}</button>
                             {% else %}
-                                <input type="hidden" name="action" value="suspend">
-                                <input type="text" class="form-control mb-2" name="reason" placeholder="{% trans 'suspend_reason_placeholder' context 'profile.superadmin_orgs' %}">
-                                <button type="submit" class="btn btn-danger btn-sm">{% trans "suspend" context "profile.superadmin_orgs" %}</button>
+                                <div class="d-flex flex-column gap-2">
+                                    <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'suspend_reason_placeholder' context 'profile.superadmin_orgs' %}">
+                                    <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "suspend" context "profile.superadmin_orgs" %}</button>
+                                </div>
                             {% endif %}
                         </form>
                     </td>

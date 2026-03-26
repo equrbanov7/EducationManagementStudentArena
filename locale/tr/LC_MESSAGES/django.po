@@ -12755,6 +12755,10 @@ msgctxt "nav"
 msgid "my_profile"
 msgstr "Profilim"
 
+msgctxt "nav"
+msgid "notifications"
+msgstr "Bildirimler"
+
 #: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
 msgctxt "nav"
 msgid "logout"
@@ -15235,3 +15239,337 @@ msgstr "Kapat"
 msgctxt "accounts.register"
 msgid "privacy_accept_from_modal"
 msgstr "Okudum, kabul ediyorum"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Bildirimler"
+
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Kuruluşa katıl"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Kuruluşa katıl"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Öğrenci"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Öğretmen"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Personel"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Üye"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "Üniversite"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "Okul"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Kurs merkezi"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "Tümü"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Okunmamış"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Okunmuş"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Tümünü okundu işaretle"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Tümünü seç"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Seçilenleri sil"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "önce"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "Yeni"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Okundu işaretle"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "Okunmamış bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "Okunmuş bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "Henüz bildirim yok."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "Yeni bildirimler burada görünecek."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Bildirim"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Kapat"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Bağlantıya git"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "için başvurunuz onay bekliyor."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Mesaj"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "İptal"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "sizi öğrenci olarak davet etti."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Kabul et"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Reddet"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "%(organization_name)s kuruluşuna %(role_label)s olarak başvurunuz gönderildi ve şu anda yanıt bekliyor."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "%(organization_name)s sizi %(role_label)s olarak davet etti."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "%(role_label)s olarak kuruluşa katıl"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Mevcut kuruluşları arayın, birini seçin ve %(role_label)s olarak katılmak için kısa bir mesaj gönderin."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "Şu anda <strong>%(organization_name)s</strong> kuruluşuna bağlısınız. Ayrıldıktan sonra bu bölümden yeniden başvuru gönderebilir veya bekleyen davetleri kabul edebilirsiniz."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "Şu anda onay bekleyen <strong>%(count)s</strong> kuruluş başvurunuz var."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "<strong>%(count)s</strong> kuruluş davetiniz var. Bu davetlerden %(role_label)s olarak katılabilirsiniz."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "İptal et"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Kuruluş ara..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "Tüm kuruluş türleri"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "%(role_label)s başvurusu gönder"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "%(role_label)s başvuru mesajı"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "Kuruluşa kısa bir not yazabilirsiniz..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Başvuruyu onayla"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Seç"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Kuruluş"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Tür"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Ülke"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Durum"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "%(role_label)s başvurusu gönderildi"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "Uygun kuruluş bulunamadı."
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Bildirim gönder"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Seçtiğiniz hedef gruba bildirim göndermek için aşağıdaki formu doldurun. Alıcılar bunu profillerinin bildirimler bölümünde görecek."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Hedef grup"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Bildirimin gönderileceği kullanıcı gruplarını seçin."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Ara..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Bildirim başlığı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Bildirim başlığını girin..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Bildirim metni"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Bildirim metnini girin (isteğe bağlı)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Bağlantı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Alıcılar bildirim detaylarından bu bağlantıya gidebilecek."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Görsel"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "Desteklenen formatlar: JPG, PNG, WebP, GIF."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "isteğe bağlı"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "maks. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Önizleme"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Görseli kaldır"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Gönder"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Sıfırla"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "Bildirim göndermek için uygun hedef bulunamadı."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "Bildirim göndermek için en az bir grup oluşturmanız gerekiyor."
+
+msgid "target_all_users"
+msgstr "Tüm kullanıcılar (sistem)"
+
+msgid "target_org_prefix"
+msgstr "Kuruluş"
+
+msgid "target_org_all_members"
+msgstr "tüm üyeler"
+
+msgid "target_group_prefix"
+msgstr "Grup"
+
+msgid "notif_title_required"
+msgstr "Bildirim başlığı boş olamaz."
+
+msgid "notif_link_invalid"
+msgstr "Girilen bağlantı geçersiz. http:// veya https:// ile başlamalıdır."
+
+msgid "notif_image_too_large"
+msgstr "Görsel en fazla 5 MB olabilir."
+
+msgid "notif_image_invalid"
+msgstr "Görsel dosyası geçersiz."
+
+msgid "notif_sent_success"
+msgstr "Bildirim başarıyla gönderildi."
+
+msgid "notif_no_recipients"
+msgstr "Bu hedefler için izniniz yok veya alıcı bulunamadı."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "Sonuç bulunamadı."

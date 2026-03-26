@@ -3,13 +3,16 @@ Profile views: user profile management and avatar serving.
 """
 
 import mimetypes
+import os
 import re
+from urllib.parse import urlparse as _parse_url
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
+from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
@@ -17,6 +20,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import http_date
+from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_safe
 
@@ -25,10 +29,16 @@ from apps.courses.models import Course
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import Exam, ExamAttempt, StudentGroup
 from apps.labs.models import LabSubmission
-from apps.notifications.models import StudentOrganizationRequestStatus
-from apps.notifications.services import build_profile_notification_state
+from apps.notifications.models import NotificationType, StudentOrganizationRequestStatus
+from apps.notifications.services import (
+    build_profile_notification_state,
+    create_notification_for_users,
+    get_unread_count,
+    get_user_notifications,
+)
 from apps.projects.models import ProjectSubmission
-from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
+from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
@@ -74,6 +84,19 @@ PUBLIC_PROFILE_ALLOWED_QUERY_PUNCTUATION = frozenset({" ", "-", "_", ".", ",", "
 PUBLIC_PROFILE_FORMAT_SPECIFIER_PATTERN = re.compile(r"%(?:\d+\$)?[-+#0*. ]*[a-zA-Z]")
 PUBLIC_PROFILE_CATEGORY_PATTERN = re.compile(r"^[a-z0-9_-]{1,%s}$" % PUBLIC_PROFILE_CATEGORY_MAX_LENGTH)
 PROFILE_AVATAR_VERSION_PATTERN = re.compile(r"^[0-9]{1,%s}$" % PROFILE_AVATAR_VERSION_MAX_LENGTH)
+PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
+    "groups",
+    "my-courses",
+    "my-exams",
+    "pending-post-approvals",
+    "pending-review",
+    "review-results",
+    "role-assignment",
+    "student-organization-management",
+    "permission-editor",
+    "manage-roles",
+    "publish-notification",
+}
 
 
 def _normalize_public_profile_query_value(raw_value, *, max_length):
@@ -109,6 +132,57 @@ def _validate_public_profile_category(raw_value, *, allowed_slugs):
         return "", True
 
     return normalized, False
+
+
+def _restore_profile_org_context(request, profile, active_section):
+    """
+    Re-hydrate the active organization for org-bound profile sections when the
+    session lost its tenant selection but the profile still points at a valid org.
+    """
+    if active_section not in PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT:
+        return
+    if getattr(request, "organization", None) is not None:
+        return
+
+    fallback_org = getattr(profile, "organization", None)
+    if fallback_org is None or not getattr(fallback_org, "is_active", False):
+        return
+
+    from apps.organizations.models import Membership
+
+    memberships = list(
+        Membership.objects.filter(
+            user=request.user,
+            organization=fallback_org,
+            organization__is_active=True,
+            is_active=True,
+        )
+        .select_related("organization", "role", "scope_unit")
+        .order_by("-is_primary", "-role__level")
+    )
+    is_owner = getattr(fallback_org, "owner_id", None) == getattr(request.user, "id", None)
+    is_superadmin = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False))
+    if not memberships and not is_owner and not is_superadmin:
+        return
+
+    permissions_set = set()
+    for membership in memberships:
+        if membership.role.permissions:
+            permissions_set.update(membership.role.permissions)
+        if getattr(membership.role, "name", "") == "teacher":
+            permissions_set.add("course.create")
+
+    request.organization = fallback_org
+    request.org_memberships = memberships
+    request.org_permissions = list(permissions_set)
+    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, bool(is_owner and not memberships))
+    request.session["active_organization"] = fallback_org.slug
+    if hasattr(request.user, "set_active_organization_context"):
+        request.user.set_active_organization_context(
+            fallback_org,
+            memberships=memberships,
+            permissions=request.org_permissions,
+        )
 
 
 def _parse_public_profile_page_number(raw_value):
@@ -159,6 +233,109 @@ def profile_avatar(request, user_id):
     return response
 
 
+def _get_publish_notification_targets(user, capabilities):
+    """Return list of target options for notification publishing based on role."""
+    from apps.exams.models import StudentGroup
+    from apps.organizations.models import Membership
+
+    targets = []
+    is_superadmin = capabilities["is_superadmin"]
+    is_org_admin = capabilities["is_org_admin"]
+    is_teacher = capabilities["is_teacher"]
+
+    if is_superadmin:
+        # "All users" is exclusive — if selected, ignore specific org selections
+        targets.append(
+            {
+                "value": "all",
+                "label": _("target_all_users"),
+                "is_exclusive": True,
+            }
+        )
+        from apps.organizations.models import Organization
+
+        for org in Organization.objects.filter(is_active=True, status="active").order_by("name"):
+            targets.append(
+                {
+                    "value": f"org_{org.pk}",
+                    "label": f'{_("target_org_prefix")}: {org.name}',
+                    "is_exclusive": False,
+                }
+            )
+    elif is_org_admin:
+        # Get user's active org memberships
+        org_memberships = Membership.objects.filter(
+            user=user, is_active=True, organization__is_active=True
+        ).select_related("organization")
+        for membership in org_memberships:
+            targets.append(
+                {
+                    "value": f"org_{membership.organization_id}",
+                    "label": f'{_("target_org_prefix")}: {membership.organization.name} ({_("target_org_all_members")})',
+                    "is_exclusive": False,
+                }
+            )
+    elif is_teacher:
+        teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")
+        for group in teacher_groups:
+            targets.append(
+                {
+                    "value": f"group_{group.pk}",
+                    "label": f'{_("target_group_prefix")}: {group.name}',
+                    "is_exclusive": False,
+                }
+            )
+    return targets
+
+
+def _get_notification_recipients(user, capabilities, target: str):
+    """Resolve notification target to a queryset of recipient users.
+
+    Returns a queryset/list of users, or None if target is invalid/unauthorized.
+    """
+    from apps.exams.models import StudentGroup
+    from apps.organizations.models import Membership, Organization
+
+    is_superadmin = capabilities["is_superadmin"]
+    User = get_user_model()
+
+    if target == "all":
+        if not is_superadmin:
+            return None
+        return User.objects.filter(is_active=True)
+
+    if target.startswith("org_"):
+        org_id = (target[4:] or "").strip()
+        if not org_id:
+            return None
+        try:
+            org = Organization.objects.get(pk=org_id, is_active=True, status="active")
+        except (ValidationError, Organization.DoesNotExist):
+            return None
+        # Superadmin can target any org; org admin only their own
+        if not is_superadmin:
+            if not Membership.objects.filter(user=user, organization=org, is_active=True).exists():
+                return None
+        member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
+        return User.objects.filter(pk__in=member_user_ids, is_active=True)
+
+    if target.startswith("group_"):
+        try:
+            grp_id = int(target[6:])
+        except (ValueError, IndexError):
+            return None
+        try:
+            group = StudentGroup.objects.get(pk=grp_id)
+        except StudentGroup.DoesNotExist:
+            return None
+        # Only the teacher who owns the group (or superadmin) may target it
+        if not is_superadmin and group.teacher_id != user.pk:
+            return None
+        return group.students.filter(is_active=True)
+
+    return None
+
+
 @login_required
 def user_profile(request):
     """
@@ -176,7 +353,10 @@ def user_profile(request):
     )
 
     # Ensure profile exists (get_or_create for safety)
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    requested_section = request.GET.get("section", "profile-info")
+    _restore_profile_org_context(request, profile, requested_section)
+
     capabilities = _role_capabilities(request.user, profile)
     notification_state = build_profile_notification_state(user=request.user, profile=profile)
     pending_student_invites = notification_state["pending_student_invites"]
@@ -184,7 +364,9 @@ def user_profile(request):
     pending_student_join_org_name = notification_state["pending_student_join_org_name"]
     pending_student_join_message = notification_state["pending_student_join_message"]
     student_can_leave_org = notification_state["student_can_leave_org"]
-    notifications_unread_count = notification_state["unread_count"]
+    org_notification_count = notification_state["unread_count"]
+    in_app_unread_count = get_unread_count(user=request.user)
+    notifications_unread_count = org_notification_count + in_app_unread_count
 
     def _validate_avatar_upload(uploaded_avatar):
         if uploaded_avatar is None:
@@ -219,7 +401,6 @@ def user_profile(request):
         return ""
 
     # Get active section from URL parameter (default: profile-info)
-    requested_section = request.GET.get("section", "profile-info")
     allowed_sections = capabilities["allowed_sections"]
     active_section = requested_section if requested_section in allowed_sections else "profile-info"
     password_change_form = CustomPasswordChangeForm(request.user)
@@ -249,6 +430,97 @@ def user_profile(request):
 
             messages.error(request, "Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin.")
             active_section = "change-password"
+        elif submitted_form == "publish-notification":
+            if "publish-notification" not in allowed_sections:
+                messages.error(request, "Bu əməliyyatı yerinə yetirmək üçün icazəniz yoxdur.")
+                return redirect(f"{reverse('accounts:profile')}?section=profile-info")
+            notif_title = (request.POST.get("notif_title") or "").strip()
+            notif_message = (request.POST.get("notif_message") or "").strip()
+            # Accept multiple targets submitted as a checkbox list
+            notif_targets_raw = request.POST.getlist("notif_targets")
+            notif_targets = [t.strip() for t in notif_targets_raw if t.strip()]
+            # Fall back to the old single-value field for backward-compat
+            if not notif_targets:
+                single = (request.POST.get("notif_target") or "").strip()
+                if single:
+                    notif_targets = [single]
+            if not notif_targets:
+                notif_targets = ["all"]
+            notif_link = (request.POST.get("notif_link") or "").strip()
+            notif_image_file = request.FILES.get("notif_image")
+
+            if not notif_title:
+                messages.error(request, _("notif_title_required"))
+                return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+
+            # Validate optional link — require explicit http/https scheme
+            if notif_link:
+                try:
+                    parsed_link = _parse_url(notif_link)
+                    if parsed_link.scheme not in ("http", "https"):
+                        raise ValueError("invalid scheme")
+                except Exception:
+                    messages.error(request, _("notif_link_invalid"))
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+
+            # Validate + save optional image
+            notif_image_url = ""
+            if notif_image_file:
+                _img_max_mb = 5
+                _img_max_bytes = _img_max_mb * 1024 * 1024
+                if getattr(notif_image_file, "size", 0) > _img_max_bytes:
+                    messages.error(request, _("notif_image_too_large"))
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+                try:
+                    validate_uploaded_file(
+                        notif_image_file,
+                        allowed_extensions=IMAGE_ALLOWED_EXTENSIONS,
+                        max_size_mb=_img_max_mb,
+                        allowed_mime_types=set(),
+                        allowed_mime_prefixes=("image/",),
+                    )
+                except ValidationError as exc:
+                    messages.error(request, exc.messages[0] if exc.messages else _("notif_image_invalid"))
+                    return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
+                # Save image to media/notifications/images/
+                randomize_uploaded_filename(notif_image_file)
+                saved_path = default_storage.save(
+                    os.path.join("notifications", "images", notif_image_file.name),
+                    notif_image_file,
+                )
+                notif_image_url = default_storage.url(saved_path)
+
+            metadata = {}
+            if notif_image_url:
+                metadata["image_url"] = notif_image_url
+
+            # Resolve each selected target and collect unique recipients
+            UserModel = get_user_model()
+            sent_to_user_ids: set = set()
+            for notif_target in notif_targets:
+                recipients = _get_notification_recipients(request.user, capabilities, notif_target)
+                if recipients is None:
+                    continue
+                # Avoid duplicate notifications to the same user
+                qs_ids = list(recipients.values_list("pk", flat=True).exclude(pk__in=sent_to_user_ids))
+                if not qs_ids:
+                    continue
+                target_recipients = UserModel.objects.filter(pk__in=qs_ids)
+                create_notification_for_users(
+                    recipients=target_recipients,
+                    title=notif_title,
+                    message=notif_message,
+                    link=notif_link,
+                    notification_type=NotificationType.SYSTEM,
+                    metadata=metadata or None,
+                )
+                sent_to_user_ids.update(qs_ids)
+
+            if sent_to_user_ids:
+                messages.success(request, _("notif_sent_success"))
+            else:
+                messages.error(request, _("notif_no_recipients"))
+            return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form != "edit-profile":
             target_section = request.GET.get("section") or request.POST.get("section") or active_section
             if target_section not in allowed_sections:
@@ -702,6 +974,8 @@ def user_profile(request):
         "all_modules": [],
         "organizations_page_param": "superadmin_org_page",
         "organizations_pagination_query": "",
+        "post_next_url": "",
+        "pending_count": 0,
     }
 
     management_org = None
@@ -849,10 +1123,18 @@ def user_profile(request):
         student_org_management_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),
             section="student-organization-management",
+            management_view=student_org_management_section["active_management_view"],
+            student_tab=student_org_management_section["active_student_tab"],
+            teacher_tab=student_org_management_section["active_teacher_tab"],
+            staff_tab=student_org_management_section["active_staff_tab"],
             student_org_search=student_org_management_section["student_search_query"],
             student_org_pending_search=student_org_management_section["pending_search_query"],
             student_org_unassigned_search=student_org_management_section["unassigned_search_query"],
             student_org_sent_invite_search=student_org_management_section["sent_invite_search_query"],
+            student_org_ts_search=student_org_management_section["teacher_staff_search_query"],
+            organization_search=student_org_management_section["organization_search_query"],
+            organization_status=student_org_management_section["organization_status_filter"],
+            organization_type=student_org_management_section["organization_type_filter"],
         )
 
     if "student-organization-request" in allowed_sections:
@@ -993,10 +1275,29 @@ def user_profile(request):
         superadmin_organizations_section["organizations_pagination_query"] = _query_string(
             section="superadmin-organizations"
         )
+        superadmin_organizations_section["post_next_url"] = _append_query_params(
+            reverse("accounts:profile"),
+            section="superadmin-organizations",
+        )
+        superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
+
+    # InAppNotification data for profile notifications section
+    notif_filter = request.GET.get("notif_filter", "all")
+    if notif_filter not in ("all", "unread", "read"):
+        notif_filter = "all"
+    in_app_notifications_qs = get_user_notifications(user=request.user, filter_by=notif_filter)
+    in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
+    in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+
+    # Publish-notification data (teacher groups, org info)
+    publish_notification_targets = []
+    if "publish-notification" in allowed_sections:
+        publish_notification_targets = _get_publish_notification_targets(request.user, capabilities)
 
     section_titles = {
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
-        "notifications": "Bildirişlər",
+        "notifications": pgettext_lazy("profile.section", "notifications"),
+        "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
         "posts": pgettext_lazy("profile.section", "posts"),
         "create-post": pgettext_lazy("profile.section", "create_post"),
         "courses": pgettext_lazy("profile.section", "my_courses"),
@@ -1011,8 +1312,8 @@ def user_profile(request):
         "pending-review": pgettext_lazy("profile.section", "pending_review"),
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
-        "student-organization-request": "Təşkilata qoşul",
-        "student-organization-management": "Tələbə idarəetməsi",
+        "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
+        "student-organization-management": "Staff İdarəetməsi",
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
@@ -1120,15 +1421,20 @@ def user_profile(request):
         "pending_student_invites": pending_student_invites,
         "pending_student_join_requests": pending_student_join_requests,
         "notifications_unread_count": notifications_unread_count,
+        "in_app_unread_count": in_app_unread_count,
+        "in_app_notifications_page": in_app_notifications_page,
+        "notif_filter": notif_filter,
         "pending_student_join_org_name": pending_student_join_org_name,
         "pending_student_join_message": pending_student_join_message,
         "student_can_leave_org": student_can_leave_org,
+        "publish_notification_targets": publish_notification_targets,
         "role_assignment_section": role_assignment_section,
         "student_org_request_section": student_org_request_section,
         "student_org_management_section": student_org_management_section,
         "permission_editor_section": permission_editor_section,
         "manage_roles_section": manage_roles_section,
         "superadmin_organizations_section": superadmin_organizations_section,
+        "superadmin_pending_org_count": superadmin_organizations_section.get("pending_count", 0),
         "is_teacher": capabilities["is_teacher"],
         "is_admin": capabilities["can_manage_org"],
         "is_superadmin": capabilities["is_superadmin"],
@@ -1159,7 +1465,7 @@ def public_user_profile(request, username):
     if request.user.is_authenticated and request.user == profile_user:
         return redirect("accounts:profile")
 
-    profile, _ = UserProfile.objects.get_or_create(user=profile_user)
+    profile, _created = UserProfile.objects.get_or_create(user=profile_user)
 
     published_posts = (
         Post.objects.filter(author=profile_user, is_published=True).select_related("category").order_by("-created_at")
