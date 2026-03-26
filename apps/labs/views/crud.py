@@ -137,6 +137,10 @@ def edit_lab(request, pk):
 
     # POST - yenilə
     try:
+        previous_status = lab.status
+        from apps.notifications.services import get_lab_assigned_user_ids, notify_task_assignment
+
+        previous_recipient_ids = get_lab_assigned_user_ids(lab)
         group_names = request.POST.getlist("group_names[]")
         student_ids = request.POST.getlist("student_ids[]")
 
@@ -176,6 +180,18 @@ def edit_lab(request, pk):
         # Update allowed_students M2M relation
         valid_ids = [int(sid) for sid in student_ids if str(sid).isdigit()]
         lab.allowed_students.set(User.objects.filter(pk__in=valid_ids))
+
+        current_recipient_ids = get_lab_assigned_user_ids(lab)
+        should_notify_all = previous_status != "published" and lab.status == "published"
+        new_recipient_ids = (
+            current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        )
+        if new_recipient_ids and lab.status == "published":
+            notify_task_assignment(
+                task=lab,
+                user_ids=new_recipient_ids,
+                task_kind="lab",
+            )
 
         return JsonResponse({"success": True})
 
@@ -221,5 +237,12 @@ def publish_lab(request, pk):
 
     lab.status = "published"
     lab.save()
+    from apps.notifications.services import get_lab_assigned_user_ids, notify_task_assignment
+
+    notify_task_assignment(
+        task=lab,
+        user_ids=get_lab_assigned_user_ids(lab),
+        task_kind="lab",
+    )
     messages.success(request, pgettext("labs.view.message", "lab_published"))
     return JsonResponse({"success": True})

@@ -239,6 +239,38 @@ class UserProfile(models.Model):
         help_text="Tələbə üçün məktəb nömrəsi və ya rəsmi identifikator",
     )
 
+    student_specialization = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="İxtisas / Fakültə",
+        help_text="Tələbənin ixtisası və ya fakültəsi",
+    )
+
+    student_group_number = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="Qrup / Sinif",
+        help_text="Tələbənin qrup nömrəsi və ya sinif qrupu",
+    )
+
+    department = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Departament / Kafedra",
+        help_text="Müəllim və ya işçinin departamenti/kafedrası",
+    )
+
+    staff_position = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="Vəzifə",
+        help_text="İşçinin vəzifəsi (yalnız staff üçün)",
+    )
+
     # RBAC role field – single source of truth for role checks
     role = models.CharField(
         max_length=30,

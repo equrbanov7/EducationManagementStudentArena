@@ -73,6 +73,7 @@ DEFAULT_ROLES = {
             "scope_type": RoleScopeType.COURSE,
             "permissions": [
                 "course.view",
+                "course.create",
                 "course.edit",
                 "grading.view",
                 "grading.input",
@@ -175,6 +176,7 @@ DEFAULT_ROLES = {
             "scope_type": RoleScopeType.COURSE,
             "permissions": [
                 "course.view",
+                "course.create",
                 "course.edit",
                 "grading.view",
                 "grading.input",

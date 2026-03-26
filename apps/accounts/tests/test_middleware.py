@@ -254,3 +254,218 @@ class SessionTimeoutMiddlewareTest(TestCase):
             response.wsgi_request.user.is_authenticated,
             "A recently active session must remain valid",
         )
+
+
+class PendingOrganizationViewerModeTest(TestCase):
+    """
+    Verify that organizations in 'pending' status allow the owner to remain
+    logged in with viewer/read-only mode (request.org_pending_approval=True)
+    rather than being hard-logged-out.
+    """
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_pending_org_owner_is_not_logged_out(self):
+        """Owner of a pending org must remain logged in after the middleware runs."""
+        user = _make_user("pending_owner")
+        org = _make_org(user, status="pending", is_active=True)
+        _add_membership(user, org)
+
+        user.profile.organization = org
+        user.profile.save(update_fields=["organization", "updated_at"])
+
+        self.client.login(username="pending_owner", password="StrongPass123!")
+        session = self.client.session
+        session["active_organization"] = org.slug
+        session.save()
+
+        response = self.client.get(reverse("home"))
+
+        # Must NOT be redirected to the login page
+        self.assertNotIn(
+            reverse("accounts:login"),
+            response.get("Location", ""),
+            "Pending-org owner must not be redirected to login",
+        )
+
+    def test_pending_org_request_flag_is_set(self):
+        """request.org_pending_approval must be True for pending org users."""
+        from apps.accounts.middleware import SuspendedOrganizationMiddleware
+
+        user = _make_user("pending_flag_user")
+        org = _make_org(user, status="pending", is_active=True)
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.user = user
+        request.organization = org
+
+        responses = []
+
+        def get_response(req):
+            from django.http import HttpResponse
+
+            responses.append(getattr(req, "org_pending_approval", None))
+            return HttpResponse("ok")
+
+        mw = SuspendedOrganizationMiddleware(get_response)
+        mw(request)
+
+        self.assertEqual(len(responses), 1)
+        self.assertTrue(responses[0], "org_pending_approval must be True for pending org")
+
+    def test_suspended_org_still_logs_out(self):
+        """Suspended org must still trigger the hard-logout path.
+
+        Tests the middleware directly with a complete Django test Client so that
+        the request has a proper session, as the logout() call requires it.
+        """
+        user = _make_user("susp_hard_logout")
+        # Use is_active=True so OrganizationMiddleware can load the org from the
+        # session; the SuspendedOrganizationMiddleware then handles status='suspended'.
+        org = _make_org(user, status="suspended", is_active=True)
+        _add_membership(user, org)
+
+        user.profile.organization = org
+        user.profile.save(update_fields=["organization", "updated_at"])
+
+        self.client.login(username="susp_hard_logout", password="StrongPass123!")
+        session = self.client.session
+        session["active_organization"] = org.slug
+        session.save()
+
+        response = self.client.get(reverse("home"))
+        login_url = reverse("accounts:login")
+        self.assertIn(login_url, response.get("Location", ""))
+
+    def test_active_org_flag_is_false(self):
+        """request.org_pending_approval must be False for active org users."""
+        from apps.accounts.middleware import SuspendedOrganizationMiddleware
+
+        user = _make_user("active_flag_user")
+        org = _make_org(user, status="active", is_active=True)
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.user = user
+        request.organization = org
+
+        responses = []
+
+        def get_response(req):
+            from django.http import HttpResponse
+
+            responses.append(getattr(req, "org_pending_approval", None))
+            return HttpResponse("ok")
+
+        mw = SuspendedOrganizationMiddleware(get_response)
+        mw(request)
+
+        self.assertFalse(responses[0], "org_pending_approval must be False for active org")
+
+
+class SuperadminOrgApprovalTest(TestCase):
+    """Tests for superadmin approve/reject organization actions."""
+
+    def setUp(self):
+        self.client = Client()
+        self.superadmin = User.objects.create_superuser(
+            username="test_superadmin",
+            email="sa@example.com",
+            password="SuperPass123!",
+        )
+        self.org_owner = _make_user("org_owner_sa")
+        self.pending_org = Organization.objects.create(
+            name="Pending University",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.org_owner,
+            status="pending",
+            is_active=True,
+        )
+        self.url = reverse("accounts:superadmin_organizations")
+
+    def test_approve_pending_org_sets_active(self):
+        """Approving a pending org must set status='active' and is_active=True."""
+        self.client.force_login(self.superadmin)
+        response = self.client.post(
+            self.url,
+            {"organization_id": str(self.pending_org.id), "action": "approve"},
+        )
+        self.assertRedirects(response, self.url)
+        self.pending_org.refresh_from_db()
+        self.assertEqual(self.pending_org.status, "active")
+        self.assertTrue(self.pending_org.is_active)
+
+    def test_approve_pending_org_notifies_owner(self):
+        """Approving a pending org must create an in-app notification for the owner."""
+        from apps.notifications.models import InAppNotification
+
+        self.client.force_login(self.superadmin)
+        self.client.post(
+            self.url,
+            {"organization_id": str(self.pending_org.id), "action": "approve"},
+        )
+        notifications = InAppNotification.objects.filter(recipient=self.org_owner)
+        self.assertTrue(notifications.exists(), "Owner notification must be created on approval")
+
+    def test_reject_pending_org_sets_suspended(self):
+        """Rejecting a pending org must set status='suspended' and is_active=False."""
+        self.client.force_login(self.superadmin)
+        response = self.client.post(
+            self.url,
+            {
+                "organization_id": str(self.pending_org.id),
+                "action": "reject",
+                "reason": "Policy mismatch",
+            },
+        )
+        self.assertRedirects(response, self.url)
+        self.pending_org.refresh_from_db()
+        self.assertEqual(self.pending_org.status, "suspended")
+        self.assertFalse(self.pending_org.is_active)
+
+    def test_reject_pending_org_notifies_owner(self):
+        """Rejecting a pending org must create an in-app notification for the owner."""
+        from apps.notifications.models import InAppNotification
+
+        self.client.force_login(self.superadmin)
+        self.client.post(
+            self.url,
+            {
+                "organization_id": str(self.pending_org.id),
+                "action": "reject",
+                "reason": "Policy mismatch",
+            },
+        )
+        notifications = InAppNotification.objects.filter(recipient=self.org_owner)
+        self.assertTrue(notifications.exists(), "Owner notification must be created on rejection")
+
+    def test_non_superadmin_cannot_approve(self):
+        """A regular user must not be able to approve organizations."""
+        regular_user = _make_user("regular_cannot_approve")
+        self.client.force_login(regular_user)
+        self.client.post(
+            self.url,
+            {"organization_id": str(self.pending_org.id), "action": "approve"},
+        )
+        self.pending_org.refresh_from_db()
+        # Status must not have changed
+        self.assertEqual(self.pending_org.status, "pending")
+
+    def test_superadmin_can_filter_pending_orgs(self):
+        """Superadmin can filter organizations by status=pending."""
+        # Create an active org to ensure it is excluded
+        Organization.objects.create(
+            name="Active Uni",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.org_owner,
+            status="active",
+            is_active=True,
+        )
+        self.client.force_login(self.superadmin)
+        response = self.client.get(self.url, {"status": "pending"})
+        self.assertEqual(response.status_code, 200)
+        org_names = [o.name for o in response.context["organizations"]]
+        self.assertIn("Pending University", org_names)
+        self.assertNotIn("Active Uni", org_names)

@@ -492,6 +492,126 @@
     {% include "partials/_pagination.html" with page_obj=sent_student_invites extra_query=sent_invites_pagination_query page_param=sent_invites_page_param %}
 </div>
 
+<div class="section-card mt-4">
+    <div class="section-title">
+        <i class="fas fa-chalkboard-teacher"></i> Müəllim / İşçi müraciətləri
+        {% if pending_teacher_staff_requests.paginator.count %}
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning ms-2">{{ pending_teacher_staff_requests.paginator.count }}</span>
+        {% endif %}
+    </div>
+    <p class="text-muted mb-3">
+        Bu bölmədə müəllim və ya işçi olaraq qeydiyyatdan keçib bu təşkilatı seçən istifadəçilərin müraciətlərini görə, təsdiqləyə və ya rədd edə bilərsiniz.
+    </p>
+    <form method="get"
+          class="search-form mb-3 role-assignment-search-form"
+          data-standard-search-form
+          data-debounce-ms="1000"
+          action="{% if embedded_in_profile %}{{ profile_base_url }}{% else %}{% url 'accounts:student_organization_management' %}{% endif %}">
+        {% if embedded_in_profile %}
+        <input type="hidden" name="section" value="student-organization-management">
+        {% endif %}
+        <input type="hidden" name="student_org_search" value="{{ student_search_query }}">
+        <input type="hidden" name="student_org_pending_search" value="{{ pending_search_query }}">
+        <input type="hidden" name="student_org_unassigned_search" value="{{ unassigned_search_query }}">
+        <input type="hidden" name="student_org_sent_invite_search" value="{{ sent_invite_search_query }}">
+        <div class="role-assignment-search-input-wrap">
+            <input type="text"
+                   name="student_org_ts_search"
+                   value="{{ teacher_staff_search_query }}"
+                   placeholder="Müəllim / işçi axtar..."
+                   class="form-control role-assignment-search-input"
+                   autocomplete="off"
+                   data-standard-search-input>
+            <button type="button"
+                    class="role-assignment-search-clear"
+                    data-standard-search-clear
+                    aria-label="Axtarışı təmizlə"
+                    hidden>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <button type="submit"
+                class="btn btn-primary role-assignment-search-submit"
+                data-standard-search-submit>
+            <i class="fas fa-search"></i> Axtar
+        </button>
+    </form>
+
+    <div class="table-responsive profile-section-table-scroll">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>İstifadəçi</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Rol növü</th>
+                    <th>Mesaj</th>
+                    <th>Müraciət tarixi</th>
+                    <th>Əməliyyat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ts_request in pending_teacher_staff_requests %}
+                <tr>
+                    <td>{{ ts_request.user.get_full_name|default:ts_request.user.username }}</td>
+                    <td>@{{ ts_request.user.username }}</td>
+                    <td>{{ ts_request.user.email }}</td>
+                    <td>
+                        {% if ts_request.role_type == "teacher" %}
+                            <span class="role-badge">Müəllim</span>
+                        {% elif ts_request.role_type == "staff" %}
+                            <span class="role-badge role-warning">İşçi</span>
+                        {% else %}
+                            <span class="role-badge">{{ ts_request.role_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ts_request.message %}
+                            <small>{{ ts_request.message }}</small>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ ts_request.created_at|date:"d.m.Y H:i" }}</small>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="approve_teacher_staff_request">
+                                <input type="hidden" name="ts_request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-success btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-user-check"></i> Təsdiqlə
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'accounts:student_organization_management' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ post_next_url }}">
+                                <input type="hidden" name="action" value="reject_teacher_staff_request">
+                                <input type="hidden" name="ts_request_id" value="{{ ts_request.id }}">
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        {% if not can_manage_students %}disabled{% endif %}>
+                                    <i class="fas fa-times"></i> Rədd et
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not pending_teacher_staff_requests.paginator.count %}
+    <p class="text-center text-muted mt-2 mb-0">Təsdiq gözləyən müəllim / işçi müraciəti yoxdur.</p>
+    {% endif %}
+    {% include "partials/_pagination.html" with page_obj=pending_teacher_staff_requests extra_query=teacher_staff_pagination_query page_param=teacher_staff_page_param %}
+</div>
+
 <div class="modal fade" id="revokeSentInvitesConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

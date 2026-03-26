@@ -3395,6 +3395,12 @@ msgctxt "accounts.auth.message"
 msgid "new_code_sent"
 msgstr "Yeni təsdiq kodu göndərildi."
 
+msgctxt "accounts.auth.message"
+msgid "registration_email_send_failed"
+msgstr ""
+"Qeydiyyat uğursuz oldu: doğrulama emaili göndərilə bilmədi. Zəhmət olmasa "
+"email ünvanınızı yoxlayın və yenidən cəhd edin."
+
 #: apps/accounts/views.py:2805
 msgctxt "accounts.auth.message"
 msgid "logout_success"
@@ -12877,6 +12883,10 @@ msgctxt "nav"
 msgid "my_profile"
 msgstr "Mənim profilim"
 
+msgctxt "nav"
+msgid "notifications"
+msgstr "Bildirişlər"
+
 #: templates/partials/_navbar.html:65 templates/partials/_navbar.html:125
 msgctxt "nav"
 msgid "logout"
@@ -15012,9 +15022,149 @@ msgctxt "accounts.form.register.error"
 msgid "join_organization_country_mismatch"
 msgstr "Seçilən təşkilat seçilən ölkəyə uyğun deyil."
 
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_teacher"
+msgstr "Məktəb müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_teacher"
+msgstr "Universitet müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_teacher"
+msgstr "Kurs mərkəzi müəllimi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_school_staff"
+msgstr "Məktəb işçisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_university_staff"
+msgstr "Universitet işçisi"
+
+msgctxt "accounts.form.register.choice"
+msgid "org_type_course_staff"
+msgstr "Kurs mərkəzi işçisi"
+
+msgctxt "accounts.form.register.label"
+msgid "phone"
+msgstr "Telefon nömrəsi"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "phone"
+msgstr "məs. +994501234567"
+
+msgctxt "accounts.form.register.label"
+msgid "specialization"
+msgstr "İxtisas / Fakültə"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "specialization"
+msgstr "məs. Kompüter Mühəndisliyi"
+
+msgctxt "accounts.form.register.label"
+msgid "group_number"
+msgstr "Qrup / Sinif"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "group_number"
+msgstr "məs. CS-101 və ya Qrup 3A"
+
+msgctxt "accounts.form.register.label"
+msgid "department"
+msgstr "Departament / Kafedra"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "department"
+msgstr "məs. Mühəndislik Fakültəsi"
+
+msgctxt "accounts.form.register.label"
+msgid "staff_position"
+msgstr "Vəzifə"
+
+msgctxt "accounts.form.register.placeholder"
+msgid "staff_position"
+msgstr "məs. Ofis Meneceri"
+
+msgctxt "accounts.form.register.error"
+msgid "specialization_required"
+msgstr "Tələbələr üçün ixtisas / fakültə mütləqdir."
+
+msgctxt "accounts.form.register.error"
+msgid "group_number_required"
+msgstr "Tələbələr üçün qrup / sinif mütləqdir."
+
+msgctxt "accounts.register"
+msgid "step_role"
+msgstr "Rol"
+
+msgctxt "accounts.register"
+msgid "choose_role"
+msgstr "Rolunuzu seçin"
+
+msgctxt "accounts.register"
+msgid "role_owner_title"
+msgstr "Sahibi / Qurucu"
+
+msgctxt "accounts.register"
+msgid "role_owner_description"
+msgstr "Qurumunuzu qeydiyyata alın və sahibi kimi idarə edin."
+
+msgctxt "accounts.register"
+msgid "role_teacher_title"
+msgstr "Müəllim"
+
+msgctxt "accounts.register"
+msgid "role_teacher_description"
+msgstr "Müəllim kimi qoşulun, kursları və tələbələri idarə edin."
+
+msgctxt "accounts.register"
+msgid "role_staff_title"
+msgstr "İşçi"
+
+msgctxt "accounts.register"
+msgid "role_staff_description"
+msgstr "İnzibati və ya dəstək rolunda işçi kimi qoşulun."
+
+msgctxt "accounts.register"
+msgid "role_student_title"
+msgstr "Tələbə"
+
+msgctxt "accounts.register"
+msgid "role_student_description"
+msgstr "Tələbə kimi qoşulun və kurslara daxil olun."
+
+msgctxt "accounts.register"
+msgid "org_pending_approval_notice"
+msgstr "Qurumun qeydiyyatı superadmin təsdiqi gözləyir. Nəzərdən keçirildikdən sonra sizə bildiriş göndəriləcəkdir."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_teacher_join"
+msgstr "Email təsdiqindən sonra seçdiyiniz quruma müəllim kimi qoşulacaqsınız (təsdiq gözlənilir)."
+
+msgctxt "accounts.register"
+msgid "auto_role_info_staff_join"
+msgstr "Email təsdiqindən sonra seçdiyiniz quruma işçi kimi qoşulacaqsınız (təsdiq gözlənilir)."
+
+msgctxt "accounts.register"
+msgid "student_fields_title"
+msgstr "Tələbə məlumatları"
+
+msgctxt "accounts.register"
+msgid "teacher_fields_title"
+msgstr "Müəllim məlumatları"
+
+msgctxt "accounts.register"
+msgid "staff_fields_title"
+msgstr "İşçi məlumatları"
+
 msgctxt "accounts.register"
 msgid "auto_role_info_student_join"
 msgstr "Email təsdiqindən sonra seçdiyiniz quruma tələbə kimi qoşulacaqsınız."
+
+msgctxt "accounts.register"
+msgid "join_org_optional_hint"
+msgstr "Təşkilat seçimi boş qala bilər. Sonradan profil bölməsindən təşkilata müraciət edə bilərsiniz."
 
 msgctxt "exams.template.teacher_questions_bank"
 msgid "title_questions_bank"
@@ -15357,3 +15507,337 @@ msgstr "Silməni təsdiqlə"
 msgctxt "exams.template.teacher_questions_bank"
 msgid "modal_delete_question_body"
 msgstr "Bu sualı silmək istədiyinizə əminsiniz? {question}"
+
+msgctxt "profile.section"
+msgid "notifications"
+msgstr "Bildirişlər"
+
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Təşkilata qoşul"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Təşkilata qoşul"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Tələbə"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Müəllim"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Staff"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Üzv"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "Universitet"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "Məktəb"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Kurs mərkəzi"
+
+msgctxt "profile.notifications"
+msgid "filter_all"
+msgstr "Hamısı"
+
+msgctxt "profile.notifications"
+msgid "filter_unread"
+msgstr "Oxunmamış"
+
+msgctxt "profile.notifications"
+msgid "filter_read"
+msgstr "Oxunmuş"
+
+msgctxt "profile.notifications"
+msgid "mark_all_read"
+msgstr "Hamısını oxunmuş işarələ"
+
+msgctxt "profile.notifications"
+msgid "select_all"
+msgstr "Hamısını seç"
+
+msgctxt "profile.notifications"
+msgid "delete_selected"
+msgstr "Seçilənləri sil"
+
+msgctxt "profile.notifications"
+msgid "ago"
+msgstr "əvvəl"
+
+msgctxt "profile.notifications"
+msgid "new_badge"
+msgstr "Yeni"
+
+msgctxt "profile.notifications"
+msgid "mark_read"
+msgstr "Oxunmuş işarələ"
+
+msgctxt "profile.notifications"
+msgid "delete"
+msgstr "Sil"
+
+msgctxt "profile.notifications"
+msgid "empty_unread"
+msgstr "Oxunmamış bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_read"
+msgstr "Oxunmuş bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_all"
+msgstr "Hazırda bildiriş yoxdur."
+
+msgctxt "profile.notifications"
+msgid "empty_hint"
+msgstr "Yeni bildirişlər burada görünəcək."
+
+msgctxt "profile.notifications"
+msgid "notification"
+msgstr "Bildiriş"
+
+msgctxt "profile.notifications"
+msgid "close"
+msgstr "Bağla"
+
+msgctxt "profile.notifications"
+msgid "go_to_link"
+msgstr "Keçidə get"
+
+msgctxt "profile.notifications"
+msgid "pending_approval"
+msgstr "üçün müraciətiniz təsdiq gözləyir."
+
+msgctxt "profile.notifications"
+msgid "message"
+msgstr "Mesaj"
+
+msgctxt "profile.notifications"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "profile.notifications"
+msgid "invite_as_student"
+msgstr "sizi tələbə kimi dəvət edib."
+
+msgctxt "profile.notifications"
+msgid "accept"
+msgstr "Qəbul et"
+
+msgctxt "profile.notifications"
+msgid "reject"
+msgstr "Rədd et"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "%(organization_name)s təşkilatına %(role_label)s kimi müraciətiniz göndərilib və hazırda cavab gözləyir."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "%(organization_name)s sizi %(role_label)s kimi dəvət edib."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "%(role_label)s kimi təşkilata qoşul"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Mövcud təşkilatları axtarıb birini seçin və qısa mesajla %(role_label)s kimi qoşulma müraciəti göndərin."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "Hazırda <strong>%(organization_name)s</strong> təşkilatına bağlısınız. Ayrıldıqdan sonra bu bölmədən yenidən müraciət göndərə və ya gözləyən dəvətləri qəbul edə bilərsiniz."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "Hazırda <strong>%(count)s</strong> təşkilat üzrə müraciətiniz təsdiq gözləyir."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "Sizə <strong>%(count)s</strong> təşkilat dəvəti var. Dəvətlərdən %(role_label)s kimi qoşula bilərsiniz."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Təşkilat axtar..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "Bütün təşkilat növləri"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "%(role_label)s müraciəti göndər"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "%(role_label)s müraciət mesajı"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "Təşkilata qısa qeyd yaza bilərsiniz..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Müraciəti təsdiqlə"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Seç"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Növ"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Ölkə"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Vəziyyət"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "%(role_label)s müraciəti göndərilib"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "Uyğun təşkilat tapılmadı."
+
+msgctxt "profile.publish_notification"
+msgid "title"
+msgstr "Bildiriş göndər"
+
+msgctxt "profile.publish_notification"
+msgid "description"
+msgstr "Aşağıdakı formu dolduraraq seçdiyiniz hədəf qrupa bildiriş göndərin. Bildiriş alıcıların profil səhifəsindəki bildirişlər bölməsindən görünəcək."
+
+msgctxt "profile.publish_notification"
+msgid "target_group_label"
+msgstr "Hədəf qrup"
+
+msgctxt "profile.publish_notification"
+msgid "target_group_hint"
+msgstr "Bildiriş göndəriləcək istifadəçi qruplarını seçin."
+
+msgctxt "profile.publish_notification"
+msgid "search_placeholder"
+msgstr "Axtar..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_label"
+msgstr "Bildiriş başlığı"
+
+msgctxt "profile.publish_notification"
+msgid "notif_title_placeholder"
+msgstr "Bildiriş başlığını daxil edin..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_label"
+msgstr "Bildiriş mətni"
+
+msgctxt "profile.publish_notification"
+msgid "notif_message_placeholder"
+msgstr "Bildiriş mətnini daxil edin (isteğe bağlı)..."
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_label"
+msgstr "Keçid (link)"
+
+msgctxt "profile.publish_notification"
+msgid "notif_link_hint"
+msgstr "Alıcılar bildiriş detallarından bu keçidə gedə biləcəklər."
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_label"
+msgstr "Şəkil"
+
+msgctxt "profile.publish_notification"
+msgid "notif_image_hint"
+msgstr "JPG, PNG, WebP, GIF formatları dəstəklənir."
+
+msgctxt "profile.publish_notification"
+msgid "optional"
+msgstr "isteğe bağlı"
+
+msgctxt "profile.publish_notification"
+msgid "max_5mb"
+msgstr "maks. 5 MB"
+
+msgctxt "profile.publish_notification"
+msgid "preview"
+msgstr "Önizləmə"
+
+msgctxt "profile.publish_notification"
+msgid "remove_image"
+msgstr "Şəkli sil"
+
+msgctxt "profile.publish_notification"
+msgid "send_btn"
+msgstr "Göndər"
+
+msgctxt "profile.publish_notification"
+msgid "reset_btn"
+msgstr "Sıfırla"
+
+msgctxt "profile.publish_notification"
+msgid "no_targets"
+msgstr "Bildiriş göndərmək üçün uyğun hədəf tapılmadı."
+
+msgctxt "profile.publish_notification"
+msgid "no_targets_teacher_hint"
+msgstr "Bildiriş göndərmək üçün ən azı bir qrup yaratmalısınız."
+
+msgid "target_all_users"
+msgstr "Bütün istifadəçilər (sistem)"
+
+msgid "target_org_prefix"
+msgstr "Təşkilat"
+
+msgid "target_org_all_members"
+msgstr "bütün üzvlər"
+
+msgid "target_group_prefix"
+msgstr "Qrup"
+
+msgid "notif_title_required"
+msgstr "Bildiriş başlığı boş ola bilməz."
+
+msgid "notif_link_invalid"
+msgstr "Daxil edilmiş link düzgün deyil. http:// və ya https:// ilə başlamalıdır."
+
+msgid "notif_image_too_large"
+msgstr "Şəkil maksimum 5 MB ola bilər."
+
+msgid "notif_image_invalid"
+msgstr "Şəkil faylı düzgün deyil."
+
+msgid "notif_sent_success"
+msgstr "Bildiriş uğurla göndərildi."
+
+msgid "notif_no_recipients"
+msgstr "Bu hədəflər üçün icazəniz yoxdur və ya alıcı tapılmadı."
+
+msgctxt "profile.publish_notification"
+msgid "search_no_results"
+msgstr "Axtarış nəticəsi tapılmadı."
