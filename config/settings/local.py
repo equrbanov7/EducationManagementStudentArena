@@ -6,6 +6,7 @@ Development environment configuration.
 from __future__ import annotations
 
 import os
+from copy import deepcopy
 from pathlib import Path
 
 import dj_database_url
@@ -82,12 +83,15 @@ from .base import (
     WHITENOISE_ALLOW_ALL_ORIGINS,
     WSGI_APPLICATION,
     X_FRAME_OPTIONS,
+    _redis_url_with_db,
 )
 
 # Make mutable copies of lists inherited from base so that local-only
 # additions (debug_toolbar, django_extensions) do not pollute the base module.
 INSTALLED_APPS = list(INSTALLED_APPS)
 MIDDLEWARE = list(MIDDLEWARE)
+CHANNEL_LAYERS = deepcopy(CHANNEL_LAYERS)
+CACHES = deepcopy(CACHES)
 
 
 def _split_csv_env(name: str, default: str = "") -> list[str]:
@@ -128,6 +132,7 @@ if not SECRET_KEY:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool("DEBUG", True)
+USE_REDIS = _env_bool("USE_REDIS", False)
 
 # ALLOWED_HOSTS - read from .env or use default
 ALLOWED_HOSTS = _split_csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")
@@ -144,6 +149,42 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+
+# Recompute Redis-derived URLs after loading .env so local overrides take effect.
+REDIS_URL = os.getenv("REDIS_URL", REDIS_URL).strip()
+REDIS_CACHE_URL = _redis_url_with_db(REDIS_URL, 1)
+
+if USE_REDIS:
+    CHANNEL_LAYERS["default"] = {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    }
+    CACHES["default"] = {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_CACHE_URL,
+    }
+    CELERY_BROKER_URL = _redis_url_with_db(REDIS_URL, 2)
+    CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", False)
+    CELERY_TASK_EAGER_PROPAGATES = _env_bool("CELERY_TASK_EAGER_PROPAGATES", False)
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "emsarena-local-cache",
+        }
+    }
+    CELERY_BROKER_URL = "memory://"
+    CELERY_RESULT_BACKEND = "cache+memory://"
+    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", True)
+    CELERY_TASK_EAGER_PROPAGATES = _env_bool("CELERY_TASK_EAGER_PROPAGATES", True)
 
 # Email backend:
 # - If EMAIL_BACKEND is set explicitly, use it.

@@ -9,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import get_language, pgettext_lazy
 
 from apps.organizations.models import Country, Institution, Organization
 from core.constants import OrganizationType
@@ -19,6 +19,21 @@ from ..models import ProfileRole
 from ..services import issue_email_otp, purge_stale_pending_registration
 
 User = get_user_model()
+
+
+_AZERBAIJAN_DISPLAY_NAMES = {
+    "az": "Azərbaycan",
+    "tr": "Azerbaycan",
+    "ru": "Азербайджан",
+}
+
+
+def _country_display_name(country):
+    if country.code != "AZ":
+        return country.name
+
+    language_code = (get_language() or "").split("-", 1)[0]
+    return _AZERBAIJAN_DISPLAY_NAMES.get(language_code, country.name)
 
 
 STUDENT_JOIN_ORG_TYPE_MAP = {
@@ -502,7 +517,7 @@ class RegisterForm(forms.ModelForm):
 
         countries = Country.objects.filter(is_active=True).order_by("name")
         self.fields["country"].choices = [("", pgettext_lazy("accounts.form.register.choice", "country_select"))] + [
-            (country.code, country.name) for country in countries
+            (country.code, _country_display_name(country)) for country in countries
         ]
 
         selected_country = (self.data.get("country") or self.initial.get("country") or "").upper()

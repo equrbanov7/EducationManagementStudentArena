@@ -27,7 +27,125 @@
     white-space: normal;
 }
 
+.org-management-shell__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+}
+
+.org-management-shell__lead {
+    margin: 0;
+    color: var(--text-muted);
+    max-width: 760px;
+}
+
+.org-management-shell__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.org-management-view-switch,
+.org-management-subview-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.org-management-chip,
+.org-management-subchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+    color: var(--text-primary);
+    border-radius: 999px;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.org-management-subchip {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.95rem;
+}
+
+.org-management-chip:hover,
+.org-management-subchip:hover,
+.org-management-chip.is-active,
+.org-management-subchip.is-active {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #1d4ed8;
+    color: #fff;
+}
+
+.org-management-chip__count,
+.org-management-subchip__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    font-size: 0.86rem;
+}
+
+.org-management-chip.is-active .org-management-chip__count,
+.org-management-subchip.is-active .org-management-subchip__count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.org-management-panel {
+    margin-top: 1.5rem;
+}
+
+.org-management-panel[hidden] {
+    display: none !important;
+}
+
+.org-management-org-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(180px, 0.6fr)) auto;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.org-management-select {
+    min-height: 46px;
+    border-radius: 14px;
+}
+
+.org-management-inline-form {
+    min-width: 220px;
+}
+
 @media (max-width: 768px) {
+    .org-management-shell__header {
+        flex-direction: column;
+    }
+
+    .org-management-view-switch,
+    .org-management-subview-switch {
+        gap: 0.5rem;
+    }
+
+    .org-management-chip,
+    .org-management-subchip {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .org-management-org-filters {
+        grid-template-columns: 1fr;
+    }
+
     .profile-section-table-scroll {
         max-height: 360px;
     }
