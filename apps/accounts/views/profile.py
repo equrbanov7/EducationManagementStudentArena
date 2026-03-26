@@ -38,6 +38,7 @@ from apps.notifications.services import (
 )
 from apps.projects.models import ProjectSubmission
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
+from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
@@ -174,6 +175,7 @@ def _restore_profile_org_context(request, profile, active_section):
     request.organization = fallback_org
     request.org_memberships = memberships
     request.org_permissions = list(permissions_set)
+    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, bool(is_owner and not memberships))
     request.session["active_organization"] = fallback_org.slug
     if hasattr(request.user, "set_active_organization_context"):
         request.user.set_active_organization_context(

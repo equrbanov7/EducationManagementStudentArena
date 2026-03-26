@@ -18,6 +18,8 @@ Organization resolution order
      visit the org-picker and make an explicit choice.
 """
 
+from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
+
 
 class OrganizationMiddleware:
     """
@@ -58,6 +60,7 @@ class OrganizationMiddleware:
         request.organization = None
         request.org_memberships = []
         request.org_permissions = []
+        setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, False)
         # All active memberships across every org – used by the context
         # processor to build the org-switcher list without extra DB queries.
         request._all_org_memberships = []
@@ -105,6 +108,7 @@ class OrganizationMiddleware:
                 if owner_org is not None:
                     request.organization = owner_org
                     request.org_memberships = []
+                    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, True)
                 else:
                     # User is no longer a member of the session org — clear it.
                     request.session.pop("active_organization", None)
