@@ -277,6 +277,18 @@ class NotificationQueryServiceTest(TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertEqual(qs.first().title, "E")
 
+    def test_search_query_matches_title_and_message(self):
+        create_notification(recipient=self.user, title="Budget review", message="Quarterly numbers ready")
+        create_notification(recipient=self.user, title="Exam notice", message="Schedule changed")
+
+        title_match_qs = get_user_notifications(user=self.user, search_query="budget")
+        message_match_qs = get_user_notifications(user=self.user, search_query="schedule")
+
+        self.assertEqual(title_match_qs.count(), 1)
+        self.assertEqual(title_match_qs.first().title, "Budget review")
+        self.assertEqual(message_match_qs.count(), 1)
+        self.assertEqual(message_match_qs.first().title, "Exam notice")
+
     def test_unread_count(self):
         create_notification(recipient=self.user, title="A")
         n = create_notification(recipient=self.user, title="B")
@@ -336,6 +348,15 @@ class NotificationViewTest(TestCase):
         response = self.client.get(reverse("notifications:notification_list") + "?filter=unread")
         self.assertContains(response, "Unread notif")
         self.assertNotContains(response, "Read notif")
+
+    def test_list_search_query_filters_results(self):
+        self._make_notification(title="Deadline update", message="Lab deadline moved")
+        self._make_notification(title="Exam notice", message="Schedule changed")
+
+        response = self.client.get(reverse("notifications:notification_list") + "?q=deadline")
+
+        self.assertContains(response, "Deadline update")
+        self.assertNotContains(response, "Exam notice")
 
     # ── Detail ────────────────────────────────────────────────────────────
 

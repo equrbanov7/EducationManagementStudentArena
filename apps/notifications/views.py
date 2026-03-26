@@ -15,6 +15,7 @@ Endpoints:
 """
 
 import logging
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -77,6 +78,7 @@ def notification_list(request):
     """
     filter_by = request.GET.get("filter", "all")
     type_filter = request.GET.get("type", "")
+    search_query = " ".join(request.GET.get("q", "").split()).strip()[:100]
 
     # Validate filter_by
     if filter_by not in ("all", "unread", "read"):
@@ -91,11 +93,23 @@ def notification_list(request):
         user=request.user,
         filter_by=filter_by,
         notification_type=type_filter,
+        search_query=search_query,
     )
 
     paginator = Paginator(qs, PAGE_SIZE)
     page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in {
+                "filter": filter_by,
+                "type": type_filter,
+                "q": search_query,
+            }.items()
+            if value
+        }
+    )
 
     unread_count = get_unread_count(user=request.user)
 
@@ -108,6 +122,8 @@ def notification_list(request):
             "type_filter": type_filter,
             "notification_types": NotificationType.choices,
             "unread_count": unread_count,
+            "search_query": search_query,
+            "pagination_query": pagination_query,
         },
     )
 

@@ -1333,9 +1333,22 @@ def user_profile(request):
     notif_filter = request.GET.get("notif_filter", "all")
     if notif_filter not in ("all", "unread", "read"):
         notif_filter = "all"
-    in_app_notifications_qs = get_user_notifications(user=request.user, filter_by=notif_filter)
+    notif_search_query = _normalize_public_profile_query_value(
+        request.GET.get("notif_search"),
+        max_length=100,
+    )
+    in_app_notifications_qs = get_user_notifications(
+        user=request.user,
+        filter_by=notif_filter,
+        search_query=notif_search_query,
+    )
     in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
     in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
+    notif_pagination_query = _query_string(
+        section="notifications",
+        notif_filter=notif_filter,
+        notif_search=notif_search_query,
+    )
 
     # Publish-notification data (teacher groups, org info)
     publish_notification_targets = []
@@ -1472,7 +1485,7 @@ def user_profile(request):
         "review-results": "Dəyərləndirilmiş nəticələr",
         "role-assignment": pgettext_lazy("profile.section", "role_assignment"),
         "student-organization-request": pgettext_lazy("profile.section", "join_organization"),
-        "student-organization-management": "Staff İdarəetməsi",
+        "student-organization-management": pgettext_lazy("profile.section", "staff_management"),
         "permission-editor": pgettext_lazy("profile.section", "permissions"),
         "manage-roles": pgettext_lazy("profile.section", "manage_roles"),
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
@@ -1572,6 +1585,8 @@ def user_profile(request):
         "in_app_unread_count": in_app_unread_count,
         "in_app_notifications_page": in_app_notifications_page,
         "notif_filter": notif_filter,
+        "notif_search_query": notif_search_query,
+        "notif_pagination_query": notif_pagination_query,
         "pending_student_join_org_name": pending_student_join_org_name,
         "pending_student_join_message": pending_student_join_message,
         "student_can_leave_org": student_can_leave_org,

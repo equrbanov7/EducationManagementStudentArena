@@ -15757,6 +15757,14 @@ msgctxt "profile.sidebar"
 msgid "join_organization"
 msgstr "Join organization"
 
+msgctxt "profile.section"
+msgid "staff_management"
+msgstr "Staff Management"
+
+msgctxt "profile.sidebar"
+msgid "staff_management"
+msgstr "Staff Management"
+
 msgctxt "membership_request.role"
 msgid "Student"
 msgstr "Student"
@@ -16078,3 +16086,195 @@ msgstr "You do not have permission for these targets or no recipients found."
 msgctxt "profile.publish_notification"
 msgid "search_no_results"
 msgstr "No results found."
+
+msgctxt "staff.management"
+msgid "There are no active invites to withdraw."
+msgstr "There are no active invites to withdraw."
+
+msgctxt "staff.management"
+msgid "Teachers in organization"
+msgstr "Teachers in organization"
+
+msgctxt "staff.management"
+msgid "Active teacher accounts are shown here."
+msgstr "Active teacher accounts are shown here."
+
+msgctxt "staff.management"
+msgid "Search teachers..."
+msgstr "Search teachers..."
+
+msgctxt "staff.management"
+msgid "Not available"
+msgstr "Not available"
+
+msgctxt "staff.management"
+msgid "No teacher found."
+msgstr "No teacher found."
+
+msgctxt "staff.management"
+msgid "Respond to pending teacher requests here."
+msgstr "Respond to pending teacher requests here."
+
+msgctxt "staff.management"
+msgid "Search teacher requests..."
+msgstr "Search teacher requests..."
+
+msgctxt "staff.management"
+msgid "Message"
+msgstr "Message"
+
+msgctxt "staff.management"
+msgid "Request date"
+msgstr "Request date"
+
+msgctxt "staff.management"
+msgid "There are no pending teacher requests."
+msgstr "There are no pending teacher requests."
+
+msgctxt "staff.management"
+msgid "Teachers without organization"
+msgstr "Teachers without organization"
+
+msgctxt "staff.management"
+msgid "Teachers who can be invited appear here."
+msgstr "Teachers who can be invited appear here."
+
+msgctxt "staff.management"
+msgid "Invite selected teachers"
+msgstr "Invite selected teachers"
+
+msgctxt "staff.management"
+msgid "Invite selected teachers ({count} selected)"
+msgstr "Invite selected teachers ({count} selected)"
+
+msgctxt "staff.management"
+msgid "No teacher available for invitation."
+msgstr "No teacher available for invitation."
+
+msgctxt "staff.management"
+msgid "Sent teacher invites"
+msgstr "Sent teacher invites"
+
+msgctxt "staff.management"
+msgid "Withdraw pending teacher invites from here."
+msgstr "Withdraw pending teacher invites from here."
+
+msgctxt "staff.management"
+msgid "Search teacher invites..."
+msgstr "Search teacher invites..."
+
+msgctxt "staff.management"
+msgid "There are no active teacher invites to withdraw."
+msgstr "There are no active teacher invites to withdraw."
+
+msgctxt "staff.management"
+msgid "Organizations"
+msgstr "Organizations"
+
+msgctxt "staff.management"
+msgid "Superadmin organization overview and status actions."
+msgstr "Superadmin organization overview and status actions."
+
+msgctxt "staff.management"
+msgid "Search organizations..."
+msgstr "Search organizations..."
+
+msgctxt "staff.management"
+msgid "All statuses"
+msgstr "All statuses"
+
+msgctxt "staff.management"
+msgid "Active"
+msgstr "Active"
+
+msgctxt "staff.management"
+msgid "Pending"
+msgstr "Pending"
+
+msgctxt "staff.management"
+msgid "Suspended"
+msgstr "Suspended"
+
+msgctxt "staff.management"
+msgid "Inactive"
+msgstr "Inactive"
+
+msgctxt "staff.management"
+msgid "All types"
+msgstr "All types"
+
+msgctxt "staff.management"
+msgid "School"
+msgstr "School"
+
+msgctxt "staff.management"
+msgid "University"
+msgstr "University"
+
+msgctxt "staff.management"
+msgid "Course center"
+msgstr "Course center"
+
+msgctxt "staff.management"
+msgid "Individual"
+msgstr "Individual"
+
+msgctxt "staff.management"
+msgid "Apply filters"
+msgstr "Apply filters"
+
+msgctxt "staff.management"
+msgid "Type"
+msgstr "Type"
+
+msgctxt "staff.management"
+msgid "Owner"
+msgstr "Owner"
+
+msgctxt "staff.management"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "staff.management"
+msgid "Active members"
+msgstr "Active members"
+
+msgctxt "staff.management"
+msgid "Details"
+msgstr "Details"
+
+msgctxt "staff.management"
+msgid "Manage"
+msgstr "Manage"
+
+msgctxt "staff.management"
+msgid "Code"
+msgstr "Code"
+
+msgctxt "staff.management"
+msgid "License"
+msgstr "License"
+
+msgctxt "staff.management"
+msgid "Reason"
+msgstr "Reason"
+
+msgctxt "staff.management"
+msgid "Reject reason (optional)"
+msgstr "Reject reason (optional)"
+
+msgctxt "staff.management"
+msgid "Unsuspend"
+msgstr "Unsuspend"
+
+msgctxt "staff.management"
+msgid "Suspension reason"
+msgstr "Suspension reason"
+
+msgctxt "staff.management"
+msgid "Suspend"
+msgstr "Suspend"
+
+msgctxt "staff.management"
+msgid "No organization found."
+msgstr "No organization found."
