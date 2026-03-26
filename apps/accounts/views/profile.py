@@ -37,8 +37,8 @@ from apps.notifications.services import (
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
-from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
+from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from ..forms import CustomPasswordChangeForm
 from ..models import ProfileRole, UserProfile
