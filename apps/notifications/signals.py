@@ -4,8 +4,8 @@ from django.dispatch import receiver
 from apps.assignments.models import Submission as AssignmentSubmission
 from apps.exams.models import ExamAttempt
 from apps.labs.models import LabSubmission
-from apps.projects.models import ProjectSubmission
 from apps.notifications.services import notify_student_about_feedback, notify_teacher_about_submission
+from apps.projects.models import ProjectSubmission
 
 
 def _cache_previous_state(sender, instance, field_names):
@@ -73,7 +73,9 @@ def _notify_lab_submission_events(sender, instance, created, **kwargs):
     previous_state = getattr(instance, "_notification_previous_state", {})
 
     if created and instance.status in {"submitted", "late"}:
-        notify_teacher_about_submission(task=instance.assignment.lab, student=instance.assignment.student, task_kind="lab")
+        notify_teacher_about_submission(
+            task=instance.assignment.lab, student=instance.assignment.student, task_kind="lab"
+        )
         return
 
     if instance.status == "graded" and _graded_payload_changed(
@@ -82,7 +84,9 @@ def _notify_lab_submission_events(sender, instance, created, **kwargs):
         score_field="score",
         feedback_field="feedback",
     ):
-        notify_student_about_feedback(task=instance.assignment.lab, student=instance.assignment.student, task_kind="lab")
+        notify_student_about_feedback(
+            task=instance.assignment.lab, student=instance.assignment.student, task_kind="lab"
+        )
 
 
 @receiver(pre_save, sender=ExamAttempt)

@@ -260,7 +260,9 @@ def createAndEditExamView(request, slug=None):
 
             current_recipient_ids = get_exam_assigned_user_ids(exam_instance)
             should_notify_all = not previous_is_active and exam_instance.is_active
-            new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+            new_recipient_ids = (
+                current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+            )
             if new_recipient_ids and exam_instance.is_active:
                 notify_task_assignment(
                     task=exam_instance,

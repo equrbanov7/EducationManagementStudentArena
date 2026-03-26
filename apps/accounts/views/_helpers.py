@@ -457,7 +457,6 @@ def _extract_assignment_attachments(submission):
 def _role_capabilities(user, profile):
     scoped_roles = _extract_profile_roles_for_user(user)
     profile_role = getattr(profile, "role", ProfileRole.MEMBER) if profile else ProfileRole.MEMBER
-    has_profile_org = bool(getattr(profile, "organization_id", None)) if profile else False
     active_organization = getattr(user, "active_organization", None)
     has_active_org_context = bool(scoped_roles or active_organization)
     role = scoped_roles[0] if scoped_roles else profile_role
@@ -466,8 +465,13 @@ def _role_capabilities(user, profile):
     if not has_active_org_context and profile_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
         is_student = True
     is_teacher = _user_has_any_role(user, {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER})
-    is_owner_of_active_org = bool(active_organization is not None and getattr(active_organization, "owner_id", None) == user.id)
-    is_org_admin = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR}) or is_owner_of_active_org
+    is_owner_of_active_org = bool(
+        active_organization is not None and getattr(active_organization, "owner_id", None) == user.id
+    )
+    is_org_admin = (
+        _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER, ProfileRole.HR})
+        or is_owner_of_active_org
+    )
     user_level = 999 if is_superadmin else (user._highest_role_level() if hasattr(user, "_highest_role_level") else 0)
 
     can_manage_org = is_superadmin or is_org_admin
@@ -540,16 +544,23 @@ def _role_capabilities(user, profile):
         if not (is_student or is_teacher or is_org_admin):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
 
-    has_admin_control_role = _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
+    has_admin_control_role = (
+        _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
+    )
 
-    if profile_role in {
-        ProfileRole.STUDENT,
-        ProfileRole.LEAD_STUDENT,
-        ProfileRole.TEACHER,
-        ProfileRole.ASSISTANT_TEACHER,
-        ProfileRole.MEMBER,
-        ProfileRole.HR,
-    } and not is_superadmin and not has_admin_control_role:
+    if (
+        profile_role
+        in {
+            ProfileRole.STUDENT,
+            ProfileRole.LEAD_STUDENT,
+            ProfileRole.TEACHER,
+            ProfileRole.ASSISTANT_TEACHER,
+            ProfileRole.MEMBER,
+            ProfileRole.HR,
+        }
+        and not is_superadmin
+        and not has_admin_control_role
+    ):
         allowed_sections.add("student-organization-request")
 
     if can_manage_blog:
@@ -816,7 +827,8 @@ def _build_user_organization_access_rows(
 
 
 def _build_student_org_management_section(*, request, organization, is_superadmin, user_level, default_view=None):
-    from apps.organizations.models import Membership, Organization as OrganizationModel
+    from apps.organizations.models import Membership
+    from apps.organizations.models import Organization as OrganizationModel
 
     from ..models import UserProfile
 
@@ -995,10 +1007,9 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     for invite_membership in sent_pending_invites:
         mapped_role = _map_org_role_to_profile_role(invite_membership.role)
         invite_membership.management_role_key = mapped_role
-        invite_membership.management_role_label = (
-            getattr(invite_membership.role, "display_name", "")
-            or PROFILE_ROLE_LABELS.get(mapped_role, getattr(invite_membership.role, "name", "Üzv"))
-        )
+        invite_membership.management_role_label = getattr(
+            invite_membership.role, "display_name", ""
+        ) or PROFILE_ROLE_LABELS.get(mapped_role, getattr(invite_membership.role, "name", "Üzv"))
         invite_membership.management_position = (
             getattr(getattr(invite_membership.user, "profile", None), "staff_position", "") or ""
         ).strip()
@@ -1309,12 +1320,12 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         seen_member_user_ids.add(membership.user_id)
         mapped_role = _map_org_role_to_profile_role(membership.role)
         membership.management_role_key = mapped_role
-        membership.management_role_label = (
-            getattr(membership.role, "display_name", "") or PROFILE_ROLE_LABELS.get(mapped_role, membership.role.name)
+        membership.management_role_label = getattr(membership.role, "display_name", "") or PROFILE_ROLE_LABELS.get(
+            mapped_role, membership.role.name
         )
         membership.management_position = (getattr(membership.user.profile, "staff_position", "") or "").strip()
-        membership.management_can_remove = (
-            mapped_role in removable_member_roles and membership.user_id != getattr(organization, "owner_id", None)
+        membership.management_can_remove = mapped_role in removable_member_roles and membership.user_id != getattr(
+            organization, "owner_id", None
         )
 
         if mapped_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:

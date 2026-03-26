@@ -204,8 +204,13 @@ def edit_assignment(request, pk):
             assignment.assigned_students.clear()
 
         current_recipient_ids = set(assignment.assigned_students.values_list("id", flat=True))
-        should_notify_all = previous_status not in {"active", "published"} and assignment.status in {"active", "published"}
-        new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        should_notify_all = previous_status not in {"active", "published"} and assignment.status in {
+            "active",
+            "published",
+        }
+        new_recipient_ids = (
+            current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        )
         if new_recipient_ids and assignment.status in {"active", "published"}:
             from apps.notifications.services import notify_task_assignment
 

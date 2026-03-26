@@ -169,9 +169,7 @@ class NotificationEventFlowTests(TestCase):
         applicant.profile.organization = None
         applicant.profile.organization_type = OrganizationType.INDIVIDUAL
         applicant.profile.department = "Kompüter elmləri kafedrası"
-        applicant.profile.save(
-            update_fields=["role", "organization", "organization_type", "department", "updated_at"]
-        )
+        applicant.profile.save(update_fields=["role", "organization", "organization_type", "department", "updated_at"])
 
         request_obj = StudentOrganizationRequest.objects.create(
             user=applicant,
@@ -191,7 +189,9 @@ class NotificationEventFlowTests(TestCase):
         self.assertIn("Ad soyad: Nigar Məmmədova", owner_notification.message)
         self.assertIn("Username: @teacher_candidate", owner_notification.message)
         self.assertIn("Kafedra / Departament: Kompüter elmləri kafedrası", owner_notification.message)
-        self.assertIn("Müraciət mesajı: Riyaziyyat və proqramlaşdırma fənlərini tədris edirəm.", owner_notification.message)
+        self.assertIn(
+            "Müraciət mesajı: Riyaziyyat və proqramlaşdırma fənlərini tədris edirəm.", owner_notification.message
+        )
         self.assertIn("/organizations/switch/", owner_notification.link)
         link_query = parse_qs(urlparse(owner_notification.link).query)
         next_url = link_query["next"][0]

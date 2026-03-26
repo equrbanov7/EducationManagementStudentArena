@@ -183,7 +183,9 @@ def edit_lab(request, pk):
 
         current_recipient_ids = get_lab_assigned_user_ids(lab)
         should_notify_all = previous_status != "published" and lab.status == "published"
-        new_recipient_ids = current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        new_recipient_ids = (
+            current_recipient_ids if should_notify_all else (current_recipient_ids - previous_recipient_ids)
+        )
         if new_recipient_ids and lab.status == "published":
             notify_task_assignment(
                 task=lab,

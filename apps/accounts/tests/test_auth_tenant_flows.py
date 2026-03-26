@@ -1229,7 +1229,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Hamısı")
-        self.assertContains(response, 'data-management-all', html=False)
+        self.assertContains(response, "data-management-all", html=False)
         self.assertContains(response, 'data-management-chip="student-members"', html=False)
         self.assertContains(response, 'data-management-panel="student-members"', html=False)
         self.assertContains(response, 'data-management-panel="teacher-members"', html=False)
