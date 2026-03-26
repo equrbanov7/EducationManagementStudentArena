@@ -907,6 +907,8 @@ def user_profile(request):
         "all_modules": [],
         "organizations_page_param": "superadmin_org_page",
         "organizations_pagination_query": "",
+        "post_next_url": "",
+        "pending_count": 0,
     }
 
     management_org = None
@@ -1054,10 +1056,18 @@ def user_profile(request):
         student_org_management_section["post_next_url"] = _append_query_params(
             reverse("accounts:profile"),
             section="student-organization-management",
+            management_view=student_org_management_section["active_management_view"],
+            student_tab=student_org_management_section["active_student_tab"],
+            teacher_tab=student_org_management_section["active_teacher_tab"],
+            staff_tab=student_org_management_section["active_staff_tab"],
             student_org_search=student_org_management_section["student_search_query"],
             student_org_pending_search=student_org_management_section["pending_search_query"],
             student_org_unassigned_search=student_org_management_section["unassigned_search_query"],
             student_org_sent_invite_search=student_org_management_section["sent_invite_search_query"],
+            student_org_ts_search=student_org_management_section["teacher_staff_search_query"],
+            organization_search=student_org_management_section["organization_search_query"],
+            organization_status=student_org_management_section["organization_status_filter"],
+            organization_type=student_org_management_section["organization_type_filter"],
         )
 
     if "student-organization-request" in allowed_sections:
@@ -1197,6 +1207,10 @@ def user_profile(request):
         ]
         superadmin_organizations_section["organizations_pagination_query"] = _query_string(
             section="superadmin-organizations"
+        )
+        superadmin_organizations_section["post_next_url"] = _append_query_params(
+            reverse("accounts:profile"),
+            section="superadmin-organizations",
         )
         superadmin_organizations_section["pending_count"] = Organization.objects.filter(status="pending").count()
 

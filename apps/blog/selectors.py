@@ -27,6 +27,14 @@ _CACHE_KEY_SIDEBAR = "emsarena:blog:sidebar_categories"
 _CACHE_KEY_POPULAR_TOPICS = "emsarena:blog:popular_topics"
 
 
+def _safe_cache_get(key):
+    try:
+        return cache.get(key)
+    except Exception:
+        logger.warning("Redis unavailable; cache lookup failed for key %s", key)
+        return None
+
+
 def _static_category_sort_key(category):
     return (
         0 if category.is_default else 1,
@@ -157,7 +165,7 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
     use_cache = active_category is None and posts_queryset is None
     if use_cache:
         cache_key = f"{_CACHE_KEY_SIDEBAR}:{include_empty}"
-        cached = cache.get(cache_key)
+        cached = _safe_cache_get(cache_key)
         if cached is not None:
             return cached
 
@@ -208,7 +216,7 @@ def get_category_assignment_queryset_and_labels():
 
 
 def get_navbar_categories():
-    cached = cache.get(_CACHE_KEY_NAVBAR)
+    cached = _safe_cache_get(_CACHE_KEY_NAVBAR)
     if cached is not None:
         return cached
     navbar_categories = get_flat_category_tree(include_empty=True)
@@ -244,7 +252,7 @@ def get_popular_topics(*, active_category=None, limit=5):
     # Use cached result only for the common global call (no category filter)
     if active_category is None:
         cache_key = f"{_CACHE_KEY_POPULAR_TOPICS}:{limit}"
-        cached = cache.get(cache_key)
+        cached = _safe_cache_get(cache_key)
         if cached is not None:
             return cached
 

@@ -623,18 +623,10 @@ def student_organization_management(request):
             messages.success(request, f"Uğurla uzaqlaşdırıldı: {target_user.username}.")
             return redirect(next_url)
 
-        messages.error(request, "Naməlum əməliyyat.")
-        return redirect(next_url)
-
-    # Teacher / staff join requests: approve or reject
-    if request.method == "POST":
-        action = (request.POST.get("action") or "").strip().lower()
-        next_url = _resolve_next_url(request, reverse("accounts:student_organization_management"))
-
         if action in {"approve_teacher_staff_request", "reject_teacher_staff_request"}:
             from apps.notifications.models import MembershipRequestRoleType as MRR
 
-            request_id = (request.POST.get("request_id") or "").strip()
+            request_id = (request.POST.get("request_id") or request.POST.get("ts_request_id") or "").strip()
             if not request_id.isdigit():
                 messages.error(request, "Keçərsiz müraciət ID-si.")
                 return redirect(next_url)
@@ -712,6 +704,9 @@ def student_organization_management(request):
                     f"{ts_request.user.get_full_name() or ts_request.user.username} müraciəti rədd edildi.",
                 )
             return redirect(next_url)
+
+        messages.error(request, "Naməlum əməliyyat.")
+        return redirect(next_url)
 
     context = _build_student_org_management_section(
         request=request,

@@ -306,6 +306,9 @@ class RegisterViewTest(TestCase):
         """Test that register page is accessible."""
         response = self.client.get(self.register_url)
         self.assertEqual(response.status_code, 200)
+        country_codes = {code for code, _label in response.context["form"].fields["country"].choices}
+        self.assertIn("AZ", country_codes)
+        self.assertContains(response, "Azərbaycan")
 
     def test_register_creates_user_and_profile(self):
         """Test that registration creates both user and profile."""

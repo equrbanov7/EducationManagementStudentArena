@@ -1023,6 +1023,56 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("organizations:dashboard", kwargs={"slug": member_org.slug}))
         self.assertContains(response, reverse("organizations:switch", kwargs={"slug": owned_org.slug}))
 
+    def test_superadmin_profile_renders_superadmin_control_inside_profile_without_active_org(self):
+        superuser = User.objects.create_superuser(
+            username="profile_superadmin_org_management",
+            email="profile_superadmin_org_management@example.com",
+            password="adminpass123",
+        )
+        owner_pending = User.objects.create_user(
+            username="pending_org_owner",
+            email="pending_org_owner@example.com",
+            password="testpass123",
+        )
+        owner_active = User.objects.create_user(
+            username="active_org_owner",
+            email="active_org_owner@example.com",
+            password="testpass123",
+        )
+        pending_org = Organization.objects.create(
+            name="Pending Profile Org",
+            org_type=OrganizationType.SCHOOL,
+            owner=owner_pending,
+            status="pending",
+            is_active=True,
+        )
+        active_org = Organization.objects.create(
+            name="Active Profile Org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner_active,
+            status="active",
+            is_active=True,
+        )
+
+        self.client.force_login(superuser)
+        response = self.client.get(
+            reverse("accounts:profile"),
+            {
+                "section": "superadmin-organizations",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "?section=superadmin-organizations")
+        self.assertContains(response, pending_org.name)
+        self.assertContains(response, active_org.name)
+        self.assertContains(response, reverse("accounts:superadmin_organizations"))
+        self.assertContains(
+            response,
+            'name="next" value="/accounts/profile/?section=superadmin-organizations"',
+            html=False,
+        )
+
     def test_manage_roles_assigns_multiple_roles_and_keeps_highest_as_primary(self):
         from apps.accounts.models import ProfileRole
         from apps.organizations.models import Membership

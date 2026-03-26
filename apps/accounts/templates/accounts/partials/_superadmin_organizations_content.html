@@ -111,6 +111,7 @@
                     <td>
                         <form method="post" action="{% url 'accounts:superadmin_organizations' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ post_next_url }}">
                             <input type="hidden" name="organization_id" value="{{ organization.id }}">
                             {% if organization.status == "pending" %}
                                 <div class="d-flex flex-column gap-2">

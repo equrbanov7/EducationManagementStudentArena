@@ -774,8 +774,8 @@ def _build_user_organization_access_rows(
     return rows
 
 
-def _build_student_org_management_section(*, request, organization, is_superadmin, user_level):
-    from apps.organizations.models import Membership
+def _build_student_org_management_section(*, request, organization, is_superadmin, user_level, default_view=None):
+    from apps.organizations.models import Membership, Organization as OrganizationModel
 
     from ..models import UserProfile
 
@@ -784,21 +784,66 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     unassigned_search = request.GET.get("student_org_unassigned_search", "")
     sent_invite_search = request.GET.get("student_org_sent_invite_search", "")
     teacher_staff_search = request.GET.get("student_org_ts_search", "")
+    organization_search = request.GET.get("organization_search", "")
+    organization_status_filter = (request.GET.get("organization_status", "") or "").strip().lower()
+    organization_type_filter = (request.GET.get("organization_type", "") or "").strip().lower()
+    superadmin_user_ids = list(
+        User.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN)).values_list("id", flat=True)
+    )
+
+    allowed_management_views = {"students", "teachers", "staff"}
+    if is_superadmin:
+        allowed_management_views.add("organizations")
+
+    management_view = (request.GET.get("management_view") or default_view or "students").strip().lower()
+    if management_view not in allowed_management_views:
+        management_view = "students"
+
+    student_tab = (request.GET.get("student_tab") or "members").strip().lower()
+    if student_tab not in {"members", "pending", "unassigned", "invites"}:
+        student_tab = "members"
+
+    teacher_tab = (request.GET.get("teacher_tab") or "members").strip().lower()
+    if teacher_tab not in {"members", "requests"}:
+        teacher_tab = "members"
+
+    staff_tab = (request.GET.get("staff_tab") or "members").strip().lower()
+    if staff_tab not in {"members", "requests"}:
+        staff_tab = "members"
+
     section = {
         "organization": organization,
+        "is_superadmin": is_superadmin,
+        "active_management_view": management_view,
+        "active_student_tab": student_tab,
+        "active_teacher_tab": teacher_tab,
+        "active_staff_tab": staff_tab,
+        "management_view_options": [],
+        "student_tab_options": [],
+        "teacher_tab_options": [],
+        "staff_tab_options": [],
         "students": [],
         "pending_requested_students": [],
         "unassigned_students": [],
         "sent_student_invites": [],
+        "teacher_members": [],
+        "staff_members": [],
+        "pending_teacher_requests": [],
+        "pending_staff_requests": [],
         "pending_teacher_staff_requests": [],
+        "organization_records": [],
         "student_search_query": student_search,
         "pending_search_query": pending_search,
         "unassigned_search_query": unassigned_search,
         "sent_invite_search_query": sent_invite_search,
         "teacher_staff_search_query": teacher_staff_search,
+        "organization_search_query": organization_search,
+        "organization_status_filter": organization_status_filter,
+        "organization_type_filter": organization_type_filter,
         "post_next_url": "",
         "access_denied_message": "",
         "can_manage_students": False,
+        "pending_org_count": 0,
         "students_page_param": "student_org_members_page",
         "students_pagination_query": "",
         "pending_page_param": "student_org_pending_page",
@@ -809,9 +854,67 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
         "sent_invites_pagination_query": "",
         "teacher_staff_page_param": "student_org_ts_page",
         "teacher_staff_pagination_query": "",
+        "teacher_members_page_param": "teacher_members_page",
+        "teacher_members_pagination_query": "",
+        "staff_members_page_param": "staff_members_page",
+        "staff_members_pagination_query": "",
+        "teacher_requests_page_param": "teacher_requests_page",
+        "teacher_requests_pagination_query": "",
+        "staff_requests_page_param": "staff_requests_page",
+        "staff_requests_pagination_query": "",
+        "organizations_page_param": "organization_page",
+        "organizations_pagination_query": "",
     }
 
     if organization is None:
+        if is_superadmin and management_view == "organizations":
+            organization_records = OrganizationModel.objects.select_related("owner").annotate(
+                active_member_count=Count("memberships", filter=Q(memberships__is_active=True))
+            )
+            if organization_search:
+                organization_records = organization_records.filter(
+                    Q(name__icontains=organization_search)
+                    | Q(slug__icontains=organization_search)
+                    | Q(organization_identifier__icontains=organization_search)
+                    | Q(license_identifier__icontains=organization_search)
+                    | Q(owner__username__icontains=organization_search)
+                    | Q(owner__email__icontains=organization_search)
+                )
+            if organization_type_filter:
+                organization_records = organization_records.filter(org_type=organization_type_filter)
+            if organization_status_filter == "active":
+                organization_records = organization_records.filter(is_active=True, status="active")
+            elif organization_status_filter == "pending":
+                organization_records = organization_records.filter(status="pending")
+            elif organization_status_filter == "suspended":
+                organization_records = organization_records.filter(status="suspended")
+            elif organization_status_filter == "inactive":
+                organization_records = organization_records.filter(is_active=False)
+
+            section["organization_records"] = Paginator(
+                organization_records.order_by("name"),
+                12,
+            ).get_page(request.GET.get(section["organizations_page_param"]))
+            section["pending_org_count"] = OrganizationModel.objects.filter(status="pending").count()
+            section["management_view_options"] = [
+                {"value": "students", "label": "Tələbələr", "count": 0},
+                {"value": "teachers", "label": "Müəllimlər", "count": 0},
+                {"value": "staff", "label": "Staff", "count": 0},
+                {
+                    "value": "organizations",
+                    "label": "Təşkilatlar",
+                    "count": section["organization_records"].paginator.count,
+                },
+            ]
+            section["post_next_url"] = _append_query_params(
+                reverse("accounts:student_organization_management"),
+                management_view="organizations",
+                organization_search=organization_search,
+                organization_status=organization_status_filter,
+                organization_type=organization_type_filter,
+            )
+            return section
+
         section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
         return section
 
@@ -828,6 +931,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             title=STUDENT_PENDING_INVITE_TITLE,
             user__is_active=True,
         )
+        .exclude(user_id__in=superadmin_user_ids)
         .select_related("user", "assigned_by", "role")
         .order_by("-updated_at", "user__username")
     )
@@ -851,6 +955,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             organization__isnull=True,
             role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT, ProfileRole.MEMBER],
         )
+        .exclude(user__id__in=superadmin_user_ids)
         .filter(
             Q(requested_organization=organization)
             | Q(
@@ -887,6 +992,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
 
     students = (
         UserProfile.objects.filter(user__is_active=True, organization=organization)
+        .exclude(user__id__in=superadmin_user_ids)
         .filter(
             Q(role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT])
             | Q(
@@ -916,6 +1022,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             ],
         )
         .filter(user__is_active=True)
+        .exclude(user_id__in=superadmin_user_ids)
         .exclude(user_id__in=pending_invite_user_ids)
         .select_related("user", "organization", "user__profile", "user__profile__organization")
         .order_by("-created_at", "user__username")
@@ -940,6 +1047,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             organization__isnull=True,
             role__in=[ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT, ProfileRole.MEMBER],
         )
+        .exclude(user__id__in=superadmin_user_ids)
         .exclude(user_id__in=pending_request_user_ids_any)
         .exclude(user_id__in=pending_invite_user_ids)
         .exclude(
@@ -972,7 +1080,6 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
     section["unassigned_students"] = Paginator(unassigned_students, 12).get_page(unassigned_page)
     section["sent_student_invites"] = Paginator(sent_student_invites, 12).get_page(sent_invites_page)
 
-    # Teacher / staff pending requests
     teacher_staff_pending_qs = (
         StudentOrganizationRequest.objects.filter(
             organization=organization,
@@ -980,6 +1087,7 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             role_type__in=[MembershipRequestRoleType.TEACHER, MembershipRequestRoleType.STAFF],
             user__is_active=True,
         )
+        .exclude(user_id__in=superadmin_user_ids)
         .select_related("user", "user__profile")
         .order_by("-created_at", "user__username")
     )
@@ -989,8 +1097,70 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             | Q(user__email__icontains=teacher_staff_search)
             | Q(user__first_name__icontains=teacher_staff_search)
             | Q(user__last_name__icontains=teacher_staff_search)
+            | Q(message__icontains=teacher_staff_search)
         )
     section["pending_teacher_staff_requests"] = Paginator(teacher_staff_pending_qs, 12).get_page(teacher_staff_page)
+
+    teacher_requests_qs = teacher_staff_pending_qs.filter(role_type=MembershipRequestRoleType.TEACHER)
+    staff_requests_qs = teacher_staff_pending_qs.filter(role_type=MembershipRequestRoleType.STAFF)
+    section["pending_teacher_requests"] = Paginator(
+        teacher_requests_qs,
+        12,
+    ).get_page(request.GET.get(section["teacher_requests_page_param"]))
+    section["pending_staff_requests"] = Paginator(
+        staff_requests_qs,
+        12,
+    ).get_page(request.GET.get(section["staff_requests_page_param"]))
+
+    active_member_qs = (
+        Membership.objects.filter(
+            organization=organization,
+            is_active=True,
+            user__is_active=True,
+        )
+        .exclude(user_id__in=superadmin_user_ids)
+        .select_related("user", "role", "user__profile")
+        .order_by("user_id", "-is_primary", "-role__level", "role__display_name")
+    )
+    if teacher_staff_search:
+        active_member_qs = active_member_qs.filter(
+            Q(user__username__icontains=teacher_staff_search)
+            | Q(user__email__icontains=teacher_staff_search)
+            | Q(user__first_name__icontains=teacher_staff_search)
+            | Q(user__last_name__icontains=teacher_staff_search)
+            | Q(role__display_name__icontains=teacher_staff_search)
+            | Q(role__name__icontains=teacher_staff_search)
+        )
+
+    teacher_members = []
+    staff_members = []
+    seen_member_user_ids = set()
+    for membership in active_member_qs:
+        if membership.user_id in seen_member_user_ids:
+            continue
+        seen_member_user_ids.add(membership.user_id)
+        mapped_role = _map_org_role_to_profile_role(membership.role)
+        membership.management_role_key = mapped_role
+        membership.management_role_label = (
+            getattr(membership.role, "display_name", "") or PROFILE_ROLE_LABELS.get(mapped_role, membership.role.name)
+        )
+        membership.management_position = (getattr(membership.user.profile, "staff_position", "") or "").strip()
+
+        if mapped_role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
+            continue
+        if mapped_role in {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER}:
+            teacher_members.append(membership)
+            continue
+        staff_members.append(membership)
+
+    section["teacher_members"] = Paginator(
+        teacher_members,
+        12,
+    ).get_page(request.GET.get(section["teacher_members_page_param"]))
+    section["staff_members"] = Paginator(
+        staff_members,
+        12,
+    ).get_page(request.GET.get(section["staff_members_page_param"]))
 
     for pending_request in section["pending_requested_students"].object_list:
         pending_request.request_display_status = (
@@ -1037,51 +1207,141 @@ def _build_student_org_management_section(*, request, organization, is_superadmi
             pending_request.request_note = (pending_request.resolution_note or "").strip()
             pending_request.request_is_actionable = True
 
-    section["students_pagination_query"] = _query_string(
-        section="student-organization-management",
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-    )
-    section["pending_pagination_query"] = _query_string(
-        section="student-organization-management",
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-    )
-    section["unassigned_pagination_query"] = _query_string(
-        section="student-organization-management",
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-    )
-    section["sent_invites_pagination_query"] = _query_string(
-        section="student-organization-management",
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-        student_org_ts_search=teacher_staff_search,
-    )
-    section["teacher_staff_pagination_query"] = _query_string(
-        section="student-organization-management",
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-        student_org_ts_search=teacher_staff_search,
-    )
+    organization_records = OrganizationModel.objects.none()
+    if is_superadmin:
+        organization_records = (
+            OrganizationModel.objects.select_related("owner")
+            .annotate(active_member_count=Count("memberships", filter=Q(memberships__is_active=True)))
+            .order_by("name")
+        )
+        if organization_search:
+            organization_records = organization_records.filter(
+                Q(name__icontains=organization_search)
+                | Q(slug__icontains=organization_search)
+                | Q(organization_identifier__icontains=organization_search)
+                | Q(license_identifier__icontains=organization_search)
+                | Q(owner__username__icontains=organization_search)
+                | Q(owner__email__icontains=organization_search)
+            )
+        if organization_type_filter:
+            organization_records = organization_records.filter(org_type=organization_type_filter)
+        if organization_status_filter == "active":
+            organization_records = organization_records.filter(is_active=True, status="active")
+        elif organization_status_filter == "pending":
+            organization_records = organization_records.filter(status="pending")
+        elif organization_status_filter == "suspended":
+            organization_records = organization_records.filter(status="suspended")
+        elif organization_status_filter == "inactive":
+            organization_records = organization_records.filter(is_active=False)
+
+        section["organization_records"] = Paginator(
+            organization_records,
+            12,
+        ).get_page(request.GET.get(section["organizations_page_param"]))
+        section["pending_org_count"] = OrganizationModel.objects.filter(status="pending").count()
+
+    base_query_kwargs = {
+        "section": "student-organization-management",
+        "management_view": management_view,
+        "student_tab": student_tab,
+        "teacher_tab": teacher_tab,
+        "staff_tab": staff_tab,
+        "student_org_search": student_search,
+        "student_org_pending_search": pending_search,
+        "student_org_unassigned_search": unassigned_search,
+        "student_org_sent_invite_search": sent_invite_search,
+        "student_org_ts_search": teacher_staff_search,
+        "organization_search": organization_search,
+        "organization_status": organization_status_filter,
+        "organization_type": organization_type_filter,
+    }
+    section["students_pagination_query"] = _query_string(**base_query_kwargs)
+    section["pending_pagination_query"] = _query_string(**base_query_kwargs)
+    section["unassigned_pagination_query"] = _query_string(**base_query_kwargs)
+    section["sent_invites_pagination_query"] = _query_string(**base_query_kwargs)
+    section["teacher_staff_pagination_query"] = _query_string(**base_query_kwargs)
+    section["teacher_members_pagination_query"] = _query_string(**base_query_kwargs)
+    section["staff_members_pagination_query"] = _query_string(**base_query_kwargs)
+    section["teacher_requests_pagination_query"] = _query_string(**base_query_kwargs)
+    section["staff_requests_pagination_query"] = _query_string(**base_query_kwargs)
+    section["organizations_pagination_query"] = _query_string(**base_query_kwargs)
     section["post_next_url"] = _append_query_params(
         reverse("accounts:student_organization_management"),
-        student_org_search=student_search,
-        student_org_pending_search=pending_search,
-        student_org_unassigned_search=unassigned_search,
-        student_org_sent_invite_search=sent_invite_search,
-        student_org_ts_search=teacher_staff_search,
+        **{key: value for key, value in base_query_kwargs.items() if key != "section"},
     )
+
+    section["student_tab_options"] = [
+        {
+            "value": "members",
+            "label": "Tələbələr",
+            "count": section["students"].paginator.count,
+        },
+        {
+            "value": "pending",
+            "label": "Müraciətlər",
+            "count": section["pending_requested_students"].paginator.count,
+        },
+        {
+            "value": "unassigned",
+            "label": "Dəvətsizlər",
+            "count": section["unassigned_students"].paginator.count,
+        },
+        {
+            "value": "invites",
+            "label": "Dəvətlər",
+            "count": section["sent_student_invites"].paginator.count,
+        },
+    ]
+    section["teacher_tab_options"] = [
+        {
+            "value": "members",
+            "label": "Müəllimlər",
+            "count": section["teacher_members"].paginator.count,
+        },
+        {
+            "value": "requests",
+            "label": "Müraciətlər",
+            "count": section["pending_teacher_requests"].paginator.count,
+        },
+    ]
+    section["staff_tab_options"] = [
+        {
+            "value": "members",
+            "label": "Staff",
+            "count": section["staff_members"].paginator.count,
+        },
+        {
+            "value": "requests",
+            "label": "Müraciətlər",
+            "count": section["pending_staff_requests"].paginator.count,
+        },
+    ]
+    section["management_view_options"] = [
+        {
+            "value": "students",
+            "label": "Tələbələr",
+            "count": section["students"].paginator.count,
+        },
+        {
+            "value": "teachers",
+            "label": "Müəllimlər",
+            "count": section["teacher_members"].paginator.count + section["pending_teacher_requests"].paginator.count,
+        },
+        {
+            "value": "staff",
+            "label": "Staff",
+            "count": section["staff_members"].paginator.count + section["pending_staff_requests"].paginator.count,
+        },
+    ]
+    if is_superadmin:
+        section["management_view_options"].append(
+            {
+                "value": "organizations",
+                "label": "Təşkilatlar",
+                "count": section["organization_records"].paginator.count,
+            }
+        )
+
     section["can_manage_students"] = True
     return section
 
