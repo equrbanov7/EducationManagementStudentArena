@@ -351,7 +351,9 @@ class TeacherStaffRequestFlowTest(TestCase):
         """After email verification activate_verified_membership does not duplicate requests."""
         from apps.accounts.services import activate_verified_membership
         from apps.notifications.models import (
+            InAppNotification,
             MembershipRequestRoleType,
+            NotificationType,
             StudentOrganizationRequest,
             StudentOrganizationRequestStatus,
         )
@@ -370,6 +372,28 @@ class TeacherStaffRequestFlowTest(TestCase):
             status=StudentOrganizationRequestStatus.PENDING,
         ).count()
         self.assertEqual(req_count, 1, "Duplicate teacher request was created on verification")
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.owner,
+                notification_type=NotificationType.APPROVAL,
+                title__icontains="Yeni müəllim müraciəti",
+            ).exists()
+        )
+
+    def test_teacher_signup_notifies_org_owner(self):
+        """Teacher join signup should notify the target organization owner."""
+        from apps.notifications.models import InAppNotification, NotificationType
+
+        user, _, _, _ = self._register_teacher(username="teacher_notify_owner")
+
+        self.assertTrue(
+            InAppNotification.objects.filter(
+                recipient=self.owner,
+                notification_type=NotificationType.APPROVAL,
+                title__icontains="Yeni müəllim müraciəti",
+                metadata__user_id=user.id,
+            ).exists()
+        )
 
     def test_pending_teacher_appears_in_management_section(self):
         """pending_teacher_staff_requests in the management section must include teacher requests."""

@@ -15512,6 +15512,42 @@ msgctxt "profile.section"
 msgid "notifications"
 msgstr "Bildirişlər"
 
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Təşkilata qoşul"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Təşkilata qoşul"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Tələbə"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Müəllim"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Staff"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Üzv"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "Universitet"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "Məktəb"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Kurs mərkəzi"
+
 msgctxt "profile.notifications"
 msgid "filter_all"
 msgstr "Hamısı"
@@ -15603,6 +15639,90 @@ msgstr "Qəbul et"
 msgctxt "profile.notifications"
 msgid "reject"
 msgstr "Rədd et"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "%(organization_name)s təşkilatına %(role_label)s kimi müraciətiniz göndərilib və hazırda cavab gözləyir."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "%(organization_name)s sizi %(role_label)s kimi dəvət edib."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "%(role_label)s kimi təşkilata qoşul"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Mövcud təşkilatları axtarıb birini seçin və qısa mesajla %(role_label)s kimi qoşulma müraciəti göndərin."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "Hazırda <strong>%(organization_name)s</strong> təşkilatına bağlısınız. Ayrıldıqdan sonra bu bölmədən yenidən müraciət göndərə və ya gözləyən dəvətləri qəbul edə bilərsiniz."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "Hazırda <strong>%(count)s</strong> təşkilat üzrə müraciətiniz təsdiq gözləyir."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "Sizə <strong>%(count)s</strong> təşkilat dəvəti var. Dəvətlərdən %(role_label)s kimi qoşula bilərsiniz."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "Ləğv et"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Təşkilat axtar..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "Bütün təşkilat növləri"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "%(role_label)s müraciəti göndər"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "%(role_label)s müraciət mesajı"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "Təşkilata qısa qeyd yaza bilərsiniz..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Müraciəti təsdiqlə"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Seç"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Növ"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Ölkə"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Vəziyyət"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "%(role_label)s müraciəti göndərilib"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "Uyğun təşkilat tapılmadı."
 
 msgctxt "profile.publish_notification"
 msgid "title"

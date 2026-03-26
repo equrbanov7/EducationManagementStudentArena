@@ -15749,6 +15749,42 @@ msgctxt "profile.section"
 msgid "notifications"
 msgstr "Notifications"
 
+msgctxt "profile.section"
+msgid "join_organization"
+msgstr "Join organization"
+
+msgctxt "profile.sidebar"
+msgid "join_organization"
+msgstr "Join organization"
+
+msgctxt "membership_request.role"
+msgid "Student"
+msgstr "Student"
+
+msgctxt "membership_request.role"
+msgid "Teacher"
+msgstr "Teacher"
+
+msgctxt "membership_request.role"
+msgid "Staff"
+msgstr "Staff"
+
+msgctxt "membership_request.role"
+msgid "Member"
+msgstr "Member"
+
+msgctxt "organization.type"
+msgid "university"
+msgstr "University"
+
+msgctxt "organization.type"
+msgid "school"
+msgstr "School"
+
+msgctxt "organization.type"
+msgid "course_center"
+msgstr "Course center"
+
 msgctxt "profile.notifications"
 msgid "filter_all"
 msgstr "All"
@@ -15840,6 +15876,90 @@ msgstr "Accept"
 msgctxt "profile.notifications"
 msgid "reject"
 msgstr "Reject"
+
+msgctxt "profile.notifications"
+msgid "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+msgstr "Your %(role_label)s request has been sent to %(organization_name)s and is currently awaiting a response."
+
+msgctxt "profile.notifications"
+msgid "%(organization_name)s has invited you as %(role_label)s."
+msgstr "%(organization_name)s has invited you as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "Join organization as %(role_label)s"
+msgstr "Join organization as %(role_label)s"
+
+msgctxt "profile.join_org"
+msgid "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+msgstr "Search current organizations, choose one, and send a short message to join as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+msgstr "You are currently connected to <strong>%(organization_name)s</strong>. After leaving, you can submit a new request from this section or accept any pending invites."
+
+msgctxt "profile.join_org"
+msgid "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+msgstr "You currently have <strong>%(count)s</strong> organization requests awaiting approval."
+
+msgctxt "profile.join_org"
+msgid "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+msgstr "You have <strong>%(count)s</strong> organization invites. You can join from those invites as %(role_label)s."
+
+msgctxt "profile.join_org"
+msgid "cancel"
+msgstr "Cancel"
+
+msgctxt "profile.join_org"
+msgid "search_placeholder"
+msgstr "Search organization..."
+
+msgctxt "profile.join_org"
+msgid "all_org_types"
+msgstr "All organization types"
+
+msgctxt "profile.join_org"
+msgid "Send %(role_label)s request"
+msgstr "Send %(role_label)s request"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request message"
+msgstr "%(role_label)s request message"
+
+msgctxt "profile.join_org"
+msgid "request_message_placeholder"
+msgstr "You can write a short note to the organization..."
+
+msgctxt "profile.join_org"
+msgid "confirm_request"
+msgstr "Confirm request"
+
+msgctxt "profile.join_org"
+msgid "select"
+msgstr "Select"
+
+msgctxt "profile.join_org"
+msgid "organization"
+msgstr "Organization"
+
+msgctxt "profile.join_org"
+msgid "type"
+msgstr "Type"
+
+msgctxt "profile.join_org"
+msgid "country"
+msgstr "Country"
+
+msgctxt "profile.join_org"
+msgid "status"
+msgstr "Status"
+
+msgctxt "profile.join_org"
+msgid "%(role_label)s request sent"
+msgstr "%(role_label)s request sent"
+
+msgctxt "profile.join_org"
+msgid "no_results"
+msgstr "No matching organizations were found."
 
 msgctxt "profile.publish_notification"
 msgid "title"

@@ -364,6 +364,17 @@ class NotificationViewTest(TestCase):
         n.refresh_from_db()
         self.assertTrue(n.is_read)
 
+    def test_mark_read_post_ajax_returns_json(self):
+        n = self._make_notification()
+        response = self.client.post(
+            reverse("notifications:notification_mark_read", args=[n.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        n.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"success": True, "is_read": True})
+        self.assertTrue(n.is_read)
+
     def test_mark_unread_post(self):
         n = self._make_notification()
         n.mark_read()

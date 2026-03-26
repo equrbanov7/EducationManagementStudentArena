@@ -10,7 +10,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
+from apps.notifications.services import notify_org_admins_of_new_request
+from apps.notifications.services import notify_member_removed_from_organization
 from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
@@ -25,9 +31,12 @@ from ._helpers import (
     _ensure_profile_admin_membership,
     _get_active_organization,
     _is_superadmin_user,
+    _membership_request_role_label,
+    _membership_request_role_type_for_profile_role,
     _map_org_role_to_profile_role,
     _normalized_org_name,
     _pending_student_request_queryset,
+    _profile_role_for_membership_request_type,
     _resolve_membership_role,
     _resolve_next_url,
     _role_capabilities,
@@ -259,11 +268,14 @@ def student_organization_management(request):
         _sync_profile_pending_request_snapshot(target_profile)
         return True, ""
 
-    def _invite_student_user(target_user):
+    def _invite_user_for_role(target_user, role_type):
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+        target_profile_role = _profile_role_for_membership_request_type(role_type)
+        target_role_label = _membership_request_role_label(role_type).lower()
+        membership_role = _resolve_membership_role(org, target_profile_role)
 
-        if student_role is None:
-            return False, "Bu təşkilat üçün tələbə rolu tapılmadı."
+        if membership_role is None:
+            return False, "Bu təşkilat üçün uyğun rol tapılmadı."
 
         if target_profile.organization and target_profile.organization != org:
             return False, "İstifadəçi başqa təşkilata bağlıdır."
@@ -283,7 +295,7 @@ def student_organization_management(request):
             invite_membership, _ = Membership.objects.update_or_create(
                 user=target_user,
                 organization=org,
-                role=student_role,
+                role=membership_role,
                 scope_unit=None,
                 defaults={
                     "assigned_by": request.user,
@@ -310,7 +322,7 @@ def student_organization_management(request):
                 user=target_user,
                 organization=org,
                 statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).update(
+            ).filter(role_type=role_type).update(
                 status=StudentOrganizationRequestStatus.AUTO_CLOSED,
                 resolution_note="Təşkilat dəvəti göndərildiyi üçün müraciət bağlandı.",
                 responded_by=request.user,
@@ -327,30 +339,36 @@ def student_organization_management(request):
             resource_repr=f"{target_user.username} pending invite",
             old_values=None,
             new_values={
-                "action": "invite_student",
+                "action": f"invite_{target_role_label}",
                 "invited_user": target_user.username,
-                "role": student_role.name,
+                "role": membership_role.name,
             },
             request=request,
         )
         return True, ""
 
-    def _revoke_sent_invite_for_user(target_user):
+    def _invite_student_user(target_user):
+        return _invite_user_for_role(target_user, MembershipRequestRoleType.STUDENT)
+
+    def _revoke_sent_invite_for_user(target_user, role_type=None):
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
-        invite_membership = (
-            Membership.objects.filter(
-                user=target_user,
-                organization=org,
-                is_active=False,
-                title=STUDENT_PENDING_INVITE_TITLE,
-            )
-            .select_related("role")
-            .first()
-        )
+        invite_queryset = Membership.objects.filter(
+            user=target_user,
+            organization=org,
+            is_active=False,
+            title=STUDENT_PENDING_INVITE_TITLE,
+        ).select_related("role")
+        if role_type is not None:
+            target_profile_role = _profile_role_for_membership_request_type(role_type)
+            invite_queryset = invite_queryset.filter(role=_resolve_membership_role(org, target_profile_role))
+        invite_membership = invite_queryset.first()
         if invite_membership is None:
             return False, "Geri çəkiləcək aktiv dəvət tapılmadı."
 
         invite_id = str(invite_membership.id)
+        mapped_role_type = role_type or _membership_request_role_type_for_profile_role(
+            _map_org_role_to_profile_role(invite_membership.role)
+        )
         with transaction.atomic():
             invite_membership.delete()
             now = timezone.now()
@@ -358,7 +376,7 @@ def student_organization_management(request):
                 user=target_user,
                 organization=org,
                 statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).update(
+            ).filter(role_type=mapped_role_type).update(
                 status=StudentOrganizationRequestStatus.CANCELLED,
                 resolution_note="Təşkilat dəvəti geri çəkildiyi üçün müraciət ləğv edildi.",
                 responded_by=request.user,
@@ -377,6 +395,103 @@ def student_organization_management(request):
             old_values={"status": "pending"},
             new_values={"status": "revoked_by_org"},
             request=request,
+        )
+        return True, ""
+
+    def _remove_org_member(target_user, *, remove_reason=""):
+        removable_profile_roles = {
+            ProfileRole.STUDENT,
+            ProfileRole.LEAD_STUDENT,
+            ProfileRole.TEACHER,
+            ProfileRole.ASSISTANT_TEACHER,
+            ProfileRole.MEMBER,
+            ProfileRole.HR,
+        }
+        target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
+        active_memberships = list(
+            Membership.objects.filter(user=target_user, organization=org, is_active=True).select_related("role")
+        )
+        if not active_memberships and target_profile.organization != org:
+            return False, "İstifadəçi bu təşkilata bağlı deyil."
+
+        effective_profile_role = None
+        if active_memberships:
+            top_membership = max(active_memberships, key=lambda membership: getattr(membership.role, "level", 0))
+            effective_profile_role = _map_org_role_to_profile_role(top_membership.role)
+        elif target_profile.role in removable_profile_roles:
+            effective_profile_role = target_profile.role
+
+        if effective_profile_role not in removable_profile_roles:
+            return False, "Yalnız tələbə, müəllim və staff istifadəçilər bu bölmədən uzaqlaşdırıla bilər."
+
+        if getattr(org, "owner_id", None) == target_user.id:
+            return False, "Təşkilat sahibi bu bölmədən uzaqlaşdırıla bilməz."
+
+        highest_target_level = max([membership.role.level for membership in active_memberships], default=0)
+        if not is_superadmin and highest_target_level >= user_level:
+            return False, "Yalnız öz səviyyənizdən aşağı istifadəçiləri idarə edə bilərsiniz."
+
+        with transaction.atomic():
+            if active_memberships:
+                membership_ids = [membership.id for membership in active_memberships]
+                Membership.objects.filter(id__in=membership_ids).update(
+                    is_active=False,
+                    is_primary=False,
+                )
+
+            fallback_membership = (
+                Membership.objects.filter(user=target_user, is_active=True)
+                .exclude(organization=org)
+                .select_related("organization", "role")
+                .order_by("-is_primary", "-role__level")
+                .first()
+            )
+            if fallback_membership:
+                target_profile.organization = fallback_membership.organization
+                target_profile.organization_type = fallback_membership.organization.org_type
+                target_profile.role = _map_org_role_to_profile_role(fallback_membership.role)
+            else:
+                target_profile.organization = None
+                target_profile.organization_type = OrganizationType.INDIVIDUAL
+                target_profile.role = effective_profile_role or target_profile.role
+
+            # Do not auto-create a new pending request after removal.
+            target_profile.requested_organization = None
+            target_profile.requested_organization_name = ""
+            target_profile.requested_organization_message = ""
+            target_profile.student_university_name = ""
+            target_profile.student_school_identifier = ""
+            target_profile.save(
+                update_fields=[
+                    "organization",
+                    "organization_type",
+                    "role",
+                    "requested_organization",
+                    "requested_organization_name",
+                    "requested_organization_message",
+                    "student_university_name",
+                    "student_school_identifier",
+                    "updated_at",
+                ]
+            )
+
+        create_audit_log(
+            user=request.user,
+            organization=org,
+            action="update",
+            resource_type="membership",
+            resource_id=target_user.id,
+            resource_repr=f"{target_user.username} removed from {org.name}",
+            old_values={"organization": org.name},
+            new_values={"organization": "", "action": "remove_member"},
+            reason=remove_reason or None,
+            request=request,
+        )
+        notify_member_removed_from_organization(
+            removed_user=target_user,
+            organization=org,
+            removed_by=request.user,
+            reason=remove_reason,
         )
         return True, ""
 
@@ -453,8 +568,17 @@ def student_organization_management(request):
                 )
             return redirect(next_url)
 
-        if action in {"invite_student", "bulk_invite_students"}:
-            if action == "invite_student":
+        if action in {"invite_student", "bulk_invite_students", "invite_teacher_staff", "bulk_invite_teacher_staff"}:
+            invite_role_type = (request.POST.get("invite_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            if invite_role_type not in {
+                MembershipRequestRoleType.STUDENT,
+                MembershipRequestRoleType.TEACHER,
+                MembershipRequestRoleType.STAFF,
+            }:
+                invite_role_type = MembershipRequestRoleType.STUDENT
+            invite_role_label = _membership_request_role_label(invite_role_type).lower()
+
+            if action in {"invite_student", "invite_teacher_staff"}:
                 single_user_id = (request.POST.get("user_id") or "").strip()
             else:
                 single_user_id = (request.POST.get("single_invite_user_id") or "").strip()
@@ -465,20 +589,24 @@ def student_organization_management(request):
                 selected_user_ids = {int(single_user_id)}
                 is_single_invite = True
             if not selected_user_ids:
-                selected_user_ids = {
-                    int(user_id)
-                    for user_id in request.POST.getlist("selected_unassigned_user_ids")
-                    if user_id.isdigit()
-                }
+                field_name = "selected_unassigned_user_ids"
+                if invite_role_type == MembershipRequestRoleType.TEACHER:
+                    field_name = "selected_unassigned_teacher_user_ids"
+                elif invite_role_type == MembershipRequestRoleType.STAFF:
+                    field_name = "selected_unassigned_staff_user_ids"
+                selected_user_ids = {int(user_id) for user_id in request.POST.getlist(field_name) if user_id.isdigit()}
             if not selected_user_ids:
-                messages.error(request, "Dəvət göndərmək üçün ən azı bir tələbə seçin.")
+                messages.error(request, f"Dəvət göndərmək üçün ən azı bir {invite_role_label} seçin.")
                 return redirect(next_url)
 
             processed_count = 0
             failed_usernames = []
             target_users = User.objects.filter(id__in=selected_user_ids, is_active=True).order_by("username")
             for target_user in target_users:
-                is_ok, _ = _invite_student_user(target_user)
+                if invite_role_type == MembershipRequestRoleType.STUDENT:
+                    is_ok, _ = _invite_student_user(target_user)
+                else:
+                    is_ok, _ = _invite_user_for_role(target_user, invite_role_type)
                 if is_ok:
                     processed_count += 1
                 else:
@@ -491,7 +619,10 @@ def student_organization_management(request):
                         f"Uğurla əlavə edildi: {target_users.first().username} üçün dəvət göndərildi.",
                     )
                 else:
-                    messages.success(request, f"Uğurla əlavə edildi: {processed_count} tələbəyə dəvət göndərildi.")
+                    messages.success(
+                        request,
+                        f"Uğurla əlavə edildi: {processed_count} {invite_role_label} istifadəçiyə dəvət göndərildi.",
+                    )
             if failed_usernames:
                 messages.warning(
                     request,
@@ -499,7 +630,14 @@ def student_organization_management(request):
                 )
             return redirect(next_url)
 
-        if action == "revoke_sent_invites":
+        if action in {"revoke_sent_invites", "revoke_teacher_staff_invites"}:
+            revoke_role_type = (request.POST.get("revoke_role_type") or MembershipRequestRoleType.STUDENT).strip().lower()
+            if revoke_role_type not in {
+                MembershipRequestRoleType.STUDENT,
+                MembershipRequestRoleType.TEACHER,
+                MembershipRequestRoleType.STAFF,
+            }:
+                revoke_role_type = MembershipRequestRoleType.STUDENT
             single_revoke_user_id = (request.POST.get("single_revoke_user_id") or "").strip()
             selected_user_ids = _csv_to_int_set(request.POST.get("selected_user_ids"))
             is_single_revoke = False
@@ -507,11 +645,12 @@ def student_organization_management(request):
                 selected_user_ids = {int(single_revoke_user_id)}
                 is_single_revoke = True
             if not selected_user_ids:
-                selected_user_ids = {
-                    int(user_id)
-                    for user_id in request.POST.getlist("selected_sent_invite_user_ids")
-                    if user_id.isdigit()
-                }
+                field_name = "selected_sent_invite_user_ids"
+                if revoke_role_type == MembershipRequestRoleType.TEACHER:
+                    field_name = "selected_sent_teacher_invite_user_ids"
+                elif revoke_role_type == MembershipRequestRoleType.STAFF:
+                    field_name = "selected_sent_staff_invite_user_ids"
+                selected_user_ids = {int(user_id) for user_id in request.POST.getlist(field_name) if user_id.isdigit()}
             if not selected_user_ids:
                 messages.error(request, "Geri çəkmək üçün ən azı bir dəvət seçin.")
                 return redirect(next_url)
@@ -520,7 +659,7 @@ def student_organization_management(request):
             failed_usernames = []
             target_users = User.objects.filter(id__in=selected_user_ids, is_active=True).order_by("username")
             for target_user in target_users:
-                is_ok, _ = _revoke_sent_invite_for_user(target_user)
+                is_ok, _ = _revoke_sent_invite_for_user(target_user, revoke_role_type)
                 if is_ok:
                     processed_count += 1
                 else:
@@ -538,88 +677,14 @@ def student_organization_management(request):
                 )
             return redirect(next_url)
 
-        if action == "remove_student":
+        if action in {"remove_student", "remove_org_member"}:
             target_user_id = request.POST.get("user_id")
             remove_reason = (request.POST.get("remove_reason") or "").strip()
             target_user = get_object_or_404(User, id=target_user_id, is_active=True)
-            target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
-            active_memberships = list(
-                Membership.objects.filter(user=target_user, organization=org, is_active=True).select_related("role")
-            )
-            if not active_memberships and target_profile.organization != org:
-                messages.error(request, "İstifadəçi bu təşkilata bağlı deyil.")
+            is_ok, error_message = _remove_org_member(target_user, remove_reason=remove_reason)
+            if not is_ok:
+                messages.error(request, error_message)
                 return redirect(next_url)
-
-            is_student_target = target_profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT} or any(
-                membership.role.name == "student" for membership in active_memberships
-            )
-            if not is_student_target:
-                messages.error(request, "Yalnız tələbə istifadəçilər bu bölmədən uzaqlaşdırıla bilər.")
-                return redirect(next_url)
-
-            highest_target_level = max([membership.role.level for membership in active_memberships], default=0)
-            if not is_superadmin and highest_target_level >= user_level:
-                messages.error(request, "Yalnız öz səviyyənizdən aşağı istifadəçiləri idarə edə bilərsiniz.")
-                return redirect(next_url)
-
-            with transaction.atomic():
-                if active_memberships:
-                    membership_ids = [membership.id for membership in active_memberships]
-                    Membership.objects.filter(id__in=membership_ids).update(
-                        is_active=False,
-                        is_primary=False,
-                    )
-
-                fallback_membership = (
-                    Membership.objects.filter(user=target_user, is_active=True)
-                    .exclude(organization=org)
-                    .select_related("organization", "role")
-                    .order_by("-is_primary", "-role__level")
-                    .first()
-                )
-                if fallback_membership:
-                    target_profile.organization = fallback_membership.organization
-                    target_profile.organization_type = fallback_membership.organization.org_type
-                    target_profile.role = _map_org_role_to_profile_role(fallback_membership.role)
-                else:
-                    target_profile.organization = None
-                    target_profile.organization_type = OrganizationType.INDIVIDUAL
-                    if target_profile.role not in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-                        target_profile.role = ProfileRole.STUDENT
-
-                # Do not auto-create a new pending request after removal.
-                target_profile.requested_organization = None
-                target_profile.requested_organization_name = ""
-                target_profile.requested_organization_message = ""
-                target_profile.student_university_name = ""
-                target_profile.student_school_identifier = ""
-                target_profile.save(
-                    update_fields=[
-                        "organization",
-                        "organization_type",
-                        "role",
-                        "requested_organization",
-                        "requested_organization_name",
-                        "requested_organization_message",
-                        "student_university_name",
-                        "student_school_identifier",
-                        "updated_at",
-                    ]
-                )
-
-            create_audit_log(
-                user=request.user,
-                organization=org,
-                action="update",
-                resource_type="membership",
-                resource_id=target_user.id,
-                resource_repr=f"{target_user.username} removed from {org.name}",
-                old_values={"organization": org.name},
-                new_values={"organization": "", "action": "remove_student"},
-                reason=remove_reason or None,
-                request=request,
-            )
-
             messages.success(request, f"Uğurla uzaqlaşdırıldı: {target_user.username}.")
             return redirect(next_url)
 
@@ -693,12 +758,14 @@ def student_organization_management(request):
                     f"{ts_request.user.get_full_name() or ts_request.user.username} qəbul edildi.",
                 )
             else:
+                target_profile, _ = UserProfile.objects.get_or_create(user=ts_request.user)
                 _set_student_org_request_status(
                     request_obj=ts_request,
                     status=StudentOrganizationRequestStatus.REJECTED,
                     note="Müraciət rədd edildi.",
                     responded_by=request.user,
                 )
+                _sync_profile_pending_request_snapshot(target_profile)
                 messages.success(
                     request,
                     f"{ts_request.user.get_full_name() or ts_request.user.username} müraciəti rədd edildi.",
@@ -719,19 +786,61 @@ def student_organization_management(request):
 
 @login_required
 def student_organization_request(request):
-    """Allow students to browse organizations and send join requests with a short message."""
+    """Allow applicants to send or clear organization join requests."""
     from apps.organizations.models import Membership, Organization
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
-    if "student-organization-request" not in capabilities["allowed_sections"]:
-        messages.error(request, "Bu bölmə yalnız tələbələr üçün aktivdir.")
-        return redirect("accounts:profile")
-
+    request_role_type = _membership_request_role_type_for_profile_role(profile.role)
+    request_role_label = _membership_request_role_label(request_role_type).lower()
     default_next = f"{reverse('accounts:profile')}?section=student-organization-request"
     if request.method == "POST":
         action = (request.POST.get("action") or "submit_request").strip().lower()
         next_url = _resolve_next_url(request, default_next)
+
+        if action == "clear_request":
+            request_id = (request.POST.get("request_id") or "").strip()
+            target_request = None
+            if request_id:
+                target_request = (
+                    _pending_student_request_queryset(
+                        user=request.user,
+                        statuses=[StudentOrganizationRequestStatus.PENDING],
+                    )
+                    .filter(id=request_id)
+                    .select_related("organization")
+                    .first()
+                )
+            else:
+                organization_id = (request.POST.get("organization_id") or "").strip()
+                if organization_id:
+                    target_request = (
+                        _pending_student_request_queryset(
+                            user=request.user,
+                            statuses=[StudentOrganizationRequestStatus.PENDING],
+                        )
+                        .filter(organization_id=organization_id)
+                        .select_related("organization")
+                        .first()
+                    )
+
+            if target_request is None:
+                messages.error(request, "Ləğv ediləcək aktiv müraciət tapılmadı.")
+                return redirect(next_url)
+
+            _set_student_org_request_status(
+                request_obj=target_request,
+                status=StudentOrganizationRequestStatus.CANCELLED,
+                note="Müraciət istifadəçi tərəfindən ləğv edildi.",
+                responded_by=request.user,
+            )
+            _sync_profile_pending_request_snapshot(profile)
+            messages.success(request, f"{target_request.organization.name} üçün müraciət ləğv edildi.")
+            return redirect(next_url)
+
+        if "student-organization-request" not in capabilities["allowed_sections"]:
+            messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
+            return redirect("accounts:profile")
 
         if action == "submit_request":
             if profile.organization_id:
@@ -780,6 +889,7 @@ def student_organization_request(request):
                     organization=target_org,
                     statuses=[StudentOrganizationRequestStatus.PENDING],
                 )
+                .filter(role_type=request_role_type)
                 .order_by("-created_at")
                 .first()
             )
@@ -802,16 +912,21 @@ def student_organization_request(request):
                 target_request = StudentOrganizationRequest.objects.create(
                     user=request.user,
                     organization=target_org,
+                    role_type=request_role_type,
                     message=request_message,
                     status=StudentOrganizationRequestStatus.PENDING,
                 )
+                try:
+                    notify_org_admins_of_new_request(request_obj=target_request)
+                except Exception:
+                    pass
 
             # Keep one pending row per user+organization for cleaner history and UI.
             duplicate_pending = _pending_student_request_queryset(
                 user=request.user,
                 organization=target_org,
                 statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).exclude(id=target_request.id)
+            ).filter(role_type=request_role_type).exclude(id=target_request.id)
             if duplicate_pending.exists():
                 now = timezone.now()
                 duplicate_pending.update(
@@ -826,65 +941,29 @@ def student_organization_request(request):
             profile.requested_organization_name = target_org.name
             profile.requested_organization_message = request_message
             profile.organization_type = target_org.org_type
-            if profile.role not in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-                profile.role = ProfileRole.STUDENT
             profile.save(
                 update_fields=[
                     "requested_organization",
                     "requested_organization_name",
                     "requested_organization_message",
                     "organization_type",
-                    "role",
                     "updated_at",
                 ]
             )
             _sync_profile_pending_request_snapshot(profile)
 
-            messages.success(request, f"{target_org.name} üçün müraciətiniz göndərildi və təsdiq gözləyir.")
-            return redirect(next_url)
-
-        if action == "clear_request":
-            request_id = (request.POST.get("request_id") or "").strip()
-            target_request = None
-            if request_id:
-                target_request = (
-                    _pending_student_request_queryset(
-                        user=request.user,
-                        statuses=[StudentOrganizationRequestStatus.PENDING],
-                    )
-                    .filter(id=request_id)
-                    .select_related("organization")
-                    .first()
-                )
-            else:
-                organization_id = (request.POST.get("organization_id") or "").strip()
-                if organization_id:
-                    target_request = (
-                        _pending_student_request_queryset(
-                            user=request.user,
-                            statuses=[StudentOrganizationRequestStatus.PENDING],
-                        )
-                        .filter(organization_id=organization_id)
-                        .select_related("organization")
-                        .first()
-                    )
-
-            if target_request is None:
-                messages.error(request, "Ləğv ediləcək aktiv müraciət tapılmadı.")
-                return redirect(next_url)
-
-            _set_student_org_request_status(
-                request_obj=target_request,
-                status=StudentOrganizationRequestStatus.CANCELLED,
-                note="Müraciət tələbə tərəfindən ləğv edildi.",
-                responded_by=request.user,
+            messages.success(
+                request,
+                f"{target_org.name} üçün {request_role_label} müraciətiniz göndərildi və təsdiq gözləyir.",
             )
-            _sync_profile_pending_request_snapshot(profile)
-            messages.success(request, f"{target_request.organization.name} üçün müraciət ləğv edildi.")
             return redirect(next_url)
 
         messages.error(request, "Naməlum əməliyyat.")
         return redirect(next_url)
+
+    if "student-organization-request" not in capabilities["allowed_sections"]:
+        messages.error(request, "Bu bölmə yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
+        return redirect("accounts:profile")
 
     context = _build_student_org_request_section(request=request, profile=profile)
     return render(request, "accounts/student_organization_request.html", context)
@@ -911,6 +990,10 @@ def student_org_invitation_action(request):
         title=STUDENT_PENDING_INVITE_TITLE,
     )
 
+    invite_profile_role = _map_org_role_to_profile_role(getattr(invite_membership, "role", None))
+    invite_role_type = _membership_request_role_type_for_profile_role(invite_profile_role)
+    invite_role_label = _membership_request_role_label(invite_role_type).lower()
+
     if action == "accept":
         organization = invite_membership.organization
         if organization.is_suspended:
@@ -922,13 +1005,16 @@ def student_org_invitation_action(request):
             messages.error(request, "Əvvəlcə mövcud təşkilatdan çıxın, sonra yeni dəvəti qəbul edin.")
             return redirect(back_url)
 
-        student_role = _resolve_membership_role(organization, ProfileRole.STUDENT)
-        if student_role is None:
-            messages.error(request, "Təşkilatda tələbə rolu tapılmadı.")
+        membership_role = invite_membership.role or _resolve_membership_role(
+            organization,
+            _profile_role_for_membership_request_type(invite_role_type),
+        )
+        if membership_role is None:
+            messages.error(request, "Təşkilatda uyğun üzvlük rolu tapılmadı.")
             return redirect(back_url)
 
         with transaction.atomic():
-            invite_membership.role = student_role
+            invite_membership.role = membership_role
             invite_membership.is_active = True
             invite_membership.is_primary = True
             invite_membership.title = ""
@@ -944,7 +1030,7 @@ def student_org_invitation_action(request):
 
             profile.organization = organization
             profile.organization_type = organization.org_type
-            profile.role = ProfileRole.STUDENT
+            profile.role = _profile_role_for_membership_request_type(invite_role_type)
             profile.requested_organization = organization
             profile.requested_organization_name = organization.name
             profile.requested_organization_message = ""
@@ -973,7 +1059,7 @@ def student_org_invitation_action(request):
                 user=request.user,
                 organization=organization,
                 statuses=[StudentOrganizationRequestStatus.PENDING],
-            ).update(
+            ).filter(role_type=invite_role_type).update(
                 status=StudentOrganizationRequestStatus.APPROVED,
                 resolution_note="Dəvət qəbul edildiyi üçün üzvlük aktivləşdi.",
                 responded_by=request.user,
@@ -998,7 +1084,7 @@ def student_org_invitation_action(request):
             new_values={"status": "accepted"},
             request=request,
         )
-        messages.success(request, f"{organization.name} təşkilatına qoşuldunuz.")
+        messages.success(request, f"{organization.name} təşkilatına {invite_role_label} kimi qoşuldunuz.")
         return redirect(back_url)
 
     if action == "reject":
@@ -1015,7 +1101,7 @@ def student_org_invitation_action(request):
             new_values={"status": "rejected"},
             request=request,
         )
-        messages.info(request, f"{organization.name} dəvəti rədd edildi.")
+        messages.info(request, f"{organization.name} tərəfindən göndərilən {invite_role_label} dəvəti rədd edildi.")
         return redirect(back_url)
 
     messages.error(request, "Naməlum əməliyyat.")
@@ -1024,7 +1110,7 @@ def student_org_invitation_action(request):
 
 @login_required
 def student_leave_organization(request):
-    """Allow students to leave their current organization with mandatory reason."""
+    """Allow eligible non-admin members to leave their current organization with mandatory reason."""
     from apps.organizations.models import Membership
     from apps.organizations.services import create_audit_log
 
@@ -1043,17 +1129,45 @@ def student_leave_organization(request):
         messages.error(request, "Hazırda bağlı olduğunuz təşkilat yoxdur.")
         return redirect(back_url)
 
-    is_student_user = (
-        profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
-        or Membership.objects.filter(
+    active_membership = (
+        Membership.objects.filter(
             user=request.user,
             organization=organization,
             is_active=True,
-            role__name="student",
-        ).exists()
+        )
+        .select_related("role")
+        .order_by("-is_primary", "-role__level")
+        .first()
     )
-    if not is_student_user:
-        messages.error(request, "Bu əməliyyat yalnız tələbələr üçün aktivdir.")
+    membership_profile_role = _map_org_role_to_profile_role(getattr(active_membership, "role", None))
+    can_leave_org = bool(
+        getattr(organization, "owner_id", None) != request.user.id
+        and (
+            membership_profile_role
+            in {
+                ProfileRole.STUDENT,
+                ProfileRole.LEAD_STUDENT,
+                ProfileRole.TEACHER,
+                ProfileRole.ASSISTANT_TEACHER,
+                ProfileRole.MEMBER,
+                ProfileRole.HR,
+            }
+            or (
+                active_membership is None
+                and profile.role
+                in {
+                    ProfileRole.STUDENT,
+                    ProfileRole.LEAD_STUDENT,
+                    ProfileRole.TEACHER,
+                    ProfileRole.ASSISTANT_TEACHER,
+                    ProfileRole.MEMBER,
+                    ProfileRole.HR,
+                }
+            )
+        )
+    )
+    if not can_leave_org:
+        messages.error(request, "Bu əməliyyat yalnız tələbə, müəllim və staff hesabları üçün aktivdir.")
         return redirect(back_url)
 
     with transaction.atomic():

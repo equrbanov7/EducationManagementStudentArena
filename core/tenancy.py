@@ -24,6 +24,8 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     user = getattr(request, "user", None)
     if allow_superadmin and bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False)):
         return True
+    if user is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        return True
 
     memberships = getattr(request, "org_memberships", None) or []
     return bool(memberships)

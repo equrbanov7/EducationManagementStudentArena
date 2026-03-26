@@ -97,8 +97,17 @@ class OrganizationMiddleware:
                 except Organization.DoesNotExist:
                     request.session.pop("active_organization", None)
             else:
-                # User is no longer a member of the session org — clear it.
-                request.session.pop("active_organization", None)
+                owner_org = Organization.objects.filter(
+                    slug=org_slug,
+                    is_active=True,
+                    owner=request.user,
+                ).first()
+                if owner_org is not None:
+                    request.organization = owner_org
+                    request.org_memberships = []
+                else:
+                    # User is no longer a member of the session org — clear it.
+                    request.session.pop("active_organization", None)
 
         # ── Step 2: auto-select when no session org is available ──────────
         if request.organization is None:
@@ -138,6 +147,10 @@ class OrganizationMiddleware:
             for membership in request.org_memberships:
                 if membership.role.permissions:
                     permissions_set.update(membership.role.permissions)
+                if getattr(membership.role, "name", "") == "teacher":
+                    # Back-compat: older default teacher roles missed course.create
+                    # even though the UI and flow allow teachers to create courses.
+                    permissions_set.add("course.create")
             request.org_permissions = list(permissions_set)
 
         if hasattr(request.user, "set_active_organization_context"):
