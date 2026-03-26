@@ -499,6 +499,8 @@ def _role_capabilities(user, profile):
             "student-organization-management",
             "permission-editor",
             "manage-roles",
+            "create-category",
+            "category-management",
             "superadmin-organizations",
             "pending-post-approvals",
             "blog",

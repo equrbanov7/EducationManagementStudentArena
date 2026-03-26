@@ -5,21 +5,27 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
+from django.db.models.functions import Lower
 from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.text import slugify
 
-from .taxonomy import get_category_placeholder_static_path, get_localized_category_name
+from .taxonomy import SUPPORTED_CATEGORY_LANGUAGES, get_category_placeholder_static_path, get_localized_category_name
 
 User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
+    name_az = models.CharField(max_length=100, blank=True, default="")
+    name_en = models.CharField(max_length=100, blank=True, default="")
+    name_ru = models.CharField(max_length=100, blank=True, default="")
+    name_tr = models.CharField(max_length=100, blank=True, default="")
     slug = models.SlugField(max_length=120, unique=True)
     parent = models.ForeignKey(
         "self",
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="children",
@@ -31,14 +37,83 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Kateqoriya"
         verbose_name_plural = "Kateqoriyalar"
-        ordering = ["sort_order", "name"]
+        ordering = ["sort_order", "name_en", "name_az", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name_az"),
+                condition=Q(parent__isnull=True),
+                name="blog_category_root_name_az_unique",
+            ),
+            models.UniqueConstraint(
+                Lower("name_en"),
+                condition=Q(parent__isnull=True),
+                name="blog_category_root_name_en_unique",
+            ),
+            models.UniqueConstraint(
+                Lower("name_ru"),
+                condition=Q(parent__isnull=True),
+                name="blog_category_root_name_ru_unique",
+            ),
+            models.UniqueConstraint(
+                Lower("name_tr"),
+                condition=Q(parent__isnull=True),
+                name="blog_category_root_name_tr_unique",
+            ),
+            models.UniqueConstraint(
+                "parent",
+                Lower("name_az"),
+                condition=Q(parent__isnull=False),
+                name="blog_subcategory_parent_name_az_unique",
+            ),
+            models.UniqueConstraint(
+                "parent",
+                Lower("name_en"),
+                condition=Q(parent__isnull=False),
+                name="blog_subcategory_parent_name_en_unique",
+            ),
+            models.UniqueConstraint(
+                "parent",
+                Lower("name_ru"),
+                condition=Q(parent__isnull=False),
+                name="blog_subcategory_parent_name_ru_unique",
+            ),
+            models.UniqueConstraint(
+                "parent",
+                Lower("name_tr"),
+                condition=Q(parent__isnull=False),
+                name="blog_subcategory_parent_name_tr_unique",
+            ),
+        ]
 
     def __str__(self):
         return self.name
 
+    def _normalize_translated_names(self):
+        canonical_name = (self.name or "").strip()
+
+        if not canonical_name:
+            for language_code in SUPPORTED_CATEGORY_LANGUAGES:
+                translated_value = (getattr(self, f"name_{language_code}", "") or "").strip()
+                if translated_value:
+                    canonical_name = translated_value
+                    break
+
+        translated_values = {}
+        for language_code in SUPPORTED_CATEGORY_LANGUAGES:
+            field_name = f"name_{language_code}"
+            translated_value = (getattr(self, field_name, "") or "").strip()
+            translated_values[field_name] = translated_value or canonical_name
+
+        if not canonical_name:
+            canonical_name = translated_values.get("name_en") or translated_values.get("name_az") or ""
+
+        self.name = canonical_name
+        for field_name, translated_value in translated_values.items():
+            setattr(self, field_name, translated_value)
+
     @property
     def localized_name(self):
-        return get_localized_category_name(self.slug, self.name) if self.is_default else self.name
+        return get_localized_category_name(self, self.name)
 
     @property
     def full_name(self):
@@ -106,19 +181,27 @@ class Category(models.Model):
 
     def clean(self):
         super().clean()
+        self._normalize_translated_names()
 
         if self.parent_id and self.pk and self.parent_id == self.pk:
             raise ValidationError({"parent": "Kateqoriya özü-özünün valideyni ola bilməz."})
 
-        if self.parent_id and self.pk and self.pk in self.parent.get_descendant_ids(include_self=True):
+        if self.parent_id and self.parent and self.parent.parent_id:
+            raise ValidationError({"parent": "Yalnız bir səviyyəlik alt kateqoriya yaratmaq olar."})
+
+        if self.parent_id and self.pk and self.children.exists():
+            raise ValidationError({"parent": "Alt kateqoriyası olan kateqoriya alt kateqoriya edilə bilməz."})
+
+        if self.parent_id and self.pk and self.parent and self.pk in self.parent.get_descendant_ids(include_self=True):
             raise ValidationError({"parent": "Kateqoriya öz övladlarından birinin altına köçürülə bilməz."})
 
     def save(self, *args, **kwargs):
-        # Slug boşdursa və ya dəyişdirilibsə yenilə
-        if not self.slug:
-            self.slug = slugify(self.name)
+        self._normalize_translated_names()
 
-            # Əgər bu slug artıq varsa, sonuna rəqəm artır (nadir halda)
+        if not self.slug:
+            slug_source = self.name_en or self.name_az or self.name or self.name_ru or self.name_tr
+            self.slug = slugify(slug_source)
+
             original_slug = self.slug
             for x in itertools.count(1):
                 if not Category.objects.filter(slug=self.slug).exists():
@@ -146,7 +229,7 @@ class Post(models.Model):
     # Burada related_name="posts" qalsa yaxşıdır, kateqoriyadan postları çağırmaq üçün
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET_NULL,  # Kateqoriya silinsə, məqalə silinməsin, kategoriyasız qalsın
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="posts",
@@ -220,6 +303,18 @@ class Post(models.Model):
         return agg["rating__avg"] or 0
 
     @property
+    def root_category(self):
+        if not self.category_id or not self.category:
+            return None
+        return self.category.get_root()
+
+    @property
+    def selected_subcategory(self):
+        if not self.category_id or not self.category or not self.category.parent_id:
+            return None
+        return self.category
+
+    @property
     def get_image(self):
         """
         Bu metod yoxlayır:
@@ -234,7 +329,7 @@ class Post(models.Model):
         else:
             category_slug = None
             if self.category_id and self.category:
-                category_slug = self.category.get_root().slug
+                category_slug = self.root_category.slug if self.root_category else None
 
             return static(get_category_placeholder_static_path(category_slug))
 

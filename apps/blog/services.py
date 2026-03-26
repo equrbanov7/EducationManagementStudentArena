@@ -5,6 +5,7 @@ This module contains service functions that encapsulate business operations.
 
 from collections import defaultdict
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from apps.accounts.models import ProfileRole
@@ -12,7 +13,7 @@ from apps.accounts.policies import get_user_role_level, is_superadmin_user, user
 from apps.exams.models import StudentGroup
 from core.constants import ROLE_LEVEL_TEACHER
 
-from .models import Post
+from .models import Category, Post
 
 APPROVAL_STATUS_FILTERS = {
     "all",
@@ -30,10 +31,30 @@ def author_requires_post_approval(author):
     return user_has_any_role(author, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
 
 
-def can_user_create_post_category(user):
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    return get_user_role_level(user) >= ROLE_LEVEL_TEACHER
+def can_user_manage_categories(user):
+    return is_superadmin_user(user)
+
+
+def resolve_post_category_selection(*, category=None, subcategory=None):
+    if category is None:
+        raise ValidationError({"category": "Please select a category."})
+
+    if category.parent_id:
+        raise ValidationError({"category": "Please select a top-level category."})
+
+    if subcategory is None:
+        return category
+
+    if not isinstance(subcategory, Category):
+        raise ValidationError({"subcategory": "Please select a valid subcategory."})
+
+    if not subcategory.parent_id:
+        raise ValidationError({"subcategory": "Please select a valid subcategory."})
+
+    if subcategory.parent_id != category.id:
+        raise ValidationError({"subcategory": "Selected subcategory does not belong to the chosen category."})
+
+    return subcategory
 
 
 def can_user_review_post(user, post):

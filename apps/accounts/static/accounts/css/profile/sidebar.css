@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .profile-sidebar.collapsed {
@@ -69,6 +70,7 @@
 .sidebar-menu-item {
     position: relative;
     width: 100%;
+    flex-shrink: 0;
 }
 
 .sidebar-menu-link {
@@ -93,6 +95,45 @@
     background: var(--primary-blue);
     color: white;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.sidebar-menu-link--accent {
+    border: 1px solid transparent;
+    box-shadow: 0 10px 24px rgba(148, 163, 184, 0.14);
+}
+
+.sidebar-menu-link--accent-ocean {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.14), rgba(16, 185, 129, 0.18));
+    border-color: rgba(14, 165, 233, 0.16);
+    color: #0f4c81;
+}
+
+.sidebar-menu-link--accent-ocean:hover {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(16, 185, 129, 0.24));
+    color: #0b4f73;
+}
+
+.sidebar-menu-link--accent-ocean.active {
+    background: linear-gradient(135deg, #0f766e, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+}
+
+.sidebar-menu-link--accent-admin {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(59, 130, 246, 0.18));
+    border-color: rgba(99, 102, 241, 0.16);
+    color: #3346a0;
+}
+
+.sidebar-menu-link--accent-admin:hover {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(59, 130, 246, 0.24));
+    color: #2f3f95;
+}
+
+.sidebar-menu-link--accent-admin.active {
+    background: linear-gradient(135deg, #4f46e5, #2563eb);
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(79, 70, 229, 0.22);
 }
 
 .sidebar-menu-icon {
@@ -140,6 +181,7 @@
     letter-spacing: 1px;
     color: #9ca3af;
     list-style: none;
+    flex-shrink: 0;
 }
 
 .sidebar-menu-group-label--bottom {
@@ -154,11 +196,13 @@
 }
 
 .sidebar-menu-group {
+    --sidebar-group-open-height: 900px;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     background: #f9fbff;
     transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .sidebar-menu-group.is-open {
@@ -188,6 +232,7 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     cursor: pointer;
+    min-height: 3.25rem;
 }
 
 .sidebar-menu-group-toggle:hover {
@@ -221,7 +266,7 @@
 }
 
 .sidebar-menu-group.is-open .sidebar-menu-group-items {
-    max-height: 900px;
+    max-height: var(--sidebar-group-open-height);
     opacity: 1;
     padding-top: 0.2rem;
 }
