@@ -2,6 +2,8 @@
 Shared helpers for request-scoped tenant filtering.
 """
 
+TRUSTED_OWNER_CONTEXT_ATTR = "_owner_verified_organization_context"
+
 
 def get_request_organization(request):
     """
@@ -24,10 +26,17 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     user = getattr(request, "user", None)
     if allow_superadmin and bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False)):
         return True
-    if user is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None):
-        return True
+    if bool(getattr(request, TRUSTED_OWNER_CONTEXT_ATTR, False)):
+        return user is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None)
 
     memberships = getattr(request, "org_memberships", None) or []
+    if not memberships:
+        return False
+
+    if user is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        # Owners may still appear inside a normal membership-backed context.
+        return True
+
     return bool(memberships)
 
 
