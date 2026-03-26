@@ -180,7 +180,8 @@ POSTGRES_USER=emsarena_user
 POSTGRES_PASSWORD=replace-with-a-strong-postgres-password
 DATABASE_URL=postgresql://emsarena_user:replace-with-a-strong-postgres-password@localhost:5432/emsarena_db
 
-# Redis (for WebSockets)
+# Redis (optional locally; enable only if Redis is running)
+USE_REDIS=False
 REDIS_URL=redis://127.0.0.1:6379/0
 # Production Docker stack only
 REDIS_PASSWORD=replace-with-a-strong-redis-password

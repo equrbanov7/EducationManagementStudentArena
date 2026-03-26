@@ -58,6 +58,14 @@ logger = logging.getLogger(__name__)
 _PREFIX = "emsarena"
 
 
+def _safe_cache_get(key: str):
+    try:
+        return cache.get(key)
+    except Exception:
+        logger.warning("Redis unavailable; cache lookup failed for key %s", key)
+        return None
+
+
 def _session_settings_key(session) -> str:
     return f"{_PREFIX}:live_exam:session_settings:{session.pk}"
 
@@ -85,7 +93,7 @@ def get_cached_session_settings(session) -> dict[str, Any]:
     The result is always a fully normalised settings dict (never ``None``).
     """
     key = _session_settings_key(session)
-    cached = cache.get(key)
+    cached = _safe_cache_get(key)
     if cached is not None:
         return cached
 
@@ -123,7 +131,7 @@ def get_cached_exam_question_ids(session) -> list[int]:
     removes questions (which should invalidate this cache).
     """
     key = _exam_question_ids_key(session)
-    cached = cache.get(key)
+    cached = _safe_cache_get(key)
     if cached is not None:
         return cached
 
@@ -163,7 +171,7 @@ def get_cached_exam_metadata(exam_pk: int) -> dict[str, Any] | None:
     and populate the cache.
     """
     key = _exam_metadata_key(exam_pk)
-    return cache.get(key)
+    return _safe_cache_get(key)
 
 
 def set_cached_exam_metadata(exam_pk: int, metadata: dict[str, Any]) -> None:

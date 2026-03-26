@@ -206,6 +206,11 @@ def get_user_org_role_level(user, organization):
     """Get the highest role level a user has in an organization."""
     if not user or not organization:
         return 0
+    if getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        return max(
+            ProfileRole.LEVELS.get(ProfileRole.ORG_OWNER, 0),
+            ROLE_LEVELS.get(ProfileRole.ORG_OWNER, 0),
+        )
     levels = [
         _membership_effective_level(user, membership, organization=organization)
         for membership in get_active_memberships(user, organization)

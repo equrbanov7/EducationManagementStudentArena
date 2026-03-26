@@ -81,7 +81,7 @@
                             <a href="{% url 'accounts:profile' %}" class="blog-header__user-menu-item">
                                 {% trans "my_profile" context "nav" %}
                             </a>
-                            <a href="{% url 'notifications:notification_list' %}" class="blog-header__user-menu-item">
+                            <a href="{% url 'accounts:profile' %}?section=notifications" class="blog-header__user-menu-item">
                                 {% user_unread_notification_count request.user as notif_count %}
                                 {% trans "notifications" context "nav" %}
                                 {% if notif_count %}

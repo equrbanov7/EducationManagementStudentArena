@@ -2,17 +2,30 @@
 Organization-request services for accounts.
 """
 
+import logging
+
 from django.utils import timezone
 
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
+from apps.notifications.services import (
+    notify_membership_request_resolution,
+    notify_org_admins_of_new_request,
+)
 from core.constants import OrganizationType
 
 from ..models import ProfileRole
 from ..queries import pending_student_request_queryset
 
+logger = logging.getLogger(__name__)
+
 
 def set_student_org_request_status(*, request_obj, status, note="", responded_by=None, when=None):
     """Persist a status update for a student organization request."""
+    previous_status = request_obj.status
     responded_at = when or timezone.now()
     request_obj.status = status
     request_obj.resolution_note = (note or "").strip()
@@ -27,6 +40,15 @@ def set_student_org_request_status(*, request_obj, status, note="", responded_by
             "updated_at",
         ]
     )
+    if previous_status != status:
+        try:
+            notify_membership_request_resolution(request_obj=request_obj)
+        except Exception:
+            logger.exception(
+                "Failed to notify applicant about request %s status change to %s",
+                request_obj.pk,
+                status,
+            )
 
 
 def sync_profile_pending_request_snapshot(profile):
@@ -93,9 +115,20 @@ def close_other_pending_student_requests(*, user, accepted_organization, respond
 
 
 def activate_verified_student_membership(user):
+    """Back-compat alias for activate_verified_membership (students only)."""
+    return activate_verified_membership(user)
+
+
+def activate_verified_membership(user):
     """
-    Keep student join requests pending after email verification.
-    Students only become full members after organization approval.
+    Finalize pending join requests after email verification.
+
+    For students, teachers, and staff who registered with a join mode and
+    selected an organization, this function creates (or updates) the
+    ``StudentOrganizationRequest`` record so that org admins can act on it.
+
+    The user is NOT immediately added as a member; that requires explicit
+    admin approval.
     """
     profile = getattr(user, "profile", None)
     if profile is None:
@@ -110,27 +143,45 @@ def activate_verified_student_membership(user):
     if requested_organization.is_suspended:
         return None
 
+    # Determine the request role type based on the profile role.
     if profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}:
-        request_message = (profile.requested_organization_message or "").strip()
-        existing_pending = (
-            pending_student_request_queryset(
-                user=user,
-                organization=requested_organization,
-                statuses=[StudentOrganizationRequestStatus.PENDING],
-            )
-            .order_by("-created_at")
-            .first()
+        role_type = MembershipRequestRoleType.STUDENT
+    elif profile.role == ProfileRole.TEACHER:
+        role_type = MembershipRequestRoleType.TEACHER
+    else:
+        # Staff / HR / member → treat as staff request
+        role_type = MembershipRequestRoleType.STAFF
+
+    request_message = (profile.requested_organization_message or "").strip()
+
+    existing_pending = (
+        pending_student_request_queryset(
+            user=user,
+            organization=requested_organization,
+            statuses=[StudentOrganizationRequestStatus.PENDING],
         )
-        if existing_pending:
-            if existing_pending.message != request_message:
-                existing_pending.message = request_message
-                existing_pending.save(update_fields=["message", "updated_at"])
-        else:
-            StudentOrganizationRequest.objects.create(
-                user=user,
-                organization=requested_organization,
-                message=request_message,
-                status=StudentOrganizationRequestStatus.PENDING,
+        .filter(role_type=role_type)
+        .order_by("-created_at")
+        .first()
+    )
+    if existing_pending:
+        if existing_pending.message != request_message:
+            existing_pending.message = request_message
+            existing_pending.save(update_fields=["message", "updated_at"])
+    else:
+        request_obj = StudentOrganizationRequest.objects.create(
+            user=user,
+            organization=requested_organization,
+            role_type=role_type,
+            message=request_message,
+            status=StudentOrganizationRequestStatus.PENDING,
+        )
+        try:
+            notify_org_admins_of_new_request(request_obj=request_obj)
+        except Exception:
+            logger.exception(
+                "Failed to notify org admins about verified membership request %s",
+                request_obj.pk,
             )
 
     profile.requested_organization_name = requested_organization.name
@@ -154,6 +205,7 @@ def activate_verified_student_membership(user):
 
 
 __all__ = [
+    "activate_verified_membership",
     "activate_verified_student_membership",
     "close_other_pending_student_requests",
     "set_student_org_request_status",

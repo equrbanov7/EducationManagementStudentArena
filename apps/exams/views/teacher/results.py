@@ -198,6 +198,7 @@ def teacher_exam_results(request, slug):
         attempt_id = request.POST.get("attempt_id")
         score_raw = request.POST.get("teacher_score", "").strip()
         feedback = request.POST.get("teacher_feedback", "").strip()
+        from apps.notifications.services import notify_student_about_feedback
 
         selected_attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
 
@@ -211,6 +212,12 @@ def teacher_exam_results(request, slug):
                     selected_attempt.teacher_score = score_val
                     selected_attempt.teacher_feedback = feedback
                     selected_attempt.mark_checked()
+                    notify_student_about_feedback(
+                        task=exam,
+                        student=selected_attempt.user,
+                        task_kind="exam",
+                        extra_metadata={"attempt_id": selected_attempt.id},
+                    )
                     messages.success(request, pgettext_lazy("exams.view.results.message", "score_feedback_saved"))
                     return redirect(
                         _append_query_params(
@@ -232,6 +239,12 @@ def teacher_exam_results(request, slug):
                     "teacher_feedback",
                     "checked_by_teacher",
                 ]
+            )
+            notify_student_about_feedback(
+                task=exam,
+                student=selected_attempt.user,
+                task_kind="exam",
+                extra_metadata={"attempt_id": selected_attempt.id},
             )
             messages.success(request, pgettext_lazy("exams.view.results.message", "feedback_saved"))
             return redirect(
@@ -585,6 +598,7 @@ def teacher_check_attempt(request, slug, attempt_id):
 
         total_score = 0
         any_score = False
+        from apps.notifications.services import notify_student_about_feedback
 
         for a in answers_qs:
             q = a.question
@@ -612,6 +626,12 @@ def teacher_check_attempt(request, slug, attempt_id):
         if not attempt.teacher_checked_at:
             attempt.teacher_checked_at = timezone.now()
         attempt.save(update_fields=["teacher_score", "checked_by_teacher", "teacher_checked_at"])
+        notify_student_about_feedback(
+            task=exam,
+            student=attempt.user,
+            task_kind="exam",
+            extra_metadata={"attempt_id": attempt.id},
+        )
 
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
         return redirect(results_return_url)

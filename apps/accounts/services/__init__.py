@@ -32,6 +32,7 @@ from .auth import (
     verify_otp_code,
 )
 from .organization_requests import (
+    activate_verified_membership,
     activate_verified_student_membership,
     close_other_pending_student_requests,
     set_student_org_request_status,
@@ -43,6 +44,7 @@ from .registration import create_user_with_organization, purge_stale_pending_reg
 
 __all__ = [
     "activate_user_account",
+    "activate_verified_membership",
     "activate_verified_student_membership",
     "close_other_pending_student_requests",
     "create_user_with_organization",

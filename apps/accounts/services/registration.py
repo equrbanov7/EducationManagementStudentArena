@@ -8,7 +8,12 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 
-from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
+from apps.notifications.models import (
+    MembershipRequestRoleType,
+    StudentOrganizationRequest,
+    StudentOrganizationRequestStatus,
+)
+from apps.notifications.services import notify_org_admins_of_new_request
 from core.constants import OrganizationType
 
 from ..models import ProfileRole, UserProfile
@@ -33,7 +38,6 @@ def purge_stale_pending_registration(username: str, email: str) -> None:
     Owned organizations are deleted first to satisfy the ``PROTECT`` constraint
     on ``Organization.owner``.
     """
-    from apps.accounts.models import EmailOTP
     from apps.organizations.models import Organization
 
     if not username and not email:
@@ -76,6 +80,11 @@ def create_user_with_organization(
     organization_identifier="",
     organization_license_identifier="",
     initial_role=ProfileRole.MEMBER,
+    phone="",
+    specialization="",
+    group_number="",
+    department="",
+    staff_position="",
 ):
     """Create a user, profile, request, and optional organization membership."""
     del country_code
@@ -114,19 +123,30 @@ def create_user_with_organization(
         organization_name = institution_not_listed_name
         requested_organization_name = organization_name
         resolved_identifier = organization_identifier
+        # New organizations require superadmin approval before becoming active.
         organization = Organization.objects.create(
             name=organization_name,
             org_type=organization_type,
             country=country_name,
             owner=user,
-            status="active",
+            status="pending",
             is_active=True,
             organization_identifier=resolved_identifier,
             license_identifier=organization_license_identifier,
         )
         requested_organization = organization
         requested_organization_name = organization.name
+
+        # Notify all superadmins that a new organization is awaiting approval.
+        # Import deferred to avoid circular imports at module load time.
+        try:
+            from apps.accounts.views.superadmin import _notify_superadmins_of_pending_org
+
+            _notify_superadmins_of_pending_org(organization)
+        except Exception:
+            logger.exception("Failed to notify superadmins about new pending org %s", organization.pk)
     else:
+        # student_join / teacher_join / staff_join
         requested_organization = join_organization
         requested_organization_name = join_organization.name if join_organization else ""
         resolved_identifier = (
@@ -143,7 +163,7 @@ def create_user_with_organization(
     profile.role = map_signup_role_to_profile_role(initial_role)
     profile.student_university_name = (
         requested_organization_name
-        if signup_mode == "student_join"
+        if signup_mode in {"student_join", "teacher_join", "staff_join"}
         or organization_type
         in {
             OrganizationType.UNIVERSITY,
@@ -153,16 +173,36 @@ def create_user_with_organization(
         else ""
     )
     profile.student_school_identifier = resolved_identifier if organization_type == OrganizationType.SCHOOL else ""
+
+    # Persona-specific profile data
+    if phone:
+        profile.phone = phone
+    if signup_mode == "student_join":
+        profile.student_specialization = specialization
+        profile.student_group_number = group_number
+    if signup_mode in {"teacher_join", "staff_join"}:
+        profile.department = department
+    if signup_mode == "staff_join":
+        profile.staff_position = staff_position
+
     profile.save()
 
     if (
         organization is None
         and requested_organization is not None
-        and profile.role in {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}
+        and signup_mode in {"student_join", "teacher_join", "staff_join"}
     ):
-        StudentOrganizationRequest.objects.update_or_create(
+        if signup_mode == "teacher_join":
+            req_role_type = MembershipRequestRoleType.TEACHER
+        elif signup_mode == "staff_join":
+            req_role_type = MembershipRequestRoleType.STAFF
+        else:
+            req_role_type = MembershipRequestRoleType.STUDENT
+
+        request_obj, created = StudentOrganizationRequest.objects.update_or_create(
             user=user,
             organization=requested_organization,
+            role_type=req_role_type,
             status=StudentOrganizationRequestStatus.PENDING,
             defaults={
                 "message": "",
@@ -171,6 +211,14 @@ def create_user_with_organization(
                 "responded_at": None,
             },
         )
+        if created:
+            try:
+                notify_org_admins_of_new_request(request_obj=request_obj)
+            except Exception:
+                logger.exception(
+                    "Failed to notify org admins about join request %s during registration",
+                    request_obj.pk,
+                )
 
     if organization is not None:
         membership_role = resolve_membership_role(organization, initial_role)
