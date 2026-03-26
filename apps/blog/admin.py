@@ -1,5 +1,5 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 
 from .models import Category, Comment, Post, PostApprovalLog, Question
 from .services import can_user_manage_categories
@@ -52,7 +52,9 @@ class CategoryAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["parent"].queryset = Category.objects.filter(parent__isnull=True).order_by("sort_order", "name_en", "name_az")
+        self.fields["parent"].queryset = Category.objects.filter(parent__isnull=True).order_by(
+            "sort_order", "name_en", "name_az"
+        )
         for field_name in ("name_az", "name_en", "name_ru", "name_tr"):
             self.fields[field_name].required = True
 

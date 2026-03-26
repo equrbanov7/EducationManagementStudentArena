@@ -47,7 +47,9 @@ def home(request):
     post_list = published_posts.order_by("-created_at")
 
     if category_slug:
-        selected_category = get_object_or_404(Category.objects.select_related("parent", "parent__parent"), slug=category_slug)
+        selected_category = get_object_or_404(
+            Category.objects.select_related("parent", "parent__parent"), slug=category_slug
+        )
         post_list = filter_posts_by_category_scope(post_list, selected_category)
 
     if query:
@@ -87,9 +89,9 @@ def home(request):
         "active_category_slug": selected_category.slug if selected_category else "",
         "selected_category": selected_category,
         "selected_category_display_name": (
-            selected_category.localized_full_name if selected_category and selected_category.parent_id else (
-                selected_category.localized_name if selected_category else ""
-            )
+            selected_category.localized_full_name
+            if selected_category and selected_category.parent_id
+            else (selected_category.localized_name if selected_category else "")
         ),
         "clear_category_filter_url": clear_category_filter_url,
         "search_query": query,

@@ -194,6 +194,8 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
             logger.warning("Redis unavailable; sidebar categories cache not populated")
 
     return result
+
+
 def get_post_category_tree(*, category_queryset=None):
     categories = _load_categories(category_queryset)
     if not categories:

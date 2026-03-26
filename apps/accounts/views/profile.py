@@ -14,8 +14,8 @@ from django.core.exceptions import ValidationError
 from django.core.files.images import get_image_dimensions
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
-from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Q
+from django.db.models.deletion import ProtectedError
 from django.http import FileResponse, Http404, HttpResponseBadRequest, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -38,7 +38,7 @@ from apps.notifications.services import (
     get_user_notifications,
 )
 from apps.projects.models import ProjectSubmission
-from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
+from core.tenancy import restore_request_organization_from_profile
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
 from ..forms import CustomPasswordChangeForm
@@ -142,48 +142,7 @@ def _restore_profile_org_context(request, profile, active_section):
     """
     if active_section not in PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT:
         return
-    if getattr(request, "organization", None) is not None:
-        return
-
-    fallback_org = getattr(profile, "organization", None)
-    if fallback_org is None or not getattr(fallback_org, "is_active", False):
-        return
-
-    from apps.organizations.models import Membership
-
-    memberships = list(
-        Membership.objects.filter(
-            user=request.user,
-            organization=fallback_org,
-            organization__is_active=True,
-            is_active=True,
-        )
-        .select_related("organization", "role", "scope_unit")
-        .order_by("-is_primary", "-role__level")
-    )
-    is_owner = getattr(fallback_org, "owner_id", None) == getattr(request.user, "id", None)
-    is_superadmin = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False))
-    if not memberships and not is_owner and not is_superadmin:
-        return
-
-    permissions_set = set()
-    for membership in memberships:
-        if membership.role.permissions:
-            permissions_set.update(membership.role.permissions)
-        if getattr(membership.role, "name", "") == "teacher":
-            permissions_set.add("course.create")
-
-    request.organization = fallback_org
-    request.org_memberships = memberships
-    request.org_permissions = list(permissions_set)
-    setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, bool(is_owner and not memberships))
-    request.session["active_organization"] = fallback_org.slug
-    if hasattr(request.user, "set_active_organization_context"):
-        request.user.set_active_organization_context(
-            fallback_org,
-            memberships=memberships,
-            permissions=request.org_permissions,
-        )
+    restore_request_organization_from_profile(request, profile=profile)
 
 
 def _parse_public_profile_page_number(raw_value):
@@ -547,9 +506,8 @@ def user_profile(request):
                 messages.error(request, _("notif_no_recipients"))
             return redirect(f"{reverse('accounts:profile')}?section=publish-notification")
         elif submitted_form in {"category-create", "category-management-save", "category-management-delete"}:
-            if (
-                not {"create-category", "category-management"} & set(allowed_sections)
-                or not can_user_manage_categories(request.user)
+            if not {"create-category", "category-management"} & set(allowed_sections) or not can_user_manage_categories(
+                request.user
             ):
                 messages.error(request, "Bu bölməni yalnız SuperAdmin idarə edə bilər.")
                 return redirect(f"{reverse('accounts:profile')}?section=profile-info")
@@ -1437,7 +1395,9 @@ def user_profile(request):
 
         for root_category in category_management_tree:
             root_children = list(getattr(root_category, "child_categories", []))
-            matching_children = [child_category for child_category in root_children if _category_matches_search(child_category)]
+            matching_children = [
+                child_category for child_category in root_children if _category_matches_search(child_category)
+            ]
             if normalized_category_search:
                 root_matches = _category_matches_search(root_category)
                 if not root_matches and not matching_children:
@@ -1457,7 +1417,9 @@ def user_profile(request):
 
         category_management_total_count = len(category_management_tree)
         category_management_filtered_count = len(filtered_category_tree)
-        category_management_page = Paginator(filtered_category_tree, 6).get_page(request.GET.get(category_management_page_param))
+        category_management_page = Paginator(filtered_category_tree, 6).get_page(
+            request.GET.get(category_management_page_param)
+        )
         category_management_pagination_query = _query_string(
             section="category-management",
             category_search=category_management_search_query,

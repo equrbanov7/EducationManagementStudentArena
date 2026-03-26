@@ -10,6 +10,7 @@ Nə üçün:
 """
 
 from django import forms
+from django.apps import apps
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import pgettext_lazy
 
@@ -40,9 +41,38 @@ class CourseForm(forms.ModelForm):
     </form>
     """
 
+    organization = forms.ModelChoiceField(
+        queryset=apps.get_model("organizations", "Organization").objects.none(),
+        required=False,
+        label=pgettext_lazy("courses.form.course.label", "organization"),
+        empty_label=pgettext_lazy("courses.form.course.placeholder", "select_organization"),
+    )
+
     def __init__(self, *args, **kwargs):
+        allow_organization_selection = kwargs.pop("allow_organization_selection", False)
+        organization_queryset = kwargs.pop("organization_queryset", None)
+        initial_organization = kwargs.pop("initial_organization", None)
         super().__init__(*args, **kwargs)
         self._clear_missing_cover_image = False
+
+        if allow_organization_selection:
+            from apps.organizations.models import Organization
+
+            self.fields["organization"].queryset = (
+                organization_queryset
+                if organization_queryset is not None
+                else Organization.objects.filter(is_active=True, status="active").order_by("name")
+            )
+            self.fields["organization"].required = True
+            self.fields["organization"].widget.attrs.update(
+                {
+                    "class": "form-control",
+                }
+            )
+            if initial_organization is not None:
+                self.fields["organization"].initial = initial_organization
+        else:
+            self.fields.pop("organization", None)
 
     class Meta:
         model = Course

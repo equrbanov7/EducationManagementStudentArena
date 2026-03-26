@@ -145,7 +145,9 @@ def post_edit_ajax(request, pk):
     post.content = content
     post.excerpt = excerpt
 
-    selected_root_category = Category.objects.filter(pk=category_id, parent__isnull=True).first() if category_id else None
+    selected_root_category = (
+        Category.objects.filter(pk=category_id, parent__isnull=True).first() if category_id else None
+    )
     selected_subcategory = (
         Category.objects.select_related("parent").filter(pk=subcategory_id, parent__isnull=False).first()
         if subcategory_id
