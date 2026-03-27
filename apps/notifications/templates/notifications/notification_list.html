@@ -22,7 +22,7 @@
         <div class="notifications-actions d-flex gap-2">
             <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
+                <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                 <button type="submit" class="btn btn-sm btn-outline-primary">
                     <i class="fas fa-check-double me-1"></i>{% trans "Mark all as read" %}
                 </button>
@@ -87,7 +87,7 @@
         {# Bulk-delete form wraps the list #}
         <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="bulk-delete-form">
             {% csrf_token %}
-            <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
+            <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
             <div class="notifications-bulk-actions mb-2 d-flex align-items-center gap-2" id="bulk-actions-bar" style="display:none !important">
                 <input type="checkbox" id="select-all-notifications" title="{% trans 'Select all' %}">
                 <label for="select-all-notifications" class="mb-0 me-2">{% trans "Select all" %}</label>
@@ -137,7 +137,7 @@
                         {% if notification.is_read %}
                             <form method="post" action="{% url 'notifications:notification_mark_unread' notification.pk %}" class="d-inline">
                                 {% csrf_token %}
-                                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
+                                <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                                 <button type="submit" class="btn btn-sm btn-outline-secondary" title="{% trans 'Mark as unread' %}">
                                     <i class="fas fa-envelope"></i>
                                 </button>
@@ -145,7 +145,7 @@
                         {% else %}
                             <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
                                 {% csrf_token %}
-                                <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
+                                <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                                 <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'Mark as read' %}">
                                     <i class="fas fa-envelope-open"></i>
                                 </button>
@@ -153,7 +153,7 @@
                         {% endif %}
                         <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
                             {% csrf_token %}
-                            <input type="hidden" name="next" value="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
+                            <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}"
                                     onclick="return confirm('{% trans "Delete this notification?" %}')">
                                 <i class="fas fa-trash"></i>
