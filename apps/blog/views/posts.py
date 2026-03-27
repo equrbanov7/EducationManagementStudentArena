@@ -314,6 +314,108 @@ def delete_post(request, post_id):
     return redirect(f"{reverse('accounts:profile')}?section=posts")
 
 
+# 3. MÜƏLLIM MODERASIYA: sil və ya deaktiv et (approved post-lar üçün)
+@login_required
+@require_POST
+def teacher_moderate_post(request, post_id):
+    """
+    Müəllim tərəfindən post moderasiyası.
+
+    POST parametrləri:
+      action  – "delete" (postu sil) və ya "deactivate" (gizlət, tələbə görə bilmir)
+      feedback – Opsional rəy (deactivate zamanı tələbəyə göstərilər)
+
+    Yalnız postu nəzərdən keçirə bilən müəllimlər bu əməliyyatı icra edə bilər.
+    """
+    post = get_object_or_404(Post.objects.select_related("author"), pk=post_id)
+
+    if not can_user_review_post(request.user, post):
+        raise PermissionDenied("Bu postu idarə etmək üçün icazəniz yoxdur.")
+
+    action = (request.POST.get("action") or "").strip().lower()
+    feedback = (request.POST.get("feedback") or "").strip()
+
+    if action not in {"delete", "deactivate"}:
+        messages.error(request, "Yanlış əməliyyat seçildi.")
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    if action == "delete":
+        post_title = post.title
+        post.delete()
+        messages.success(request, f'"{post_title}" postu silindi.')
+
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        if is_ajax:
+            return JsonResponse({"success": True, "message": f'"{post_title}" postu silindi.'})
+
+        next_url = (request.POST.get("next") or "").strip()
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(next_url)
+        return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+    # action == "deactivate": postu gizlət, tələbəyə rəy göndər
+    post.is_published = False
+    post.approval_feedback = feedback
+    post.save(update_fields=["is_published", "approval_feedback", "updated_at"])
+
+    PostApprovalLog.objects.create(
+        post=post,
+        reviewer=request.user,
+        action=PostApprovalLog.Action.FEEDBACK,
+        feedback=feedback,
+    )
+
+    # Müəllif-tələbəyə bildiriş göndər (əgər rəy varsa)
+    if feedback:
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import create_notification
+
+            create_notification(
+                recipient=post.author,
+                title=f"Postunuz deaktiv edildi: {post.title}",
+                message=(
+                    f'"{post.title}" başlıqlı postunuz müəllim tərəfindən gizlədildi. '
+                    f"Post silinməyib — düzəlişlər edib yenidən göndərə bilərsiniz. "
+                    f"Müəllim rəyi: {feedback}"
+                ),
+                link=f"{reverse('accounts:profile')}?section=posts",
+                notification_type=NotificationType.APPROVAL,
+                metadata={"post_id": post.pk, "feedback": feedback},
+            )
+        except Exception:
+            logger.exception("Failed to notify author about post deactivation pk=%s", post.pk)
+
+    messages.info(
+        request,
+        f'"{post.title}" postu deaktiv edildi. Post gizlədilib, lakin silinməyib — '
+        f"tələbə düzəliş edib yenidən göndərə bilər.",
+    )
+
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    if is_ajax:
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f'"{post.title}" postu deaktiv edildi.',
+                "is_published": post.is_published,
+            }
+        )
+
+    next_url = (request.POST.get("next") or "").strip()
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
+
+
 def list_posts(request):
     """
     Bütün postların siyahısı (əgər ayrıca page istəyirsənsə).
