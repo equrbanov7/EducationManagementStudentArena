@@ -34,14 +34,13 @@ def preview_randomization(request, pk):
 
     if selected_student_id:
         try:
-            from django.contrib.auth import get_user_model
+            membership = memberships.filter(user_id=selected_student_id).first()
+            if membership:
+                selected_student = membership.user
 
-            User = get_user_model()
-            selected_student = User.objects.get(id=selected_student_id)
-
-            # Bu tələbə üçün assignment yarat/al
-            assignment = get_lab_assignment_for_student(lab, selected_student)
-            questions = assignment.assigned_questions.all().order_by("block__order", "question_number")
+                # Bu tələbə üçün assignment yarat/al
+                assignment = get_lab_assignment_for_student(lab, selected_student)
+                questions = assignment.assigned_questions.all().order_by("block__order", "question_number")
         except Exception:
             pass
 

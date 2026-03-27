@@ -695,3 +695,188 @@ class HttpTenantIsolationTest(TestCase):
         # The key assertion: the response succeeded and does not display a
         # "forbidden" message that would indicate the superadmin was blocked.
         self.assertNotIn(response.status_code, [403, 302])
+
+
+class CrossTenantAssignmentIsolationTest(TestCase):
+    """
+    Cross-tenant tests for Assignment and Lab object access.
+
+    Verifies that:
+    - A teacher from Org A cannot remove a student from Org B via the assignment API.
+    - A teacher from Org A cannot look up a student from Org B via the lab preview.
+    """
+
+    def setUp(self):
+        from django.utils import timezone
+
+        self.client = Client()
+        self.now = timezone.now()
+
+        self.teacher_a = User.objects.create_user("ct_teacher_a", "ct_teacher_a@example.com", "StrongPass123!")
+        self.teacher_b = User.objects.create_user("ct_teacher_b", "ct_teacher_b@example.com", "StrongPass123!")
+        self.student_a = User.objects.create_user("ct_student_a", "ct_student_a@example.com", "StrongPass123!")
+        self.student_b = User.objects.create_user("ct_student_b", "ct_student_b@example.com", "StrongPass123!")
+
+        self.org_a = Organization.objects.create(
+            name="CT Org A",
+            slug="ct-org-a",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.teacher_a,
+            status="active",
+            is_active=True,
+        )
+        self.org_b = Organization.objects.create(
+            name="CT Org B",
+            slug="ct-org-b",
+            org_type=OrganizationType.SCHOOL,
+            owner=self.teacher_b,
+            status="active",
+            is_active=True,
+        )
+
+        _assign_user_to_org(self.teacher_a, self.org_a, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student_a, self.org_a, ProfileRole.STUDENT)
+        _assign_user_to_org(self.teacher_b, self.org_b, ProfileRole.TEACHER)
+        _assign_user_to_org(self.student_b, self.org_b, ProfileRole.STUDENT)
+
+        self.course_a = Course.objects.create(
+            owner=self.teacher_a,
+            title="CT Course A",
+            status="published",
+            organization=self.org_a,
+        )
+        self.course_b = Course.objects.create(
+            owner=self.teacher_b,
+            title="CT Course B",
+            status="published",
+            organization=self.org_b,
+        )
+
+        CourseMembership.objects.create(course=self.course_a, user=self.student_a, role="student")
+        CourseMembership.objects.create(course=self.course_b, user=self.student_b, role="student")
+
+    def _make_assignment(self, course, title):
+        from apps.assignments.models import Assignment
+
+        return Assignment.objects.create(
+            course=course,
+            title=title,
+            start_date=self.now,
+        )
+
+    def _make_lab(self, course, title, created_by):
+        import datetime
+
+        from django.utils import timezone
+
+        from apps.labs.models import Lab
+
+        return Lab.objects.create(
+            course=course,
+            title=title,
+            created_by=created_by,
+            start_datetime=timezone.now(),
+            end_datetime=timezone.now() + datetime.timedelta(days=30),
+        )
+
+    def test_remove_student_api_rejects_cross_tenant_student_id(self):
+        """
+        A teacher from Org A cannot remove a student from Org B via the
+        remove-student endpoint, even if they know the student's primary key.
+
+        The view must scope the student lookup to the assignment's course,
+        so an Org-B student_id returns 404 instead of silently succeeding or
+        exposing user data.
+        """
+        from apps.organizations.models import Role as OrgRole
+
+        # Give teacher_a the permissions required to reach the student lookup
+        role = OrgRole.objects.create(
+            organization=self.org_a,
+            name="ct_teacher_role_reject",
+            display_name="Teacher",
+            level=80,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["assignment.edit"],
+        )
+        Membership.objects.filter(user=self.teacher_a, organization=self.org_a).update(role=role)
+
+        assignment_a = self._make_assignment(self.course_a, "CT Assignment A")
+        assignment_a.assigned_students.add(self.student_a)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+
+        response = self.client.post(
+            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment_a.pk}),
+            data={"student_id": str(self.student_b.pk)},
+        )
+        # The endpoint must not find Org-B's student via this assignment's course.
+        self.assertEqual(response.status_code, 404)
+
+    def test_remove_student_api_accepts_same_tenant_student(self):
+        """
+        A teacher from Org A CAN remove an Org-A student from their own
+        assignment (happy-path sanity check).
+        """
+        import json
+
+        from apps.organizations.models import Role as OrgRole
+
+        role = OrgRole.objects.create(
+            organization=self.org_a,
+            name="ct_teacher_role",
+            display_name="Teacher",
+            level=80,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["assignment.edit"],
+        )
+        Membership.objects.filter(user=self.teacher_a, organization=self.org_a).update(role=role)
+
+        assignment_a = self._make_assignment(self.course_a, "CT Assignment A Same Tenant")
+        assignment_a.assigned_students.add(self.student_a)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+
+        response = self.client.post(
+            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment_a.pk}),
+            data={"student_id": str(self.student_a.pk)},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertTrue(data.get("success"))
+
+    def test_lab_preview_rejects_cross_tenant_student(self):
+        """
+        The lab preview endpoint must NOT return data for a student from a
+        different organization, even if their user PK is passed directly.
+
+        The view scopes the student lookup to course memberships, so an
+        Org-B student ID returns no `selected_student` in the context.
+        """
+        lab_a = self._make_lab(self.course_a, "CT Lab A", self.teacher_a)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+
+        url = reverse("labs:preview_randomization", kwargs={"pk": lab_a.pk})
+        response = self.client.get(url, {"student": str(self.student_b.pk)})
+
+        # The view must succeed (200) but not expose Org-B student data.
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context.get("selected_student"))
+
+    def test_lab_preview_shows_same_tenant_student(self):
+        """
+        The lab preview endpoint returns data when the student belongs to the
+        same course (same-tenant happy path).
+        """
+        lab_a = self._make_lab(self.course_a, "CT Lab A Same Tenant", self.teacher_a)
+
+        _login_with_org(self.client, self.teacher_a, self.org_a)
+
+        url = reverse("labs:preview_randomization", kwargs={"pk": lab_a.pk})
+        response = self.client.get(url, {"student": str(self.student_a.pk)})
+
+        self.assertEqual(response.status_code, 200)
+        selected = response.context.get("selected_student")
+        self.assertIsNotNone(selected)
+        self.assertEqual(selected.pk, self.student_a.pk)
