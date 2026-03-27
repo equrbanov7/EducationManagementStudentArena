@@ -3,6 +3,7 @@ Authentication views: registration, verification, login, logout.
 """
 
 import logging
+from urllib.parse import quote
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,8 +11,9 @@ from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 from django.core.signing import BadSignature, SignatureExpired
 from django.db import transaction
+from django.http import HttpResponseNotAllowed
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
@@ -222,6 +224,12 @@ def register_view(request):
 
             request.session["pending_verify_email"] = user.email
 
+            # Preserve any ?next= parameter so it can be forwarded to the
+            # login redirect after OTP verification completes (BUG-04 fix).
+            next_url = _sanitize_auth_redirect_target(request, request.POST.get("next", request.GET.get("next", "")))
+            if next_url:
+                request.session["pending_next_url"] = next_url
+
             if organization is None and requested_organization_name:
                 messages.success(
                     request,
@@ -306,6 +314,13 @@ def verify_code_view(request):
         request.session.pop("pending_verify_email", None)
 
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
+
+        # Restore the ?next= URL that was stored during registration so the
+        # user lands on the originally requested page after logging in (BUG-04 fix).
+        next_url = request.session.pop("pending_next_url", "")
+        if next_url:
+            login_url = reverse("accounts:login")
+            return redirect(f"{login_url}?next={quote(next_url, safe='/:@!$&()*+,;=')}")
         return redirect("accounts:login")
 
     user = User.objects.filter(email=email).first()
@@ -331,6 +346,12 @@ def verify_email_link_view(request):
             request.session["active_organization"] = joined_organization.slug
         request.session.pop("pending_verify_email", None)
         messages.success(request, pgettext_lazy("accounts.auth.message", "email_verified_you_can_login_now"))
+
+        # Restore the ?next= URL that was stored during registration (BUG-04 fix).
+        next_url = request.session.pop("pending_next_url", "")
+        if next_url:
+            login_url = reverse("accounts:login")
+            return redirect(f"{login_url}?next={quote(next_url, safe='/:@!$&()*+,;=')}")
         return redirect("accounts:login")
     except (BadSignature, SignatureExpired, User.DoesNotExist):
         messages.error(request, pgettext_lazy("accounts.auth.message", "link_invalid_or_expired"))
@@ -372,7 +393,14 @@ def resend_code_view(request):
 
 
 def logout_view(request):
-    """Logout user and redirect to home."""
+    """Logout user and redirect to home.
+
+    Only POST requests are accepted to prevent cross-site forced-logout attacks
+    (e.g. an attacker embedding ``<img src="/accounts/logout/">`` on another page).
+    GET requests receive HTTP 405 Method Not Allowed.
+    """
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
     logout(request)
     messages.success(request, pgettext_lazy("accounts.auth.message", "logout_success"))
     return redirect("home")
